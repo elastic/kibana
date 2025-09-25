@@ -15168,6 +15168,40 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/entity_store/entities/bulk:
+    put:
+      description: |
+        Update or create many entities in Entity Store.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+        The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+      summary: Upsert many entities in Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -77293,6 +77327,15 @@ components:
         - updating
         - error
       type: string
+    Security_Entity_Analytics_API_EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityContainer'
+          type: array
+      required:
+        - entities
     Security_Entity_Analytics_API_Entity:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
@@ -77333,6 +77376,16 @@ components:
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+        type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - record
     Security_Entity_Analytics_API_EntityField:
       additionalProperties: false
       type: object
