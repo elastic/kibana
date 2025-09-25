@@ -321,8 +321,7 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground =
-      props.isLoading || backgroundSearchState === SearchSessionState.Loading;
+    const canSendToBackground = backgroundSearchState === SearchSessionState.Loading;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
