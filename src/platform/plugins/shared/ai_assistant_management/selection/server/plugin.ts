@@ -34,12 +34,13 @@ import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_ke
 
 export class AIAssistantManagementSelectionPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginServerSetup,
-    AIAssistantManagementSelectionPluginServerStart,
-    AIAssistantManagementSelectionPluginServerDependenciesSetup,
-    AIAssistantManagementSelectionPluginServerDependenciesStart
-  > {
+    Plugin<
+      AIAssistantManagementSelectionPluginServerSetup,
+      AIAssistantManagementSelectionPluginServerStart,
+      AIAssistantManagementSelectionPluginServerDependenciesSetup,
+      AIAssistantManagementSelectionPluginServerDependenciesStart
+    >
+{
   private readonly config: AIAssistantManagementSelectionConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -181,5 +182,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

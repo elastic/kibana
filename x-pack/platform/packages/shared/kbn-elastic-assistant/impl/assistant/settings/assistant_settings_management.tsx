@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { Conversation } from '../../..';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -52,7 +52,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onTabChange,
     currentTab: selectedSettingsTab,
-    settings
+    settings,
   }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },

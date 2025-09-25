@@ -47,7 +47,6 @@ export const ManagementSettings = React.memo(() => {
     notifications,
   } = useKibana().services;
 
-
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
@@ -143,18 +142,18 @@ export const ManagementSettings = React.memo(() => {
     return spaceId ? (
       <AssistantSpaceIdProvider spaceId={spaceId}>
         <DefaultAiConnectorSettingsContextProvider
-        toast={notifications.toasts}
-        application={application}
-        docLinks={docLinks}
-        featureFlags={featureFlags}
-      >
-        <AssistantSettingsManagement
-          settings={settings}
-          selectedConversation={currentConversation}
-          dataViews={dataViews}
-          onTabChange={handleTabChange}
-          currentTab={currentTab}
-        />
+          toast={notifications.toasts}
+          application={application}
+          docLinks={docLinks}
+          featureFlags={featureFlags}
+        >
+          <AssistantSettingsManagement
+            settings={settings}
+            selectedConversation={currentConversation}
+            dataViews={dataViews}
+            onTabChange={handleTabChange}
+            currentTab={currentTab}
+          />
         </DefaultAiConnectorSettingsContextProvider>
       </AssistantSpaceIdProvider>
     ) : null;

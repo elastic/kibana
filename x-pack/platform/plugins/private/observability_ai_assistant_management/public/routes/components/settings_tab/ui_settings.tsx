@@ -31,14 +31,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
 
 export function UISettings() {
-  const {
-    docLinks,
-    settings,
-    notifications,
-    application,
-    featureFlags
-  } = useKibana().services;
-    const { capabilities, getUrlForApp } = application;
+  const { docLinks, settings, notifications, application, featureFlags } = useKibana().services;
+  const { capabilities, getUrlForApp } = application;
   const knowledgeBase = useKnowledgeBase();
   const { config } = useAppContext();
   const connectors = useGenAIConnectors();

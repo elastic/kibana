@@ -57,7 +57,7 @@ describe('SettingsTab', () => {
       isPolling: false,
       isWarmingUpModel: false,
     });
-     useGenAIConnectorsMock.mockReturnValue({
+    useGenAIConnectorsMock.mockReturnValue({
       connectors: [
         {
           id: 'test-connector',
