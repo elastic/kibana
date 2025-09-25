@@ -26,6 +26,7 @@ const mockAssistantContext = {
       },
     },
   },
+  getServerBasePath: () => '/test-base-path',
 };
 
 describe('IntegrationKnowledgeTool', () => {
@@ -73,7 +74,7 @@ describe('IntegrationKnowledgeTool', () => {
               _id: 'test-id',
               _source: {
                 package_name: 'nginx',
-                filename: 'docs/README.md',
+                filename: 'README.md',
                 content: 'This is how to configure nginx integration for web server monitoring.',
                 version: '1.2.3',
               },
@@ -89,10 +90,10 @@ describe('IntegrationKnowledgeTool', () => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('Href');
           expect((reference as HrefContentReference).href).toEqual(
-            '/app/integrations/detail/nginx'
+            '/test-base-path/app/integrations/detail/nginx'
           );
           expect((reference as HrefContentReference).label).toEqual(
-            'nginx Integration: docs/README.md'
+            'nginx integration (README.md)'
           );
           return reference;
         }
@@ -114,7 +115,7 @@ describe('IntegrationKnowledgeTool', () => {
 
       expect(result).toContain('Citation: {reference(exampleContentReferenceId)}');
       expect(result).toContain('Package: nginx (v1.2.3)');
-      expect(result).toContain('File: docs/README.md');
+      expect(result).toContain('File: README.md');
       expect(result).toContain('This is how to configure nginx integration');
     });
 

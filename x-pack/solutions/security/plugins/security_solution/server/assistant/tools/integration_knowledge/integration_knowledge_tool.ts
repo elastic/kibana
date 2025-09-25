@@ -21,7 +21,7 @@ import { APP_UI_ID } from '../../../../common';
 
 export type IntegrationKnowledgeToolParams = Require<AssistantToolParams, 'assistantContext'>;
 
-const INTEGRATIONS_BASE_URL = '/app/integrations/detail/';
+const INTEGRATIONS_BASE_PATH = '/app/integrations/detail';
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -77,9 +77,11 @@ export const INTEGRATION_KNOWLEDGE_TOOL: AssistantTool = {
 
             let reference: ContentReference | undefined;
             try {
-              // Create a reference to the integration package
-              const packageUrl = `${INTEGRATIONS_BASE_URL}${source.package_name}`;
-              const title = `${source.package_name} Integration: ${source.filename}`;
+              // Create a reference to the integration details page
+              const packageUrl = `${assistantContext.getServerBasePath()}${INTEGRATIONS_BASE_PATH}/${
+                source.package_name
+              }`;
+              const title = `${source.package_name} integration (${source.filename})`;
 
               reference = contentReferencesStore.add((p) => hrefReference(p.id, packageUrl, title));
             } catch (_error) {
