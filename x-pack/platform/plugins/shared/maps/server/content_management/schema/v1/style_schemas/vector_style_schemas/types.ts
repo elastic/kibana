@@ -75,14 +75,6 @@ export type SizeStylePropertyDescriptor = TypeOf<typeof sizeSchema>;
 
 export type SymbolizeAsOptions = TypeOf<typeof symbolizeAsOptions>;
 
-export interface CustomIcon {
-  symbolId: string;
-  svg: string; // svg string
-  label: string; // user given label
-  cutoff: number;
-  radius: number;
-}
-
 export type DynamicStylePropertyOptions =
   | ColorDynamicOptions
   | IconDynamicOptions

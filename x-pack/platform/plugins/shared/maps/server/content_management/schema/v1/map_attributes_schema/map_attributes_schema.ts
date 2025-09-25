@@ -10,7 +10,7 @@ import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server
 import { layersSchema } from '../layer_schemas';
 import { settingsSchema } from './settings_schema';
 
-const mapCenterSchema = schema.object({
+export const mapCenterSchema = schema.object({
   lat: schema.number(),
   lon: schema.number(),
 });

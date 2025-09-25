@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { INITIAL_LOCATION } from '../../../../../common';
 
-const customIconSchema = schema.object({
+export const customIconSchema = schema.object({
   symbolId: schema.string(),
   svg: schema.string(),
   label: schema.string(),

@@ -14,7 +14,10 @@ export type { StoredMapAttributes } from './saved_objects/types';
 
 export type {
   AdhocDataView,
+  CustomIcon,
   MapAttributes,
+  MapCenter,
+  MapSettings,
 
   //
   // Layer types
@@ -63,7 +66,6 @@ export type {
   ColorDynamicStylePropertyDescriptor,
   ColorStaticStylePropertyDescriptor,
   ColorStylePropertyDescriptor,
-  CustomIcon,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
   EMSVectorTileStyleDescriptor,
