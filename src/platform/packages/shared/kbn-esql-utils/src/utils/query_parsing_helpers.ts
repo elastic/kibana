@@ -14,6 +14,7 @@ import {
   isFunctionExpression,
   isColumn,
   WrappingPrettyPrinter,
+  BasicPrettyPrinter,
   isStringLiteral,
 } from '@kbn/esql-ast';
 
@@ -116,6 +117,34 @@ export function getLimitFromESQLQuery(esql: string): number {
 export function removeDropCommandsFromESQLQuery(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
+}
+
+/**
+ * Converts timeseries (TS) commands to FROM commands in an ES|QL query
+ * @param esql - The ES|QL query string
+ * @returns The modified query with TS commands converted to FROM commands
+ */
+export function convertTimeseriesCommandToFrom(esql?: string): string {
+  const { root } = Parser.parse(esql || '');
+  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  if (!timeseriesCommand) return esql || '';
+
+  const fromCommand = {
+    ...timeseriesCommand,
+    name: 'from',
+  };
+
+  // Replace the ts command with the from command in the commands array
+  const newCommands = root.commands.map((command) =>
+    command === timeseriesCommand ? fromCommand : command
+  );
+
+  const newRoot = {
+    ...root,
+    commands: newCommands,
+  };
+
+  return BasicPrettyPrinter.print(newRoot);
 }
 
 /**
