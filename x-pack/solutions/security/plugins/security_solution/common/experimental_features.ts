@@ -157,21 +157,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
-   */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
    * Enables SentinelOne manual host isolation response actions directly through the connector
    * sub-actions framework.
    * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables Response actions telemetry collection
@@ -180,9 +170,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsTelemetryEnabled: true,
 
   /**
-   * Enables experimental JAMF integration data to be available in Analyzer
+   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: true,
+  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
