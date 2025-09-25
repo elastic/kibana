@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { DIMENSION_TYPES, NUMERIC_TYPES } from '../common/fields/constants';
+
 import { MetricsExperiencePlugin } from './plugin';
 export type { MetricsExperienceClient, MetricsExperiencePluginStart } from './types';
 

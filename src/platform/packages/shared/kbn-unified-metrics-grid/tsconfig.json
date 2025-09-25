@@ -1,11 +1,11 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -30,6 +30,6 @@
     "@kbn/react-hooks",
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
-    "@kbn/discover-utils",
+    "@kbn/discover-utils"
   ]
 }

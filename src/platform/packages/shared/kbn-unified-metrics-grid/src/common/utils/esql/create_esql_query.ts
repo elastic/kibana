@@ -9,9 +9,8 @@
 
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-
-import { DIMENSION_TYPES } from '@kbn/metrics-experience-plugin/common/fields/constants';
+import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { DIMENSION_TYPES } from '@kbn/metrics-experience-plugin/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DIMENSIONS_COLUMN } from './constants';
 
