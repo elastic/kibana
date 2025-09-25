@@ -19,6 +19,7 @@ import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SpacesMenu } from './components/spaces_menu';
+import { useSpaces } from './hooks/use_spaces';
 import { SolutionViewTour } from './solution_view_tour';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
@@ -63,10 +64,9 @@ const NavControlPopoverUI = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [showSpaceSelector, setShowSpaceSelector] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
-  const [spaces, setSpaces] = useState<Space[]>([]);
   const [showTour, setShowTour] = useState(false);
+  const { data, isLoading } = useSpaces(spacesManager);
 
   useEffect(() => {
     const activeSpace$ = spacesManager.onActiveSpaceChange$.subscribe({
@@ -85,17 +85,6 @@ const NavControlPopoverUI = ({
     };
   }, [spacesManager, showTour$]);
 
-  const loadSpaces = useCallback(async () => {
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-    const spacesList = await spacesManager.getSpaces();
-    setSpaces(spacesList);
-    setLoading(false);
-  }, [spacesManager, loading]);
-
   const getAlignedLoadingSpinner = useCallback(() => {
     return (
       <EuiSkeletonRectangle
@@ -108,14 +97,8 @@ const NavControlPopoverUI = ({
   }, []);
 
   const toggleSpaceSelector = useCallback(() => {
-    const isOpening = !showSpaceSelector;
-
-    if (isOpening) {
-      loadSpaces();
-    }
-
     setShowSpaceSelector(!showSpaceSelector);
-  }, [showSpaceSelector, loadSpaces]);
+  }, [showSpaceSelector]);
 
   const getButton = useCallback(
     (linkIcon: JSX.Element, linkTitle: string) => {
@@ -199,7 +182,7 @@ const NavControlPopoverUI = ({
       >
         <SpacesMenu
           id={popoutContentId}
-          spaces={spaces}
+          spaces={data || []}
           serverBasePath={serverBasePath}
           toggleSpaceSelector={toggleSpaceSelector}
           capabilities={capabilities}
@@ -209,7 +192,7 @@ const NavControlPopoverUI = ({
           allowSolutionVisibility={allowSolutionVisibility}
           eventTracker={eventTracker}
           onClickManageSpaceBtn={handleManageSpaceBtnClick}
-          isLoading={loading}
+          isLoading={isLoading}
         />
       </EuiPopover>
     </SolutionViewTour>
