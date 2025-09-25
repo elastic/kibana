@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, isObject, isString } from 'lodash';
 import type { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
 
 export const getValueTextContent = (
@@ -52,28 +52,55 @@ export const formatUpdateRequest = ({
   oldIncident: Record<string, unknown>;
   newIncident: Record<string, unknown>;
 }): UpdateIncidentRequest => {
+  const { additionalFields, ...updates } = newIncident;
+
+  // `additionalFields` need to be treated differently as they are dynamic and not part of the standard fields
+  // In the update request, we do not need to add them under `properties`. They're added at the top level.
+  // We only need to make sure we merge them correctly with the old incident properties.
+  let mergedAdditionalFields: UpdateIncidentRequest['changes'] = [];
+  const additionalFieldsObj: Record<string, unknown> = isString(newIncident.additionalFields)
+    ? JSON.parse(newIncident.additionalFields)
+    : {};
+  if (additionalFieldsObj && isObject(additionalFieldsObj)) {
+    mergedAdditionalFields = Object.keys(additionalFieldsObj)
+      .map((key) => {
+        if (additionalFieldsObj[key]) {
+          return {
+            field: { name: key },
+            old_value:
+              oldIncident.properties && isObject(oldIncident.properties)
+                ? (oldIncident.properties as Record<string, unknown>)[key]
+                : null,
+            new_value: additionalFieldsObj[key] ?? null,
+          };
+        }
+      })
+      .filter(Boolean) as UpdateIncidentRequest['changes'];
+  }
   return {
-    changes: Object.keys(newIncident).map((key) => {
-      let name = key;
+    changes: mergedAdditionalFields.concat(
+      Object.keys(updates).map((key) => {
+        let name = key;
 
-      if (key === 'incidentTypes') {
-        name = 'incident_type_ids';
-      }
+        if (key === 'incidentTypes') {
+          name = 'incident_type_ids';
+        }
 
-      if (key === 'severityCode') {
-        name = 'severity_code';
-      }
+        if (key === 'severityCode') {
+          name = 'severity_code';
+        }
 
-      return {
-        field: { name },
-        old_value: getValueTextContent(
-          key,
-          name === 'description'
-            ? (oldIncident as { description: { content: string } }).description.content
-            : (oldIncident[name] as string | number | number[])
-        ),
-        new_value: getValueTextContent(key, newIncident[key] as string | undefined),
-      };
-    }),
+        return {
+          field: { name },
+          old_value: getValueTextContent(
+            key,
+            name === 'description'
+              ? (oldIncident as { description: { content: string } }).description.content
+              : (oldIncident[name] as string | number | number[])
+          ),
+          new_value: getValueTextContent(key, updates[key] as string | undefined),
+        };
+      })
+    ),
   };
 };

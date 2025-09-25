@@ -125,7 +125,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   }, [editSubActionProperty, incident.incidentTypes]);
   const additionalFieldsOnChange = useCallback(
     (value: string | null) => {
-      editSubActionProperty('additional_fields', value);
+      editSubActionProperty('additionalFields', value);
     },
     [editSubActionProperty]
   );
@@ -255,9 +255,9 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       />
 
       <AdditionalFields
-        value={actionParams.subActionParams?.incident.additional_fields}
+        value={actionParams.subActionParams?.incident.additionalFields}
         messageVariables={messageVariables}
-        errors={errors['subActionParams.incident.additional_fields'] as string[]}
+        errors={errors['subActionParams.incident.additionalFields'] as string[]}
         onChange={additionalFieldsOnChange}
         isOptionalField
         helpText={i18n.translate(

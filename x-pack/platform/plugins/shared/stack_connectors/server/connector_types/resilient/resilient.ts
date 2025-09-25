@@ -156,8 +156,8 @@ export class ResilientConnector extends CaseConnector<
         };
       }
 
-      if (incident.additional_fields) {
-        data = { ...data, properties: JSON.parse(incident.additional_fields) };
+      if (incident.additionalFields) {
+        data = { ...data, properties: JSON.parse(incident.additionalFields) };
       }
 
       const res = await this.request(

@@ -103,6 +103,7 @@ describe('EditConnector ', () => {
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
         fields: {
+          additionalFields: null,
           incidentTypes: null,
           severityCode: null,
         },

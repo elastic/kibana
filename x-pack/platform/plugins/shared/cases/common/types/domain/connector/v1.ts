@@ -64,10 +64,17 @@ export const ResilientFieldsRt = rt.intersection([
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRt>;
 
-const ConnectorResilientTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.resilient),
-  fields: rt.union([ResilientFieldsRt, rt.null]),
-});
+const ConnectorResilientTypeFieldsRt = rt.intersection([
+  rt.strict({
+    type: rt.literal(ConnectorTypes.resilient),
+    fields: rt.union([ResilientFieldsRt, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 /**
  * ServiceNow

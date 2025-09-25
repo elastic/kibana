@@ -63,8 +63,8 @@ export interface UpdateFieldTextArea {
 
 interface UpdateField {
   field: { name: string };
-  old_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
-  new_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
+  old_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField | unknown;
+  new_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField | unknown;
 }
 
 export interface UpdateIncidentRequest {

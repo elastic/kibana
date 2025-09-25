@@ -174,7 +174,7 @@ describe('IBM Resilient connector', () => {
       description: 'desc',
       incidentTypes: [1001],
       severityCode: 6,
-      additional_fields: null,
+      additionalFields: null,
     };
 
     beforeEach(() => {
@@ -204,7 +204,7 @@ describe('IBM Resilient connector', () => {
 
     it('should call request with correct arguments', async () => {
       await connector.createIncident(
-        { ...incidentMock, additional_fields: '{"test_field":"testing"}' },
+        { ...incidentMock, additionalFields: '{"test_field":"testing"}' },
         connectorUsageCollector
       );
 
@@ -243,7 +243,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc',
             incidentTypes: [1001],
             severityCode: 6,
-            additional_fields: null,
+            additionalFields: null,
           },
           connectorUsageCollector
         )
@@ -269,7 +269,7 @@ describe('IBM Resilient connector', () => {
         description: 'desc',
         incidentTypes: [1001],
         severityCode: 6,
-        additional_fields: null,
+        additionalFields: null,
       },
     };
     it('updates the incident correctly', async () => {
@@ -295,7 +295,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc_updated',
             incidentTypes: [1001],
             severityCode: 5,
-            additional_fields: null,
+            additionalFields: '{"customField1":"customValue1"}',
           },
         },
         connectorUsageCollector
@@ -311,6 +311,11 @@ describe('IBM Resilient connector', () => {
         method: 'PATCH',
         data: {
           changes: [
+            {
+              field: { name: 'customField1' },
+              old_value: null,
+              new_value: 'customValue1',
+            },
             {
               field: { name: 'name' },
               old_value: { text: 'title' },

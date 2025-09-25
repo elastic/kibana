@@ -14,5 +14,5 @@ export const format: Format = (theCase, alerts) => {
     severityCode = null,
     additionalFields = null,
   } = (theCase.connector.fields as ConnectorResilientTypeFields['fields']) ?? {};
-  return { incidentTypes, severityCode, additional_fields: additionalFields };
+  return { incidentTypes, severityCode, additionalFields };
 };
