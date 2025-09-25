@@ -21,7 +21,6 @@ import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticse
 import type {
   GetInfoResponse,
   InstallPackageResponse,
-  DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -58,6 +57,7 @@ import type {
   CustomIntegrationRequestSchema,
   RollbackPackageRequestSchema,
   GetKnowledgeBaseRequestSchema,
+  DeletePackageResponseSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -545,7 +545,7 @@ export const deletePackageHandler: FleetRequestHandler<
     esClient,
     force: request.query?.force,
   });
-  const body: DeletePackageResponse = {
+  const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,
   };
   return response.ok({ body });

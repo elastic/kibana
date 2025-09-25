@@ -191,12 +191,12 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
     [notifications.toasts, packageInfo.name, packageInfo.version, forceRefreshAssets]
   );
 
-  const createAlerts = useCallback(
+  const createRules = useCallback(
     async (alertIds: Array<string>) => {
       setIsLoading(true);
       notifications.toasts.addInfo(
-        i18n.translate('xpack.fleet.epm.packageDetails.assets.creatingAlerts', {
-          defaultMessage: 'Creating {count, plural, one {# alert} other {# alerts}}.',
+        i18n.translate('xpack.fleet.epm.packageDetails.assets.creatingRules', {
+          defaultMessage: 'Creating {count, plural, one {# rule} other {# rules}}.',
           values: { count: alertIds.length },
         }),
         { toastLifeTimeMs: 500 }
@@ -206,16 +206,16 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
         await sendRequestInstallRuleAssets(packageInfo.name, packageInfo.version);
 
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.epm.packageDetails.assets.createAlertsSuccess', {
-            defaultMessage: 'Successfully created {count, plural, one {# alert} other {# alerts}}.',
+          i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesSuccess', {
+            defaultMessage: 'Successfully created {count, plural, one {# rule} other {# rules}}.',
             values: { count: alertIds.length },
           }),
           { toastLifeTimeMs: 1000 }
         );
       } catch (e) {
         notifications.toasts.addError(e, {
-          title: i18n.translate('xpack.fleet.epm.packageDetails.assets.createAlertsError', {
-            defaultMessage: 'An error occurred creating alerts.',
+          title: i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesError', {
+            defaultMessage: 'An error occurred creating rules.',
           }),
         });
       }
@@ -267,7 +267,7 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
             if (type === ElasticsearchAssetType.transform) {
               authorizeTransforms(deferredAssets.map((t) => ({ transformId: t.id })));
             } else if (type === KibanaSavedObjectType.alert) {
-              createAlerts(deferredAssets.map(({ id }) => id));
+              createRules(deferredAssets.map(({ id }) => id));
             }
           }}
           aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
@@ -281,8 +281,8 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
             : null}
 
           {type === KibanaSavedObjectType.alert
-            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createAlertsButton', {
-                defaultMessage: 'Create alerts',
+            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesButton', {
+                defaultMessage: 'Create rules',
               })
             : null}
         </EuiButton>

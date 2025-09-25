@@ -40,6 +40,7 @@ export const GetPackagesRequestSchema = {
 export const KibanaAssetReferenceSchema = schema.object({
   id: schema.string(),
   originId: schema.maybe(schema.string()),
+  deferred: schema.maybe(schema.boolean()),
   type: schema.oneOf([
     schema.oneOf([
       schema.literal('dashboard'),
