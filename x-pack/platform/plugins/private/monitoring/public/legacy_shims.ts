@@ -70,6 +70,7 @@ export interface IShims {
   ) => Promise<any>;
   isCloud: boolean;
   cloudBaseUrl?: string;
+  hasEnterpriseLicense: boolean;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
@@ -84,6 +85,7 @@ export class Legacy {
     data,
     isCloud,
     cloudBaseUrl,
+    hasEnterpriseLicense,
     triggersActionsUi,
     usageCollection,
     appMountParameters,
@@ -139,6 +141,7 @@ export class Legacy {
         }),
       isCloud,
       cloudBaseUrl,
+      hasEnterpriseLicense,
       triggersActionsUi,
       usageCollection,
       kibanaServices: {

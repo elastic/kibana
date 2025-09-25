@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { take } from 'rxjs/operators';
 import type {
   App,
   AppMountParameters,
@@ -18,6 +19,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   CCS_REMOTE_PATTERN,
   RULE_DETAILS,
@@ -46,6 +48,7 @@ interface MonitoringSetupPluginDependencies {
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export class MonitoringPlugin
@@ -98,6 +101,10 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
+        // Check if user has enterprise license
+        const license = await pluginsStart.licensing.license$.pipe(take(1)).toPromise();
+        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
+
         const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
@@ -106,6 +113,7 @@ export class MonitoringPlugin
           share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           cloudBaseUrl: plugins.cloud?.baseUrl,
+          hasEnterpriseLicense,
           pluginInitializerContext: this.initializerContext,
           externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
@@ -122,6 +130,7 @@ export class MonitoringPlugin
           navigation: deps.navigation,
           isCloud: deps.isCloud,
           cloudBaseUrl: deps.cloudBaseUrl,
+          hasEnterpriseLicense: deps.hasEnterpriseLicense,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
           triggersActionsUi: deps.triggersActionsUi,
