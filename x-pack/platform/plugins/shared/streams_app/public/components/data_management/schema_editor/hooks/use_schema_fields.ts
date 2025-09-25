@@ -144,15 +144,12 @@ export const useSchemaFields = ({
   );
 
   const pendingChangesCount = useMemo(() => {
-    const added =
-      fields.filter((field) => field.status !== 'unmapped').length - definitionFields.length;
-
-    const changed = fields.filter((field) => {
+    const addedOrChanged = fields.filter((field) => {
       const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return stored && !isEqual(field, stored);
-    }).length;
+      return !stored || !isEqual(field, stored);
+    });
 
-    return added + changed;
+    return addedOrChanged.length;
   }, [fields, definitionFields, storedFields]);
 
   const discardChanges = useCallback(() => {
