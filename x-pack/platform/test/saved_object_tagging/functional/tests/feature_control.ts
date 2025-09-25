@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { USERS, User } from '../../common/lib';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { User } from '../../common/lib';
+import { USERS } from '../../common/lib';
 
 interface PrivilegeMap {
   view: boolean;
@@ -52,8 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const addFeatureControlSuite = ({ user, description, privileges }: FeatureControlUserSuite) => {
     const testPrefix = (allowed: boolean) => (allowed ? `can` : `can't`);
 
-    // Failing: See https://github.com/elastic/kibana/issues/216512
-    describe.skip(description, () => {
+    describe(description, () => {
       before(async () => {
         await loginAs(user);
         await tagManagementPage.navigateTo();

@@ -12,7 +12,8 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-browser-internal';
-import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {

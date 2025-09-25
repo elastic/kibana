@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
@@ -24,7 +25,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useUpdateMigration } from '../../logic/use_update_migration';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
-import { useDeleteMigration } from '../../logic/use_delete_migration';
+import { useDeleteMigration } from '../../../common/hooks/use_delete_migrations';
 
 interface MigrationPanelTitleProps {
   migrationStats: RuleMigrationStats;
@@ -44,12 +45,15 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     close: closeDeleteModal,
   } = useIsOpenState(false);
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const onRenameError = useCallback(() => {
     setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
   }, [migrationStats.name]);
 
   const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
-    migrationStats.id
+    migrationStats.id,
+    'rule'
   );
   const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
     migrationStats.id,
@@ -152,7 +156,9 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
             </EuiPopover>
             {isDeleteModalOpen && (
               <EuiConfirmModal
+                aria-labelledby={confirmModalTitleId}
                 title={i18n.DELETE_MIGRATION_TITLE}
+                titleProps={{ id: confirmModalTitleId }}
                 onCancel={closeDeleteModal}
                 onConfirm={confirmDeleteMigration}
                 confirmButtonText={i18n.DELETE_MIGRATION_TEXT}

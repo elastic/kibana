@@ -10,8 +10,9 @@ import {
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CloudUsageCollectorConfig, createCloudUsageCollector } from './cloud_usage_collector';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { CloudUsageCollectorConfig } from './cloud_usage_collector';
+import { createCloudUsageCollector } from './cloud_usage_collector';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 describe('createCloudUsageCollector', () => {
   let usageCollection: UsageCollectionSetup;
@@ -68,6 +69,26 @@ describe('createCloudUsageCollector', () => {
       });
     });
 
+    it('return inTrial true if inTrial is provided', async () => {
+      const collector = createCloudUsageCollector(usageCollection, {
+        isCloudEnabled: true,
+        organizationInTrial: true,
+      } as CloudUsageCollectorConfig);
+
+      expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
+        isCloudEnabled: true,
+        isElasticStaffOwned: undefined,
+        organizationId: undefined,
+        trialEndDate: undefined,
+        inTrial: true,
+        deploymentId: undefined,
+        projectId: undefined,
+        projectType: undefined,
+        productTier: undefined,
+        orchestratorTarget: undefined,
+      });
+    });
+
     it('pass-through properties are copied as expected', async () => {
       const collector = createCloudUsageCollector(usageCollection, {
         isCloudEnabled: true,
@@ -79,6 +100,7 @@ describe('createCloudUsageCollector', () => {
         projectType: 'security',
         productTier: 'complete',
         orchestratorTarget: 'canary',
+        organizationInTrial: undefined,
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({

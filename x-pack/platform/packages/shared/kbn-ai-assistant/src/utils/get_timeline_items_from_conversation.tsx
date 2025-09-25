@@ -13,11 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import {
-  ChatState,
+import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ChatActionClickPayload,
   ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { ChatActionClickPayload } from '@kbn/observability-ai-assistant-plugin/public';
 import { RenderFunction } from '../render_function';
 import { safeJsonParse } from './safe_json_parse';
 import type { ChatTimelineItem } from '../chat/chat_timeline';
@@ -130,6 +130,10 @@ export function getTimelineItemsfromConversation({
         hide: false,
       };
 
+      // Normalize special placeholder content coming from some providers when using native tool calls
+      const isToolCallsPlaceholder = message.message.content === '[TOOL_CALLS]';
+      const normalizedContent = isToolCallsPlaceholder ? '' : message.message.content;
+
       switch (role) {
         case MessageRole.User:
           actions.canGiveFeedback = false;
@@ -235,13 +239,14 @@ export function getTimelineItemsfromConversation({
                 }}
               />
             );
-            if (message.message.content) {
+
+            if (normalizedContent) {
               // TODO: we want to show the content always, and hide
               // the function request initially, but we don't have a
               // way to do that yet, so we hide the request here until
               // we have a fix.
               // element = message.message.content;
-              content = message.message.content;
+              content = normalizedContent;
               display.collapsed = false;
             } else {
               content = convertMessageToMarkdownCodeBlock(message.message);
@@ -252,7 +257,7 @@ export function getTimelineItemsfromConversation({
           } else {
             // is an assistant response
             title = '';
-            content = message.message.content;
+            content = normalizedContent || undefined;
             display.collapsed = false;
             actions.canEdit = false;
           }

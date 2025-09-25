@@ -12,7 +12,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { ConfigKey } from '../constants';
 
 export interface MonitorSpacesProps {
@@ -97,6 +97,7 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
   return (
     <EuiComboBox<string>
       fullWidth
+      isDisabled={rest.readOnly}
       aria-label={SPACES_LABEL}
       placeholder={SPACES_LABEL}
       isInvalid={showFieldInvalid}

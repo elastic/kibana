@@ -12,6 +12,11 @@ import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
 
+/**
+ * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
+ * to spin up a local k8s cluster with the required resources.
+ */
+
 test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
@@ -23,6 +28,7 @@ test.beforeEach(async ({ page }) => {
  */
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
+const isServerless = process.env.CLUSTER_ENVIRONMENT === 'serverless';
 
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
@@ -81,6 +87,11 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   const apmServiceInventoryPage = new ApmServiceInventoryPage(
     await otelKubernetesFlowPage.openServiceInventoryInNewTab()
   );
-  await apmServiceInventoryPage.page.getByTestId('serviceLink_opentelemetry/java/elastic').click();
+
+  const serviceTestId = isServerless
+    ? 'serviceLink_java'
+    : 'serviceLink_opentelemetry/java/elastic';
+
+  await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
   await apmServiceInventoryPage.assertTransactionExists();
 });

@@ -73,7 +73,6 @@ const avgOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(avg_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -642,7 +641,6 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS distincts=count_distinct(count_distinct_over_time(network.cost)),\n        distincts_imprecise=count_distinct(count_distinct_over_time(network.cost, 100))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -683,7 +681,27 @@ const countOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -704,6 +722,46 @@ const countOverTimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
           optional: false,
         },
       ],
@@ -781,7 +839,6 @@ const countOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS count=count(count_over_time(network.cost))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -831,7 +888,6 @@ const firstOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(first_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -881,7 +937,6 @@ const lastOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(last_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -992,6 +1047,16 @@ const maxOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -1000,7 +1065,6 @@ const maxOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS cost=sum(max_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -1111,6 +1175,16 @@ const minOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -1119,7 +1193,6 @@ const minOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS cost=sum(min_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -1168,7 +1241,6 @@ const rateDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max(rate(network.total_bytes_in)) BY time_bucket = bucket(@timestamp,5minute)',
   ],

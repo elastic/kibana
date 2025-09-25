@@ -37,7 +37,7 @@ export const Table = () => {
     resultsCount,
     showInactiveDatasets,
     showFullDatasetNames,
-    canUserMonitorDataset,
+    canUserMonitorAnyDataset,
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
@@ -63,7 +63,7 @@ export const Table = () => {
             tooltipText={fullDatasetNameDescription}
             onToggle={toggleFullDatasetNames}
           />
-          {canUserMonitorDataset && canUserMonitorAnyDataStream && (
+          {canUserMonitorAnyDataset && canUserMonitorAnyDataStream && (
             <DescriptiveSwitch
               testSubject="datasetQualityInactiveDatasetsSwitch"
               label={inactiveDatasetsLabel}

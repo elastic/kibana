@@ -718,7 +718,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"profiling\" | \"uptime\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"streams\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
+          "\"profiling\" | \"streams\" | \"uptime\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -923,6 +923,21 @@
           "\"observability-overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.STREAMS_APP_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_APP_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"STREAMS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -182,7 +182,8 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
-  const isBulkFillRuleGapsEnables = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
+  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
+  const isFillRuleGapsButtonEnabled = hasCRUDPermissions && isBulkFillRuleGapsEnabled;
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -291,7 +292,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
-            {isBulkFillRuleGapsEnables && (
+            {isFillRuleGapsButtonEnabled && (
               <EuiFlexItem grow={false}>
                 <FillRuleGapsButton ruleId={ruleId} />
               </EuiFlexItem>

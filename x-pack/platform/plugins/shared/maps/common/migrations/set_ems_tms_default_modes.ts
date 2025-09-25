@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import { DEFAULT_EMS_ROADMAP_ID } from '@kbn/maps-ems-plugin/common';
 import { SOURCE_TYPES } from '../constants';
-import { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
+import type { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 // LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0
@@ -32,7 +33,7 @@ export function setEmsTmsDefaultModes({
 
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (layerDescriptor.sourceDescriptor?.type === SOURCE_TYPES.EMS_TMS) {
-      const sourceDescriptor = layerDescriptor.sourceDescriptor as EMSTMSSourceDescriptor;
+      const sourceDescriptor = layerDescriptor.sourceDescriptor as Writable<EMSTMSSourceDescriptor>;
       // auto select bright tiles for EMS_TMS layers created before 8.0.0
       if (!sourceDescriptor.lightModeDefault) {
         sourceDescriptor.lightModeDefault = DEFAULT_EMS_ROADMAP_ID;

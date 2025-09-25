@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 
@@ -52,20 +51,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const resp = await monitorTestService.addMonitor(newMonitor, editorUser);
 
       const res = await supertest
-        .post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)
+        .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${resp.id}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       const result = res.body;
       expect(typeof result.testRunId).to.eql('string');
-      expect(typeof result.configId).to.eql('string');
-      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-        omit(newMonitor, ['id', 'config_id'])
-      );
     });
 
     it('works in non default space', async () => {
@@ -80,20 +72,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(resp.status).to.eql(200, JSON.stringify(resp.body));
 
       const res = await supertest
-        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TEST_NOW_MONITOR}/${resp.body.id}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       const result = res.body;
       expect(typeof result.testRunId).to.eql('string');
-      expect(typeof result.configId).to.eql('string');
-      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-        omit({ ...newMonitor, spaces: [SPACE_ID] }, ['id', 'config_id'])
-      );
     });
   });
 }

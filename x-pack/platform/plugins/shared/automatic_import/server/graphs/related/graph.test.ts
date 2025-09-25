@@ -23,14 +23,11 @@ import { handleReview } from './review';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { testPipeline, combineProcessors } from '../../util';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 jest.mock('./errors');
 jest.mock('./review');

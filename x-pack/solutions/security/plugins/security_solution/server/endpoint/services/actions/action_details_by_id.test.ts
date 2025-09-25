@@ -39,6 +39,9 @@ describe('When using `getActionDetailsById()', () => {
     actionResponses = createActionResponsesEsSearchResultsMock();
 
     applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should return expected output', async () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, CoreSetup } from '@kbn/core/public';
+import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { createLegacyUrlForwardApp } from './forward_app';
 import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
 

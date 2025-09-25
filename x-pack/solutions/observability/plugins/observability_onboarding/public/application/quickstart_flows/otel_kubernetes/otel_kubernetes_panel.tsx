@@ -39,7 +39,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.6.3';
+const OTEL_KUBE_STACK_VERSION = '0.9.1';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
@@ -85,9 +85,11 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
   const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
+  const valuesFileName =
+    !isServerless || metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
 
   const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
+    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/${valuesFileName}`
     : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
@@ -439,7 +441,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                             label: i18n.translate(
                               'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
                               {
-                                defaultMessage: 'Explore Service Inventory',
+                                defaultMessage: 'Explore Service inventory',
                               }
                             ),
                             href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',

@@ -6,7 +6,7 @@
  */
 
 import { LAYER_TYPE } from '../constants';
-import { LayerDescriptor } from '../descriptor_types';
+import type { LayerDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 // LAYER_TYPE constants renamed in 8.1 to provide more distinguishable names that better refect layer.
@@ -26,7 +26,7 @@ export function renameLayerTypes({ attributes }: { attributes: MapAttributes }):
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layerDescriptor: LayerDescriptor) => {
+  layerList.forEach((layerDescriptor: { type: string }) => {
     if (layerDescriptor.type === 'TILED_VECTOR') {
       layerDescriptor.type = LAYER_TYPE.MVT_VECTOR;
     } else if (layerDescriptor.type === 'VECTOR_TILE') {

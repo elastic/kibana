@@ -16,6 +16,7 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
+  'alerting_rule_template',
   'api_key_pending_invalidation',
   'apm-custom-dashboards',
   'apm-indices',

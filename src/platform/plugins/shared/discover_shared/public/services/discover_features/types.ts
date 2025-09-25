@@ -10,7 +10,10 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { FeaturesRegistry } from '../../../common';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SpanLinks } from '@kbn/apm-types';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { FeaturesRegistry } from '../../../common';
 
 /**
  * Features types
@@ -24,13 +27,14 @@ import { FeaturesRegistry } from '../../../common';
  * will be shown on the logs-overview preset tab of the UnifiedDocViewer.
  */
 
-export interface StreamsFeatureRenderDeps {
+export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
 }
 
-export interface StreamsFeature {
+export interface ObservabilityStreamsFeature {
   id: 'streams';
-  renderStreamsField: (deps: StreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
 export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
@@ -41,12 +45,40 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityTracesSpanLinksFeature {
+  id: 'observability-traces-fetch-span-links';
+  fetchSpanLinks: (
+    params: {
+      traceId: string;
+      docId: string;
+      start: string;
+      end: string;
+      processorEvent?: ProcessorEvent;
+    },
+    signal: AbortSignal
+  ) => Promise<SpanLinks>;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
     onClose: () => void;
     initialValues: Record<string, unknown>;
   }) => React.ReactNode;
+}
+
+export interface ObservabilityLogEventsFeature {
+  id: 'observability-log-events';
+  render: (props: {
+    query: Query;
+    timeRange: TimeRange;
+    index: string;
+    displayOptions?: {
+      solutionNavIdOverride: 'oblt';
+      enableDocumentViewer: false;
+      enableFilters: false;
+    };
+  }) => JSX.Element;
 }
 
 /** **************** Security Solution ****************/
@@ -71,9 +103,11 @@ export type SecuritySolutionFeature =
 
 // This should be a union of all the available client features.
 export type DiscoverFeature =
-  | StreamsFeature
+  | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityLogEventsFeature
+  | ObservabilityTracesSpanLinksFeature
   | SecuritySolutionFeature;
 
 /**

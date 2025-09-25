@@ -33,6 +33,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -45,17 +46,17 @@ describe('parseRecords', () => {
     const ids = result.nodes.map((n) => n.id);
     expect(ids).toContain('actor1');
     expect(ids).toContain('target1');
-    expect(ids.some((id) => id.includes('label(login)'))).toBe(true);
+    expect(ids.some((id) => id.includes('label(login)oe(1)oa(0)'))).toBe(true);
 
     // Should have 2 edges: actor->label, label->target
     expect(result.edges.length).toBe(2);
     expect(result.edges[0].source).toBe('actor1');
-    expect(result.edges[0].target).toContain('label(login)');
-    expect(result.edges[1].source).toContain('label(login)');
+    expect(result.edges[0].target).toContain('label(login)oe(1)oa(0)');
+    expect(result.edges[1].source).toContain('label(login)oe(1)oa(0)');
     expect(result.edges[1].target).toBe('target1');
 
     // Label node should have correct label and documentsData
-    const labelNode = result.nodes.find((n) => n.id.includes('label(login)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(login)oe(1)oa(0)'));
     expect(labelNode).toBeDefined();
     expect(labelNode!.label).toBe('login');
     expect(labelNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
@@ -70,13 +71,14 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: '{"a":1}',
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
       },
     ];
     const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.id.includes('label(foo)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(foo)oe(1)oa(0)'));
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
   });
@@ -88,6 +90,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -97,6 +100,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"baz":2}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -150,14 +154,82 @@ describe('parseRecords', () => {
         action: 'alert',
         docs: ['{"foo":"bar"}'],
         badge: 1,
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: true,
       },
     ];
     const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)'));
+    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)oe(1)oa(1)'));
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('color', 'danger');
+  });
+
+  it('sets color to danger for isAlert', () => {
+    const records: GraphEdge[] = [
+      {
+        actorIds: 'actor1',
+        targetIds: 'target1',
+        action: 'alert',
+        docs: ['{"foo":"bar"}'],
+        badge: 1,
+        isAlert: true,
+        isOrigin: true,
+        isOriginAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)oe(1)oa(0)'));
+    expect(labelNode).toBeDefined();
+    expect(labelNode).toHaveProperty('color', 'danger');
+  });
+
+  it('sets label node id based on action, isOrigin and isOriginAlert fields', () => {
+    const actorId = 'actor1';
+    const targetId = 'target1';
+    const baseLabelNodeData = {
+      actorIds: actorId,
+      targetIds: targetId,
+      docs: ['{"foo":"bar"}'],
+      badge: 1,
+      isAlert: true,
+    };
+
+    const records: GraphEdge[] = [
+      {
+        ...baseLabelNodeData,
+        action: 'action1',
+        isOrigin: false,
+        isOriginAlert: false,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action2',
+        isOrigin: true,
+        isOriginAlert: false,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action3',
+        isOrigin: false,
+        isOriginAlert: true,
+      },
+      {
+        ...baseLabelNodeData,
+        action: 'action4',
+        isOrigin: true,
+        isOriginAlert: true,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+    const labelNodes = result.nodes.filter((n) => n.shape === 'label');
+
+    expect(labelNodes.map((n) => n.id)).toStrictEqual([
+      `a(${actorId})-b(${targetId})label(action1)oe(0)oa(0)`,
+      `a(${actorId})-b(${targetId})label(action2)oe(1)oa(0)`,
+      `a(${actorId})-b(${targetId})label(action3)oe(0)oa(1)`,
+      `a(${actorId})-b(${targetId})label(action4)oe(1)oa(1)`,
+    ]);
   });
 
   it('handles unknown target ids', () => {
@@ -167,12 +239,10 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: [],
-        ips: [],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: [null, 'target1'],
-        users: [],
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -189,6 +259,7 @@ describe('parseRecords', () => {
         actorIds: ['a1', 'a2'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['t1'],
@@ -198,6 +269,7 @@ describe('parseRecords', () => {
         actorIds: ['a3'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['t2', 't3'],
@@ -211,30 +283,123 @@ describe('parseRecords', () => {
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
 
-  it('assigns correct shapes and icons for entity nodes', () => {
+  it('assigns correct shapes and icons for entity nodes without entity data', () => {
     const records: GraphEdge[] = [
       {
         action: 'foo',
         actorIds: ['user1', 'host1', 'ip1'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: ['host1'],
-        ips: ['ip1'],
+        actorsDocData: [null],
+        targetsDocData: [null],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
-        targetIds: [],
-        users: ['user1'],
+        targetIds: ['ip1'],
       },
     ];
     const result = parseRecords(mockLogger, records);
 
     const userNode = result.nodes.find((n) => n.id === 'user1');
-    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+    expect(userNode).toMatchObject({ shape: 'rectangle' });
+    expect(userNode).not.toHaveProperty('tag');
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
+    expect(hostNode).not.toHaveProperty('tag');
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
-    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+    expect(ipNode).toMatchObject({ shape: 'rectangle' });
+    expect(ipNode).not.toHaveProperty('tag');
+  });
+
+  it('assigns correct shapes, icons and tags for entity nodes - with entity data', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'foo',
+        actorIds: ['user1', 'host1', 'ip1'],
+        actorsDocData: [
+          '{"id":"user1","type":"entity","index":"test","entity":{"name":"john","type":"Identity"}}',
+          '{"id":"ip1","type":"entity","index":"test","entity":{"name":"192.168.1.1","type":"ip"}}',
+          '{"id":"target1","type":"entity","index":"test","entity":{"name":"Target Service","type":"service"}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['target1', 'target2'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    const userNode = result.nodes.find((n) => n.id === 'user1');
+    expect(userNode).toMatchObject({
+      shape: 'ellipse',
+      icon: 'user',
+      tag: 'Identity',
+    });
+
+    const hostNode = result.nodes.find((n) => n.id === 'host1');
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
+    expect(hostNode).not.toHaveProperty('tag');
+
+    const ipNode = result.nodes.find((n) => n.id === 'ip1');
+    expect(ipNode).toMatchObject({
+      shape: 'rectangle',
+      icon: 'globe',
+      tag: 'ip',
+    });
+
+    const targetNode = result.nodes.find((n) => n.id === 'target1');
+    expect(targetNode).toBeDefined();
+    expect(targetNode).toMatchObject({
+      label: 'Target Service',
+      icon: 'cloudStormy',
+      tag: 'service',
+    });
+
+    const target2Node = result.nodes.find((n) => n.id === 'target2');
+    expect(target2Node).toBeDefined();
+    // No entity data for target2, so no tag should be present
+    expect(target2Node).not.toHaveProperty('tag');
+  });
+
+  it('handles entity data with missing type property', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'foo',
+        actorIds: ['entity1', 'entity2', 'entity3'],
+        actorsDocData: [
+          '{"id":"entity1","type":"entity","index":"test","entity":{"name":"Entity One","type":"custom"}}',
+          '{"id":"entity2","type":"entity","index":"test","entity":{"name":"Entity Two"}}',
+          '{"id":"entity3","type":"entity","index":"test","entity":{}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['entity4'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    const entity1Node = result.nodes.find((n) => n.id === 'entity1');
+    expect(entity1Node).toBeDefined();
+    expect(entity1Node).toHaveProperty('tag', 'custom');
+
+    const entity2Node = result.nodes.find((n) => n.id === 'entity2');
+    expect(entity2Node).toBeDefined();
+    expect(entity2Node).toHaveProperty('label', 'Entity Two');
+    expect(entity2Node).not.toHaveProperty('tag');
+
+    const entity3Node = result.nodes.find((n) => n.id === 'entity3');
+    expect(entity3Node).toBeDefined();
+    expect(entity3Node).not.toHaveProperty('tag');
+
+    const entity4Node = result.nodes.find((n) => n.id === 'entity4');
+    expect(entity4Node).toBeDefined();
+    expect(entity4Node).not.toHaveProperty('tag');
   });
 });

@@ -26,6 +26,8 @@ import type {
   UpdateProfilesContextWith,
 } from './types';
 
+export const NON_ECS_FIELD = '<non-ecs>';
+
 type FilterOperation = '+' | '-' | '_exists_';
 
 enum FieldUsageEventName {
@@ -88,9 +90,11 @@ export class ScopedDiscoverEBTManager {
         fieldNames: [fieldName],
       });
 
-      // excludes non ECS fields
+      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
+      } else {
+        eventData[FIELD_USAGE_FIELD_NAME] = NON_ECS_FIELD;
       }
     }
 

@@ -12,7 +12,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();
@@ -66,7 +66,10 @@ export const DissectPatternDefinition = () => {
         onChange={(value) => field.onChange(deserialize(value))}
         languageId="text"
         height={75}
-        options={{ minimap: { enabled: false } }}
+        options={{
+          automaticLayout: true,
+          minimap: { enabled: false },
+        }}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
           { defaultMessage: 'Pattern editor' }

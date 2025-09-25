@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, log } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates realistic Apache access and security logs.
+ */
+
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { log } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { random } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';

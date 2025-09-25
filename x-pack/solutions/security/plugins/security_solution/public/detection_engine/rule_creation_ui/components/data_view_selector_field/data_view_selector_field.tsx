@@ -80,6 +80,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
         data-test-subj="pick-rule-data-source"
       >
         <EuiComboBox
+          isInvalid={isInvalid}
           isDisabled={areDataViewsFetching}
           isClearable
           singleSelection={{ asPlainText: true }}

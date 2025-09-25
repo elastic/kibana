@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { Aggregators, MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import type { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators } from '@kbn/infra-plugin/common/alerting/metrics';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InfraRuleType } from '@kbn/rule-data-utils';
@@ -17,7 +19,7 @@ import {
   waitForRuleStatus,
 } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
@@ -31,15 +33,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Infrastructure Source Configuration', function () {
     before(async () =>
       Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.load('x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'),
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        ),
         kibanaServer.savedObjects.cleanStandardList(),
       ])
     );
     after(async () =>
       Promise.all([
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.unload('x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'),
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        ),
         kibanaServer.savedObjects.cleanStandardList(),
       ])
     );

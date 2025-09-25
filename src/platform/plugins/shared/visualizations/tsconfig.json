@@ -77,7 +77,8 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
-    "@kbn/css-utils",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

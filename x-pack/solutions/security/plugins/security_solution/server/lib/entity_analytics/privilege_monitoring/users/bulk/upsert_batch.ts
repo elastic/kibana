@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { separate } from 'fp-ts/Array';
+import { uniqBy } from 'lodash';
 import type { Batch, BulkPrivMonUser, BulkBatchProcessingResults, Options } from './types';
 
 export const bulkUpsertBatch =
@@ -16,7 +17,7 @@ export const bulkUpsertBatch =
     const { left: parsingErrors, right: users } = separate(batch.uploaded);
     const res = await esClient.bulk<BulkPrivMonUser>({
       index,
-      operations: users.flatMap((u) => {
+      operations: uniqBy(users, (u) => u.username).flatMap((u) => {
         const id = batch.existingUsers[u.username];
         const timestamp = new Date().toISOString();
 
@@ -34,7 +35,7 @@ export const bulkUpsertBatch =
             {
               '@timestamp': timestamp,
               user: { name: u.username, is_privileged: true },
-              labels: { sources: ['csv'] },
+              labels: { sources: ['csv'], source_ids: [] },
               ...labelField,
             },
             /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -46,6 +47,8 @@ export const bulkUpsertBatch =
           {
             script: {
               source: /* java */ `
+                boolean userModified = false;
+
                 if (ctx._source.labels == null) {
                   ctx._source.labels = new HashMap();
                 }
@@ -54,6 +57,7 @@ export const bulkUpsertBatch =
                 }
                 if (!ctx._source.labels.sources.contains(params.source)) {
                   ctx._source.labels.sources.add(params.source);
+                  userModified = true;
                 }
 
                 if (params.ea_label != null) {
@@ -65,17 +69,25 @@ export const bulkUpsertBatch =
                   }
                   if (!ctx._source.entity_analytics_monitoring.labels.contains(params.ea_label)) {
                     ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
+                    userModified = true;
                   }
                 }
 
                 if (ctx._source.user.is_privileged == false) {
                   ctx._source.user.is_privileged = true;
+                  userModified = true;
+                }
+
+                if (userModified) {
+                  ctx._source['@timestamp'] = params.timestamp;
+                  ctx._source.event.ingested = params.timestamp;
                 }
               `,
               lang: 'painless',
               params: {
                 source: 'csv',
                 ea_label: u.label,
+                timestamp,
               },
             },
           },

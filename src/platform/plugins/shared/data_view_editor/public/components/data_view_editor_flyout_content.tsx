@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -18,6 +19,7 @@ import {
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
   type UseEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -25,15 +27,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import {
-  DataView,
-  DataViewSpec,
-  Form,
-  useForm,
-  useFormData,
-  useKibana,
-  UseField,
-} from '../shared_imports';
+import type { DataView, DataViewSpec } from '../shared_imports';
+import { Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
 
@@ -41,7 +36,7 @@ import { removeSpaces } from '../lib';
 
 import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
-import {
+import type {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   IndexPatternConfig,
@@ -61,7 +56,7 @@ import {
   RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorService } from '../data_view_editor_service';
+import type { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -77,6 +72,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -94,9 +90,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
+  getDataViewHelpText,
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
+  const isMobile = useIsWithinBreakpoints(['s', 'xs']);
 
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
@@ -202,6 +200,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [dataViewEditorService, type]);
 
   const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
+  const titleHelpText = useMemo(
+    () => editData && getDataViewHelpText && getDataViewHelpText(editData),
+    [editData, getDataViewHelpText]
+  );
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -261,12 +263,41 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  const FlyoutEditorFooter = () => (
+    <Footer
+      onCancel={onCancel}
+      onSubmit={async (adhoc?: boolean) => {
+        const formData = form.getFormData();
+        if (!formData.name) {
+          form.updateFieldValues({ name: formData.title });
+          await form.getFields().name.validate();
+        }
+        // Ensures timestamp field is validated against current set of options
+        form.validateFields(['timestampField']);
+        form.setFieldValue('isAdHoc', adhoc || false);
+        form.submit();
+      }}
+      submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+      submittingType={
+        form.isSubmitting
+          ? form.getFormData().isAdHoc
+            ? SubmittingType.savingAsAdHoc
+            : SubmittingType.persisting
+          : undefined
+      }
+      isEdit={!!editData}
+      isPersisted={Boolean(editData && editData.isPersisted())}
+      allowAdHoc={allowAdHoc}
+      canSave={canSave}
+    />
+  );
+
   return (
-    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
+    <FlyoutPanels.Group flyoutClassName="indexPatternEditorFlyout" maxWidth={1180}>
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
           </EuiTitle>
           {showManagementLink && editData && editData.id && (
             <EuiLink
@@ -305,6 +336,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   indexPatternValidationProvider={
                     dataViewEditorService.indexPatternValidationProvider
                   }
+                  titleHelpText={titleHelpText}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -328,32 +360,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             />
           </Form>
         </FlyoutPanels.Content>
-        <Footer
-          onCancel={onCancel}
-          onSubmit={async (adhoc?: boolean) => {
-            const formData = form.getFormData();
-            if (!formData.name) {
-              form.updateFieldValues({ name: formData.title });
-              await form.getFields().name.validate();
-            }
-            // Ensures timestamp field is validated against current set of options
-            form.validateFields(['timestampField']);
-            form.setFieldValue('isAdHoc', adhoc || false);
-            form.submit();
-          }}
-          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
-          submittingType={
-            form.isSubmitting
-              ? form.getFormData().isAdHoc
-                ? SubmittingType.savingAsAdHoc
-                : SubmittingType.persisting
-              : undefined
-          }
-          isEdit={!!editData}
-          isPersisted={Boolean(editData && editData.isPersisted())}
-          allowAdHoc={allowAdHoc}
-          canSave={canSave}
-        />
+        {!isMobile && <FlyoutEditorFooter />}
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
         {isLoadingSources ? (
@@ -367,6 +374,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           />
         )}
       </FlyoutPanels.Item>
+      {isMobile && <FlyoutEditorFooter />}
     </FlyoutPanels.Group>
   );
 };

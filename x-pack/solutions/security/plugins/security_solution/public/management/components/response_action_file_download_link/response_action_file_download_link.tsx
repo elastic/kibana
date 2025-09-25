@@ -14,9 +14,11 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  type EuiTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { useHttp } from '../../../common/lib/kibana';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -104,7 +106,7 @@ export interface ResponseActionFileDownloadLinkProps {
   canAccessFileDownloadLink: boolean;
   isTruncatedFile?: boolean;
   'data-test-subj'?: string;
-  textSize?: 's' | 'xs';
+  textSize?: EuiTextProps['size'];
   /**
    * If zip file needs a passcode to be opened. If `false`, then the passcode text will not be displayed.
    * Default is `true`
@@ -131,17 +133,18 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const http = useHttp();
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
     }, [action.isCompleted, action.wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
-      return `${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
+      return `${http.basePath.get()}${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         file_id: getFileDownloadId(action, agentId),
       })}?apiVersion=2023-10-31`;
-    }, [action, agentId]);
+    }, [action, agentId, http.basePath]);
 
     const {
       isLoading,

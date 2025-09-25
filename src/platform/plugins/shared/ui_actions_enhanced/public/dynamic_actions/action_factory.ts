@@ -18,7 +18,8 @@ import type {
   ActionMenuItemProps,
 } from '@kbn/ui-actions-plugin/public';
 import type { Configurable } from '@kbn/kibana-utils-plugin/public';
-import type { ILicense, LicensingPluginStart, LicenseType } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';

@@ -6,16 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { ChatCompletionMessageParam } from 'openai/resources';
+import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import type { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { TINY_ELSER_INFERENCE_ID } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
 import {
+  TINY_ELSER_INFERENCE_ID,
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
@@ -27,6 +29,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertest = getService('supertest');
     const USER_PROMPT = 'What is Kibana Lens?';
 

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ToolDefinitionWithSchema, ToolDefinition } from '@kbn/onechat-common';
+import type {
+  ToolDefinition,
+  ToolDefinitionWithSchema,
+  SerializedOnechatError,
+} from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
   results: ToolDefinitionWithSchema[];
@@ -17,7 +22,7 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
@@ -27,3 +32,40 @@ export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'ta
 export type CreateToolResponse = ToolDefinitionWithSchema;
 
 export type UpdateToolResponse = ToolDefinitionWithSchema;
+
+interface BulkDeleteToolResultBase {
+  toolId: string;
+}
+
+interface BulkDeleteToolSuccessResult extends BulkDeleteToolResultBase {
+  success: true;
+}
+
+interface BulkDeleteToolFailureResult extends BulkDeleteToolResultBase {
+  success: false;
+  reason: SerializedOnechatError;
+}
+
+export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolFailureResult;
+
+export interface BulkDeleteToolResponse {
+  results: BulkDeleteToolResult[];
+}
+
+export interface ExecuteToolResponse {
+  result: ToolResult[];
+}
+
+export interface ResolveSearchSourcesRequest {
+  pattern: string;
+}
+
+export interface ResolveSearchSourceItem {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+}
+
+export interface ResolveSearchSourcesResponse {
+  results: ResolveSearchSourceItem[];
+  total: number;
+}

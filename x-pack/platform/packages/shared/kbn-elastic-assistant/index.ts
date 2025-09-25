@@ -193,6 +193,8 @@ export interface UseAssistantAvailability {
   isAssistantEnabled: boolean;
   // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
   isAssistantVisible: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -203,4 +205,7 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, the Assistant Sharing feature is enabled
+  // keep type loose to avoid updating mocks as temp property
+  isAssistantSharingEnabled?: boolean;
 }

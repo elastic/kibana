@@ -8,9 +8,9 @@
  */
 
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { FieldType } from '@kbn/esql-ast';
-import { monaco } from '../../../../../monaco_imports';
-import { HoverMonacoModel } from '../hover';
+import type { FieldType } from '@kbn/esql-ast';
+import type { monaco } from '../../../../../monaco_imports';
+import type { HoverMonacoModel } from '../hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
@@ -18,9 +18,10 @@ const fields: Array<ESQLFieldWithMetadata & { suggestedAs?: string }> = [
   ...types.map((type) => ({
     name: `${type}Field`,
     type,
+    userDefined: false as false,
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`', userDefined: false },
+  { name: 'kubernetes.something.something', type: 'double', userDefined: false },
 ];
 
 const indexes = (

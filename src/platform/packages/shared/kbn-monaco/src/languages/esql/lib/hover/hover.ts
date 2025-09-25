@@ -7,31 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, parse, type ESQLAstItem, TIME_SYSTEM_PARAMS } from '@kbn/esql-ast';
+import { TIME_SYSTEM_PARAMS, Walker, parse, within, type ESQLAstItem } from '@kbn/esql-ast';
 import {
-  ESQLAstQueryExpression,
-  ESQLFunction,
-  ESQLSingleAstItem,
-  ESQLSource,
-  isESQLNamedParamLiteral,
-} from '@kbn/esql-ast/src/types';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+  ENRICH_MODES,
+  modeDescription,
+} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import {
-  getFunctionSignatures,
   getFunctionDefinition,
+  getFunctionSignatures,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-ast/src/definitions/utils';
-import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
-import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
-  modeDescription,
-  ENRICH_MODES,
-} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
-import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
+  isESQLNamedParamLiteral,
+  type ESQLAstQueryExpression,
+  type ESQLFunction,
+  type ESQLSingleAstItem,
+  type ESQLSource,
+} from '@kbn/esql-ast/src/types';
+import { type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
+import { getColumnsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '../../../../monaco_imports';
+import type { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
 import { getVariablesHoverContent } from './helpers';
 
@@ -69,7 +66,7 @@ export async function getHoverItem(
   let node: ESQLSingleAstItem | undefined;
   Walker.walk(root, {
     visitFunction: (fn) => {
-      if (within(offset, fn.location)) node = fn;
+      if (within(offset, fn)) node = fn;
 
       if (fn.subtype === 'variadic-call') {
         const parentheses = {
@@ -81,7 +78,7 @@ export async function getHoverItem(
       }
     },
     visitSource: (source, parent, walker) => {
-      if (within(offset, source.location)) {
+      if (within(offset, source)) {
         node = source;
         walker.abort();
       }
@@ -90,7 +87,7 @@ export async function getHoverItem(
       // ignore identifiers because we don't want to choose them as the node type
       // instead of the function node (functions can have an "operator" child which is
       // usually an identifer representing the name of the function)
-      if (_node.type !== 'identifier' && within(offset, _node.location)) {
+      if (_node.type !== 'identifier' && within(offset, _node)) {
         node = _node;
       }
     },
@@ -188,20 +185,17 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(query, root);
-  const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
+  const { getColumnMap } = getColumnsByTypeRetriever(root, query, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
   // early exit on no hit
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
-  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
+  const columnsMap = await getColumnMap();
 
   const references = {
-    fields: fieldsMap,
-    userDefinedColumns: anyUserDefinedColumns,
+    columns: columnsMap,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(

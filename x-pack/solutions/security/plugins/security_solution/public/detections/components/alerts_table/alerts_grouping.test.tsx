@@ -27,8 +27,9 @@ import {
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from './grouping_settings';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -119,8 +120,7 @@ const sourcererDataView = {
 };
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
-const dataViewSpec: DataViewSpec = { title: 'test' };
-const dataView: DataView = createStubDataView({ spec: dataViewSpec });
+const dataView: DataView = getMockDataViewWithMatchedIndices(['test']);
 
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
@@ -130,6 +130,7 @@ const testProps: AlertsTableComponentProps = {
     renderer: defaultGroupStatsRenderer,
   },
   dataViewSpec: dataView.toSpec(),
+  dataView,
   defaultFilters: [],
   defaultGroupingOptions,
   globalFilters: [],
@@ -176,6 +177,12 @@ describe('GroupedAlertsTable', () => {
       selectedPatterns: ['myFakebeat-*'],
       sourcererDataView: {},
     });
+
+    jest.mocked(useDataView).mockReturnValue({
+      status: 'ready',
+      dataView,
+    });
+
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {
         return mockQueryResponse;
@@ -205,7 +212,6 @@ describe('GroupedAlertsTable', () => {
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({
       activeGroups: ['none'],
-      options: mockOptions,
       tableId: testProps.tableId,
     });
   });

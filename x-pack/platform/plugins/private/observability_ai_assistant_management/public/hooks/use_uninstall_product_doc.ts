@@ -27,6 +27,7 @@ export function useUninstallProductDoc() {
       return productDocBase!.installation.uninstall({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(

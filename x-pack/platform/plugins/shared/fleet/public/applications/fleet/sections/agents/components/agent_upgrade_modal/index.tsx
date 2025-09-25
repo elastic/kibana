@@ -12,15 +12,15 @@ import {
   EuiConfirmModal,
   EuiComboBox,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
-  EuiToolTip,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
   EuiDatePicker,
   EuiFieldText,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -93,6 +93,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
   isUpdating = false,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { notifications, docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion() || '';
   const config = useConfig();
@@ -177,6 +179,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     fetchFleetServerAgents();
   }, []);
 
+  const isIndependentAgentReleaseVersion = (version: string) => {
+    return version.includes('+build');
+  };
+
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
       // when agent is a query, don't set minVersion, so the versions are available to select
@@ -201,6 +207,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const options = displayVersions.map((option) => ({
       label: option,
       value: option,
+      toolTipContent: isIndependentAgentReleaseVersion(option)
+        ? i18n.translate('xpack.fleet.upgradeAgents.iarVersionOptionTooltip', {
+            defaultMessage: 'Independent Elastic Agent release version',
+          })
+        : undefined,
     }));
     if (options.length === 0) {
       return [EMPTY_VALUE];
@@ -230,6 +241,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
+  const isSelectedVersionIAR = useMemo(() => {
+    return isIndependentAgentReleaseVersion(selectedVersion[0]?.value || '');
+  }, [selectedVersion]);
 
   // latest agent version might be earlier than kibana version
   const latestAgentVersion = useAgentVersion();
@@ -384,6 +398,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   return (
     <EuiConfirmModal
       data-test-subj="agentUpgradeModal"
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       title={
         <>
           {isSingleAgent ? (
@@ -545,6 +561,36 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           />
         )}
       </p>
+      {isSelectedVersionIAR ? (
+        <>
+          <EuiCallOut
+            iconType="info"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.iarVersionSelectedCalloutTitle"
+                defaultMessage="Independent Elastic Agent release version selected"
+              />
+            }
+            data-test-subj="iarVersionSelectedCallout"
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.iarVersionSelected.description"
+              defaultMessage="For more information, refer to {documentationLink}."
+              values={{
+                documentationLink: (
+                  <EuiLink external={true} href={docLinks.links.fleet.agentReleaseProcess}>
+                    <FormattedMessage
+                      id="xpack.fleet.settings.iarVersionSelected.documentationLink"
+                      defaultMessage="Elastic Agent release process"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <EuiFormRow
         label={i18n.translate('xpack.fleet.upgradeAgents.chooseVersionLabel', {
           defaultMessage: 'Upgrade version',
@@ -654,15 +700,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
+                  type="info"
                   position="top"
                   content={i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodTooltip', {
                     defaultMessage:
                       'Define the rollout period for upgrades to your Elastic Agents. Any agents that are offline during this period will be upgraded when they come back online.',
                   })}
-                >
-                  <EuiIcon type="info" />
-                </EuiToolTip>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           }

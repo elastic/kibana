@@ -138,7 +138,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
   );
 
-  const filteredPromotedList = useMemo(() => {
+  const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
     if (isLoading) return [];
 
     const searchResults =
@@ -291,7 +291,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        {spacer && <EuiSpacer size="s" />}
+        {spacer && <EuiSpacer size="m" />}
         <EuiFlexItem>
           <GridColumn
             emptyStateStyles={emptyStateStyles}

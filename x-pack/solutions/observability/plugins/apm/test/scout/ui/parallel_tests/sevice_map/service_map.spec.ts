@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });
@@ -23,7 +23,7 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     );
     expect(page.url()).toContain('/app/apm/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
-    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.clickZoomIn();
     await serviceMapPage.centerServiceMapBtn.click();
     await serviceMapPage.waitForServiceMapToLoad();
   });
@@ -35,9 +35,9 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     );
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
-    await serviceMapPage.zoomOutBtn.click();
+    await serviceMapPage.clickZoomOut();
     await serviceMapPage.centerServiceMapBtn.click();
-    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.clickZoomIn();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 

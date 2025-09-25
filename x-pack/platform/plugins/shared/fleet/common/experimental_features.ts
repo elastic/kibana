@@ -9,7 +9,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
-  useSpaceAwareness: false,
+  useSpaceAwareness: true,
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: false,
@@ -17,7 +17,10 @@ const _allowedExperimentalValues = {
   enabledUpgradeAgentlessDeploymentsTask: true,
   enableAgentMigrations: false,
   enablePackageRollback: false,
-  enableAutoInstallContentPackages: false,
+  enableAutoInstallContentPackages: true,
+  enableOtelIntegrations: false,
+  enableAgentStatusAlerting: false,
+  enableAgentPrivilegeLevelChange: false,
 };
 
 /**

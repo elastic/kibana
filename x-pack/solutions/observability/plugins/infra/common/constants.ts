@@ -7,14 +7,16 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+export {
+  HOST_NAME as HOST_NAME_FIELD,
+  CONTAINER_ID as CONTAINER_ID_FIELD,
+  KUBERNETES_POD_UID as KUBERNETES_POD_UID_FIELD,
+} from '@kbn/metrics-data-access-plugin/common';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
-export const METRIC_SCHEMA_ECS = 'ecs';
-export const METRIC_SCHEMA_SEMCONV = 'semconv';
-export type MetricSchema = typeof METRIC_SCHEMA_ECS | typeof METRIC_SCHEMA_SEMCONV;
 
 export const METRICS_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
 export const INFRA_ALERT_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
@@ -36,7 +38,7 @@ export const TIEBREAKER_FIELD = '_doc';
 
 // processes
 export const TOP_N = 10;
-export const MANDATORY_PROCESS_FIELDS = [
+export const MANDATORY_PROCESS_FIELDS_ECS = [
   'system.process.cpu.total.pct',
   'system.process.memory.rss.pct',
   'system.process.cpu.start_time',
@@ -45,22 +47,12 @@ export const MANDATORY_PROCESS_FIELDS = [
   'process.pid',
   'process.command_line',
 ];
+export const MANDATORY_PROCESS_FIELDS_SEMCONV = [
+  'process.pid',
+  'process.command_line',
+  'process.owner',
+];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
-
-// system
-export const HOST_NAME_FIELD = 'host.name';
-export const CONTAINER_ID_FIELD = 'container.id';
-export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
-export const EVENT_MODULE = 'event.module';
-export const METRICSET_MODULE = 'metricset.module';
-export const METRICSET_NAME = 'metricset.name';
-export const DATASTREAM_DATASET = 'data_stream.dataset';
-
-// OTel hostmetricsreceiver
-
-// integrations
-export const SYSTEM_INTEGRATION = 'system';
-export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';
 
 // logs
 export const MESSAGE_FIELD = 'message';
@@ -82,3 +74,5 @@ export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
 };
 
 export const SNAPSHOT_API_MAX_METRICS = 20;
+
+export const SCHEMA_SELECTOR_DOCS_LINK = 'https://ela.st/schema-selector-hosts';

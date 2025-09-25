@@ -24,7 +24,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -105,7 +105,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'schemaEditor',
+                        tab: 'schema',
                       },
                     })}
                     target="_blank"

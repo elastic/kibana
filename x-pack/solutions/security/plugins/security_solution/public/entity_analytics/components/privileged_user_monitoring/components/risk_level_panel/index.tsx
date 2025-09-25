@@ -26,7 +26,7 @@ import { EnableRiskScore } from '../../../enable_risk_score';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.title',
-  { defaultMessage: 'Risk levels of privileged users' }
+  { defaultMessage: 'Privileged user risk levels' }
 );
 
 export const DONUT_CHART_HEIGHT = 160;
@@ -79,11 +79,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
   const isDisabled = !hasEngineBeenInstalled && !isLoading;
 
   if (isDisabled) {
-    return (
-      <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
-      </EuiPanel>
-    );
+    return <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />;
   }
 
   return (
@@ -96,7 +92,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
           inspectTitle={TITLE}
           title={TITLE}
-          titleSize="s"
+          titleSize="m"
           outerDirection={'column'}
         />
         {toggleStatus &&
@@ -119,7 +115,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                 <EuiBasicTable
                   responsiveBreakpoint={false}
                   data-test-subj="severity-level-table"
-                  compressed
                   columns={columns}
                   items={severityTableData}
                   loading={isLoading}

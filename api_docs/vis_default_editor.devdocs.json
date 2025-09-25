@@ -665,7 +665,7 @@
           "\nUse only this component instead of NumberInputOption in 'number_input.tsx'.\nIt is required for compatibility with TS 3.7.0\n"
         ],
         "signature": [
-          "({\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => React.JSX.Element"
+          "({\n  disabled,\n  error,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/required_number_input.tsx",
         "deprecated": false,
@@ -676,7 +676,7 @@
             "id": "def-public.RequiredNumberInputOption.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}",
+            "label": "{\n  disabled,\n  error,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
             "signature": [
               "NumberInputOptionProps<ParamName>"

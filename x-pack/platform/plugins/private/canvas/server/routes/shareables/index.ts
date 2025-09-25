@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { initializeZipShareableWorkpadRoute } from './zip';
 import { initializeDownloadShareableWorkpadRoute } from './download';
 

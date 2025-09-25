@@ -278,9 +278,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
     chartsStateService,
     anomalyDetectionAlertsStateService,
     anomalyTableService,
+    annotationsStateService,
+    influencersStateService,
   } = useAnomalyExplorerContext();
 
   const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
+  const tableError = useObservable(anomalyTableService.tableError$, anomalyTableService.tableError);
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -368,7 +371,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const { annotations, filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
+  const { filterPlaceHolder, indexPattern, loading } = explorerState;
+  const influencers = useObservable(
+    influencersStateService.influencers$,
+    influencersStateService.influencers
+  );
+  const influencersLoading = useObservable(influencersStateService.isLoading$, true);
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -393,7 +401,14 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyTimelineStateService.getSwimLaneBucketInterval()
   );
 
-  const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
+  const {
+    annotationsData,
+    totalCount: allAnnotationsCnt,
+    error: annotationsError,
+  } = useObservable(
+    annotationsStateService.annotationsTable$,
+    annotationsStateService.annotationsTable
+  );
 
   const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
   const badge =
@@ -587,6 +602,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer size="s" />
+
         <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
           <EuiFlexItem grow={false}>
             <SelectSeverity />
@@ -621,7 +638,18 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         <EuiSpacer size="m" />
 
-        {tableData ? (
+        {tableError ? (
+          <EuiCallOut
+            color="danger"
+            iconType="warning"
+            title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {
+              defaultMessage: 'An error occurred loading anomalies table data',
+            })}
+            data-test-subj="mlAnomaliesTableErrorCallout"
+          >
+            {tableError}
+          </EuiCallOut>
+        ) : tableData ? (
           <AnomaliesTable
             bounds={bounds}
             tableData={tableData}
@@ -732,7 +760,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
                       <EuiSpacer size={'m'} />
 
-                      <EuiSkeletonText lines={10} isLoading={loading}>
+                      <EuiSkeletonText lines={10} isLoading={influencersLoading}>
                         <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
                       </EuiSkeletonText>
                     </div>

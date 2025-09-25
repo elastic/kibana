@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
   aiAssistantSimulatedFunctionCalling,
@@ -33,7 +33,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.boolean(),
     type: 'boolean',
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
   },
   [aiAssistantSearchConnectorIndexPattern]: {
@@ -53,6 +53,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.string(),
     type: 'string',
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
   },
 };

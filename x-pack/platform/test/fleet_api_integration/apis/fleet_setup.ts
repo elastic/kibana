@@ -8,10 +8,9 @@
 import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 import { SpaceTestApiClient } from './space_awareness/api_helper';
 
@@ -27,12 +26,12 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
     beforeEach(async () => {
       try {
@@ -72,6 +71,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('upgrade managed package policies', () => {
       const apiClient = new SpaceTestApiClient(supertest);
       before(async () => {
+        await apiClient.setup();
         const pkgRes = await apiClient.getPackage({
           pkgName: 'synthetics',
         });
@@ -96,12 +96,13 @@ export default function (providerContext: FtrProviderContext) {
           operations: [...new Array(10).keys()].flatMap((_, index) => [
             {
               create: {
-                _id: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
+                _id: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
               },
             },
             {
-              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-              [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              namespaces: ['default'],
+              [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
                 name: `test-${index}`,
                 policy_ids: [agentPolicyRes.item.id],
                 inputs: [],
@@ -109,12 +110,13 @@ export default function (providerContext: FtrProviderContext) {
                   name: 'synthetics',
                   version: '1.2.1',
                 },
+                latest_revision: true,
               },
             },
           ]),
         });
 
-        await apiClient.getPackage({
+        return await apiClient.getPackage({
           pkgName: 'synthetics',
         });
       });
@@ -130,29 +132,28 @@ export default function (providerContext: FtrProviderContext) {
                 bool: {
                   must: {
                     term: {
-                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
+                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
                     },
                   },
                   filter: {
                     term: {
-                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
+                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
                     },
                   },
                 },
               },
             });
-            if ((res.hits.total as SearchTotalHits).value > 0) {
-              throw new Error(
-                `Managed package policies not upgraded ${
-                  (res.hits.total as SearchTotalHits).value
-                }.`
-              );
+            const packagePolicies = res.hits.hits.filter(
+              (so) => so._id && !so._id.includes(':prev')
+            );
+            if (packagePolicies.length > 0) {
+              throw new Error(`Managed package policies not upgraded ${packagePolicies.length}.`);
             }
           },
           {
-            retryCount: 15,
-            retryDelay: 5000,
-            timeout: 30_000,
+            retryCount: 25,
+            retryDelay: 10000,
+            timeout: 60_000,
           }
         );
       });

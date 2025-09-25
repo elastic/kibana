@@ -28,7 +28,7 @@ import {
   SO_SEARCH_LIMIT,
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
-import { ElasticsearchAssetType } from '../../../types';
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
   AssetReference,
   AssetType,
@@ -55,6 +55,7 @@ import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
+import { deletePackageKnowledgeBase } from './knowledge_base_index';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -154,7 +155,9 @@ export async function deleteKibanaAssets({
   spaceId?: string;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository()
+    appContextService
+      .getSavedObjects()
+      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
@@ -390,6 +393,8 @@ async function deleteAssets(
           packageSpecConditions: packageInfo?.conditions,
         })
       ),
+      // Delete knowledge base content for this package
+      deletePackageKnowledgeBase(esClient, name),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -447,7 +452,6 @@ export async function deleteKibanaSavedObjectsAssets({
   const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
-
   try {
     const packageInfo = await getPackageInfo({
       savedObjectsClient,
@@ -463,6 +467,7 @@ export async function deleteKibanaSavedObjectsAssets({
       logger,
     });
   } catch (err) {
+    logger.debug(`Deletion error: ${err}`);
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);

@@ -14,12 +14,10 @@ import type {
 } from '@kbn/core/server';
 import {
   type AgentDefinition,
-  AgentType,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
   oneChatDefaultAgentId,
-  allToolsSelectionWildcard as allTools,
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/onechat-common';
@@ -30,9 +28,11 @@ import type {
   AgentUpdateRequest,
 } from '../../../../common/agents';
 import type { ToolsServiceStart } from '../../tools';
-import { AgentProfileStorage, createStorage } from './storage';
+import type { AgentProfileStorage } from './storage';
+import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateProfile } from './converters';
 import { ensureValidId, validateToolSelection } from './utils';
+import { createDefaultAgentDefinition } from './default_definitions';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -182,7 +182,19 @@ class AgentClientImpl implements AgentClient {
     }
 
     const now = new Date();
-    const document = await this.storage.getClient().get({ id: agentId });
+
+    let document: Document;
+    try {
+      document = await this.storage.getClient().get({ id: agentId });
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        throw createAgentNotFoundError({
+          agentId,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     if (!hasAccess({ profile: document, user: this.user })) {
       throw createAgentNotFoundError({ agentId });
@@ -262,18 +274,6 @@ class AgentClientImpl implements AgentClient {
     }
   }
 }
-
-const createDefaultAgentDefinition = (): AgentDefinition => {
-  return {
-    id: oneChatDefaultAgentId,
-    type: AgentType.chat,
-    name: 'Onechat default agent',
-    description: 'The default onechat agent',
-    configuration: {
-      tools: [{ tool_ids: [allTools] }],
-    },
-  };
-};
 
 const hasAccess = ({
   profile,

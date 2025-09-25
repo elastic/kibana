@@ -12,11 +12,13 @@ export type TelemetryServiceStart = ITelemetryClient;
 export interface ITelemetryClient {
   reportRelatedAlertsLoaded(count: number): void;
   reportAlertDetailsPageView(ruleType: string): void;
+  reportRelatedAlertAddedToCase(newCaseCreated: boolean): void;
 }
 
 export enum TelemetryEventTypes {
   RELATED_ALERTS_LOADED = 'Related Alerts Loaded',
   ALERT_DETAILS_PAGE_VIEW = 'Alert Details Page View',
+  RELATED_ALERT_ADDED_TO_CASE = 'Related Alert Added to Case',
 }
 
 interface RelatedAlertsLoadedParams {
@@ -36,6 +38,21 @@ interface AlertDetailsPageViewEvent {
   schema: RootSchema<AlertDetailsPageViewParams>;
 }
 
-export type TelemetryEvent = AlertDetailsPageViewEvent | RelatedAlertsLoadedEvent;
+interface RelatedAlertAddedToCaseParams {
+  new_case_created: boolean;
+}
 
-export type TelemetryEventParams = RelatedAlertsLoadedParams | AlertDetailsPageViewParams;
+interface RelatedAlertAddedToCaseEvent {
+  eventType: TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE;
+  schema: RootSchema<RelatedAlertAddedToCaseParams>;
+}
+
+export type TelemetryEvent =
+  | AlertDetailsPageViewEvent
+  | RelatedAlertsLoadedEvent
+  | RelatedAlertAddedToCaseEvent;
+
+export type TelemetryEventParams =
+  | RelatedAlertsLoadedParams
+  | AlertDetailsPageViewParams
+  | RelatedAlertAddedToCaseParams;

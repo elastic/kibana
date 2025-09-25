@@ -7,32 +7,32 @@
 
 import { createElement as h } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
 import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
+import type { SampleApp2ClickContext } from './triggers';
 import {
   sampleApp1ClickTrigger,
   sampleApp2ClickTrigger,
   SAMPLE_APP2_CLICK_TRIGGER,
-  SampleApp2ClickContext,
   sampleApp2ClickContext,
 } from './triggers';
 import { mount } from './mount';

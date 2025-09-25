@@ -22,52 +22,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-status-common",
-        "id": "def-common.CoreStatus",
-        "type": "Interface",
-        "tags": [],
-        "label": "CoreStatus",
-        "description": [
-          "\nStatus of core services.\n"
-        ],
-        "path": "src/core/packages/status/common/src/core_status.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-status-common",
-            "id": "def-common.CoreStatus.elasticsearch",
-            "type": "Object",
-            "tags": [],
-            "label": "elasticsearch",
-            "description": [],
-            "signature": [
-              "ServiceStatus",
-              "<unknown>"
-            ],
-            "path": "src/core/packages/status/common/src/core_status.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-status-common",
-            "id": "def-common.CoreStatus.savedObjects",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjects",
-            "description": [],
-            "signature": [
-              "ServiceStatus",
-              "<unknown>"
-            ],
-            "path": "src/core/packages/status/common/src/core_status.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-status-common",
         "id": "def-common.ServerVersion",
         "type": "Interface",
         "tags": [],
@@ -333,7 +287,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
+              "\"degraded\" | \"critical\" | \"unavailable\" | \"available\""
             ],
             "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
@@ -427,6 +381,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.CoreStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreStatus",
+        "description": [
+          "\nStatus of core services.\n"
+        ],
+        "signature": [
+          "CoreStatusBase | CoreStatusWithHttp"
+        ],
+        "path": "src/core/packages/status/common/src/core_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
         "id": "def-common.ServerMetrics",
         "type": "Type",
         "tags": [],
@@ -469,7 +440,7 @@
           "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
         ],
         "signature": [
-          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
+          "\"degraded\" | \"critical\" | \"unavailable\" | \"available\""
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,

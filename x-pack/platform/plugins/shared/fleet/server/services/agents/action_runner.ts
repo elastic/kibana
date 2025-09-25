@@ -221,9 +221,11 @@ export abstract class ActionRunner {
 
     const getAgents = async () => {
       const namespaceFilter = await agentsKueryNamespaceFilter(this.actionParams.spaceId);
-      const kuery = namespaceFilter
-        ? `${namespaceFilter} AND ${this.actionParams.kuery}`
-        : this.actionParams.kuery;
+
+      const kuery = [
+        ...(namespaceFilter ? [namespaceFilter] : []),
+        ...(this.actionParams.kuery ? [this.actionParams.kuery] : []),
+      ].join(' AND ');
 
       return getAgentsByKuery(this.esClient, this.soClient, {
         kuery,

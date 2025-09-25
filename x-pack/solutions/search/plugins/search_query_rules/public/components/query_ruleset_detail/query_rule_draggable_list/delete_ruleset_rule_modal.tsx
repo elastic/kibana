@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -21,6 +21,8 @@ export const DeleteRulesetRuleModal = ({
   onConfirm: onSuccessAction,
 }: DeleteRulesetRuleModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
+
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
@@ -36,9 +38,11 @@ export const DeleteRulesetRuleModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.queryRules.deleteRulesetRuleModal.title', {
         defaultMessage: 'Delete query rule?',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeDeleteModal}
       onConfirm={deleteOperation}
       cancelButtonText={i18n.translate('xpack.queryRules.deleteRulesetRuleModal.cancelButton', {

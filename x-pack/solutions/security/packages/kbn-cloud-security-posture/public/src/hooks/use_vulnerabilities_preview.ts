@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import {
+import type {
   SearchRequest,
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
@@ -30,6 +30,7 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
+  by_datastream_dataset?: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
 export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
@@ -51,6 +52,9 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
 
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
+        data_stream: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
+          ? aggregations.by_datastream_dataset.buckets.map((bucket) => bucket.key)
+          : [],
       };
     },
     {

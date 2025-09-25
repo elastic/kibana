@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-management-plugin",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin contains the Workflows management application.",
+  "plugin": {
+    "id": "workflowsManagement",
+    "configPath": ["workflowsManagement"],
+    "browser": true,
+    "server": true,
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "data"],
+    "requiredPlugins": [
+      "navigation",
+      "taskManager",
+      "actions",
+      "workflowsExecutionEngine",
+      "features",
+      "security",
+      "triggersActionsUi",
+      "spaces",
+      "embeddable"
+    ],
+    "optionalPlugins": ["alerting"]
+  }
+}

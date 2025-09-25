@@ -8,14 +8,13 @@
  */
 import {
   isLiteral,
-  isTimeInterval,
   isInlineCast,
   isColumn,
   isParamLiteral,
   isFunctionExpression,
 } from '../../ast/is';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../commands_registry/types';
+import type { ESQLColumnData } from '../../commands_registry/types';
 import type { SupportedDataType, FunctionDefinition } from '../types';
 import { lastItem } from '../../visitor/utils';
 import { getFunctionDefinition } from './functions';
@@ -29,15 +28,20 @@ export function getSignaturesWithMatchingArity(
   fnDef: FunctionDefinition,
   astFunction: ESQLFunction
 ) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
+  return fnDef.signatures.filter((sig) => matchesArity(sig, astFunction.args.length));
+}
+
+export function matchesArity(
+  signature: FunctionDefinition['signatures'][number],
+  arity: number
+): boolean {
+  if (signature.minParams) {
+    return arity >= signature.minParams;
+  }
+  return (
+    arity >= signature.params.filter(({ optional }) => !optional).length &&
+    arity <= signature.params.length
+  );
 }
 
 /**
@@ -89,11 +93,11 @@ export function buildPartialMatcher(str: string) {
   }
 
   // Return the final regex pattern
-  return new RegExp(pattern + '$', 'i');
+  return pattern;
 }
 
-const isNullMatcher = buildPartialMatcher('is nul');
-const isNotNullMatcher = buildPartialMatcher('is not nul');
+const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
+const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
 
 // --- Expression types helpers ---
 
@@ -123,8 +127,7 @@ export function isExpressionComplete(
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
+  columns?: Map<string, ESQLColumnData>
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -134,15 +137,11 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], fields, userDefinedColumns);
+    return getExpressionType(root[0], columns);
   }
 
   if (isLiteral(root)) {
     return root.literalType;
-  }
-
-  if (isTimeInterval(root)) {
-    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
@@ -163,8 +162,8 @@ export function getExpressionType(
     }
   }
 
-  if (isColumn(root) && fields && userDefinedColumns) {
-    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+  if (isColumn(root) && columns) {
+    const column = getColumnForASTNode(root, { columns });
     const lastArg = lastItem(root.args);
     // If the last argument is a param, we return its type (param literal type)
     // This is useful for cases like `where ??field`
@@ -174,11 +173,14 @@ export function getExpressionType(
     if (!column) {
       return 'unknown';
     }
+    if ('hasConflict' in column && column.hasConflict) {
+      return 'unknown';
+    }
     return column.type;
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, userDefinedColumns);
+    return getExpressionType(root.values[0], columns);
   }
 
   if (isFunctionExpression(root)) {
@@ -212,7 +214,7 @@ export function getExpressionType(
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
-      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
+      return getExpressionType(root.args[root.args.length - 1], columns);
     }
 
     const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
@@ -220,7 +222,7 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
+    const argTypes = root.args.map((arg) => getExpressionType(arg, columns));
 
     // When functions are passed null for any argument, they generally return null
     // This is a special case that is not reflected in our function definitions

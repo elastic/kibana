@@ -9,7 +9,7 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Cloud Security Posture Workflows Cypress tests on Serverless"
 
-cd x-pack/test/security_solution_cypress
+cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
 

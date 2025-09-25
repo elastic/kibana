@@ -41,6 +41,7 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.WHERE,
     Location.ROW,
     Location.SORT,
+    Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
   ],
@@ -94,6 +95,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.DISSECT,
       Location.COMPLETION,
       Location.RENAME,
+      Location.RERANK,
     ],
     signatures: [
       {
@@ -129,6 +131,7 @@ const otherDefinitions: FunctionDefinition[] = [
       defaultMessage: 'WHERE operator',
     }),
     locationsAvailable: [Location.STATS],
+    ignoreAsSuggestion: true,
     signatures: [
       {
         params: [

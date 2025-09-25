@@ -22,7 +22,7 @@ import { MessageSigningError } from '../../common/errors';
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
-
+import { scheduleSetupTask } from '../tasks/setup/schedule';
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
 
 import { appContextService } from './app_context';
@@ -165,14 +165,12 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Setting up Fleet outputs');
-  await Promise.all([
-    ensurePreconfiguredOutputs(
-      soClient,
-      esClient,
-      getPreconfiguredOutputFromConfig(appContextService.getConfig())
-    ),
-    settingsService.settingsSetup(soClient),
-  ]);
+  await settingsService.settingsSetup(soClient);
+  await ensurePreconfiguredOutputs(
+    soClient,
+    esClient,
+    getPreconfiguredOutputFromConfig(appContextService.getConfig())
+  );
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
@@ -290,6 +288,9 @@ async function createSetupSideEffects(
       : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
+
+  logger.info('Scheduling async setup tasks');
+  await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

@@ -19,7 +19,7 @@ import { IconSelect, LineStyleSettings } from '@kbn/visualization-ui-components'
 import React from 'react';
 import { Select } from './components/forward_refs';
 import { TextDecoration } from './components/text_decoration';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 import { FillOptions } from './components/fill_option';
 import { iconsSet } from './icon_set';
 

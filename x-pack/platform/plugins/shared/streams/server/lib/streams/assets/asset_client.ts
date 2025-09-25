@@ -5,15 +5,14 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { IStorageClient } from '@kbn/storage-adapter';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IStorageClient } from '@kbn/storage-adapter';
 import { keyBy, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import {
-  ASSET_TYPES,
+import type {
   Asset,
   AssetLink,
   AssetLinkRequest,
@@ -26,15 +25,10 @@ import {
   RuleLink,
   SloLink,
 } from '../../../../common/assets';
-import {
-  ASSET_ID,
-  ASSET_TYPE,
-  ASSET_UUID,
-  QUERY_KQL_BODY,
-  QUERY_TITLE,
-  STREAM_NAME,
-} from './fields';
-import { AssetStorageSettings } from './storage_settings';
+import { ASSET_TYPES } from '../../../../common/assets';
+import type { QUERY_KQL_BODY, QUERY_TITLE } from './fields';
+import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
+import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
@@ -250,10 +244,10 @@ export class AssetClient {
   }
 
   async getAssetLinks<TAssetType extends AssetType>(
-    name: string,
+    names: string[],
     assetTypes?: TAssetType[]
-  ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
-    const filters = [...termQuery(STREAM_NAME, name)];
+  ): Promise<Record<string, Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>>> {
+    const filters = [...termsQuery(STREAM_NAME, names)];
     if (assetTypes?.length) {
       filters.push(...termsQuery(ASSET_TYPE, assetTypes));
     }
@@ -268,9 +262,18 @@ export class AssetClient {
       },
     });
 
-    return assetsResponse.hits.hits.map(
-      (hit) => fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>
-    );
+    const assetsPerName = names.reduce((acc, name) => {
+      acc[name] = [];
+      return acc;
+    }, {} as Record<string, Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>>);
+
+    assetsResponse.hits.hits.forEach((hit) => {
+      const name = hit._source[STREAM_NAME];
+      const asset = fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>;
+      assetsPerName[name].push(asset);
+    });
+
+    return assetsPerName;
   }
 
   async bulkGetByIds<TAssetType extends AssetType>(
@@ -324,9 +327,9 @@ export class AssetClient {
   }
 
   async getAssets(name: string): Promise<Asset[]> {
-    const assetLinks = await this.getAssetLinks(name);
+    const { [name]: assetLinks } = await this.getAssetLinks([name]);
 
-    if (!assetLinks.length) {
+    if (assetLinks.length === 0) {
       return [];
     }
 
@@ -368,11 +371,20 @@ export class AssetClient {
       Promise.all(
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
-            this.clients.rulesClient.get({ id: ruleId }).then((rule) => {
-              return ruleToAsset(ruleId, rule);
-            })
+            this.clients.rulesClient
+              .get({ id: ruleId })
+              .then((rule) => {
+                return ruleToAsset(ruleId, rule);
+              })
+              .catch((error) => {
+                // Handle missing rules gracefully (404, etc.)
+                // Return null for missing/inaccessible rules, filter them out later
+                return null;
+              })
           );
         })
+      ).then((results) =>
+        results.filter((rule): rule is NonNullable<typeof rule> => rule !== null)
       ),
       idsByType.slo.length
         ? this.clients.soClient

@@ -6,9 +6,9 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
-export const getStyles = (euiTheme: EuiThemeComputed) => css`
+export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => css`
   [class*='cssTreeNode-'] {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     padding: ${euiTheme.size.base} ${euiTheme.size.m};
@@ -22,7 +22,7 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
   }
 
   [class*='cssTreeNode-children'] {
-    margin-left: ${euiTheme.size.l};
+    margin-left: ${isExtension ? euiTheme.size.xl : euiTheme.size.l};
   }
 
   // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's
@@ -40,6 +40,7 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
   .cssTreeNode-morePipelines {
     margin-left: ${euiTheme.size.base};
     background-color: ${euiTheme.colors.backgroundLightPrimary};
+    color: ${euiTheme.colors.textPrimary} !important;
     border: none;
   }
 `;

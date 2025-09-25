@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
-import {
+import type {
   LogsSharedClientCoreSetup,
   LogsSharedClientPluginClass,
   LogsSharedClientSetupDeps,
   LogsSharedClientStartDeps,
 } from './types';
-
+import { createLogEventsRenderer } from './components/log_events';
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
 
@@ -45,7 +45,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
-    const { http, settings } = core;
+    const { http, settings, theme } = core;
     const {
       charts,
       data,
@@ -72,6 +72,8 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       share,
       dataViews,
       embeddable: plugins.embeddable,
+      mlApi: plugins.ml?.mlApi,
+      theme,
     });
 
     if (!observabilityAIAssistant) {
@@ -86,6 +88,18 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',
       render: createLogsAIAssistantRenderer(LogAIAssistant),
+    });
+
+    // Register "Log Events" as a feature in Discover.
+    // The LazySavedSearchComponent cannot be used directly because of circular dependencies
+    // (see https://github.com/elastic/kibana/issues/233132).
+    discoverShared.features.registry.register({
+      id: 'observability-log-events',
+      render: createLogEventsRenderer({
+        dataViews,
+        embeddable: plugins.embeddable,
+        searchSource: data.search.searchSource,
+      }),
     });
 
     return {

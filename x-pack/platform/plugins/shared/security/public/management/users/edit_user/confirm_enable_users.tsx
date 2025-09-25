@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -52,8 +52,12 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
     }
   }, [services.http]);
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
         defaultMessage: "Activate {count, plural, one{user ''{username}''} other{{count} users}}?",

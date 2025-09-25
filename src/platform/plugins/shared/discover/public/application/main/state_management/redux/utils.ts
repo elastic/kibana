@@ -8,10 +8,10 @@
  */
 
 import { v4 as uuid } from 'uuid';
-import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
+import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -29,8 +29,18 @@ type CreateInternalStateAsyncThunk = ReturnType<
   }>
 >;
 
-export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
-  createAsyncThunk.withTypes();
+export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
+  ...[typePrefix, payloadCreator, options]: Parameters<CreateInternalStateAsyncThunk>
+) => {
+  return createAsyncThunk(typePrefix, payloadCreator, {
+    ...options,
+    serializeError: (error) => {
+      return error instanceof SavedObjectNotFound
+        ? error
+        : options?.serializeError?.(error) ?? miniSerializeError(error);
+    },
+  });
+}) as CreateInternalStateAsyncThunk;
 
 type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
 type VoidIfEmpty<T> = keyof T extends never ? void : T;
@@ -47,23 +57,13 @@ export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
   defaultMessage: 'Untitled',
 });
-const ESCAPED_DEFAULT_TAB_LABEL = escapeRegExp(DEFAULT_TAB_LABEL);
-const DEFAULT_TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL}( \\d+)?$`); // any default tab
-const DEFAULT_TAB_NUMBER_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (?<tabNumber>\\d+)$`); // tab with a number
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
+  const baseLabel = DEFAULT_TAB_LABEL;
 
-  const existingNumbers = allTabs
-    .filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim()))
-    .map((tab) => {
-      const match = tab.label.trim().match(DEFAULT_TAB_NUMBER_REGEX);
-      const tabNumber = match?.groups?.tabNumber;
-      return tabNumber ? Number(tabNumber) : 1;
-    });
-
-  const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : null;
-  const label = nextNumber ? `${DEFAULT_TAB_LABEL} ${nextNumber}` : DEFAULT_TAB_LABEL;
+  const nextNumber = getNextTabNumber(allTabs, baseLabel);
+  const label = nextNumber ? `${baseLabel} ${nextNumber}` : baseLabel;
 
   return { id, label };
 };

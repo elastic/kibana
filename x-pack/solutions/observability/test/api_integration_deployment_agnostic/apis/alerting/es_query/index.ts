@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('ElasticSearch query rule', () => {
     loadTestFile(require.resolve('./query_dsl'));
     loadTestFile(require.resolve('./query_dsl_with_group_by'));
-    // movd to feature flag config until custom roles are supported in serverless
-    // loadTestFile(require.resolve('./consumers_and_privileges'));
+    loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }

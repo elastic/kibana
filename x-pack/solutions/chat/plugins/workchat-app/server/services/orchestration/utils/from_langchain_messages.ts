@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  BaseMessage,
-  MessageContentComplex,
-  isAIMessage,
-  isHumanMessage,
-} from '@langchain/core/messages';
+import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
 import { AppLogger } from '../../../utils';
 import {

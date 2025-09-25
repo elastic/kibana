@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
@@ -21,6 +21,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./kql_telemetry'));
+    loadTestFile(require.resolve('./metrics_experience'));
     loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./saved_queries'));
@@ -33,7 +34,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ui_metric'));
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
-    loadTestFile(require.resolve('./guided_onboarding'));
     loadTestFile(require.resolve('./esql'));
   });
 }

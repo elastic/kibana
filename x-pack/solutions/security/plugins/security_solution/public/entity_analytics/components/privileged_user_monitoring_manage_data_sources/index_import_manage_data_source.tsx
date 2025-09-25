@@ -49,7 +49,10 @@ export const IndexImportManageDataSource = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.infoText"
-              defaultMessage="One or more indices containing the user.name field. All user names in the indices, specified in the user.name field, will be defined as privileged users."
+              defaultMessage="Select one or more indices containing the {field} field. All users specified in the {field} field will be defined as privileged users."
+              values={{
+                field: <code>{'user.name'}</code>,
+              }}
             />
           </p>
 

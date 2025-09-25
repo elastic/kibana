@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiConfirmModal,
   EuiFormRow,
   EuiRadio,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +27,7 @@ import {
   SCALING_TYPES,
 } from '../../../../../common/constants';
 import { loadIndexSettings } from './load_index_settings';
-import { OnSourceChangeArgs } from '../../source';
+import type { OnSourceChangeArgs } from '../../source';
 import { ScalingDocumenationPopover } from './scaling_documenation_popover';
 
 interface Props {
@@ -188,11 +190,15 @@ export class ScalingForm extends Component<Props, State> {
       return null;
     }
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('xpack.maps.source.esSearch.scalingModal.title', {
           defaultMessage: `Remove unsupported configurations?`,
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this._closeModal}
         onConfirm={this._acceptModal}
         cancelButtonText={i18n.translate('xpack.maps.source.esSearch.scalingModal.cancelBtnLabel', {
@@ -216,6 +222,7 @@ export class ScalingForm extends Component<Props, State> {
     const clusteringRadio = (
       <EuiRadio
         id={SCALING_TYPES.CLUSTERS}
+        name="scalingType"
         label={this._getClustersOptionLabel()}
         checked={this.props.scalingType === SCALING_TYPES.CLUSTERS}
         onChange={() => this._onScalingTypeSelect(SCALING_TYPES.CLUSTERS)}
@@ -270,6 +277,7 @@ export class ScalingForm extends Component<Props, State> {
           <div>
             <EuiRadio
               id={SCALING_TYPES.MVT}
+              name="scalingType"
               label={this._getMvtOptionLabel()}
               checked={this.props.scalingType === SCALING_TYPES.MVT}
               onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
@@ -277,6 +285,7 @@ export class ScalingForm extends Component<Props, State> {
             {this._renderClusteringRadio()}
             <EuiRadio
               id={SCALING_TYPES.LIMIT}
+              name="scalingType"
               label={this._getLimitOptionLabel()}
               checked={this.props.scalingType === SCALING_TYPES.LIMIT}
               onChange={() => this._onScalingTypeSelect(SCALING_TYPES.LIMIT)}

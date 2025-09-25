@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromPromise } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { StreamEnrichmentServiceDependencies } from './types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { getFormattedError } from '../../../../../util/errors';
+import type { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
-  processors: ProcessorDefinitionWithUIAttributes[];
+  processors: StreamlangProcessorDefinition[];
   fields?: FieldDefinition;
 }
 
@@ -37,7 +40,9 @@ export function createUpsertStreamActor({
           ? {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: {
+                  steps: input.processors.map(processorConverter.toAPIDefinition),
+                },
                 ...(input.fields && {
                   wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
                 }),
@@ -46,7 +51,15 @@ export function createUpsertStreamActor({
           : {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: {
+                  steps: input.processors.map(processorConverter.toAPIDefinition),
+                },
+                ...(input.fields && {
+                  classic: {
+                    ...input.definition.stream.ingest.classic,
+                    field_overrides: input.fields,
+                  },
+                }),
               },
             },
       },
@@ -68,11 +81,12 @@ export const createUpsertStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
         { defaultMessage: "An issue occurred saving processors' changes." }
       ),
-      toastMessage: event.error.body.message,
+      toastMessage: formattedError.message,
     });
   };

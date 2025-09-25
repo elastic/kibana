@@ -21,6 +21,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import type { GraphEdge } from './types';
+import { transformEntityTypeToIconAndShape } from './utils';
 
 interface LabelEdges {
   source: string;
@@ -36,6 +37,13 @@ interface ParseContext {
   readonly labelEdges: Record<string, LabelEdges>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
+}
+
+interface NodeVisualProps {
+  shape: EntityNodeDataModel['shape'];
+  label?: EntityNodeDataModel['label'];
+  tag?: EntityNodeDataModel['tag'];
+  icon?: EntityNodeDataModel['icon'];
 }
 
 export const parseRecords = (
@@ -88,12 +96,36 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
+    const {
+      docs,
+      actorIds,
+      action,
+      targetIds,
+      isOrigin,
+      isOriginAlert,
+      actorsDocData,
+      targetsDocData,
+      isAlert,
+    } = record;
+
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+
+    const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
+      ? castArray(actorsDocData)
+          .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
+          .map((actorData) => JSON.parse(actorData))
+      : [];
+    const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
+      ? castArray(targetsDocData)
+          .filter(
+            (targetData): targetData is string => targetData !== null && targetData !== undefined
+          )
+          .map((targetData) => JSON.parse(targetData))
+      : [];
+
     const targetIdsArraySafe: string[] = [];
     const unknownTargets: string[] = [];
-
     // Ensure all targets has an id (target can return null from the query)
     targetIdsArray.forEach((id, idx) => {
       if (!id) {
@@ -112,12 +144,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeShape(
-            id,
-            castArray(ips ?? []),
-            castArray(hosts ?? []),
-            castArray(users ?? [])
-          ),
+          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
         };
       }
     });
@@ -132,9 +159,9 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         }
 
         const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})`,
+          id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
           label: action,
-          color: isOriginAlert ? 'danger' : 'primary',
+          color: isOriginAlert || isAlert ? 'danger' : 'primary',
           shape: 'label',
           documentsData: parseDocumentsData(docs),
         };
@@ -151,31 +178,37 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
   }
 };
 
-const determineEntityNodeShape = (
+const determineEntityNodeVisualProps = (
   actorId: string,
-  ips: string[],
-  hosts: string[],
-  users: string[]
-): {
-  shape: EntityNodeDataModel['shape'];
-  icon?: string;
-} => {
-  // If actor is a user return ellipse
-  if (users.includes(actorId)) {
-    return { shape: 'ellipse', icon: 'user' };
+  entitiesData: NodeDocumentDataModel[] = []
+): NodeVisualProps => {
+  // try to find an exact match by entity id
+  const matchingEntity = entitiesData.find((entity) => entity.id === actorId);
+
+  // Extract entity data from the matching entity's documentsData if available
+  const entityDetailsData = matchingEntity?.entity ?? {};
+
+  let mappedProps: Partial<NodeVisualProps> = {
+    shape: 'rectangle',
+  };
+
+  if (entityDetailsData.name) {
+    mappedProps.label = entityDetailsData.name;
   }
 
-  // If actor is a host return hexagon
-  if (hosts.includes(actorId)) {
-    return { shape: 'hexagon', icon: 'storage' };
+  if (entityDetailsData.type) {
+    mappedProps.tag = entityDetailsData.type;
+
+    const { icon, shape } = transformEntityTypeToIconAndShape(entityDetailsData);
+
+    mappedProps = {
+      ...mappedProps,
+      ...(icon && { icon }),
+      ...(shape && { shape }),
+    };
   }
 
-  // If actor is an IP return diamond
-  if (ips.includes(actorId)) {
-    return { shape: 'diamond', icon: 'globe' };
-  }
-
-  return { shape: 'hexagon' };
+  return mappedProps as NodeVisualProps;
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {

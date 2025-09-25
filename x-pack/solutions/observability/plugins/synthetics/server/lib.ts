@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -19,11 +19,11 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { SyntheticsServerSetup } from './types';
+import type { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {
@@ -76,7 +76,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -152,7 +152,11 @@ export class SyntheticsEsClient {
         this.inspectableEsQueries.push(
           getInspectResponse({
             esError,
-            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestParams: {
+              index: SYNTHETICS_INDEX_PATTERN,
+              ignore_unavailable: true,
+              ...request,
+            },
             esRequestStatus: RequestStatus.OK,
             esResponse: res?.body.responses[index],
             kibanaRequest: this.request!,
@@ -175,7 +179,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
 
     try {
       res = await this.baseESClient.count(esParams, {

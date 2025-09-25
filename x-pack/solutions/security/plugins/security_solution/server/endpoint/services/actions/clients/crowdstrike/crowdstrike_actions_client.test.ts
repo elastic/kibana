@@ -77,6 +77,11 @@ describe('CrowdstrikeActionsClient class', () => {
 
       return BaseDataGenerator.toEsSearchResponse([]);
     });
+
+    (
+      classConstructorOptions.endpointService.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it.each([
@@ -192,7 +197,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -366,7 +383,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -549,7 +578,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },

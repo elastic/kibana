@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from '../column_types';
+import type { ValueFormatConfig } from '../../../../../../common';
+import type { FieldBasedIndexPatternColumn } from '../column_types';
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';

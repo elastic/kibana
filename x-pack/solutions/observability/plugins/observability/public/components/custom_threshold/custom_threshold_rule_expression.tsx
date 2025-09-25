@@ -20,32 +20,43 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { ISearchSource, Query } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
+import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { ISearchSource, Query } from '@kbn/data-plugin/common';
+import { type SavedQuery } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ForLastExpression,
+import type {
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators } from '../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import {
+  Aggregators,
+  type CustomThresholdSearchSourceFields,
+} from '../../../common/custom_threshold_rule/types';
+import type { TimeUnitChar } from '../../../common/utils/formatters/duration';
+import type { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import type { MetricsExplorerFields } from './components/group_by';
+import { GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
-const FILTER_TYPING_DEBOUNCE_MS = 500;
+const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
+  'pinFilter',
+  'disableFilter',
+];
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -64,6 +75,9 @@ export const defaultExpression: MetricExpression = {
   timeSize: 1,
   timeUnit: 'm',
 };
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
+const EMPTY_FILTERS: Filter[] = [];
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -91,6 +105,7 @@ export default function Expressions(props: Props) {
   const [triggerResetDataView, setTriggerResetDataView] = useState<boolean>(false);
   const [paramsError, setParamsError] = useState<SavedObjectNotFound>();
   const [paramsWarning, setParamsWarning] = useState<string>();
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
     (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
       (!hasGroupBy && !!ruleParams.alertOnNoData)
@@ -250,21 +265,106 @@ export default function Expressions(props: Props) {
     [setRuleParams, ruleParams.criteria]
   );
 
-  const onFilterChange = useCallback(
-    ({ query }: { query?: Query }) => {
-      setParamsWarning(undefined);
+  // Saved query
+  const onSavedQueryUpdated = useCallback(
+    (newSavedQuery: SavedQuery) => {
+      setSavedQuery(newSavedQuery);
+      const { filters: newFilters, query: newQuery } = newSavedQuery.attributes;
+
+      // Only update fields if they are defined
+      const updates: Partial<CustomThresholdSearchSourceFields> = {};
+      if (newFilters !== undefined) updates.filter = newFilters;
+      if (newQuery !== undefined) updates.query = newQuery;
+
+      if (Object.keys(updates).length > 0) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              ...updates,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onClearSavedQuery = () => {
+    setSavedQuery(undefined);
+    setRuleParams(
+      'searchConfiguration',
+      getSearchConfiguration(
+        {
+          ...ruleParams.searchConfiguration,
+          query: { language: ruleParams.searchConfiguration.query?.language ?? 'kuery', query: '' },
+          filter: undefined,
+        },
+        setParamsWarning
+      )
+    );
+  };
+
+  const onFilterUpdated = useCallback(
+    (filter: Filter[]) => {
       setRuleParams(
         'searchConfiguration',
-        getSearchConfiguration({ ...ruleParams.searchConfiguration, query }, setParamsWarning)
+        getSearchConfiguration(
+          {
+            ...ruleParams.searchConfiguration,
+            filter,
+          },
+          setParamsWarning
+        )
       );
     },
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
+  const onQuerySubmit = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: { language: newQuery?.language ?? 'kuery', query: newQuery?.query ?? '' },
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onQueryChange = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: newQuery ?? ruleParams.searchConfiguration.query,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const debouncedOnQueryChange = useMemo(
+    () => debounce(onQueryChange, FILTER_TYPING_DEBOUNCE_MS),
+    [onQueryChange]
+  );
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
@@ -362,13 +462,6 @@ export default function Expressions(props: Props) {
     );
   }
 
-  const placeHolder = i18n.translate(
-    'xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder',
-    {
-      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
-    }
-  );
-
   return (
     <>
       {!!paramsWarning && (
@@ -459,31 +552,25 @@ export default function Expressions(props: Props) {
       <SearchBar
         appName="Custom threshold rule"
         iconType="search"
-        placeholder={placeHolder}
         indexPatterns={dataView ? [dataView] : undefined}
-        showQueryInput={true}
-        showQueryMenu={false}
-        showFilterBar={!!ruleParams.searchConfiguration?.filter}
+        allowSavingQueries
+        showQueryInput
+        showQueryMenu
+        showFilterBar
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
-        onQueryChange={debouncedOnFilterChange}
-        onQuerySubmit={onFilterChange}
+        onQueryChange={debouncedOnQueryChange}
+        onQuerySubmit={onQuerySubmit}
+        onClearSavedQuery={onClearSavedQuery}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSaved={onSavedQueryUpdated}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
-        filters={ruleParams.searchConfiguration?.filter}
-        onFiltersUpdated={(filter) => {
-          setRuleParams(
-            'searchConfiguration',
-            getSearchConfiguration(
-              {
-                ...ruleParams.searchConfiguration,
-                filter,
-              },
-              setParamsWarning
-            )
-          );
-        }}
+        filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
+        savedQuery={savedQuery}
+        onFiltersUpdated={onFilterUpdated}
+        hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">

@@ -8,10 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ScheduleType } from '@kbn/reporting-server';
 import { getCounters } from '..';
-import { Report, SavedReport } from '../../../lib/store';
+import type { SavedReport } from '../../../lib/store';
+import { Report } from '../../../lib/store';
 import type { ReportingJobResponse } from '../../../types';
-import { RequestHandler, RequestParams } from './request_handler';
+import type { RequestParams } from './request_handler';
+import { RequestHandler } from './request_handler';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
@@ -118,6 +121,7 @@ export class GenerateRequestHandler extends RequestHandler<
       eventTracker?.createReport({
         isDeprecated: Boolean(report.payload.isDeprecated),
         isPublicApi: path.match(/internal/) === null,
+        scheduleType: ScheduleType.SINGLE,
       });
 
       return res.ok<ReportingJobResponse>({

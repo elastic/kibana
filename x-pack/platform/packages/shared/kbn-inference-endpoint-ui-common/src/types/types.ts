@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProperties } from './dynamic_config/types';
+import type { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
   key: string;
@@ -27,6 +27,7 @@ export interface Config {
   inferenceId: string;
   provider: string;
   providerConfig?: Record<string, unknown>;
+  contextWindowLength?: number;
 }
 
 export interface Secrets {

@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,14 +17,14 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
@@ -134,6 +128,7 @@ const useTableListViewProps = (
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -171,8 +166,8 @@ const useTableListViewProps = (
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectReference[];
-        referencesToExclude?: SavedObjectReference[];
+        references?: Reference[];
+        referencesToExclude?: Reference[];
       } = {}
     ) => {
       return findListItems(
@@ -212,12 +207,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -235,12 +231,10 @@ const useTableListViewProps = (
                       id,
                       title: value,
                       lastSavedTitle: content.title,
-                      getEsType: () => content.type,
                     },
                     false,
                     false,
-                    () => {},
-                    startServices
+                    () => {}
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -259,7 +253,7 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [startServices]
+    []
   );
 
   const deleteItems = useCallback(
@@ -360,14 +354,14 @@ export const VisualizeListing = () => {
       chrome.setBreadcrumbs([
         {
           text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize Library',
+            defaultMessage: 'Visualize library',
           }),
         },
       ]);
     }
 
     chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
+      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
@@ -378,7 +372,7 @@ export const VisualizeListing = () => {
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
 
   const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize Library',
+    defaultMessage: 'Visualize library',
   });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {

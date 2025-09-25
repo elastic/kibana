@@ -10,10 +10,11 @@ import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchProcessorType, elasticsearchProcessorTypes } from '@kbn/streams-schema';
+import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
+import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 import { deserializeJson, serializeXJson } from '../../helpers';
 
 export const JsonEditor = () => {
@@ -42,7 +43,10 @@ export const JsonEditor = () => {
         }
         const invalidProcessor = value.find((processor) => {
           const processorType = Object.keys(processor)[0];
-          return !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType);
+          return (
+            processorType &&
+            !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
+          );
         });
         if (invalidProcessor) {
           return i18n.translate(
@@ -58,6 +62,18 @@ export const JsonEditor = () => {
       },
     },
   });
+
+  /**
+   * To have the editor properly handle the set xjson language
+   * we need to avoid the continuous parsing/serialization of the editor value
+   * using a parallel state always setting a string make the editor format well the content.
+   */
+  const [value, setValue] = React.useState(() => serializeXJson(field.value));
+
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    field.onChange(deserializeJson(newValue));
+  };
 
   return (
     <EuiFormRow
@@ -96,14 +112,18 @@ export const JsonEditor = () => {
       fullWidth
     >
       <CodeEditor
-        value={serializeXJson(field.value, '[]')}
-        onChange={(value) => field.onChange(deserializeJson(value))}
+        value={value}
+        onChange={handleChange}
         languageId="xjson"
         height={200}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
           { defaultMessage: 'Ingest pipeline processors editor' }
         )}
+        options={{
+          automaticLayout: true,
+          wordWrap: 'on',
+        }}
       />
     </EuiFormRow>
   );

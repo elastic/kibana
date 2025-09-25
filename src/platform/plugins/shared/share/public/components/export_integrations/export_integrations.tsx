@@ -31,9 +31,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
-import { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -50,6 +51,19 @@ interface ExportMenuProps {
 interface LayoutOptionsProps {
   usePrintLayout: boolean;
   printLayoutChange: (evt: EuiSwitchEvent) => void;
+}
+
+interface ManagedFlyoutProps {
+  exportIntegration: ExportShareConfig;
+  intl: InjectedIntl;
+  isDirty: boolean;
+  onCloseFlyout: () => void;
+  publicAPIEnabled?: boolean;
+  shareObjectType: string;
+  shareObjectTypeAlias?: string;
+  shareObjectTypeMeta: ReturnType<
+    typeof useShareTypeContext<'integration', 'export'>
+  >['objectTypeMeta'];
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -112,18 +126,7 @@ function ManagedFlyout({
   shareObjectTypeMeta,
   shareObjectType,
   shareObjectTypeAlias,
-}: {
-  exportIntegration: ExportShareConfig;
-  intl: InjectedIntl;
-  isDirty: boolean;
-  onCloseFlyout: () => void;
-  publicAPIEnabled?: boolean;
-  shareObjectType: string;
-  shareObjectTypeAlias?: string;
-  shareObjectTypeMeta: ReturnType<
-    typeof useShareTypeContext<'integration', 'export'>
-  >['objectTypeMeta'];
-}) {
+}: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const getReport = useCallback(async () => {
@@ -260,6 +263,13 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     'integration',
     'exportDerivatives'
   );
+  const availableExportDerivatives = useMemo(
+    () =>
+      exportDerivatives.filter((exportDerivative) =>
+        exportDerivative.config.shouldRender({ availableExportItems: exportIntegrations })
+      ),
+    [exportDerivatives, exportIntegrations]
+  );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const selectionOptions = useRef({ export: exportIntegrations, exportDerivatives });
   const [selectedMenuItemMeta, setSelectedMenuItemMeta] = useState<{
@@ -365,11 +375,11 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             </EuiToolTip>
           ))}
         </EuiListGroup>
-        {Boolean(exportDerivatives.length) && (
+        {Boolean(availableExportDerivatives.length) && (
           <React.Fragment>
             <EuiHorizontalRule margin="xs" />
             <EuiFlexGroup direction="column" gutterSize="s">
-              {exportDerivatives.map((exportDerivative) => {
+              {availableExportDerivatives.map((exportDerivative) => {
                 return (
                   <EuiFlexItem key={exportDerivative.id}>
                     {exportDerivative.config.label({

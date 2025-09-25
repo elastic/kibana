@@ -6,14 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext, integrations } from '../../../__tests__/context_fixtures';
-import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import { integrations, mockContext } from '../../../__tests__/context_fixtures';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
-import { getRecommendedQueriesTemplates } from '../../options/recommended_queries';
 import { METADATA_FIELDS } from '../../options/metadata';
+import { getRecommendedQueriesTemplates } from '../../options/recommended_queries';
+import type { ICommandCallbacks } from '../../types';
+import { autocomplete } from './autocomplete';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -57,7 +57,7 @@ describe('FROM Autocomplete', () => {
       getByType: jest.fn(),
     };
 
-    const expectedFields = getFieldNamesByType('any');
+    const expectedFields = getFieldNamesByType('any', true);
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );

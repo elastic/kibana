@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
@@ -19,7 +20,7 @@ import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { getSupportUrl } from './utils';
-import { ElasticsearchConfigType } from '../common/types';
+import type { ElasticsearchConfigType } from '../common/types';
 
 export interface CloudConfigType {
   id?: string;
@@ -46,6 +47,7 @@ export interface CloudConfigType {
     project_type?: KibanaSolution;
     product_tier?: KibanaProductTier;
     orchestrator_target?: string;
+    in_trial?: boolean;
   };
 }
 
@@ -123,6 +125,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier: this.config.serverless?.product_tier,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -181,6 +184,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
       performanceUrl,
       usersAndRolesUrl,
