@@ -152,24 +152,8 @@ components:
               oneOf:
                 - type: string
                 - type: object
-        integrations: 
-          type: object
-          properties:
-            syncMarkerIndex: 
-              type: string
-              description: Index to read latest sync markers from
-            syncData: 
-              type: object
-              description: integrations latest full sync and update syncData
-              properties:
-                lastFullSync: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last full sync
-                lastUpdateProcessed: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last update lastUpdateProcessed               
+        integrations:
+            $ref: '#/components/schemas/Integrations'          
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -212,23 +196,7 @@ components:
                 - type: string
                 - type: object
         integrations: 
-          type: object
-          properties:
-            syncMarkerIndex: 
-              type: string
-              description: Index to read latest sync markers from
-            syncData: 
-              type: object
-              description: integrations latest full sync and update syncData
-              properties:
-                lastFullSync: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last full sync
-                lastUpdateProcessed: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last update lastUpdateProcessed
+            $ref: '#/components/schemas/Integrations'
 
     MonitoringEntitySourceProperties:
       type: object
@@ -269,24 +237,7 @@ components:
               - type: string
               - type: object
         integrations: 
-          type: object
-          properties:
-            syncMarkerIndex: 
-              type: string
-              description: Index to read latest sync markers from
-            syncData: 
-              type: object
-              description: integrations latest full sync and update syncData
-              properties:
-                lastFullSync: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last full sync
-                lastUpdateProcessed: 
-                  type: string
-                  format: date-time
-                  description: Timestamp of the last update lastUpdateProcessed
-              
+          $ref: '#/components/schemas/Integrations'
 
     MonitoringEntitySourceNoId:
       allOf:
@@ -302,3 +253,22 @@ components:
         properties:
           id:
             type: string
+
+    Integrations: 
+      type: object
+      properties:
+        syncMarkerIndex: 
+          type: string
+          description: Index to read latest sync markers from
+        syncData: 
+          type: object
+          description: integrations latest full sync and update syncData
+          properties:
+            lastFullSync: 
+              type: string
+              format: date-time
+              description: Timestamp of the last full sync from integrations
+            lastUpdateProcessed: 
+              type: string
+              format: date-time
+              description: Timestamp of the last update processed from integrations
