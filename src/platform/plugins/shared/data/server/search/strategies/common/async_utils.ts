@@ -20,6 +20,7 @@ import type { SearchConfigSchema } from '../../../config';
 export function getCommonDefaultAsyncSubmitParams(
   config: SearchConfigSchema,
   options: ISearchOptions,
+  hasBackgroundSearch: boolean,
   /**
    * Allows to override some of internal logic (e.g. eql / sql searches don't fully support search sessions yet)
    */
@@ -31,7 +32,9 @@ export function getCommonDefaultAsyncSubmitParams(
   'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
 > {
   const useSearchSessions =
-    config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
+    (config.sessions.enabled || hasBackgroundSearch) &&
+    !!options.sessionId &&
+    !overrides?.disableSearchSessions;
   const keepAlive =
     useSearchSessions && options.isStored
       ? `${config.sessions.defaultExpiration.asMilliseconds()}ms`
@@ -53,6 +56,7 @@ export function getCommonDefaultAsyncSubmitParams(
 export function getCommonDefaultAsyncGetParams(
   config: SearchConfigSchema,
   options: ISearchOptions,
+  hasBackgroundSearch: boolean,
   /**
    * Allows to override some of internal logic (e.g. eql / sql searches don't fully support search sessions yet)
    */
@@ -61,7 +65,9 @@ export function getCommonDefaultAsyncGetParams(
   }
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   const useSearchSessions =
-    config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
+    (config.sessions.enabled || hasBackgroundSearch) &&
+    !!options.sessionId &&
+    !overrides?.disableSearchSessions;
 
   return {
     // Wait up to the timeout for the response to return

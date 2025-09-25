@@ -46,11 +46,16 @@ export const enhancedEsSearchStrategyProvider = (
   async function asyncSearchStatus(
     { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient }: Pick<SearchStrategyDependencies, 'esClient'>
+    { esClient, featureFlags }: Pick<SearchStrategyDependencies, 'esClient' | 'featureFlags'>
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const keepAlive =
-      request.params?.keep_alive ?? getDefaultAsyncGetParams(searchConfig, options).keep_alive;
+      request.params?.keep_alive ??
+      getDefaultAsyncGetParams(
+        searchConfig,
+        options,
+        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+      ).keep_alive;
 
     const { body, headers } = await client.asyncSearch.status(
       { id: id!, keep_alive: keepAlive },
@@ -63,18 +68,25 @@ export const enhancedEsSearchStrategyProvider = (
   async function getAsyncSearch(
     { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, featureFlags }: SearchStrategyDependencies
   ) {
     if (!options.retrieveResults) {
       // First, request the status of the async search, and return the status if incomplete
-      const status = await asyncSearchStatus({ id, ...request }, options, { esClient });
+      const status = await asyncSearchStatus({ id, ...request }, options, {
+        esClient,
+        featureFlags,
+      });
       if (isRunningResponse(status)) return status;
     }
 
     // Then, if the search is complete, request & return the final results
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...getDefaultAsyncGetParams(searchConfig, options),
+      ...getDefaultAsyncGetParams(
+        searchConfig,
+        options,
+        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+      ),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
       ...(request.params?.wait_for_completion_timeout
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
@@ -96,11 +108,16 @@ export const enhancedEsSearchStrategyProvider = (
   async function submitAsyncSearch(
     request: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient, featureFlags }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+      ...(await getDefaultAsyncSubmitParams(
+        uiSettingsClient,
+        searchConfig,
+        options,
+        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+      )),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {

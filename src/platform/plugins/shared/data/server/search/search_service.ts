@@ -519,7 +519,7 @@ export class SearchService {
   };
 
   private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
-    const { elasticsearch, savedObjects, uiSettings } = core;
+    const { elasticsearch, savedObjects, uiSettings, featureFlags } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -533,6 +533,7 @@ export class SearchService {
         ),
         request,
         rollupsEnabled,
+        featureFlags,
       };
       return {
         search: <

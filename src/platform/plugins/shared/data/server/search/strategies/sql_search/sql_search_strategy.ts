@@ -39,7 +39,7 @@ export const sqlSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: SqlSearchStrategyRequest,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, featureFlags }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const startTime = Date.now();
@@ -49,12 +49,16 @@ export const sqlSearchStrategyProvider = (
       let body: SqlQueryResponse;
       let headers: IncomingHttpHeaders;
       let meta: DiagnosticResult['meta'];
+      const hasBackgroundSearch = await featureFlags.getBooleanValue(
+        'search.backgroundSearchEnabled',
+        false
+      );
 
       if (id) {
         ({ body, headers, meta } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
-            ...getDefaultAsyncGetParams(searchConfig, options),
+            ...getDefaultAsyncGetParams(searchConfig, options, hasBackgroundSearch),
             id,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
@@ -62,7 +66,7 @@ export const sqlSearchStrategyProvider = (
       } else {
         ({ headers, body, meta } = await client.sql.query(
           {
-            ...getDefaultAsyncSubmitParams(searchConfig, options),
+            ...getDefaultAsyncSubmitParams(searchConfig, options, hasBackgroundSearch),
             ...params,
             format: (params.format ?? 'json') as SqlQuerySqlFormat,
           },

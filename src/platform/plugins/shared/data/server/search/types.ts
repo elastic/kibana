@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   CustomRequestHandlerContext,
+  FeatureFlagsStart,
 } from '@kbn/core/server';
 import type {
   ISearchClient,
@@ -36,6 +37,7 @@ export interface SearchStrategyDependencies {
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
+  featureFlags: FeatureFlagsStart;
   rollupsEnabled?: boolean;
 }
 

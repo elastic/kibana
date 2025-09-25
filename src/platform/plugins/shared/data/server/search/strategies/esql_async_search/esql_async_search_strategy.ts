@@ -74,13 +74,17 @@ export const esqlAsyncSearchStrategyProvider = (
     );
   }
 
-  function getEsqlAsyncSearch(
+  async function getEsqlAsyncSearch(
     { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, featureFlags }: SearchStrategyDependencies
   ) {
     const params = {
-      ...getCommonDefaultAsyncGetParams(searchConfig, options),
+      ...getCommonDefaultAsyncGetParams(
+        searchConfig,
+        options,
+        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+      ),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
       ...(request.params?.wait_for_completion_timeout
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
@@ -105,12 +109,16 @@ export const esqlAsyncSearchStrategyProvider = (
   async function submitEsqlSearch(
     { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, featureFlags }: SearchStrategyDependencies
   ) {
     const { dropNullColumns, ...requestParams } = request.params ?? {};
+    const hasSearchSessions = await featureFlags.getBooleanValue(
+      'search.backgroundSearchEnabled',
+      false
+    );
 
     const params = {
-      ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
+      ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options, hasSearchSessions)),
       ...requestParams,
     };
 

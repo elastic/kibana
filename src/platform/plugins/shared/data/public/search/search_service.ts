@@ -74,10 +74,7 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import type { ISessionsClient, ISessionService } from './session';
 import { SessionsClient, SessionService } from './session';
-import {
-  registerSearchSessionsMgmt,
-  updateSearchSessionMgmtSectionTitle,
-} from './session/sessions_mgmt';
+import { registerSearchSessionsMgmtIfNeeded } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
@@ -202,22 +199,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       expressions.registerFunction(aggShardDelay);
     }
 
+    // We need to check a feature flag to see if we should register the search sessions section, for that this code
+    // needs to be async
     const config = this.initializerContext.config.get<ConfigSchema>();
-    if (config.search.sessions.enabled) {
-      const sessionsConfig = config.search.sessions;
+    const sessionsConfig = config.search.sessions;
 
-      const searchSessionsApp = registerSearchSessionsMgmt(
-        core as CoreSetup<DataStartDependencies>,
-        {
-          management,
-          searchUsageCollector: this.usageCollector!,
-          sessionsClient: this.sessionsClient,
-        },
-        sessionsConfig,
-        this.initializerContext.env.packageInfo.version
-      );
-      updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
-    }
+    registerSearchSessionsMgmtIfNeeded(
+      getStartServices,
+      core as CoreSetup<DataStartDependencies>,
+      {
+        management,
+        searchUsageCollector: this.usageCollector!,
+        sessionsClient: this.sessionsClient,
+      },
+      sessionsConfig,
+      this.initializerContext.env.packageInfo.version
+    );
 
     return {
       aggs,

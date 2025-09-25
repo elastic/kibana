@@ -62,7 +62,33 @@ export const APP = {
         }),
 };
 
-export function registerSearchSessionsMgmt(
+export async function registerSearchSessionsMgmtIfNeeded(
+  getStartServices: StartServicesAccessor,
+  coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
+  deps: IManagementSectionsPluginsSetup,
+  config: SearchSessionsConfigSchema,
+  kibanaVersion: string
+) {
+  const [coreStart] = await getStartServices();
+
+  const isEnabled =
+    config.enabled ||
+    coreStart.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false);
+
+  if (!isEnabled) return;
+
+  const sessionsConfig = config;
+
+  const searchSessionsApp = registerSearchSessionsMgmt(
+    coreSetup,
+    deps,
+    sessionsConfig,
+    kibanaVersion
+  );
+  updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
+}
+
+function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
   deps: IManagementSectionsPluginsSetup,
   config: SearchSessionsConfigSchema,

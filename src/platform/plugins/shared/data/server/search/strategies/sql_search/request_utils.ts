@@ -20,10 +20,11 @@ import {
  */
 export function getDefaultAsyncSubmitParams(
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  hasSearchSessions: boolean
 ): Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'> {
   return {
-    ...getCommonDefaultAsyncSubmitParams(searchConfig, options, {
+    ...getCommonDefaultAsyncSubmitParams(searchConfig, options, hasSearchSessions, {
       /**
        * force disable search sessions until sessions support SQL
        * https://github.com/elastic/kibana/issues/127880
@@ -38,10 +39,11 @@ export function getDefaultAsyncSubmitParams(
  */
 export function getDefaultAsyncGetParams(
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  hasSearchSessions: boolean
 ): Pick<SqlGetAsyncRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchConfig, options, {
+    ...getCommonDefaultAsyncGetParams(searchConfig, options, hasSearchSessions, {
       /**
        * force disable search sessions until sessions support SQL
        * https://github.com/elastic/kibana/issues/127880

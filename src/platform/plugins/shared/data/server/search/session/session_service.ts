@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   ElasticsearchClient,
+  FeatureFlagsStart,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
@@ -68,6 +69,7 @@ interface TrackIdQueueEntry {
 export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
   private setupCompleted = false;
+  private featureFlags?: FeatureFlagsStart;
 
   constructor(
     private readonly logger: Logger,
@@ -84,6 +86,8 @@ export class SearchSessionService implements ISearchSessionService {
   public start(core: CoreStart, deps: StartDependencies) {
     if (!this.setupCompleted)
       throw new Error('SearchSessionService setup() must be called before start()');
+
+    this.featureFlags = core.featureFlags;
   }
 
   public stop() {}
@@ -100,7 +104,7 @@ export class SearchSessionService implements ISearchSessionService {
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
   ) => {
-    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
+    if (!(await this.isEnabled())) throw new Error('Search sessions are disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
     if (!locatorId) throw new Error('locatorId is required');
@@ -221,7 +225,7 @@ export class SearchSessionService implements ISearchSessionService {
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`SearchSessionService: update | ${sessionId}`);
-    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
+    if (!(await this.isEnabled())) throw new Error('Search sessions are disabled');
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
@@ -259,7 +263,7 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
+    if (!(await this.isEnabled())) throw new Error('Search sessions are disabled');
     this.logger.debug(`SearchSessionService: delete | ${sessionId}`);
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
@@ -289,7 +293,7 @@ export class SearchSessionService implements ISearchSessionService {
     options: ISearchOptions
   ) => {
     const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
-    if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
+    if (!(await this.isEnabled()) || !sessionId || !searchId) return;
     if (!searchRequest.params) return;
 
     const requestHash = createRequestHash(searchRequest.params);
@@ -393,7 +397,7 @@ export class SearchSessionService implements ISearchSessionService {
     searchRequest: IKibanaSearchRequest,
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
-    if (!this.sessionConfig.enabled) {
+    if (!(await this.isEnabled())) {
       throw new Error('Search sessions are disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
@@ -465,4 +469,13 @@ export class SearchSessionService implements ISearchSessionService {
       throw notFound();
     }
   };
+
+  private async isEnabled() {
+    const hasBackgroundSearch = await this.featureFlags?.getBooleanValue(
+      'search.backgroundSearchEnabled',
+      false
+    );
+
+    return this.sessionConfig.enabled || hasBackgroundSearch;
+  }
 }

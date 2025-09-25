@@ -35,7 +35,8 @@ export async function getIgnoreThrottled(
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  hasBackgroundSearch: boolean
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
@@ -55,7 +56,7 @@ export async function getDefaultAsyncSubmitParams(
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
     // Decreases delays due to network when using CCS
     ccs_minimize_roundtrips: true,
-    ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
+    ...getCommonDefaultAsyncSubmitParams(searchConfig, options, hasBackgroundSearch),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
   };
@@ -66,9 +67,10 @@ export async function getDefaultAsyncSubmitParams(
  */
 export function getDefaultAsyncGetParams(
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  hasBackgroundSearch: boolean
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchConfig, options),
+    ...getCommonDefaultAsyncGetParams(searchConfig, options, hasBackgroundSearch),
   };
 }
