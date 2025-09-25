@@ -24,7 +24,7 @@ import { CUSTOM_ROLES_URL } from '../../../urls/navigation';
 describe(
   'Custom role creation',
   {
-    tags: ['@serverless']
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
