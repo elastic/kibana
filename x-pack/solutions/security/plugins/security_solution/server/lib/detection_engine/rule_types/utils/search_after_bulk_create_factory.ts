@@ -99,6 +99,7 @@ export const searchAfterAndBulkCreateFactory = async ({
       index: inputIndexPattern,
       keep_alive: PIT_KEEP_ALIVE,
       allow_partial_search_results: true,
+      ignore_unavailable: true,
     });
     let pitId = pitResponse.id;
 
