@@ -233,7 +233,15 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'onboarding' && (
           <>
-            <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+            <EuiFlexGroup alignItems="center" justifyContent="center">
+              <EuiFlexItem
+                style={{
+                  maxWidth: '1144px',
+                }}
+              >
+                <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="l" />
             <PrivilegedUserMonitoringSampleDashboardsPanel />
           </>

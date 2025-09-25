@@ -17,6 +17,7 @@ import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { AssistantProviderProps } from '../../assistant_context';
 import { AssistantProvider, useAssistantContextValue } from '../../assistant_context';
 import type { AssistantAvailability } from '../../assistant_context/types';
@@ -97,7 +98,12 @@ export const TestProvidersComponent: React.FC<Props> = ({
     },
     userProfileService: jest.fn() as unknown as UserProfileService,
     chrome,
-  };
+    settings: {
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
+  } as AssistantProviderProps;
 
   return (
     <I18nProvider>

@@ -143,58 +143,58 @@ export const updateAgentlessCloudConnectorConfig = (
   setNewAgentPolicy: (policy: NewAgentPolicy) => void,
   setPackagePolicy: (policy: NewPackagePolicy) => void
 ) => {
-  const input = packagePolicy.inputs?.filter(
+  const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  )[0];
+  );
 
-  const cloudConnectorPolicyMismatch =
-    newAgentPolicy.agentless?.cloud_connectors?.enabled !== packagePolicy.supports_cloud_connector;
+  const targetCsp = input?.type.match(/aws|azure/)?.[0];
 
-  if (cloudConnectorPolicyMismatch && newAgentPolicy?.supports_agentless) {
-    let targetCsp;
-    if (input?.type.includes('aws')) {
-      targetCsp = 'aws';
-    }
-    if (input?.type.includes('gcp')) {
-      targetCsp = 'gcp';
-    }
-    if (input?.type.includes('azure')) {
-      targetCsp = 'azure';
-    }
 
-    if (targetCsp !== 'aws') {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
+  // Making sure that the cloud connector is disabled when switching to GCP
+  if (
+    !targetCsp &&
+    (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
+  ) {
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: undefined,
+      },
+    });
+
+
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: false,
+    });
+    return;
+  }
+
+
+  const cloudConnectorEnabled =
+    input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
+  if (
+    targetCsp &&
+    newAgentPolicy?.supports_agentless &&
+    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorEnabled ||
+      newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
+  ) {
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: {
+          enabled: cloudConnectorEnabled,
+          target_csp: targetCsp,
         },
-      });
+      },
+    });
 
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: false,
-      });
-      return;
-    }
-
-    if (cloudConnectorPolicyMismatch) {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: {
-            enabled: packagePolicy?.supports_cloud_connector || false,
-            target_csp: targetCsp,
-          },
-        },
-      });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: true,
-      });
-    }
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: cloudConnectorEnabled,
+    });
   }
 };
 
