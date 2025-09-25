@@ -171,6 +171,7 @@ export default function QualitySummaryCards({
                   </EuiText>
                 )
               }
+              dataTestSubjTitle="noFailureStore"
             />
             {renderFailureStoreModal()}
           </>

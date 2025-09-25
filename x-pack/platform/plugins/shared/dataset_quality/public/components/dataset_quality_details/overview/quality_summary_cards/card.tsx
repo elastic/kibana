@@ -28,6 +28,7 @@ export function Card({
   footer,
   onClick,
   isLoading = false,
+  dataTestSubjTitle,
 }: {
   isDisabled?: boolean;
   isSelected?: boolean;
@@ -37,6 +38,7 @@ export function Card({
   footer: React.ReactNode;
   onClick?: () => void;
   isLoading?: boolean;
+  dataTestSubjTitle?: string;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -54,7 +56,7 @@ export function Card({
     padding: ${euiTheme.size.m};
   `;
 
-  const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${title}`;
+  const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${dataTestSubjTitle || title}`;
 
   const content = (
     <>
