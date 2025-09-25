@@ -21,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'indexManagement',
     'searchNavigation',
+    'solutionNavigation',
   ]);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -226,6 +227,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 spaceCreated.id
               )}/app/elasticsearch/indices/index_details/${indexDoesNotExistName}/data`
             );
+            await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
           });
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
