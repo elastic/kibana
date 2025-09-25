@@ -1112,6 +1112,35 @@ function copyClientAsSchemas() {
     // Replace with z.any().optional() to fix TypeScript compilation errors
     processedLine = processedLine.replace(/\bz\.optional\(\)/g, 'z.any().optional()');
 
+    // Patch 6: Fix TS7056 error - Add explicit type annotations for complex union schemas
+    // These schemas exceed TypeScript's serialization limits and need explicit typing
+    const complexUnionSchemas = [
+      'Security_Detections_API_RuleResponse',
+      'Security_Detections_API_RulePatchProps', 
+      'Security_Detections_API_RuleCreateProps',
+      'Security_Detections_API_RuleUpdateProps',
+      'RulePreview_Body',
+      'put_streams_name_Body',
+      'InstallPrepackedTimelines_Body',
+      'SLOs_slo_with_summary_response',
+      'SLOs_find_slo_response',
+      'SLOs_create_slo_request',
+      'SLOs_update_slo_request',
+      'SLOs_slo_definition_response',
+      'SLOs_find_slo_definitions_response'
+    ];
+    
+    complexUnionSchemas.forEach((schemaName) => {
+      // Handle both single-line and multi-line schema definitions
+      const exportPattern = new RegExp(`^export const ${schemaName} = z`);
+      if (exportPattern.test(processedLine)) {
+        processedLine = processedLine.replace(
+          `export const ${schemaName} = z`,
+          `export const ${schemaName}: z.ZodType<any> = z`
+        );
+      }
+    });
+
     return processedLine;
   }
 
