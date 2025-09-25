@@ -31,4 +31,4 @@ export const secondaryScopeNodes = [
   'enter-fallback-path',
   'exit-fallback-path',
 ];
-export const atomicNodes = ['atomic', 'http'];
+export const atomicNodes = ['atomic', 'http', 'wait'];
