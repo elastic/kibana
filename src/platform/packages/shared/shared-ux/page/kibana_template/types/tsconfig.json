@@ -5,7 +5,7 @@
     "types": []
   },
   "include": [
-    "*.d.ts"
+    "index.ts"
   ],
   "exclude": [
     "target/**/*",
