@@ -31,7 +31,6 @@ const generateESQL = tool(
      * @param b - second number
      * @returns The product of a and b
      */
-    console.log('inside tool', query);
     return 'FROM nothing | limit 9';
   },
   {
@@ -50,7 +49,6 @@ export const getRuleCreationAgent = ({ model, logger }: GetRuleCreationAgentPara
   //  const model = withoutTools.bindTools([generateESQL]);
   const tools = [generateESQL];
   const toolNode = new ToolNode(tools);
-  console.log('test');
   model.bindTools(tools);
   const createEsqlRule = createEsqlRuleNode({ model });
   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
@@ -74,7 +72,6 @@ export const getRuleCreationAgent = ({ model, logger }: GetRuleCreationAgentPara
 };
 
 const shouldAddDefaultFieldsToRule = (state: RuleCreationState) => {
-  console.log('weer', state);
   if (state.rule) {
     return 'addDefaultFieldsToRules';
   }

@@ -38,7 +38,6 @@ export function naturalLanguageToEsql({
       const messages: Message[] =
         'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
-      console.log('>>>>>>', JSON.stringify(messages, null, 2));
       const askLlmToRespond = generateEsqlTask({
         connectorId,
         chatCompleteApi: client.chatComplete,
