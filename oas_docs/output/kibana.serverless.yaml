@@ -1401,6 +1401,12 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
                   type: string
+                capabilities:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    visualizations:
+                      type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string
@@ -1475,6 +1481,12 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
                   type: string
+                capabilities:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    visualizations:
+                      type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string
