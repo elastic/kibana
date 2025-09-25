@@ -120,23 +120,24 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({ title, actions, 
 
   return (
     <EuiPanel hasShadow={false} hasBorder={true} grow>
-      <EuiFlexGroup
-        direction="row"
-        justifyContent="spaceBetween"
-        alignItems="flexStart"
-        responsive={false}
-      >
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem css={{ minHeight: '32px', justifyContent: 'center' }}>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <EuiFlexItem grow>
               <EuiText size="s">
                 <b>{title}</b>
               </EuiText>
             </EuiFlexItem>
-            {renderMetrics()}
+            {renderActionButtons()}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {renderActionButtons()}
+        {renderMetrics()}
       </EuiFlexGroup>
     </EuiPanel>
   );
