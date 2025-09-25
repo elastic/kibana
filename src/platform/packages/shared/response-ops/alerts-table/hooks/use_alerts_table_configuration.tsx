@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Dispatch, type SetStateAction, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { noop } from 'lodash';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -64,10 +64,8 @@ export const useAlertsTableConfiguration = ({
 
   const [configuration, setConfiguration] = useState(loadConfiguration);
 
-  const safeSetConfiguration = useCallback<
-    Dispatch<SetStateAction<AlertsTableConfiguration | null>>
-  >(
-    (setStateAction) => {
+  const safeSetConfiguration = useCallback(
+    (configUpdates: Partial<AlertsTableConfiguration> | null) => {
       if (!configurationStorage) {
         return;
       }
@@ -75,8 +73,7 @@ export const useAlertsTableConfiguration = ({
       // of using the `configuration` variable from the outer scope, as that would make this callback
       // referentially unstable and cause an unnecessary configuration save
       setConfiguration((prevConfig) => {
-        const newConfig =
-          typeof setStateAction === 'function' ? setStateAction(prevConfig) : setStateAction;
+        const newConfig = configUpdates != null ? { ...prevConfig, ...configUpdates } : null;
 
         try {
           // Parsing the configuration ensures that it is valid and contains only the minimal

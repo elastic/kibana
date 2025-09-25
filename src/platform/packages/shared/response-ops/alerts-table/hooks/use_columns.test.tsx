@@ -91,10 +91,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns,
+            updateColumns: setColumns,
             defaultColumns,
             visibleColumns,
-            setVisibleColumns,
+            updateVisibleColumns: setVisibleColumns,
             defaultVisibleColumns,
             alertsFields,
           }),
@@ -116,10 +116,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns,
+            updateColumns: setColumns,
             defaultColumns,
             visibleColumns,
-            setVisibleColumns,
+            updateVisibleColumns: setVisibleColumns,
             defaultVisibleColumns,
             alertsFields,
           }),
@@ -149,10 +149,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns,
+            updateColumns: setColumns,
             defaultColumns,
             visibleColumns,
-            setVisibleColumns,
+            updateVisibleColumns: setVisibleColumns,
             defaultVisibleColumns,
           }),
         { wrapper }
@@ -193,10 +193,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns,
+            updateColumns: setColumns,
             defaultColumns,
             visibleColumns,
-            setVisibleColumns,
+            updateVisibleColumns: setVisibleColumns,
             defaultVisibleColumns,
           }),
         { wrapper }
@@ -222,10 +222,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns,
+            updateColumns: setColumns,
             defaultColumns,
             visibleColumns,
-            setVisibleColumns,
+            updateVisibleColumns: setVisibleColumns,
             defaultVisibleColumns,
           }),
         { wrapper }
@@ -249,10 +249,10 @@ describe('useColumns', () => {
         () =>
           useColumns({
             columns,
-            setColumns: setColumnsMock,
+            updateColumns: setColumnsMock,
             defaultColumns,
             visibleColumns: columns.map((col) => col.id),
-            setVisibleColumns: jest.fn(),
+            updateVisibleColumns: jest.fn(),
             defaultVisibleColumns,
             alertsFields,
           }),

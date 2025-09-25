@@ -135,10 +135,10 @@ const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => 
 
 export interface UseColumnsArgs {
   columns: EuiDataGridColumn[];
-  setColumns: Dispatch<SetStateAction<EuiDataGridColumn[]>>;
+  updateColumns: Dispatch<SetStateAction<EuiDataGridColumn[]>>;
   defaultColumns: EuiDataGridColumn[];
   visibleColumns: string[];
-  setVisibleColumns: Dispatch<SetStateAction<string[]>>;
+  updateVisibleColumns: Dispatch<SetStateAction<string[]>>;
   defaultVisibleColumns: string[];
   alertsFields?: BrowserFields;
 }
@@ -156,10 +156,10 @@ export interface UseColumnsResp {
 
 export const useColumns = ({
   columns,
-  setColumns,
+  updateColumns,
   defaultColumns,
   visibleColumns,
-  setVisibleColumns,
+  updateVisibleColumns,
   defaultVisibleColumns,
   alertsFields,
 }: UseColumnsArgs): UseColumnsResp => {
@@ -179,13 +179,13 @@ export const useColumns = ({
   }, [columns, alertsFields, visibleColumns]);
 
   const onResetColumns = useCallback(() => {
-    setColumns(defaultColumns);
-    setVisibleColumns(defaultColumns.map((col) => col.id));
-  }, [defaultColumns, setColumns, setVisibleColumns]);
+    updateColumns(defaultColumns);
+    updateVisibleColumns(defaultColumns.map((col) => col.id));
+  }, [defaultColumns, updateColumns, updateVisibleColumns]);
 
   const onToggleColumn = useCallback(
     (columnId: string) => {
-      setColumns((oldColumns) =>
+      updateColumns((oldColumns) =>
         toggleColumn({
           columnId,
           columns: oldColumns,
@@ -193,7 +193,7 @@ export const useColumns = ({
         })
       );
       // Toggle the column in the visible columns as well
-      setVisibleColumns((oldVisibleColumns) =>
+      updateVisibleColumns((oldVisibleColumns) =>
         toggleVisibleColumn({
           columnId,
           visibleColumns: oldVisibleColumns,
@@ -201,16 +201,16 @@ export const useColumns = ({
         })
       );
     },
-    [setColumns, setVisibleColumns, defaultColumns, defaultVisibleColumns]
+    [updateColumns, updateVisibleColumns, defaultColumns, defaultVisibleColumns]
   );
 
   const onColumnResize = useCallback(
     ({ columnId, width }: EuiDataGridOnColumnResizeData) => {
-      setColumns((oldColumns) =>
+      updateColumns((oldColumns) =>
         oldColumns.map((col) => (col.id === columnId ? { ...col, initialWidth: width } : col))
       );
     },
-    [setColumns]
+    [updateColumns]
   );
 
   const fieldsToFetch = useMemo(

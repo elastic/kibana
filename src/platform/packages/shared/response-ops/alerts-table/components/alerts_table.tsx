@@ -42,7 +42,6 @@ import type { Alert, BrowserFields } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { applyColumnsConfiguration } from '../utils/columns_configuration';
 import { useAlertsTableConfiguration } from '../hooks/use_alerts_table_configuration';
 import { ErrorFallback } from './error_fallback';
@@ -236,6 +235,15 @@ const AlertsTableContent = typedForwardRef(
         configuredColumns: configuration?.columns,
       }),
     });
+    const updateColumns = useCallback<typeof setColumns>(
+      (setColumnsAction) => {
+        const newColumns =
+          typeof setColumnsAction === 'function' ? setColumnsAction(columns) : setColumnsAction;
+        setColumns(newColumns);
+        setConfiguration({ columns: newColumns });
+      },
+      [columns, setColumns, setConfiguration]
+    );
     // Like `defaultColumns`, purposefully keeping the initial value only
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const defaultVisibleColumns = useMemo(() => visibleColumnsProp ?? columns.map((c) => c.id), []);
@@ -244,18 +252,28 @@ const AlertsTableContent = typedForwardRef(
       onChange: onVisibleColumnsChange,
       defaultValue: configuration?.visibleColumns ?? defaultVisibleColumns,
     });
+    const updateVisibleColumns = useCallback<typeof setVisibleColumns>(
+      (setVisibleColumnsAction) => {
+        const newVisibleColumns =
+          typeof setVisibleColumnsAction === 'function'
+            ? setVisibleColumnsAction(visibleColumns)
+            : setVisibleColumnsAction;
+        setVisibleColumns(newVisibleColumns);
+        setConfiguration({ visibleColumns: newVisibleColumns });
+      },
+      [setConfiguration, setVisibleColumns, visibleColumns]
+    );
     const [sort, setSort] = useState<AlertsTableSortCombinations[]>(
       configuration?.sort ?? initialSort
     );
-
-    // Persist table configuration on changes (using useUpdateEffect to avoid saving on first render)
-    useUpdateEffect(() => {
-      setConfiguration({
-        columns,
-        visibleColumns,
-        sort,
-      });
-    }, [columns, setConfiguration, sort, visibleColumns]);
+    const updateSort = useCallback<typeof setSort>(
+      (setSortAction) => {
+        const newSort = typeof setSortAction === 'function' ? setSortAction(sort) : setSortAction;
+        setSort(newSort);
+        setConfiguration({ sort: newSort });
+      },
+      [setConfiguration, sort]
+    );
 
     const fieldsQuery = useFetchAlertsFieldsQuery(
       { http, ruleTypeIds },
@@ -277,10 +295,10 @@ const AlertsTableContent = typedForwardRef(
     const { columnsWithFieldsData, onToggleColumn, onColumnResize, onResetColumns, fields } =
       useColumns({
         columns,
-        setColumns,
+        updateColumns,
         defaultColumns,
         visibleColumns,
-        setVisibleColumns,
+        updateVisibleColumns,
         defaultVisibleColumns,
         alertsFields: selectedAlertsFields,
       });
@@ -451,22 +469,22 @@ const AlertsTableContent = typedForwardRef(
             return visibleColumns.includes(sortKey);
           });
 
-        setSort(newSort);
+        updateSort(newSort);
       },
-      [setSort, visibleColumns]
+      [updateSort, visibleColumns]
     );
 
     const handleReset = useCallback(() => {
       // allow to reset to previous sort state in case of sorting error
       if (fieldWithSortingError) {
         const newSort = sort.filter((sortField) => !deepEqual(sortField, fieldWithSortingError));
-        setSort(newSort);
+        updateSort(newSort);
       } else {
         // allow to reset to default state in case of any other error
-        setSort(initialSort);
+        updateSort(initialSort);
         onResetColumns();
       }
-    }, [fieldWithSortingError, sort, initialSort, onResetColumns]);
+    }, [fieldWithSortingError, sort, updateSort, initialSort, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -596,7 +614,7 @@ const AlertsTableContent = typedForwardRef(
         renderContext,
         columnVisibility: {
           visibleColumns,
-          setVisibleColumns,
+          setVisibleColumns: updateVisibleColumns,
         },
         additionalToolbarControls,
         leadingControlColumns,
@@ -625,7 +643,7 @@ const AlertsTableContent = typedForwardRef(
         publicDataGridProps,
         renderContext,
         visibleColumns,
-        setVisibleColumns,
+        updateVisibleColumns,
         additionalToolbarControls,
         leadingControlColumns,
         trailingControlColumns,

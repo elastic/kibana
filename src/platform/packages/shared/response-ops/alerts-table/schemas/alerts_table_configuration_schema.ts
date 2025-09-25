@@ -15,14 +15,16 @@ import { z } from '@kbn/zod';
  * will be removed by parsing to avoid saving unnecessary or non-serializable objects.
  */
 export const alertsTableConfigurationSchema = z.object({
-  columns: z.array(
-    z.object({
-      id: z.string(),
-      initialWidth: z.number().optional(),
-    })
-  ),
+  columns: z
+    .array(
+      z.object({
+        id: z.string(),
+        initialWidth: z.number().optional(),
+      })
+    )
+    .optional(),
   visibleColumns: z.array(z.string()).optional(),
-  sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))),
+  sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))).optional(),
 });
 
 export type AlertsTableConfiguration = z.infer<typeof alertsTableConfigurationSchema>;
