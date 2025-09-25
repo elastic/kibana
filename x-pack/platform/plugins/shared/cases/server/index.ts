@@ -18,7 +18,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     stack: { enabled: true },
     unsafe: { enableCaseSummary: true },
     incrementalId: {
-      enabled: true,
+      enabled: false,
     },
   },
   deprecations: ({ renameFromRoot }) => [
