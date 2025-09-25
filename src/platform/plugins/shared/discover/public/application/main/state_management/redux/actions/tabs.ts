@@ -310,7 +310,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
   async function initializeTabsThunkFn(
     {
       discoverSessionId,
-      shouldClearAllTabs: originalShouldClearAllTabs,
+      shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     {
       dispatch,
@@ -322,12 +322,8 @@ export const initializeTabs = createInternalStateAsyncThunk(
     const {
       userId: existingUserId,
       spaceId: existingSpaceId,
-      persistedDiscoverSession: currentPersistedDiscoverSession,
       tabs: { unsafeCurrentId, transitioningFromTo },
     } = currentState;
-    const shouldClearAllTabs =
-      originalShouldClearAllTabs ??
-      Boolean(discoverSessionId && discoverSessionId !== currentPersistedDiscoverSession?.id);
 
     // console.log('initializeTabs called with:', {
     //   discoverSessionId,
