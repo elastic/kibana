@@ -45,5 +45,10 @@ jobs:
           # "Requesting Copilot review for PR #$PR_NUMBER"
 
           # Workaround from https://github.com/cli/cli/issues/10598
-          gh api --method POST "/repos/elastic/kibana/pulls/${PR_NUMBER}/requested_reviewers" \
-            -f "reviewers[]=copilot-pull-request-reviewer[bot]"
+          if gh api --method POST "/repos/elastic/kibana/pulls/${PR_NUMBER}/requested_reviewers" \
+            -f "reviewers[]=copilot-pull-request-reviewer[bot]" > /dev/null; then
+            echo "Successfully requested Copilot review"
+          else
+            echo "Failed to request Copilot review"
+            exit 1
+          fi
