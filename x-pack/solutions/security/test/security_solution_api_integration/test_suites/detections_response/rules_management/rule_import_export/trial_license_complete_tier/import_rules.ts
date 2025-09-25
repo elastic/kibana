@@ -40,7 +40,7 @@ const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const detectionsApi = getService('detectionsApi');
-  const securitySolutionExceptionsApi = getService('securitySolutionExceptionsApi');
+  const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
   const spacesServices = getService('spaces');
 
@@ -414,7 +414,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: ReadExceptionListRequestQueryInput;
         expected: Record<string, unknown>;
       }) => {
-        const { body: exceptionList } = await securitySolutionExceptionsApi
+        const { body: exceptionList } = await exceptionsApi
           .readExceptionList(
             {
               query,
@@ -432,7 +432,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: ReadExceptionListItemRequestQueryInput;
         expected: Record<string, unknown>;
       }) => {
-        const { body: exceptionListItem } = await securitySolutionExceptionsApi
+        const { body: exceptionListItem } = await exceptionsApi
           .readExceptionListItem(
             {
               query,
@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('removes non-existent exception list from the imported rule', async () => {
-          const { body: exceptionBody } = await securitySolutionExceptionsApi
+          const { body: exceptionBody } = await exceptionsApi
             .createExceptionList(
               {
                 body: {

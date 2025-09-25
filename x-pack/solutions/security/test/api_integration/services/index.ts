@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
+import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
@@ -13,5 +13,5 @@ import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 export const services = {
   ...platformServices,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-  securitySolutionExceptionsApi: SecuritySolutionExceptionsApiProvider,
+  exceptionsApi: ExceptionsApiProvider,
 };
