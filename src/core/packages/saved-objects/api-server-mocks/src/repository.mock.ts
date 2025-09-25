@@ -37,7 +37,7 @@ const create = () => {
     asScopedToNamespace: jest.fn().mockImplementation(create),
     changeOwnership: jest.fn(),
     changeAccessMode: jest.fn(),
-  };
+  });
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
     savedObjectsMock: mock,
