@@ -1372,7 +1372,10 @@ describe('MetricVisComponent', function () {
         extra,
       } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
-      return { primary: valueFormatter(primaryMetric), secondary: (extra as ReactElement).props.children[1] };
+      return {
+        primary: valueFormatter(primaryMetric),
+        secondary: (extra as ReactElement).props.children[1],
+      };
     };
 
     it.each`
