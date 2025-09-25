@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { querySchema } from '@kbn/es-query-server';
 import { LAYER_TYPE } from '../../../../../common';
 import {
   EMSFileSourceSchema,
@@ -24,7 +25,6 @@ import {
   ESPewPewSourceSchema,
 } from '../source_schemas/es_agg_source_schemas';
 import { ESQLSourceSchema, ESSearchSourceSchema } from '../source_schemas/es_source_schemas';
-import { querySchema } from '@kbn/es-query-server';
 
 export const attributionSchema = schema.object({
   label: schema.string(),

@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
 
@@ -20,16 +21,29 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   if (mapState.description) storedMapAttributes.description = mapState.description;
   if (mapState.layers) storedMapAttributes.layerListJSON = JSON.stringify(mapState.layers);
 
-  const mapStateJSON = getJSONString(mapState, [
-    'adHocDataViews',
-    'center',
-    'filters',
-    'query',
-    'refreshConfig',
-    'settings',
-    'timeFilters',
-    'zoom',
-  ]);
+  const mapStateJSON = getJSONString(
+    {
+      ...mapState,
+      ...(mapState.refreshInterval
+        ? {
+            refreshConfig: {
+              isPaused: mapState.refreshInterval.pause,
+              interval: mapState.refreshInterval.value,
+            } as StoredRefreshInterval,
+          }
+        : {}),
+    },
+    [
+      'adHocDataViews',
+      'center',
+      'filters',
+      'query',
+      'refreshConfig',
+      'settings',
+      'timeFilters',
+      'zoom',
+    ]
+  );
   if (mapStateJSON) storedMapAttributes.mapStateJSON = mapStateJSON;
 
   const uiStateJSON = getJSONString(mapState, ['isLayerTOCOpen', 'openTOCDetails']);

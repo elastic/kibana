@@ -7,18 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { layersSchema } from '../layer_schemas';
 import { settingsSchema } from './settings_schema';
 
 export const mapCenterSchema = schema.object({
   lat: schema.number(),
   lon: schema.number(),
-});
-
-// TODO replace with refreshIntervalSchema from @kbn/data-service-server
-const refreshConfigSchema = schema.object({
-  isPaused: schema.boolean(),
-  interval: schema.number(),
 });
 
 export const adhocDataViewSchema = schema.object({
@@ -72,7 +67,7 @@ export const mapAttributesSchema = schema.object(
       )
     ),
     query: schema.maybe(querySchema),
-    refreshConfig: schema.maybe(refreshConfigSchema),
+    refreshInterval: schema.maybe(refreshIntervalSchema),
     settings: schema.maybe(settingsSchema),
     timeFilters: schema.maybe(timeRangeSchema),
     title: schema.string(),

@@ -64,9 +64,9 @@ describe('transformMapIn', () => {
           query: 'find me',
           language: 'kql',
         },
-        refreshConfig: {
-          isPaused: false,
-          interval: 500,
+        refreshInterval: {
+          pause: false,
+          value: 500,
         },
         settings: {},
         timeFilters: {

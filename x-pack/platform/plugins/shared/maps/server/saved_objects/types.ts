@@ -20,3 +20,8 @@ export type StoredMapAttributes = SerializableRecord & {
   layerListJSON?: string;
   uiStateJSON?: string;
 };
+
+export interface StoredRefreshInterval {
+  isPaused: boolean;
+  interval: number;
+}

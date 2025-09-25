@@ -62,7 +62,8 @@ describe('transformMapOut', () => {
       transformMapAttributesOut(
         {
           title: 'my map',
-          mapStateJSON: '{"center":{"lat":60,"lon":120}}',
+          mapStateJSON:
+            '{"center":{"lat":60,"lon":120},"refreshConfig":{"isPaused":false,"interval":500}}',
         },
         []
       )
@@ -71,6 +72,10 @@ describe('transformMapOut', () => {
         "center": Object {
           "lat": 60,
           "lon": 120,
+        },
+        "refreshInterval": Object {
+          "pause": false,
+          "value": 500,
         },
         "title": "my map",
       }

@@ -24,8 +24,18 @@ export function transformMapAttributesOut(
     ...(injectedAttributes.layerListJSON
       ? { layers: parseJSON<Partial<LayerDescriptor[]>>([], injectedAttributes.layerListJSON) }
       : {}),
-    ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.mapStateJSON),
+    ...parseMapStateJSON(injectedAttributes.mapStateJSON),
     ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.uiStateJSON),
+  };
+}
+
+function parseMapStateJSON(mapStateJSON?: string) {
+  const { refreshConfig, ...rest } = parseJSON<Partial<MapAttributes>>({}, mapStateJSON);
+  return {
+    ...rest,
+    ...(refreshConfig
+      ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
+      : {}),
   };
 }
 

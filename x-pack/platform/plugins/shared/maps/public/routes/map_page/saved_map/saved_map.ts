@@ -517,10 +517,7 @@ export class SavedMap {
     this._attributes!.zoom = getMapZoom(state);
     this._attributes!.center = getMapCenter(state);
     this._attributes!.timeFilters = getTimeFilters(state);
-    this._attributes!.refreshConfig = {
-      isPaused: getTimeFilter().getRefreshInterval().pause,
-      interval: getTimeFilter().getRefreshInterval().value,
-    };
+    this._attributes!.refreshInterval = getTimeFilter().getRefreshInterval();
     this._attributes!.query = getQuery(state);
     this._attributes!.filters = getFilters(state);
     const mapSettings = getMapSettings(state);

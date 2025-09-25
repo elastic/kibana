@@ -25,6 +25,7 @@ import type {
   GlobalQueryStateFromUrl,
   QueryState,
   QueryStateChange,
+  RefreshInterval,
   SavedQuery,
 } from '@kbn/data-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -369,16 +370,13 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  _onRefreshConfigChange({ isPaused, interval }: Required<MapAttributes>['refreshConfig']) {
+  _onRefreshConfigChange(refreshInterval: RefreshInterval) {
     this.setState({
-      isRefreshPaused: isPaused,
-      refreshInterval: interval,
+      isRefreshPaused: refreshInterval.pause,
+      refreshInterval: refreshInterval.value,
     });
     this._updateGlobalState({
-      refreshInterval: {
-        pause: isPaused,
-        value: interval,
-      },
+      refreshInterval,
     });
   }
 
@@ -393,10 +391,7 @@ export class MapApp extends React.Component<Props, State> {
 
     const refreshInterval = _.get(savedQuery, 'attributes.timefilter.refreshInterval');
     if (refreshInterval) {
-      this._onRefreshConfigChange({
-        isPaused: refreshInterval.pause,
-        interval: refreshInterval.value,
-      });
+      this._onRefreshConfigChange(refreshInterval);
     }
     this._onQueryChange({
       filters: allFilters,
@@ -533,8 +528,8 @@ export class MapApp extends React.Component<Props, State> {
           refreshInterval: number;
         }) => {
           this._onRefreshConfigChange({
-            isPaused,
-            interval: refreshInterval,
+            pause: isPaused,
+            value: refreshInterval,
           });
         }}
         showSearchBar={true}
