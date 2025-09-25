@@ -2068,10 +2068,8 @@ x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elasti
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
 !src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
-# Exclude usage collection & telemetry schemas from @elastic/kibana-core ownership
+# Exclude usage collection schema from @elastic/kibana-core ownership
 !src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
-!x-pack/platform/plugins/private/telemetry_collection_xpack/schema/
-!src/platform/plugins/shared/telemetry/schema/
 
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
@@ -2093,8 +2091,8 @@ x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elasti
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-telemetry
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-telemetry
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
