@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -62,7 +62,7 @@ describe('renders', () => {
       },
       parent: '',
     };
-    const { container } = render(
+    render(
       <Wrapper>
         <ListControlEditor
           deps={deps}
@@ -79,9 +79,18 @@ describe('renders', () => {
     );
 
     // Wait for async loading to complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await waitFor(() => {
+      expect(screen.getByText('Index Pattern')).toBeInTheDocument();
+    });
 
-    expect(container).toMatchSnapshot();
+    // Should show index pattern and field selectors
+    expect(screen.getByText('Index Pattern')).toBeInTheDocument();
+    expect(screen.getByText('Field')).toBeInTheDocument();
+    
+    // Should not show control-specific options when no field is selected
+    expect(screen.queryByTestId('listControlMultiselectInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('listControlDynamicOptionsSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('listControlSizeInput')).not.toBeInTheDocument();
   });
 
   test('should display chaining input when parents are provided', async () => {
@@ -89,7 +98,7 @@ describe('renders', () => {
       { value: '1', text: 'fieldA' },
       { value: '2', text: 'fieldB' },
     ];
-    const { container } = render(
+    render(
       <Wrapper>
         <ListControlEditor
           deps={deps}
@@ -106,9 +115,23 @@ describe('renders', () => {
     );
 
     // Wait for async loading to complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await waitFor(() => {
+      expect(screen.getByText('Index Pattern')).toBeInTheDocument();
+    });
 
-    expect(container).toMatchSnapshot();
+    // Should display all main form controls
+    expect(screen.getByText('Index Pattern')).toBeInTheDocument();
+    expect(screen.getByText('Field')).toBeInTheDocument();
+    
+    // Should display parent/chaining control when parent candidates are provided
+    expect(screen.getByText('Parent control')).toBeInTheDocument();
+    
+    // Should show control-specific options for selected field
+    await waitFor(() => {
+      expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('listControlDynamicOptionsSwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
   });
 
   describe('dynamic options', () => {
@@ -127,7 +150,7 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const { container } = render(
+      render(
         <Wrapper>
           <ListControlEditor
             deps={deps}
@@ -143,10 +166,20 @@ describe('renders', () => {
         </Wrapper>
       );
 
-      // Wait for async loading to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for dynamic options switch to load
+      await waitFor(() => {
+        expect(screen.getByTestId('listControlDynamicOptionsSwitch')).toBeInTheDocument();
+      });
 
-      expect(container).toMatchSnapshot();
+      // Dynamic options switch should be enabled for string fields
+      const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
+      expect(dynamicSwitch).not.toBeDisabled();
+      
+      // Should show multiselect checkbox
+      expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
+      
+      // Should not show size input when dynamic options is enabled
+      expect(screen.queryByTestId('listControlSizeInput')).not.toBeInTheDocument();
     });
 
     test('should display size field when dynamic options is disabled', async () => {
@@ -164,7 +197,7 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const { container } = render(
+      render(
         <Wrapper>
           <ListControlEditor
             deps={deps}
@@ -180,10 +213,21 @@ describe('renders', () => {
         </Wrapper>
       );
 
-      // Wait for async loading to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for components to load
+      await waitFor(() => {
+        expect(screen.getByTestId('listControlDynamicOptionsSwitch')).toBeInTheDocument();
+      });
 
-      expect(container).toMatchSnapshot();
+      // Dynamic options should be disabled (unchecked) for this test
+      const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
+      expect(dynamicSwitch).not.toBeDisabled();
+      
+      // Should show multiselect checkbox
+      expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
+      
+      // Should show size input when dynamic options is disabled
+      expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
+      expect(screen.getByTestId('listControlSizeInput')).toHaveValue(5);
     });
 
     test('should display disabled dynamic options with tooltip for non-string fields', async () => {
@@ -201,7 +245,7 @@ describe('renders', () => {
         },
         parent: '',
       };
-      const { container } = render(
+      render(
         <Wrapper>
           <ListControlEditor
             deps={deps}
@@ -217,10 +261,21 @@ describe('renders', () => {
         </Wrapper>
       );
 
-      // Wait for async loading to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for components to load
+      await waitFor(() => {
+        expect(screen.getByTestId('listControlDynamicOptionsSwitch')).toBeInTheDocument();
+      });
 
-      expect(container).toMatchSnapshot();
+      // Dynamic options switch should be disabled for non-string fields
+      const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
+      expect(dynamicSwitch).toBeDisabled();
+      
+      // Should show multiselect checkbox
+      expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
+      
+      // Should show size input when dynamic options is not available
+      expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
+      expect(screen.getByTestId('listControlSizeInput')).toHaveValue(5);
     });
   });
 });
@@ -286,7 +341,11 @@ test('handleOptionsChange - size', async () => {
 
   await user.clear(input);
   await user.type(input, '7');
-  input.blur();
+  
+  // Use act to wrap the blur operation that triggers state updates
+  await act(async () => {
+    input.blur();
+  });
 
   expect(handleFieldNameChange).not.toHaveBeenCalled();
   expect(handleIndexPatternChange).not.toHaveBeenCalled();

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
@@ -81,14 +81,36 @@ beforeEach(() => {
   } as unknown as ControlsTabProps;
 });
 
-test('renders ControlsTab', () => {
-  const { container } = render(
-    <Wrapper>
-      <ControlsTab {...props} />
-    </Wrapper>
-  );
+test('renders ControlsTab', async () => {
+  await act(async () => {
+    render(
+      <Wrapper>
+        <ControlsTab {...props} />
+      </Wrapper>
+    );
+  });
 
-  expect(container).toMatchSnapshot();
+  // Should render add control button
+  expect(screen.getByTestId('inputControlEditorAddBtn')).toBeInTheDocument();
+  
+  // Should render control editors for each control in stateParams
+  // First control (list control with custom label)
+  expect(screen.getByText('custom label')).toBeInTheDocument();
+  
+  // Should render action buttons for first control
+  expect(screen.getByTestId('inputControlEditorMoveUpControl0')).toBeInTheDocument();
+  expect(screen.getByTestId('inputControlEditorMoveDownControl0')).toBeInTheDocument();
+  expect(screen.getByTestId('inputControlEditorRemoveControl0')).toBeInTheDocument();
+  
+  // Should render action buttons for second control
+  expect(screen.getByTestId('inputControlEditorMoveUpControl1')).toBeInTheDocument();
+  expect(screen.getByTestId('inputControlEditorMoveDownControl1')).toBeInTheDocument();
+  expect(screen.getByTestId('inputControlEditorRemoveControl1')).toBeInTheDocument();
+  
+  // Should have proper aria labels for accessibility - check that buttons exist
+  expect(screen.getAllByLabelText('Move control up')).toHaveLength(2); // One for each control
+  expect(screen.getAllByLabelText('Move control down')).toHaveLength(2); // One for each control
+  expect(screen.getAllByLabelText('Remove control')).toHaveLength(2); // One for each control
 });
 
 describe('behavior', () => {
