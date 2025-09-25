@@ -53,11 +53,11 @@ const applyValuesMatcher = (
 
     return []
       .concat(fieldValue) // coerce to array for uniform processing of single vs multi-valued fields
-      .map((val) => String(val))
-      .filter((val) => matcher.values.includes(val))
-      .map((val) => ({
+      .map((value) => String(value))
+      .filter((value) => matcher.values.includes(value))
+      .map((value) => ({
         field,
-        value: val,
+        value,
         source,
       }));
   });
