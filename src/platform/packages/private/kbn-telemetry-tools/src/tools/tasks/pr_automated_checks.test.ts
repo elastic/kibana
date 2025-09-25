@@ -67,7 +67,7 @@ describe('prAutomatedChecks', () => {
 
       // @ts-expect-error We know that the method doesn't use the arguments
       await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/src/platform/packages/private/kbn-telemetry-tools/test.json: 404 Who checks the checker?]`
+        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/test.json: 404 Who checks the checker?]`
       );
     });
   });
@@ -115,7 +115,7 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         The _meta.description of properties.myCollector.properties.some_field is missing. Please add it.",
           ],
         }
@@ -160,7 +160,7 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         The _meta.description of properties.myCollector.properties.some_field has been removed. Please add it back.",
           ],
         }
@@ -211,7 +211,7 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         The _meta.description of properties.myCollector.properties.some_field.items has been removed. Please add it back.",
           ],
         }
@@ -260,7 +260,7 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.some_field\\": it has been changed from an object to a single value.",
           ],
         }
@@ -309,7 +309,7 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.some_field\\": it has been changed from a single value to an object.",
           ],
         }
@@ -375,15 +375,15 @@ describe('prAutomatedChecks', () => {
       await expect(throwIfError.task()).rejects.toMatchInlineSnapshot(`
         ErrorReporter {
           "errors": Array [
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         The _meta.description of properties.myCollector.properties.compatible_modification_without_description is missing. Please add it.",
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_number\\": it has been changed from a non-numeric type \\"text\\" to a numeric type \\"long\\".",
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         The _meta.description of properties.myCollector.properties.string_to_number is missing. Please add it.",
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_boolean\\": it has been changed from a non-boolean type \\"text\\" to a \\"boolean\\" type.",
-            "[37m[41m TELEMETRY ERROR [49m[39m Error in src/platform/packages/private/kbn-telemetry-tools/test.json
+            "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.number_to_boolean\\": it has been changed from a non-boolean type \\"long\\" to a \\"boolean\\" type.",
           ],
         }
