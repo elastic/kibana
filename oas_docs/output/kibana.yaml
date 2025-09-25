@@ -28626,6 +28626,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -28996,6 +28998,8 @@ paths:
                                   additionalProperties: true
                                   type: object
                                   properties:
+                                    deferred:
+                                      type: boolean
                                     id:
                                       type: string
                                     originId:
@@ -29094,6 +29098,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -29354,6 +29360,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -29512,6 +29520,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          deferred:
+                                            type: boolean
                                           id:
                                             type: string
                                           originId:
@@ -29598,6 +29608,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: OK
         '400':
           content:
             application/json:
@@ -29618,6 +29629,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -29681,6 +29693,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -29701,6 +29714,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -29765,6 +29779,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -29785,6 +29800,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -29852,6 +29868,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -29872,6 +29889,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -29936,6 +29954,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -29956,6 +29975,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -30010,6 +30030,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -30256,6 +30278,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -30354,6 +30378,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -30676,6 +30702,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -30728,6 +30756,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: OK
         '400':
           content:
             application/json:
@@ -30748,6 +30777,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -30928,6 +30958,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -31026,6 +31058,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -31421,6 +31455,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -31441,6 +31476,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -31503,6 +31539,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -31523,7 +31560,87 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install Kibana assets for a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-pkgversion-rule-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                force:
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
