@@ -146,7 +146,10 @@ export const useSchemaFields = ({
   const pendingChangesCount = useMemo(() => {
     const addedOrChanged = fields.filter((field) => {
       const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return !stored || !isEqual(field, stored);
+      if (!stored) {
+        return field.status !== 'unmapped';
+      }
+      return !isEqual(field, stored);
     });
 
     return addedOrChanged.length;
