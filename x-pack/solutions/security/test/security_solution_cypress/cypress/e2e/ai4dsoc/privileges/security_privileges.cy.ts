@@ -21,7 +21,20 @@ import { visit } from '../../../tasks/navigation';
 import { selectAllSpaces } from '../../../tasks/select_all_spaces';
 import { CUSTOM_ROLES_URL } from '../../../urls/navigation';
 
-describe('Custom role creation', { tags: '@serverless' }, () => {
+describe(
+  'Custom role creation',
+  {
+    tags: ['@serverless']
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'complete' },
+          { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
+        ],
+      },
+    },
+  },
+  () => {
   beforeEach(() => {
     login('admin');
     visit(CUSTOM_ROLES_URL);
