@@ -84,9 +84,6 @@ export const riskScoreServiceFactory = ({
       logger,
       experimentalFeatures,
       filters: params.filters || [],
-    }).catch((err) => {
-      logger.error(`Error calculating risk scores: ${err}`);
-      throw err;
     });
   },
   calculateAndPersistScores: (params) =>

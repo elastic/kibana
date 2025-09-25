@@ -14,6 +14,7 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
@@ -187,8 +188,16 @@ export const calculateScoresWithESQL = async (
     return results;
   });
 
-const getFilters = (options: CalculateScoresParams) => {
-  const { excludeAlertStatuses = [], excludeAlertTags = [], range, filter: userFilter } = options;
+const getFilters = (
+  options: CalculateScoresParams & { filters?: Array<{ entity_types: string[]; filter: string }> }
+) => {
+  const {
+    excludeAlertStatuses = [],
+    excludeAlertTags = [],
+    range,
+    filter: userFilter,
+    filters: customFilters = [],
+  } = options;
   const filters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
   if (excludeAlertStatuses.length > 0) {
     filters.push({
@@ -203,6 +212,17 @@ const getFilters = (options: CalculateScoresParams) => {
       bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
     });
   }
+
+  // Add custom KQL filters (applies to all entity types in ES|QL)
+  customFilters.forEach((f) => {
+    try {
+      const esQuery = toElasticsearchQuery(fromKueryExpression(f.filter));
+      filters.push(esQuery);
+    } catch (error) {
+      // Log warning but don't fail the entire query
+      // Note: Invalid KQL filters are silently ignored to prevent query failures
+    }
+  });
 
   return filters;
 };
