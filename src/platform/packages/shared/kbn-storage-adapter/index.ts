@@ -30,7 +30,7 @@ export interface StorageSchema {
 }
 
 interface StorageSettingsBase {
-  /** a number > 0 */
+  /** a number > 0; increment whenever you want new mappings to be applied to the index */
   version: number;
   schema: StorageSchema;
 }
