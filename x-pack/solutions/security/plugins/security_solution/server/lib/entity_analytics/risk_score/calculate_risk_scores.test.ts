@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { buildFiltersForEntityType } from './calculate_risk_scores';
+import { buildFiltersForEntityType, calculateRiskScores } from './calculate_risk_scores';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
-import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
-
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { allowedExperimentalValues } from '../../../../common';
 
 describe('buildFiltersForEntityType', () => {
