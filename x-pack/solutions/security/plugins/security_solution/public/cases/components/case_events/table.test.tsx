@@ -65,7 +65,7 @@ describe('EventsTableForCases', () => {
     // Check if value cells are displayed at all
     await waitFor(() => {
       const cells = screen.getAllByTestId('dataGridRowCell');
-      
+
       expect(cells.length).toBeGreaterThan(2);
     });
   });
