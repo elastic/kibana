@@ -7,7 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import moment from 'moment';
-import type { SignificantEventsResponse, StreamQuery, System } from '@kbn/streams-schema';
+import type { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
@@ -15,7 +15,6 @@ export interface SignificantEventItem {
   query: StreamQuery;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
-  system: Pick<System, 'name' | 'filter'> | undefined;
 }
 
 export const useFetchSignificantEvents = ({

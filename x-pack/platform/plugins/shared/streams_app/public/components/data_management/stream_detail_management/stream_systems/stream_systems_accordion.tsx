@@ -39,7 +39,7 @@ export const StreamSystemsAccordion = ({
         </EuiFlexGroup>
       }
     >
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <StreamExistingSystemsTable
         isLoading={loading}
         systems={systems}

@@ -37,6 +37,7 @@ export const Default: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      systems={[]}
     />
   );
 };
@@ -44,6 +45,7 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      systems={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}

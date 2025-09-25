@@ -7,11 +7,19 @@
 
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiHorizontalRule, EuiSpacer, EuiButtonEmpty, EuiLink, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
-import { EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+} from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { ConditionPanel } from '../../shared';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
@@ -56,7 +64,9 @@ export function StreamExistingSystemsTable({
       field: 'filter',
       name: FILTER_LABEL,
       render: (filter: System['filter']) => {
-        return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
+        return <ConditionPanel condition={filter} />;
+
+        // return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
       },
     },
     {

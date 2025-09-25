@@ -12,12 +12,11 @@ import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_mes
 
 export function AiFlowWaitingForGeneration({
   stopGeneration,
-  hasInitialResults = false,
 }: {
   stopGeneration: () => void;
   hasInitialResults?: boolean;
 }) {
-  const label = useWaitingForAiMessage(hasInitialResults);
+  const label = useWaitingForAiMessage();
 
   return (
     <EuiFlexGroup
@@ -32,7 +31,13 @@ export function AiFlowWaitingForGeneration({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={stopGeneration}>
+        <EuiButtonEmpty
+          onClick={stopGeneration}
+          aria-label={i18n.translate(
+            'xpack.streams.aiFlowWaitingForGeneration.button.stopGenerationButtonAriaLabel',
+            { defaultMessage: 'Stop generation' }
+          )}
+        >
           {i18n.translate(
             'xpack.streams.aiFlowWaitingForGeneration.button.stopGenerationButtonLabel',
             { defaultMessage: 'Stop' }

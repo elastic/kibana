@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { ConditionPanel } from '../data_management/shared';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -67,7 +67,7 @@ export function SignificantEventsTable({
   const items = useMemo(() => {
     return response.value ?? [];
   }, [response.value]);
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
+  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<SignificantEventItem>();
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -79,10 +79,12 @@ export function SignificantEventsTable({
           <span>{OPEN_DETAILS_LABEL}</span>
         </EuiScreenReaderOnly>
       ),
-      render: () => {
+      render: (item: SignificantEventItem) => {
         return (
           <EuiButtonIcon
-            onClick={() => {}}
+            onClick={() => {
+              setIsDetailFlyoutOpen(isDetailFlyoutOpen ? undefined : item);
+            }}
             aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
             iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
             iconSize="s"
@@ -130,9 +132,6 @@ export function SignificantEventsTable({
           return '--';
         }
         return <ConditionPanel condition={query.system.filter} />;
-        // return (
-        //   <EuiCodeBlock paddingSize="none">{JSON.stringify(query.system?.filter)}</EuiCodeBlock>
-        // );
       },
     },
     {
