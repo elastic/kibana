@@ -9,13 +9,13 @@
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new tool.
  */
-export const AGENT_BUILDER_BUILTIN_TOOLS = [];
+export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new tool.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS = [];
+export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);
