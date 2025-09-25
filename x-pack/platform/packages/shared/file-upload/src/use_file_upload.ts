@@ -74,22 +74,30 @@ export function useFileUpload(
         return;
       }
 
-      http.get<Index[]>('/api/index_management/indices').then((loadedIndices) => {
-        if (!isMounted()) {
-          return;
-        }
-        const tempIndices = loadedIndices.filter((i) => i.hidden === false && i.isFrozen === false);
-        setIndices(tempIndices);
-        const initializedWithExistingIndex = fileUploadManager.getInitializedWithExistingIndex();
-        const existingIndex = fileUploadManager.getExistingIndexName();
-        if (
-          initializedWithExistingIndex &&
-          existingIndex !== null &&
-          tempIndices.find((idx) => idx.name === existingIndex)
-        ) {
-          setIndexName(existingIndex);
-        }
-      });
+      http
+        .get<Index[]>('/api/index_management/indices')
+        .then((loadedIndices) => {
+          if (!isMounted()) {
+            return;
+          }
+          const tempIndices = loadedIndices.filter(
+            (i) => i.hidden === false && i.isFrozen === false
+          );
+          setIndices(tempIndices);
+          const initializedWithExistingIndex = fileUploadManager.getInitializedWithExistingIndex();
+          const existingIndex = fileUploadManager.getExistingIndexName();
+          if (
+            initializedWithExistingIndex &&
+            existingIndex !== null &&
+            tempIndices.find((idx) => idx.name === existingIndex)
+          ) {
+            setIndexName(existingIndex);
+          }
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error('Error loading indices', e);
+        });
     },
     [http, fileUploadManager, isMounted]
   );
@@ -176,8 +184,6 @@ export function useFileUpload(
     fileUploadManager.getExistingIndexName()
   );
 
-  const hasPermissionToImport = useObservable(fileUploadManager.hasPermissionToImport$, false);
-
   const canImport = useMemo(() => {
     return (
       uploadStatus.analysisStatus === STATUS.COMPLETED &&
@@ -186,8 +192,7 @@ export function useFileUpload(
       uploadStatus.mappingsJsonValid === true &&
       uploadStatus.settingsJsonValid === true &&
       uploadStatus.pipelinesJsonValid === true &&
-      dataViewNameError === '' &&
-      hasPermissionToImport
+      dataViewNameError === ''
     );
   }, [
     uploadStatus.analysisStatus,
@@ -198,7 +203,6 @@ export function useFileUpload(
     existingIndexName,
     indexName,
     dataViewNameError,
-    hasPermissionToImport,
   ]);
 
   const mappings = useObservable(fileUploadManager.mappings$, fileUploadManager.getMappings());
@@ -255,7 +259,6 @@ export function useFileUpload(
     indices,
     existingIndexName,
     setExistingIndexName,
-    hasPermissionToImport,
   };
 }
 

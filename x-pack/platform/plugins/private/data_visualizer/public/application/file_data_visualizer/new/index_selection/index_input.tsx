@@ -14,6 +14,20 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { STATUS } from '@kbn/file-upload';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
+const existsErrorText = i18n.translate(
+  'xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage',
+  {
+    defaultMessage: 'Index name already exists',
+  }
+);
+
+const permissionErrorText = i18n.translate(
+  'xpack.dataVisualizer.file.importView.indexNameNoPermissionErrorMessage',
+  {
+    defaultMessage: 'You do not have permission to create this index',
+  }
+);
+
 interface Props {
   setIndexName: (name: string) => void;
   setIndexValidationStatus: (status: STATUS) => void;
@@ -42,23 +56,42 @@ export const IndexInput: FC<Props> = ({
         setIndexName('');
         return;
       }
-      const exists = await fileUpload.checkIndexExists(indexNameLocal);
-      const error = exists
-        ? i18n.translate(
-            'xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage',
-            {
-              defaultMessage: 'Index name already exists',
-            }
-          )
-        : isIndexNameValid(indexNameLocal);
+
+      const indexNameValid = isIndexNameValid(indexNameLocal);
+      if (indexNameValid.error) {
+        setIndexNameError(indexNameValid.error);
+        return;
+      }
+
+      const [exists, canImport] = await Promise.all([
+        fileUpload.checkIndexExists(indexNameLocal),
+        fileUpload.hasImportPermission({
+          checkCreateDataView: false,
+          checkHasManagePipeline: true,
+          indexName: indexNameLocal,
+        }),
+      ]);
 
       if (!isMounted()) {
         return;
       }
 
       setIndexName(indexNameLocal);
-      setIndexNameError(error);
-      setIndexValidationStatus(error === '' ? STATUS.COMPLETED : STATUS.FAILED);
+
+      if (canImport === false) {
+        setIndexNameError(permissionErrorText);
+        setIndexValidationStatus(STATUS.FAILED);
+        return;
+      }
+
+      if (exists) {
+        setIndexNameError(existsErrorText);
+        setIndexValidationStatus(STATUS.FAILED);
+        return;
+      }
+
+      setIndexNameError('');
+      setIndexValidationStatus(STATUS.COMPLETED);
     },
     250,
     [indexNameLocal]
@@ -95,7 +128,7 @@ export const IndexInput: FC<Props> = ({
   );
 };
 
-function isIndexNameValid(name: string) {
+function isIndexNameValid(name: string): { valid: boolean; error?: string } {
   const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   if (
     name !== name.toLowerCase() || // name should be lowercase
@@ -104,12 +137,15 @@ function isIndexNameValid(name: string) {
     name.match(/^[-_+]/) !== null || // name can't start with these chars
     name.match(reg) !== null // name can't contain these chars
   ) {
-    return i18n.translate(
-      'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
-      {
-        defaultMessage: 'Index name contains illegal characters',
-      }
-    );
+    return {
+      valid: false,
+      error: i18n.translate(
+        'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+        {
+          defaultMessage: 'Index name contains illegal characters',
+        }
+      ),
+    };
   }
-  return '';
+  return { valid: true };
 }
