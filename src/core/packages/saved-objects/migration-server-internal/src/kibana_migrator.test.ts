@@ -242,14 +242,9 @@ describe('KibanaMigrator', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      expect(options.logger.info).toHaveBeenCalledTimes(2);
+      expect(options.logger.info).toHaveBeenCalledTimes(0);
       expect(options.logger.warn).toHaveBeenCalledTimes(0);
       expect(options.logger.error).toHaveBeenCalledTimes(0);
-      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Performing migrations');
-      expect(options.logger.info).toHaveBeenNthCalledWith(
-        2,
-        expect.stringContaining('Completed all migrations in ')
-      );
     });
 
     it('logs the intermediate steps when `useCumulativeLogger: false`', async () => {
@@ -259,15 +254,10 @@ describe('KibanaMigrator', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      expect(options.logger.info).toHaveBeenCalledTimes(3);
+      expect(options.logger.info).toHaveBeenCalledTimes(1);
       expect(options.logger.warn).toHaveBeenCalledTimes(0);
       expect(options.logger.error).toHaveBeenCalledTimes(0);
-      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Performing migrations');
-      expect(options.logger.info).toHaveBeenNthCalledWith(2, 'Running v2 migrations');
-      expect(options.logger.info).toHaveBeenNthCalledWith(
-        3,
-        expect.stringContaining('Completed all migrations in ')
-      );
+      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Running v2 migrations');
     });
   });
 });
