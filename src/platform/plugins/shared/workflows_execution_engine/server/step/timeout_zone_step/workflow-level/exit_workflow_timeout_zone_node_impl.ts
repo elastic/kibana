@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodeImplementation } from '../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../../node_implementation';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitTimeoutZoneNodeImpl implements NodeImplementation {
+export class ExitWorkflowTimeoutZoneNodeImpl implements NodeImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {

@@ -57,6 +57,7 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
           ExecutionStatus.FAILED,
           ExecutionStatus.CANCELLED,
           ExecutionStatus.SKIPPED,
+          ExecutionStatus.TIMED_OUT,
         ].includes(workflowExecution.status)
       ) {
         refetch();

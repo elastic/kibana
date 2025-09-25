@@ -8,17 +8,17 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import { EnterTimeoutZoneNodeImpl } from '../enter_timeout_zone_node_impl';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
+import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowContextManager } from '../../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionState } from '../../../../workflow_context_manager/workflow_execution_state';
 
-describe('EnterTimeoutZoneNodeImpl', () => {
+describe('EnterStepTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let wfExecutionStateMock: WorkflowExecutionState;
   let stepContextMock: WorkflowContextManager;
-  let impl: EnterTimeoutZoneNodeImpl;
+  let impl: EnterStepTimeoutZoneNodeImpl;
 
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
@@ -57,7 +57,7 @@ describe('EnterTimeoutZoneNodeImpl', () => {
       stepExecutionId: 'step-exec-123',
     } as WorkflowContextManager;
 
-    impl = new EnterTimeoutZoneNodeImpl(
+    impl = new EnterStepTimeoutZoneNodeImpl(
       node,
       wfExecutionRuntimeManagerMock,
       wfExecutionStateMock,
@@ -136,7 +136,7 @@ describe('EnterTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step timeout happened because it ran for 40 seconds');
+        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
         expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
       }
     });
@@ -152,7 +152,7 @@ describe('EnterTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step timeout happened because it ran for 45 seconds');
+        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
       }
     });
 
@@ -203,7 +203,7 @@ describe('EnterTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step timeout happened because it ran for 50 seconds');
+        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
       }
     });
   });

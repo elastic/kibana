@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitTimeoutZoneNodeImpl } from '../exit_timeout_zone_node_impl';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { ExitStepTimeoutZoneNodeImpl } from '../exit_step_timeout_zone_node_impl';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 
-describe('ExitTimeoutZoneNodeImpl', () => {
+describe('ExitStepTimeoutZoneNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
-  let impl: ExitTimeoutZoneNodeImpl;
+  let impl: ExitStepTimeoutZoneNodeImpl;
 
   beforeEach(() => {
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManagerMock.exitScope = jest.fn();
     wfExecutionRuntimeManagerMock.finishStep = jest.fn();
     wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
-    impl = new ExitTimeoutZoneNodeImpl(wfExecutionRuntimeManagerMock);
+    impl = new ExitStepTimeoutZoneNodeImpl(wfExecutionRuntimeManagerMock);
   });
 
   it('should exit scope', async () => {

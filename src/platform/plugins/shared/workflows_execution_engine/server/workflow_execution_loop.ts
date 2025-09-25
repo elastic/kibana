@@ -75,11 +75,11 @@ async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
   const nodeImplementation = params.nodesFactory.create(stepContext);
   const monitorAbortController = new AbortController();
 
+  const runMonitorPromise = runStackMonitor(params, stepContext, monitorAbortController);
+  const runStepPormise = nodeImplementation.run().then(() => monitorAbortController.abort());
+
   try {
-    await Promise.race([
-      runStackMonitor(params, stepContext, monitorAbortController),
-      nodeImplementation.run(),
-    ]);
+    await Promise.race([runMonitorPromise, runStepPormise]);
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
@@ -123,11 +123,6 @@ async function runStackMonitor(
   const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
 
   while (!monitorAbortController.signal.aborted) {
-    await new Promise((resolve) => {
-      const timeout = setTimeout(resolve, 500);
-      monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
-    });
-
     await cancelWorkflowIfRequested(
       params.workflowExecutionRepository,
       params.workflowExecutionState,
@@ -159,6 +154,11 @@ async function runStackMonitor(
         await monitored.monitor(monitoredContext);
       }
     }
+
+    await new Promise((resolve) => {
+      const timeout = setTimeout(resolve, 500);
+      monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
+    });
   }
 }
 

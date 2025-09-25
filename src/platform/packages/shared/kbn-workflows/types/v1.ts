@@ -22,6 +22,7 @@ export enum ExecutionStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  TIMED_OUT = 'timed_out',
   SKIPPED = 'skipped',
 }
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
