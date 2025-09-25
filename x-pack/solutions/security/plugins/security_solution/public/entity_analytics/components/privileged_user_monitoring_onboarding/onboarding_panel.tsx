@@ -45,7 +45,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
             <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" direction="column">
                 <EuiFlexGroup gutterSize={'m'} alignItems={'center'}>
-                  <EuiTitle>
+                  <EuiTitle size="l">
                     <h2>
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
