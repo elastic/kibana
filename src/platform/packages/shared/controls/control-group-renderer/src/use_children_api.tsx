@@ -8,10 +8,9 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { useMemo } from 'react';
+import { BehaviorSubject, distinctUntilChanged, map, tap } from 'rxjs';
 
-import type { StickyControlState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {
@@ -19,41 +18,21 @@ import {
   type ESQLControlVariable,
   type PublishesESQLVariable,
 } from '@kbn/esql-types';
-import {
-  childrenUnsavedChanges$,
-  combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiAppliesFilters,
   type AppliesFilters,
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './types';
+import type { ControlGroupCreationOptions } from './types';
 
 export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
   lastState$Ref: React.MutableRefObject<
-    BehaviorSubject<ControlGroupRuntimeState['initialChildControlState']>
+    BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
   >
 ) => {
-  const currentChildState = useRef<{ [id: string]: SerializedPanelState<StickyControlState> }>({});
-  const lastSavedChildState = useRef<{ [id: string]: SerializedPanelState<StickyControlState> }>(
-    {}
-  );
-
-  useEffect(() => {
-    Object.entries(state?.initialState?.initialChildControlState ?? {}).forEach(([id, control]) => {
-      const serializedState = {
-        rawState: {
-          ...control,
-        },
-      };
-      lastSavedChildState.current[id] = serializedState;
-      currentChildState.current[id] = serializedState;
-    });
-  }, [state]);
-
   const childrenApi = useMemo(() => {
     const children$ = new BehaviorSubject<{ [uuid: string]: DefaultEmbeddableApi }>({});
 
@@ -66,17 +45,23 @@ export const useChildrenApi = (
           [child.uuid]: child,
         });
       },
-      setSerializedStateForChild: (
-        id: string,
-        childState: SerializedPanelState<StickyControlState>
-      ) => {
+      setSerializedStateForChild: (id: string, childState: SerializedPanelState<object>) => {
         console.log('setSerializedStateForChild');
-        currentChildState.current[id] = childState;
+        lastState$Ref.current.next({ ...lastState$Ref.current.value, [id]: childState });
       },
-      getSerializedStateForChild: (id: string) => currentChildState.current[id],
-      lastSavedStateForChild$: (id: string) =>
-        lastState$Ref.current.pipe(map(() => lastSavedChildState.current[id])),
-      getLastSavedStateForChild: (uuid: string) => lastSavedChildState.current[uuid],
+      getSerializedStateForChild: (id: string) => {
+        console.log('get serialized state for child 123', lastState$Ref.current.getValue());
+        return lastState$Ref.current.getValue()[id];
+      },
+      lastSavedStateForChild$: (id: string) => {
+        return lastState$Ref.current.pipe(
+          map((newState) => newState[id]),
+          tap((test) => {
+            console.log('lastSavedStateForChild$', test);
+          })
+        );
+      },
+      getLastSavedStateForChild: (id: string) => lastState$Ref.current.getValue()[id],
       appliedFilters$: combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
         { children$ },
         'appliedFilters$',

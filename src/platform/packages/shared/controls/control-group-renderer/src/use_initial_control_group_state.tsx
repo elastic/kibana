@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import type { BehaviorSubject } from 'rxjs';
+
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { controlGroupStateBuilder } from './control_group_state_builder';
@@ -17,8 +19,8 @@ import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './ty
 
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
-  lastState$Ref: React.MutableRefObject<
-    BehaviorSubject<ControlGroupRuntimeState['initialChildControlState']>
+  childState$Ref: React.MutableRefObject<
+    BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
   >
 ) => {
   const [initialState, setInitialState] = useState<ControlGroupCreationOptions | undefined>();
@@ -28,23 +30,26 @@ export const useInitialControlGroupState = (
     getCreationOptions(controlGroupStateBuilder).then((creationOptions) => {
       if (cancelled) return;
       const ignoreParentSettings = creationOptions.initialState?.ignoreParentSettings;
-      const controls = Object.values(
+      const serializedState: { [id: string]: SerializedPanelState<object> } = {};
+      const controls = Object.entries(
         creationOptions?.initialState?.initialChildControlState ?? {}
-      ).reduce((prev, control, index) => {
-        const { id = uuidv4(), ...rest } = control;
+      ).reduce((prev, [id, control]) => {
+        const controlState = {
+          // pass in legacy ignore parent settings into respective panel level settings, if necessary
+          useGlobalFilters: !(
+            ignoreParentSettings?.ignoreFilters || ignoreParentSettings?.ignoreQuery
+          ),
+          ignoreValidations: ignoreParentSettings?.ignoreValidations,
+          ...control,
+        };
+        serializedState[id] = { rawState: omit(controlState, ['grow', 'width', 'order']) };
         return {
           ...prev,
-          [id]: {
-            ...rest,
-            order: rest.order ?? index,
-            useGlobalFilters:
-              !ignoreParentSettings?.ignoreFilters || !ignoreParentSettings?.ignoreQuery,
-            ignoreValidations: ignoreParentSettings?.ignoreValidations,
-          },
+          [id]: controlState,
         };
       }, {} as ControlGroupRuntimeState['initialChildControlState']);
-
-      lastState$Ref.current.next(controls);
+      console.log({ serializedState });
+      childState$Ref.current.next(serializedState);
       setInitialState({
         ...creationOptions,
         initialState: { ...creationOptions.initialState, initialChildControlState: controls },

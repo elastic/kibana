@@ -13,7 +13,12 @@ import { ControlsRenderer } from '@kbn/controls-renderer';
 // import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 // import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AppliesFilters, useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
+import {
+  AppliesFilters,
+  SerializedPanelState,
+  useSearchApi,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 
 import type {
   ControlGroupCreationOptions,
@@ -25,9 +30,11 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
-import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map, merge, tap } from 'rxjs';
 import { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
+import { ControlState } from '@kbn/controls-schemas';
+import { omit } from 'lodash';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -52,13 +59,16 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
-  const lastState$Ref = useRef(
-    new BehaviorSubject<ControlGroupRuntimeState['initialChildControlState']>({})
+  const childState$Ref = useRef(
+    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({})
   );
 
-  const initialState = useInitialControlGroupState(getCreationOptions, lastState$Ref);
-  const childrenApi = useChildrenApi(initialState, lastState$Ref);
-  const layoutApi = useLayoutApi(initialState, childrenApi);
+  /** Creation options management */
+  const initialState = useInitialControlGroupState(getCreationOptions, childState$Ref);
+  const childrenApi = useChildrenApi(initialState, childState$Ref);
+  const layoutApi = useLayoutApi(initialState, childrenApi, childState$Ref);
+
+  /** Props management */
   const searchApi = useSearchApi({
     filters,
     query,
@@ -81,27 +91,62 @@ export const ControlGroupRenderer = ({
 
     const reload$ = new Subject<void>();
 
-    const hasUnsavedChanges$ = combineLatest([
-      parentApi.layout$,
-      childrenUnsavedChanges$(parentApi.children$),
-    ]).subscribe((changes) => {
-      console.log('changes', changes);
+    const subscription = childrenUnsavedChanges$(parentApi.children$)
+      .pipe(
+        tap(() => {
+          console.log('TAP!!!!!');
+        }),
+        map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges))
+      )
+      .subscribe((hasUnsavedChanges) => {
+        console.log('has unsaved changes', hasUnsavedChanges);
+        // console.log('current', lastState$Ref.current.getValue());
+
+        if (hasUnsavedChanges) {
+          childState$Ref.current.next(
+            Object.values(parentApi.children$.getValue()).reduce((prev, child) => {
+              return {
+                ...prev,
+                [child.uuid]: child.serializeState(),
+              };
+            }, {})
+          );
+        }
+      });
+
+    childState$Ref.current.subscribe((test) => {
+      console.log('HERE!!!!!!!!!!!', { current: test });
     });
 
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
-      getInput$: () => lastState$Ref.current,
-      getInput: () => lastState$Ref.current.value,
+      getInput$: () => childState$Ref.current,
+      getInput: () => childState$Ref.current.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
         console.log({ newInput });
-        // lastState$Ref.current.next(
-        //   serializeRuntimeState({
-        //     ...lastState$Ref.current.value,
-        //     ...newInput,
-        //   })
-        // );
-        // controlGroupApi.resetUnsavedChanges();
+        const result = {
+          ...childState$Ref.current.value,
+          ...Object.entries(newInput.initialChildControlState ?? {}).reduce(
+            (prev, [id, control]) => {
+              return {
+                ...prev,
+                [id]: {
+                  rawState: {
+                    ...childState$Ref.current.value[id].rawState,
+                    ...omit(control, ['grow', 'width', 'order']),
+                  },
+                },
+              };
+            },
+            {}
+          ),
+        };
+        console.log({ result });
+        childState$Ref.current.next(result);
+        Object.values(parentApi.children$.getValue()).forEach((child) => {
+          child.resetUnsavedChanges();
+        });
       },
     } as unknown as ControlGroupRendererApi);
   }, [parentApi, onApiAvailable]);

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, pairwise } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
@@ -16,33 +17,21 @@ import type { StickyControlState } from '@kbn/controls-schemas';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import type { PanelPackage } from '@kbn/presentation-containers';
 
-import type { ControlGroupCreationOptions } from './types';
+import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './types';
 import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
   state: ControlGroupCreationOptions | undefined,
-  childrenApi: ReturnType<typeof useChildrenApi>
+  childrenApi: ReturnType<typeof useChildrenApi>,
+  lastState$Ref: React.MutableRefObject<
+    BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
+  >
 ) => {
   const layoutApi = useMemo(() => {
     if (!state) return;
 
     const layout$ = new BehaviorSubject<DashboardLayout>({
-      controls: Object.entries(state.initialState?.initialChildControlState ?? {}).reduce(
-        (prev, [id, control], index) => {
-          const { type, width, grow, order } = control;
-          return {
-            ...prev,
-            [id]: {
-              order: order ?? index,
-              id,
-              width,
-              grow,
-              type,
-            },
-          };
-        },
-        {}
-      ),
+      controls: getControlsLayout(state.initialState?.initialChildControlState),
       panels: {},
       sections: {},
     });
@@ -78,8 +67,43 @@ export const useLayoutApi = (
           },
         });
       },
+      layoutHasUnsavedChanges$: layout$.pipe(
+        pairwise(),
+        map(([before, after]) => ({
+          hasUnsavedChanges: !deepEqual(before, after),
+        }))
+      ),
     };
   }, [state, childrenApi]);
 
+  // useEffect(() => {
+  //   if (!layoutApi) return;
+  //   lastState$Ref.current.subscribe((lastSavedState) => {
+  //     layoutApi?.layout$.next({
+  //       controls: getControlsLayout(lastSavedState),
+  //       panels: {},
+  //       sections: {},
+  //     });
+  //   });
+  // }, [layoutApi, lastState$Ref]);
+
   return layoutApi;
+};
+
+const getControlsLayout = (
+  initialChildControlState: ControlGroupRuntimeState['initialChildControlState'] | undefined
+) => {
+  return Object.entries(initialChildControlState ?? {}).reduce((prev, [id, control], index) => {
+    const { type, width, grow, order } = control;
+    return {
+      ...prev,
+      [id]: {
+        order: order ?? index,
+        id,
+        width,
+        grow,
+        type,
+      },
+    };
+  }, {});
 };
