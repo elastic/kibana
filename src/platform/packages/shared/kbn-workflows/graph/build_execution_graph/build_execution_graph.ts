@@ -120,7 +120,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
 
   if ((currentStep as StepWithTimeout).timeout) {
     const step = currentStep as BaseStep & StepWithTimeout;
-    return handleStepTimeout(
+    return handleTimeout(
       getStepId(step, context),
       step.type,
       step.timeout!,
@@ -371,7 +371,7 @@ function visitOnFailure(
   return graph;
 }
 
-function handleStepTimeout(
+function handleTimeout(
   stepId: string,
   stepType: string,
   timeout: string,
@@ -735,7 +735,7 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.G
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
   if (workflowSchema.settings?.timeout) {
-    finalGraph = handleStepTimeout(
+    finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
       workflowSchema.settings.timeout,
