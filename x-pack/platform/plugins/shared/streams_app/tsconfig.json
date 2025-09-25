@@ -84,5 +84,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/io-ts-utils",
     "@kbn/otel-semantic-conventions",
+    "@kbn/storage-adapter",
   ]
 }
