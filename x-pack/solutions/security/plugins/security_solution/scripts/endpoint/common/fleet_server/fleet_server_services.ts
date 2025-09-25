@@ -38,7 +38,7 @@ import {
   FLEET_SERVER_KEY_PATH,
   fleetServerDevServiceAccount,
 } from '@kbn/dev-utils';
-import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { maybeCreateDockerNetwork, getServerlessNodes, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
@@ -515,7 +515,7 @@ const getFleetServerStandAloneDockerArgs = ({
   port,
 }: GetFleetServerStandAloneDockerArgsOptions): string[] => {
   const esURL = new URL(esUrl);
-  esURL.hostname = SERVERLESS_NODES[0].name;
+  esURL.hostname = getServerlessNodes()[0].name;
 
   return [
     'run',
