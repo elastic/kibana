@@ -21,5 +21,6 @@ export const INTEGRATION_TABS: Tab[] = [
     sortByFeaturedIntegrations: false,
     featuredCardIds: FEATURED_INTEGRATION_SORT_ORDER,
     height: `${INTEGRATION_CARD_HEIGHT * 1.8}px`,
+    overflow: 'scroll',
   },
 ];

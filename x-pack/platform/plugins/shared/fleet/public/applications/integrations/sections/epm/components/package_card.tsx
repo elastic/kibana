@@ -267,9 +267,8 @@ export function PackageCard({
             width: ${installationStatusVisible
               ? `calc(100% - ${theme.euiTheme.base * 4}px)`
               : '100%'};
-            overflow: hidden scroll;
+            overflow-x: hidden;
             text-overflow: ellipsis;
-            max-height: ${theme.euiTheme.base * 2}px;
           `}
         >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
