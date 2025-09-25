@@ -259,7 +259,7 @@ export function UnifiedDocViewerFlyout({
         defaultMessage: 'Document',
       });
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
-  const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+  const { screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
   return (
     <EuiPortal>
@@ -279,7 +279,6 @@ export function UnifiedDocViewerFlyout({
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
         paddingSize="m"
-        // {...a11yProps}
         aria-labelledby="docViewerFlyout"
       >
         {screenReaderDescription}
