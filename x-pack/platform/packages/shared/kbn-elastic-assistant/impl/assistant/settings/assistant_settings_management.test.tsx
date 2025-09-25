@@ -72,7 +72,6 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
-  settings: {} as SettingsStart,
 };
 jest.mock('../../assistant_context');
 

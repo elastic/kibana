@@ -24,7 +24,6 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -64,7 +63,6 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
-  settings: {} as SettingsStart,
 };
 jest.mock('../../assistant_context');
 

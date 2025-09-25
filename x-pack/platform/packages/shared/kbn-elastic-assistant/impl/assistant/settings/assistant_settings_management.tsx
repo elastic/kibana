@@ -35,7 +35,6 @@ import { ManagementSettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;
-  settings: SettingsStart;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
 }
@@ -45,7 +44,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, settings }) => {
+  ({ dataViews, onTabChange, currentTab: selectedSettingsTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
