@@ -136,7 +136,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
+        expect(error.message).toMatch(
+          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+        );
         expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
       }
     });
@@ -152,7 +154,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
+        expect(error.message).toMatch(
+          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+        );
       }
     });
 
@@ -203,7 +207,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         await impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toMatch('Step failed due to exceeding the step timeout of 30s.');
+        expect(error.message).toBe(
+          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+        );
       }
     });
   });

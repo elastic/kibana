@@ -170,7 +170,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     let isAborted = false;
 
     if (axios.isAxiosError(error)) {
-      if (error.code === 'ERR_CANCELED' || error.message?.includes('aborted')) {
+      if (error.code === 'ERR_CANCELED') {
         errorMessage = 'HTTP request was cancelled';
         isAborted = true;
       } else if (error.response) {
