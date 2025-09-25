@@ -41,9 +41,10 @@ export const TabsView = (props: SingleTabViewProps) => {
 
   const onEvent: UnifiedTabsProps['onEvent'] = useCallback(
     (eventName, payload) => {
-      if (Object.values(TabsEventName).includes(eventName as TabsEventName)) {
-        void tabsEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
+      if (!Object.values(TabsEventName).includes(eventName as TabsEventName)) {
+        return;
       }
+      void tabsEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
     },
     [tabsEbtManager]
   );
