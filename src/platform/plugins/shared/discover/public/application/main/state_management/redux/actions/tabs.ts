@@ -8,7 +8,6 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +16,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import type { TabState } from '../types';
+import { type TabState, TabsStateTransition } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -255,13 +254,21 @@ export const updateDiscoverSessionAndTabs: InternalStateThunkActionCreator<
   [
     {
       items: TabState[] | TabItem[];
-      selectedItem: TabState | TabItem | null;
+      selectedItem: TabState | TabItem;
       persistedDiscoverSession: DiscoverSession | undefined;
+      transitioningFromTo?: TabsStateTransition;
     }
   ],
   Promise<void>
-> = ({ items, selectedItem, persistedDiscoverSession }) =>
+> = ({ items, selectedItem, persistedDiscoverSession, transitioningFromTo }) =>
   async function updateDiscoverSessionAndTabsThunkFn(dispatch) {
+    if (transitioningFromTo) {
+      dispatch(
+        internalStateSlice.actions.setTabsTransitioningStarted({
+          transitioningFromTo,
+        })
+      );
+    }
     dispatch(
       internalStateSlice.actions.setPersistedDiscoverSession({
         persistedDiscoverSession,
@@ -277,15 +284,31 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+    {
+      dispatch,
+      getState,
+      extra: { services, runtimeStateManager, tabsStorageManager, customizationContext },
+    }
   ) {
     const currentState = getState();
     const {
       userId: existingUserId,
       spaceId: existingSpaceId,
-      persistedDiscoverSession: currentlyPersistedDiscoverSession,
-      tabs: { unsafeCurrentId },
+      tabs: { unsafeCurrentId, transitioningFromTo },
     } = currentState;
+
+    if (unsafeCurrentId && transitioningFromTo) {
+      // already initialized with the requested discover session via resetDiscoverSession
+
+      if (transitioningFromTo === TabsStateTransition.savingFromNonPersistedToNewPersisted) {
+        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, unsafeCurrentId);
+        const currentTabStateContainer = currentTabRuntimeState?.stateContainer$.getValue();
+        currentTabStateContainer?.appState.updateUrlWithCurrentState();
+      }
+      return null;
+    }
+
+    dispatch(internalStateSlice.actions.setTabsInitializationStarted());
 
     const getUserId = async () => {
       try {
@@ -322,17 +345,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       );
 
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
-    }
-
-    if (
-      unsafeCurrentId &&
-      !shouldClearAllTabs &&
-      persistedDiscoverSession?.id &&
-      currentlyPersistedDiscoverSession?.id === persistedDiscoverSession.id &&
-      deepEqual(currentlyPersistedDiscoverSession?.tabs, persistedDiscoverSession.tabs)
-    ) {
-      // already initialized with the requested discover session via resetDiscoverSession
-      return { userId, spaceId, persistedDiscoverSession };
     }
 
     const initialTabsState = tabsStorageManager.loadLocally({

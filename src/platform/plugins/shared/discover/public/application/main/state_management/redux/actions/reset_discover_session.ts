@@ -18,6 +18,7 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { updateDiscoverSessionAndTabs } from './tabs';
+import type { TabsStateTransition } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -25,10 +26,12 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     {
       updatedDiscoverSession,
       nextSelectedTabId,
+      transitioningFromTo,
     }:
       | {
           updatedDiscoverSession?: DiscoverSession;
           nextSelectedTabId?: string;
+          transitioningFromTo?: TabsStateTransition;
         }
       | undefined = {},
     { dispatch, getState, extra: { services, runtimeStateManager } }
@@ -92,6 +95,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         items: allTabs,
         selectedItem: selectedTab,
         persistedDiscoverSession: discoverSession,
+        transitioningFromTo,
       })
     );
   }

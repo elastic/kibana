@@ -27,6 +27,7 @@ import {
 } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
+import { TabsStateTransition } from '../types';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -215,10 +216,17 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
+      const transitioningFromTo = !state.persistedDiscoverSession?.id
+        ? TabsStateTransition.savingFromNonPersistedToNewPersisted
+        : newCopyOnSave
+        ? TabsStateTransition.savingFromPersistedToNewPersisted
+        : undefined;
+
       await dispatch(
         resetDiscoverSession({
           updatedDiscoverSession: discoverSession,
           nextSelectedTabId,
+          transitioningFromTo,
         })
       ).unwrap();
     }

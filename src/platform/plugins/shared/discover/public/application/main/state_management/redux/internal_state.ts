@@ -59,6 +59,7 @@ const initialState: DiscoverInternalState = {
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
+    transitioningFromTo: undefined,
     byId: {},
     allIds: [],
     unsavedIds: [],
@@ -101,6 +102,19 @@ export const internalStateSlice = createSlice({
       }>
     ) => {
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
+    },
+
+    setTabsInitializationStarted: (state) => {
+      state.tabs.areInitializing = true;
+    },
+
+    setTabsTransitioningStarted: (
+      state,
+      action: PayloadAction<{
+        transitioningFromTo: DiscoverInternalState['tabs']['transitioningFromTo'];
+      }>
+    ) => {
+      state.tabs.transitioningFromTo = action.payload.transitioningFromTo;
     },
 
     setTabs: (
@@ -281,11 +295,10 @@ export const internalStateSlice = createSlice({
       state.savedDataViews = action.payload;
     });
 
-    builder.addCase(initializeTabs.pending, (state) => {
-      state.tabs.areInitializing = true;
-    });
-
     builder.addCase(initializeTabs.fulfilled, (state, action) => {
+      if (!action.payload) {
+        return;
+      }
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
@@ -293,6 +306,7 @@ export const internalStateSlice = createSlice({
 
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
       state.tabs.areInitializing = false;
+      state.tabs.transitioningFromTo = undefined;
     });
   },
 });
