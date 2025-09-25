@@ -43,7 +43,10 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       };
     }
 
-    throw new Error('Unable to inject references from Map state, unexpected state');
+    return {
+      ...state,
+      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+    };
   }
   return transformOut;
 }

@@ -110,11 +110,26 @@ describe('JOIN Autocomplete', () => {
         },
         detail: 'Click to create',
         filterText: '',
+        incomplete: true,
         kind: 'Issue',
         label: 'Create lookup index',
         sortText: '1A',
         text: '',
       });
+    });
+
+    test('can suggest indeces based on a fragment', async () => {
+      const suggestions = await suggest('FROM index | LOOKUP JOIN join_');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).toEqual([
+        'Create lookup index "join_"',
+        'join_index',
+        'join_index_with_alias',
+        'lookup_index',
+        'join_index_alias_1',
+        'join_index_alias_2',
+      ]);
     });
 
     test('does not suggest the create index command when the index already exists', async () => {
@@ -154,8 +169,13 @@ describe('JOIN Autocomplete', () => {
         },
         detail: 'Click to create',
         filterText: 'new_join_index',
+        incomplete: true,
         kind: 'Issue',
         label: 'Create lookup index "new_join_index"',
+        rangeToReplace: {
+          end: 37,
+          start: 23,
+        },
         sortText: '1A',
         text: 'new_join_index',
       });
