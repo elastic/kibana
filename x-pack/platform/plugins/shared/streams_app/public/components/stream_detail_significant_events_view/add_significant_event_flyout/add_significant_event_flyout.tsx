@@ -25,6 +25,7 @@ import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { v4 } from 'uuid';
+import { from, concatMap } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
@@ -81,8 +82,12 @@ export function AddSignificantEventFlyout({
   const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [stopGeneration, setStopGeneration] = useState<() => void>(() => () => {});
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+
+  const stopGeneration = useCallback(() => {
+    setIsGenerating(false);
+    abort();
+  }, [abort]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -98,71 +103,72 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
-    if (!aiFeatures?.enabled) {
+    const connector = aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connector || selectedSystems.length === 0) {
       return;
     }
 
     const startTime = Date.now();
-
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!, selectedSystems[0]);
-    generation$.subscribe({
-      next: (result) => {
-        const validation = validateQuery({
-          title: result.query.title,
-          kql: { query: result.query.kql },
-        });
+    from(selectedSystems)
+      .pipe(
+        concatMap((system) =>
+          generate(connector, system).pipe(
+            concatMap((result) => {
+              const validation = validateQuery({
+                title: result.query.title,
+                kql: { query: result.query.kql },
+              });
 
-        if (!validation.kql.isInvalid) {
-          setGeneratedQueries((prev) => [
-            ...prev,
-            {
-              id: v4(),
-              kql: { query: result.query.kql },
-              title: result.query.title,
-              system: result.query.system,
-            },
-          ]);
-        }
-      },
-      error: (error) => {
-        setIsGenerating(false);
-        if (error.name === 'AbortError') {
-          return;
-        }
-
-        notifications.showErrorDialog({
-          title: i18n.translate('xpack.streams.addSignificantEventFlyout.generateErrorToastTitle', {
-            defaultMessage: `Could not generate significant events queries`,
-          }),
-          error,
-        });
-      },
-      complete: () => {
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
-            { defaultMessage: `Generated significant events queries successfully` }
-          ),
-        });
-        telemetryClient.trackSignificantEventsSuggestionsGenerate({
-          duration_ms: Date.now() - startTime,
-          stream_type: getStreamTypeFromDefinition(definition),
-        });
-        setIsGenerating(false);
-      },
-    });
-
-    setStopGeneration(() => {
-      return () => {
-        setIsGenerating(false);
-        setGeneratedQueries([]);
-        abort();
-      };
-    });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, abort]);
+              if (!validation.kql.isInvalid) {
+                setGeneratedQueries((prev) => [
+                  ...prev,
+                  {
+                    id: v4(),
+                    kql: { query: result.query.kql },
+                    title: result.query.title,
+                    system: result.query.system,
+                  },
+                ]);
+              }
+              return [];
+            })
+          )
+        )
+      )
+      .subscribe({
+        error: (error) => {
+          setIsGenerating(false);
+          if (error.name === 'AbortError') {
+            return;
+          }
+          notifications.showErrorDialog({
+            title: i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
+              {
+                defaultMessage: `Could not generate significant events queries`,
+              }
+            ),
+            error,
+          });
+        },
+        complete: () => {
+          notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
+              { defaultMessage: `Generated significant events queries successfully` }
+            ),
+          });
+          telemetryClient.trackSignificantEventsSuggestionsGenerate({
+            duration_ms: Date.now() - startTime,
+            stream_type: getStreamTypeFromDefinition(definition),
+          });
+          setIsGenerating(false);
+        },
+      });
+  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedSystems]);
 
   useEffect(() => {
     if (initialFlow === 'ai' && initialSelectedSystems.length > 0) {
@@ -268,7 +274,7 @@ export function AddSignificantEventFlyout({
               justifyContent="spaceBetween"
               css={{ height: '100%' }}
             >
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} css={{ overflow: 'scroll' }}>
                 <EuiPanel hasShadow={false} paddingSize="l">
                   {selectedFlow === 'manual' && (
                     <>
@@ -341,7 +347,7 @@ export function AddSignificantEventFlyout({
                   <EuiButton
                     color="primary"
                     fill
-                    disabled={isSubmitting || !parsedQueries.success || !canSave}
+                    disabled={!parsedQueries.success || !canSave || isGenerating}
                     isLoading={isSubmitting}
                     onClick={() => {
                       setIsSubmitting(true);

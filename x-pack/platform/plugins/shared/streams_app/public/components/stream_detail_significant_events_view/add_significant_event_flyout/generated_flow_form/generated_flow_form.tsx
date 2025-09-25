@@ -47,17 +47,22 @@ export function GeneratedFlowForm({
     return <AiFlowEmptyState />;
   }
 
-  if (isGenerating) {
+  if (isGenerating && generatedQueries.length === 0) {
     return <AiFlowWaitingForGeneration stopGeneration={stopGeneration} />;
   }
 
   return (
-    <SignificantEventsGeneratedTable
-      isSubmitting={isSubmitting}
-      generatedQueries={generatedQueries}
-      selectedQueries={selectedQueries}
-      onSelectionChange={onSelectionChange}
-      definition={definition}
-    />
+    <>
+      <SignificantEventsGeneratedTable
+        isSubmitting={isSubmitting}
+        generatedQueries={generatedQueries}
+        selectedQueries={selectedQueries}
+        onSelectionChange={onSelectionChange}
+        definition={definition}
+      />
+      {isGenerating && (
+        <AiFlowWaitingForGeneration stopGeneration={stopGeneration} hasInitialResults={true} />
+      )}
+    </>
   );
 }

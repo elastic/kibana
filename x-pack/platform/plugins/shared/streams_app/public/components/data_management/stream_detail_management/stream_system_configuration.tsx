@@ -50,7 +50,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              // Disable the button if no GenAI connector is selected
+              disabled={!aiFeatures?.genAiConnectors.selectedConnector}
               iconType="sparkles"
               onClick={() => {
                 setIsLoading(true);
