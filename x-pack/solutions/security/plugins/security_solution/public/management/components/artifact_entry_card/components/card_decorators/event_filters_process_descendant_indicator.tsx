@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ProcessDescendantsTooltip } from '../../../../pages/event_filters/view/components/process_descendant_tooltip';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
@@ -23,7 +23,7 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
 
     if (
       isProcessDescendantFeatureEnabled &&
-      isFilterProcessDescendantsEnabled(item as ExceptionListItemSchema)
+      isProcessDescendantsEnabled(item as ExceptionListItemSchema)
     ) {
       return (
         <>

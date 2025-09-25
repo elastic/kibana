@@ -22,7 +22,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { PROCESS_DESCENDANT_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -189,12 +189,18 @@ export function translateToEndpointExceptions(
       } else if ((
         experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
-        isFilterProcessDescendantsEnabled(entry)) || (
+        isProcessDescendantsEnabled(entry)) || ( // TODO: may need to remove this
         experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
-        isFilterProcessDescendantsEnabled(entry))
+        isProcessDescendantsEnabled(entry))
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeUniqueItem(translatedItem);
+      } else if ((experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+        isProcessDescendantsEnabled(entry))
+      ) {
+        const translatedItem = translateProcessDescendantTrustedApp(schemaVersion, entry);
         storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
@@ -209,6 +215,29 @@ export function translateToEndpointExceptions(
 }
 
 function translateProcessDescendantEventFilter(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedExceptionListItem {
+  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfDescendantOf;
+
+  return {
+    type: entry.type,
+    entries: [
+      {
+        operator: 'included',
+        type: 'descendent_of',
+        value: {
+          entries: [translatedEntries],
+        },
+      },
+    ],
+  };
+}
+
+function translateProcessDescendantTrustedApp(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {

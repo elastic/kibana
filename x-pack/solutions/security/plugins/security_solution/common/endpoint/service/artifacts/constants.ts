@@ -15,7 +15,11 @@ export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
 export const ADVANCED_MODE_TAG = 'form_mode:advanced';
 
+/** The tag name for process descendants in event filters */
 export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
+
+/** The tag name for process descendants in trusted apps */
+export const TRUSTED_PROCESS_DESCENDANTS_TAG = 'trust_process_descendants';
 
 /** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
 export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';

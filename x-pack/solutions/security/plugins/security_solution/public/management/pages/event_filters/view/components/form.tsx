@@ -50,7 +50,7 @@ import {
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
@@ -156,7 +156,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const isFilterProcessDescendantsSelected = useMemo(
-      () => isFilterProcessDescendantsEnabled(exception),
+      () => isProcessDescendantsEnabled(exception),
       [exception]
     );
 
