@@ -34,17 +34,11 @@ interface BaseMetricCardProps {
   title: React.ReactNode;
   actions?: ActionButton[] | React.ReactNode;
   metrics: Metrics[];
-  grow?: boolean;
 }
 
 const EMPTY_LINE = '\u00A0';
 
-export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
-  title,
-  actions,
-  metrics,
-  grow = false,
-}) => {
+export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({ title, actions, metrics }) => {
   const renderActionButtons = () => {
     if (!actions) return null;
 
@@ -114,7 +108,7 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
     }
 
     return (
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         {metrics.map((metric, index) => (
           <EuiFlexGroup key={index} direction="column" gutterSize="s">
             {renderSingleMetric(metric)}
@@ -125,19 +119,24 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
   };
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={true} grow={grow}>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ minHeight: 24 }}>
-            <EuiFlexItem>
+    <EuiPanel hasShadow={false} hasBorder={true} grow>
+      <EuiFlexGroup
+        direction="row"
+        justifyContent="spaceBetween"
+        alignItems="flexStart"
+        responsive={false}
+      >
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem css={{ minHeight: '32px', justifyContent: 'center' }}>
               <EuiText size="s">
                 <b>{title}</b>
               </EuiText>
             </EuiFlexItem>
-            {renderActionButtons()}
+            {renderMetrics()}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {renderMetrics()}
+        {renderActionButtons()}
       </EuiFlexGroup>
     </EuiPanel>
   );

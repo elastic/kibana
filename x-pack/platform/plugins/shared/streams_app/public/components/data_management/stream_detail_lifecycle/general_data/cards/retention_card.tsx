@@ -9,8 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { isRoot } from '@kbn/streams-schema';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { IlmLink } from '../ilm_link';
@@ -23,7 +22,6 @@ export const RetentionCard = ({
   definition: Streams.ingest.all.GetResponse;
   openEditModal: () => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const lifecycle = definition.effective_lifecycle;
 
   const isInheritingFromParent = isInheritLifecycle(definition.stream.ingest.lifecycle);
@@ -121,9 +119,12 @@ export const RetentionCard = ({
           onClick={openEditModal}
           disabled={!definition.privileges.lifecycle}
           iconType="pencil"
-          css={css`
-            margin-bottom: -${euiTheme.size.s};
-          `}
+          aria-label={i18n.translate(
+            'xpack.streams.entityDetailViewWithoutParams.editDataRetention.ariaLabel',
+            {
+              defaultMessage: 'Edit',
+            }
+          )}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
             defaultMessage: 'Edit data retention',
