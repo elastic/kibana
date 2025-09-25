@@ -32,7 +32,9 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-default-llm-setting"
   ],
   "exclude": [
     "target/**/*"
