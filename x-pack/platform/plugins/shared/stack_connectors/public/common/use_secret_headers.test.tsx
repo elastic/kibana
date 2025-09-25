@@ -28,7 +28,9 @@ const customWrapper = () => {
 describe('useSecretHeaders', () => {
   const addErrorMock = jest.fn();
   const getMock = jest.fn();
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
 
   const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
