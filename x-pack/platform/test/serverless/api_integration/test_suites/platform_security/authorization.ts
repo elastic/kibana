@@ -993,7 +993,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('available features', function () {
-      it('all Dashboard and Discover sub-feature privileges except search_sessions are disabled', async function () {
+      it('all Dashboard and Discover sub-feature privileges except store_search_session are disabled', async function () {
         const { body } = await supertestAdminWithCookieCredentials.get('/api/features').expect(200);
 
         // We should make sure that neither Discover nor Dashboard displays any sub-feature privileges in Serverless.
@@ -1007,7 +1007,7 @@ export default function ({ getService }: FtrProviderContext) {
             log.debug(
               `Verifying that ${privilege.id} sub-feature privilege of ${featureId} feature is disabled.`
             );
-            if (privilege.id !== 'search_sessions') {
+            if (privilege.id !== 'store_search_session') {
               expect(privilege.disabled).toBe(true);
             }
           }
