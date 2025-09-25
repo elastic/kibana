@@ -12,31 +12,43 @@ import type {
   SelectOptionInterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiBadge } from '@elastic/eui';
+import { useInterruptResumeValue } from './use_persisted_interrupt_resume_value';
 
 interface Props {
   interrupt: SelectOptionInterruptValue;
   resumeGraph: (threadId: string, resumeValue: SelectOptionInterruptResumeValue) => void;
   resumedValue?: SelectOptionInterruptResumeValue;
   isLastInConversation: boolean;
+  disableAction: boolean;
 }
 
 export const SelectOption = ({
   interrupt,
   resumeGraph,
-  resumedValue: initialResumeValue,
+  resumedValue: liveInterruptResumeValue,
   isLastInConversation,
+  disableAction,
 }: Props) => {
-  const [resumeValue, setResumeValue] = React.useState<
-    SelectOptionInterruptResumeValue | undefined
-  >(initialResumeValue);
+  const { resumeValue, setCachedResumeValue } = useInterruptResumeValue(
+    interrupt,
+    liveInterruptResumeValue
+  );
 
   const handleOnSelect = (value: SelectOptionInterruptValue['options'][number]['value']) => {
-    const newResumeValue: SelectOptionInterruptResumeValue = { type: 'SELECT_OPTION', value };
-    setResumeValue(newResumeValue);
+    const newResumeValue: SelectOptionInterruptResumeValue = {
+      type: 'SELECT_OPTION',
+      value,
+      interruptId: interrupt.id,
+    };
+    setCachedResumeValue(newResumeValue);
     resumeGraph(interrupt.threadId, newResumeValue);
   };
 
-  const disabled = resumeValue !== undefined || interrupt.expired === true || !isLastInConversation;
+  const disabled =
+    disableAction ||
+    resumeValue !== undefined ||
+    interrupt.expired === true ||
+    !isLastInConversation;
 
   const getOutcome = () => {
     switch (true) {

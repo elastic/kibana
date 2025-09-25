@@ -243,7 +243,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     replacements,
     newMessages,
-    threadId,
     interruptResumeValue,
   });
 
@@ -309,7 +308,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       telemetry,
       telemetryTracer,
       traceOptions,
-      interruptResumeValue
+      interruptResumeValue,
     });
   }
 
@@ -321,7 +320,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     onLlmResponse,
     telemetryTracer,
     traceOptions,
-    interruptResumeValue
+    interruptResumeValue,
   });
 
   const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(

@@ -17,7 +17,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
-import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
@@ -72,10 +71,9 @@ export const getComments: GetComments =
     setIsStreaming,
     showAnonymizedValues,
     systemPromptContent,
+    resumeGraph,
   }) => {
     if (!currentConversation) return [];
-
-    const mockResumeGraph: ResumeGraphFunction = (threadId, resumeValue) => Promise.resolve(); // TODO: Replace with actual implementation
 
     const regenerateMessageOfConversation = () => {
       regenerateMessage(currentConversation.id);
@@ -100,7 +98,7 @@ export const getComments: GetComments =
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-                resumeGraph={mockResumeGraph}
+                resumeGraph={resumeGraph}
                 isLastInConversation={true}
                 contentReferences={null}
                 messageRole="assistant"
@@ -130,7 +128,7 @@ export const getComments: GetComments =
                   refetchCurrentConversation={refetchCurrentConversation}
                   regenerateMessage={regenerateMessageOfConversation}
                   setIsStreaming={setIsStreaming}
-                  resumeGraph={mockResumeGraph}
+                  resumeGraph={resumeGraph}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
                   transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
@@ -185,7 +183,7 @@ export const getComments: GetComments =
                 contentReferences={null}
                 contentReferencesVisible={contentReferencesVisible}
                 index={index}
-                resumeGraph={mockResumeGraph}
+                resumeGraph={resumeGraph}
                 isLastInConversation={isLastInConversation}
                 isControlsEnabled={isControlsEnabled}
                 isError={message.isError}
@@ -215,7 +213,7 @@ export const getComments: GetComments =
               interruptValue={message.metadata?.interruptValue}
               interruptResumeValue={message.metadata?.interruptResumeValue}
               index={index}
-              resumeGraph={mockResumeGraph}
+              resumeGraph={resumeGraph}
               isLastInConversation={isLastInConversation}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}

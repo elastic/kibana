@@ -116,6 +116,7 @@ describe('typedInterrupt', () => {
     const resumeValue: SelectOptionInterruptResumeValue = {
       type: 'SELECT_OPTION',
       value: 'option_2',
+      interruptId: state.tasks[0].id,
     };
 
     await workflow.invoke(new Command({ resume: resumeValue }), {

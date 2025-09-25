@@ -43,6 +43,7 @@ const testProps = {
   regenerateMessage: jest.fn(),
   setIsStreaming: jest.fn(),
   showAnonymizedValues,
+  resumeGraph: jest.fn(),
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {

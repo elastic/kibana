@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { InterruptValue } from '@kbn/elastic-assistant-common';
+
 export interface PromptObservableState {
   chunks: string[];
   message?: string;
+  interruptValues?: InterruptValue[];
   error?: string;
   loading: boolean;
 }

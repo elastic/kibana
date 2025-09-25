@@ -13,28 +13,36 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { EuiBadge, EuiButton, EuiFieldText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useInterruptResumeValue } from './use_persisted_interrupt_resume_value';
 
 interface Props {
   interruptValue: InputTextInterruptValue;
   resumeGraph: (threadId: string, resumeValue: InputTextInterruptResumeValue) => void;
   resumeValue?: InputTextInterruptResumeValue;
   isLastInConversation: boolean;
+  disableAction: boolean;
 }
 
 export const InputText = ({
   interruptValue: interrupt,
   resumeGraph,
-  resumeValue: initialResumeValue,
+  resumeValue: liveInterruptResumeValue,
   isLastInConversation,
+  disableAction,
 }: Props) => {
-  const [input, setInput] = React.useState<string>(initialResumeValue?.value ?? '');
-  const [resumeValue, setResumeValue] = React.useState<InputTextInterruptResumeValue | undefined>(
-    initialResumeValue
+  const { resumeValue, setCachedResumeValue } = useInterruptResumeValue(
+    interrupt,
+    liveInterruptResumeValue
   );
+  const [input, setInput] = React.useState<string>(resumeValue?.value ?? '');
 
   const onSubmit = () => {
-    const newResumeValue: InputTextInterruptResumeValue = { type: 'INPUT_TEXT', value: input };
-    setResumeValue(newResumeValue);
+    const newResumeValue: InputTextInterruptResumeValue = {
+      type: 'INPUT_TEXT',
+      value: input,
+      interruptId: interrupt.id,
+    };
+    setCachedResumeValue(newResumeValue);
     resumeGraph(interrupt.threadId, newResumeValue);
   };
 
@@ -55,7 +63,11 @@ export const InputText = ({
   };
 
   const outcome = getOutcome();
-  const disabled = resumeValue !== undefined || interrupt.expired === true || !isLastInConversation;
+  const disabled =
+    disableAction ||
+    resumeValue !== undefined ||
+    interrupt.expired === true ||
+    !isLastInConversation;
 
   return (
     <div data-test-subj="input-text-interrupt">

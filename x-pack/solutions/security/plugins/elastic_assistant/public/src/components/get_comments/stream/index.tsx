@@ -63,7 +63,14 @@ export const StreamComment = ({
   resumeGraph,
   isLastInConversation,
 }: Props) => {
-  const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
+  const {
+    error,
+    isLoading,
+    isStreaming,
+    pendingMessage,
+    setComplete,
+    interruptValue: streamedInterruptValue,
+  } = useStream({
     refetchCurrentConversation,
     content,
     reader,
@@ -127,13 +134,24 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream]);
 
-  const footer = (
-    <InterruptFactory
-      interruptValue={interruptValue}
-      resumeGraph={resumeGraph}
-      interruptResumeValue={interruptResumeValue}
-      isLastInConversation={isLastInConversation}
-    />
+  const footer = useMemo(
+    () => (
+      <InterruptFactory
+        interruptValue={interruptValue ?? streamedInterruptValue}
+        resumeGraph={resumeGraph}
+        interruptResumeValue={interruptResumeValue}
+        isLastInConversation={isLastInConversation}
+        disableAction={isAnythingLoading}
+      />
+    ),
+    [
+      interruptValue,
+      streamedInterruptValue,
+      resumeGraph,
+      interruptResumeValue,
+      isLastInConversation,
+      isAnythingLoading,
+    ]
   );
 
   return (

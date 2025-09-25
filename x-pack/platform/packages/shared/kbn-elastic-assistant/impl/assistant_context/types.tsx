@@ -91,6 +91,7 @@ export type GetAssistantMessages = (commentArgs: {
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
+  resumeGraph: ResumeGraphFunction;
   showAnonymizedValues: boolean;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
@@ -99,5 +100,5 @@ export type GetAssistantMessages = (commentArgs: {
 
 export type ResumeGraphFunction = (
   threadId: string,
-  resumeValue: InterruptResumeValue
+  interruptResumeValue: InterruptResumeValue
 ) => Promise<void>;

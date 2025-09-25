@@ -31,6 +31,7 @@ components:
       required:
         - 'type'
         - 'threadId'
+        - 'id'
       properties:
         type:
           $ref: '#/components/schemas/InterruptType'
@@ -44,17 +45,24 @@ components:
           type: string
           description: Thread ID of the graph execution that produced this message.
           example: '<UUID>'
+        id:
+          type: string
+          description: ID of the interrupt
 
     BaseInterruptResumeValue:
       type: object
       description: The basis of an interrupt resume value
       required:
         - 'type'
+        - 'interruptId'
       properties:
         type:
           $ref: '#/components/schemas/InterruptType'
           description: Type of the resume value
           example: 'SELECT_OPTION'
+        interruptId:
+          type: string
+          description: ID that corresponds to the InterruptValue
 
     SelectOptionInterruptOption:
       description: A request approval option

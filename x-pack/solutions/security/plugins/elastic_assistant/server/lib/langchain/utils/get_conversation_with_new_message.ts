@@ -19,7 +19,6 @@ interface Params {
   conversationId?: string;
   replacements?: Replacements;
   newMessages: BaseMessage[];
-  threadId: string;
   interruptResumeValue?: InterruptResumeValue;
 }
 
@@ -45,18 +44,18 @@ export const getConversationWithNewMessage = async (params: Params) => {
     return params.newMessages;
   }
 
-
-  /** 
+  /**
    * Modified past messages in the conversation to ensure interrups are aligned.
    * 1. Addes the interruptResumeValue to the corresponding message if needed
    * 2. Expires messages with interrupts that have not been resumed
-  */
-  const modifiedConversation = existingConversation.messages?.map((message): Message => {
+   */
+
+  const modifiedConversation = existingConversation.messages?.map((message, i, arr): Message => {
     if (
+      params.interruptResumeValue &&
       message.metadata?.interruptValue &&
-      message.metadata?.interruptValue.expired !== true &&
-      message.metadata.interruptValue.threadId === params.threadId &&
-      params.interruptResumeValue
+      message.metadata.interruptValue.id === params.interruptResumeValue.interruptId &&
+      i === arr.length - 1
     ) {
       // The graph is being resumed and this is the message that triggered the interrupt.
       return {
@@ -70,8 +69,10 @@ export const getConversationWithNewMessage = async (params: Params) => {
 
     if (
       message.metadata?.interruptValue !== undefined &&
-      message.metadata.interruptValue.threadId !== params.threadId &&
-      message.metadata.interruptResumeValue === undefined
+      message.metadata.interruptResumeValue == null &&
+      (params.interruptResumeValue == null ||
+        message.metadata.interruptValue.id !== params.interruptResumeValue.interruptId ||
+        i !== arr.length - 1)
     ) {
       // This is an old interrupt. It should be expired
       return {
@@ -86,7 +87,7 @@ export const getConversationWithNewMessage = async (params: Params) => {
       };
     }
     return message;
-  })
+  });
 
   const newMessages = params.newMessages.map((newMessage) => {
     const role = _isMessageFieldWithRole(newMessage)
@@ -98,20 +99,22 @@ export const getConversationWithNewMessage = async (params: Params) => {
         replacements: params.replacements,
       }),
       role,
+      user:
+        existingConversation.createdBy ??
+        (existingConversation.users?.length === 1
+          ? // no createdBy indicates legacy conversation, assign the sole user in the user list
+            existingConversation.users?.[0]
+          : undefined),
       timestamp: new Date().toISOString(),
     };
-  })
+  });
 
   const updatedConversation = conversationsDataClient.updateConversation({
     conversationUpdateProps: {
       ...existingConversation,
-      messages: [
-        ...modifiedConversation ?? [],
-        ...newMessages
-      ]
-    }
-  })
-
+      messages: [...(modifiedConversation ?? []), ...newMessages],
+    },
+  });
 
   if (!updatedConversation) {
     params.logger.debug('Conversation was not updated with new messages');

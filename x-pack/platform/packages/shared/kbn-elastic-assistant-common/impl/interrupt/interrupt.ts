@@ -8,19 +8,20 @@
 import type { InterruptType, InterruptValue } from '../schemas';
 import { InterruptResumeValue } from '../schemas';
 
-/**
- * Light wrapper around the `interrupt` helper method from @langchain/langgraph.
- * Ensures the correct types are used for interrupt values and resume values so that
- * the interrupts are rendered correctly on the frontend.
- */
-export const typedInterrupt = async <T extends InterruptType>(
-  interruptValue: { type: T } & InterruptValue
-): Promise<{ type: T } & InterruptResumeValue> => {
+// id of the interrupt is created when the graph is interrupted. Therefore, it is not yet available yet.
+type InterruptValueWithoutId<T extends InterruptType> = Omit<
+  Extract<InterruptValue, { type: T }>,
+  'id'
+>;
+
+export const typedInterrupt = async <T extends InterruptValue['type'] = InterruptValue['type']>(
+  interruptValue: InterruptValueWithoutId<T> & { type: T }
+): Promise<Extract<InterruptResumeValue, { type: T }>> => {
   if (typeof window !== 'undefined') {
     throw new Error('typedInterrupt is only available on the server side');
   }
 
-  const { interrupt } = await import('@langchain/langgraph'); // Ensures this is only imported server side.
+  const { interrupt } = await import('@langchain/langgraph');
 
   const result = interrupt(interruptValue);
 
@@ -35,5 +36,5 @@ export const typedInterrupt = async <T extends InterruptType>(
     );
   }
 
-  return parsedResult.data as { type: T } & InterruptResumeValue;
+  return parsedResult.data as Extract<InterruptResumeValue, { type: T }>;
 };

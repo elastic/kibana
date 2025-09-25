@@ -58,6 +58,10 @@ export const BaseInterruptValue = z.object({
    * Thread ID of the graph execution that produced this message.
    */
   threadId: z.string(),
+  /**
+   * ID of the interrupt
+   */
+  id: z.string(),
 });
 
 /**
@@ -69,6 +73,10 @@ export const BaseInterruptResumeValue = z.object({
    * Type of the resume value
    */
   type: InterruptType,
+  /**
+   * ID that corresponds to the InterruptValue
+   */
+  interruptId: z.string(),
 });
 
 /**

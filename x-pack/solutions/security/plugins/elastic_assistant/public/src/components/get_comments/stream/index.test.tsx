@@ -11,6 +11,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockSetComplete = jest.fn();
 
@@ -143,6 +144,7 @@ describe('StreamComment', () => {
           resumeGraph: resumeFunction,
           content: 'User information requested',
           interruptValue: {
+            id: 'test-interrupt-1',
             type: 'SELECT_OPTION',
             threadId: 'test-thread-id',
             options: [
@@ -161,7 +163,13 @@ describe('StreamComment', () => {
           },
         }}
       />,
-      { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> }
+      {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={new QueryClient()}>
+            <I18nProvider>{children}</I18nProvider>
+          </QueryClientProvider>
+        ),
+      }
     );
 
     expect(screen.queryByText('Approved')).toBeInTheDocument();
@@ -180,13 +188,20 @@ describe('StreamComment', () => {
           resumeGraph: resumeFunction,
           content: 'User information requested',
           interruptValue: {
+            id: 'test-interrupt-1',
             type: 'INPUT_TEXT',
             threadId: 'test-thread-id',
             description: 'Input text',
           },
         }}
       />,
-      { wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider> }
+      {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={new QueryClient()}>
+            <I18nProvider>{children}</I18nProvider>
+          </QueryClientProvider>
+        ),
+      }
     );
 
     expect(screen.queryByText('Input text')).toBeInTheDocument();
@@ -232,5 +247,33 @@ describe('StreamComment', () => {
     render(<StreamComment {...testProps} />);
 
     expect(screen.getByTestId('message-error')).toBeInTheDocument();
+  });
+
+  it('displays an interrupt from stream', () => {
+    (useStream as jest.Mock).mockReturnValue({
+      error: 'Test Error Message',
+      isLoading: false,
+      isStreaming: false,
+      pendingMessage: 'Test Message',
+      setComplete: mockSetComplete,
+      interruptValue: {
+        id: 'test-interrupt-1',
+        type: 'SELECT_OPTION',
+        threadId: 'test-thread-id',
+        description: 'Test Interrupt Description',
+        options: [{ label: 'Test Option', value: 'test-option' }],
+      },
+    });
+    render(<StreamComment {...testProps} />, {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={new QueryClient()}>
+          <I18nProvider>{children}</I18nProvider>
+        </QueryClientProvider>
+      ),
+    });
+
+    expect(screen.getByTestId('select-option-interrupt')).toBeInTheDocument();
+    expect(screen.getByText('Test Interrupt Description')).toBeInTheDocument();
+    expect(screen.getByText('Test Option')).toBeInTheDocument();
   });
 });
