@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiCardProps } from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
 
 import type {
   RedirectAppLinksServices,
@@ -56,25 +55,47 @@ export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinks
 /**
  * Props for the `NoDataCard` pure component.
  */
-export type NoDataCardComponentProps = Partial<
-  Pick<EuiCardProps, 'className' | 'href' | 'title'>
-> & {
+export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
   /**
-   * Provide just a string for the button's label, or a whole component;
-   * The button will be hidden completely if `isDisabled=true`
+   * Title for the card;
+   * If not provided, the default will be used
    */
-  button?: string | ReactNode;
-  /** Remapping `onClick` to any element */
-  onClick?: MouseEventHandler<HTMLElement>;
+  title?: string;
   /**
    * Description for the card;
    * If not provided, the default will be used
    */
-  description?: string | ReactNode;
-  /** Category to auto-select within Fleet */
-  category?: string;
-  /** True if the person has permission to access Fleet, false otherwise */
+  description?: React.ReactNode;
+  /** True if the person has access to Fleet, false otherwise */
   canAccessFleet?: boolean;
+  /**
+   * Provide a string for the button's label;
+   * The button will be hidden completely if `canAccessFleet=false` or `hideActionButton=true`
+   */
+  buttonText?: string;
+  /**
+   * Provide a boolean to disable the button;
+   * The button will be disabled if `buttonIsDisabled` or `disabledButtonTooltipText`is provided otherwise the button will be hidden completely
+   */
+  buttonIsDisabled?: boolean;
+  /**
+   * Provide a tooltip text for the disabled button;
+   * The button will be disabled if `buttonIsDisabled` or `disabledButtonTooltipText` is provided otherwise the button will be hidden completely
+   */
+  disabledButtonTooltipText?: string;
+  /**
+   * Provide a href for the button;
+   */
+  href?: string;
+  /**
+   * Link to the documentation for this card;
+   * If not provided, the default will be used
+   */
+  docsLink?: string;
+  /** Callback function for when the button is clicked */
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  /** Data test subject for the card */
+  'data-test-subj'?: string;
 };
 
 /**

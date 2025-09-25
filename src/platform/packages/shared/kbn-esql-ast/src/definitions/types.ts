@@ -184,6 +184,15 @@ export interface ElasticsearchCommandDefinition {
   observability_tier?: string;
 }
 
+export interface ElasticsearchSettingsDefinition {
+  name: string;
+  type: string;
+  serverlessOnly: boolean;
+  preview: boolean;
+  snapshotOnly: boolean;
+  description: string;
+}
+
 /**
  * This is the return type of a function definition.
  *

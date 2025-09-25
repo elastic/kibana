@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const NO_DATA_CARD_MAX_WIDTH = 400;
+import React from 'react';
 
-export const NoDataCardStyles = () => {
-  return {
-    maxWidth: NO_DATA_CARD_MAX_WIDTH,
-    marginInline: 'auto',
-  };
+import svg from './assets/elastic_agent_card.svg';
+
+export const ElasticAgentCardIllustration = () => {
+  return (
+    <img
+      src={svg}
+      alt="Elastic Agent illustration"
+      data-test-subj="ElasticAgentIllustration"
+      width="140"
+      height="92"
+    />
+  );
 };
