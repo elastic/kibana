@@ -87,18 +87,19 @@ export const columnsAfter = (
   ];
 };
 
+/**
+ * Maps Grok data types to ES|QL field types.
+ * Reference: https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html
+ */
+const GROK_TO_ESQL_TYPE_MAP: Record<GrokDataType, FieldType> = {
+  int: 'integer',
+  long: 'long',
+  float: 'double',
+  double: 'double',
+  boolean: 'boolean',
+} as const;
+
 function grokTypeToESQLFieldType(grokType: GrokDataType): FieldType {
-  switch (grokType) {
-    case 'int':
-      return 'integer';
-    case 'long':
-      return 'long';
-    case 'double':
-    case 'float':
-      return 'double';
-    case 'boolean':
-      return 'boolean';
-    default:
-      return 'keyword';
-  }
+  const normalizedType = grokType.toLowerCase() as GrokDataType;
+  return GROK_TO_ESQL_TYPE_MAP[normalizedType] ?? 'keyword';
 }
