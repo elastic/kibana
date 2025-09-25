@@ -82,13 +82,14 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http, inferenceEnabled, settings } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({
     http,
     inferenceEnabled,
+    settings
   });
 
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
   const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
 
   const { createConversation } = useConversation();

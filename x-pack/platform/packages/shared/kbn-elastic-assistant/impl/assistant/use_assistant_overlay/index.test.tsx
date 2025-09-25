@@ -17,6 +17,11 @@ const mockUseAssistantContext = {
   registerPromptContext: jest.fn(),
   showAssistantOverlay: jest.fn(),
   unRegisterPromptContext: jest.fn(),
+  settings: {
+    client: {
+      get: jest.fn(),
+    },
+  }
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
