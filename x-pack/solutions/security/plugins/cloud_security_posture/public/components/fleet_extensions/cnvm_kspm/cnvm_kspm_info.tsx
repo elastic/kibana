@@ -25,7 +25,7 @@ export const CnvmKspmTemplateInfo = ({ policyTemplate }: CnvmKspmTemplateInfoPro
     {policyTemplate === VULN_MGMT_POLICY_TEMPLATE && (
       <>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           iconType="info"
           color="primary"
           data-test-subj="additionalChargeCalloutTestSubj"

@@ -459,7 +459,7 @@ const InsightEditorComponent = ({
       </EuiModalHeader>
       {isPlatinum === false && (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title="To add suggested queries to an investigation guide, please upgrade to platinum"
           iconType="timeline"
         />

@@ -37,7 +37,7 @@ export const ResponseSection = memo(() => {
     if (isRulePreview) {
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           iconType="documentation"
           size="s"
           title={
@@ -62,7 +62,7 @@ export const ResponseSection = memo(() => {
     if (!isNewNavigationEnabled && isPreviewMode) {
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           iconType="documentation"
           size="s"
           title={

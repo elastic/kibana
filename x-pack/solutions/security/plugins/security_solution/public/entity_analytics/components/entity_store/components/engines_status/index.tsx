@@ -51,7 +51,9 @@ export const EngineStatus: React.FC = () => {
   useErrorToast(errorMessage, error);
 
   if (error) {
-    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="alert" />;
+    return (
+      <EuiCallOut announceOnMount={false} title={errorMessage} color="danger" iconType="alert" />
+    );
   }
 
   if (!data || isStatusAPILoading) return <EuiLoadingSpinner size="xl" />;

@@ -331,7 +331,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       if (automaticUpdatesEnabled) {
         return (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             color={'primary'}
             iconType={'info'}
             size="m"

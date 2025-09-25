@@ -203,7 +203,7 @@ const EndpointsEmptyState = React.memo<{
           <>
             <EuiSpacer size="xl" />
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               color="primary"
               iconType="info"
               title={i18n.translate(
@@ -310,7 +310,7 @@ const EndpointsEmptyState = React.memo<{
                   if (!selectionOptions.length) {
                     return (
                       <EuiCallOut
-                        announceOnMount
+                        announceOnMount={false}
                         color="warning"
                         data-test-subj="noIntegrationsAddedToAgentPoliciesCallout"
                       >

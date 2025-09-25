@@ -102,7 +102,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   if (isLeft(visualizationQuery)) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorTitle"
@@ -148,7 +148,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           ) : isError ? (
             <div>
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={i18n.translate('xpack.securitySolution.genericDashboard.errorLoadingData', {
                   defaultMessage: 'Error loading data',
                 })}

@@ -165,7 +165,7 @@ export const EntityAnalyticsAnomalies = () => {
           {incompatibleJobCount > 0 && (
             <>
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 data-test-subj="incompatible_jobs_warnings"
                 color="warning"

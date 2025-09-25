@@ -114,7 +114,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
           children: (
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={ATTACHMENT_NOT_REGISTERED_ERROR}
               color="danger"
               iconType="warning"

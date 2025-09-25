@@ -260,7 +260,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           <>
             <EuiSpacer />
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               size="s"
               data-test-subj={getTestId('unAccessiblePoliciesCallout')}
             >

@@ -25,7 +25,7 @@ export function RuleUpgradeCallout({
     return (
       <>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={
             <>
               <strong>{i18n.UPGRADE_STATUS}</strong>
@@ -53,7 +53,7 @@ export function RuleUpgradeCallout({
     return (
       <>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={
             <>
               <strong>{i18n.UPGRADE_STATUS}</strong>

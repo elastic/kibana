@@ -52,7 +52,7 @@ export const NoApiIntegrationKeyCallOut = memo(() => {
     showCallout && (
       <>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           color="danger"
           data-test-subj={NO_INTEGRATION_CALLOUT_TEST_ID}
           iconType="warning"

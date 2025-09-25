@@ -73,7 +73,7 @@ export const NodeEventsInCategory = memo(function ({
         <PanelLoading id={id} />
       ) : hasError || !node ? (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate(
             'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
             {

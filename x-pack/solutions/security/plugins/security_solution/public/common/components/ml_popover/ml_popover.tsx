@@ -159,7 +159,7 @@ export const MlPopover = React.memo(() => {
           {incompatibleJobCount > 0 && (
             <>
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 color="warning"
                 iconType="warning"

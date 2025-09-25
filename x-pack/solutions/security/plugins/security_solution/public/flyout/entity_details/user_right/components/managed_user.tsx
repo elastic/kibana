@@ -114,7 +114,7 @@ export const ManagedUser = ({
             <>
               {!entraManagedUser && !oktaManagedUser && !managedUser.isLoading ? (
                 <EuiCallOut
-                  announceOnMount
+                  announceOnMount={false}
                   data-test-subj="managedUser-no-data"
                   title={i18n.NO_MANAGED_DATA_TITLE}
                   color="warning"

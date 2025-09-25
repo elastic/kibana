@@ -106,7 +106,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               {showCallOutUnauthorizedMsg && (
                 <EuiFlexItem>
                   <EuiCallOut
-                    announceOnMount
+                    announceOnMount={false}
                     data-test-subj="timelineCallOutUnauthorized"
                     title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
                     color="warning"
@@ -118,7 +118,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               {status === TimelineStatusEnum.immutable && (
                 <EuiFlexItem>
                   <EuiCallOut
-                    announceOnMount
+                    announceOnMount={false}
                     data-test-subj="timelineImmutableCallOut"
                     title={i18n.CALL_OUT_IMMUTABLE}
                     color="primary"

@@ -20,7 +20,7 @@ export const SourcererCallout = React.memo<SourcererCalloutProps>(
   ({ isOnlyDetectionAlerts, title }) =>
     isOnlyDetectionAlerts ? (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         data-test-subj="sourcerer-callout"
         iconType="info"
         size="s"

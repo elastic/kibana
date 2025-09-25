@@ -26,7 +26,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           color="warning"
           iconType="warning"
           title={

@@ -166,7 +166,7 @@ export const RiskInputsTab = <T extends EntityType>({
   if (riskScoreError) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"

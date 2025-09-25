@@ -192,7 +192,7 @@ const IndexPatternsFormComponent = ({
       {editAction === BulkActionEditTypeEnum.delete_index_patterns && (
         <EuiFormRow fullWidth>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             color="warning"
             size="s"
             data-test-subj="bulkEditRulesDataViewsWarning"

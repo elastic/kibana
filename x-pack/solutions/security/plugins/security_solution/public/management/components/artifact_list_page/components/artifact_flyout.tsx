@@ -469,7 +469,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         </EuiFlyoutHeader>
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
             iconType="question"

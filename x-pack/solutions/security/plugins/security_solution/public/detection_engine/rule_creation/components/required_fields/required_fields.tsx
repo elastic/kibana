@@ -147,7 +147,7 @@ const RequiredFieldsList = ({
     <>
       {hasWarnings && (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
           iconType="question"
