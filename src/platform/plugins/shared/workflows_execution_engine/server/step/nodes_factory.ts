@@ -203,6 +203,7 @@ export class NodesFactory {
       case 'wait':
         return new WaitStepImpl(
           node as any,
+          contextManager,
           this.workflowRuntime,
           stepLogger,
           this.workflowTaskManager

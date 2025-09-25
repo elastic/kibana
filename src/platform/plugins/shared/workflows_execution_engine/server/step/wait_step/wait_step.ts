@@ -12,6 +12,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 import { parseDuration } from '../../utils';
+import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class WaitStepImpl implements NodeImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -19,6 +20,7 @@ export class WaitStepImpl implements NodeImplementation {
 
   constructor(
     private node: WaitGraphNode,
+    private stepContext: WorkflowContextManager,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private workflowTaskManager: WorkflowTaskManager
@@ -45,7 +47,13 @@ export class WaitStepImpl implements NodeImplementation {
     await this.workflowRuntime.startStep();
     this.logStartWait();
     const durationInMs = this.getDurationInMs();
-    await new Promise((resolve) => setTimeout(resolve, durationInMs));
+    await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(resolve, durationInMs);
+      this.stepContext.abortController.signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        reject(new Error('Wait step was aborted'));
+      });
+    });
     this.logFinishWait();
     await this.workflowRuntime.finishStep();
     this.workflowRuntime.navigateToNextNode();
