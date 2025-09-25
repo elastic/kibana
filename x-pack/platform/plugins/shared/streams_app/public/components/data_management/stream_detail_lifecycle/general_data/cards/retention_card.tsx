@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams, isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { isRoot } from '@kbn/streams-schema';
+import {
+  Streams,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+  isRoot,
+} from '@kbn/streams-schema';
+import React from 'react';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import { IlmLink } from '../ilm_link';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import { IlmLink } from '../ilm_link';
 
 export const RetentionCard = ({
   definition,
@@ -22,7 +26,6 @@ export const RetentionCard = ({
   definition: Streams.ingest.all.GetResponse;
   openEditModal: () => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const lifecycle = definition.effective_lifecycle;
 
   const isRootStream = isRoot(definition.stream.name);
@@ -115,9 +118,6 @@ export const RetentionCard = ({
               defaultMessage: 'Edit data retention',
             }
           )}
-          css={css`
-            margin-bottom: -${euiTheme.size.s};
-          `}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
             defaultMessage: 'Edit data retention',
