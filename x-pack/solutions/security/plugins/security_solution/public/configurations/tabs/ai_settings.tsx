@@ -23,7 +23,6 @@ export const AISettings: React.FC = () => {
   const {
     application,
     data: { dataViews },
-    settings,
     docLinks,
     notifications: { toasts },
     featureFlags,
