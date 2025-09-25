@@ -68,24 +68,6 @@ components:
           type: array
           items:
             type: string
-        filters:
-          description: Custom KQL filters to apply to risk scoring queries, allowing more targeted risk analysis.
-          type: array
-          items:
-            type: object
-            properties:
-              entity_types:
-                type: array
-                items:
-                  type: string
-                  enum: [host, user, service]
-                description: The entity types this filter applies to
-              filter:
-                type: string
-                description: KQL filter expression to apply
-            required:
-              - entity_types
-              - filter
           
 
     RiskScoresPreviewResponse:
