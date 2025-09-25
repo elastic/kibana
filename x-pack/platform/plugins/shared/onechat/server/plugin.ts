@@ -18,6 +18,8 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
+import type { OnechatHandlerContext } from './request_handler_context';
+import { registerOnechatHandlerContext } from './request_handler_context';
 
 export class OnechatPlugin
   implements
@@ -50,7 +52,9 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    const router = coreSetup.http.createRouter();
+    registerOnechatHandlerContext({ coreSetup });
+
+    const router = coreSetup.http.createRouter<OnechatHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
@@ -77,13 +81,14 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference }: OnechatStartDependencies
+    { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
       inference,
+      spaces,
       uiSettings,
       savedObjects,
     });
