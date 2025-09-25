@@ -251,3 +251,24 @@ export const TOTAL_USERS_ASSIGNED = (total: number) =>
 export const CASE_SUMMARY_TITLE = i18n.translate('xpack.cases.caseSummary.title', {
   defaultMessage: 'Case summary',
 });
+
+export const ADDED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.addedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'added {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
+
+export const DELETED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.deletedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'deleted {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
+
+export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.updatedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'updated {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
