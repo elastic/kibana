@@ -31,9 +31,12 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  ES_QUERY_DEFAULT_VALUES,
+  ES_QUERY_SERVERLESS_DEFAULT_VALUES,
+} from '@kbn/response-ops-rule-params/es_query';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
-import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
@@ -86,17 +89,17 @@ export const EsqlQueryExpression: React.FC<
     EsQueryRuleParams<SearchType.esqlQuery>
   >({
     ...ruleParams,
-    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+    timeWindowSize: timeWindowSize ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE,
+    timeWindowUnit: timeWindowUnit ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT,
     // ESQL queries compare conditions within the ES query
     // so only 'met' results are returned, therefore the threshold should always be 0
     threshold: [0],
-    thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-    size: isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
+    thresholdComparator: ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+    size: isServerless ? ES_QUERY_SERVERLESS_DEFAULT_VALUES.SIZE : ES_QUERY_DEFAULT_VALUES.SIZE,
     esqlQuery: esqlQuery ?? { esql: '' },
-    aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-    groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
-    termSize: DEFAULT_VALUES.TERM_SIZE,
+    aggType: ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE,
+    groupBy: groupBy ?? ES_QUERY_DEFAULT_VALUES.GROUP_BY,
+    termSize: ES_QUERY_DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
     // The sourceFields param is ignored
     sourceFields: [],

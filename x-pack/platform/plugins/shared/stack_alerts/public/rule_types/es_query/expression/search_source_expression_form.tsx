@@ -25,6 +25,10 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import {
+  ES_QUERY_DEFAULT_VALUES,
+  ES_QUERY_SERVERLESS_DEFAULT_VALUES,
+} from '@kbn/response-ops-rule-params/es_query';
 import { getComparatorScript } from '../../../../common';
 import type { Comparator } from '../../../../common/comparator_types';
 import type {
@@ -34,7 +38,6 @@ import type {
   SearchType,
   SourceField,
 } from '../types';
-import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
@@ -106,19 +109,21 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       index: searchSource.getField('index'),
       query: searchSource.getField('query')! as Query,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-      threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      aggType: ruleParams.aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      threshold: ruleParams.threshold ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator:
+        ruleParams.thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: ruleParams.timeWindowSize ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: ruleParams.timeWindowUnit ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      aggType: ruleParams.aggType ?? ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE,
       aggField: ruleParams.aggField,
-      groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
-      termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      groupBy: ruleParams.groupBy ?? ES_QUERY_DEFAULT_VALUES.GROUP_BY,
+      termSize: ruleParams.termSize ?? ES_QUERY_DEFAULT_VALUES.TERM_SIZE,
       termField: ruleParams.termField,
       size:
-        ruleParams.size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
+        ruleParams.size ??
+        (isServerless ? ES_QUERY_SERVERLESS_DEFAULT_VALUES.SIZE : ES_QUERY_DEFAULT_VALUES.SIZE),
       excludeHitsFromPreviousRun:
-        ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+        ruleParams.excludeHitsFromPreviousRun ?? ES_QUERY_DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       // The sourceFields param is ignored
       sourceFields: [],
     }
@@ -262,7 +267,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         termSize: ruleParams.termSize,
         condition: {
           conditionScript: getComparatorScript(
-            (ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
+            (ruleParams.thresholdComparator ??
+              ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
             ruleParams.threshold,
             BUCKET_SELECTOR_FIELD
           ),
@@ -387,7 +393,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
-        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        canSelectMultiTerms={ES_QUERY_DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
       <EuiSpacer />
     </Fragment>

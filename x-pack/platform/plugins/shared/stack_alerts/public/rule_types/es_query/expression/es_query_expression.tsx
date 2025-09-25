@@ -26,6 +26,10 @@ import {
   isCountAggregation,
   BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  ES_QUERY_DEFAULT_VALUES,
+  ES_QUERY_SERVERLESS_DEFAULT_VALUES,
+} from '@kbn/response-ops-rule-params/es_query';
 import type { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
@@ -33,7 +37,6 @@ import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_q
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
-import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
@@ -65,18 +68,20 @@ export const EsQueryExpression: React.FC<
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
     {
       ...ruleParams,
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
-      esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
-      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
-      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      timeWindowSize: timeWindowSize ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: timeWindowUnit ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      threshold: threshold ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator: thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      size:
+        size ??
+        (isServerless ? ES_QUERY_SERVERLESS_DEFAULT_VALUES.SIZE : ES_QUERY_DEFAULT_VALUES.SIZE),
+      esQuery: esQuery ?? ES_QUERY_DEFAULT_VALUES.QUERY,
+      aggType: aggType ?? ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE,
+      groupBy: groupBy ?? ES_QUERY_DEFAULT_VALUES.GROUP_BY,
+      termSize: termSize ?? ES_QUERY_DEFAULT_VALUES.TERM_SIZE,
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
-        excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+        excludeHitsFromPreviousRun ?? ES_QUERY_DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       // The sourceFields param is ignored
       sourceFields: [],
     }
@@ -96,11 +101,11 @@ export const EsQueryExpression: React.FC<
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
   const [combinedFields, setCombinedFields] = useState<FieldOption[]>([]);
-  const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
+  const { convertToJson, setXJson, xJson } = useXJsonMode(ES_QUERY_DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
-    const query = esQuery ?? DEFAULT_VALUES.QUERY;
+    const query = esQuery ?? ES_QUERY_DEFAULT_VALUES.QUERY;
     setXJson(query);
 
     if (index && index.length > 0) {
@@ -171,7 +176,7 @@ export const EsQueryExpression: React.FC<
             termSize,
             condition: {
               conditionScript: getComparatorScript(
-                (thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
+                (thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
                 threshold,
                 BUCKET_SELECTOR_FIELD
               ),
@@ -228,17 +233,17 @@ export const EsQueryExpression: React.FC<
               setRuleProperty('params', {
                 timeField: ruleParams.timeField,
                 index: indices,
-                esQuery: DEFAULT_VALUES.QUERY,
-                size: DEFAULT_VALUES.SIZE,
-                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-                threshold: DEFAULT_VALUES.THRESHOLD,
-                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-                groupBy: DEFAULT_VALUES.GROUP_BY,
-                termSize: DEFAULT_VALUES.TERM_SIZE,
+                esQuery: ES_QUERY_DEFAULT_VALUES.QUERY,
+                size: ES_QUERY_DEFAULT_VALUES.SIZE,
+                thresholdComparator: ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                threshold: ES_QUERY_DEFAULT_VALUES.THRESHOLD,
+                aggType: ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE,
+                groupBy: ES_QUERY_DEFAULT_VALUES.GROUP_BY,
+                termSize: ES_QUERY_DEFAULT_VALUES.TERM_SIZE,
                 searchType: SearchType.esQuery,
-                excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+                excludeHitsFromPreviousRun: ES_QUERY_DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
                 sourceFields: undefined,
               });
             } else {
@@ -299,8 +304,8 @@ export const EsQueryExpression: React.FC<
       <EuiSpacer size="s" />
 
       <RuleCommonExpressions
-        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+        threshold={threshold ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD}
+        thresholdComparator={thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
@@ -357,13 +362,13 @@ export const EsQueryExpression: React.FC<
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={
-          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS
+          excludeHitsFromPreviousRun ?? ES_QUERY_DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS
         }
         onChangeExcludeHitsFromPreviousRun={useCallback(
           (exclude: boolean) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
-        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        canSelectMultiTerms={ES_QUERY_DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
 
       <EuiSpacer />

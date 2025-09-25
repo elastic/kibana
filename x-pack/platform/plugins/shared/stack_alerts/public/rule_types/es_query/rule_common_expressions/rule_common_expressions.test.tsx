@@ -15,8 +15,8 @@ import {
   builtInComparators,
   getTimeUnitLabel,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DEFAULT_VALUES } from '../constants';
 import type { CommonEsQueryRuleParams } from '../types';
+import { ES_QUERY_DEFAULT_VALUES } from '@kbn/response-ops-rule-params/es_query';
 
 const errors = {
   index: new Array<string>(),
@@ -157,21 +157,21 @@ describe('RuleCommonExpressions', () => {
     });
 
     expect(wrapper.find('button[data-test-subj="whenExpression"]').text()).toEqual(
-      `when ${builtInAggregationTypes[DEFAULT_VALUES.AGGREGATION_TYPE].text}`
+      `when ${builtInAggregationTypes[ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE].text}`
     );
     expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
-      `over ${DEFAULT_VALUES.GROUP_BY} documents `
+      `over ${ES_QUERY_DEFAULT_VALUES.GROUP_BY} documents `
     );
     expect(wrapper.find('[data-test-subj="aggTypeExpression"]').exists()).toBeFalsy();
     expect(wrapper.find('button[data-test-subj="thresholdPopover"]').text()).toEqual(
-      `${builtInComparators[DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} ${
-        DEFAULT_VALUES.THRESHOLD[0]
+      `${builtInComparators[ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR].text} ${
+        ES_QUERY_DEFAULT_VALUES.THRESHOLD[0]
       }`
     );
     expect(wrapper.find('button[data-test-subj="forLastExpression"]').text()).toEqual(
-      `for the last ${DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
-        DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
-        DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
+      `for the last ${ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE} ${getTimeUnitLabel(
+        ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT as TIME_UNITS,
+        ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE.toString()
       )}`
     );
   });

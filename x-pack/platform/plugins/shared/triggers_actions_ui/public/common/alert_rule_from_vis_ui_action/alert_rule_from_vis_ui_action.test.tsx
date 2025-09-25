@@ -131,13 +131,15 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
     `);
   });
 
-  it("creates a rule with the visualization's ES|QL query plus an additional threshold line and removes bucket grouping", async () => {
+  it("creates a rule with the visualization's ES|QL query plus an additional threshold line with replaced tstart tend values", async () => {
     await act(
       async () =>
         await action.execute({
@@ -157,12 +159,14 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*)
+      FROM index | STATS count = COUNT(*) BY BUCKET(@timestamp, 100, NOW() - 5 minutes, NOW())
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE count >= 210",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -175,8 +179,7 @@ describe('AlertRuleFromVisAction', () => {
         await action.execute({
           embeddable: embeddableMock,
           data: {
-            query:
-              'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field, BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
+            query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
             thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
             xValues: { 'uhhhhhhhh.field': 'zoop' },
           },
@@ -195,6 +198,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -227,6 +232,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -260,6 +267,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -290,6 +299,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -328,6 +339,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -363,6 +376,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -395,7 +410,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | RENAME bytes AS \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
+      FROM index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Rename the following columns so they can be used as part of the alerting threshold:
       | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
@@ -403,6 +418,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -437,7 +454,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM logst* | RENAME bytes AS \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
+      FROM logst* | RENAME bytes as \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
       // Rename the following columns so they can be used as part of the alerting threshold:
       | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
@@ -445,6 +462,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -485,6 +504,8 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -555,6 +576,8 @@ describe('AlertRuleFromVisAction', () => {
             },
             "searchType": "esqlQuery",
             "timeField": "timestamp",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
           },
           "tags": Array [],
         }
@@ -625,6 +648,8 @@ describe('AlertRuleFromVisAction', () => {
             },
             "searchType": "esqlQuery",
             "timeField": "timestamp",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
           },
           "tags": Array [],
         }
