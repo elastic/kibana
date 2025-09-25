@@ -268,7 +268,7 @@ export function AddSignificantEventFlyout({
               </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
