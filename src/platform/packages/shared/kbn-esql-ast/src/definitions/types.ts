@@ -133,6 +133,9 @@ export enum FunctionDefinitionTypes {
   TIME_SERIES_AGG = 'time_series_agg',
 }
 
+export const grokSupportedDataTypes = ['int', 'long', 'double', 'float', 'boolean'] as const;
+export type GrokDataType = (typeof grokSupportedDataTypes)[number];
+
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
@@ -182,6 +185,15 @@ export interface ElasticsearchCommandDefinition {
   name: string;
   license?: LicenseType;
   observability_tier?: string;
+}
+
+export interface ElasticsearchSettingsDefinition {
+  name: string;
+  type: string;
+  serverlessOnly: boolean;
+  preview: boolean;
+  snapshotOnly: boolean;
+  description: string;
 }
 
 /**
@@ -361,6 +373,14 @@ export interface ValidationErrors {
     type: {};
   };
   unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  forkTooFewBranches: {
     message: string;
     type: {};
   };

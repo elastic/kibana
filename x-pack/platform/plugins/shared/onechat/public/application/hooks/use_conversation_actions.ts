@@ -5,25 +5,34 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolCallStep } from '@kbn/onechat-common';
+import type {
+  ConversationRound,
+  ReasoningStep,
+  ToolCallProgress,
+  ToolCallStep,
+} from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import { useConversationId } from './use_conversation_id';
-import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
-import { useNavigation } from './use_navigation';
+import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
+import { usePrefetchAgentById } from './agents/use_agent_by_id';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import { useConversationId } from './use_conversation_id';
+import { useNavigation } from './use_navigation';
 
 const pendingRoundId = '__pending__';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -38,9 +47,6 @@ export const useConversationActions = () => {
       })
     );
   };
-  const removeNewConversationQuery = () => {
-    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-  };
   const { navigateToOnechatUrl } = useNavigation();
   const shouldAllowConversationRedirectRef = useRef(true);
   useEffect(() => {
@@ -52,16 +58,22 @@ export const useConversationActions = () => {
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
     // Navigate to the new conversation if user is still on the "new" conversation page
     if (!conversationId && shouldAllowConversationRedirectRef.current) {
-      navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+      const path = appPaths.chat.conversation({ conversationId: nextConversationId });
+      const params = undefined;
+      const state = { shouldStickToBottom: false };
+      navigateToOnechatUrl(path, params, state);
     }
   };
+  const prefetchAgentById = usePrefetchAgentById();
 
   return {
+    removeNewConversationQuery: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
+    },
     invalidateConversation: () => {
-      removeNewConversationQuery();
       queryClient.invalidateQueries({ queryKey });
     },
-    addConversationRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
@@ -81,6 +93,13 @@ export const useConversationActions = () => {
         })
       );
     },
+    removeOptimisticRound: () => {
+      setConversation(
+        produce((draft) => {
+          draft?.rounds?.pop();
+        })
+      );
+    },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
@@ -97,10 +116,34 @@ export const useConversationActions = () => {
           draft.agent_id = agentId;
         })
       );
+      prefetchAgentById(agentId);
+      setAgentIdStorage(agentId);
+    },
+    addReasoningStep: ({ step }: { step: ReasoningStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
     },
     addToolCall: ({ step }: { step: ToolCallStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    setToolCallProgress: ({
+      progress,
+      toolCallId,
+    }: {
+      progress: ToolCallProgress;
+      toolCallId: string;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
+        if (step) {
+          if (!step.progression) {
+            step.progression = [];
+          }
+          step.progression.push(progress);
+        }
       });
     },
     setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
@@ -132,6 +175,7 @@ export const useConversationActions = () => {
       if (!current) {
         throw new Error('Conversation not created');
       }
+      // 1. Update individual conversation cache (with rounds)
       queryClient.setQueryData<Conversation>(
         queryKeys.conversations.byId(id),
         produce(current, (draft) => {
@@ -139,8 +183,7 @@ export const useConversationActions = () => {
           draft.title = title;
         })
       );
-      removeNewConversationQuery();
-      // Invalidate all conversations to refresh conversation history
+      // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
     },

@@ -50,10 +50,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           stream: { name: 'logs.android' },
           where: { field: 'attributes.filepath', eq: 'Android.log' },
         });
+
         await streamsClient.enableFailureStore('logs.android');
         await streamsClient.putIngestStream('logs.android', {
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [],
             },

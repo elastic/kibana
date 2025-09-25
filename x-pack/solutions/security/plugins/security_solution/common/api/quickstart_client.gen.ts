@@ -127,6 +127,10 @@ import type {
   EndpointGetActionsListResponse,
 } from './endpoint/actions/list/list.gen';
 import type {
+  CancelActionRequestBodyInput,
+  CancelActionResponse,
+} from './endpoint/actions/response_actions/cancel/cancel.gen';
+import type {
   EndpointExecuteActionRequestBodyInput,
   EndpointExecuteActionResponse,
 } from './endpoint/actions/response_actions/execute/execute.gen';
@@ -254,6 +258,12 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+  UpsertEntityResponse,
+} from './entity_analytics/entity_store/entities/upsert_entity.gen';
 import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
@@ -399,6 +409,8 @@ import type {
   CreateDashboardMigrationDashboardsRequestBodyInput,
   DeleteDashboardMigrationRequestParamsInput,
   GetAllDashboardMigrationsStatsResponse,
+  GetAllTranslationStatsDashboardMigrationRequestParamsInput,
+  GetAllTranslationStatsDashboardMigrationResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
   GetDashboardMigrationDashboardsRequestQueryInput,
@@ -411,11 +423,16 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+  InstallMigrationDashboardsResponse,
   StartDashboardsMigrationRequestParamsInput,
   StartDashboardsMigrationRequestBodyInput,
   StartDashboardsMigrationResponse,
   StopDashboardsMigrationRequestParamsInput,
   StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
   UpsertDashboardMigrationResourcesRequestParamsInput,
   UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
@@ -553,6 +570,22 @@ If asset criticality records already exist for the specified entities, those rec
     return this.kbnClient
       .request<BulkUpsertAssetCriticalityRecordsResponse>({
         path: '/api/asset_criticality/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cancel a running or pending response action (Applies only to some agent types).
+   */
+  async cancelAction(props: CancelActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CancelAction`);
+    return this.kbnClient
+      .request<CancelActionResponse>({
+        path: '/api/endpoint/action/cancel',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1493,6 +1526,28 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+   */
+  async getAllTranslationStatsDashboardMigration(
+    props: GetAllTranslationStatsDashboardMigrationProps
+  ) {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetAllTranslationStatsDashboardMigration`
+    );
+    return this.kbnClient
+      .request<GetAllTranslationStatsDashboardMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the asset criticality record for a specific entity.
    */
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
@@ -2116,6 +2171,25 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs migration dashboards
+   */
+  async installMigrationDashboards(props: InstallMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationDashboards`);
+    return this.kbnClient
+      .request<InstallMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/install',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2851,6 +2925,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates mutable fields of an existing dashboard migration
+   */
+  async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -2997,6 +3087,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+
+    */
+  async upsertEntity(props: UpsertEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
+    return this.kbnClient
+      .request<UpsertEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -3022,6 +3132,9 @@ export interface AlertsMigrationCleanupProps {
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
@@ -3164,6 +3277,9 @@ export interface FindAssetCriticalityRecordsProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
@@ -3266,6 +3382,10 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
+}
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
@@ -3367,6 +3487,10 @@ export interface SuggestUserProfilesProps {
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
 }
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
+}
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;
   body: UpdateEntitySourceRequestBodyInput;
@@ -3400,6 +3524,11 @@ export interface UploadAssetCriticalityRecordsProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

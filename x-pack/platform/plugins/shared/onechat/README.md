@@ -92,16 +92,20 @@ class MyPlugin {
   setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
     onechat.tools.register({
       id: 'my_tool',
-      name: 'My Tool',
       description: 'My very first tool',
-      meta: {
-        tags: ['foo', 'bar'],
-      },
+      tags: ['foo', 'bar'],
       schema: z.object({
         someNumber: z.number().describe('Some random number'),
       }),
-      handler: ({ someNumber }, context) => {
-        return 42 + someNumber;
+      handler: async ({ someNumber }, context) => {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { value: 42 + someNumber },
+            },
+          ],
+        };
       },
     });
   }
@@ -129,7 +133,7 @@ onechat.tools.register({
 });
 ```
 
-#### emitting events
+#### reporting tool progress
 
 ```ts
 onechat.tools.register({
@@ -138,17 +142,13 @@ onechat.tools.register({
   description: 'Some example',
   schema: z.object({}),
   handler: async ({}, { events }) => {
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'before' },
-    });
+    events.reportProgress('Doing something');
 
     const response = doSomething();
 
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'after' },
-    });
+    events.reportProgress('Doing something else');
+
+    return doSomethingElse(response);
 
     return response;
   },
@@ -174,85 +174,6 @@ const tool = await onechat.tools.registry.get({ toolId: 'my_tool', request });
 const { result } = await tool.execute({ toolParams: { someNumber: 9000 } });
 ```
 
-### Event handling
-
-Tool execution emits `toolCall` and `toolResponse` events:
-
-```ts
-import { isToolCallEvent, isToolResponseEvent } from '@kbn/onechat-server';
-
-const { result } = await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-  onEvent: (event) => {
-    if (isToolCallEvent(event)) {
-      const {
-        data: { toolId, toolParams },
-      } = event;
-    }
-    if (isToolResponseEvent(event)) {
-      const {
-        data: { toolResult },
-      } = event;
-    }
-  },
-});
-```
-
-### Tool identifiers
-
-Because tools are coming from multiple sources, and because we need to be able to identify
-which source a given tool is coming from (e.g. for execution), we're using the concept of tool identifier
-to represent more than a plain id.
-
-Tool identifier come into 3 shapes:
-
-- `PlainIdToolIdentifier`: plain tool identifiers
-- `StructuredToolIdentifier`: structured (object version)
-- `SerializedToolIdentifier`: serialized string version
-
-Using a `plain` id is always possible but discouraged, as in case of id conflict,
-the system will then just pick an arbitrary tool in any source available.
-
-E.g. avoid doing:
-
-```ts
-await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-And instead do:
-
-```ts
-import { ToolSourceType, builtinSourceId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: {
-    toolId: 'my_tool',
-    sourceType: ToolSourceType.builtIn,
-    sourceId: builtinSourceId,
-  },
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-Or, with the corresponding utility:
-
-```ts
-import { createBuiltinToolId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: createBuiltinToolId('my_tool'),
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
 ### Error handling
 
 All onechat errors inherit from the `OnechatError` error type. Various error utilities
@@ -276,9 +197,44 @@ try {
 }
 ```
 
+## Agents
+
+Agents can be either built-in or user-defined.
+
+### Registering a built-in agent
+
+Registering a built-in agent is done using the `agents.register` API of the onechat setup contract:
+
+#### Basic example
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
+    onechat.agents.register({
+      id: 'platform.core.dashboard',
+      name: 'Dashboard agent',
+      description: 'Agent specialized in dashboard related tasks',
+      avatar_icon: 'dashboardApp',
+      configuration: {
+        instructions: 'You are a dashboard specialist [...]',
+        tools: [
+          {
+            tool_ids: [
+              'platform.dashboard.create_dashboard',
+              'platform.dashboard.edit_dashboard',
+              '[...]',
+            ],
+          },
+        ],
+      },
+    });
+  }
+}
+```
+
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 
 ### Running with Claude Desktop
@@ -291,7 +247,7 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/chat/mcp",
+        "http://localhost:5601/api/agent_builder/mcp",
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
@@ -307,14 +263,14 @@ Configure Claude Desktop by adding this to its configuration:
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
+Agentcards for onechat agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 
 The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
 
 ```json
-POST kbn://api/chat/tools
+POST kbn://api/agent_builder/tools
 {
   "id": "case_by_id",
   "description": "Find a custom case by id.",
@@ -331,3 +287,21 @@ POST kbn://api/chat/tools
   "tags": ["salesforce"]
 }
 ```
+
+
+## Use custom LLM connector
+
+Create new LLM connector in UI (in search bar type “connectors” ), fill it in with creds. In dev console:
+
+```
+GET kbn://api/actions/connectors # find id of your connector
+
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "{connecotor id}"
+   }
+}
+```
+
+Or, set the default LLM in the UI under Management > GenAI Settings.
