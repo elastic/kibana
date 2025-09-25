@@ -29,8 +29,8 @@ pageLoadAssetSize:
   dashboardEnhanced: 12500
   dashboardMarkdown: 5134
   data: 453742
-  dataQuality: 10387
-  datasetQuality: 30094
+  dataQuality: 11469
+  datasetQuality: 49315
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -49,7 +49,7 @@ pageLoadAssetSize:
   enterpriseSearch: 38494
   esql: 13323
   esqlDataGrid: 10209
-  esUiShared: 100338
+  esUiShared: 101220
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 67975
   streams: 8494
-  streamsApp: 15200
+  streamsApp: 15500
   streamsAppWrapper: 5787
   synthetics: 31571
   telemetry: 25755
