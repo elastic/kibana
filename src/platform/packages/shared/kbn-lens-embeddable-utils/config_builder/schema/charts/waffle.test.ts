@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { partitionStateSchema } from './waffle';
+import { waffleStateSchema } from './waffle';
 
 describe('Waffle Schema', () => {
   const baseWaffleConfig = {
@@ -42,7 +42,7 @@ describe('Waffle Schema', () => {
       ],
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = waffleStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -79,7 +79,7 @@ describe('Waffle Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = waffleStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -106,7 +106,7 @@ describe('Waffle Schema', () => {
       legend: {},
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = waffleStateSchema.validate(input);
     expect(validated.legend).toEqual({});
   });
 
@@ -123,7 +123,7 @@ describe('Waffle Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = waffleStateSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
@@ -139,6 +139,6 @@ describe('Waffle Schema', () => {
       ],
     };
 
-    expect(() => partitionStateSchema.validate(input)).toThrow();
+    expect(() => waffleStateSchema.validate(input)).toThrow();
   });
 });

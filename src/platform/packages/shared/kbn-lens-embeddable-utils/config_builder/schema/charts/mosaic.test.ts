@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { partitionStateSchema } from './mosaic';
+import { mosaicStateSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
   const baseMosaicConfig = {
@@ -42,7 +42,7 @@ describe('Mosaic Schema', () => {
       ],
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = mosaicStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -84,7 +84,7 @@ describe('Mosaic Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = mosaicStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -111,7 +111,7 @@ describe('Mosaic Schema', () => {
       legend: {},
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = mosaicStateSchema.validate(input);
     expect(validated.legend).toEqual({});
   });
 
@@ -127,6 +127,6 @@ describe('Mosaic Schema', () => {
       group_by: [],
     };
 
-    expect(() => partitionStateSchema.validate(input)).toThrow();
+    expect(() => mosaicStateSchema.validate(input)).toThrow();
   });
 });

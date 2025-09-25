@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { partitionStateSchema } from './pie';
+import { pieStateSchema } from './pie';
 
 describe('Pie Schema', () => {
   const basePieConfig = {
@@ -42,7 +42,7 @@ describe('Pie Schema', () => {
       ],
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = pieStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -73,7 +73,7 @@ describe('Pie Schema', () => {
       donut_hole: 'medium' as const,
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = pieStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -112,7 +112,7 @@ describe('Pie Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = pieStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -142,7 +142,7 @@ describe('Pie Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = pieStateSchema.validate(input);
     expect(validated.legend).toEqual({});
     expect(validated.value_display).toEqual({
       mode: 'percentage',
@@ -167,6 +167,6 @@ describe('Pie Schema', () => {
       donut_hole: 'invalid' as const,
     };
 
-    expect(() => partitionStateSchema.validate(input)).toThrow();
+    expect(() => pieStateSchema.validate(input)).toThrow();
   });
 });

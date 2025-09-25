@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { partitionStateSchema } from './treemap';
+import { treemapStateSchema } from './treemap';
 
 describe('Treemap Schema', () => {
   const baseTreemapConfig = {
@@ -42,7 +42,7 @@ describe('Treemap Schema', () => {
       ],
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = treemapStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -79,7 +79,7 @@ describe('Treemap Schema', () => {
       },
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = treemapStateSchema.validate(input);
     expect(validated).toEqual({
       ...defaultValues,
       ...input,
@@ -106,7 +106,7 @@ describe('Treemap Schema', () => {
       legend: {},
     };
 
-    const validated = partitionStateSchema.validate(input);
+    const validated = treemapStateSchema.validate(input);
     expect(validated.legend).toEqual({});
   });
 
@@ -128,6 +128,6 @@ describe('Treemap Schema', () => {
       label_position: 'invalid' as const,
     };
 
-    expect(() => partitionStateSchema.validate(input)).toThrow();
+    expect(() => treemapStateSchema.validate(input)).toThrow();
   });
 });
