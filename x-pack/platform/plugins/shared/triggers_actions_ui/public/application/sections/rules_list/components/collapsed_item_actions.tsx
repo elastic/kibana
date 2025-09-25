@@ -213,7 +213,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     }
   }, [isDisabled, item.autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]);
 
-  const getUpdateAPIKeyPanel = (testId: string) => ({
+  const getUpdateApiKeyPanelItem = (testId: string) => ({
     disabled: !item.isEditable,
     'data-test-subj': testId,
     onClick: () => {
@@ -227,7 +227,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   });
 
   const panels = item.isInternallyManaged
-    ? [{ id: 0, hasFocus: true, items: [getUpdateAPIKeyPanel('updateApiKeyInternallyManaged')] }]
+    ? [
+        {
+          id: 0,
+          hasFocus: true,
+          items: [getUpdateApiKeyPanelItem('updateApiKeyInternallyManaged')],
+        },
+      ]
     : [
         {
           id: 0,
@@ -275,7 +281,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 { defaultMessage: 'Edit rule' }
               ),
             },
-            getUpdateAPIKeyPanel('updateApiKey'),
+            getUpdateApiKeyPanelItem('updateApiKey'),
             {
               disabled: !item.isEditable,
               'data-test-subj': 'runRule',

@@ -36,7 +36,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
     }
   `;
 
-  const getUpdateApiKeyItem = (testId: string) => {
+  const getUpdateApiKeyPanelItem = (testId: string) => {
     return {
       'data-test-subj': testId,
       onClick: () => {
@@ -75,7 +75,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
           {
             id: 0,
             items: isInternallyManaged
-              ? [getUpdateApiKeyItem('updateAPIKeyButtonInternallyManaged')]
+              ? [getUpdateApiKeyPanelItem('updateAPIKeyButtonInternallyManaged')]
               : [
                   {
                     'data-test-subj': 'disableButton',
@@ -93,7 +93,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                           { defaultMessage: 'Disable' }
                         ),
                   },
-                  getUpdateApiKeyItem('updateAPIKeyButton'),
+                  getUpdateApiKeyPanelItem('updateAPIKeyButton'),
                   {
                     'data-test-subj': 'runRuleButton',
                     onClick: () => {
