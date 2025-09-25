@@ -7,11 +7,11 @@
 
 import { expect } from '@kbn/scout';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/esql';
-import { streamlangApiTest } from '../..';
+import { transpileEsql as transpile } from '@kbn/streamlang';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
-  streamlangApiTest(
+apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
+  apiTest(
     'should parse a date and set it to @timestamp',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -34,7 +34,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
   );
 
   // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
-  streamlangApiTest(
+  apiTest(
     'should parse a date with multiple formats',
     { tag: ['@ess'] },
     async ({ testBed, esql }) => {
@@ -62,7 +62,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should use a different to field',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -85,7 +85,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should use a different output format',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -108,7 +108,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should not parse a date when where is false',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -141,7 +141,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should leave source unchanged in case of error',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -164,7 +164,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should reject Mustache template syntax {{ and {{{',
     { tag: ['@ess', '@svlOblt'] },
     async () => {
@@ -180,7 +180,9 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow();
+      expect(() => transpile(streamlangDSL)).toThrow(
+        'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+      );
     }
   );
 });

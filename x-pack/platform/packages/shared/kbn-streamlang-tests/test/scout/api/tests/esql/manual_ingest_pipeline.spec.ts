@@ -8,14 +8,14 @@
 import { expect } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/esql';
-import { streamlangApiTest } from '../..';
+import { transpileEsql as transpile } from '@kbn/streamlang';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported)',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest(
+    apiTest(
       'should handle manual_ingest_pipeline by showing warning message',
       async ({ esql, testBed }) => {
         const indexName = 'stream-e2e-test-esql-manual-not-supported';
@@ -67,7 +67,7 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
+    apiTest(
       'should handle manual_ingest_pipeline with where condition (condition ignored)',
       async ({ esql, testBed }) => {
         const indexName = 'stream-e2e-test-esql-manual-conditional';
@@ -117,7 +117,7 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
+    apiTest(
       'should generate valid ES|QL when mixed with supported processors',
       async ({ esql, testBed }) => {
         const indexName = 'stream-e2e-test-esql-mixed-processors';

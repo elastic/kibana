@@ -7,11 +7,12 @@
 
 import { expect } from '@kbn/scout';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/esql';
-import { streamlangApiTest } from '../..';
+import { transpileEsql as transpile } from '@kbn/streamlang';
+import { expectDefined } from '../../../utils';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
-  streamlangApiTest(
+apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
+  apiTest(
     'should correctly parse a log line with the grok processor',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -31,7 +32,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]).toEqual(
+      expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
           'client.ip': '55.3.244.1',
           'http.request.method': 'GET',
@@ -43,7 +44,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should creates a multi-valued column if filed is repeated in a pattern',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -61,11 +62,11 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       const docs = [{ message: '8.8.8.8 4.4.4.4' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]['client.ip']).toEqual(['8.8.8.8', '4.4.4.4']);
+      expect(esqlResult.documents[0]['client.ip']).toStrictEqual(['8.8.8.8', '4.4.4.4']);
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should produce a column when grok pattern does not match',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -87,7 +88,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should grok an alias-only pattern',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -110,7 +111,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       ];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]).toEqual(
+      expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
           'user.name': 'frank',
           'http.request.method': 'GET',
@@ -129,7 +130,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should ignore missing field when ignore_missing is true',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -153,17 +154,23 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      for (const esqlDoc of esqlResult.documents) {
-        if (esqlDoc.expect === null) {
-          expect(esqlDoc['client.ip']).toBeNull();
-        } else if (esqlDoc.expect !== undefined) {
-          expect(esqlDoc['client.ip']).toEqual(esqlDoc.expect);
-        }
-      }
+      // Group documents by their expectation
+      const nullDocs = esqlResult.documents.filter((doc) => doc.expect === null);
+      const ipDocs = esqlResult.documents.filter((doc) => doc.expect === '127.0.0.1');
+
+      // Test all null docs have null client.ip
+      nullDocs.forEach((doc) => {
+        expect(doc['client.ip']).toBeNull();
+      });
+
+      // Test all IP docs have correct client.ip
+      ipDocs.forEach((doc) => {
+        expect(doc['client.ip']).toBe('127.0.0.1');
+      });
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should fail if field is missing and ignore_missing is false',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -181,11 +188,11 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       const { query } = transpile(streamlangDSL);
       const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs);
-      await expect(esql.queryOnIndex(indexName, query)).rejects.toThrow();
+      await expect(esql.queryOnIndex(indexName, query)).rejects.toThrow('Unknown column [message]');
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should not grok when where is false',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -217,15 +224,25 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      for (const esqlDoc of esqlResult.documents) {
-        if (esqlDoc.expect !== undefined) {
-          expect(esqlDoc['client.ip']).toEqual(esqlDoc.expect);
-        }
-      }
+      // Group documents by their expectation
+      const ipDocsWithShouldExist = esqlResult.documents.filter(
+        (doc) => doc.expect === '55.3.244.1' || doc.expect === '8.8.8.8'
+      );
+      const docsWithSize = esqlResult.documents.filter((doc) => doc['attributes.size'] === 2048);
+
+      // Test documents with should_exist have correct IP
+      ipDocsWithShouldExist.forEach((doc) => {
+        expect(doc['client.ip']).toBe(doc.expect);
+      });
+
+      // Test documents with size have null client.ip
+      docsWithSize.forEach((doc) => {
+        expect(doc['client.ip']).toBeNull();
+      });
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should handle field type mismatches gracefully (pre-existing numeric vs GROK string output)',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -272,20 +289,23 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Ensure no verification exception: values should be strings for both branches
-      for (const doc of esqlResult.documents.filter((d) => d.case)) {
-        if (doc.case === 'grok_numeric') {
-          expect(doc['http.response.body.bytes']).toBe('2048'); // String as no :int GROK suffix
-          expect(doc['status.keyword']).toBe('SUCCESS');
-        } else if (doc.case === 'skip_numeric') {
-          expect(doc['http.response.body.bytes']).toBeNull(); // Not groked but nullifies the matching field
-          expect(doc['status.keyword']).toBeNull(); // Not groked but nullifies the matching field
-        }
-      }
+      // Get specific documents by case
+      const grokNumericDoc = esqlResult.documents.find((doc) => doc.case === 'grok_numeric');
+      const skipNumericDoc = esqlResult.documents.find((doc) => doc.case === 'skip_numeric');
+
+      // Test grokked document
+      expectDefined(grokNumericDoc);
+      expect(grokNumericDoc['http.response.body.bytes']).toBe('2048'); // String as no :int GROK suffix
+      expect(grokNumericDoc['status.keyword']).toBe('SUCCESS');
+
+      // Test skipped document
+      expectDefined(skipNumericDoc);
+      expect(skipNumericDoc['http.response.body.bytes']).toBeNull(); // Not groked but nullifies the matching field
+      expect(skipNumericDoc['status.keyword']).toBeNull(); // Not groked but nullifies the matching field
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should grok only when both ignore_missing and where conditions match (fork logic)',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -327,33 +347,36 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      for (const doc of esqlResult.documents.filter((d) => d.case)) {
-        switch (doc.case) {
-          case 'both':
-            expect(doc['user.name']).toBe('alice');
-            expect(doc['client.ip']).toBe('10.0.0.1');
-            break;
-          case 'no_message':
-            // Grok didn't extract but nullified tne operand/matching fields
-            expect(doc['user.name']).toBeNull();
-            expect(doc['client.ip']).toBeNull();
-            break;
-          case 'no_where':
-            // Grok skipped due to where; fields stay original (cast to string) or undefined
-            expect(doc['user.name']).toBeNull();
-            expect(doc['client.ip']).toBeNull();
-            break;
-          case 'none':
-            expect(doc['user.name']).toBeNull(); // Non groked but matching field nullified
-            expect(doc['client.ip']).toBeNull();
-            break;
-        }
-      }
+      // Find specific documents by case
+      const bothDoc = esqlResult.documents.find((doc) => doc.case === 'both');
+      const noMessageDoc = esqlResult.documents.find((doc) => doc.case === 'no_message');
+      const noWhereDoc = esqlResult.documents.find((doc) => doc.case === 'no_where');
+      const noneDoc = esqlResult.documents.find((doc) => doc.case === 'none');
+
+      // Test document with both conditions
+      expectDefined(bothDoc);
+      expect(bothDoc['user.name']).toBe('alice');
+      expect(bothDoc['client.ip']).toBe('10.0.0.1');
+
+      // Test document with no message
+      expectDefined(noMessageDoc);
+      expect(noMessageDoc['user.name']).toBeNull();
+      expect(noMessageDoc['client.ip']).toBeNull();
+
+      // Test document with no where condition
+      expectDefined(noWhereDoc);
+      expect(noWhereDoc['user.name']).toBeNull();
+      expect(noWhereDoc['client.ip']).toBeNull();
+
+      // Test document with neither condition
+      expectDefined(noneDoc);
+      expect(noneDoc['user.name']).toBeNull();
+      expect(noneDoc['client.ip']).toBeNull();
     }
   );
 
   // This test fails on Serverless which is a different behavior from Stateful and needs to be investigated
-  streamlangApiTest(
+  apiTest(
     'should handle exhaustive pattern with mixed overrides, intact values, typed fields, and skip branches without type conflicts',
     { tag: ['@ess'] },
     async ({ testBed, esql }) => {
@@ -432,54 +455,49 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       const resultDocs = esqlResult.documents.filter((d) => d.case);
       expect(resultDocs).toHaveLength(4);
 
-      for (const doc of resultDocs) {
-        switch (doc.case) {
-          case 'grok_all': {
-            // Overridden values from GROK
-            expect(doc['client.ip']).toBe('10.1.2.3');
-            expect(typeof doc['client.ip']).toBe('string');
-            expect(doc['user.name']).toBe('alice');
-            expect(doc['http.response.body.bytes']).toBe(9876); // int due to :int
-            expect(typeof doc['http.response.body.bytes']).toBe('number');
-            expect(doc['http.response.status']).toBe('OK');
+      // Find specific documents by case
+      const grokAllDoc = resultDocs.find((doc) => doc.case === 'grok_all');
+      const skipWhereDoc = resultDocs.find((doc) => doc.case === 'skip_where');
+      const skipMissingDoc = resultDocs.find((doc) => doc.case === 'skip_missing');
+      const skipBothDoc = resultDocs.find((doc) => doc.case === 'skip_both');
 
-            expect(doc['event.duration']).toBeCloseTo(4.56); // float due to :float
-            break;
-          }
-          case 'skip_where': {
-            // Not grokked: original values are nullified
-            expect(doc['client.ip']).toBeNull();
-            expect(doc['user.name']).toBeNull();
-            expect(doc['http.response.body.bytes']).toBeNull();
-            expect(doc['http.response.status']).toBeNull();
-            expect(doc['event.duration']).toBeNull();
-            break;
-          }
-          case 'skip_missing': {
-            // Missing `message`, where passes; fields are nullified
-            expect(doc['client.ip']).toBeNull();
-            expect(doc['user.name']).toBeNull();
-            expect(doc['http.response.body.bytes']).toBeNull();
-            expect(doc['http.response.status']).toBeNull();
-            expect(doc['event.duration']).toBeNull(); // Non-grokked but matching field nullified
-            break;
-          }
-          case 'skip_both': {
-            // Fields are not grokked; but since they match the pattern, they are nullified
-            // It's a caveat of the approach to simulate `where` in ES|QL GORK
-            expect(doc['client.ip']).toBeNull();
-            expect(doc['user.name']).toBeNull();
-            expect(doc['http.response.body.bytes']).toBeNull();
-            expect(doc['http.response.status']).toBeNull();
-            expect(doc['event.duration']).toBeNull();
-            break;
-          }
-        }
-      }
+      // Test grokked document
+      expectDefined(grokAllDoc);
+      expect(grokAllDoc['client.ip']).toBe('10.1.2.3');
+      expect(typeof grokAllDoc['client.ip']).toBe('string');
+      expect(grokAllDoc['user.name']).toBe('alice');
+      expect(grokAllDoc['http.response.body.bytes']).toBe(9876); // int due to :int
+      expect(typeof grokAllDoc['http.response.body.bytes']).toBe('number');
+      expect(grokAllDoc['http.response.status']).toBe('OK');
+      expect(grokAllDoc['event.duration']).toBeCloseTo(4.56); // float due to :float
+
+      // Test skipped document (where fails)
+      expectDefined(skipWhereDoc);
+      expect(skipWhereDoc['client.ip']).toBeNull();
+      expect(skipWhereDoc['user.name']).toBeNull();
+      expect(skipWhereDoc['http.response.body.bytes']).toBeNull();
+      expect(skipWhereDoc['http.response.status']).toBeNull();
+      expect(skipWhereDoc['event.duration']).toBeNull();
+
+      // Test skipped document (missing message)
+      expectDefined(skipMissingDoc);
+      expect(skipMissingDoc['client.ip']).toBeNull();
+      expect(skipMissingDoc['user.name']).toBeNull();
+      expect(skipMissingDoc['http.response.body.bytes']).toBeNull();
+      expect(skipMissingDoc['http.response.status']).toBeNull();
+      expect(skipMissingDoc['event.duration']).toBeNull();
+
+      // Test skipped document (both skip conditions)
+      expectDefined(skipBothDoc);
+      expect(skipBothDoc['client.ip']).toBeNull();
+      expect(skipBothDoc['user.name']).toBeNull();
+      expect(skipBothDoc['http.response.body.bytes']).toBeNull();
+      expect(skipBothDoc['http.response.status']).toBeNull();
+      expect(skipBothDoc['event.duration']).toBeNull();
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should not be able to retain ingested precision if field is mapped as long',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
@@ -504,21 +522,21 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      for (const doc of esqlResult.documents.filter((d) => d.case)) {
-        switch (doc.case) {
-          case 'groked':
-            expect(doc.size).toBeCloseTo(3.1415); // Because groked as float
-            break;
-          case 'skipped':
-            // Non-extracted but matching fields are nullified
-            expect(doc.size).toBeNull();
-            break;
-        }
-      }
+      // Find specific documents by case
+      const grokedDoc = esqlResult.documents.find((doc) => doc.case === 'groked');
+      const skippedDoc = esqlResult.documents.find((doc) => doc.case === 'skipped');
+
+      // Test groked document
+      expectDefined(grokedDoc);
+      expect(grokedDoc.size).toBeCloseTo(3.1415); // Because groked as float
+
+      // Test skipped document
+      expectDefined(skippedDoc);
+      expect(skippedDoc.size).toBeNull();
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should reject Mustache template syntax {{ and {{{',
     { tag: ['@ess', '@svlOblt'] },
     async () => {
@@ -533,7 +551,9 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow();
+      expect(() => transpile(streamlangDSL)).toThrow(
+        'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+      );
     }
   );
 });
