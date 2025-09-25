@@ -53,9 +53,11 @@ export const CaseSettingsRt = rt.intersection([
   rt.strict({
     syncAlerts: rt.boolean,
   }),
-  rt.partial({
-    extractObservables: rt.boolean,
-  }),
+  rt.exact(
+    rt.partial({
+      extractObservables: rt.boolean,
+    })
+  ),
 ]);
 
 const CaseBaseFields = {

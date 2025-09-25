@@ -155,9 +155,7 @@ describe('SettingsRt', () => {
     });
   });
 
-  // Stripping additional attributes require a stricter rt type
-  // This test cannot be passed because we want extractObservables to be optional
-  it.skip('removes foo:bar attributes from request', () => {
+  it('removes foo:bar attributes from request', () => {
     const query = CaseSettingsRt.decode({
       syncAlerts: false,
       extractObservables: false,
