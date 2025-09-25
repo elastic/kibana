@@ -38,6 +38,7 @@ export function getTabRuntimeStateMock(
       {} as unknown as ScopedDiscoverEBTManager
     ),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    migratedToAnotherId$: new BehaviorSubject<string | undefined>(undefined),
     ...attrs,
   };
 }

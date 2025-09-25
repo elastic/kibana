@@ -68,6 +68,11 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   updateUrlWithCurrentState: () => Promise<void>;
   /**
+   * Migrating to another tab id if it was regenerated on save as new discover session
+   * @param newTabId
+   */
+  migrateToTabId: (newTabId: string) => void;
+  /**
    * Replaces the current state in URL with the given state
    * @param newState
    * @param merge if true, the given state is merged with the current state
@@ -186,7 +191,7 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param services
  */
 export const getDiscoverAppStateContainer = ({
-  tabId,
+  tabId: originalTabId,
   stateStorage,
   internalState,
   savedSearchContainer,
@@ -200,6 +205,7 @@ export const getDiscoverAppStateContainer = ({
   services: DiscoverServices;
   injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
+  let tabId = originalTabId;
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
     savedSearch: savedSearchContainer.getState(),
@@ -396,6 +402,11 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
+  const migrateToTabId = (newTabId: string) => {
+    addLog('[appState] migrateToTabId', { newTabId });
+    tabId = newTabId;
+  };
+
   const getPrevious = () => previousState;
 
   return {
@@ -406,6 +417,7 @@ export const getDiscoverAppStateContainer = ({
     resetToState,
     resetInitialState,
     updateUrlWithCurrentState,
+    migrateToTabId,
     replaceUrlState,
     update,
     getAppStateFromSavedSearch,

@@ -78,10 +78,11 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           tabStateContainer.appState.resetInitialState();
         }
 
-        if (tabId !== tab.id && tabRuntimeState) {
+        if (tabId !== tab.id && tabRuntimeState && tabStateContainer) {
           // If the tab id has changed, we need to migrate the runtime state to another id.
           runtimeStateManager.tabs.byId[tab.id] = tabRuntimeState;
           tabRuntimeState.migratedToAnotherId$.next(tab.id);
+          tabStateContainer.actions.migrateToTabId(tab.id);
         }
 
         const tabState = fromSavedObjectTabToTabState({

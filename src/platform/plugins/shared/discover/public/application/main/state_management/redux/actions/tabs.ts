@@ -155,7 +155,12 @@ export const updateTabs: InternalStateThunkActionCreator<
         ...item,
       };
 
-      if (!existingTab) {
+      const migratingToTabId = selectTabRuntimeState(
+        runtimeStateManager,
+        item.id
+      )?.migratedToAnotherId$.getValue();
+
+      if (!existingTab && !migratingToTabId) {
         // the following assignments for initialAppState, globalState, and dataRequestParams are for supporting `openInNewTab` action
         tab.initialAppState =
           'initialAppState' in item ? cloneDeep(item.initialAppState) : tab.initialAppState;

@@ -144,7 +144,12 @@ export interface DiscoverStateContainer {
     /**
      * Stop syncing the state containers started by initializeAndSync
      */
-    stopSyncing: () => void;
+    stopSyncing: (newTabId?: string) => void;
+    /**
+     * Migrating to another tab id if it was regenerated on save as new discover session
+     * @param newTabId
+     */
+    migrateToTabId: (newTabId: string) => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -216,13 +221,14 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
-  tabId,
+  tabId: originalTabId,
   services,
   customizationContext,
   stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
+  let tabId = originalTabId;
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
@@ -423,6 +429,11 @@ export function getDiscoverStateContainer({
   };
 
   let internalStopSyncing = () => {};
+
+  const migrateToTabId = (newTabId: string) => {
+    tabId = newTabId;
+    appStateContainer.migrateToTabId(newTabId);
+  };
 
   const stopSyncing = () => {
     internalStopSyncing();
@@ -642,6 +653,7 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
+      migrateToTabId,
       fetchData,
       onChangeDataView,
       createAndAppendAdHocDataView,
