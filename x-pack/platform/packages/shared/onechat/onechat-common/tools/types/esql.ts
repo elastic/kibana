@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 
 /**
  * Common ES Field Types
