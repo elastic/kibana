@@ -11,12 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
-import {
-  getCurrentConversationOwner,
-  ConversationSharedState,
-} from '@kbn/elastic-assistant-common';
-import { ShareSelect } from '../../share_conversation/share_select';
+import type { PromptResponse} from '@kbn/elastic-assistant-common';
 import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';

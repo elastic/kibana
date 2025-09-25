@@ -43,7 +43,6 @@ interface Props {
   dataViews: DataViewsContract;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
-  settings: SettingsStart;
 }
 
 /**
@@ -51,7 +50,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab, settings }) => {
+  ({ dataViews, onTabChange, currentTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
