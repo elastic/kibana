@@ -803,20 +803,10 @@ const ensureResponseActionsIndexHasRequiredMappings = async (
 
   logger.debug(
     () =>
-      `Index already exists [${indexExists}]. Currently installed endpoint package:${stringify(
+      `Does DS index already exists: ${indexExists}\nCurrently installed endpoint package:${stringify(
         installedEndpointPackages
       )}`
   );
-
-  // If current installed package is 9.1, then nothing to do. Mapping are included in that package version.
-  if (
-    installedEndpointPackages.items.some((endpointPackage) =>
-      endpointPackage.version.startsWith('9.1')
-    )
-  ) {
-    logger.debug(`Endpoint package version 9.1.* already installed. Nothing to do.`);
-    return response;
-  }
 
   // If the index does not exist and Endpoint package is not installed, then this must be an env.
   // where the use of security and/or Fleet is not being utilized.

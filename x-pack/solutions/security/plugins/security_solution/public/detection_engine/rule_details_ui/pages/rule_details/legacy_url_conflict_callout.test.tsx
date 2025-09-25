@@ -9,30 +9,12 @@ import React from 'react';
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import { render, screen } from '@testing-library/react';
 import type { Rule } from '../../../rule_management/logic';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
-const mockRedirectLegacyUrl = jest.fn();
-const mockGetLegacyUrlConflict = jest.fn();
+const mockSpacesApi = spacesPluginMock.createStartContract();
 
-const mockSpacesApi: SpacesApi = {
-  getActiveSpace$: jest.fn(),
-  getActiveSpace: jest.fn(),
-  ui: {
-    components: {
-      getSpacesContextProvider: jest.fn(),
-      getShareToSpaceFlyout: jest.fn(),
-      getCopyToSpaceFlyout: jest.fn(),
-      getSpaceList: jest.fn(),
-      getEmbeddableLegacyUrlConflict: jest.fn(),
-      getSpaceAvatar: jest.fn(),
-      getLegacyUrlConflict: mockGetLegacyUrlConflict,
-    },
-    redirectLegacyUrl: mockRedirectLegacyUrl,
-    useSpaces: jest.fn(),
-  },
-  hasOnlyDefaultSpace: false,
-  isSolutionViewEnabled: true,
-};
+const mockRedirectLegacyUrl = jest.mocked(mockSpacesApi.ui.redirectLegacyUrl);
+const mockGetLegacyUrlConflict = jest.mocked(mockSpacesApi.ui.components.getLegacyUrlConflict);
 
 describe('<LegacyUrlConflictCallOut />', () => {
   beforeEach(() => {
