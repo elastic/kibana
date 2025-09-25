@@ -126,7 +126,9 @@ const PillarsPieChart: React.FC = () => {
         }}
       >
         <EuiTitle className="eui-textCenter" size="m">
-          <h1 style={{ fontWeight: 700 }}>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
+          <h1
+            style={{ fontWeight: 700 }}
+          >{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
         </EuiTitle>
         <EuiTitle className="eui-textCenter" size="xxs">
           <h3>
@@ -161,7 +163,9 @@ const PillarsMiniSummaryTable: React.FC = () => {
         defaultMessage: 'Readiness Section',
       }),
       render: (pillarName: string, record: LegendTableDataItem) => (
-        <EuiHealth color={pillarPropsMap[record.pillarKey as PillarKey].color}>{pillarName}</EuiHealth>
+        <EuiHealth color={pillarPropsMap[record.pillarKey as PillarKey].color}>
+          {pillarName}
+        </EuiHealth>
       ),
     },
     {
