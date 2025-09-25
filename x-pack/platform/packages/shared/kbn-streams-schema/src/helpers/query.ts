@@ -6,7 +6,7 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
-import { escapeQuotes } from '@kbn/es-query';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import type { StreamQuery } from '../queries';
 
 export const buildEsqlQuery = (
@@ -15,9 +15,26 @@ export const buildEsqlQuery = (
   includeMetadata: boolean = false
 ): string => {
   const metadata = includeMetadata ? ' METADATA _id, _source' : '';
-  const systemFilter = query.system ? ` AND ${conditionToESQL(query.system.filter)}` : '';
-  const escapedKql = escapeQuotes(query.kql.query);
-  // eslint-disable-next-line prettier/prettier
-  const esqlQuery = `FROM ${indices.join(',')}${metadata} | WHERE KQL("${escapedKql}")${systemFilter}`;
-  return esqlQuery;
+  const fromCommand = Builder.command({
+    name: 'from',
+    args: [
+      Builder.expression.literal.string(`${indices.join(',')}${metadata}`, { unquoted: true }),
+    ],
+  });
+
+  const whereCondition = query.system
+    ? Builder.expression.func.binary('and', [
+        Builder.expression.func.call('KQL', [Builder.expression.literal.string(query.kql.query)]),
+        Builder.expression.literal.string(conditionToESQL(query.system.filter), { unquoted: true }),
+      ])
+    : Builder.expression.func.call('KQL', [Builder.expression.literal.string(query.kql.query)]);
+
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: [whereCondition],
+  });
+
+  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
+
+  return BasicPrettyPrinter.print(esqlQuery);
 };

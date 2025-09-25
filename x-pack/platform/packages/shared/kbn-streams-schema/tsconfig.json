@@ -9,8 +9,7 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/sse-utils",
-    "@kbn/streamlang",
-    "@kbn/es-query"
+    "@kbn/streamlang"
   ],
   "exclude": ["target/**/*"]
 }
