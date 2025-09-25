@@ -12,11 +12,7 @@ import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
 import { PrivMonUtils } from '../utils';
-import {
-  enablePrivmonSetting,
-  disablePrivmonSetting,
-  toggleIntegrationsSyncFlag,
-} from '../../../utils';
+import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -51,8 +47,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
     beforeEach(async () => {
-      await toggleIntegrationsSyncFlag(kibanaServer, false);
-      // await toggleIntegrationsSyncFlag(kibanaServer, false);
       await asyncForEach(SPACES, async (space) => {
         if (space !== 'default') {
           await spacesService.create({
@@ -96,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
         const listed = res.body as ListPrivMonUsersResponse;
 
         expect(listed.length).toEqual(1);
-
         expect(listed[0]?.labels?.source_ids).toBeDefined();
         expect((listed[0]?.labels as any).source_indices).not.toBeDefined(); // Type Assertion required because source_indices is not defined in the schema anymore
       });
