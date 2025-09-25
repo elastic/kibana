@@ -28,6 +28,7 @@ import { useMatchRate } from './use_match_rate';
 import { useStreamSamplesSelector } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel } from '../../shared';
+import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 
 const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
@@ -44,6 +45,7 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   onSuccess(): void;
 }) {
+  const { refresh: refreshDefinition } = useStreamDetail();
   const [isModalOpen, toggleModal] = useToggle(false);
   const { timeState } = useTimefilter();
   const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
@@ -63,6 +65,7 @@ export function SuggestedStreamPanel({
           onSuccess={() => {
             toggleModal(false);
             onSuccess();
+            refreshDefinition();
           }}
           onClose={() => toggleModal(false)}
         />
