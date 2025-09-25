@@ -349,6 +349,14 @@ export async function suggestForExpression({
             // so we can only suggest operators that accept any type as a left operand
             leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
             ignored: ['='],
+            allowed:
+              expressionType === 'boolean' && position === 'after_literal'
+                ? [
+                    ...logicalOperators
+                      .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
+                      .map(({ name }) => name),
+                  ]
+                : undefined,
           },
           hasMinimumLicenseRequired,
           activeProduct

@@ -205,7 +205,7 @@ async function handleOnExpression({
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
 }): Promise<ISuggestionItem[]> {
-  let suggestions = await suggestForExpression({
+  const suggestions = await suggestForExpression({
     innerText,
     getColumnsByType: callbacks.getByType,
     expressionRoot,
@@ -220,8 +220,6 @@ async function handleOnExpression({
     const expressionType = getExpressionType(expressionRoot, context?.columns);
 
     if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
-      const allowed = new Set(['AND', 'OR']); // TODO: this filter should be unnecessary. Need to fix suggestForExpression
-      suggestions = suggestions.filter(({ label }) => allowed.has(label.toUpperCase()));
       suggestions.push(...buildNextActions());
     }
   }

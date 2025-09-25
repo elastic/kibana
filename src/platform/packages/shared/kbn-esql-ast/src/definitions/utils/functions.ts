@@ -107,7 +107,7 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { location, returnTypes, ignored = [] } = predicates;
+  const { location, returnTypes, ignored = [], allowed = [] } = predicates;
 
   return functions.filter(
     ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
@@ -127,6 +127,10 @@ export const filterFunctionDefinitions = (
         activeProduct.type === 'observability' &&
         activeProduct.tier !== observabilityTier.toLowerCase()
       ) {
+        return false;
+      }
+
+      if (allowed.length > 0 && !allowed.includes(name)) {
         return false;
       }
 
@@ -318,14 +322,22 @@ export function checkFunctionInvocationComplete(
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
     }
+
     if (cleanedArgs.length === def.params.length) {
       return true;
     }
+
     return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
   });
+
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };
   }
+
+  if (func.incomplete && (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+
   if (
     (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
     Array.isArray(func.args[1]) &&
