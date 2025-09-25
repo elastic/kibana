@@ -117,6 +117,7 @@ export const IndexInput: FC<Props> = ({
         fullWidth
         value={indexNameLocal}
         onChange={(e) => setIndexNameLocal(e.target.value)}
+        data-test-subj="dataVisualizerFileIndexNameInput"
         placeholder={i18n.translate(
           'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
           {

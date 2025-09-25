@@ -121,7 +121,11 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {showImportControls ? (
-            <EuiButton disabled={canImport === false} onClick={onImportClick}>
+            <EuiButton
+              disabled={canImport === false}
+              onClick={onImportClick}
+              data-test-subj="dataVisualizerImportButton"
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.importButton"
                 defaultMessage="Import"

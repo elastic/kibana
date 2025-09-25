@@ -33,6 +33,7 @@ interface Props {
   results: FindFileStructureResponse;
   showTitle?: boolean;
   disableHighlighting?: boolean;
+  index: number;
 }
 
 interface SemiStructureTextData {
@@ -58,6 +59,7 @@ export const FileContents: FC<Props> = ({
   results,
   showTitle = true,
   disableHighlighting = false,
+  index,
 }) => {
   let mode = EDITOR_MODE.TEXT;
   const format = results.format;
@@ -125,7 +127,7 @@ export const FileContents: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj={`dataVisualizerFileContentsPanel_${index}`}>
         <EuiFlexItem>
           {showTitle ? (
             <EuiTitle size="s">
@@ -195,7 +197,7 @@ const PreviewLimitMessage: FC<PropsWithChildren<{ wrapInCallout?: boolean }>> = 
   children,
 }) => {
   return wrapInCallout ? (
-    <EuiCallOut size="s" color="primary" title={children} />
+    <EuiCallOut announceOnMount size="s" color="primary" title={children} />
   ) : (
     <>
       <EuiSpacer size="s" />

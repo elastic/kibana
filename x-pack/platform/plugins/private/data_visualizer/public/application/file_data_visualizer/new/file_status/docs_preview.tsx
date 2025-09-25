@@ -16,9 +16,10 @@ import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
   mappings: MappingTypeMapping;
+  index: number;
 }
 
-export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }) => {
+export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings, index }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
     if (!sampleDocs?.length) {
       return [];
@@ -54,7 +55,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
     <>
       {sampleDocs?.length ? (
         <EuiBasicTable
-          data-test-subj="indexEditorPreviewFile"
+          data-test-subj={`dataVisualizerFilePreviewPanel_${index}`}
           tableLayout="auto"
           columns={columns}
           items={items}

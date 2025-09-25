@@ -383,23 +383,24 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
             await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
-          it.skip('should display elements on File Data Visualizer page correctly', async () => {
+          it('should display elements on File Data Visualizer page correctly', async () => {
             await ml.testExecution.logTestStep(
               'should load the file data visualizer file selection'
             );
             await ml.navigation.navigateToDataVisualizer();
             await ml.dataVisualizer.navigateToFileUpload();
+
             await ml.testExecution.logTestStep(
               'should select a file and load visualizer result page'
             );
             await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
+
             await ml.testExecution.logTestStep(
               'should display components of the file details page'
             );
-            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
-            await ml.dataVisualizerFileBased.assertFileContentPanelExists();
-            await ml.dataVisualizerFileBased.assertSummaryPanelExists();
-            await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle, 0);
+            await ml.dataVisualizerFileBased.assertFilePreviewPanelExists(0);
+            await ml.dataVisualizerFileBased.setIndexName('user-import_1');
             await ml.dataVisualizerFileBased.assertImportButtonEnabled(true);
           });
           it('should display elements on Settings home page correctly', async () => {

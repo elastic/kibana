@@ -130,7 +130,12 @@ export const FileStatus: FC<Props> = ({
                   <EuiText size="xs">
                     <EuiFlexGroup gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>
+                        <span
+                          css={{ fontWeight: 'bold' }}
+                          data-test-subj={`dataVisualizerFileResultsTitle_${index}`}
+                        >
+                          {fileStatus.fileName}
+                        </span>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <span>{fileStatus.fileSizeInfo.fileSizeFormatted}</span>
@@ -270,12 +275,14 @@ export const FileStatus: FC<Props> = ({
                         <ResultsPreview
                           sampleDocs={fileStatus.sampleDocs}
                           mappings={fileStatus.results!.mappings as MappingTypeMapping}
+                          index={index}
                         />
                       ) : (
                         <FileContents
                           fileContents={fileStatus.fileContents}
                           results={fileStatus.results!}
                           showTitle={false}
+                          index={index}
                         />
                       )}
                     </>
