@@ -454,7 +454,7 @@ export const createTabsStorageManager = ({
       }
     }
 
-    // overwise open the first tab from the Discover Session SO or a new default tab as a fallback
+    // otherwise open the first tab from the Discover Session SO or a new default tab as a fallback
     const newDefaultTab = {
       ...defaultTabState,
       ...createTabItem([]),
