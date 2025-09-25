@@ -89,7 +89,7 @@ export const useAssistantOverlay = (
     settings,
   });
 
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors, settings]);
   const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
 
   const { createConversation } = useConversation();
