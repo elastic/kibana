@@ -70,6 +70,11 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray',
     },
+    [ExecutionStatus.TIMED_OUT]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
+    },
     [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textDisabled,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -95,6 +100,7 @@ export const getExecutionStatusColors = (
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
   [ExecutionStatus.FAILED]: 'errorFilled',
+  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
