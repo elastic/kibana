@@ -16,7 +16,7 @@ export interface ConnectorFormFields {
 }
 
 export function ActionsOpsgenieServiceProvider(
-  { getService, getPageObject }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');

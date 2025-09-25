@@ -20,11 +20,14 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
+import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
+import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -41,6 +44,9 @@ export interface ChromeNavigationProps {
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
+  // tour
+  navigationTourManager: NavigationTourManager;
+
   // other state that might be needed later
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   isFeedbackBtnVisible$: Observable<boolean>;
@@ -56,19 +62,23 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId } = state;
+  const { navItems, logoItem, activeItemId, solutionId } = state;
 
   return (
-    <RedirectNavigationAppLinks application={props.application}>
-      <NavigationComponent
-        items={navItems}
-        logo={logoItem}
-        isCollapsed={props.isCollapsed}
-        setWidth={props.setWidth}
-        activeItemId={activeItemId}
-        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
-      />
-    </RedirectNavigationAppLinks>
+    <>
+      <NavigationTour tourManager={props.navigationTourManager} />
+      <RedirectNavigationAppLinks application={props.application}>
+        <NavigationComponent
+          items={navItems}
+          logo={logoItem}
+          sidePanelFooter={<NavigationFeedbackSnippet solutionId={solutionId} />}
+          isCollapsed={props.isCollapsed}
+          setWidth={props.setWidth}
+          activeItemId={activeItemId}
+          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+        />
+      </RedirectNavigationAppLinks>
+    </>
   );
 };
 

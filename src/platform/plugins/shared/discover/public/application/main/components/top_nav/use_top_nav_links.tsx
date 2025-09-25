@@ -127,7 +127,7 @@ export const useTopNavLinks = ({
       if (!defaultMenu?.newItem?.disabled) {
         const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
           isEsqlMode && currentDataView.type === ESQL_TYPE
-            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+            ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
             : undefined;
         const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
           ? defaultEsqlState

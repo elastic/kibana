@@ -21,16 +21,18 @@ import {
   updateTabs,
   disconnectTab,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
+  resetDiscoverSession,
 } from './actions';
 
-export type {
-  DiscoverInternalState,
-  TabState,
-  TabStateGlobalState,
-  InternalStateDataRequestParams,
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type InternalStateDataRequestParams,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
@@ -56,9 +58,11 @@ export const internalStateActions = {
   initializeSingleTab,
   syncLocallyPersistedTabState,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
+  resetDiscoverSession,
 };
 
 export {
@@ -77,23 +81,31 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
 } from './selectors';
 
 export {
   type RuntimeStateManager,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
 
 export {
   fromSavedObjectTabToTabState,
