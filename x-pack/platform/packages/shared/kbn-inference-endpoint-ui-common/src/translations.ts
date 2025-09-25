@@ -223,3 +223,35 @@ export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
     defaultMessage: 'Context window length is only applicable for chat completion tasks.',
   }
 );
+
+export const HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.includeHeadersLabel',
+  {
+    defaultMessage: 'Add HTTP header',
+  }
+);
+
+export const ADD_LABEL = i18n.translate('xpack.inferenceEndpointUICommon.components.addLabel', {
+  defaultMessage: 'Add',
+});
+
+export const DELETE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const HEADERS_KEY_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const HEADERS_VALUE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);

@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import type { ConfigEntryView } from '../../types/types';
+import { FieldType } from '../../types/types';
 import { ConfigFieldTitularComponent } from './titular_component_registry';
 import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
@@ -30,7 +31,10 @@ interface ItemFormRowProps {
   isInternalProvider?: boolean;
   isEdit?: boolean;
   isLoading: boolean;
-  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  setConfigEntry: (
+    key: string,
+    value: string | number | boolean | null | Record<string, string>
+  ) => void;
 }
 
 export const ItemFormRow: React.FC<ItemFormRowProps> = ({
@@ -85,32 +89,47 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
     </EuiText>
   ) : undefined;
 
+  const wrapInFormRow = configEntry.type !== FieldType.MAP;
+
+  const configField = (
+    <ConfigurationField
+      configEntry={configEntry}
+      isLoading={isLoading}
+      setConfigValue={(value) => {
+        setConfigEntry(key, value);
+      }}
+      isEdit={isEdit}
+      isPreconfigured={isPreconfigured}
+    />
+  );
+
   return (
     <EuiFlexItem key={key}>
       <ConfigFieldTitularComponent configKey={key} />
-      <EuiFormRow
-        label={rowLabel}
-        fullWidth
-        helpText={helpText}
-        error={validationErrors}
-        isInvalid={!isValid}
-        labelAppend={optionalLabel}
-        data-test-subj={`configuration-formrow-${key}`}
-      >
-        <ConfigurationField
-          configEntry={configEntry}
-          isLoading={isLoading}
-          setConfigValue={(value) => {
-            setConfigEntry(key, value);
-          }}
-          isEdit={isEdit}
-          isPreconfigured={isPreconfigured}
-        />
-      </EuiFormRow>
+      {wrapInFormRow ? (
+        <EuiFormRow
+          label={rowLabel}
+          fullWidth
+          helpText={helpText}
+          error={validationErrors}
+          isInvalid={!isValid}
+          labelAppend={optionalLabel}
+          data-test-subj={`configuration-formrow-${key}`}
+        >
+          {configField}
+        </EuiFormRow>
+      ) : (
+        configField
+      )}
       {sensitive ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            title={LABELS.RE_ENTER_SECRETS(label)}
+          />
         </>
       ) : null}
     </EuiFlexItem>

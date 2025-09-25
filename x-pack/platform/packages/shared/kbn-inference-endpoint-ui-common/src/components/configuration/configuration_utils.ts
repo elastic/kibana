@@ -7,7 +7,9 @@
 
 import { FieldType } from '../../types/types';
 
-export const validIntInput = (value: string | number | boolean | null): boolean => {
+export const validIntInput = (
+  value: string | number | boolean | null | Record<string, string>
+): boolean => {
   // reject non integers (including x.0 floats), but don't validate if empty
   return (value !== null || value !== '') &&
     (isNaN(Number(value)) ||
@@ -19,23 +21,30 @@ export const validIntInput = (value: string | number | boolean | null): boolean 
 
 export const ensureCorrectTyping = (
   type: FieldType,
-  value: string | number | boolean | null
-): string | number | boolean | null => {
+  value: string | number | boolean | null | Record<string, string>
+): string | number | boolean | null | Record<string, string> => {
   switch (type) {
     case FieldType.INTEGER:
       return validIntInput(value) ? ensureIntType(value) : value;
     case FieldType.BOOLEAN:
       return ensureBooleanType(value);
+    case FieldType.MAP:
+      // return ensureMapType(value);
+      return value;
     default:
       return ensureStringType(value);
   }
 };
 
-export const ensureStringType = (value: string | number | boolean | null): string => {
+export const ensureStringType = (
+  value: string | number | boolean | null | Record<string, string>
+): string => {
   return value !== null ? String(value) : '';
 };
 
-export const ensureIntType = (value: string | number | boolean | null): number | null => {
+export const ensureIntType = (
+  value: string | number | boolean | null | Record<string, string>
+): number | null => {
   // int is null-safe to prevent empty values from becoming zeroes
   if (value === null || value === '') {
     return null;
@@ -44,6 +53,8 @@ export const ensureIntType = (value: string | number | boolean | null): number |
   return parseInt(String(value), 10);
 };
 
-export const ensureBooleanType = (value: string | number | boolean | null): boolean => {
+export const ensureBooleanType = (
+  value: string | number | boolean | null | Record<string, string>
+): boolean => {
   return Boolean(value);
 };

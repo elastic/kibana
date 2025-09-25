@@ -31,6 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
+import { isRecordOfStrings } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -213,14 +214,24 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       // Update config and secrets with the new set of fields + keeps the entered data for a common
       const newConfig = { ...(config.providerConfig ?? {}) };
       const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
-      Object.keys(config.providerConfig ?? {}).forEach((k) => {
+
+      // Iterate through the new provider configurations so we can ensure all fields supporting task type are added
+      Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
         if (
+          newConfig[k] !== undefined &&
           newProvider?.configurations[k]?.supported_task_types &&
           !newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
           delete newConfig[k];
+        } else if (
+          newConfig[k] === undefined &&
+          newProvider?.configurations[k]?.supported_task_types &&
+          newProvider?.configurations[k].supported_task_types.includes(taskType)
+        ) {
+          newConfig[k] = newProvider?.configurations[k]?.default_value ?? null;
         }
       });
+
       if (secrets && secrets?.providerSecrets) {
         Object.keys(secrets.providerSecrets).forEach((k) => {
           if (
@@ -466,6 +477,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'string' ||
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
+              (typeof configValue === 'object' && isRecordOfStrings(configValue)) ||
               configValue === null ||
               configValue === undefined
             ) {
