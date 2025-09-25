@@ -385,6 +385,94 @@ describe('File kind HTTP API', () => {
   });
 
   describe('MIME type validation', () => {
+    test('should allow files with permitted MIME types', async () => {
+      // Test PNG (allowed)
+      const pngResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test',
+          mimeType: 'image/png',
+          alt: 'test image',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(pngResult.body.file.mimeType).toBe('image/png');
+
+      // Test JPEG (allowed)
+      const jpegResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test',
+          mimeType: 'image/jpeg',
+          alt: 'test image',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(jpegResult.body.file.mimeType).toBe('image/jpeg');
+
+      // Test PDF (allowed)
+      const pdfResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'document',
+          mimeType: 'application/pdf',
+          alt: 'test document',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(pdfResult.body.file.mimeType).toBe('application/pdf');
+    });
+
+    test('should reject files with forbidden MIME types', async () => {
+      // Test video file rejection (not in allowed list)
+      const videoResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test',
+          mimeType: 'video/mp4',
+          alt: 'test video',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(videoResult.body.message).toBe('File type is not supported');
+
+      // Test executable file rejection (not in allowed list)
+      const exeResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'malware',
+          mimeType: 'application/x-msdownload',
+          alt: 'executable file',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(exeResult.body.message).toBe('File type is not supported');
+
+      // Test XML file rejection (not in allowed list)
+      const xmlResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'config',
+          mimeType: 'text/xml',
+          alt: 'xml file',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(xmlResult.body.message).toBe('File type is not supported');
+    });
+
     test('should allow files with no MIME type when restrictions exist', async () => {
       // Undefined MIME type should be allowed (validation only applies when MIME type is provided)
       const result = await request
