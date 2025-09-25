@@ -210,7 +210,7 @@ export class SavedMap {
       );
     }
 
-    const layerList: LayerDescriptor[] = this._attributes.layers ?? [];
+    const layerList: LayerDescriptor[] = (this._attributes.layers as LayerDescriptor[]) ?? [];
     if (layerList.length === 0) {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {

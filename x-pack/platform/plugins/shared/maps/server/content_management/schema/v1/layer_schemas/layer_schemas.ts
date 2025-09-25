@@ -188,4 +188,10 @@ export const layersSchema = schema.oneOf([
   layerGroupSchema,
   rasterLayerSchema,
   vectorLayerSchema,
+  schema.object(
+    {},
+    {
+      unknowns: 'allow',
+    }
+  ),
 ]);
