@@ -192,6 +192,7 @@ async function runConfigs(
         proc.stderr.on('data', (d) => {
           const output = d.toString();
           buffer += output;
+          process.stderr.write(d);
         });
 
         proc.on('exit', (c) => {
