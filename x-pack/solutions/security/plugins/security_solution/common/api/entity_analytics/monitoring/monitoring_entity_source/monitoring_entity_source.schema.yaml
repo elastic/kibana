@@ -152,6 +152,28 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        integrations: 
+          type: object
+          properties:
+            syncMarkerIndex: 
+              type: string
+              description: Index to read latest sync markers from
+            syncData: 
+              type: object
+              description: integrations latest full sync and update syncData
+              properties:
+                lastFullSync: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last full sync
+                lastUpdateProcessed: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last update lastUpdateProcessed
+                lastError: 
+                  type: string
+                  description: Details of the last error encountered during sync operations
+            
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -193,6 +215,27 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        integrations: 
+          type: object
+          properties:
+            syncMarkerIndex: 
+              type: string
+              description: Index to read latest sync markers from
+            syncData: 
+              type: object
+              description: integrations latest full sync and update syncData
+              properties:
+                lastFullSync: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last full sync
+                lastUpdateProcessed: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last update lastUpdateProcessed
+                lastError: 
+                  type: string
+                  description: Details of the last error encountered during sync operations
 
     MonitoringEntitySourceProperties:
       type: object
@@ -232,6 +275,28 @@ components:
               oneOf:
               - type: string
               - type: object
+        integrations: 
+          type: object
+          properties:
+            syncMarkerIndex: 
+              type: string
+              description: Index to read latest sync markers from
+            syncData: 
+              type: object
+              description: integrations latest full sync and update syncData
+              properties:
+                lastFullSync: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last full sync
+                lastUpdateProcessed: 
+                  type: string
+                  format: date-time
+                  description: Timestamp of the last update lastUpdateProcessed
+                lastError: 
+                  type: string
+                  description: Details of the last error encountered during sync operations
+              
 
     MonitoringEntitySourceNoId:
       allOf:

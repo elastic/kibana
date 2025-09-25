@@ -39,6 +39,33 @@ export const CreateMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  integrations: z
+    .object({
+      /**
+       * Index to read latest sync markers from
+       */
+      syncMarkerIndex: z.string().optional(),
+      /**
+       * integrations latest full sync and update syncData
+       */
+      syncData: z
+        .object({
+          /**
+           * Timestamp of the last full sync
+           */
+          lastFullSync: z.string().datetime().optional(),
+          /**
+           * Timestamp of the last update lastUpdateProcessed
+           */
+          lastUpdateProcessed: z.string().datetime().optional(),
+          /**
+           * Details of the last error encountered during sync operations
+           */
+          lastError: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
@@ -63,6 +90,33 @@ export const UpdatedMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  integrations: z
+    .object({
+      /**
+       * Index to read latest sync markers from
+       */
+      syncMarkerIndex: z.string().optional(),
+      /**
+       * integrations latest full sync and update syncData
+       */
+      syncData: z
+        .object({
+          /**
+           * Timestamp of the last full sync
+           */
+          lastFullSync: z.string().datetime().optional(),
+          /**
+           * Timestamp of the last update lastUpdateProcessed
+           */
+          lastUpdateProcessed: z.string().datetime().optional(),
+          /**
+           * Details of the last error encountered during sync operations
+           */
+          lastError: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
@@ -84,6 +138,33 @@ export const MonitoringEntitySourceProperties = z.object({
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
+  integrations: z
+    .object({
+      /**
+       * Index to read latest sync markers from
+       */
+      syncMarkerIndex: z.string().optional(),
+      /**
+       * integrations latest full sync and update syncData
+       */
+      syncData: z
+        .object({
+          /**
+           * Timestamp of the last full sync
+           */
+          lastFullSync: z.string().datetime().optional(),
+          /**
+           * Timestamp of the last update lastUpdateProcessed
+           */
+          lastUpdateProcessed: z.string().datetime().optional(),
+          /**
+           * Details of the last error encountered during sync operations
+           */
+          lastError: z.string().optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
