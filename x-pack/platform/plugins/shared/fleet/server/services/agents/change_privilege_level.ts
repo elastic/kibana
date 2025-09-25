@@ -8,22 +8,22 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { omit } from 'lodash';
 
-import pMap from 'p-map';
-
 import { FleetUnauthorizedError } from '../../errors';
 import { packagePolicyService } from '../package_policy';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, SO_SEARCH_LIMIT } from '../../constants';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgentById, getAgents, getAgentsByKuery, openPointInTime } from './crud';
-
-import { ChangePrivilegeActionRunner, changePrivilegeAgentsBatch } from './change_privilege_runner';
+import {
+  BulkChangePrivilegeAgentsBatch,
+  ChangePrivilegeActionRunner,
+} from './change_privilege_runner';
 
 export async function changeAgentPrivilegeLevel(
   esClient: ElasticsearchClient,
@@ -85,32 +85,9 @@ export async function bulkChangeAgentsPrivilegeLevel(
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  // Fail fast if agents contain an integration that requires root access.
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    const agentPolicyIds = givenAgents.map((agent) => agent.policy_id);
-    if (givenAgents.length > 0) {
-      await pMap(
-        agentPolicyIds,
-        async (agentPolicyId) => {
-          if (agentPolicyId) {
-            const allPackagePolicies =
-              (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicyId)) || [];
-            const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
-            if (packagesWithRootAccess.length > 0) {
-              throw new FleetUnauthorizedError(
-                `Agent policy ${agentPolicyId} contains integrations that require root access: ${packagesWithRootAccess
-                  .map((pkg) => pkg?.name)
-                  .join(', ')}`
-              );
-            }
-          }
-          return undefined;
-        },
-        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
-      );
-    }
-    return await changePrivilegeAgentsBatch(esClient, soClient, givenAgents, options);
+    return await BulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, options);
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -123,7 +100,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    return await changePrivilegeAgentsBatch(esClient, soClient, res.agents, options);
+    return await BulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, options);
   } else {
     return await new ChangePrivilegeActionRunner(
       esClient,
@@ -138,7 +115,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
   }
 }
 
-function getPackagesWithRootAccess(packagePolicies: PackagePolicy[]) {
+export function getPackagesWithRootAccess(packagePolicies: PackagePolicy[]) {
   return packagePolicies
     .map((policy) => policy.package)
     .filter((pkg) => pkg && Boolean(pkg?.requires_root));

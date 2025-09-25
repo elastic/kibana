@@ -10,16 +10,26 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { omit } from 'lodash';
 
+import pMap from 'p-map';
+
 import type { Agent } from '../../types';
+
+import { packagePolicyService } from '../package_policy';
+
+import { FleetUnauthorizedError } from '../../errors';
+
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 
 import { createAgentAction, createErrorActionResults } from './actions';
 
+import { getPackagesWithRootAccess } from './change_privilege_level';
+
 export class ChangePrivilegeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await changePrivilegeAgentsBatch(
+    return await BulkChangePrivilegeAgentsBatch(
       this.esClient,
       this.soClient,
       agents,
@@ -28,15 +38,15 @@ export class ChangePrivilegeActionRunner extends ActionRunner {
   }
 
   protected getTaskType() {
-    return BulkActionTaskType.MIGRATE_RETRY;
+    return BulkActionTaskType.PRIVILEGE_LEVEL_CHANGE_RETRY;
   }
 
   protected getActionType() {
-    return 'MIGRATE';
+    return 'PRIVILEGE_LEVEL_CHANGE';
   }
 }
 
-export async function changePrivilegeAgentsBatch(
+export async function BulkChangePrivilegeAgentsBatch(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agents: Agent[],
@@ -59,6 +69,30 @@ export async function changePrivilegeAgentsBatch(
   const total = options.total ?? agents.length;
   const agentIds = agentsToAction.map((agent) => agent.id);
 
+  // Fail fast if agent policies contain an integration that requires root access.
+  if (agents.length > 0) {
+    const agentPolicyIds = agents.map((agent) => agent.policy_id);
+    await pMap(
+      agentPolicyIds,
+      async (agentPolicyId) => {
+        if (agentPolicyId) {
+          const allPackagePolicies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicyId)) || [];
+          const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
+          if (packagesWithRootAccess.length > 0) {
+            throw new FleetUnauthorizedError(
+              `Agent policy ${agentPolicyId} contains integrations that require root access: ${packagesWithRootAccess
+                .map((pkg) => pkg?.name)
+                .join(', ')}`
+            );
+          }
+        }
+        return undefined;
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    );
+  }
+
   // Extract password from options if provided and pass it as a secret.
   const res = await createAgentAction(esClient, soClient, {
     id: actionId,
@@ -79,7 +113,7 @@ export async function changePrivilegeAgentsBatch(
     esClient,
     actionId,
     errors,
-    'agent does not support migration action'
+    'agent does not support privilege change action'
   );
 
   return { actionId: res.id };

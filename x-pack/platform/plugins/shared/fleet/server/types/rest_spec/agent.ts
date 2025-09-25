@@ -805,17 +805,15 @@ export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
 });
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
-  body: schema.nullable(
-    schema.object({
-      agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-      batchSize: schema.maybe(schema.number()),
-      user_info: schema.maybe(
-        schema.object({
-          username: schema.maybe(schema.string()),
-          groupname: schema.maybe(schema.string()),
-          password: schema.maybe(schema.string()),
-        })
-      ),
-    })
-  ),
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+    user_info: schema.maybe(
+      schema.object({
+        username: schema.maybe(schema.string()),
+        groupname: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+      })
+    ),
+  }),
 };
