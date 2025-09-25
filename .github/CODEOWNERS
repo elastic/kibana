@@ -2225,6 +2225,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/solutions/observability/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
+/x-pack/platform/test/plugin_api_integration/test_suites/event_log/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
