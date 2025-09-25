@@ -22,6 +22,7 @@ import {
 } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 import { SPACES_QUERY_KEY } from '../nav_control/hooks/use_spaces';
+import { createSpacesQueryClient } from '../services/query_client';
 import type { SpaceContentTypeSummaryItem } from '../types';
 
 interface SavedObjectTarget {
@@ -39,7 +40,7 @@ export class SpacesManager {
 
   private readonly _onActiveSpaceChange$: Observable<Space>;
 
-  private queryClient?: QueryClient;
+  private queryClient: QueryClient;
 
   constructor(private readonly http: HttpSetup) {
     this.serverBasePath = http.basePath.serverBasePath;
@@ -47,16 +48,16 @@ export class SpacesManager {
     this._onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
+
+    this.queryClient = createSpacesQueryClient();
   }
 
   private invalidateSpacesCache(): void {
-    if (this.queryClient) {
-      this.queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
-    }
+    this.queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
   }
 
-  public setQueryClient(queryClient: QueryClient): void {
-    this.queryClient = queryClient;
+  public getQueryClient(): QueryClient {
+    return this.queryClient;
   }
 
   public get onActiveSpaceChange$() {

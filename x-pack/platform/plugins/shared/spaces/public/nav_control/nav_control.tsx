@@ -17,7 +17,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { TourManager } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
-import { createSpacesQueryClient } from '../services/query_client';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(
@@ -27,8 +26,7 @@ export function initSpacesNavControl(
   eventTracker: EventTracker,
   tour: TourManager
 ) {
-  const queryClient = createSpacesQueryClient();
-  spacesManager.setQueryClient(queryClient);
+  const queryClient = spacesManager.getQueryClient();
 
   core.chrome.navControls.registerLeft({
     order: 1000,
