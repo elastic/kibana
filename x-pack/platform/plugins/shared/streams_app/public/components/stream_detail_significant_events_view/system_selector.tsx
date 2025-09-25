@@ -11,8 +11,8 @@ import type { System } from '@kbn/streams-schema';
 import React from 'react';
 
 export interface SystemSelectorProps {
-  systems: System[];
-  selectedSystems: System[];
+  systems: Omit<System, 'description'>[];
+  selectedSystems: Omit<System, 'description'>[];
   onSystemsChange: (systems: System[]) => void;
 }
 

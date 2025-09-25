@@ -39,12 +39,13 @@ import { SystemSelector } from '../system_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 
 interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (data: SaveData) => Promise<void>;
-  systems: System[];
+  systems: Omit<System, 'description'>[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedSystems?: System[];
@@ -63,11 +64,21 @@ export function AddSignificantEventFlyout({
   const {
     core: { notifications },
     services: { telemetryClient },
+    dependencies: {
+      start: { data },
+    },
   } = useKibana();
   const {
     timeState: { start, end },
   } = useTimefilter();
   const aiFeatures = useAIFeatures();
+
+  const dataViewsFetch = useStreamsAppFetch(() => {
+    return data.dataViews.create({ title: definition.name }).then((value) => {
+      return [value];
+    });
+  }, [data.dataViews, definition.name]);
+
   const { generate, abort } = useSignificantEventsApi({ name: definition.name, start, end });
 
   const isEditMode = !!query?.id;
@@ -302,12 +313,8 @@ export function AddSignificantEventFlyout({
                           setCanSave(next);
                         }}
                         definition={definition}
-                        systems={
-                          systems.map((system) => ({
-                            name: system.name,
-                            filter: system.filter,
-                          })) || []
-                        }
+                        systems={systems}
+                        dataViews={dataViewsFetch.value ?? []}
                       />
                     </>
                   )}
@@ -316,6 +323,11 @@ export function AddSignificantEventFlyout({
                     <GeneratedFlowForm
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}
+                      onEditQuery={(editedQuery) => {
+                        setGeneratedQueries((prev) =>
+                          prev.map((q) => (q.id === editedQuery.id ? editedQuery : q))
+                        );
+                      }}
                       stopGeneration={stopGeneration}
                       isSubmitting={isSubmitting}
                       definition={definition}
@@ -325,6 +337,8 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
+                      systems={systems}
+                      dataViews={dataViewsFetch.value ?? []}
                     />
                   )}
                 </EuiPanel>

@@ -183,7 +183,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       }}
       initialFlow={initialFlow}
       initialSelectedSystems={selectedSystems}
-      systems={systems}
+      systems={systems.map((system) => ({
+        name: system.name,
+        filter: system.filter,
+      }))}
     />
   ) : null;
 

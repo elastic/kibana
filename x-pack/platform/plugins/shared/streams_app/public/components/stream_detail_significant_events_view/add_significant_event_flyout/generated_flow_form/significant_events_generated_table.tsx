@@ -15,8 +15,9 @@ import {
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useState, type ReactNode } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
@@ -24,17 +25,25 @@ import { GeneratedEventPreview } from './generated_event_preview';
 interface Props {
   definition: Streams.all.Definition;
   generatedQueries: StreamQueryKql[];
+  onEditQuery: (query: StreamQueryKql) => void;
   selectedQueries: StreamQueryKql[];
   isSubmitting: boolean;
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
+  isGenerating: boolean;
+  systems: Omit<System, 'description'>[];
+  dataViews: DataView[];
 }
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,
+  onEditQuery,
   selectedQueries,
   onSelectionChange,
   definition,
   isSubmitting,
+  isGenerating,
+  systems,
+  dataViews,
 }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
@@ -42,15 +51,24 @@ export function SignificantEventsGeneratedTable({
 
   const toggleDetails = (query: StreamQueryKql) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    const validation = validateQuery(query);
 
     if (itemIdToExpandedRowMapValues[query.id]) {
       delete itemIdToExpandedRowMapValues[query.id];
     } else {
+      const validation = validateQuery(query);
       itemIdToExpandedRowMapValues[query.id] = (
-        <GeneratedEventPreview definition={definition} query={query} validation={validation} />
+        <GeneratedEventPreview
+          definition={definition}
+          query={query}
+          validation={validation}
+          onSave={onEditQuery}
+          isGenerating={isGenerating}
+          systems={systems}
+          dataViews={dataViews}
+        />
       );
     }
+
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
