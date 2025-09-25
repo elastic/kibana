@@ -15,6 +15,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
   PostMessageSubActionParams,
@@ -80,7 +81,9 @@ const buildSlackExecutorErrorResponse = ({
   );
   logger.error(`error on ${SLACK_API_CONNECTOR_ID} slack action: ${errorMessage}`);
 
-  return errorResult(SLACK_API_CONNECTOR_ID, errorMessage);
+  const errorSource = getErrorSource(slackApiError as Error);
+
+  return errorResult(SLACK_API_CONNECTOR_ID, errorMessage, errorSource);
 };
 
 const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({

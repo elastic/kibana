@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -52,6 +52,7 @@ export const Chart: React.FC<ChartProps> = ({
   filters = [],
 }) => {
   const { euiTheme } = useEuiTheme();
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const { getTimeRange } = requestParams;
 
@@ -72,14 +73,15 @@ export const Chart: React.FC<ChartProps> = ({
   const lensProps = useLensProps({
     title: metric.name,
     query: esqlQuery,
-    getTimeRange,
-    color,
+    unit: metric.unit,
     seriesType: dimensions.length > 0 ? 'line' : 'area',
+    color,
     services,
     searchSessionId,
-    unit: metric.unit,
     discoverFetch$,
     abortController,
+    getTimeRange,
+    chartRef,
   });
 
   return (
@@ -92,8 +94,9 @@ export const Chart: React.FC<ChartProps> = ({
           display: none;
         }
       `}
+      ref={chartRef}
     >
-      {lensProps && (
+      {lensProps ? (
         <LensWrapperMemo
           metric={metric}
           lensProps={lensProps}
@@ -104,6 +107,17 @@ export const Chart: React.FC<ChartProps> = ({
           metricName={metric.name}
           onViewDetails={onViewDetails}
         />
+      ) : (
+        <EuiFlexGroup
+          style={{ height: '100%' }}
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </div>
   );

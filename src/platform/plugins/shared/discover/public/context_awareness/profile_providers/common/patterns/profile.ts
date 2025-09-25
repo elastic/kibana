@@ -11,7 +11,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { extractCategorizeTokens, getCategorizeColumns, getCategorizeField } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { XYState } from '@kbn/lens-plugin/public';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -80,7 +79,7 @@ export const createPatternDataSourceProfileProvider = (
               }
 
               const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
-              const categoryField = getCategorizeField(executeContext.query.esql);
+              const categoryField = getCategorizeField(executeContext.query.esql)[0];
 
               if (!categoryField || !pattern) {
                 return;
@@ -109,19 +108,6 @@ export const createPatternDataSourceProfileProvider = (
           { name: 'Pattern', width: undefined },
         ],
       };
-    },
-    getModifiedVisAttributes: (prev) => (params) => {
-      const prevAttributes = prev(params);
-
-      if (prevAttributes.visualizationType === 'lnsXY') {
-        const visualization = prevAttributes.state.visualization as XYState;
-
-        if (visualization.tickLabelsVisibilitySettings) {
-          visualization.tickLabelsVisibilitySettings.x = false;
-        }
-      }
-
-      return prevAttributes;
     },
   },
   resolve: (params) => {
