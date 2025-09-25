@@ -16,6 +16,7 @@
     "@kbn/zod",
     "@kbn/es-types",
     "@kbn/zod-helpers",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/otel-semantic-conventions"
   ]
 }
