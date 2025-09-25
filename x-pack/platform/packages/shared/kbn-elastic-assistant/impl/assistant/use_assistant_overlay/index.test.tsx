@@ -21,7 +21,7 @@ const mockUseAssistantContext = {
     client: {
       get: jest.fn(),
     },
-  }
+  },
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');

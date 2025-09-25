@@ -86,7 +86,7 @@ export const useAssistantOverlay = (
   const { data: connectors } = useLoadConnectors({
     http,
     inferenceEnabled,
-    settings
+    settings,
   });
 
   const defaultConnector = useMemo(() => getDefaultConnector(connectors, settings), [connectors]);
