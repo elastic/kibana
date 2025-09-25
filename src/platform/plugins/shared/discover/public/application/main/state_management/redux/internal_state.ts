@@ -63,6 +63,7 @@ const initialState: DiscoverInternalState = {
     byId: {},
     allIds: [],
     unsavedIds: [],
+    recentlyClosedTabsById: {},
     recentlyClosedTabIds: [],
     unsafeCurrentId: '',
   },
@@ -104,9 +105,7 @@ export const internalStateSlice = createSlice({
         updatedDiscoverSession?: DiscoverSession;
       }>
     ) => {
-      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState | RecentlyClosedTabState>
-      >(
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
           [tab.id]:
@@ -115,8 +114,17 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
-      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
+      state.tabs.recentlyClosedTabsById = action.payload.recentlyClosedTabs.reduce<
+        Record<string, RecentlyClosedTabState>
+      >(
+        (acc, tab) => ({
+          ...acc,
+          [tab.id]: tab,
+        }),
+        {}
+      );
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
+      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.persistedDiscoverSession =
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
     },
