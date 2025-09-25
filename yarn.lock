@@ -5516,6 +5516,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-content-management-service@link:src/platform/packages/shared/dashboards/content-management-service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-enhanced-plugin@link:x-pack/platform/plugins/shared/dashboard_enhanced":
   version "0.0.0"
   uid ""
