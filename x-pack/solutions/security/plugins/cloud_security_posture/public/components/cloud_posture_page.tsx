@@ -47,6 +47,7 @@ export interface CspNoDataPageProps {
   actionTitle: NoDataPageProps['action']['elasticAgent']['title'];
   actionDescription: NoDataPageProps['action']['elasticAgent']['description'];
   dataTestSubj: string;
+  buttonText: NoDataPageProps['action']['elasticAgent']['buttonText'];
 }
 
 export const CspNoDataPage = ({
@@ -55,6 +56,7 @@ export const CspNoDataPage = ({
   actionTitle,
   actionDescription,
   dataTestSubj,
+  buttonText,
 }: CspNoDataPageProps) => {
   return (
     <NoDataPage
@@ -67,6 +69,7 @@ export const CspNoDataPage = ({
           title: actionTitle,
           description: actionDescription,
           'data-test-subj': dataTestSubj,
+          buttonText,
         },
       }}
     />

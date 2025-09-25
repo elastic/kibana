@@ -52,7 +52,10 @@ const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
 
 const noDataOptions: Record<
   PosturePolicyTemplate,
-  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription' | 'dataTestSubj'>
+  Pick<
+    CspNoDataPageProps,
+    'docsLink' | 'actionTitle' | 'actionDescription' | 'dataTestSubj' | 'buttonText'
+  >
 > = {
   kspm: {
     dataTestSubj: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
@@ -67,6 +70,10 @@ const noDataOptions: Record<
         defaultMessage:
           'Use our Kubernetes Security Posture Management (KSPM) integration to detect security misconfigurations in your Kubernetes clusters.',
       }
+    ),
+    buttonText: i18n.translate(
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonText',
+      { defaultMessage: 'Add a KSPM integration' }
     ),
   },
   cspm: {
@@ -84,6 +91,10 @@ const noDataOptions: Record<
           'Use our Cloud Security Posture Management (CSPM) integration to detect security misconfigurations in your cloud infrastructure.',
       }
     ),
+    buttonText: i18n.translate(
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonText',
+      { defaultMessage: 'Add a CSPM integration' }
+    ),
   },
 };
 
@@ -99,6 +110,7 @@ const getNotInstalledConfig = (
     actionTitle: policyTemplateNoDataConfig.actionTitle,
     actionDescription: policyTemplateNoDataConfig.actionDescription,
     dataTestSubj: policyTemplateNoDataConfig.dataTestSubj,
+    buttonText: policyTemplateNoDataConfig.buttonText,
   };
 };
 
