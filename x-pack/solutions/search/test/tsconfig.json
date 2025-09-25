@@ -33,6 +33,5 @@
     "@kbn/dev-utils",
     "@kbn/cases-plugin",
     "@kbn/serverless-search-settings",
-    "@kbn/workflows"
   ]
 }
