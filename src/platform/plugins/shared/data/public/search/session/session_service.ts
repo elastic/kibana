@@ -532,7 +532,7 @@ export class SessionService {
    * Save current session as SO to get back to results later
    * (Send to background)
    */
-  public async save(): Promise<void> {
+  public async save() {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     const currentSessionApp = this.state.get().appName;
@@ -597,6 +597,8 @@ export class SessionService {
 
       await extendSearchesPromise;
     }
+
+    return searchSessionSavedObject;
   }
 
   /**
