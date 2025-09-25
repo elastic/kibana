@@ -9,13 +9,13 @@ import { expect } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest(
+    apiTest(
       'should process basic manual ingest pipeline with set processor',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-manual-ingest-set';
@@ -55,7 +55,7 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
+    apiTest(
       'should process manual ingest pipeline with multiple processors',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-manual-ingest-multiple';
@@ -103,7 +103,7 @@ streamlangApiTest.describe(
     );
 
     // TODO: `eq`/`neq` check for boolean fields is doesn't work for the following test. `shorthandBinaryToPainless` needs to be checked
-    streamlangApiTest.skip(
+    apiTest.skip(
       'should process manual ingest pipeline with conditional where clause',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-manual-ingest-conditional';
@@ -150,7 +150,7 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest('should handle manual ingest pipeline with tag', async ({ testBed }) => {
+    apiTest('should handle manual ingest pipeline with tag', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-manual-ingest-tag';
 
       const streamlangDSL: StreamlangDSL = {
@@ -186,7 +186,7 @@ streamlangApiTest.describe(
       expect(source).toHaveProperty('message', 'test message with tag');
     });
 
-    streamlangApiTest(
+    apiTest(
       'should handle complex manual ingest pipeline with grok processor',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-manual-ingest-grok';

@@ -8,13 +8,13 @@
 import { expect } from '@kbn/scout';
 import type { AppendProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Append Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest('should append values to a field', async ({ testBed }) => {
+    apiTest('should append values to a field', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-append';
 
       const streamlangDSL: StreamlangDSL = {
@@ -37,7 +37,7 @@ streamlangApiTest.describe(
       expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
     });
 
-    streamlangApiTest('should append values to a non-existent field', async ({ testBed }) => {
+    apiTest('should append values to a non-existent field', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-append-non-existent';
 
       const streamlangDSL: StreamlangDSL = {
@@ -60,7 +60,7 @@ streamlangApiTest.describe(
       expect(ingestedDocs[0]).toHaveProperty('tags', ['new_tag']);
     });
 
-    streamlangApiTest(
+    apiTest(
       'should not append duplicate values when allow_duplicates is false',
       async ({ testBed }) => {
         const indexName = 'stream-e2e-test-append-no-duplicates';
@@ -87,32 +87,29 @@ streamlangApiTest.describe(
       }
     );
 
-    streamlangApiTest(
-      'should append duplicate values when allow_duplicates is true',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-append-duplicates';
+    apiTest('should append duplicate values when allow_duplicates is true', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-append-duplicates';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'append',
-              to: 'tags',
-              value: ['existing_tag'],
-              allow_duplicates: true,
-            } as AppendProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'append',
+            to: 'tags',
+            value: ['existing_tag'],
+            allow_duplicates: true,
+          } as AppendProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ tags: ['existing_tag'] }];
-        await testBed.ingest(indexName, docs, processors);
+      const docs = [{ tags: ['existing_tag'] }];
+      await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveLength(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'existing_tag']);
-      }
-    );
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'existing_tag']);
+    });
 
     // Template validation tests - should reject Mustache templates
     [
@@ -127,7 +124,7 @@ streamlangApiTest.describe(
         description: 'should reject {{{ }}} template syntax',
       },
     ].forEach(({ templateTo, templateValue, description }) => {
-      streamlangApiTest(description, async () => {
+      apiTest(`${description}`, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -139,7 +136,9 @@ streamlangApiTest.describe(
         };
 
         // Should throw validation error for Mustache templates
-        expect(() => transpile(streamlangDSL)).toThrow();
+        expect(() => transpile(streamlangDSL)).toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

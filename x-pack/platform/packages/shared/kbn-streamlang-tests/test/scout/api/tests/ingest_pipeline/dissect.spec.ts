@@ -8,101 +8,92 @@
 import { expect } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Dissect Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest(
-      'should correctly parse a log line with the dissect processor',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-dissect';
+    apiTest('should correctly parse a log line with the dissect processor', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-dissect';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'dissect',
-              from: 'message',
-              pattern:
-                '[%{@timestamp}] [%{log.level}] %{client.ip} - - "%{@method} %{url.original} HTTP/%{http.version}" %{http.response.status_code} %{http.response.body.bytes}',
-            } as DissectProcessor,
-          ],
-        };
-
-        const { processors } = transpile(streamlangDSL);
-
-        const docs = [
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
           {
-            message: '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1 - - "GET / HTTP/1.1" 200 123',
-          },
-        ];
-        await testBed.ingest(indexName, docs, processors);
+            action: 'dissect',
+            from: 'message',
+            pattern:
+              '[%{@timestamp}] [%{log.level}] %{client.ip} - - "%{@method} %{url.original} HTTP/%{http.version}" %{http.response.status_code} %{http.response.body.bytes}',
+          } as DissectProcessor,
+        ],
+      };
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveLength(1);
-        const source = ingestedDocs[0];
-        expect(source).toHaveProperty('log.level', 'info');
-        expect(source).toHaveProperty('client.ip', '127.0.0.1');
-        expect(source).toHaveProperty('http.version', '1.1');
-        expect(source).toHaveProperty('http.response.status_code', '200');
-        expect(source).toHaveProperty('http.response.body.bytes', '123');
-      }
-    );
+      const { processors } = transpile(streamlangDSL);
 
-    streamlangApiTest(
-      'should ignore missing field when ignore_missing is true',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-dissect-ignore-missing';
+      const docs = [
+        {
+          message: '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1 - - "GET / HTTP/1.1" 200 123',
+        },
+      ];
+      await testBed.ingest(indexName, docs, processors);
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'dissect',
-              from: 'message',
-              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              ignore_missing: true,
-            } as DissectProcessor,
-          ],
-        };
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      expect(source).toHaveProperty('log.level', 'info');
+      expect(source).toHaveProperty('client.ip', '127.0.0.1');
+      expect(source).toHaveProperty('http.version', '1.1');
+      expect(source).toHaveProperty('http.response.status_code', '200');
+      expect(source).toHaveProperty('http.response.body.bytes', '123');
+    });
 
-        const { processors } = transpile(streamlangDSL);
+    apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-dissect-ignore-missing';
 
-        const docs = [{ log: { level: 'info' } }];
-        await testBed.ingest(indexName, docs, processors);
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: 'message',
+            pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+            ignore_missing: true,
+          } as DissectProcessor,
+        ],
+      };
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveLength(1);
-        const source = ingestedDocs[0];
-        expect(source).not.toHaveProperty('client.ip');
-      }
-    );
+      const { processors } = transpile(streamlangDSL);
 
-    streamlangApiTest(
-      'should fail if field is missing and ignore_missing is false',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-dissect-fail-missing';
+      const docs = [{ log: { level: 'info' } }];
+      await testBed.ingest(indexName, docs, processors);
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'dissect',
-              from: 'message',
-              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              ignore_missing: false,
-            } as DissectProcessor,
-          ],
-        };
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      expect(source).not.toHaveProperty('client.ip');
+    });
 
-        const { processors } = transpile(streamlangDSL);
+    apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-dissect-fail-missing';
 
-        const docs = [{ log: { level: 'info' } }];
-        const { errors } = await testBed.ingest(indexName, docs, processors);
-        expect(errors[0].reason).toContain('field [message] not present as part of path [message]');
-      }
-    );
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: 'message',
+            pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+            ignore_missing: false,
+          } as DissectProcessor,
+        ],
+      };
 
-    streamlangApiTest('should use append_separator', async ({ testBed }) => {
+      const { processors } = transpile(streamlangDSL);
+
+      const docs = [{ log: { level: 'info' } }];
+      const { errors } = await testBed.ingest(indexName, docs, processors);
+      expect(errors[0].reason).toContain('field [message] not present as part of path [message]');
+    });
+
+    apiTest('should use append_separator', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-dissect-append-separator';
 
       const streamlangDSL: StreamlangDSL = {
@@ -137,7 +128,7 @@ streamlangApiTest.describe(
         description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, description }) => {
-      streamlangApiTest(description, async ({ testBed }) => {
+      apiTest(`${description}`, async ({ testBed }) => {
         expect(() => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
@@ -149,7 +140,7 @@ streamlangApiTest.describe(
             ],
           };
           transpile(streamlangDSL);
-        }).toThrow(); // Should throw validation error for Mustache templates
+        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Added error message for Mustache templates
       });
     });
   }

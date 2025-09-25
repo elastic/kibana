@@ -8,13 +8,13 @@
 import { expect } from '@kbn/scout';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Rename Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest('should rename a field', async ({ testBed }) => {
+    apiTest('should rename a field', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-rename';
 
       const streamlangDSL: StreamlangDSL = {
@@ -51,129 +51,118 @@ streamlangApiTest.describe(
         description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateFrom, templateTo, description }) => {
-      streamlangApiTest(description, async ({ testBed }) => {
+      apiTest(`${description}`, async ({ testBed }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'rename',
+              from: templateFrom,
+              to: templateTo,
+            } as RenameProcessor,
+          ],
+        };
+
         expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'rename',
-                from: templateFrom,
-                to: templateTo,
-              } as RenameProcessor,
-            ],
-          };
           transpile(streamlangDSL);
-        }).toThrow(); // Should throw validation error for Mustache templates
+        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
       });
     });
 
-    streamlangApiTest(
-      'should ignore missing field when ignore_missing is true',
-      async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-ignore-missing';
+    apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-rename-ignore-missing';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: 'host.original',
-              to: 'host.renamed',
-              ignore_missing: true,
-            } as RenameProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'rename',
+            from: 'host.original',
+            to: 'host.renamed',
+            ignore_missing: true,
+          } as RenameProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
-        await testBed.ingest(indexName, docs, processors);
+      const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
+      await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveLength(1);
-        const source = ingestedDocs[0];
-        expect(source).not.toHaveProperty('host.renamed');
-      }
-    );
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      expect(source).not.toHaveProperty('host.renamed');
+    });
 
-    streamlangApiTest(
-      'should fail if field is missing and ignore_missing is false',
-      async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-fail-missing';
+    apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-rename-fail-missing';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: 'host.original',
-              to: 'host.renamed',
-              ignore_missing: false,
-            } as RenameProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'rename',
+            from: 'host.original',
+            to: 'host.renamed',
+            ignore_missing: false,
+          } as RenameProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
-        const { errors } = await testBed.ingest(indexName, docs, processors);
-        expect(JSON.stringify(errors[0].reason)).toContain('host.original');
-        expect(errors[0].type).toBe('illegal_argument_exception');
-      }
-    );
+      const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
+      const { errors } = await testBed.ingest(indexName, docs, processors);
+      expect(JSON.stringify(errors[0].reason)).toContain('host.original');
+      expect(errors[0].type).toBe('illegal_argument_exception');
+    });
 
-    streamlangApiTest(
-      'should override existing field when override is true',
-      async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-override';
+    apiTest('should override existing field when override is true', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-rename-override';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: 'host.original',
-              to: 'host.renamed',
-              override: true,
-            } as RenameProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'rename',
+            from: 'host.original',
+            to: 'host.renamed',
+            override: true,
+          } as RenameProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
-        await testBed.ingest(indexName, docs, processors);
+      const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
+      await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveLength(1);
-        const source = ingestedDocs[0];
-        expect(source).toHaveProperty('host.renamed', 'test-host');
-      }
-    );
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      expect(source).toHaveProperty('host.renamed', 'test-host');
+    });
 
-    streamlangApiTest(
-      'should fail if target field exists and override is false',
-      async ({ testBed }) => {
-        const indexName = 'streams-e2e-test-rename-no-override';
+    apiTest('should fail if target field exists and override is false', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-rename-no-override';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'rename',
-              from: 'host.original',
-              to: 'host.renamed',
-              override: false,
-            } as RenameProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'rename',
+            from: 'host.original',
+            to: 'host.renamed',
+            override: false,
+          } as RenameProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
-        const { errors } = await testBed.ingest(indexName, docs, processors);
-        expect(JSON.stringify(errors[0].reason)).toContain('host.renamed');
-        expect(errors[0].type).toBe('illegal_argument_exception');
-      }
-    );
+      const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
+      const { errors } = await testBed.ingest(indexName, docs, processors);
+      expect(JSON.stringify(errors[0].reason)).toContain('host.renamed');
+      expect(errors[0].type).toBe('illegal_argument_exception');
+    });
 
-    streamlangApiTest(
+    apiTest(
       'default values of ignore_missing and override (ignore_missing: false, override: false)',
       async ({ testBed }) => {
         const indexName = 'streams-e2e-test-rename-defaults';

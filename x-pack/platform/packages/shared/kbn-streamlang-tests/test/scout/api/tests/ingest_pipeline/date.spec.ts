@@ -8,10 +8,10 @@
 import { expect } from '@kbn/scout';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
-  streamlangApiTest(
+apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
+  apiTest(
     'should parse a date and set it to @timestamp',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed }) => {
@@ -38,7 +38,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should override the field if from and to are same',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed }) => {
@@ -67,7 +67,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should parse a date with a specific format',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed }) => {
@@ -96,7 +96,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
   );
 
   // This test fails/flaky on Serverless, which is a different behavior then Stateful and needs to be checked
-  streamlangApiTest('should handle multiple formats', { tag: ['@ess'] }, async ({ testBed }) => {
+  apiTest('should handle multiple formats', { tag: ['@ess'] }, async ({ testBed }) => {
     const indexName = 'stream-e2e-test-date-multiple-formats';
 
     const streamlangDSL: StreamlangDSL = {
@@ -125,7 +125,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
     expect(ingestedDocs[1]).toHaveProperty('event.created_date', '01 01 2025 12:35');
   });
 
-  streamlangApiTest(
+  apiTest(
     'should parse a date with a specific output format',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed }) => {
@@ -154,7 +154,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
     }
   );
 
-  streamlangApiTest(
+  apiTest(
     'should fail when date format is incorrect',
     { tag: ['@ess', '@svlOblt'] },
     async ({ testBed }) => {
@@ -190,7 +190,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
       description: 'should reject {{{ }}} template syntax in field names',
     },
   ].forEach(({ templateFrom, templateTo, description }) => {
-    streamlangApiTest(description, { tag: ['@ess', '@svlOblt'] }, async ({ testBed }) => {
+    apiTest(`${description}`, { tag: ['@ess', '@svlOblt'] }, async ({ testBed }) => {
       expect(() => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -204,7 +204,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
           ],
         };
         transpile(streamlangDSL);
-      }).toThrow(); // Should throw validation error for Mustache templates
+      }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
     });
   });
 });

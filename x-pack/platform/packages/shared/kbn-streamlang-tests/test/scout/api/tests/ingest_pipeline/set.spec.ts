@@ -8,13 +8,13 @@
 import { expect } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest } from '../..';
+import { streamlangApiTest as apiTest } from '../..';
 
-streamlangApiTest.describe(
+apiTest.describe(
   'Streamlang to Ingest Pipeline - Set Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    streamlangApiTest('should set a field using a value', async ({ testBed }) => {
+    apiTest('should set a field using a value', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-set-value';
 
       const streamlangDSL: StreamlangDSL = {
@@ -63,23 +63,24 @@ streamlangApiTest.describe(
         description: 'should reject {{{ }}} template syntax',
       },
     ].forEach(({ templateValue, templateTo, templateType, description }) => {
-      streamlangApiTest(description, async () => {
+      apiTest(`${description}`, async () => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: templateTo,
+              value: templateValue,
+            } as SetProcessor,
+          ],
+        };
+
         expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'set',
-                to: templateTo,
-                value: templateValue,
-              } as SetProcessor,
-            ],
-          };
           transpile(streamlangDSL);
-        }).toThrow(); // Should throw validation error for Mustache templates
+        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
       });
     });
 
-    streamlangApiTest('should set a field by copying from another field', async ({ testBed }) => {
+    apiTest('should set a field by copying from another field', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-set-copy';
 
       const streamlangDSL: StreamlangDSL = {
@@ -101,94 +102,86 @@ streamlangApiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'should-be-copied');
     });
 
-    streamlangApiTest(
-      'should not override an existing field when override is false',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-set-no-override';
+    apiTest('should not override an existing field when override is false', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-set-no-override';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'attributes.status',
-              value: 'inactive',
-              override: false,
-            } as SetProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.status',
+            value: 'inactive',
+            override: false,
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ attributes: { status: 'active' } }];
-        await testBed.ingest(indexName, docs, processors);
+      const docs = [{ attributes: { status: 'active' } }];
+      await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
-      }
-    );
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
+    });
 
-    streamlangApiTest(
-      'should override an existing field when override is true',
-      async ({ testBed }) => {
-        const indexName = 'stream-e2e-test-set-override';
+    apiTest('should override an existing field when override is true', async ({ testBed }) => {
+      const indexName = 'stream-e2e-test-set-override';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'attributes.status',
-              value: 'inactive',
-              override: true,
-            } as SetProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.status',
+            value: 'inactive',
+            override: true,
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
-        const docs = [{ attributes: { status: 'active' } }];
-        await testBed.ingest(indexName, docs, processors);
+      const docs = [{ attributes: { status: 'active' } }];
+      await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
-      }
-    );
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
+    });
 
-    streamlangApiTest(
-      'should throw error if value and copy_from are missing',
-      async ({ testBed }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'attributes.status',
-            } as SetProcessor,
-          ],
-        };
+    apiTest('should throw error if value and copy_from are missing', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.status',
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
-        const docs = [{ attributes: { status: 'active' } }];
-        await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError();
-      }
-    );
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ attributes: { status: 'active' } }];
+      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
+        '[value] required property is missing'
+      );
+    });
 
-    streamlangApiTest(
-      'should throw error if value and copy_from are both present',
-      async ({ testBed }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'attributes.status',
-              value: 'active',
-              copy_from: 'message',
-            } as SetProcessor,
-          ],
-        };
+    apiTest('should throw error if value and copy_from are both present', async ({ testBed }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.status',
+            value: 'active',
+            copy_from: 'message',
+          } as SetProcessor,
+        ],
+      };
 
-        const { processors } = transpile(streamlangDSL);
-        const docs = [{ attributes: { status: 'active' } }];
-        await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError();
-      }
-    );
+      const { processors } = transpile(streamlangDSL);
+      const docs = [{ attributes: { status: 'active' } }];
+      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
+        '[copy_from] cannot set both `copy_from` and `value` in the same processor'
+      );
+    });
   }
 );
