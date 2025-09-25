@@ -8,7 +8,6 @@
  */
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 import type { SearchDashboardsArgs } from './lib/find_dashboards';
 import {
   findDashboardById,
@@ -16,14 +15,6 @@ import {
   findDashboardsByIds,
   searchDashboards,
 } from './lib/find_dashboards';
-
-let dashboardContentManagementCache: DashboardContentManagementCache;
-
-export const getDashboardContentManagementCache = () => {
-  if (!dashboardContentManagementCache)
-    dashboardContentManagementCache = new DashboardContentManagementCache();
-  return dashboardContentManagementCache;
-};
 
 export const getFindDashboardsService = (
   contentManagementService: ContentManagementPublicStart

@@ -20,7 +20,7 @@ import {
   DASHBOARD_CONTENT_ID,
 } from '@kbn/dashboard-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { getDashboardContentManagementCache } from '..';
+import { DashboardContentManagementCache } from '../dashboard_content_management_cache';
 
 export interface SearchDashboardsArgs {
   options?: DashboardSearchOptions;
@@ -72,7 +72,7 @@ export async function findDashboardById(
   id: string,
   contentManagementService: ContentManagementPublicStart
 ): Promise<FindDashboardsByIdResponse> {
-  const dashboardContentManagementCache = getDashboardContentManagementCache();
+  const dashboardContentManagementCache = DashboardContentManagementCache.getInstance();
 
   /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);

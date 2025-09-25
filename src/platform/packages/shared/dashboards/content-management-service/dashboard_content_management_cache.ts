@@ -14,6 +14,7 @@ const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
 const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
 export class DashboardContentManagementCache {
+  private static instance: DashboardContentManagementCache;
   private cache: LRUCache<string, DashboardGetOut>;
 
   constructor() {
@@ -21,6 +22,13 @@ export class DashboardContentManagementCache {
       max: DASHBOARD_CACHE_SIZE,
       ttl: DASHBOARD_CACHE_TTL,
     });
+  }
+
+  public static getInstance(): DashboardContentManagementCache {
+    if (!DashboardContentManagementCache.instance) {
+      DashboardContentManagementCache.instance = new DashboardContentManagementCache();
+    }
+    return DashboardContentManagementCache.instance;
   }
 
   /** Fetch the dashboard with `id` from the cache */
