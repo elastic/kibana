@@ -12,3 +12,4 @@ enabled:
   - x-pack/solutions/search/test/functional_solution_sidenav/config.ts
   - x-pack/solutions/search/test/functional_solution_sidenav/config.nav_v2.ts
   - x-pack/solutions/search/test/accessibility/config.ts
+  - x-pack/platform/test/onechat_api_integration/configs/config.stateful.ts

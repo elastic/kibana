@@ -7,21 +7,33 @@
 
 import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { QualityIndicators } from '../../../common/types';
+import {
+  summaryPanelQualityGoodText,
+  summaryPanelQualityDegradedText,
+  summaryPanelQualityPoorText,
+} from '../../../common/translations';
 import { QualityIndicator } from '.';
 
 export const DatasetQualityIndicator = ({
   isLoading,
   quality,
+  verbose = false,
 }: {
   isLoading: boolean;
   quality: QualityIndicators;
+  verbose?: boolean;
 }) => {
+  const QUALITY_LABELS: Record<QualityIndicators, string> = {
+    good: summaryPanelQualityGoodText,
+    degraded: summaryPanelQualityDegradedText,
+    poor: summaryPanelQualityPoorText,
+  };
+
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
-    defaultMessage: '{quality}',
-    values: { quality: capitalize(quality) },
+    defaultMessage: '{quality}{verbose, select, true { quality} other {}}',
+    values: { quality: QUALITY_LABELS[quality], verbose },
   });
 
   return (
