@@ -20,6 +20,6 @@ export const TOTAL_EXECUTION_TIME_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.totalExecutionTimeTooltip',
   {
     defaultMessage:
-      'The total amount of processing and re-processing time for translating the complete item set in this migration',
+      'The total amount of processing and re-processing time for translating the rules and dashboards in this migration',
   }
 );
