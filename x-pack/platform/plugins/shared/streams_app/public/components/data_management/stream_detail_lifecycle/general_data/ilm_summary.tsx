@@ -199,15 +199,15 @@ function IlmPhase({
           <EuiPanel
             paddingSize="xs"
             css={{
-              marginRight: '-40px',
-              width: '80px',
+              marginRight: minAge ? '-40px' : '-10px',
+              width: minAge ? '80px' : '20px',
             }}
             grow={false}
             hasBorder={false}
             hasShadow={false}
           >
             <EuiText textAlign="center" size="xs" color="subdued">
-              {minAge ? getTimeSizeAndUnitLabel(minAge) + (phase.name === 'hot' ? '*' : '') : '∞'}
+              {minAge ? getTimeSizeAndUnitLabel(minAge) : '∞'}
             </EuiText>
           </EuiPanel>
         ) : undefined}
