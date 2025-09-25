@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiComboBox,
@@ -37,7 +38,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
     fileUploadManager,
   } = useFileUploadContext();
   const setSelectedOptions = useCallback(
-    (selected: any[]) => {
+    (selected: EuiComboBoxOptionOption<string>[]) => {
       fileUploadManager.setExistingIndexName(selected.length > 0 ? selected[0].label : null);
     },
     [fileUploadManager]
@@ -94,7 +95,9 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButtonGroup
-              legend="Default single select button group"
+              legend={i18n.translate('xpack.dataVisualizer.file.indexSelection.label', {
+                defaultMessage: 'Select index creation method',
+              })}
               isFullWidth={true}
               isDisabled={false}
               options={[

@@ -15,7 +15,6 @@ import type {
   InputOverrides,
 } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-// import type { DataTableRecord } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isTikaType } from './tika_utils';

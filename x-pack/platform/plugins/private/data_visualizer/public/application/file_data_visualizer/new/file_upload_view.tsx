@@ -28,7 +28,6 @@ interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   reset?: (existingIndex?: string) => void;
-  onClose?: () => void;
 }
 
 export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {

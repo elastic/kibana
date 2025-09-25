@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FileUploadManager, useFileUpload, FileUploadContext } from '@kbn/file-upload';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
@@ -20,6 +20,7 @@ export interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
+  props?: OpenFileUploadLiteContext;
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
@@ -28,6 +29,7 @@ export const FileDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   resultLinks,
   setUploadResults,
+  props,
 }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
@@ -43,9 +45,7 @@ export const FileDataVisualizer: FC<Props> = ({
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
-  const autoAddInference = undefined;
-  const autoCreateDataView = true;
-  const indexSettings = undefined;
+  const { autoAddInference, autoCreateDataView, indexSettings } = props ?? {};
 
   const createFileUploadManager = useCallback(
     (existingIndex?: string) => {
@@ -104,7 +104,6 @@ export const FileDataVisualizer: FC<Props> = ({
               reset={(existingIndex?: string) => {
                 reset(existingIndex);
               }}
-              onClose={() => {}}
             />
           </FileUploadContext.Provider>
         </CloudContext>
