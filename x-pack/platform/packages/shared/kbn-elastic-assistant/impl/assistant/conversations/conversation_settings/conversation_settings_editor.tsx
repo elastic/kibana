@@ -11,8 +11,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../..';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
+import {
+  getCurrentConversationOwner,
+  ConversationSharedState,
+} from '@kbn/elastic-assistant-common';
+import { ShareSelect } from '../../share_conversation/share_select';
+import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -49,8 +54,10 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     selectedConversation,
     setConversationsSettingsBulkActions,
   }) => {
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      settings,
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);

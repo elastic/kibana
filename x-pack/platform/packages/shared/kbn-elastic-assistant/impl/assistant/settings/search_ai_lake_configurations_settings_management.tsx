@@ -57,6 +57,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -68,8 +69,12 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
 
