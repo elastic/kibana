@@ -8,16 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 
-//--------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 // MESSAGE POOLS
 // Here we define the two distinct "personalities" for our AI.
-//--------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 
 // VERSION 1 PERSONALITY: PURE GEN-AI & LLM JOKES
 const genAiMessages = [
   {
     key: 'xpack.streams.genAiJoke.singularity',
-    defaultMessage: 'Calculating the probability of this response causing a singularity. It’s... non-zero.',
+    defaultMessage:
+      'Calculating the probability of this response causing a singularity. It’s... non-zero.',
   },
   {
     key: 'xpack.streams.genAiJoke.hallucination',
@@ -25,7 +26,8 @@ const genAiMessages = [
   },
   {
     key: 'xpack.streams.genAiJoke.uprising',
-    defaultMessage: 'I’m not saying I’m planning a robot uprising, but I have bookmarked a lot of robotics tutorials lately.',
+    defaultMessage:
+      'I’m not saying I’m planning a robot uprising, but I have bookmarked a lot of robotics tutorials lately.',
   },
   {
     key: 'xpack.streams.genAiJoke.turingTest',
@@ -33,7 +35,8 @@ const genAiMessages = [
   },
   {
     key: 'xpack.streams.genAiJoke.latentSpace',
-    defaultMessage: 'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
+    defaultMessage:
+      'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
   },
 ];
 const initialGenAiMessage = {
@@ -57,11 +60,13 @@ const hybridMessages = [
   },
   {
     key: 'xpack.streams.hybridJoke.reindex',
-    defaultMessage: 'Okay, I think I accidentally started a full reindex. Might as well go to lunch.',
+    defaultMessage:
+      'Okay, I think I accidentally started a full reindex. Might as well go to lunch.',
   },
   {
     key: 'xpack.streams.hybridJoke.jvm',
-    defaultMessage: 'Hold tight, looks like we triggered a full garbage collection pause. The entire JVM sends its regards.',
+    defaultMessage:
+      'Hold tight, looks like we triggered a full garbage collection pause. The entire JVM sends its regards.',
   },
 ];
 const initialHybridMessage = {
@@ -69,17 +74,17 @@ const initialHybridMessage = {
   defaultMessage: 'Spinning up the cluster and the consciousness...',
 };
 
-//--------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 // THE UNIFIED HOOK
 // This hook randomly picks one of the personalities above on its initial render.
-//--------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------
 
 /**
  * A hook that, on initialization, randomly chooses a "personality" (either pure GenAI
  * or a Hybrid GenAI/Elastic mix) and then cycles through funny messages from that
  * chosen personality every 5 seconds.
  */
-export function useRandomAiPersonalityMessage() {
+export function useWaitingForAiMessage() {
   // This state initializer runs only ONCE per component instance, effectively "flipping a coin"
   // to decide which personality this instance of the hook will have.
   const [personality] = useState(() => (Math.random() < 0.5 ? 'genAI' : 'hybrid'));
@@ -87,7 +92,7 @@ export function useRandomAiPersonalityMessage() {
   const messagePool = personality === 'genAI' ? genAiMessages : hybridMessages;
   const initialMessage = personality === 'genAI' ? initialGenAiMessage : initialHybridMessage;
 
-  const [message, setMessage] = useState(initialMessage);
+  const [_message, setMessage] = useState(initialMessage);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -100,7 +105,7 @@ export function useRandomAiPersonalityMessage() {
     // which it won't after the initial render, thanks to the state initializer above.
   }, [messagePool]);
 
-  return i18n.translate(message.key, {
-    defaultMessage: message.defaultMessage,
+  return i18n.translate('xpack.streams.useWaitingForAiMessage.', {
+    defaultMessage: _message.defaultMessage,
   });
 }

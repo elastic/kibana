@@ -47,7 +47,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
 
-  const { systems, refresh, loading: systemsLoading } = useStreamSystems(definition.stream);
+  const { systems, refresh } = useStreamSystems(definition.stream);
   const { identifySystems } = useStreamSystemsApi(definition.stream);
   const [isSystemDetectionFlyoutOpen, setIsSystemDetectionFlyoutOpen] = useState(false);
   const [isSystemDetectionLoading, setIsSystemDetectionLoading] = useState(false);
@@ -64,13 +64,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     end,
   });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-  const [initialFlow, setInitialFlow] = useState<Flow | undefined>(undefined);
+  const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   if (!significantEventsFetchState.value) {
-    return <LoadingPanel />;
+    return <LoadingPanel size="xxl" />;
   }
 
   const systemDetectionFlyout = isSystemDetectionFlyoutOpen ? (

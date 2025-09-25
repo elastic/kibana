@@ -5,15 +5,16 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import { ConditionPanel } from '../data_management/shared';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
@@ -84,6 +85,7 @@ export function SignificantEventsTable({
             onClick={() => {}}
             aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
             iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
+            iconSize="s"
           />
         );
       },
@@ -94,14 +96,19 @@ export function SignificantEventsTable({
         defaultMessage: 'Title',
       }),
       render: (_, record) => (
-        <EuiLink
+        <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
+            defaultMessage: 'Open in discover',
+          })}
           target="_blank"
           href={discover?.locator?.getRedirectUrl(
             buildDiscoverParams(record.query, definition, timeState)
           )}
+          iconType="discoverApp"
+          iconSide="right"
         >
           {record.query.title}
-        </EuiLink>
+        </EuiButtonEmpty>
       ),
     },
     {
@@ -122,9 +129,10 @@ export function SignificantEventsTable({
         if (!query.system?.filter) {
           return '--';
         }
-        return (
-          <EuiCodeBlock paddingSize="none">{JSON.stringify(query.system?.filter)}</EuiCodeBlock>
-        );
+        return <ConditionPanel condition={query.system.filter} />;
+        // return (
+        //   <EuiCodeBlock paddingSize="none">{JSON.stringify(query.system?.filter)}</EuiCodeBlock>
+        // );
       },
     },
     {

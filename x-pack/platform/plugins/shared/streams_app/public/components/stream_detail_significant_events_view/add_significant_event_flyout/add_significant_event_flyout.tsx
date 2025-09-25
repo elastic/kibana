@@ -107,7 +107,7 @@ export function AddSignificantEventFlyout({
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
+    const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!, selectedSystems[0]);
     generation$.subscribe({
       next: (result) => {
         const validation = validateQuery({
