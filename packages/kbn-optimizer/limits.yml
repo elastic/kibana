@@ -30,7 +30,7 @@ pageLoadAssetSize:
   dashboardMarkdown: 5134
   data: 453742
   dataQuality: 10387
-  datasetQuality: 30094
+  datasetQuality: 49315
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -47,9 +47,9 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 12323
+  esql: 13323
   esqlDataGrid: 10209
-  esUiShared: 100338
+  esUiShared: 101220
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 15709
+  onechat: 17322
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -150,8 +150,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79987
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
+  securitySolutionEss: 43319
+  securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
