@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
@@ -23,9 +24,10 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
+import * as Styles from '../styles';
+
 import { SearchApplicationAPI } from './search_application_api';
 
-import '../search_application_layout.scss';
 import { SearchApplicationDocumentation } from './search_application_documentation';
 
 const pageTitle = i18n.translate(
@@ -58,6 +60,7 @@ const getTabBreadCrumb = (tabId: string) => {
 };
 
 export const SearchApplicationConnect: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
@@ -81,7 +84,7 @@ export const SearchApplicationConnect: React.FC = () => {
       isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
-        className: 'searchApplicationHeaderBackgroundColor',
+        css: Styles.searchApplicationHeaderBackgroundColor(euiTheme),
         pageTitle,
         rightSideItems: [],
         tabs: [
