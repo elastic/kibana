@@ -31,5 +31,6 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
     "@kbn/discover-utils",
+    "@kbn/fields-metadata-plugin",
   ]
 }

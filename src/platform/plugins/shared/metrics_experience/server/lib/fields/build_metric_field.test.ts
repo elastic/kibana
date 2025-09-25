@@ -24,7 +24,6 @@ describe('buildMetricField', () => {
       time_series_metric: 'gauge',
       meta: {
         unit: 'bytes',
-        description: 'Test metric description',
         display: 'Test Metric',
       },
     };
@@ -38,7 +37,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'gauge',
       unit: 'bytes',
-      description: 'Test metric description',
       display: 'Test Metric',
     });
   });
@@ -55,7 +53,6 @@ describe('buildMetricField', () => {
       time_series_metric: 'counter',
       meta: {
         unit: ['bytes', 'per_second'],
-        description: ['Another', 'description'],
         display: ['Another', 'Display'],
       },
     };
@@ -69,7 +66,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'counter',
       unit: 'bytes, per_second',
-      description: 'Another, description',
       display: 'Another, Display',
     });
   });
@@ -122,7 +118,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'gauge',
       unit: undefined,
-      description: undefined,
       display: undefined,
     });
   });

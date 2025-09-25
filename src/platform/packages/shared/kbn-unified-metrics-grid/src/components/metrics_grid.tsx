@@ -17,6 +17,7 @@ import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
+import { FieldsMetadataProvider } from './context/fields_metadata';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -55,7 +56,7 @@ export const MetricsGrid = ({
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
-        metric: MetricField;
+        rowIndex: number;
         esqlQuery: string;
       }
     | undefined
@@ -74,20 +75,26 @@ export const MetricsGrid = ({
       : dimensions.map((dim, i) => ({ key: `${dim}-${i}`, metric: fields }));
   }, [pivotOn, fields, dimensions]);
 
-  const handleViewDetails = useCallback((metric: MetricField, esqlQuery: string) => {
-    setExpandedMetric({ metric, esqlQuery });
-    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-  }, []);
+  const handleViewDetails = useCallback(
+    (index: number) => (esqlQuery: string) => {
+      setExpandedMetric({ rowIndex: index, esqlQuery });
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    },
+    []
+  );
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
   }, []);
+
+  const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
+
   if (rows.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <>
+    <FieldsMetadataProvider fields={normalizedFields} services={services}>
       <EuiFlexGrid columns={columns} gutterSize="s" data-test-subj="unifiedMetricsExperienceGrid">
         {rows.map(({ key, metric }, index) => (
           <EuiFlexItem key={key}>
@@ -104,20 +111,20 @@ export const MetricsGrid = ({
               filters={filters}
               onBrushEnd={onBrushEnd}
               onFilter={onFilter}
-              onViewDetails={handleViewDetails}
-              metricName={metric.name}
+              onViewDetails={handleViewDetails(index)}
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      {expandedMetric && (
+
+      {expandedMetric && expandedMetric.rowIndex < rows.length && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
+          metric={rows[expandedMetric.rowIndex].metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen={!!expandedMetric}
+          isOpen
           onClose={handleCloseFlyout}
         />
       )}
-    </>
+    </FieldsMetadataProvider>
   );
 };

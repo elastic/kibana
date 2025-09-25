@@ -29,6 +29,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
@@ -55,6 +56,7 @@ export interface UnifiedHistogramServices {
   expressions: ExpressionsStart;
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 /**

@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface Dimension {
-  name: string;
-  type: string;
+import { useContext } from 'react';
+import { FieldsMetadataContext } from './fields_metadata_context';
+
+export function useFieldsMetadataContext() {
+  const context = useContext(FieldsMetadataContext);
+
+  if (!context) {
+    throw new Error('useFieldsMetadataContext must be used within a FieldsMetadataProvider');
+  }
+
+  return context;
 }

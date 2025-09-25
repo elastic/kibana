@@ -11,64 +11,136 @@ import {
   type EuiTextTruncationTypes,
   useEuiTheme,
   EuiHighlight,
+  euiTextTruncate,
+  EuiToolTip,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highlight_colors';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 export const ChartTitle = ({
   searchTerm,
-  text,
+  title,
+  description,
   truncation,
 }: {
   searchTerm: string;
-  text: string;
+  title: string;
+  description?: React.ReactNode;
   truncation: EuiTextTruncationTypes;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
 
+  // styles here were copied from use_hover_actions_styles.tsx
+  const { captionStyles, headerStyles } = useMemo(() => {
+    return {
+      captionStyles: css`
+        position: absolute;
+        width: 100%;
+        height: ${euiTheme.size.l};
+        z-index: ${Number(euiTheme.levels.content) + 1};
+
+        transition: outline-color ${euiTheme.animation.extraFast},
+          z-index ${euiTheme.animation.extraFast};
+        transition-delay: ${euiTheme.animation.fast};
+      `,
+      headerStyles: css`
+        overflow: hidden;
+        height: 100%;
+        line-height: ${euiTheme.size.l};
+        padding: 0px ${euiTheme.size.s};
+        display: flex;
+        flex-wrap: nowrap;
+        column-gap: ${euiTheme.size.s};
+        align-items: center;
+
+        > * {
+          min-width: 0;
+          flex: 1 !important;
+          max-width: 90% !important;
+        }
+      `,
+    };
+  }, [
+    euiTheme.size.l,
+    euiTheme.size.s,
+    euiTheme.animation.extraFast,
+    euiTheme.animation.fast,
+    euiTheme.levels.content,
+  ]);
+
   const chartTitleCss = css`
-    min-height: ${euiTheme.size.l};
-    max-height: ${euiTheme.size.l};
-    max-width: 90%;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 9000;
-    padding: ${euiTheme.size.s};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: ${euiTheme.font.weight.semiBold};
+    ${euiTextTruncate()};
+
+    font-weight: ${euiTheme.font.weight.bold};
   `;
 
-  if (!searchTerm) {
+  const titleElement = useMemo(() => {
     return (
-      <h3 css={chartTitleCss}>
-        <EuiTextTruncate truncation={truncation} text={text} />
-      </h3>
+      <span css={chartTitleCss}>
+        {searchTerm ? (
+          <EuiHighlight
+            css={css`
+              & mark {
+                color: ${colors.highlightColor};
+                background-color: ${colors.highlightBackgroundColor};
+              }
+            `}
+            strict={false}
+            highlightAll
+            search={searchTerm}
+          >
+            {title}
+          </EuiHighlight>
+        ) : (
+          <EuiTextTruncate truncation={truncation} text={title} />
+        )}
+      </span>
     );
+  }, [searchTerm, colors, title, truncation, chartTitleCss]);
+
+  if (!description) {
+    return titleElement;
   }
 
   return (
-    <h3 css={chartTitleCss}>
-      <EuiHighlight
-        css={css`
-          & mark {
-            color: ${colors.highlightColor};
-            background-color: ${colors.highlightBackgroundColor};
-          }
-          overflow: ellipsis;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        `}
-        strict={false}
-        highlightAll
-        search={searchTerm}
-      >
-        {text}
-      </EuiHighlight>
-    </h3>
+    <figcaption css={captionStyles} className="metricsExperienceChartTitle">
+      <div css={headerStyles}>
+        {description ? (
+          <EuiToolTip
+            content={description}
+            delay="regular"
+            position="top"
+            anchorProps={{
+              'data-test-subj': 'metricsExperienceChartTooltipAnchor',
+            }}
+            anchorClassName="eui-fullWidth"
+          >
+            <h2
+              css={css`
+                overflow: hidden;
+              `}
+            >
+              <EuiScreenReaderOnly>
+                <span id={title}>
+                  {i18n.translate('metricsExperience.chart.panelTitle.ariaLabel', {
+                    defaultMessage: 'Panel: {title}',
+                    values: {
+                      title,
+                    },
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+              {titleElement}
+            </h2>
+          </EuiToolTip>
+        ) : (
+          titleElement
+        )}
+      </div>
+    </figcaption>
   );
 };

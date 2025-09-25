@@ -14,6 +14,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -30,7 +31,9 @@ describe('MetricsGrid', () => {
     updateTimeRange: () => {},
   };
 
-  const services = {} as UnifiedHistogramServices;
+  const services = {
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+  } as unknown as UnifiedHistogramServices;
 
   const fields: MetricsGridProps['fields'] = [
     {
