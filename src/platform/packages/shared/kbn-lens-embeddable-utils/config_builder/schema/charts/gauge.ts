@@ -66,7 +66,7 @@ const gaugeStateMetricOptionsSchema = schema.object({
   /**
    * Tick marks configuration
    */
-  thicks: schema.maybe(
+  ticks: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('bands'), schema.literal('hidden')], {
       defaultValue: 'auto',
     })
