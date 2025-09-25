@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { FilterStateStore } from '@kbn/es-query';
+import { filterSchema, querySchema } from '@kbn/es-query-server';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -170,60 +170,6 @@ export const optionsSchema = schema.object({
   }),
 });
 
-export const filterSchema = schema.object(
-  {
-    meta: schema.object(
-      {
-        alias: schema.maybe(schema.nullable(schema.string())),
-        disabled: schema.maybe(schema.boolean()),
-        negate: schema.maybe(schema.boolean()),
-        controlledBy: schema.maybe(schema.string()),
-        group: schema.maybe(schema.string()),
-        index: schema.maybe(schema.string()),
-        isMultiIndex: schema.maybe(schema.boolean()),
-        type: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        params: schema.maybe(schema.any()),
-        field: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    $state: schema.maybe(
-      schema.object({
-        store: schema.oneOf(
-          [
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
-          ],
-          {
-            meta: {
-              description:
-                "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-            },
-          }
-        ),
-      })
-    ),
-  },
-  { meta: { description: 'A filter for the search source.' } }
-);
-
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string({
-    meta: { description: 'The query language such as KQL or Lucene.' },
-  }),
-});
-
 export const searchSourceSchema = schema.object(
   {
     type: schema.maybe(schema.string()),
@@ -306,7 +252,7 @@ export const searchResultsAttributes = {
   }),
   tags: schema.maybe(
     schema.arrayOf(
-      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
+      schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
     )
   ),
 };

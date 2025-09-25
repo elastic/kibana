@@ -48,6 +48,9 @@ function getNoDataConfigDetails({
     }),
     href: `${basePath}/app/integrations/detail/apm/overview`,
     description,
+    buttonText: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
+      defaultMessage: 'Add the APM integration',
+    }),
   };
 }
 
@@ -79,16 +82,15 @@ export function getNoDataConfig({
   });
 
   return {
-    solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
-      defaultMessage: 'Observability',
-    }),
     action: {
       elasticAgent: {
         title: noDataConfigDetails.title,
         description: noDataConfigDetails.description,
         href: noDataConfigDetails.href,
+        buttonText: noDataConfigDetails.buttonText,
+        'data-test-subj': 'apmNoDataCard',
+        docsLink,
       },
     },
-    docsLink,
   };
 }
