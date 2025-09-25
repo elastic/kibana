@@ -20862,7 +20862,7 @@ Object {
         "presence": "optional",
       },
       "keys": Object {
-        "additional_fields": Object {
+        "additionalFields": Object {
           "flags": Object {
             "default": null,
             "error": [Function],

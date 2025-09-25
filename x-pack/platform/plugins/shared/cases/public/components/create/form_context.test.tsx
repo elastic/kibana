@@ -763,7 +763,7 @@ describe('Create case', () => {
             id: 'resilient-2',
             name: 'My Resilient connector',
             type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
+            fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
           },
         },
       });
@@ -774,7 +774,7 @@ describe('Create case', () => {
           id: 'resilient-2',
           name: 'My Resilient connector',
           type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+          fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
         },
       });
 
