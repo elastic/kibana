@@ -565,9 +565,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -592,9 +594,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -679,9 +683,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -706,9 +712,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -734,9 +742,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => BulkInstallPackagesFromRegistryResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
