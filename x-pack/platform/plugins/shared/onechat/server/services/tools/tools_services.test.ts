@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import { ToolsService } from './tools_service';
-import { createMockedTool } from '../../test_utils/tools';
+import { createMockedBuiltinTool } from '../../test_utils/tools';
 
 jest.mock('@kbn/onechat-server/allow_lists');
 
@@ -35,7 +35,7 @@ describe('ToolsService', () => {
 
       const serviceSetup = service.setup({ logger });
 
-      expect(() => serviceSetup.register(createMockedTool())).not.toThrow();
+      expect(() => serviceSetup.register(createMockedBuiltinTool())).not.toThrow();
     });
 
     it('throws an error trying to register non-allowed built-in tools', () => {
@@ -43,7 +43,8 @@ describe('ToolsService', () => {
 
       const serviceSetup = service.setup({ logger });
 
-      expect(() => serviceSetup.register(createMockedTool())).toThrowErrorMatchingInlineSnapshot(`
+      expect(() => serviceSetup.register(createMockedBuiltinTool()))
+        .toThrowErrorMatchingInlineSnapshot(`
         "Built-in tool with id \\"test-tool\\" is not in the list of allowed built-in tools.
                      Please add it to the list of allowed built-in tools in the \\"@kbn/onechat-server/allow_lists.ts\\" file."
       `);
