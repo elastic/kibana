@@ -21,5 +21,7 @@ export const DeleteManagedAssetsCallout = () => {
 };
 
 export const ErrorDeleteManagedAssetsCallout = () => {
-  return <Component cloudBaseUrl="https://cloud-ui.com/auto_ops" docsLink="https://docs.com/auto_ops" />;
+  return (
+    <Component cloudBaseUrl="https://cloud-ui.com/auto_ops" docsLink="https://docs.com/auto_ops" />
+  );
 };

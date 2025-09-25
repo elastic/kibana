@@ -8,8 +8,7 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, take } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -131,7 +130,9 @@ export class ManagementPlugin
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
         // Check if user has enterprise license
-        const license = deps.licensing ? await deps.licensing.license$.pipe(take(1)).toPromise() : null;
+        const license = deps.licensing
+          ? await deps.licensing.license$.pipe(take(1)).toPromise()
+          : null;
         const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
 
         return renderApp(params, {

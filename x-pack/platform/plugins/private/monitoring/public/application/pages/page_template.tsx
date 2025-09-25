@@ -114,7 +114,8 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   };
 
   const { supported, enabled } = getSetupModeState();
-  const shouldShowAutoOpsPromotion = showAutoOpsPromotion && Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
+  const shouldShowAutoOpsPromotion =
+    showAutoOpsPromotion && Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
 
   return (
     <EuiPageTemplate

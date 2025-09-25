@@ -20,7 +20,6 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
   EuiScreenReaderOnly,
-  EuiCallOut,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
