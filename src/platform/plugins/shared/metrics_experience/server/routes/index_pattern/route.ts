@@ -10,9 +10,9 @@
 import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
-import { parse as dateMathParse } from '@kbn/datemath';
 import { createRoute } from '../create_route';
 import { getIndexPatternMetadata } from './get_index_pattern_metadata';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getIndexPatternMetadataRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}',
@@ -22,16 +22,15 @@ export const getIndexPatternMetadataRoute = createRoute({
       indexPattern: z.string(),
     }),
     query: z.object({
-      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
-      from: z
-        .string()
-        .datetime()
-        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
-        .transform(isoToEpoch),
+      to: z.string().datetime().transform(isoToEpoch),
+      from: z.string().datetime().transform(isoToEpoch),
     }),
   }),
   handler: async ({ context, params, logger }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
+    const esClient = elasticsearch.client.asCurrentUser;
 
     const { indexPattern } = params.path;
     const { from, to } = params.query;

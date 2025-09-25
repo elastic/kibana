@@ -247,6 +247,7 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -257,6 +258,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -311,6 +313,7 @@ export enum RegistryStreamKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
+  ingestion_method = 'ingestion_method',
 }
 
 export interface RegistryStream {
@@ -321,6 +324,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
+  [RegistryStreamKeys.ingestion_method]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
