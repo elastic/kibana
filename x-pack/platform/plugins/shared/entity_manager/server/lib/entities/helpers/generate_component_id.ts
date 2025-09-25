@@ -11,6 +11,7 @@ import {
   ENTITY_HISTORY,
   ENTITY_LATEST,
   ENTITY_RESET,
+  ENTITY_UPDATES,
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
@@ -55,3 +56,6 @@ export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
 export function generateResetIndexTemplateId(definition: EntityDefinition) {
   return `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_RESET}_${definition.id}_index_template` as const;
 }
+
+export const generateUpdatesIndexTemplateId = (definition: EntityDefinition) =>
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_UPDATES}_${definition.id}_index_template` as const;
