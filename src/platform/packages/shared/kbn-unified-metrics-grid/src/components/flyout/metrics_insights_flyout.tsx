@@ -50,7 +50,7 @@ export const MetricInsightsFlyout = ({
     'metricsExperience:flyoutWidth',
     defaultWidth
   );
-  const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+  const { screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
@@ -89,7 +89,7 @@ export const MetricInsightsFlyout = ({
           maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
         }}
         paddingSize="m"
-        {...a11yProps}
+        // {...a11yProps}
       >
         {screenReaderDescription}
         <EuiFlyoutHeader hasBorder>

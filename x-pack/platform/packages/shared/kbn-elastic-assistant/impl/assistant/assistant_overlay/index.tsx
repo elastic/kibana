@@ -163,6 +163,7 @@ export const AssistantOverlay = React.memo(() => {
         data-test-subj="ai-assistant-flyout"
         paddingSize="none"
         hideCloseButton
+        aria-label="ai-assistant-flyout"
       >
         <Assistant
           lastConversation={lastConversation}
