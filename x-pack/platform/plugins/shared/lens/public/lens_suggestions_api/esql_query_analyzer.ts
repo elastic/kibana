@@ -125,7 +125,10 @@ export function analyzeESQLTimeSeriesPattern(
                 firstArg.type === 'column' && 'name' in firstArg && typeof firstArg.name === 'string') {
               const fieldName = firstArg.name;
               if (fieldName === '@timestamp' || fieldName.includes('timestamp') || fieldName.includes('time')) {
-                result.timestampFields.push(fieldName);
+                // Avoid duplicates
+                if (!result.timestampFields.includes(fieldName)) {
+                  result.timestampFields.push(fieldName);
+                }
                 result.isTimeSeries = true;
               }
             }

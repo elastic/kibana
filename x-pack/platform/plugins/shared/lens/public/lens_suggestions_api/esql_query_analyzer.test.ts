@@ -143,9 +143,8 @@ describe('esql_query_analyzer', () => {
     it('should detect multiple timestamp fields', () => {
       const query = {
         esql: `FROM logs 
-               | STATS 
-                   events_by_created = COUNT(*) BY BUCKET(created_timestamp, 1h),
-                   events_by_updated = COUNT(*) BY BUCKET(updated_timestamp, 1h)`,
+               | STATS created_events = COUNT(*) BY BUCKET(created_timestamp, 1h)
+               | STATS updated_events = COUNT(*) BY BUCKET(updated_timestamp, 1h)`,
       };
 
       const result = analyzeESQLTimeSeriesPattern(query);
