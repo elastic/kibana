@@ -8,9 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { layersSchema } from '../layer_schemas';
 
-/**
- * TODO destringify values
- */
 export const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
