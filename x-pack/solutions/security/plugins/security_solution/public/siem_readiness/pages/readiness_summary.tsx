@@ -24,21 +24,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
 import { usePillarsProps, type PillarKey } from '../hooks/use_pillar_props';
 
-const PieChartSize = 200;
-const siemReadinessPieChartChartId = 'siem-readiness-pie-chart';
+type PillarIncludingIncomplete = PillarKey | 'incomplete';
 
 interface LegendTableDataItem {
-  pillarKey: string;
+  pillarKey: PillarKey;
   completed: number;
   total: number;
 }
 
 interface PieChartDataItem {
-  pillarKey: string;
+  pillarKey: PillarIncludingIncomplete;
   completedTasksCount: number;
 }
 
-type PillarIncludingIncomplete = PillarKey | 'incomplete';
+const PIE_CHART_SIZE = 200;
+const siemReadinessPieChartChartId = 'siem-readiness-pie-chart';
 
 const PillarsPieChart: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
@@ -69,8 +69,8 @@ const PillarsPieChart: React.FC = () => {
   });
 
   return (
-    <div style={{ position: 'relative', width: PieChartSize }}>
-      <Chart size={{ height: PieChartSize }}>
+    <div style={{ position: 'relative', width: PIE_CHART_SIZE }}>
+      <Chart size={{ height: PIE_CHART_SIZE }}>
         <Settings theme={themeOverrides} ariaLabelledBy={siemReadinessPieChartChartId} />
         <Partition
           id="pillarDonut"
