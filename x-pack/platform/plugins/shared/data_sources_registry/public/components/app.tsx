@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChatDataRegistryPluginSetup {}
+import React from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChatDataRegistryPluginStart {}
+import { PLUGIN_NAME } from '../../common/constants';
+
+export const DataSourcesRegistryApp = () => {
+  return <h1>{PLUGIN_NAME}</h1>;
+};
