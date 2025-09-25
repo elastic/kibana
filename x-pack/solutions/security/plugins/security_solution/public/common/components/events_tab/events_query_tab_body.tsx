@@ -12,7 +12,7 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
-import { useBulkAddToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
+import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
@@ -177,7 +177,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     scopeId: SourcererScopeName.default,
   }) as CustomBulkAction;
 
-  const caseEventsBulkActions = useBulkAddToCaseActions({
+  const caseEventsBulkActions = useBulkAddEventsToCaseActions({
     clearSelection: () => dispatch(dataTableActions.clearSelected({ id: tableId })),
   });
 

@@ -14,6 +14,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { CustomBulkAction } from '../../../../common/types';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
+/**
+ * Utility function converting timeline items to event attachments
+ */
 const timelineItemsToCaseEventAttachments = (
   timelineItems: TimelineItem[]
 ): CaseAttachmentWithoutOwner[] => {
@@ -34,7 +37,10 @@ const timelineItemsToCaseEventAttachments = (
     .filter(Boolean) as CaseAttachmentWithoutOwner[];
 };
 
-export const useBulkAddToCaseActions = ({
+/**
+ * Prepares bulk actions related to case event attachments
+ */
+export const useBulkAddEventsToCaseActions = ({
   clearSelection,
 }: {
   clearSelection: VoidFunction;
