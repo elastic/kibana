@@ -16,9 +16,11 @@ export interface ConnectorSelectableComponentProps<
   T extends { value: string } = { value: string }
 > {
   /** Pre-configured connectors to display in the selector */
-  preConfiguredConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];
+  preConfiguredConnectors: Array<
+    EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined }
+  >;
   /** Custom connectors to display in the selector */
-  customConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];
+  customConnectors: Array<EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined }>;
   /** Default connector id if a default connector has been configured. */
   defaultConnectorId?: string;
   /** Optional test subject for the component. */
@@ -78,7 +80,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
     [props.customConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
 
-  const options = useMemo<EuiSelectableOption<T>[]>(
+  const options = useMemo<Array<EuiSelectableOption<T>>>(
     () => [
       ...(preConfiguredConnectors.length > 0
         ? [
@@ -91,16 +93,16 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         : []),
       ...preConfiguredConnectors,
       ...(customConnectors.length > 0
-        ? ([
-            { label: i8n.customConnectorLabel, isGroupLabel: true, value: 'customLabel' },
-          ] as EuiSelectableOption<T>[])
+        ? ([{ label: i8n.customConnectorLabel, isGroupLabel: true, value: 'customLabel' }] as Array<
+            EuiSelectableOption<T>
+          >)
         : []),
       ...customConnectors,
     ],
     [preConfiguredConnectors, customConnectors]
   );
 
-  const handleChange = (newOptions: EuiSelectableOption<T>[]) => {
+  const handleChange = (newOptions: Array<EuiSelectableOption<T>>) => {
     const selectedOption = newOptions.find((option) => option.checked === 'on');
     if (!selectedOption) return;
 
