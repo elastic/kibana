@@ -123,7 +123,6 @@ describe('Input package with custom data stream type', () => {
   });
 });
 
-
 describe('OTel input package with custom data stream type', () => {
   beforeEach(() => {
     login();
