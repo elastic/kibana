@@ -76,7 +76,6 @@ describe('EntityStoreCrudClient', () => {
       const doc: Entity = {
         user: {
           name: 'not-allowed',
-          id: ['123'],
         },
         entity: {
           id: 'host-1',
@@ -88,10 +87,10 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
+      await expect(async () => client.upsertEntity('user', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
-            `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
+            `updated without forcing it (?force=true): entity.type, entity.sub_type`
         )
       );
     });
@@ -106,9 +105,6 @@ describe('EntityStoreCrudClient', () => {
           id: 'host-1',
           attributes: {
             privileged: true,
-          },
-          lifecycle: {
-            first_seen: new Date().toISOString(),
           },
         },
       };
@@ -137,9 +133,6 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
-          },
         },
       };
 
@@ -162,9 +155,7 @@ describe('EntityStoreCrudClient', () => {
           source:
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
-            `ctx._source['entity']['attributes']['Privileged'] = true;` +
-            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['attributes']['Privileged'] = true;`,
         },
       });
 
@@ -179,10 +170,6 @@ describe('EntityStoreCrudClient', () => {
               id: 'host-1',
               attributes: {
                 Privileged: true,
-              },
-              lifecycle: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                First_seen: '1995-12-17T03:24:00',
               },
             },
           },
@@ -281,7 +268,7 @@ describe('EntityStoreCrudClient', () => {
 
       const doc: Entity = {
         host: {
-          name: 'not-allowed',
+          name: 'should not be there',
           id: ['123'],
         },
         entity: {
@@ -313,8 +300,17 @@ describe('EntityStoreCrudClient', () => {
           lang: 'painless',
           source:
             `ctx._source['host'] = ctx._source['host'] == null ? [:] : ctx._source['host'];` +
-            `ctx._source['host']['name'] = 'not-allowed';` +
-            `ctx._source['host']['id'] = ['123'];` +
+            `def collectMap = [:];` +
+            `collectMap['host.id'] = new HashSet();` +
+            `collectMap['host.id'].addAll(['123']);` +
+            `if (!(ctx?._source['host']['id'] == null || ((ctx._source['host']['id'] instanceof Collection || ctx._source['host']['id'] instanceof String || ctx._source['host']['id'] instanceof Map) && ctx._source['host']['id'].isEmpty()))) {` +
+            `  if(ctx._source['host']['id'] instanceof Collection) {` +
+            `    collectMap['host.id'].addAll(ctx._source['host']['id']);` +
+            `  } else {` +
+            `    collectMap['host.id'].add(ctx._source['host']['id']);` +
+            `  }` +
+            `}` +
+            `ctx._source['host']['id'] = new ArrayList(collectMap['host.id']).subList(0, (int) Math.min(10, collectMap['host.id'].size()));` +
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
