@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml, ForEachContextSchema } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
+import type { z } from '@kbn/zod';
 import _ from 'lodash';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
@@ -58,7 +59,7 @@ function getStepContextSchemaEnrichmentEntries(
   workflowExecutionGraph: WorkflowGraph,
   stepId: string
 ) {
-  const enrichments: { key: 'foreach'; value: typeof ForEachContextSchema }[] = [];
+  const enrichments: { key: 'foreach'; value: z.ZodType }[] = [];
   const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
   for (const node of predecessors) {
     if (isEnterForeach(node)) {
