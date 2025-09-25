@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
@@ -149,15 +150,13 @@ export const calculateScoresWithESQL = async (
     return results;
   });
 
-const getFilters = (
-  options: CalculateScoresParams & { filters?: Array<{ entity_types: string[]; filter: string }> }
-) => {
+const getFilters = (options: CalculateScoresParams) => {
   const {
     excludeAlertStatuses = [],
     excludeAlertTags = [],
     range,
     filter: userFilter,
-    filters: customFilters = [],
+    filters: customFilters,
   } = options;
   const filters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
   if (excludeAlertStatuses.length > 0) {
@@ -174,16 +173,21 @@ const getFilters = (
     });
   }
 
-  // Add custom KQL filters (applies to all entity types in ES|QL)
-  customFilters.forEach((f) => {
-    try {
-      const esQuery = toElasticsearchQuery(fromKueryExpression(f.filter));
-      filters.push(esQuery);
-    } catch (error) {
-      // Log warning but don't fail the entire query
-      // Note: Invalid KQL filters are silently ignored to prevent query failures
-    }
-  });
+  // Add custom filters if provided
+  if (customFilters && customFilters.length > 0) {
+    customFilters.forEach((customFilter) => {
+      try {
+        const kqlQuery = fromKueryExpression(customFilter.filter);
+        const esQuery = toElasticsearchQuery(kqlQuery);
+        if (esQuery) {
+          filters.push(esQuery);
+        }
+      } catch (error) {
+        // Silently ignore invalid KQL filters to prevent query failures
+        // This matches the behavior in the scripted metrics implementation
+      }
+    });
+  }
 
   return filters;
 };
