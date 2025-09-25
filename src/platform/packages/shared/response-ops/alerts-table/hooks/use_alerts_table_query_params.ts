@@ -10,21 +10,25 @@
 import type { Dispatch } from 'react';
 import { useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import type { SetRequired } from 'type-fest';
 import type { AlertsTableProps, BulkActionsReducerAction } from '../types';
 import { BulkActionsVerbs } from '../types';
 
 export interface UseAlertsTableQueryParamsOptions
-  extends Pick<
-    AlertsTableProps,
-    | 'ruleTypeIds'
-    | 'consumers'
-    | 'query'
-    | 'sort'
-    | 'runtimeMappings'
-    | 'pageIndex'
-    | 'pageSize'
-    | 'minScore'
-    | 'trackScores'
+  extends SetRequired<
+    Pick<
+      AlertsTableProps,
+      | 'ruleTypeIds'
+      | 'consumers'
+      | 'query'
+      | 'sort'
+      | 'runtimeMappings'
+      | 'pageIndex'
+      | 'pageSize'
+      | 'minScore'
+      | 'trackScores'
+    >,
+    'sort'
   > {
   fields: Array<{
     field: string;

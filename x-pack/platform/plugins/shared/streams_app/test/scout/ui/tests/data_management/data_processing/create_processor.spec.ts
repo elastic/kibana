@@ -31,7 +31,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   test('should create a new processor successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
     await pageObjects.streams.saveProcessorsListChanges();
@@ -63,7 +63,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   }) => {
     // Create a new processor ready to be saved
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
 
@@ -83,7 +83,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickAddProcessor();
 
     // Fill in some data
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
 
     // Cancel the changes and confirm discard
@@ -100,9 +100,9 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   }) => {
     await pageObjects.streams.clickAddProcessor();
     // Field can be automatically filled based on the samples, empty it.
-    await pageObjects.streams.fillFieldInput('');
+    await pageObjects.streams.fillProcessorFieldInput('');
 
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.clickSaveProcessor();
     await expect(page.getByText('Empty patterns are not allowed.')).toBeVisible();
 

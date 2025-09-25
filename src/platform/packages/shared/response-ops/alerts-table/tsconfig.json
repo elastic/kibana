@@ -45,5 +45,6 @@
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
     "@kbn/licensing-types",
+    "@kbn/field-types",
   ]
 }

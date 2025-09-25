@@ -39,6 +39,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import type { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
+import deepEqual from 'fast-deep-equal';
 import { useAlertsTableQueryParams } from '../hooks/use_alerts_table_query_params';
 import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
@@ -330,12 +331,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -343,6 +346,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError?.message, queryParams.sort]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -423,6 +436,32 @@ const AlertsTableContent = typedForwardRef(
       },
       [id, setSort, visibleColumns]
     );
+
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
+      if (fieldWithSortingError) {
+        const newSort = queryParams.sort.filter(
+          (sortField) => !deepEqual(sortField, fieldWithSortingError)
+        );
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        storageAlertsTable.current = {
+          columns: DEFAULT_COLUMNS,
+          sort: DEFAULT_SORT,
+          visibleColumns: DEFAULT_COLUMNS.map((c) => c.id),
+        };
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(DEFAULT_SORT);
+        onResetColumns();
+      }
+    }, [fieldWithSortingError, queryParams.sort, id, setSort, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -581,6 +620,9 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}

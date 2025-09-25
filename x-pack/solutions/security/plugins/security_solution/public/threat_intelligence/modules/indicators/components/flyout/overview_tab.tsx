@@ -96,7 +96,7 @@ export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h5>
