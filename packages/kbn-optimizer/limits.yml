@@ -29,7 +29,7 @@ pageLoadAssetSize:
   dashboardEnhanced: 12500
   dashboardMarkdown: 5134
   data: 453742
-  dataQuality: 10387
+  dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8926
   dataViewEditor: 7735
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 67975
   streams: 8494
-  streamsApp: 15200
+  streamsApp: 15500
   streamsAppWrapper: 5787
   synthetics: 31571
   telemetry: 25755
