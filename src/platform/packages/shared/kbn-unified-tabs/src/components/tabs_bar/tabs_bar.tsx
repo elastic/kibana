@@ -50,6 +50,14 @@ const droppableCss = css`
   wrap: no-wrap;
 `;
 
+enum shortcutActions {
+  MOVE_LEFT = 'moveLeft',
+  MOVE_RIGHT = 'moveRight',
+  MOVE_HOME = 'moveHome',
+  MOVE_END = 'moveEnd',
+  CLOSE_TAB = 'closeTab',
+}
+
 export type TabsBarProps = Pick<
   TabProps,
   'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
@@ -103,9 +111,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     const hasSentMaxReachedEventRef = useRef(false);
 
     const emitOnKeyUsedEvent = useCallback(
-      (key: string) => {
+      (shortcut: string) => {
         onEBTEvent('tabsKeyboardShortcutsUsed', {
-          keyUsed: key,
+          shortcutUsed: shortcut,
         });
       },
       [onEBTEvent]
@@ -198,7 +206,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex > 0 ? selectedItemIndex - 1 : lastItemIndex
           );
-          emitOnKeyUsedEvent(event.key);
+          emitOnKeyUsedEvent(shortcutActions.MOVE_LEFT);
 
           return;
         }
@@ -208,7 +216,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             selectedItemIndex < lastItemIndex ? selectedItemIndex + 1 : firstItemIndex
           );
 
-          emitOnKeyUsedEvent(event.key);
+          emitOnKeyUsedEvent(shortcutActions.MOVE_RIGHT);
 
           return;
         }
@@ -216,7 +224,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         if (event.key === keys.HOME && items.length > 0) {
           await selectAndMoveFocusToItemIndex(0);
 
-          emitOnKeyUsedEvent(event.key);
+          emitOnKeyUsedEvent(shortcutActions.MOVE_HOME);
 
           return;
         }
@@ -224,7 +232,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         if (event.key === keys.END && items.length > 0) {
           await selectAndMoveFocusToItemIndex(lastItemIndex);
 
-          emitOnKeyUsedEvent(event.key);
+          emitOnKeyUsedEvent(shortcutActions.MOVE_END);
 
           return;
         }
@@ -236,7 +244,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         ) {
           await onClose?.(selectedItem);
 
-          emitOnKeyUsedEvent(event.key);
+          emitOnKeyUsedEvent(shortcutActions.CLOSE_TAB);
 
           return;
         }
