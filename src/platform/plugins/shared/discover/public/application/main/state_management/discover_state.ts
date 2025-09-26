@@ -229,7 +229,7 @@ export function getDiscoverStateContainer({
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   let tabId = originalTabId;
-  const injectCurrentTab = createTabActionInjector(tabId);
+  let injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
   /**
@@ -433,6 +433,7 @@ export function getDiscoverStateContainer({
   const migrateToTabId = (newTabId: string) => {
     tabId = newTabId;
     appStateContainer.migrateToTabId(newTabId);
+    injectCurrentTab = createTabActionInjector(newTabId);
   };
 
   const stopSyncing = () => {
