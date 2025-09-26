@@ -191,6 +191,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         onScanButtonClick={onScanButtonClick}
         inferenceEnabled={inferenceEnabled}
         kbStatus={kbStatus}
+        defendInsightsPolicyResponseFailureEnabled={defendInsightsPolicyResponseFailureEnabled}
       />
       <EuiSpacer size={'m'} />
       <WorkflowInsightsResults

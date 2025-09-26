@@ -661,13 +661,27 @@ async function waitForKB(kbDataClient: AIAssistantKnowledgeBaseDataClient | null
   }
 
   if (kbDataClient?.isSetupInProgress) {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       const interval = 30000;
+      const maxTimeout = 10 * 60 * 1000;
+      const startTime = Date.now();
+
       const checkKBStatus = async () => {
-        if (await kbDataClient.isDefendInsightsDocsLoaded()) {
-          resolve();
-        } else {
-          setTimeout(checkKBStatus, interval);
+        try {
+          const elapsedTime = Date.now() - startTime;
+
+          if (elapsedTime > maxTimeout) {
+            reject(new Error(`Knowledge base setup timed out after ${maxTimeout / 1000} seconds`));
+            return;
+          }
+
+          if (await kbDataClient.isDefendInsightsDocsLoaded()) {
+            resolve();
+          } else {
+            setTimeout(checkKBStatus, interval);
+          }
+        } catch (error) {
+          reject(error);
         }
       };
 

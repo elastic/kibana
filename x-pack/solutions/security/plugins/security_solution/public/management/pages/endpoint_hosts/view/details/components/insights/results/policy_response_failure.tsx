@@ -32,17 +32,8 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
   const { ariaLabel, actionText, expandMessage, collapseMessage } =
     WORKFLOW_INSIGHTS.issues.remediationButton.policyResponseFailure;
 
-  const parsedRemediation = useMemo(() => {
-    try {
-      // remove escape characters (e.g. C:\\file\\path -> C:\file\path)
-      return JSON.parse(`"${insight.remediation.descriptive ?? ''}"`);
-    } catch {
-      return insight.remediation.descriptive ?? '';
-    }
-  }, [insight.remediation.descriptive]);
-
   const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
-    parsedRemediation,
+    (insight.remediation.descriptive ?? '').replace(/\\\\/g, '\\').replace(/\\n/g, '\n'),
     120
   );
 

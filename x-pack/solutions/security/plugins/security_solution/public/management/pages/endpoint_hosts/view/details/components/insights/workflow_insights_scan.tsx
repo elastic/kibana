@@ -48,6 +48,7 @@ interface WorkflowInsightsScanSectionProps {
   }) => void;
   inferenceEnabled: boolean;
   kbStatus?: ReadKnowledgeBaseResponse;
+  defendInsightsPolicyResponseFailureEnabled: boolean;
 }
 
 export const WorkflowInsightsScanSection = ({
@@ -55,6 +56,7 @@ export const WorkflowInsightsScanSection = ({
   onScanButtonClick,
   inferenceEnabled,
   kbStatus,
+  defendInsightsPolicyResponseFailureEnabled,
 }: WorkflowInsightsScanSectionProps) => {
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
@@ -182,34 +184,36 @@ export const WorkflowInsightsScanSection = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {!kbStatus?.defend_insights_exists && (
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
-            <EuiFlexItem>
-              <EuiText size="s">
-                {kbStatus?.is_setup_in_progress ? (
-                  setupOngoing
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupRequired"
-                    defaultMessage="This scan is for incompatible antiviruses. To also scan for Policy Response issues, you should first {setupKB}. This may take a while."
-                    values={{ setupKB: <b>{setupKB}</b> }}
-                  />
-                )}
-                {!kbStatus?.is_setup_in_progress && (
-                  <EuiLink
-                    href={docLinks.links.securitySolution.aiAssistant.knowledgeBaseHome}
-                    target="_blank"
-                  >
-                    {` ${docsLinkText}`}
-                  </EuiLink>
-                )}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SetupKnowledgeBaseButton fill={false} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        {defendInsightsPolicyResponseFailureEnabled &&
+          !!kbStatus &&
+          !kbStatus?.defend_insights_exists && (
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {kbStatus?.is_setup_in_progress ? (
+                    setupOngoing
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupRequired"
+                      defaultMessage="This scan is for incompatible antiviruses. To also scan for Policy Response issues, you should first {setupKB}. This may take a while."
+                      values={{ setupKB: <b>{setupKB}</b> }}
+                    />
+                  )}
+                  {!kbStatus?.is_setup_in_progress && (
+                    <EuiLink
+                      href={docLinks.links.securitySolution.aiAssistant.knowledgeBaseHome}
+                      target="_blank"
+                    >
+                      {` ${docsLinkText}`}
+                    </EuiLink>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SetupKnowledgeBaseButton fill={false} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
       </EuiFlexGroup>
     </EuiPanel>
   );
