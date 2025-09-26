@@ -98,7 +98,7 @@ const version3: SavedObjectsModelVersion = {
         return {
           attributes: {
             ...document.attributes,
-            excludeAlertStatuses: document.attributes.excludeAlertStatuses || ['closed'],
+            enableResetToZero: false
           },
         };
       },
