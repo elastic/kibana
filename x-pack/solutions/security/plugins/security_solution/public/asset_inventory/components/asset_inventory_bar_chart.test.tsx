@@ -52,12 +52,12 @@ describe('handleElementClick', () => {
     });
   });
 
-  it('should call setQuery with only entity.type filter when sub_type is "Unknown"', () => {
+  it('should call setQuery with only entity.type filter when sub_type is "Uncategorized"', () => {
     const setQuery = jest.fn();
 
     const mockDatum = {
       [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',
-      [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Unknown',
+      [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Uncategorized',
       count: 1,
     };
 
