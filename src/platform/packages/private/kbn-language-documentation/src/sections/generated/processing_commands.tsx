@@ -314,6 +314,96 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.fork', {
+        defaultMessage: 'FORK',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
+            defaultMessage: `### FORK
+\`FORK\` creates multiple execution branches to operate on the same input data and combines the results in a single output table.
+
+\`\`\` esql
+FORK ( <processing_commands> ) ( <processing_commands> ) ... ( <processing_commands> )
+\`\`\`
+
+**Description**
+
+The \`FORK\` processing command creates multiple execution branches to operate
+on the same input data and combines the results in a single output table. A discriminator column (\`_fork\`) is added to identify which branch each row came from.
+
+**Branch identification:**
+- The \`_fork\` column identifies each branch with values like \`fork1\`, \`fork2\`, \`fork3\`, etc.
+- Values correspond to the order in which branches are defined
+- \`fork1\` always indicates the first branch
+
+**Column handling:**
+- \`FORK\` branches can output different columns
+- Columns with the same name must have the same data type across all branches
+- Missing columns are filled with \`null\` values
+
+**Row ordering:**
+- \`FORK\` preserves row order within each branch
+- Rows from different branches may be interleaved
+- Use \`SORT _fork\` to group results by branch
+
+NOTE:
+\`FORK\` branches default to \`LIMIT 1000\` if no \`LIMIT\` is provided.
+
+**Limitations**
+
+- \`FORK\` supports at most 8 execution branches.
+- Using remote cluster references and \`FORK\` is not supported.
+- Using more than one \`FORK\` command in a query is not supported.
+
+**Examples**
+
+In the following example, each \`FORK\` branch returns one row.
+Notice how \`FORK\` adds a \`_fork\` column that indicates which row the branch originates from:
+
+\`\`\` esql
+FROM employees
+| FORK ( WHERE emp_no == 10001 )
+       ( WHERE emp_no == 10002 )
+| KEEP emp_no, _fork
+| SORT emp_no
+\`\`\`
+
+| emp_no:integer | _fork:keyword |
+| --- | --- |
+| 10001 | fork1 |
+| 10002 | fork2 |
+
+The next example, returns total number of rows that match the query along with
+the top five rows sorted by score.
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE author:"Faulkner"
+| EVAL score = round(_score, 2)
+| FORK (SORT score DESC, author | LIMIT 5 | KEEP author, score)
+       (STATS total = COUNT(*))
+| SORT _fork, score DESC, author
+\`\`\`
+
+| author:text | score:double | _fork:keyword | total:long |
+| --- | --- | --- | --- |
+| William Faulkner | 2.39 | fork1 | null |
+| William Faulkner | 2.39 | fork1 | null |
+| Colleen Faulkner | 1.59 | fork1 | null |
+| Danny Faulkner | 1.59 | fork1 | null |
+| Keith Faulkner | 1.59 | fork1 | null |
+| null | null | fork2 | 18 |
+            `,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          })}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.grok', {
         defaultMessage: 'GROK',
       }),
