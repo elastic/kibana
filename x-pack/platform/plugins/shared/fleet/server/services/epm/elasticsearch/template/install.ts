@@ -50,6 +50,8 @@ import {
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
+import { OTEL_COLLECTOR_INPUT_TYPE, OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -364,6 +366,7 @@ export function buildComponentTemplates(params: {
   lifecycle?: IndexTemplate['template']['lifecycle'];
   fieldCount?: number;
   type?: string;
+  isOtelInputType?: boolean;
 }) {
   const {
     templateName,
@@ -376,6 +379,7 @@ export function buildComponentTemplates(params: {
     lifecycle,
     fieldCount,
     type,
+    isOtelInputType,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -410,9 +414,8 @@ export function buildComponentTemplates(params: {
 
   const mappingsDynamicTemplates = uniqBy(
     concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
-    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+    (dynamicTemplate) => Object.keys(dynamicTemplate)[0]
   );
-
   const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
@@ -423,6 +426,17 @@ export function buildComponentTemplates(params: {
     (experimentalDataStreamFeature?.features.synthetic_source === true ||
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
+
+  const isPkgConfiguringDynamicSettings =
+    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.dynamic !== undefined;
+
+  // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
+  // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
+  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringDynamicSettings;
+
+  // Override `subobjects: false` to avoid conflicts with traces-otel@mappings
+  const shouldOverrideSettingsForOtelInputsTraces =
+    shouldOverrideSettingsForOtelInputs && type === 'traces' && !indexTemplateMappings.runtime;
 
   templatesMap[packageTemplateName] = {
     template: {
@@ -457,6 +471,8 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
+        ...(shouldOverrideSettingsForOtelInputs ? { dynamic: true } : {}),
+        ...(shouldOverrideSettingsForOtelInputsTraces ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
@@ -466,6 +482,15 @@ export function buildComponentTemplates(params: {
   // Stub custom template
   if (type) {
     const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
+  if (type && isOtelInputType) {
+    const customTemplateName = `${type}-${OTEL_TEMPLATE_SUFFIX}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
     templatesMap[customTemplateName] = {
       template: {
         settings: {},
@@ -626,7 +651,10 @@ export function prepareTemplate({
     fieldAssetsMap,
     dataStream.path
   );
-
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  const isOtelInputType =
+    experimentalFeature.enableOtelIntegrations &&
+    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;
@@ -635,7 +663,7 @@ export function prepareTemplate({
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
   const templateName = generateTemplateName(dataStream);
-  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
@@ -659,6 +687,7 @@ export function prepareTemplate({
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
     type: dataStream.type,
+    isOtelInputType,
   });
 
   const template = getTemplate({
@@ -668,9 +697,9 @@ export function prepareTemplate({
     templatePriority,
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
-    mappings,
     isIndexModeTimeSeries,
     type: dataStream.type,
+    isOtelInputType,
   });
 
   return {

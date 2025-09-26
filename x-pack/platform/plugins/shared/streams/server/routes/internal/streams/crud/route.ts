@@ -32,15 +32,32 @@ export const listStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: ListStreamDetail[]; canReadFailureStore: boolean }> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const streams = await streamsClient.listStreamsWithDataStreamExistence();
 
     const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
-    const dataStreams = await processAsyncInChunks(streamNames, (streamNamesChunk) =>
-      scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
-    );
+    let canReadFailureStore = true;
+
+    const dataStreams = await processAsyncInChunks(streamNames, async (streamNamesChunk) => {
+      if (streamNamesChunk.length === 0) {
+        return { data_streams: [] };
+      }
+      const [{ read_failure_store: readFailureStore }, dataStreamsChunk] = await Promise.all([
+        streamsClient.getPrivileges(streamNamesChunk),
+        scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk }),
+      ]);
+
+      if (!readFailureStore) {
+        canReadFailureStore = false;
+      }
+
+      return dataStreamsChunk;
+    });
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
       if (Streams.GroupStream.Definition.is(stream)) {
@@ -57,7 +74,7 @@ export const listStreamsRoute = createServerRoute({
       return acc;
     }, []);
 
-    return { streams: enrichedStreams };
+    return { streams: enrichedStreams, canReadFailureStore };
   },
 });
 
