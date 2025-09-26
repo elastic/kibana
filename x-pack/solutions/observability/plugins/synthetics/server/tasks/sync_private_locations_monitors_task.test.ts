@@ -484,7 +484,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1-space1'];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any);
+      const result = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        {},
+        new Date()
+      );
       expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
       expect(result.performSync).toBe(false);
     });
@@ -495,7 +499,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1-space1', 'unexpected-policy'];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any);
+      const result = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        {},
+        new Date()
+      );
       expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
         mockSoClient,
         expect.anything(),
@@ -511,13 +519,21 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield [];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any);
+      const result = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        {},
+        new Date()
+      );
       expect(result.performSync).toBe(true);
     });
 
     it('should handle errors gracefully and return performSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any);
+      const result = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        {},
+        new Date()
+      );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toHaveProperty('performSync');
     });
