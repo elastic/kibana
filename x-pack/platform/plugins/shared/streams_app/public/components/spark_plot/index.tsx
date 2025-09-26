@@ -41,6 +41,8 @@ export function SparkPlot({
   annotations,
   compressed,
   xFormatter: givenXFormatter,
+  hideXAxis = false,
+  height,
 }: {
   id: string;
   name?: string;
@@ -49,6 +51,8 @@ export function SparkPlot({
   annotations?: SparkPlotAnnotation[];
   compressed?: boolean;
   xFormatter?: TickFormatter;
+  hideXAxis?: boolean;
+  height?: number;
 }) {
   const {
     dependencies: {
@@ -65,10 +69,15 @@ export function SparkPlot({
       vizColors: euiPaletteWarm(1),
     },
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    chartPaddings: {
-      top: 12,
-      bottom: 12,
-    },
+    chartPaddings: hideXAxis
+      ? {
+          top: 0,
+          bottom: 0,
+        }
+      : {
+          top: 12,
+          bottom: 12,
+        },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
@@ -109,7 +118,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: '100%',
-        height: !compressed ? 144 : 48,
+        height: height ? height : !compressed ? 144 : 48,
       }}
     >
       <Tooltip
@@ -118,7 +127,7 @@ export function SparkPlot({
         }}
       />
       <Axis id="y_axis" position="left" hide={compressed} domain={{ min: 0, max: NaN }} />
-      <Axis id="x_axis" position="bottom" hide={compressed} />
+      <Axis id="x_axis" position="bottom" hide={compressed || hideXAxis} />
       <Settings
         theme={[sparkplotChartTheme, baseTheme]}
         baseTheme={defaultTheme}
