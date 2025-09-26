@@ -65,6 +65,7 @@ import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -97,7 +98,7 @@ import type { MetricVisualizationState } from '../visualizations/metric/types';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
 
-export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
+export type LensSavedObjectAttributes = Simplify<Omit<LensDocument, 'savedObjectId' | 'type'>>;
 
 /**
  * This visualization context can have a different attributes than the
@@ -151,9 +152,9 @@ export interface PreventableEvent {
   preventDefault(): void;
 }
 
-interface LensByValue {
-  // by-value
-  attributes?: Simplify<LensSavedObjectAttributes>;
+interface LensByValueBase {
+  savedObjectId?: string;
+  attributes?: LensSavedObjectAttributes;
 }
 
 export interface LensOverrides {
@@ -175,10 +176,9 @@ export interface LensOverrides {
 /**
  * Lens embeddable props broken down by type
  */
-
-export interface LensByReference {
-  // by-reference
-  savedObjectId?: string;
+interface LensByReferenceBase {
+  savedObjectId?: string; // really should be never
+  attributes?: never;
 }
 
 interface ContentManagementProps {
@@ -186,9 +186,9 @@ interface ContentManagementProps {
   managed?: boolean;
 }
 
-export type LensPropsVariants = (LensByValue & LensByReference) & {
+interface LensWithReferences {
   references?: Reference[];
-};
+}
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData$: PublishingSubject<boolean>;
@@ -275,24 +275,47 @@ interface LensRequestHandlersProps {
   abortController?: AbortController;
 }
 
-/**
- * Compose together all the props and make them inspectable via Simplify
- *
- * The LensSerializedState is the state stored for a dashboard panel
- * that contains:
- * * Lens document state
- * * Panel settings
- * * other props from the embeddable
- */
-export type LensSerializedState = Simplify<
-  LensPropsVariants &
-    LensOverrides &
+type LensSerializedSharedState = Simplify<
+  LensOverrides &
+    LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
+
+export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;
+export type LensByRefSerializedState = Simplify<LensSerializedSharedState & LensByReferenceBase>;
+
+/**
+ * Combined properties of serialized state stored on dashboard panel
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
+
+type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
+  attributes: LensApiState;
+};
+
+export type LensByValueSerializedAPIConfig = Simplify<
+  LensSerializedSharedState & LensByValueAPIConfigBase
+>;
+export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
+
+/**
+ * Combined properties of API config used in dashboard API for lens panels
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
 
 /**
  * Custom props exposed on the Lens exported component
@@ -351,9 +374,9 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
  * that contains:
- * * Lens document state
- * * Panel settings
- * * other props from the embeddable
+ * - Lens document state
+ * - Panel settings
+ * - other props from the embeddable
  */
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
@@ -384,7 +407,7 @@ export interface LensInspectorAdapters {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState> &
+  DefaultEmbeddableApi<LensSerializedAPIConfig> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -406,7 +429,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     // Let the container know the view mode
     PublishesViewMode &
     // Let the container know the saved object id
