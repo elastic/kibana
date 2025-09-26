@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTruncateText } from '@kbn/react-hooks';
 import {
   EuiFlexGroup,
