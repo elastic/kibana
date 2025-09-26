@@ -318,8 +318,8 @@ $$$server-compression$$$ `server.compression.enabled`
 `server.cors.allowCredentials`
 :   Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-`server.cors.allowOrigin`
-:   experimental::[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
+`server.cors.allowOrigin` {applies_to}`stack: preview`
+:   List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
 
 `server.compression.referrerWhitelist`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**
