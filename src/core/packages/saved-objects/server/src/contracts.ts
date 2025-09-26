@@ -138,6 +138,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the default index used for saved objects.
    */
   getDefaultIndex: () => string;
+
+  /**
+   * Returns whether the access control feature is enabled for saved objects.
+   */
+  isAccessControlEnabled: () => boolean;
 }
 
 /**

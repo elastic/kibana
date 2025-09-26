@@ -127,9 +127,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
-      ...(_source.accessControl && {
-        accessControl: _source.accessControl,
-      }),
+      ...(this.registry.isAccessControlEnabled() &&
+        _source.accessControl && {
+          accessControl: _source.accessControl,
+        }),
     };
   }
 

@@ -7,7 +7,7 @@
 
 import type { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
-import { fetchEsqlQuery, getEsqlQuery, getSourceFields, generateLink } from './fetch_esql_query';
+import { fetchEsqlQuery, getEsqlQuery, generateLink } from './fetch_esql_query';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -100,6 +100,7 @@ describe('fetchEsqlQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (e) {
         expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
@@ -163,6 +164,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       const warning =
@@ -218,6 +220,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       const warning =
@@ -270,6 +273,7 @@ describe('fetchEsqlQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(result).toEqual({
@@ -334,32 +338,6 @@ describe('fetchEsqlQuery', () => {
           },
           "query": "from test | limit 100",
         }
-      `);
-    });
-  });
-
-  describe('getSourceFields', () => {
-    it('should generate the correct source fields', async () => {
-      const sourceFields = getSourceFields({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'ecs.version', type: 'keyword' },
-          { name: 'error.code', type: 'keyword' },
-        ],
-        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
-      });
-
-      expect(sourceFields).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "ecs.version",
-            "searchPath": "ecs.version",
-          },
-          Object {
-            "label": "error.code",
-            "searchPath": "error.code",
-          },
-        ]
       `);
     });
   });
@@ -460,6 +438,7 @@ describe('fetchEsqlQuery', () => {
       spacePrefix: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
+      sourceFields: [],
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
