@@ -31,7 +31,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { CreateIndexModal } from './create_index_modal';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
 
 export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
@@ -74,9 +74,8 @@ export const IndexSelectorModal = ({
   const debouncedSetSearchQuery = useDebounceFn(setSearchQuery, DEBOUNCE_OPTIONS);
   const { registerPrivMonMonitoredIndices, updatePrivMonMonitoredIndices } =
     useEntityAnalyticsRoutes();
-  const { services } = useKibana();
-  const maxUsersAllowed =
-    services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+  const { userStats } = useUserLimitStatus();
+  const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
   const options = useMemo(
     () =>
       indices?.map((index) => ({
@@ -191,6 +190,7 @@ export const IndexSelectorModal = ({
               iconType="plusInCircle"
               onClick={showCreateIndexModal}
               data-test-subj="create-index-button"
+              aria-label="Cancel"
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
@@ -200,7 +200,7 @@ export const IndexSelectorModal = ({
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose}>
+              <EuiButtonEmpty onClick={onClose} aria-label="Cancel">
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

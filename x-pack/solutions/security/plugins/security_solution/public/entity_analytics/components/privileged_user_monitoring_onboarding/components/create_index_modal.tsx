@@ -27,7 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
 
 enum IndexMode {
   STANDARD = 'standard',
@@ -77,9 +77,8 @@ export const CreateIndexModal = ({
   const [indexMode, setIndexMode] = useState<IndexMode>(IndexMode.STANDARD);
   const [error, setError] = useState<string | null>(null);
   const { createPrivMonImportIndex } = useEntityAnalyticsRoutes();
-  const { services } = useKibana();
-  const maxUsersAllowed =
-    services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+  const { userStats } = useUserLimitStatus();
+  const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
 
   const handleCreate = useCallback(async () => {
     setError(null);
@@ -117,7 +116,9 @@ export const CreateIndexModal = ({
       <EuiModalBody>
         {error && (
           <>
-            <EuiCallOut color="danger">{error}</EuiCallOut>
+            <EuiCallOut announceOnMount color="danger">
+              {error}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
@@ -162,7 +163,7 @@ export const CreateIndexModal = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose}>
+              <EuiButtonEmpty onClick={onClose} aria-label="Cancel">
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

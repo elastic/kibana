@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormatBytes } from '../../../../../../common/components/formatted_bytes';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES } from '../../../../../../../common/constants';
 import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from '../constants';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useUserLimitStatus } from '../../../../../hooks/use_privileged_monitoring_health';
 
 interface PrivilegedUserMonitoringFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
@@ -42,10 +42,8 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
-    const { services } = useKibana();
-    const maxUsersAllowed =
-      services.config?.entityAnalytics?.monitoring?.privileges?.users?.maxPrivilegedUsersAllowed ??
-      10000;
+    const { userStats } = useUserLimitStatus();
+    const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
 
     const listStyle = css`
       list-style-type: disc;
