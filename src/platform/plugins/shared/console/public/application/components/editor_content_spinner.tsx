@@ -17,7 +17,7 @@ const useStyles = () => {
   return {
     editorSpinner: css`
       width: 100%;
-      background-color: ${euiTheme.components.forms.background};
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
     `,
   };
 };

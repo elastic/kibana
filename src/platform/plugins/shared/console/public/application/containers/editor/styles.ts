@@ -12,7 +12,8 @@ import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 
 export const useActionStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const EuiThemeContext = useEuiTheme();
+  const { euiTheme } = EuiThemeContext;
   return {
     actions: css`
       position: absolute;
@@ -21,7 +22,7 @@ export const useActionStyles = () => {
       // Adjust for possible scrollbars
       right: ${euiTheme.size.base};
       height: ${euiTheme.size.l};
-      background-color: ${euiTheme.components.forms.background}
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
       border-radius: ${euiTheme.size.xs};
       box-shadow: 0 0 calc(${euiTheme.size.xs} * 0.5) calc(${euiTheme.size.xs} * 0.5)
         ${euiTheme.colors.lightShade};
