@@ -14,7 +14,7 @@ import { pickFromObjectSchema } from '../../../utils';
 
 export const lensCMCreateOptionsSchema = schema.object(
   {
-    ...pickFromObjectSchema(createOptionsSchemas, ['overwrite', 'references']),
+    ...pickFromObjectSchema(createOptionsSchemas, ['id', 'overwrite', 'references']),
   },
   { unknowns: 'forbid' }
 );

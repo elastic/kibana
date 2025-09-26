@@ -53,6 +53,5 @@ export const lensCommonSavedObjectSchema = savedObjectSchema(
   )
 );
 
-export const lensItemDataSchema = lensItemSchema.extends({
-  id: undefined,
-});
+// TODO: cleanup data for update, should we forbid or just ignore body.id on update?
+export const lensItemDataSchema = lensItemSchema.extends({});

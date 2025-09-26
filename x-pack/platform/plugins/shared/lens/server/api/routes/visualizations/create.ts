@@ -83,7 +83,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       try {
         // Note: these types are to enforce loose param typings of client methods
         const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references };
+        const options: LensCreateIn['options'] = { ...req.query, references, id: req.body.id };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {
