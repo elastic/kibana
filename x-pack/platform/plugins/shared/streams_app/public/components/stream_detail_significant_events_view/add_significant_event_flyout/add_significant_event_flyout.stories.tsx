@@ -44,6 +44,7 @@ export const Default: StoryFn<{}> = () => {
             field: 'host.name',
             eq: 'test.host',
           },
+          description: '',
         },
       ]}
     />
@@ -63,6 +64,7 @@ export const Edit: StoryFn<{}> = () => {
             field: 'host.name',
             eq: 'test.host',
           },
+          description: '',
         },
       ]}
       query={{

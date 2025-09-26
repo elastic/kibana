@@ -45,7 +45,7 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (data: SaveData) => Promise<void>;
-  systems: Omit<System, 'description'>[];
+  systems: System[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedSystems?: System[];
@@ -313,8 +313,13 @@ export function AddSignificantEventFlyout({
                           setCanSave(next);
                         }}
                         definition={definition}
-                        systems={systems}
                         dataViews={dataViewsFetch.value ?? []}
+                        systems={
+                          systems.map((system) => ({
+                            name: system.name,
+                            filter: system.filter,
+                          })) || []
+                        }
                       />
                     </>
                   )}

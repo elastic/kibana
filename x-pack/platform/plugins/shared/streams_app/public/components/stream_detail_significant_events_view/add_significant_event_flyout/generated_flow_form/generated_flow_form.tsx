@@ -58,6 +58,14 @@ export function GeneratedFlowForm({
     return <AiFlowWaitingForGeneration stopGeneration={stopGeneration} />;
   }
 
+  if (!isGenerating && generatedQueries.length === 0) {
+    return <AiFlowEmptyState />;
+  }
+
+  if (isGenerating && generatedQueries.length === 0) {
+    return <AiFlowWaitingForGeneration stopGeneration={stopGeneration} />;
+  }
+
   return (
     <>
       <SignificantEventsGeneratedTable

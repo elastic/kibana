@@ -40,7 +40,8 @@ export const runTool = async <TParams = Record<string, unknown>>({
     tool.id,
     { tool: { input: toolParams } },
     async () => {
-      const validation = tool.schema.safeParse(toolParams);
+      const schema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+      const validation = schema.safeParse(toolParams);
       if (validation.error) {
         throw createBadRequestError(
           `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`

@@ -21,7 +21,6 @@ export const GraphNodeSchema = z.object({
   stepId: z.string(),
   stepType: z.string(),
 });
-export type GraphNode = z.infer<typeof GraphNodeSchema>;
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
