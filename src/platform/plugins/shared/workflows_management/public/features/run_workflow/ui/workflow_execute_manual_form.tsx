@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { z } from '@kbn/zod';
+import { i18n } from '@kbn/i18n';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
@@ -95,7 +96,14 @@ export const WorkflowExecuteManualForm = ({
             setErrors(null);
           }
         } catch (e: Error | any) {
-          setErrors(`Invalid JSON: ${e.message || e.toString()}`);
+          setErrors(
+            i18n.translate('workflows.workflowExecuteManualForm.invalidJSONError', {
+              defaultMessage: 'Invalid JSON: {message}',
+              values: {
+                message: e.message || e.toString(),
+              },
+            })
+          );
         }
       }
     },
@@ -131,8 +139,12 @@ export const WorkflowExecuteManualForm = ({
       {/* Input Data Editor */}
       <EuiFlexItem>
         <EuiFormRow
-          label="Input Data"
-          helpText="JSON payload that will be passed to the workflow"
+          label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
+            defaultMessage: 'Input Data',
+          })}
+          helpText={i18n.translate('workflows.workflowExecuteManualForm.inputDataHelpText', {
+            defaultMessage: 'JSON payload that will be passed to the workflow',
+          })}
           fullWidth
         >
           <CodeEditor
