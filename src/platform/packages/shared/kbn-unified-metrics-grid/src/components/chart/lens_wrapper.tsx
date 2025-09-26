@@ -72,7 +72,7 @@ export function LensWrapper({
 
   const extraActions = useLensExtraActions({
     copyToDashboard: { onClick: onCopyToDashboard },
-    viewDetails: { onClick: onViewDetails },
+    viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
   });
 
   return (

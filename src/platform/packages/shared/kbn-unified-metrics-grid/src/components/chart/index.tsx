@@ -19,7 +19,7 @@ import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import { useLensProps } from './hooks/use_lens_props';
 
-const ChartSizes = {
+export const ChartSizes = {
   s: 230,
   m: 350,
 };

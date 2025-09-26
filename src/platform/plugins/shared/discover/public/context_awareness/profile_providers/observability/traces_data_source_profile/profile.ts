@@ -16,6 +16,7 @@ import {
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getCellRenderers, getColumnsConfiguration } from './accessors';
+import { createChartSection } from './accessors/chart_session';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -40,6 +41,7 @@ export const createTracesDataSourceProfileProvider = ({
     }),
     getCellRenderers,
     getColumnsConfiguration,
+    getChartSectionConfiguration: createChartSection(),
   },
   resolve: (params) => {
     if (

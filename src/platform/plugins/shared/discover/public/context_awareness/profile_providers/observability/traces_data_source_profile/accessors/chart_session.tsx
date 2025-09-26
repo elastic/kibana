@@ -10,9 +10,9 @@
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { TraceMetricsGrid } from '@kbn/unified-metrics-grid';
-import { once } from 'lodash';
 import React from 'react';
-import type { DataSourceProfileProvider } from '../../../../../profiles';
+import { once } from 'lodash';
+import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
@@ -21,7 +21,7 @@ export const createChartSection =
       once((): ChartSectionConfiguration => {
         return {
           ...(prev ? prev() : {}),
-          Component: (props: ChartSectionProps) => <TraceMetricsGrid />,
+          Component: (props: ChartSectionProps) => <TraceMetricsGrid {...props} />,
           replaceDefaultChart: true,
           // localStorageKeyPrefix: 'discover:metricsExperience',
           // defaultTopPanelHeight: 'max-content',
