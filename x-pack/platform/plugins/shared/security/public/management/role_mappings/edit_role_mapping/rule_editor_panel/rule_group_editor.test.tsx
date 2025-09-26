@@ -31,8 +31,8 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = shallowWithEuiProvider(<RuleGroupEditor {...props} />);
-    expect(wrapper.find(RuleGroupEditor)).toHaveLength(0);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
+    expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(0);
     expect(wrapper.find(AddRuleButton)).toHaveLength(1);
   });
