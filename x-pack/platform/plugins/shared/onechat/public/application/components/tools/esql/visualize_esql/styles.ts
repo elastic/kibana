@@ -13,11 +13,10 @@ export const visualizationWrapper = (euiTheme: UseEuiTheme['euiTheme'], height: 
     position: 'relative',
     height,
     overflow: 'visible',
-    '&:hover [data-test-subj="visualizationButtonActions"], &:focus-within [data-test-subj="visualizationButtonActions"]':
-      {
-        opacity: 1,
-        pointerEvents: 'auto',
-      },
+    '&:hover > .visualization-button-actions, &:focus-within > .visualization-button-actions': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
   });
 
 export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>

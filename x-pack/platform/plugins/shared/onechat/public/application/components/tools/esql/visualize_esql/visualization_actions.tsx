@@ -38,7 +38,11 @@ export function VisualizationActions({
   }
 
   return (
-    <div css={actionsContainer(euiTheme)} data-test-subj="visualizationButtonActions">
+    <div
+      className="visualization-button-actions"
+      css={actionsContainer(euiTheme)}
+      data-test-subj="visualizationButtonActions"
+    >
       <EditVisualizationButton
         uiActions={uiActions}
         lensInput={lensInput}

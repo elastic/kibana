@@ -12,7 +12,6 @@ import type { ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useState } from 'react';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-
 import { visualizationWrapper } from './styles';
 import { useLensInput } from './use_lens_input';
 import { VisualizationActions } from './visualization_actions';
