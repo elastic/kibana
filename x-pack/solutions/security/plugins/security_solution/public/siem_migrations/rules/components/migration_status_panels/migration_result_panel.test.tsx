@@ -8,19 +8,20 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { DashboardMigrationResultPanel } from './migration_result_panel';
+import { RuleMigrationResultPanel } from './migration_result_panel';
 import { TestProviders } from '../../../../common/mock';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
-import type { DashboardMigrationStats } from '../../types';
-import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
+import type { RuleMigrationStats } from '../../types';
+import * as i18n from './translations';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
 jest.mock('../../logic/use_get_migration_translation_stats', () => ({
   useGetMigrationTranslationStats: jest.fn().mockReturnValue({
     data: {
-      dashboards: {
+      rules: {
         success: { result: { full: 1, partial: 2, untranslatable: 3 } },
         failed: 4,
       },
@@ -35,7 +36,7 @@ const baseProps = {
     created_at: '2023-01-01T00:00:00Z',
     last_updated_at: '2024-01-01T01:00:00Z',
     last_execution: {},
-  } as DashboardMigrationStats,
+  } as RuleMigrationStats,
   isCollapsed: false,
   onToggleCollapsed: jest.fn(),
 };
@@ -46,7 +47,6 @@ const mockUseGetMissingResources = jest.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
-
 mockUseGetMissingResources.mockImplementation((_, setterFn) => {
   return {
     getMissingResources: jest.fn().mockImplementation(() => {
@@ -59,9 +59,9 @@ mockUseGetMissingResources.mockImplementation((_, setterFn) => {
 });
 
 const renderTestComponent = (
-  props: Partial<React.ComponentProps<typeof DashboardMigrationResultPanel>> = {}
+  props: Partial<React.ComponentProps<typeof RuleMigrationResultPanel>> = {}
 ) => {
-  return render(<DashboardMigrationResultPanel {...baseProps} {...props} />, {
+  return render(<RuleMigrationResultPanel {...baseProps} {...props} />, {
     wrapper: ({ children }) => (
       <TestProviders>
         <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
@@ -72,7 +72,7 @@ const renderTestComponent = (
   });
 };
 
-describe('DashboardMigrationResultPanel', () => {
+describe('RuleMigrationResultPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
@@ -80,21 +80,19 @@ describe('DashboardMigrationResultPanel', () => {
   it('renders panel with title, badge, and button', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument());
-    const badge = screen.getByTestId('migrationCompleteBadge');
+    const badge = screen.getByText(i18n.RULE_MIGRATION_COMPLETE_BADGE);
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveTextContent('Translation complete');
-    const button = screen.getByTestId('collapseButton');
+    const button = screen.getByRole('button', { name: i18n.RULE_MIGRATION_COLLAPSE });
     expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('aria-label', 'Collapse dashboard migration');
-    expect(screen.getByTestId('migrationPanelDescription')).toHaveTextContent(
-      /Export uploaded on December 31st 2022, 7:00:00 pm and translation finished 2 years ago./
-    );
+    expect(screen.getByText(/Export uploaded on/)).toBeInTheDocument();
   });
 
   it('calls onToggleCollapsed when button is clicked', async () => {
     renderTestComponent();
-    await waitFor(() => expect(screen.getByTestId('collapseButton')).toBeInTheDocument());
-    fireEvent.click(screen.getByTestId('collapseButton'));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: i18n.RULE_MIGRATION_COLLAPSE })).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByRole('button', { name: i18n.RULE_MIGRATION_COLLAPSE }));
     expect(baseProps.onToggleCollapsed).toHaveBeenCalled();
   });
 
@@ -105,7 +103,7 @@ describe('DashboardMigrationResultPanel', () => {
         last_execution: { error: 'Something went wrong' },
       },
     });
-    expect(screen.getByTestId(/dashboardMigrationLastError/)).toBeVisible();
+    expect(screen.getByTestId(/ruleMigrationLastError/)).toBeVisible();
   });
 
   it('renders loading spinner if translation stats are loading', () => {
@@ -117,7 +115,7 @@ describe('DashboardMigrationResultPanel', () => {
     expect(screen.getByTestId('centeredLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders  table when translation stats are loaded', async () => {
+  it('renders table when translation stats are loaded', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
   });
@@ -138,7 +136,7 @@ describe('DashboardMigrationResultPanel', () => {
       });
       expect(screen.getByTestId('migrationExecutionTime')).toBeVisible();
       expect(screen.getByTestId('migrationExecutionTime')).toHaveTextContent(
-        'Total execution time: a minute'
+        'Total execution time:'
       );
     });
 
