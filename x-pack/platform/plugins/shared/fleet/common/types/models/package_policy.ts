@@ -6,7 +6,7 @@
  */
 
 import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
-import type { PolicySecretReference } from './secret';
+import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -15,6 +15,7 @@ export interface PackagePolicyPackage {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   requires_root?: boolean;
   type?: string;
+  fips_compatible?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -84,6 +85,7 @@ export interface NewPackagePolicy {
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
+  cloud_connector_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
@@ -95,6 +97,7 @@ export interface NewPackagePolicy {
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 
@@ -110,7 +113,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   version?: string;
   agents?: number;
   revision: number;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;

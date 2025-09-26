@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -44,6 +43,7 @@ import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -82,39 +82,7 @@ export const DiscoverMainRoute = ({
     customizationContext,
   });
 
-  useEffect(() => {
-    onAppLeave?.((actions) => {
-      const tabs = runtimeStateManager.tabs.byId;
-      const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
-        const stateContainer = tab.stateContainer$.getValue();
-        if (!stateContainer) {
-          return false;
-        }
-
-        const isSaved = !!stateContainer.savedSearchState.getId();
-        const hasChanged = stateContainer.savedSearchState.getHasChanged$().getValue();
-
-        return isSaved && hasChanged;
-      });
-
-      if (!hasAnyUnsavedTab) return actions.default();
-
-      return actions.confirm(
-        i18n.translate('discover.confirmModal.confirmTextDescription', {
-          defaultMessage:
-            "You'll lose unsaved changes if you open another Discover session before returning to this one.",
-        }),
-        i18n.translate('discover.confirmModal.title', {
-          defaultMessage: 'Unsaved changes',
-        }),
-        () => {},
-        i18n.translate('discover.confirmModal.confirmText', {
-          defaultMessage: 'Leave without saving',
-        }),
-        'danger'
-      );
-    });
-  }, [onAppLeave, runtimeStateManager]);
+  useUnsavedChanges({ internalState, runtimeStateManager, onAppLeave });
 
   return (
     <InternalStateProvider store={internalState}>

@@ -11,18 +11,31 @@ import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
+import { WorkflowGraph, isEnterForeach } from '@kbn/workflows/graph';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import {
+  parseWorkflowYamlToJSON,
+  formatValidationError,
   getCurrentPath,
   getPathFromAncestors,
-  parseWorkflowYamlToJSON,
+  getStepNode,
 } from '../../../../common/lib/yaml_utils';
-import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
+import {
+  getSchemaAtPath,
+  getZodTypeName,
+  getDetailedTypeDescription,
+} from '../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
+import type { MockZodError } from '../../../../common/lib/errors/invalid_yaml_schema';
+
+interface RawVariableItem {
+  start: number;
+  end: number;
+  key: string | null;
+}
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -166,7 +179,9 @@ export function useYamlValidation({
         // Parse the YAML to JSON to get the workflow definition
         const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
         const yamlDocument = parseDocument(text);
-        const workflowGraph = result.success ? getWorkflowGraph(result.data) : null;
+        const workflowGraph = result.success
+          ? WorkflowGraph.fromWorkflowDefinition(result.data)
+          : null;
 
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
@@ -218,36 +233,76 @@ export function useYamlValidation({
           }
         }
 
-        const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+        // Currently, foreach doesn't use mustache expressions, so we need to handle it separately
+        // TODO: remove if/when foreach uses mustache expressions
+        const foreachVariableItems = (workflowGraph?.getAllNodes() ?? [])
+          .map((node) => {
+            if (isEnterForeach(node)) {
+              const yamlNode = getStepNode(yamlDocument, node.stepId);
+              const foreachValueNode = yamlNode?.get('foreach', true);
+              if (foreachValueNode && foreachValueNode.range) {
+                return {
+                  start: foreachValueNode.range[0],
+                  end: foreachValueNode.range[2],
+                  key: node.configuration.foreach,
+                };
+              }
+            }
+            return null;
+          })
+          .filter((foreach) => foreach) as RawVariableItem[];
+        const textMatches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)].map((match) => ({
+          start: match.index ?? 0,
+          end: (match.index ?? 0) + match[0].length, // match[0] is the entire {{...}} expression
+          key: match.groups?.key ?? null,
+        }));
+        const variableItems = [...textMatches, ...foreachVariableItems];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
-        for (const match of matches) {
-          const matchStart = match.index ?? 0;
-          const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
-
+        for (const variableItem of variableItems) {
+          const { start, end, key } = variableItem;
           // Get the position (line, column) for the match
-          const startPos = model.getPositionAt(matchStart);
-          const endPos = model.getPositionAt(matchEnd);
+          const startPos = model.getPositionAt(start);
+          const endPos = model.getPositionAt(end);
 
           let errorMessage: string | null = null;
-          const severity: YamlValidationErrorSeverity = 'warning';
+          let hoverMessage: string | null = null;
+          let severity: YamlValidationErrorSeverity = 'error';
 
-          const path = getCurrentPath(yamlDocument, matchStart);
-          const context = result.success
-            ? getContextSchemaForPath(result.data, workflowGraph!, path)
-            : null;
+          const path = getCurrentPath(yamlDocument, start);
+          let context = null;
+          if (result.success) {
+            try {
+              context = getContextSchemaForPath(result.data, workflowGraph!, path);
+            } catch (e) {
+              // Fallback to the main workflow schema if context detection fails
+              context = null;
+              errorMessage = e.message;
+            }
+          }
 
-          if (!match.groups?.key) {
+          if (!key) {
             errorMessage = `Variable is not defined`;
           } else {
-            const parsedPath = parseVariablePath(match.groups.key);
-            if (parsedPath?.errors) {
+            const parsedPath = parseVariablePath(key);
+            if (!parsedPath) {
+              errorMessage = `Invalid variable path: ${key}`;
+            } else if (parsedPath.errors) {
               errorMessage = parsedPath.errors.join(', ');
-            }
-            if (parsedPath?.propertyPath) {
+            } else if (parsedPath?.propertyPath && !errorMessage) {
               if (!context) {
+                severity = 'warning';
                 errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
-              } else if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
-                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+              } else {
+                const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
+                if (!refSchema) {
+                  errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+                } else if (getZodTypeName(refSchema) === 'unknown') {
+                  hoverMessage = `<pre>(property) ${
+                    parsedPath.propertyPath
+                  }: ${getDetailedTypeDescription(refSchema)}</pre>`;
+                  severity = 'warning';
+                  errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`;
+                }
               }
             }
           }
@@ -274,6 +329,7 @@ export function useYamlValidation({
               options: {
                 inlineClassName: 'template-variable-error',
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: hoverMessage ? createMarkdownContent(hoverMessage) : null,
               },
             });
           } else {
@@ -287,6 +343,7 @@ export function useYamlValidation({
               options: {
                 inlineClassName: 'template-variable-valid',
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: hoverMessage ? createMarkdownContent(hoverMessage) : null,
               },
             });
           }
@@ -310,7 +367,7 @@ export function useYamlValidation({
         );
         setError(null);
       } catch (e) {
-        setError(e as Error);
+        setError(new Error('Error validating variables'));
       }
     },
     [workflowYamlSchema]
@@ -330,8 +387,56 @@ export function useYamlValidation({
 
       const errors: YamlValidationError[] = [];
       for (const marker of markers) {
+        let formattedMessage = marker.message;
+
+        // Apply custom formatting to schema validation errors (from monaco-yaml)
+        if (owner === 'yaml' && marker.message) {
+          // Extract the actual value from the editor at the error position
+          const model = editor.getModel();
+          let receivedValue: string | undefined;
+
+          if (model) {
+            try {
+              // Get the text at the error position
+              const range = {
+                startLineNumber: marker.startLineNumber,
+                startColumn: marker.startColumn,
+                endLineNumber: marker.endLineNumber || marker.startLineNumber,
+                endColumn: marker.endColumn || marker.startColumn + 10, // fallback range
+              };
+
+              const textAtError = model.getValueInRange(range);
+
+              // Try to extract the value (remove quotes if present)
+              const valueMatch = textAtError.match(/^\s*([^:\s]+)/);
+              if (valueMatch) {
+                receivedValue = valueMatch[1].replace(/['"]/g, '');
+              }
+            } catch (e) {
+              // Fallback to parsing the message
+              receivedValue = extractReceivedValue(marker.message);
+            }
+          }
+
+          // Create a mock error object that matches our formatter's expected structure
+          const mockError: MockZodError = {
+            message: marker.message,
+            issues: [
+              {
+                code: marker.message.includes('Value must be') ? 'invalid_literal' : 'unknown',
+                message: marker.message,
+                path: ['type'], // Assume it's a type field error for now
+                received: receivedValue ?? '',
+              },
+            ],
+          };
+
+          const { message } = formatValidationError(mockError);
+          formattedMessage = message;
+        }
+
         errors.push({
-          message: marker.message,
+          message: formattedMessage,
           severity: getSeverityString(marker.severity as MarkerSeverity),
           lineNumber: marker.startLineNumber,
           column: marker.startColumn,
@@ -348,10 +453,41 @@ export function useYamlValidation({
     [onValidationErrors]
   );
 
+  // Helper function to extract the received value from Monaco's error message
+  function extractReceivedValue(message: string): string | undefined {
+    // Try different patterns to extract the received value
+
+    // Pattern 1: "Value must be one of: ... Received: 'value'"
+    let receivedMatch = message.match(/Received:\s*['"]([^'"]+)['"]/);
+    if (receivedMatch) {
+      return receivedMatch[1];
+    }
+
+    // Pattern 2: "Value must be one of: ... Received: value" (without quotes)
+    receivedMatch = message.match(/Received:\s*([^\s,]+)/);
+    if (receivedMatch) {
+      return receivedMatch[1];
+    }
+
+    // Pattern 3: Look for the actual value in the editor at the error position
+    // This is more complex but might be needed if Monaco doesn't include the value in the message
+
+    // For now, return undefined if we can't extract it
+    return undefined;
+  }
+
   return {
     error,
     validationErrors,
     validateVariables,
     handleMarkersChanged,
+  };
+}
+
+function createMarkdownContent(content: string): monaco.IMarkdownString {
+  return {
+    value: content,
+    isTrusted: true,
+    supportHtml: true,
   };
 }

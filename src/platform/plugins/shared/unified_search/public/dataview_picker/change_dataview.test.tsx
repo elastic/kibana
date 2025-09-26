@@ -96,6 +96,7 @@ describe('DataView component', () => {
   let props: DataViewPickerProps;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     props = {
       currentDataViewId: 'dataview-1',
       trigger: {
@@ -240,8 +241,14 @@ describe('DataView component', () => {
               id: 'dataview-1',
               title: 'dataview-1',
             },
+            {
+              id: 'the-data-view-id',
+              title: 'the-data-view-title',
+              name: 'the-data-view',
+              type: 'default',
+              managed: true,
+            },
           ],
-          managedDataViews: [dataViewMock],
         },
         false
       )

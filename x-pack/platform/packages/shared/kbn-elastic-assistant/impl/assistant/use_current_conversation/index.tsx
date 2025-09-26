@@ -292,7 +292,7 @@ export const useCurrentConversation = ({
     handleOnConversationSelected({
       cId: lastConversation.id,
       cTitle: lastConversation.title,
-      silent: true,
+      silent: false,
     });
   }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 

@@ -18,40 +18,18 @@ import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiThemeProvider } from '@elastic/eui';
+import { mount } from 'enzyme';
+import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
+import { FilterItems } from '../filter_bar';
+import { DataViewPicker } from '..';
+import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { createMockStorage, createMockTimeHistory } from './mocks';
+import { SearchSessionState } from '@kbn/data-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const startMock = coreMock.createStart();
 
-const mockTimeHistory = {
-  get: () => {
-    return [];
-  },
-  add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
-};
-
 const noop = jest.fn();
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 const kqlQuery = {
   query: 'response:200',
@@ -62,15 +40,27 @@ const esqlQuery = {
   esql: 'from test',
 };
 
-function wrapSearchBarInContext(testProps: any) {
+function wrapSearchBarInContext(
+  testProps: any,
+  options?: {
+    backgroundSearch?: {
+      enabled?: boolean;
+      initialState?: SearchSessionState;
+    };
+  }
+) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: mockTimeHistory,
+    timeHistory: createMockTimeHistory(),
     intl: null as any,
   };
 
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
+  const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? false;
+  const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
+  const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
   const services = {
     application: {
@@ -95,6 +85,10 @@ function wrapSearchBarInContext(testProps: any) {
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      search: searchServiceMock.createStartContract({
+        isBackgroundSearchEnabled: backgroundSearchEnabled,
+        session: getSessionServiceMock({ state$: sessionState$ }),
+      }),
       query: {
         savedQueries: {
           findSavedQueries: () =>
@@ -476,5 +470,41 @@ describe('SearchBar', () => {
         expect(textarea).toHaveValue(kqlQuery.query);
       });
     });
+  });
+
+  it('renders BackgroundSearchRestoredCallout when feature flag enabled and session restored', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: true,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      true
+    );
+  });
+
+  it('does not render BackgroundSearchRestoredCallout when feature flag disabled', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: false,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      false
+    );
   });
 });

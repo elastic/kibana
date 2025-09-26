@@ -11,7 +11,7 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -23,11 +23,16 @@ import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { IUnifiedSearchPluginServices } from '../types';
+import userEvent from '@testing-library/user-event';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
+import { SearchSessionState } from '@kbn/data-plugin/public';
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
+  add: () => jest.fn(),
   get: () => {
     return [];
   },
@@ -88,7 +93,10 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryBarTopRowInContext(testProps: any) {
+function wrapQueryBarTopRowInContext(
+  testProps: any,
+  { servicesOverride }: { servicesOverride?: Partial<IUnifiedSearchPluginServices> } = {}
+) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
     onSubmit: noop,
@@ -103,6 +111,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
+    ...servicesOverride,
   };
 
   return (
@@ -119,6 +128,186 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 describe('QueryBarTopRowTopRow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe.each([
+    {
+      value: false,
+      description: 'disabled',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
+    },
+    {
+      value: true,
+      description: 'enabled',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
+    },
+  ])('when background search is $description', ({ value, submitId, cancelId }) => {
+    describe('when it is NOT loading', () => {
+      it('should render the submit button', () => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            useBackgroundSearchButton: value,
+          })
+        );
+
+        expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
+      });
+    });
+
+    describe('when it is loading', () => {
+      it('should render the cancel button', () => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            isLoading: true,
+            onCancel: jest.fn(),
+            submitButtonStyle: 'withText',
+            useBackgroundSearchButton: value,
+          })
+        );
+
+        expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
+      });
+    });
+  });
+
+  describe('when background search is enabled', () => {
+    describe('when it is NOT loading', () => {
+      const data = dataPluginMock.createStartContract();
+      const session = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
+      });
+      data.search.session = session;
+
+      describe('when the user clicks the main button', () => {
+        it('should call the submit callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onSubmit = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                onSubmit,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+          await user.click(getByTestId('querySubmitButton'));
+
+          // Then
+          expect(onSubmit).toHaveBeenCalled();
+        });
+      });
+
+      it('the secondary button should be disabled', () => {
+        // When
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Another Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        // Then
+        expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
+      });
+    });
+
+    describe('when it is loading', () => {
+      const isLoading = true;
+
+      const data = dataPluginMock.createStartContract();
+      const loadingSession = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Loading).asObservable(),
+      });
+      data.search.session = loadingSession;
+
+      describe('when the user clicks the main button', () => {
+        it('should call the cancel callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onCancel = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                isLoading,
+                onCancel,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+          await user.click(getByTestId('queryCancelButton'));
+
+          // Then
+          expect(onCancel).toHaveBeenCalled();
+        });
+      });
+
+      describe('when the user clicks the secondary button', () => {
+        it('should call the send to background callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onSendToBackground = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                isLoading,
+                onCancel: jest.fn(),
+                onSendToBackground,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+
+          await user.click(getByTestId('queryCancelButton-secondary-button'));
+
+          // Then
+          expect(onSendToBackground).toHaveBeenCalled();
+        });
+      });
+    });
   });
 
   it('Should render query and time picker', async () => {
