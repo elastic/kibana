@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -116,8 +117,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }): Promise<{
     status: 'unknown' | 'success' | 'failure';
     simulationError: string | null;
-    documentsWithRuntimeFieldsApplied: SampleDocument[] | null;
-    documentsWithIgnoredFields: SampleDocument[] | null;
+    documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -173,7 +173,6 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         status: 'unknown',
         simulationError: null,
         documentsWithRuntimeFieldsApplied: null,
-        documentsWithIgnoredFields: null,
       };
     }
 
@@ -217,7 +216,6 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           documentWithError.doc.error
         ),
         documentsWithRuntimeFieldsApplied: null,
-        documentsWithIgnoredFields: null,
       };
     }
 
@@ -249,40 +247,29 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     // This gives us a "fields" representation rather than _source from the simulation
     const runtimeFieldsResult = await scopedClusterClient.asCurrentUser.search({
       index: params.path.name,
+      query: {
+        ids: {
+          values: sampleResults.hits.hits.map((hit) => hit._id) as string[],
+        },
+      },
       ...runtimeFieldsSearchBody,
     });
-
-    const documentsWithIgnoredFields = simulation.docs
-      .filter((doc: any) => doc.doc.ignored_fields !== undefined)
-      .map((doc: any) => {
-        const ignoredFields = doc.doc.ignored_fields.map(
-          (ignored: { field: string }) => ignored.field
-        );
-        const source = getFlattenedObject(doc.doc._source);
-        return Object.entries(source).reduce<SampleDocument>((acc, [key, value]) => {
-          if (ignoredFields.includes(key)) {
-            acc[key] = value;
-          }
-          return acc;
-        }, {});
-      })
-      .filter((doc: SampleDocument) => Object.keys(doc).length > 0);
 
     return {
       status: 'success',
       simulationError: null,
-      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits
-        .map((hit) => {
-          if (!hit.fields) {
-            return {};
-          }
-          return Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
+      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits.map((hit, index) => {
+        if (!hit.fields) {
+          return { ignored_fields: simulation.docs[index].doc.ignored_fields };
+        }
+        return {
+          values: Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
             acc[field] = hit.fields![field][0];
             return acc;
-          }, {});
-        })
-        .filter((doc) => Object.keys(doc).length > 0),
-      documentsWithIgnoredFields,
+          }, {}),
+          ignored_fields: simulation.docs[index].doc.ignored_fields,
+        };
+      }),
     };
   },
 });

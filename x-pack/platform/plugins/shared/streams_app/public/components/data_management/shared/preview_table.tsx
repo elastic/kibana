@@ -23,6 +23,10 @@ import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import type {
+  IgnoredField,
+  DocumentWithIgnoredFields,
+} from '@kbn/streams-schema/src/shared/record_types';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -53,10 +57,14 @@ export function PreviewTable({
   onRowSelected,
   cellActions,
 }: {
-  documents: SampleDocument[];
+  documents: DocumentWithIgnoredFields[];
   displayColumns?: string[];
   height?: EuiDataGridProps['height'];
-  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  renderCellValue?: (
+    values: SampleDocument,
+    columnId: string,
+    ignored_fields?: IgnoredField[]
+  ) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   toolbarVisibility?: boolean;
   setVisibleColumns?: (visibleColumns: string[]) => void;
@@ -73,11 +81,11 @@ export function PreviewTable({
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
-    documents.forEach((doc) => {
-      if (!doc || typeof doc !== 'object') {
+    documents.forEach(({ values }) => {
+      if (!values || typeof values !== 'object') {
         return;
       }
-      Object.keys(doc).forEach((key) => {
+      Object.keys(values).forEach((key) => {
         cols.add(key);
       });
     });
@@ -250,18 +258,18 @@ export function PreviewTable({
       onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
-        if (!doc || typeof doc !== 'object') {
+        if (!doc.values || typeof doc.values !== 'object') {
           return emptyCell;
         }
 
         if (renderCellValue) {
-          const renderedValue = renderCellValue(doc, columnId);
+          const renderedValue = renderCellValue(doc.values, columnId, doc.ignored_fields);
           if (renderedValue !== undefined) {
             return renderedValue;
           }
         }
 
-        const value = doc[columnId];
+        const value = doc.values[columnId];
         if (value === undefined || value === null) {
           return emptyCell;
         }

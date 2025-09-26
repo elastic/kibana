@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
@@ -72,7 +72,8 @@ const SamplePreviewTableContent = ({
       onValidate({
         isValid: value?.status === 'failure' || error ? false : true,
         isIgnored:
-          value?.documentsWithIgnoredFields && value?.documentsWithIgnoredFields?.length > 0
+          value?.documentsWithRuntimeFieldsApplied &&
+          value?.documentsWithRuntimeFieldsApplied?.some((doc) => !!doc?.ignored_fields)
             ? true
             : false,
       });
@@ -125,9 +126,9 @@ const SamplePreviewTableContent = ({
       >
         <PreviewTable
           documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
-          renderCellValue={(doc, columnId) => {
+          renderCellValue={(values, columnId, ignoredFields) => {
             const emptyCell = <>&nbsp;</>;
-            const docValue = doc[columnId];
+            const docValue = values[columnId];
 
             let renderedValue = emptyCell as ReactNode;
 
@@ -137,21 +138,21 @@ const SamplePreviewTableContent = ({
               renderedValue = String(docValue) || emptyCell;
             }
 
-            const ignoredFields = value.documentsWithIgnoredFields?.find((field) => {
-              return field[columnId] === docValue;
-            });
+            const isFieldIgnored = (ignoredFields || []).find((field) => field?.field === columnId);
 
-            if (ignoredFields?.[columnId] === docValue) {
+            if (isFieldIgnored) {
               renderedValue = (
                 <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiToolTip
+                  <EuiIconTip
                     position="bottom"
                     content={i18n.translate('xpack.streams.samplePreviewTable.ignoredField', {
                       defaultMessage: 'This value caused an issue and was ignored',
                     })}
-                  >
-                    <EuiIcon type="warning" color="warning" />
-                  </EuiToolTip>
+                    type="warning"
+                    iconProps={{
+                      color: 'warning',
+                    }}
+                  />
                   {renderedValue}
                 </EuiFlexGroup>
               );
