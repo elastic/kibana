@@ -17,6 +17,7 @@ import type {
   GetOneAgentResponse,
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import type {
   GetEnrollmentAPIKeysResponse,
@@ -99,6 +100,7 @@ export class SpaceTestApiClient {
   ): Promise<CreatePackagePolicyResponse> {
     const { body: res, statusCode } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
 
@@ -112,6 +114,47 @@ export class SpaceTestApiClient {
       throw new Error(`${statusCode} "${res?.error}" ${res.message}`);
     }
   }
+
+  async updatePackagePolicy(
+    packagePolicyId: string,
+    data: Partial<SimplifiedPackagePolicy & { package: { name: string; version: string } }> = {},
+    spaceId?: string
+  ): Promise<UpdatePackagePolicyResponse> {
+    const { body: res, statusCode } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    if (statusCode === 200) {
+      return res;
+    }
+
+    if (statusCode === 404) {
+      throw new Error('404 "Not Found"');
+    } else {
+      throw new Error(`${statusCode} "${res?.error}" ${res.message}`);
+    }
+  }
+
+  async deletePackagePolicy(packagePolicyId: string, spaceId?: string) {
+    const { body: res, statusCode } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send();
+
+    if (statusCode === 200) {
+      return res;
+    }
+
+    if (statusCode === 404) {
+      throw new Error('404 "Not Found"');
+    } else {
+      throw new Error(`${statusCode} "${res?.error}" ${res.message}`);
+    }
+  }
+
   async getPackagePolicy(
     packagePolicyId: string,
     spaceId?: string
@@ -450,6 +493,7 @@ export class SpaceTestApiClient {
   ) {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({ force })
       .expect(200);
