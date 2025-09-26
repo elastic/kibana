@@ -65,6 +65,7 @@ enabled:
   - src/platform/test/functional/apps/dashboard_elements/input_control_vis/config.ts
   - src/platform/test/functional/apps/dashboard_elements/links/config.ts
   - src/platform/test/functional/apps/dashboard_elements/markdown/config.ts
+  - src/platform/test/functional/apps/dashboard/background_search/config.ts
   - src/platform/test/functional/apps/dashboard/group1/config.ts
   - src/platform/test/functional/apps/dashboard/group2/config.ts
   - src/platform/test/functional/apps/dashboard/group3/config.ts
