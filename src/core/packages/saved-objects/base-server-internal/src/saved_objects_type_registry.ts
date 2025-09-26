@@ -23,8 +23,28 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
 
+  private accessControlEnabled: boolean = true;
+
   constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypesMap = new Set(legacyTypes);
+  }
+
+  /**
+   * Sets whether access control is enabled
+   *
+   * @internal
+   */
+  public setAccessControlEnabled(enabled: boolean) {
+    this.accessControlEnabled = enabled;
+  }
+
+  /**
+   * Gets whether access control is enabled
+   *
+   * @internal
+   */
+  public isAccessControlEnabled() {
+    return this.accessControlEnabled;
   }
 
   /**
@@ -42,8 +62,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
+    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+    const typeWithAccessControl = { ...type, supportsAccessControl };
+
     validateType(type);
-    this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
+    this.types.set(type.name, deepFreeze(typeWithAccessControl) as SavedObjectsType);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
