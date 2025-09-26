@@ -24,14 +24,8 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import {
-  type TabItem,
-  type TabsServices,
-  type TabPreviewData,
-  type TabsEBTEvent,
-  TabsEventName,
-  TabsEventDataKeys,
-} from '../../types';
+import type { TabItem, TabsServices, TabPreviewData, TabsEBTEvent } from '../../types';
+import { TabsEventName, TabsEventDataKeys } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 
