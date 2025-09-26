@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Criteria } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -29,6 +29,10 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -147,19 +151,21 @@ const ActionsConnectorsList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions.map((action) => {
-        return {
-          ...action,
-          actionType: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].name
-            : action.actionTypeId,
-          compatibility: actionTypesIndex[action.actionTypeId]
-            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
-            : [],
-        };
-      })
-    : [];
+  const actionConnectorTableItems: ActionConnectorTableItem[] = useMemo(() => {
+    return actionTypesIndex
+      ? actions.map((action) => {
+          return {
+            ...action,
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
+              : action.actionTypeId,
+            compatibility: actionTypesIndex[action.actionTypeId]
+              ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
+              : [],
+          };
+        })
+      : [];
+  }, [actions, actionTypesIndex]);
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
@@ -196,6 +202,9 @@ const ActionsConnectorsList = ({
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
   }
+  const hasDeprecatedConnectors = useMemo(() => {
+    return actionConnectorTableItems.some((item) => item.isConnectorTypeDeprecated);
+  }, [actionConnectorTableItems]);
 
   const actionsTableColumns = [
     {
@@ -269,6 +278,27 @@ const ActionsConnectorsList = ({
         );
       },
     },
+    ...(hasDeprecatedConnectors
+      ? [
+          {
+            name: '',
+            render: (item: ActionConnectorTableItem) => {
+              return (
+                item.isConnectorTypeDeprecated && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={DEPRECATED_LABEL}
+                      tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                      color="warning"
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                )
+              );
+            },
+          },
+        ]
+      : []),
     {
       field: 'actionType',
       'data-test-subj': 'connectorsTableCell-actionType',

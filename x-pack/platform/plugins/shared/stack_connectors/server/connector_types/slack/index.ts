@@ -94,6 +94,7 @@ export function getConnectorType({
     },
     renderParameterTemplates,
     executor,
+    isDeprecated: true,
   };
 }
 

@@ -24,4 +24,5 @@ export interface ActionType {
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
   subFeature?: SubFeature;
+  isDeprecated: boolean;
 }

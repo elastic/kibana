@@ -29,6 +29,7 @@ import {
   useEuiTheme,
   EuiSelectable,
   useCurrentEuiBreakpoint,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
@@ -45,6 +46,8 @@ import {
   ACTION_TYPE_MODAL_FILTER_LIST_TITLE,
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
+  DEPRECATED_LABEL,
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
 } from '../translations';
 import { getDefaultParams } from '../utils';
 
@@ -421,15 +424,26 @@ export const RuleActionsConnectorsBody = ({
                 <>
                   <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
                   <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
-                    <strong>{actionType?.name}</strong>
-                  </EuiText>
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    {actionType.isDeprecated && (
+                      <EuiFlexItem key={id} grow={false} style={{ height: `1.5rem` }}>
+                        <EuiBetaBadge
+                          color="warning"
+                          label={DEPRECATED_LABEL}
+                          size="s"
+                          tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
+                      <strong>{actionType?.name}</strong>
+                    </EuiText>
+                  </EuiFlexGroup>
                 </>
               }
               onClick={() => onSelectConnectorInternal(connector)}
             />
           );
-
           return (
             <EuiFlexItem key={id} grow={false}>
               {checkEnabledResult.isEnabled && connectorCard}

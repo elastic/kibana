@@ -18,6 +18,7 @@ export async function get({
   id,
   throwIfSystemAction = true,
 }: GetParams): Promise<Connector> {
+  const { actionTypeRegistry } = context;
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -65,6 +66,9 @@ export async function get({
       isPreconfigured: foundInMemoryConnector.isPreconfigured,
       isSystemAction: foundInMemoryConnector.isSystemAction,
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
+      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(
+        foundInMemoryConnector.actionTypeId
+      ),
     };
 
     if (foundInMemoryConnector.exposeConfig) {
@@ -92,6 +96,7 @@ export async function get({
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
+      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
     };
   }
 

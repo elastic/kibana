@@ -70,6 +70,7 @@ export function getConnectorType(): ServerLogConnectorType {
       },
     },
     executor,
+    isDeprecated: true,
   };
 }
 

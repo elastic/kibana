@@ -269,6 +269,7 @@ export class ActionsPlugin
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         };
 
         this.inMemoryConnectors.push({
@@ -517,6 +518,7 @@ export class ActionsPlugin
         internalSavedObjectsRepository,
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
+        connectorTypeRegistry: actionTypeRegistry!,
       });
     };
 

@@ -13,6 +13,10 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -35,6 +39,7 @@ interface RegisteredActionType {
   actionType: ActionType;
   name: string;
   isExperimental: boolean | undefined;
+  isDeprecated: boolean;
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -120,6 +125,7 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionType.isDeprecated,
       };
     });
 
@@ -137,6 +143,12 @@ export const ActionTypeMenu = ({
           betaBadgeProps={
             item.isExperimental
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
+              : item.isDeprecated
+              ? {
+                  label: DEPRECATED_LABEL,
+                  tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+                  color: 'warning',
+                }
               : undefined
           }
           role="listitem"
@@ -174,6 +186,7 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
+
       <EuiFlexGrid
         gutterSize="xl"
         columns={3}
