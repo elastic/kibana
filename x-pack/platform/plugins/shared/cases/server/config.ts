@@ -37,6 +37,14 @@ export const ConfigSchema = schema.object({
       enableCaseSummary: schema.boolean({ defaultValue: false }),
     })
   ),
+  resilient: schema.object({
+    additionalFields: schema.object({
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: true }),
+      }),
+    }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

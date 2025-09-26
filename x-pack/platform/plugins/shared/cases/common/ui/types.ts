@@ -80,6 +80,11 @@ export interface CasesUiConfigType {
   unsafe?: {
     enableCaseSummary: boolean;
   };
+  resilient: {
+    additionalFields: {
+      enabled: boolean;
+    };
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
