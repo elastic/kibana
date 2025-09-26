@@ -9,6 +9,8 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
+import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
+import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
@@ -25,18 +27,27 @@ export function transformMapAttributesOut(
       ? { layers: parseJSON<Partial<LayerDescriptor[]>>([], injectedAttributes.layerListJSON) }
       : {}),
     ...parseMapStateJSON(injectedAttributes.mapStateJSON),
-    ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.uiStateJSON),
+    ...parseUiStateJSON(injectedAttributes.uiStateJSON),
   };
 }
 
 function parseMapStateJSON(mapStateJSON?: string) {
-  const { refreshConfig, ...rest } = parseJSON<Partial<MapAttributes>>({}, mapStateJSON);
+  const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
+  const { refreshConfig, ...rest } = dropUnknownKeys(
+    parsedMapState,
+    mapStateKeys
+  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
   return {
     ...rest,
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
       : {}),
   };
+}
+
+function parseUiStateJSON(uiStateJSON?: string) {
+  const parsedUiState = parseJSON<{ [key: string]: unknown }>({}, uiStateJSON);
+  return dropUnknownKeys(parsedUiState, uiStateKeys);
 }
 
 function parseJSON<ReturnType>(emptyValue: ReturnType, jsonString?: string) {
@@ -48,4 +59,12 @@ function parseJSON<ReturnType>(emptyValue: ReturnType, jsonString?: string) {
     // ignore malformed JSON, map will just use defaults
     return emptyValue;
   }
+}
+
+function dropUnknownKeys(value: { [key: string]: unknown }, knownKeys: string[]) {
+  const valueWithKnownKeys: { [key: string]: unknown } = {};
+  Object.keys(value).forEach((keyFromValue) => {
+    if (knownKeys.includes(keyFromValue)) valueWithKnownKeys[keyFromValue] = value[keyFromValue];
+  });
+  return valueWithKnownKeys;
 }

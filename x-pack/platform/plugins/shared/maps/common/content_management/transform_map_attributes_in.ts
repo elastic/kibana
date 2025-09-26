@@ -9,6 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
+import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 
 export function transformMapAttributesIn(mapState: MapAttributes): {
   attributes: StoredMapAttributes;
@@ -33,20 +34,11 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
           }
         : {}),
     },
-    [
-      'adHocDataViews',
-      'center',
-      'filters',
-      'query',
-      'refreshConfig',
-      'settings',
-      'timeFilters',
-      'zoom',
-    ]
+    mapStateKeys
   );
   if (mapStateJSON) storedMapAttributes.mapStateJSON = mapStateJSON;
 
-  const uiStateJSON = getJSONString(mapState, ['isLayerTOCOpen', 'openTOCDetails']);
+  const uiStateJSON = getJSONString(mapState, uiStateKeys);
   if (uiStateJSON) storedMapAttributes.uiStateJSON = uiStateJSON;
   return extractReferences({ attributes: storedMapAttributes });
 }

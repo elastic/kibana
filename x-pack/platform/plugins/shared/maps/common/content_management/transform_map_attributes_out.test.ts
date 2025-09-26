@@ -101,4 +101,21 @@ describe('transformMapOut', () => {
       }
     `);
   });
+
+  test('Should ignore legacy keys in mapStateJOSN and uiStateJSON', () => {
+    expect(
+      transformMapAttributesOut(
+        {
+          title: 'my map',
+          mapStateJSON: '{"idDarkMode":false}',
+          uiStateJSON: '{"idDarkMode":false}',
+        },
+        []
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "title": "my map",
+      }
+    `);
+  });
 });
