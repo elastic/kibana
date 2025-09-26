@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,12 +51,15 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
   const { data: cloudConnectors } = useGetCloudConnectors();
   const cloudConnectorsCount = cloudConnectors?.length;
+  const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
-  const [selectedTabId, setSelectedTabId] = useState(
-    cloudConnectorsCount && cloudConnectorsCount > 0
-      ? TABS.EXISTING_CONNECTION
-      : TABS.NEW_CONNECTION
-  );
+  useEffect(() => {
+    setSelectedTabId(
+      cloudConnectorsCount && cloudConnectorsCount > 0
+        ? TABS.EXISTING_CONNECTION
+        : TABS.NEW_CONNECTION
+    );
+  }, [cloudConnectorsCount]);
 
   // Use the cloud connector setup hook
   const {

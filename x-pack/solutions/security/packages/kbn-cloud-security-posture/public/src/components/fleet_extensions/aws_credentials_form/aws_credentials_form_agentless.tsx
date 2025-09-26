@@ -40,6 +40,7 @@ import {
   getTemplateUrlFromPackageInfo,
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
+  getAwsCredentialsType,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -81,8 +82,28 @@ const getSelectorOptions = (
 const updatePolicyCloudConnectorSupport = (
   awsCredentialsType: string,
   newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy
+  updatePolicy: UpdatePolicy,
+  input: NewPackagePolicyInput,
+  awsPolicyType: string
 ) => {
+  if (!getAwsCredentialsType(input)) {
+    updatePolicy({
+      updatedPolicy: {
+        ...updatePolicyWithInputs(newPolicy, awsPolicyType, {
+          'aws.credentials.type': {
+            value: awsCredentialsType,
+            type: 'text',
+          },
+          'aws.supports_cloud_connectors': {
+            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+            type: 'bool',
+          },
+        }),
+      },
+    });
+    return;
+  }
+
   if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
     updatePolicy({
       updatedPolicy: {
@@ -155,7 +176,13 @@ export const AwsCredentialsFormAgentless = ({
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(awsCredentialsType, newPolicy, updatePolicy);
+  updatePolicyCloudConnectorSupport(
+    awsCredentialsType,
+    newPolicy,
+    updatePolicy,
+    input,
+    awsPolicyType
+  );
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TABS } from './constants';
 
 export interface CloudConnectorTab {
   id: 'new-connection' | 'existing-connection';
@@ -42,7 +43,7 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
               onTabClick(tab);
             }}
             isSelected={tab.id === selectedTabId}
-            disabled={isEditPage && !cloudConnectorsCount}
+            disabled={tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount}
           >
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab"

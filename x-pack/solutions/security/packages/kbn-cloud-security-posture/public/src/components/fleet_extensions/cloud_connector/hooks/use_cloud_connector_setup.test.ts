@@ -111,67 +111,6 @@ describe('useCloudConnectorSetup', () => {
         updatedPolicy: expect.objectContaining({
           cloud_connector_id: undefined,
         }),
-        isValid: true, // Both roleArn and externalId are provided, so should be valid
-      });
-    });
-
-    it('should set isValid to false when roleArn is missing', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const incompleteCredentials: CloudConnectorCredentials = {
-        roleArn: undefined,
-        externalId: 'new-external-id',
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(incompleteCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith({
-        updatedPolicy: expect.any(Object),
-        isValid: undefined, // Missing roleArn, so validation should fail
-      });
-    });
-
-    it('should set isValid to false when externalId is missing', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const incompleteCredentials: CloudConnectorCredentials = {
-        roleArn: 'arn:aws:iam::123456789012:role/NewRole',
-        externalId: undefined,
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(incompleteCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith({
-        updatedPolicy: expect.any(Object),
-        isValid: undefined, // Missing externalId, so validation should fail
-      });
-    });
-
-    it('should set isValid to false when both credentials are missing', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const emptyCredentials: CloudConnectorCredentials = {
-        roleArn: undefined,
-        externalId: undefined,
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(emptyCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith({
-        updatedPolicy: expect.any(Object),
-        isValid: undefined, // Both missing, so validation should fail
       });
     });
   });
@@ -309,71 +248,6 @@ describe('useCloudConnectorSetup', () => {
       });
 
       expect(result.current.existingConnectionCredentials).toEqual(directExistingCredentials);
-    });
-  });
-
-  describe('validation logic', () => {
-    it('should validate correctly for truthy values', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const validCredentials: CloudConnectorCredentials = {
-        roleArn: 'arn:aws:iam::123456789012:role/ValidRole',
-        externalId: 'valid-external-id',
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(validCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isValid: true,
-        })
-      );
-    });
-
-    it('should validate correctly for empty string values', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const emptyStringCredentials: CloudConnectorCredentials = {
-        roleArn: '',
-        externalId: 'valid-external-id',
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(emptyStringCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isValid: undefined, // Empty string should be falsy
-        })
-      );
-    });
-
-    it('should validate correctly for whitespace-only values', () => {
-      const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
-      );
-
-      const whitespaceCredentials: CloudConnectorCredentials = {
-        roleArn: '   ',
-        externalId: 'valid-external-id',
-      };
-
-      act(() => {
-        result.current.updatePolicyWithNewCredentials(whitespaceCredentials);
-      });
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isValid: true, // Whitespace is still truthy in JavaScript
-        })
-      );
     });
   });
 });

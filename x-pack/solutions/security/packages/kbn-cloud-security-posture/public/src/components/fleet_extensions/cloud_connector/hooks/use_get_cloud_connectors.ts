@@ -27,7 +27,9 @@ const fetchCloudConnectors = async (
 
   const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}`;
 
-  return http.get<CloudConnector[]>(url);
+  return http
+    .get<{ items: CloudConnector[] }>(url)
+    .then((res: { items: CloudConnector[] }) => res.items);
 };
 
 export const useGetCloudConnectors = () => {
