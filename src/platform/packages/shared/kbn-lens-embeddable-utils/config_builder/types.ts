@@ -249,12 +249,14 @@ export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHe
 
 export interface LensReferenceLineLayerBase {
   type: 'reference';
-  yAxis: Array<LensBaseLayer & {
-    lineThickness?: number;
-    color?: string;
-    fill?: 'none' | 'above' | 'below';
-    value?: string;
-  }>;
+  yAxis: Array<
+    LensBaseLayer & {
+      lineThickness?: number;
+      color?: string;
+      fill?: 'none' | 'above' | 'below';
+      value?: string;
+    }
+  >;
 }
 
 export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseXYLayer;

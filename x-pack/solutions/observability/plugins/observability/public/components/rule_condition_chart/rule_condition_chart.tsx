@@ -175,30 +175,33 @@ export function RuleConditionChart({
       warningComparator === COMPARATORS.NOT_BETWEEN ||
       (warningComparator === COMPARATORS.BETWEEN && warningThreshold.length === 2)
     ) {
-      const [startFill, endFill] = warningComparator === COMPARATORS.NOT_BETWEEN
-        ? ['below', 'above'] as const
-        : ['above', 'none'] as const;
+      const [startFill, endFill] =
+        warningComparator === COMPARATORS.NOT_BETWEEN
+          ? (['below', 'above'] as const)
+          : (['above', 'none'] as const);
 
       const refLayer: LensReferenceLineLayer = {
         type: 'reference',
-        yAxis: [{
-          value: (warningThreshold[0] || 0).toString(),
-          seriesColor: euiTheme.colors.danger,
-          fill: startFill
-        }, 
-        warningComparator === COMPARATORS.BETWEEN ? {
-          value: (warningThreshold[1] || 0).toString(),
-          seriesColor: 'transparent',
-          fill: startFill,
-        } : undefined,
-        {
-          value: (warningThreshold[1] || 0).toString(),
-          seriesColor: euiTheme.colors.danger,
-          fill: endFill,
-        },
-        ].filter(NonNullable)
+        yAxis: [
+          {
+            value: (warningThreshold[0] || 0).toString(),
+            seriesColor: euiTheme.colors.danger,
+            fill: startFill,
+          },
+          warningComparator === COMPARATORS.BETWEEN
+            ? {
+                value: (warningThreshold[1] || 0).toString(),
+                seriesColor: 'transparent',
+                fill: startFill,
+              }
+            : undefined,
+          {
+            value: (warningThreshold[1] || 0).toString(),
+            seriesColor: euiTheme.colors.danger,
+            fill: endFill,
+          },
+        ].filter(NonNullable),
       };
-
 
       refLayers.push(refLayer);
     } else {
@@ -216,15 +219,17 @@ export function RuleConditionChart({
             value: (warningThreshold[0] || 0).toString(),
             seriesColor: euiTheme.colors.warning,
             fill,
-          }, 
+          },
           warningComparator === COMPARATORS.LESS_THAN ||
-        warningComparator === COMPARATORS.LESS_THAN_OR_EQUALS ? 
-          // A transparent line to add extra buffer at the top of threshold
-          {
-            value: getBufferThreshold(warningThreshold[0]),
-            seriesColor: 'transparent',
-            fill
-          } : undefined].filter(NonNullable)
+          warningComparator === COMPARATORS.LESS_THAN_OR_EQUALS
+            ? // A transparent line to add extra buffer at the top of threshold
+              {
+                value: getBufferThreshold(warningThreshold[0]),
+                seriesColor: 'transparent',
+                fill,
+              }
+            : undefined,
+        ].filter(NonNullable),
       };
       refLayers.push(warningThresholdRefLine);
     }
@@ -246,29 +251,33 @@ export function RuleConditionChart({
       comparator === COMPARATORS.NOT_BETWEEN ||
       (comparator === COMPARATORS.BETWEEN && threshold.length === 2)
     ) {
-      const [startFill, endFill] = comparator === COMPARATORS.NOT_BETWEEN
-        ? ['below', 'above'] as const
-        : ['above', 'none'] as const;
+      const [startFill, endFill] =
+        comparator === COMPARATORS.NOT_BETWEEN
+          ? (['below', 'above'] as const)
+          : (['above', 'none'] as const);
 
       const refLayer: LensReferenceLineLayer = {
         type: 'reference',
-        yAxis: [{
-          value: (threshold[0] || 0).toString(),
-          seriesColor: euiTheme.colors.danger,
-          fill: startFill
-        }, 
-        comparator === COMPARATORS.BETWEEN ? {
-          value: (threshold[1] || 0).toString(),
-          seriesColor: 'transparent',
-          fill: startFill,
-        } : undefined,
-        {
-          value: (threshold[1] || 0).toString(),
-          seriesColor: euiTheme.colors.danger,
-          fill: endFill,
-        }].filter(NonNullable)
+        yAxis: [
+          {
+            value: (threshold[0] || 0).toString(),
+            seriesColor: euiTheme.colors.danger,
+            fill: startFill,
+          },
+          comparator === COMPARATORS.BETWEEN
+            ? {
+                value: (threshold[1] || 0).toString(),
+                seriesColor: 'transparent',
+                fill: startFill,
+              }
+            : undefined,
+          {
+            value: (threshold[1] || 0).toString(),
+            seriesColor: euiTheme.colors.danger,
+            fill: endFill,
+          },
+        ].filter(NonNullable),
       };
-
 
       refLayers.push(refLayer);
     } else {
@@ -279,18 +288,20 @@ export function RuleConditionChart({
       const thresholdRefLine: LensReferenceLineLayer = {
         type: 'reference',
         yAxis: [
-        {
-          value: (threshold[0] || 0).toString(),
-          seriesColor: euiTheme.colors.danger,
-          fill
-        },
-        comparator === COMPARATORS.LESS_THAN || comparator === COMPARATORS.LESS_THAN_OR_EQUALS ? 
-        // A transparent line to add extra buffer at the top of threshold
-        {
-          value: getBufferThreshold(threshold[0]),
-          seriesColor: 'transparent',
-          fill,
-        } : undefined].filter(NonNullable)
+          {
+            value: (threshold[0] || 0).toString(),
+            seriesColor: euiTheme.colors.danger,
+            fill,
+          },
+          comparator === COMPARATORS.LESS_THAN || comparator === COMPARATORS.LESS_THAN_OR_EQUALS
+            ? // A transparent line to add extra buffer at the top of threshold
+              {
+                value: getBufferThreshold(threshold[0]),
+                seriesColor: 'transparent',
+                fill,
+              }
+            : undefined,
+        ].filter(NonNullable),
       };
       refLayers.push(thresholdRefLine);
     }
@@ -417,19 +428,19 @@ export function RuleConditionChart({
 
     const orderParams: TopValuesOrderParams = firstMetricAggMap
       ? {
-        orderDirection: 'desc',
-        orderBy: { type: 'custom' },
-        orderAgg: {
-          label: firstMetricAggMap.operationWithField,
-          dataType: 'number',
-          operationType: convertToMaxOperation.includes(firstMetricAggMap.operation)
-            ? 'max'
-            : firstMetricAggMap.operation,
-          sourceField: firstMetricAggMap.sourceField,
-          isBucketed: false,
-          scale: 'ratio',
-        },
-      }
+          orderDirection: 'desc',
+          orderBy: { type: 'custom' },
+          orderAgg: {
+            label: firstMetricAggMap.operationWithField,
+            dataType: 'number',
+            operationType: convertToMaxOperation.includes(firstMetricAggMap.operation)
+              ? 'max'
+              : firstMetricAggMap.operation,
+            sourceField: firstMetricAggMap.sourceField,
+            isBucketed: false,
+            scale: 'ratio',
+          },
+        }
       : undefined;
 
     if (groupBy && groupBy?.length) {
@@ -524,8 +535,8 @@ export function RuleConditionChart({
                   Object.keys(error?.metrics || {}).length !== 0
                     ? 'aggregation fields'
                     : error?.equation
-                      ? 'equation'
-                      : 'conditions',
+                    ? 'equation'
+                    : 'conditions',
               }}
             />
           }
