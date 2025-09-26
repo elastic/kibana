@@ -36,6 +36,7 @@ interface BaseAction {
     title: string;
     subtitle: string;
     content: React.ReactNode;
+    id: string;
   };
 }
 
@@ -76,8 +77,8 @@ export function ContentFrameworkSection({
   const [dismissedTours, setDismissedTours] = useLocalStorage<string[]>(sectionsTourStorageKey, []);
   const { euiTheme } = useEuiTheme();
 
-  const dismissTour = (actionName: string) => {
-    setDismissedTours(dismissedTours ? [...dismissedTours, actionName] : [actionName]);
+  const dismissTour = (actionId: string) => {
+    setDismissedTours(dismissedTours ? [...dismissedTours, actionId] : [actionId]);
   };
 
   const renderActionButton = ({ icon, ariaLabel, dataTestSubj, label, onClick, href }: Action) => {
@@ -118,7 +119,7 @@ export function ContentFrameworkSection({
               {tour ? (
                 <EuiTourStep
                   content={tour?.content}
-                  isStepOpen={!dismissedTours?.includes(ariaLabel)}
+                  isStepOpen={!dismissedTours?.includes(id)}
                   maxWidth={350}
                   onFinish={() => {}}
                   step={1}
@@ -135,7 +136,7 @@ export function ContentFrameworkSection({
                         }
                       )}
                       onClick={() => {
-                        dismissTour(ariaLabel);
+                        dismissTour(id);
                       }}
                     >
                       {i18n.translate(

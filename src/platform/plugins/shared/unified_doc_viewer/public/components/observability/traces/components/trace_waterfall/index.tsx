@@ -81,6 +81,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
             tour: {
+              id: 'trace-waterfall-tour',
               title: i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.title', {
                 defaultMessage: 'Trace insights in Discover',
               }),
