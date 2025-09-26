@@ -31,11 +31,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const updatedPlaygroundName = 'Test Search Playground';
 
   // Failing: See https://github.com/elastic/kibana/issues/231246
-  describe.skip('Search Playground - Saved Playgrounds', function () {
+  describe('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 
       await pageObjects.svlCommonPage.loginWithRole('developer');
+      // await pageObjects.searchPlayground.PlaygroundStartChatPage.clearSkipCostTour();
     });
     after(async () => {
       try {
@@ -43,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
           openaiConnectorName
         );
+        // await pageObjects.searchPlayground.PlaygroundStartChatPage.clearSkipCostTour();
       } catch {
         // we can ignore  if this fails
       }
@@ -56,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
+        // await pageObjects.searchPlayground.PlaygroundStartChatPage.closetLLMCostTour();
         // Add a connector to the playground
         await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
@@ -66,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Select indices
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-
+        await pageObjects.searchPlayground.PlaygroundChatPage.selectConnector(openaiConnectorName)
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToExist();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToBeEnabled();
         await pageObjects.searchPlayground.PlaygroundChatPage.savePlayground(testPlaygroundName);

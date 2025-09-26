@@ -166,6 +166,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     PlaygroundStartChatPage: {
       async expectPlaygroundSetupPage() {
         await testSubjects.existOrFail('setupPage');
+        // await testSubjects.existOrFail('elasticLLMCostsTourCloseBtn');
+        // await testSubjects.click('elasticLLMCostsTourCloseBtn');
       },
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
@@ -222,6 +224,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async clickConnectLLMButton() {
         await testSubjects.existOrFail('connectLLMButton');
         await testSubjects.click('connectLLMButton');
+      },
+      async closetLLMCostTour(){
+        await testSubjects.existOrFail('elasticLLMCostsTourCloseBtn');
+        await testSubjects.click('elasticLLMCostsTourCloseBtn');
+      },
+      async clearSkipCostTour() {
+        await browser.removeLocalStorageItem('search_elastic_llm_cost_info_skip');
+        // await browser.setLocalStorageItem('search_elastic_llm_cost_info_skip', 'undefined')
       },
       async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');
@@ -531,7 +541,18 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
           timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
         });
       },
+
+      async selectConnector(name:string){
+        await testSubjects.existOrFail('summarizationPanel');
+        await testSubjects.existOrFail('summarizationModelSelect');
+        await testSubjects.click('summarizationModelSelect');
+        await retry.try(async () => {
+          await testSubjects.existOrFail(`summarization_model_select_${name}_gpt-4o`)
+          await testSubjects.click(`summarization_model_select_${name}_gpt-4o`);
+        }, undefined, 200);
+
     },
+  },
     PlaygroundStartSearchPage: {
       async expectPlaygroundStartSearchPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
