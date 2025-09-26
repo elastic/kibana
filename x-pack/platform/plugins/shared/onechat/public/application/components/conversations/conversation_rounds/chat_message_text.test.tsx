@@ -21,6 +21,7 @@ import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import type { OnechatStartDependencies } from '../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
+import { ChartType } from '@kbn/visualization-utils';
 
 jest.mock('../../tools/esql/visualize_esql', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -143,12 +144,38 @@ describe('chat_message_text', () => {
       expect(ids).toEqual(['first', 'second']);
     });
 
+    it('supports multiple visualization tags without any text', () => {
+      const markdown = `<visualization tool-result-id="first" />\n<visualization tool-result-id="second" />`;
+      const visualizationNodes = getVisualizationNodes(markdown);
+
+      expect(visualizationNodes).toHaveLength(2);
+      const ids = visualizationNodes.map((node) => node.toolResultId);
+      expect(ids).toEqual(['first', 'second']);
+    });
+
     it('handles mixed-case visualization tags', () => {
       const markdown = 'Case insensitive\n<VISUALIZATION tool-result-id="cased" />';
       const visualizationNodes = getVisualizationNodes(markdown);
 
       expect(visualizationNodes).toHaveLength(1);
       expect(visualizationNodes[0].toolResultId).toBe('cased');
+    });
+
+    it('captures chart type attribute when present', () => {
+      const markdown = `Line\n<visualization tool-result-id="2hJz" chart-type="Line" />`;
+      const [visualizationNode] = getVisualizationNodes(markdown);
+
+      expect(visualizationNode).toBeDefined();
+      expect(visualizationNode.toolResultId).toBe('2hJz');
+      expect(visualizationNode.chartType).toBe('Line');
+    });
+
+    it('captures chart type attribute for multiple visualizations sharing the same tool result', () => {
+      const markdown = `Line\n<visualization tool-result-id="2hJz" chart-type="Line" />\n\nBar\n<visualization tool-result-id="2hJz" chart-type="Bar" />`;
+      const visualizationNodes = getVisualizationNodes(markdown);
+
+      expect(visualizationNodes).toHaveLength(2);
+      expect(visualizationNodes.map((node) => node.chartType)).toEqual(['Line', 'Bar']);
     });
   });
 
@@ -239,6 +266,40 @@ describe('chat_message_text', () => {
 
       expect(mockVisualizeESQL).toHaveBeenCalledTimes(1);
     });
+
+    it('passes the chartType as preferredChartType to VisualizeESQL', () => {
+      const renderer = createVisualizationRenderer({
+        startDependencies: createStartDependencies(),
+        stepsFromCurrentRound: [toolCallStep],
+        stepsFromPrevRounds: [],
+      });
+
+      const element = renderer({ toolResultId: '6K4K', chartType: ChartType.Line });
+      render(element);
+
+      expect(mockVisualizeESQL).toHaveBeenCalledTimes(1);
+      const props = mockVisualizeESQL.mock.calls[0][0];
+      expect(props).toMatchObject({
+        esqlColumns: toolResult.data.columns,
+        esqlQuery: toolResult.data.query,
+        preferredChartType: 'Line',
+      });
+    });
+
+    it('works without a chartType attribute', () => {
+      const renderer = createVisualizationRenderer({
+        startDependencies: createStartDependencies(),
+        stepsFromCurrentRound: [toolCallStep],
+        stepsFromPrevRounds: [],
+      });
+
+      const element = renderer({ toolResultId: '6K4K' });
+      render(element);
+
+      expect(mockVisualizeESQL).toHaveBeenCalledTimes(1);
+      const props = mockVisualizeESQL.mock.calls[0][0];
+      expect(props.preferredChartType).toBeUndefined();
+    });
   });
 
   describe('<ChatMessageText />', () => {
@@ -272,6 +333,50 @@ describe('chat_message_text', () => {
           esqlQuery: toolResult.data.query,
         })
       );
+    });
+
+    it('passes the chartType to VisualizeESQL', () => {
+      useStepsFromPrevRoundsMock.mockReturnValue([]);
+
+      const content =
+        'Here is a visualization:\n<visualization tool-result-id="6K4K" chart-type="Area" />';
+      render(<ChatMessageText content={content} steps={[toolCallStep]} />);
+
+      expect(mockVisualizeESQL).toHaveBeenCalledTimes(1);
+      const props = mockVisualizeESQL.mock.calls[0][0];
+      expect(props).toEqual(
+        expect.objectContaining({
+          esqlColumns: toolResult.data.columns,
+          esqlQuery: toolResult.data.query,
+          preferredChartType: 'Area',
+        })
+      );
+    });
+
+    it('renders multiple visualizations with different chart types in a single message', () => {
+      useStepsFromPrevRoundsMock.mockReturnValue([]);
+
+      const content = `Line Chart
+<visualization tool-result-id="6K4K" chart-type="Line" />
+
+Bar Chart
+<visualization tool-result-id="6K4K" chart-type="Bar" />
+
+Area Chart
+<visualization tool-result-id="6K4K" chart-type="Area" />`;
+
+      render(<ChatMessageText content={content} steps={[toolCallStep]} />);
+
+      expect(mockVisualizeESQL).toHaveBeenCalledTimes(3);
+
+      // Check that each visualization received the correct chart type
+      const callArgs = mockVisualizeESQL.mock.calls.map((call: any) => ({
+        preferredChartType: call[0].preferredChartType,
+      }));
+
+      expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Line' }));
+      expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Bar' }));
+      expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Area' }));
     });
   });
 });
