@@ -166,8 +166,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     PlaygroundStartChatPage: {
       async expectPlaygroundSetupPage() {
         await testSubjects.existOrFail('setupPage');
-        // await testSubjects.existOrFail('elasticLLMCostsTourCloseBtn');
-        // await testSubjects.click('elasticLLMCostsTourCloseBtn');
       },
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
@@ -224,14 +222,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async clickConnectLLMButton() {
         await testSubjects.existOrFail('connectLLMButton');
         await testSubjects.click('connectLLMButton');
-      },
-      async closetLLMCostTour(){
-        await testSubjects.existOrFail('elasticLLMCostsTourCloseBtn');
-        await testSubjects.click('elasticLLMCostsTourCloseBtn');
-      },
-      async clearSkipCostTour() {
-        await browser.removeLocalStorageItem('search_elastic_llm_cost_info_skip');
-        // await browser.setLocalStorageItem('search_elastic_llm_cost_info_skip', 'undefined')
       },
       async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');

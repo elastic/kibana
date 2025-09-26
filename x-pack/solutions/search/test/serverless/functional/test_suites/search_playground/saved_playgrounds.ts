@@ -30,13 +30,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  // Failing: See https://github.com/elastic/kibana/issues/231246
   describe('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 
       await pageObjects.svlCommonPage.loginWithRole('developer');
-      // await pageObjects.searchPlayground.PlaygroundStartChatPage.clearSkipCostTour();
     });
     after(async () => {
       try {
@@ -44,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
           openaiConnectorName
         );
-        // await pageObjects.searchPlayground.PlaygroundStartChatPage.clearSkipCostTour();
       } catch {
         // we can ignore  if this fails
       }
