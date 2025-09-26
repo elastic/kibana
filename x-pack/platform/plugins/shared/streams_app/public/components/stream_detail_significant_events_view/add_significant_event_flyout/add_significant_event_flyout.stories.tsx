@@ -37,6 +37,16 @@ export const Default: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      systems={[
+        {
+          name: 'Test system',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
     />
   );
 };
@@ -44,9 +54,20 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      systems={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      systems={[
+        {
+          name: 'Test system',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
       query={{
         id: '123',
         title: 'Operational Event: Service Lifecycle - LockScreenActivity',

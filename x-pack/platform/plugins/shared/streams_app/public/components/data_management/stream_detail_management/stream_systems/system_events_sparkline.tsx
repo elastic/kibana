@@ -23,12 +23,15 @@ export const SystemEventsSparkline = ({
       definition={definition}
       isQueryValid={true}
       query={{
-        system,
+        system: {
+          name: system.name,
+          filter: system.filter,
+        },
         kql: { query: '' },
         id: 'system-events-sparkline',
         title: system.name,
       }}
-      hideXAxis={true}
+      hideAxis={true}
       height={100}
     />
   );

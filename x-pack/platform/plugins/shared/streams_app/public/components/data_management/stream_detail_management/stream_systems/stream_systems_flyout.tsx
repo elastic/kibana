@@ -23,6 +23,8 @@ import {
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
+import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_message';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 import { StreamSystemsTable } from './stream_systems_table';
 
@@ -56,7 +58,7 @@ export const StreamSystemsFlyout = ({
           <h2>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.title"
-              defaultMessage="Stream description"
+              defaultMessage="System identification"
             />
           </h2>
         </EuiTitle>
@@ -65,12 +67,18 @@ export const StreamSystemsFlyout = ({
           <p>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.description"
-              defaultMessage="Stream description is used to provide context to Elastic, so we could analyse, generate and work better with your data. We use this information to provide significant events and other insights."
+              defaultMessage="We analyzed your stream and identified the following systems. Select the ones you want to add to your stream."
             />
           </p>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        className={css`
+          & .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+        `}
+      >
         {!isLoading ? (
           <StreamSystemsTable
             systems={systems}
@@ -79,24 +87,7 @@ export const StreamSystemsFlyout = ({
             definition={definition}
           />
         ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
-            <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
-              <EuiLoadingElastic size="xxl" />
-              <EuiSpacer size="m" />
-              <EuiText>
-                <p>
-                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.analyzingDataWithGenLabel', {
-                    defaultMessage: 'Analyzing data with Gen AI …',
-                  })}
-                </p>
-                <p>
-                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.pleaseWaitWhileWeLabel', {
-                    defaultMessage: 'Please wait while we identify systems.',
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <LoadingState />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -104,7 +95,6 @@ export const StreamSystemsFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               isLoading={isUpdating}
-              iconType="cross"
               onClick={closeFlyout}
               flush="left"
               aria-label={i18n.translate('xpack.streams.streamSystemsFlyout.closeButtonAriaLabel', {
@@ -141,3 +131,22 @@ export const StreamSystemsFlyout = ({
     </EuiFlyout>
   );
 };
+
+function LoadingState() {
+  const label = useWaitingForAiMessage();
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      alignItems="center"
+      justifyContent="center"
+      css={{ height: '100%' }}
+    >
+      <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
+        <EuiLoadingElastic size="xxl" />
+        <EuiSpacer size="m" />
+        <EuiText>{label}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}

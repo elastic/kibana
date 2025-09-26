@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiMarkdownEditor, EuiTitle, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiTitle, EuiSpacer } from '@elastic/eui';
 import type { System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { ConditionPanel } from '../../shared';
 
 export const SystemDetailExpanded = ({ system }: { system: System }) => {
   const [value, setValue] = useState(system.description);
@@ -42,9 +43,7 @@ export const SystemDetailExpanded = ({ system }: { system: System }) => {
           })}
         </h3>
       </EuiTitle>
-      <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
-        {JSON.stringify(system.filter)}
-      </EuiCodeBlock>
+      <ConditionPanel condition={system.filter} />
     </div>
   );
 };
