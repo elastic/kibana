@@ -28,13 +28,13 @@ import type { Matcher, MonitoringLabel } from '../../../../../../common/api/enti
  * };
  *
  * // Result
- * generateLabels('integration.okta', matchers, doc) =>
+ * generateMonitoringLabels('integration.okta', matchers, doc) =>
  * [
  *   { field: 'user.roles', value: 'Super Administrator', source: 'integration.okta' }
  * ]
  *
  */
-export const generateLabels = (
+export const generateMonitoringLabels = (
   source: string,
   matchers: Matcher[] = [],
   document: object

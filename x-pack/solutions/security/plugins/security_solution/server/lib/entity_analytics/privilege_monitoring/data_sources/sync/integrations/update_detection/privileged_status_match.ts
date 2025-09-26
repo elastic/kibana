@@ -11,7 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_clie
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
 import type { PrivMonIntegrationsUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
-import { generateLabels } from '../../generate_labels';
+import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 
 export type AfterKey = Record<string, string> | undefined;
 
@@ -128,11 +128,12 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
         topHit?._source?.user?.is_privileged ??
         false;
       return {
+        sourceId: source.id,
         username: bucket.key.username,
         existingUserId: existingUserMap.get(bucket.key.username),
         isPrivileged: Boolean(isPriv),
         latestDocForUser: topHit,
-        labels: generateLabels(source.id, source.matchers, topHit),
+        monitoringLabels: generateMonitoringLabels(source.id, source.matchers, topHit),
       };
     });
     return usersProcessed;

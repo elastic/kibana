@@ -13,13 +13,13 @@ export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics
 export interface PrivMonBulkUser {
   username: string;
   existingUserId?: string;
-  sourceId?: string;
+  sourceId: string;
+  monitoringLabels?: MonitoringLabel[];
 }
 
 export interface PrivMonIntegrationsUser extends PrivMonBulkUser {
   latestDocForUser: PrivTopHit; // latest document for this user from the source index
   isPrivileged: boolean;
-  labels: MonitoringLabel[];
 }
 
 export type MonitoringEntitySyncType = 'entity_analytics_integration' | 'index';

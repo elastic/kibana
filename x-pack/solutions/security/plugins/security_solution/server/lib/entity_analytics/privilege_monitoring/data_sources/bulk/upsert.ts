@@ -184,11 +184,11 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
     buildOps(usersChunk, UPDATE_SCRIPT_SOURCE, {
       buildUpdateParams: (user) => ({
         new_privileged_status: user.isPrivileged,
-        labels: user.labels,
+        monitoringLabels: user.monitoringLabels,
       }),
       buildCreateDoc: (user) => ({
         user: { name: user.username, is_privileged: user.isPrivileged },
-        labels: user.labels,
+        monitoringLabels: user.monitoringLabels,
       }),
       shouldCreate: (user) => user.isPrivileged,
     });
@@ -206,6 +206,7 @@ export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) =
         buildCreateDoc: (user, sourceLabel) => ({
           user: { name: user.username, is_privileged: true },
           labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
+          monitoringLabels: user.monitoringLabels || [],
         }),
       },
       'index_sync'

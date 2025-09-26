@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { generateLabels } from './generate_labels';
+import { generateMonitoringLabels } from './generate_monitoring_labels';
 
-describe('generateLabels', () => {
+describe('generateMonitoringLabels', () => {
   const source = 'integration.okta';
 
   it('returns empty array when no matchers are provided', () => {
-    const labels = generateLabels(source, [], { any: 'thing' });
+    const labels = generateMonitoringLabels(source, [], { any: 'thing' });
     expect(labels).toEqual([]);
   });
 
@@ -19,7 +19,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['user.role'], values: ['Admin', 'User'] }];
     const doc = { user: { role: 'Admin' } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([{ field: 'user.role', value: 'Admin', source }]);
   });
@@ -37,7 +37,7 @@ describe('generateLabels', () => {
       },
     };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([
       { field: 'user.roles', value: 'Super Administrator', source },
@@ -49,7 +49,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['account.permissions.level'], values: ['read', 'write'] }];
     const doc = { account: { permissions: { level: 'write' } } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([{ field: 'account.permissions.level', value: 'write', source }]);
   });
@@ -61,7 +61,7 @@ describe('generateLabels', () => {
       group: { roles: ['Read-only', 'Other'] },
     };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([
       { field: 'user.roles', value: 'Editor', source },
@@ -73,7 +73,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['user.roles'], values: ['Editor'] }];
     const doc = { user: { roles: ['Editor', 'Editor'] } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([{ field: 'user.roles', value: 'Editor', source }]);
   });
@@ -82,7 +82,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['user.roles', 'user.meta'], values: ['User'] }];
     const doc = { user: { roles: 123, meta: { role: 'User' } } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([]);
   });
@@ -91,7 +91,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['user.roles'], values: ['Admin'] }];
     const doc = { user: { roles: ['Editor', 'Reader'] } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([]);
   });
@@ -100,7 +100,7 @@ describe('generateLabels', () => {
     const matchers = [{ fields: ['missing.field'], values: ['anything'] }];
     const doc = { user: { roles: ['anything'] } };
 
-    const labels = generateLabels(source, matchers, doc);
+    const labels = generateMonitoringLabels(source, matchers, doc);
 
     expect(labels).toEqual([]);
   });
