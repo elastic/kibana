@@ -61,7 +61,7 @@ export type TabsBarProps = Pick<
   services: TabsServices;
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
-  onReorder: (items: TabItem[]) => void;
+  onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (eventName: string, payload?: TabsEBTPayload) => void;
 };
 
@@ -162,8 +162,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       ({ source, destination }: DropResult) => {
         if (source && destination) {
           const reorderedItems = euiDragDropReorder(items, source.index, destination.index);
+          const movedTabId = items[source.index].id;
 
-          onReorder(reorderedItems);
+          onReorder(reorderedItems, movedTabId);
         }
       },
       [items, onReorder]

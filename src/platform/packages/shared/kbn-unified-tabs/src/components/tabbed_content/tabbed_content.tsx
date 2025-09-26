@@ -170,21 +170,20 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onReorder = useCallback(
-    (reorderedItems: TabItem[]) => {
+    (reorderedItems: TabItem[], movedTabId: string) => {
       changeState((prevState) => {
         const prevItems = prevState.items;
-        const movedItem = prevItems.find((item, index) => item.id !== reorderedItems[index]?.id);
         const nextState = { ...prevState, items: reorderedItems };
 
-        if (!movedItem) {
+        if (!movedTabId) {
           return nextState;
         }
 
         onEBTEvent('tabReordered', {
-          fromIndex: prevItems.findIndex((item) => item.id === movedItem.id),
-          toIndex: reorderedItems.findIndex((item) => item.id === movedItem.id),
+          fromIndex: prevItems.findIndex((item) => item.id === movedTabId),
+          toIndex: reorderedItems.findIndex((item) => item.id === movedTabId),
           totalTabsOpen: prevState.items.length,
-          tabId: movedItem.id,
+          tabId: movedTabId,
         });
 
         return nextState;
