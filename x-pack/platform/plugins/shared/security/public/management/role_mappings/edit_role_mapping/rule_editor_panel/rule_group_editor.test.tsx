@@ -31,8 +31,10 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = shallowWithEuiProvider(<RuleGroupEditor {...props} />);
-    expect(wrapper.find(RuleGroupEditor)).toHaveLength(0);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
+    // Now that it's wrapped in EuiProvider, it finds itself as a direct child, but no sub-RuleGroupEditors
+    // Before it was the "wrapper", so it didn't find any
+    expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(0);
     expect(wrapper.find(AddRuleButton)).toHaveLength(1);
   });
