@@ -55,7 +55,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 100
     timeout_in_minutes: 60
     retry:
       automatic:
