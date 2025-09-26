@@ -11,7 +11,6 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  chatDataRegistry: 4162
   cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
@@ -31,6 +30,7 @@ pageLoadAssetSize:
   data: 453742
   dataQuality: 11469
   datasetQuality: 49315
+  dataSourcesRegistry: 4162
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
