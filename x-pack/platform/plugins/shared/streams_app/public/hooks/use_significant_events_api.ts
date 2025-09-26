@@ -27,6 +27,7 @@ interface SignificantEventsApi {
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   generate: (connectorId: string, system?: System) => SignificantEventsGenerateResponse;
+  abort: () => void;
 }
 
 export function useSignificantEventsApi({
@@ -46,7 +47,7 @@ export function useSignificantEventsApi({
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
   return {
     upsertQuery: async ({ system, kql, title, id }) => {
@@ -113,6 +114,10 @@ export function useSignificantEventsApi({
           },
         }
       );
+    },
+    abort: () => {
+      abort();
+      refresh();
     },
   };
 }
