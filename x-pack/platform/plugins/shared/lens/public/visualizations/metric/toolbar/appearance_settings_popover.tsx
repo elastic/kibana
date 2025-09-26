@@ -19,7 +19,11 @@ interface AppearancePopoverProps {
   groupPosition?: ToolbarPopoverProps['groupPosition'];
 }
 
-export function AppearancePopover({ state, setState, groupPosition }: AppearancePopoverProps) {
+export function AppearanceSettingsPopover({
+  state,
+  setState,
+  groupPosition,
+}: AppearancePopoverProps) {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.metric.appearancePopover.title', {

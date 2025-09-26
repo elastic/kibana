@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import type { VisualizationToolbarProps } from '../../../types';
-import { AppearanceSettings } from '../toolbar/appearance_settings';
+import { AppearanceSettings } from './appearance_settings';
 import type { MetricVisualizationState } from '../types';
 
 type Option = EuiButtonGroupOptionProps & { label: string };
@@ -35,7 +35,7 @@ const styles = {
     }),
 };
 
-export function SettingsPanelToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
+export function FlyoutToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState('');
 
@@ -65,7 +65,7 @@ export function SettingsPanelToolbar(props: VisualizationToolbarProps<MetricVisu
         idSelected={idSelected}
         isIconOnly
       />
-
+      {/* Appearance settings flyout */}
       <FlyoutContainer
         isFullscreen={false}
         label={flyoutTitle}
