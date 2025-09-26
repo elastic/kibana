@@ -565,7 +565,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   await onSnoozeRule(rule, snoozeSchedule);
                 }}
                 unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-                isRuleEditable={rule.isEditable}
+                isRuleEditable={rule.isEditable && !rule.isInternallyManaged}
               />
             </div>
           );

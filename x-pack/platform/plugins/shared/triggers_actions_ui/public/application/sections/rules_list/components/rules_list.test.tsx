@@ -987,7 +987,10 @@ describe('internally managed rule', () => {
 
   it('render no delete button and only update api key action when rule is internally managed', async () => {
     renderWithProviders(<RulesList />);
-    expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('editActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
+
     userEvent.click(await screen.findByTestId('selectActionButton'));
     expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
     expect(screen.queryByTestId('snoozeButton')).toBeNull();
