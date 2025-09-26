@@ -22630,47 +22630,56 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "cloudProvider": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "string"
-                      },
-                      "id": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "namespace": {
-                        "type": "string"
-                      },
-                      "packagePolicyCount": {
-                        "type": "number"
-                      },
-                      "updated_at": {
-                        "type": "string"
-                      },
-                      "vars": {
-                        "additionalProperties": {},
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "cloudProvider": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "namespace": {
+                            "type": "string"
+                          },
+                          "packagePolicyCount": {
+                            "type": "number"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "vars": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "cloudProvider",
+                          "vars",
+                          "packagePolicyCount",
+                          "created_at",
+                          "updated_at"
+                        ],
                         "type": "object"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "name",
-                      "cloudProvider",
-                      "vars",
-                      "packagePolicyCount",
-                      "created_at",
-                      "updated_at"
-                    ],
-                    "type": "object"
+                      },
+                      "type": "array"
+                    }
                   },
-                  "type": "array"
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
                 }
               }
             },
@@ -22825,40 +22834,49 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "cloudProvider": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "string"
-                    },
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "namespace": {
-                      "type": "string"
-                    },
-                    "packagePolicyCount": {
-                      "type": "number"
-                    },
-                    "updated_at": {
-                      "type": "string"
-                    },
-                    "vars": {
-                      "additionalProperties": {},
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "cloudProvider": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "namespace": {
+                          "type": "string"
+                        },
+                        "packagePolicyCount": {
+                          "type": "number"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "vars": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "cloudProvider",
+                        "vars",
+                        "packagePolicyCount",
+                        "created_at",
+                        "updated_at"
+                      ],
                       "type": "object"
                     }
                   },
                   "required": [
-                    "id",
-                    "name",
-                    "cloudProvider",
-                    "vars",
-                    "packagePolicyCount",
-                    "created_at",
-                    "updated_at"
+                    "item"
                   ],
                   "type": "object"
                 }
@@ -23015,40 +23033,49 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "cloudProvider": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "string"
-                    },
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "namespace": {
-                      "type": "string"
-                    },
-                    "packagePolicyCount": {
-                      "type": "number"
-                    },
-                    "updated_at": {
-                      "type": "string"
-                    },
-                    "vars": {
-                      "additionalProperties": {},
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "cloudProvider": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "namespace": {
+                          "type": "string"
+                        },
+                        "packagePolicyCount": {
+                          "type": "number"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "vars": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "cloudProvider",
+                        "vars",
+                        "packagePolicyCount",
+                        "created_at",
+                        "updated_at"
+                      ],
                       "type": "object"
                     }
                   },
                   "required": [
-                    "id",
-                    "name",
-                    "cloudProvider",
-                    "vars",
-                    "packagePolicyCount",
-                    "created_at",
-                    "updated_at"
+                    "item"
                   ],
                   "type": "object"
                 }
@@ -23200,40 +23227,49 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "cloudProvider": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "string"
-                    },
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "namespace": {
-                      "type": "string"
-                    },
-                    "packagePolicyCount": {
-                      "type": "number"
-                    },
-                    "updated_at": {
-                      "type": "string"
-                    },
-                    "vars": {
-                      "additionalProperties": {},
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "cloudProvider": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "namespace": {
+                          "type": "string"
+                        },
+                        "packagePolicyCount": {
+                          "type": "number"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "vars": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "cloudProvider",
+                        "vars",
+                        "packagePolicyCount",
+                        "created_at",
+                        "updated_at"
+                      ],
                       "type": "object"
                     }
                   },
                   "required": [
-                    "id",
-                    "name",
-                    "cloudProvider",
-                    "vars",
-                    "packagePolicyCount",
-                    "created_at",
-                    "updated_at"
+                    "item"
                   ],
                   "type": "object"
                 }
