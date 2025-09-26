@@ -31,8 +31,11 @@ export const isInProtectedNamespace = (toolName: string) => {
 };
 
 /**
- * Checks if the provided tool name belongs to a protected namespace.
+ * Checks if the provided name is an internal or protected namespace.
  */
-export const hasProtectedNamespaceName = (toolName: string) => {
-  return protectedNamespaces.includes(toolName);
+export const hasNamespaceName = (toolName: string) => {
+  return (
+    protectedNamespaces.includes(toolName) ||
+    (Object.values(internalNamespaces) as string[]).includes(toolName)
+  );
 };
