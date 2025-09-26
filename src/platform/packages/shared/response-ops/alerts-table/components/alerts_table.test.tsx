@@ -386,6 +386,8 @@ describe('AlertsTable', () => {
 
         act(() => {
           onToggleColumn(AlertsField.name);
+        });
+        act(() => {
           onToggleColumn(testColumnId);
         });
 
