@@ -15,7 +15,8 @@ import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
-import {  serializeXJson } from '../../../../helpers';
+import { serializeXJson } from '../../../../helpers';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 export const JsonEditor = () => {
   const {
@@ -27,50 +28,30 @@ export const JsonEditor = () => {
       validate: (value) => {
         if (typeof value === 'string') {
           try {
-            const tripleQuoteRegex = /"""(.*?)"""/gs;
-            const hasTripleQuotes = tripleQuoteRegex.test(value);
-            console.log('hasTripleQuotes', hasTripleQuotes);
-            let parsedValue;
-            console.log('value', value);
-            console.log('parsedValue', parsedValue);
-            if (hasTripleQuotes) {
-              let placeholder = 'PLACEHOLDER';
-              let testString: string = value;
-              while (testString.includes(placeholder)) {
-                placeholder += '_';
-              }
-              testString = testString.replace(tripleQuoteRegex, () => `"${placeholder}"`);
-              parsedValue = JSON.parse(testString);
-            } else {
-              parsedValue = JSON.parse(value);
-            }
-            console.log('parsedValue2', parsedValue);
+            const parsed = JSON.parse(XJson.collapseLiteralStrings(value));
 
-            if (!Array.isArray(parsedValue)) {
+            if (!Array.isArray(parsed)) {
               return i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
-                {
-                  defaultMessage: 'Expected an array',
-                }
+                { defaultMessage: 'Expected an array' }
               );
             }
 
-            const invalidProcessor = parsedValue.find((processor) => {
+            const invalidProcessor = parsed.find((processor: Record<string, unknown>) => {
               const processorType = Object.keys(processor)[0];
               return (
                 processorType &&
-                !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
+                !elasticsearchProcessorTypes.includes(
+                  processorType as ElasticsearchProcessorType
+                )
               );
             });
-            console.log('invalidProcessor', invalidProcessor);
             if (invalidProcessor) {
               return i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
                 {
                   defaultMessage: 'Invalid processor type: {processorType}',
-                  values: {
-                    processorType: Object.keys(invalidProcessor)[0],
-                  },
+                  values: { processorType: Object.keys(invalidProcessor)[0] },
                 }
               );
             }
@@ -79,20 +60,18 @@ export const JsonEditor = () => {
           } catch (e) {
             return i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
-              {
-                defaultMessage: 'Invalid JSON format',
-              }
+              { defaultMessage: 'Invalid JSON format' }
             );
           }
         }
+
         if (!Array.isArray(value)) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
-            {
-              defaultMessage: 'Expected an array',
-            }
+            { defaultMessage: 'Expected an array' }
           );
         }
+
         const invalidProcessor = value.find((processor) => {
           const processorType = Object.keys(processor)[0];
           return (
@@ -105,9 +84,7 @@ export const JsonEditor = () => {
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
             {
               defaultMessage: 'Invalid processor type: {processorType}',
-              values: {
-                processorType: Object.keys(invalidProcessor)[0],
-              },
+              values: { processorType: Object.keys(invalidProcessor)[0] },
             }
           );
         }
@@ -120,39 +97,18 @@ export const JsonEditor = () => {
    * we need to avoid the continuous parsing/serialization of the editor value
    * using a parallel state always setting a string make the editor format well the content.
    */
-  const [value, setValue] = React.useState(() => serializeXJson(field.value));
+  const [value, setValue] = React.useState(() => serializeXJson(field.value, '[]'));
 
   const handleChange = (newValue: string) => {
     setValue(newValue);
 
-    let parsedValue;
-    console.log('newValue', newValue);
+    let parsed: unknown = newValue;
     try {
-      parsedValue = JSON.parse(newValue);
-    } catch (e) {
-      try {
-        const tripleQuoteRegex = /"""(.*?)"""/gs;
-        const hasTripleQuotes = tripleQuoteRegex.test(newValue);
-        console.log('hasTripleQuotes', hasTripleQuotes);
-        if (hasTripleQuotes) {
-          let placeholder = 'PLACEHOLDER';
-          let testString = newValue;
-          while (testString.includes(placeholder)) {
-            placeholder += '_';
-          }
-          testString = newValue.replace(tripleQuoteRegex, (match, content) => `"${content}"`);
-          parsedValue = JSON.parse(testString);
-          console.log('parsedValue', parsedValue);
-        } else {
-          parsedValue = newValue;
-        }
-      } catch (finalError) {
-        console.log('finalError', finalError);
-        parsedValue = newValue;
-      }
+      parsed = JSON.parse(XJson.collapseLiteralStrings(newValue));
+    } catch {
     }
 
-    field.onChange(parsedValue);
+    field.onChange(parsed);
   };
 
   return (

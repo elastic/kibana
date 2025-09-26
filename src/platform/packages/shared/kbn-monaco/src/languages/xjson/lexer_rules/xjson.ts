@@ -117,7 +117,7 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [
     ['{', '}'],
     ['[', ']'],
-    ['"""', '"""'],
+    ['"""', '"""\n'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
