@@ -13,7 +13,6 @@ import { withRouter, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
   EuiCallOut,
@@ -186,7 +185,6 @@ export const EditIndexPattern = withRouter(
               defaultIndex={defaultIndex}
               canSave={userEditPermission}
             />
-            <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
