@@ -90,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
         const listed = res.body as ListPrivMonUsersResponse;
 
         expect(listed.length).toEqual(1);
-
         expect(listed[0]?.labels?.source_ids).toBeDefined();
         expect((listed[0]?.labels as any).source_indices).not.toBeDefined(); // Type Assertion required because source_indices is not defined in the schema anymore
       });
