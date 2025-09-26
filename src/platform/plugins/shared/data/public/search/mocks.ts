@@ -31,7 +31,7 @@ function createStartContract(
     showError: jest.fn(),
     showSearchSessionsFlyout: jest.fn(),
     showWarnings: jest.fn(),
-    isBackgroundSearchEnabled: false,
+    isBackgroundSearchEnabled: true,
     session: getSessionServiceMock(),
     sessionsClient: getSessionsClientMock(),
     searchSource: searchSourceMock.createStartContract(),

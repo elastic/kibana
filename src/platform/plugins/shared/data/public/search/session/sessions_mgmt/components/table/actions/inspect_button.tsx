@@ -145,7 +145,7 @@ export const createInspectActionDescriptor = (
       <InspectFlyoutWrapper
         hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
           BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
+          true
         )}
         uiSettings={core.uiSettings}
         settings={core.settings}

@@ -297,7 +297,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const config = this.initializerContext.config.get();
     if (
       config.search.sessions.enabled &&
-      !coreStart.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
+      !coreStart.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, true)
     ) {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
@@ -353,7 +353,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       isBackgroundSearchEnabled: coreStart.featureFlags.getBooleanValue(
         BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-        false
+        true
       ),
       session: this.sessionService,
       sessionsClient: this.sessionsClient,

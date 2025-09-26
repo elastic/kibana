@@ -89,7 +89,7 @@ export async function updateSearchSessionMgmtSectionTitle(
   const [coreStart] = await getStartServices();
   const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
     BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    false
+    true
   );
 
   if (hasBackgroundSearchEnabled) {

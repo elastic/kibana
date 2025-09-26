@@ -136,7 +136,7 @@ export const createRenameActionDescriptor = (
         <RenameDialog
           hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
             BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-            false
+            true
           )}
           onActionDismiss={() => ref?.close()}
           api={api}

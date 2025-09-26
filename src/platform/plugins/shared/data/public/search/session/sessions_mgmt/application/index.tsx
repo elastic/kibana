@@ -46,7 +46,7 @@ export class SearchSessionsMgmtApp {
 
     const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
       BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
+      true
     );
     const pluginName = APP.getI18nName(hasBackgroundSearchEnabled);
     docTitle.change(pluginName);
