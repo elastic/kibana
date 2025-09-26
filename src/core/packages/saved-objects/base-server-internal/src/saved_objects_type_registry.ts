@@ -62,8 +62,8 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
-    const accessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
-    const typeWithAccessControl = { ...type, supportsAccessControl: accessControl };
+    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+    const typeWithAccessControl = { ...type, supportsAccessControl };
 
     validateType(type);
     this.types.set(type.name, deepFreeze(typeWithAccessControl) as SavedObjectsType);
