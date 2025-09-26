@@ -12,6 +12,11 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -25,6 +30,7 @@ export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
   inferenceEnabled?: boolean;
+  settings: SettingsStart;
 }
 
 const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
@@ -33,6 +39,7 @@ export const useLoadConnectors = ({
   http,
   toasts,
   inferenceEnabled = false,
+  settings,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
   useEffect(() => {
     if (inferenceEnabled && !actionTypes.includes('.inference')) {
@@ -40,13 +47,20 @@ export const useLoadConnectors = ({
     }
   }, [inferenceEnabled]);
 
+  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultAiConnectorOnly = settings.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
+
   return useQuery(
     QUERY_KEY,
     async () => {
       const connectors = await loadConnectors({ http });
-      return connectors.reduce((acc: AIConnector[], connector) => {
+
+      const allAiConnectors = connectors.flatMap((connector) => {
         if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
-          acc.push({
+          const aiConnector: AIConnector = {
             ...connector,
             apiProvider:
               !connector.isPreconfigured &&
@@ -54,10 +68,23 @@ export const useLoadConnectors = ({
               connector?.config?.apiProvider
                 ? (connector?.config?.apiProvider as OpenAiProviderType)
                 : undefined,
-          });
+          };
+          return [aiConnector];
         }
-        return acc;
-      }, []);
+        return [];
+      });
+
+      const availableConnectors = allAiConnectors.filter((connector) => {
+        if (defaultAiConnectorOnly) {
+          return connector.id === defaultAiConnectorId;
+        }
+        return true;
+      });
+
+      if (availableConnectors.length === 0) {
+        return allAiConnectors;
+      }
+      return availableConnectors;
     },
     {
       retry: false,
