@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { buildFiltersForEntityType } from './calculate_risk_scores';
+import { buildFiltersForEntityType, calculateRiskScores } from './calculate_risk_scores';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
-import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
-
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { allowedExperimentalValues } from '../../../../common';
 
 describe('buildFiltersForEntityType', () => {
@@ -42,7 +38,7 @@ describe('buildFiltersForEntityType', () => {
     });
   });
 
-  it('should apply entity-specific custom filters', () => {
+  it('should apply entity-specific custom filters (exclusive)', () => {
     const customFilters = [
       { entity_types: ['host'], filter: 'agent.type: filebeat' },
       { entity_types: ['user'], filter: 'user.name: ubuntu' },
@@ -64,40 +60,48 @@ describe('buildFiltersForEntityType', () => {
       mockExcludeAlertTags
     );
 
-    // Host filters should include the host-specific filter
+    // Host filters should exclude the host-specific filter (must_not)
     expect(hostFilters).toHaveLength(5);
     expect(hostFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          should: expect.arrayContaining([
-            expect.objectContaining({
-              match: expect.objectContaining({
-                'agent.type': 'filebeat',
-              }),
+          must_not: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'agent.type': 'filebeat',
+                  }),
+                }),
+              ]),
             }),
-          ]),
+          }),
         }),
       })
     );
 
-    // User filters should include the user-specific filter
+    // User filters should exclude the user-specific filter (must_not)
     expect(userFilters).toHaveLength(5);
     expect(userFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          should: expect.arrayContaining([
-            expect.objectContaining({
-              match: expect.objectContaining({
-                'user.name': 'ubuntu',
-              }),
+          must_not: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'user.name': 'ubuntu',
+                  }),
+                }),
+              ]),
             }),
-          ]),
+          }),
         }),
       })
     );
   });
 
-  it('should apply multiple filters for the same entity type', () => {
+  it('should apply multiple exclusive filters for the same entity type', () => {
     const customFilters = [
       { entity_types: ['host'], filter: 'agent.type: filebeat' },
       { entity_types: ['host'], filter: 'host.os.name: linux' },
