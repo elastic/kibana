@@ -57,11 +57,12 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
     });
   });
 
-  test(`with the single selection`, async ({ page }) => {
+  test(`with the single selection`, async ({ page, log }) => {
     const selector = { locator: '[id=":r5:-row"] .euiComboBox' };
     await navigateToEuiTestPage(
       page,
-      'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
+      'docs/components/forms/selection/combo-box/#single-selection-with-custom-options',
+      log
     );
 
     await test.step('should select option from dropdown', async () => {
