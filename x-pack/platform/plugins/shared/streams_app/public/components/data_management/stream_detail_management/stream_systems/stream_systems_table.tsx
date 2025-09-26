@@ -212,7 +212,7 @@ export function StreamSystemsTable({
         itemId="name"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         columns={columnsWithExpandingRowToggle}
-        selection={{ initialSelected: selectedSystems, onSelectionChange: setSelectedSystems }}
+        selection={{ selected: selectedSystems, onSelectionChange: setSelectedSystems }}
       />
     </>
   );
