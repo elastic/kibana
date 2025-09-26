@@ -18,11 +18,7 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
 
   apiTest.afterEach(async ({ apiServices }) => {
     // Clean up integration
-    try {
-      await apiServices.fleet.integration.delete(integrationName);
-    } catch (e) {
-      // Integration might not exist or already deleted
-    }
+    await apiServices.fleet.integration.delete(integrationName);
   });
 
   apiTest('should install a custom integration', async ({ apiServices }) => {
@@ -44,12 +40,10 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
   apiTest('should handle delete of non-existent integration', async ({ apiServices }) => {
     const nonExistentIntegration = `non-existent-integration-${Date.now()}`;
 
-    try {
-      await apiServices.fleet.integration.delete(nonExistentIntegration);
-    } catch (error) {
-      // Should return 400 for non-existent integration due to ignoreErrors
-      expect(error.response.status).toBe(400);
-    }
+    const response = await apiServices.fleet.integration.delete(nonExistentIntegration);
+
+    // Should return 400 for non-existent integration due to ignoreErrors
+    expect(response.status).toBe(400);
   });
 });
 
@@ -248,11 +242,8 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
   apiTest.afterEach(async ({ apiServices }) => {
     // Clean up host
     if (hostId) {
-      try {
-        await apiServices.fleet.server_hosts.delete(hostId);
-      } catch (e) {
-        // Host might not exist or already deleted
-      }
+      await apiServices.fleet.server_hosts.delete(hostId);
+      // Host might not exist or already deleted
       hostId = '';
     }
   });
