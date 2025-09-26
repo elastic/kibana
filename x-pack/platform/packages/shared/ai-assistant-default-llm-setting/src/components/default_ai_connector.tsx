@@ -314,8 +314,9 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
                   isDisabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly}
                   isLoading={connectors.loading}
                   isInvalid={
-            (selectedOptions.length === 0 && !connectors.loading) ||
-            (defaultLlmOnlyValue && selectedOptions[0]?.value === NO_DEFAULT_CONNECTOR)}
+                    (selectedOptions.length === 0 && !connectors.loading) ||
+                    (defaultLlmOnlyValue && selectedOptions[0]?.value === NO_DEFAULT_CONNECTOR)
+                  }
                 />
               </EuiFormRow>
 

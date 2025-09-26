@@ -14,8 +14,8 @@ import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;

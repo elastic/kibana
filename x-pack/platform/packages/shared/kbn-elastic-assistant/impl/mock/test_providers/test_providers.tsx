@@ -17,11 +17,11 @@ import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { AssistantProviderProps } from '../../assistant_context';
 import { AssistantProvider } from '../../assistant_context';
 import type { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -68,7 +68,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => { },
+      error: () => {},
     },
   });
 
@@ -80,11 +80,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
-            settings={{
-              client: {
-                get: jest.fn(),
-              },
-            } as unknown as SettingsStart}
+            settings={
+              {
+                client: {
+                  get: jest.fn(),
+                },
+              } as unknown as SettingsStart
+            }
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}

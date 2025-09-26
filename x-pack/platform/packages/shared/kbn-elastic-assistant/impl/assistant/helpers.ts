@@ -6,9 +6,9 @@
  */
 
 import { isEmpty, some } from 'lodash';
-import { Conversation } from '../..';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { Conversation } from '../..';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getDefaultConnector, getOptionalRequestParams, mergeBaseWithPersistedConversations } from './helpers';
+import {
+  getDefaultConnector,
+  getOptionalRequestParams,
+  mergeBaseWithPersistedConversations,
+} from './helpers';
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
