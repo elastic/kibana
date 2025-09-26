@@ -70,7 +70,7 @@ export function TracesInDiscoverCallout() {
 
   const discoverHref = useMemo(() => {
     if (!tracesIndex) return undefined;
-    share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+    return share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
       timeRange: {
         from: rangeFrom,
         to: rangeTo,
