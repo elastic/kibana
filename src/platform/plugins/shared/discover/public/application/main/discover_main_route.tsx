@@ -100,7 +100,7 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome } = services;
+  const { core, dataViews, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -178,6 +178,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
+    data.search.session.clear();
+
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }

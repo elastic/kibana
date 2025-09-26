@@ -29,28 +29,12 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const services = useDiscoverServices();
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const { chrome, docLinks, spaces, history, data, core } = services;
+  const { chrome, docLinks, spaces, history } = services;
 
   /**
    * Adhoc data views functionality
    */
   useAdHocDataViews();
-
-  useEffect(() => {
-    return () => {
-      const areTabsEnabled = core.featureFlags.getBooleanValue(
-        TABS_ENABLED_FEATURE_FLAG_KEY,
-        false
-      );
-      if (areTabsEnabled) {
-        // when tabs are enabled we do the clear from src/platform/plugins/shared/discover/public/application/main/components/tabs_view/tabs_view.tsx
-        return;
-      }
-
-      // clear session when navigating away from discover main
-      data.search.session.clear();
-    };
-  }, [data.search.session, core.featureFlags]);
 
   // TODO: Move this higher up in the component tree
   useEffect(() => {
