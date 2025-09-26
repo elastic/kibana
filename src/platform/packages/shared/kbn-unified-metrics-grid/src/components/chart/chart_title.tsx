@@ -17,7 +17,6 @@ export const ChartTitle = ({
 }: {
   searchTerm: string;
   title: string;
-  description?: React.ReactNode;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);

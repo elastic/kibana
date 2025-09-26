@@ -43,7 +43,7 @@ function FieldsMetadataProvider({
   const { fieldsMetadata: newMetadata, loading } = useFieldsMetadata(
     {
       fieldNames: unseenFields.map((field) => field.name),
-      attributes: ['description', 'source'],
+      attributes: ['description'],
     },
     [unseenFields]
   );
