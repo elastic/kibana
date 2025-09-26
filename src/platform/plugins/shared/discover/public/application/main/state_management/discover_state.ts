@@ -252,6 +252,7 @@ export function getDiscoverStateContainer({
     internalState,
     savedSearchContainer,
     services,
+    injectCurrentTab,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
@@ -284,6 +285,7 @@ export function getDiscoverStateContainer({
     runtimeStateManager,
     savedSearchContainer,
     setDataView,
+    injectCurrentTab,
     getCurrentTab,
   });
 
@@ -421,7 +423,7 @@ export function getDiscoverStateContainer({
   };
 
   let internalStopSyncing = () => {};
-  
+
   const stopSyncing = () => {
     internalStopSyncing();
     internalStopSyncing = () => {};

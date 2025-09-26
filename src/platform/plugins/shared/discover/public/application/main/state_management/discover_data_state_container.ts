@@ -39,8 +39,7 @@ import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fe
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
-import type { InternalStateStore, RuntimeStateManager, TabState } from './redux';
-import { createTabActionInjector } from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
@@ -134,11 +133,6 @@ export interface DiscoverDataStateContainer {
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
   getInitialFetchStatus: () => FetchStatus;
-  /**
-   * Migrating to another tab id if it was regenerated on save as new discover session
-   * @param newTabId
-   */
-  migrateToTabId: (newTabId: string) => void;
 }
 
 /**
@@ -154,6 +148,7 @@ export function getDataStateContainer({
   runtimeStateManager,
   savedSearchContainer,
   setDataView,
+  injectCurrentTab,
   getCurrentTab,
 }: {
   services: DiscoverServices;
@@ -163,9 +158,9 @@ export function getDataStateContainer({
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
   setDataView: (dataView: DataView) => void;
+  injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
-  let injectCurrentTab = createTabActionInjector(getCurrentTab().id);
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
@@ -212,7 +207,7 @@ export function getDataStateContainer({
     internalState,
     appStateContainer,
     dataSubjects,
-    getCurrentTab,
+    injectCurrentTab,
   });
 
   // The main subscription to handle state changes
@@ -434,10 +429,6 @@ export function getDataStateContainer({
     return abortController;
   };
 
-  const migrateToTabId = (newTabId: string) => {
-    injectCurrentTab = createTabActionInjector(newTabId);
-  };
-
   return {
     fetch: fetchQuery,
     fetchMore,
@@ -451,6 +442,5 @@ export function getDataStateContainer({
     getInitialFetchStatus,
     cancel,
     getAbortController,
-    migrateToTabId,
   };
 }
