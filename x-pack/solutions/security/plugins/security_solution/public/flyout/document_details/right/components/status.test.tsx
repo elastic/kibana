@@ -37,6 +37,7 @@ const actionItem = {
 
 (useAlertsActions as jest.Mock).mockReturnValue({
   actionItems: [actionItem],
+  panels: [],
 });
 
 describe('<DocumentStatus />', () => {

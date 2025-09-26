@@ -19,7 +19,6 @@ export const GrokProcessorForm = () => {
     <>
       <ProcessorFieldSelector
         fieldKey="from"
-        processorType="grok"
         helpText={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.setGrokFieldHelpText',
           { defaultMessage: 'Field to search for grok matches in simulation data' }

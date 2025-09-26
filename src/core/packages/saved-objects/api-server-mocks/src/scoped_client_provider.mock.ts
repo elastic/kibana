@@ -8,12 +8,14 @@
  */
 
 import type { ISavedObjectsClientProvider } from '@kbn/core-saved-objects-api-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
-const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
-  getClient: jest.fn(),
-  setClientFactory: jest.fn(),
-  getExtensions: jest.fn(),
-});
+const create = (): jest.Mocked<ISavedObjectsClientProvider> =>
+  lazyObject({
+    getClient: jest.fn(),
+    setClientFactory: jest.fn(),
+    getExtensions: jest.fn(),
+  });
 
 export const savedObjectsClientProviderMock = {
   create,

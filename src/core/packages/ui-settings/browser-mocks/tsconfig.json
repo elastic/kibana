@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",
