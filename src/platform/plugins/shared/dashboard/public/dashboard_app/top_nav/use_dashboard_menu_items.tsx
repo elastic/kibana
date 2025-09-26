@@ -13,11 +13,8 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-<<<<<<< HEAD
 
-=======
 import useObservable from 'react-use/lib/useObservable';
->>>>>>> 6ba1dae16ade79097ea4f86a8a49e49dbbc31def
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
