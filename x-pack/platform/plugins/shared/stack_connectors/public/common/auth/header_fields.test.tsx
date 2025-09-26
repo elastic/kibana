@@ -125,7 +125,7 @@ describe('HeaderFields', () => {
     await userEvent.click(addBtn);
 
     expect(screen.queryByTestId('webhookAddHeaderButton')).not.toBeInTheDocument();
-    expect(screen.getByText('Maximum number of 4 custom fields reached.')).toBeInTheDocument();
+    expect(screen.getByText('Maximum number of 4 headers reached.')).toBeInTheDocument();
   });
 
   describe('validation', () => {
