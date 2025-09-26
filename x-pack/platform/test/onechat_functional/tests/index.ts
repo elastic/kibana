@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObject }: OneChatUiFtrProviderContext) {
   describe('Agent Builder', function () {
+    before(async () => {
+      const config = getService('config');
+      const isServerless = Boolean(config.get('serverless'));
+
+      if (isServerless) {
+        const common = getPageObject('svlCommonPage');
+        await common.loginAsAdmin();
+      }
+    });
+
     describe('converse', function () {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
       loadTestFile(require.resolve('./converse/conversation_history.ts'));
     });
+
     describe('tools', function () {
       loadTestFile(require.resolve('./tools/create_tool.ts'));
       loadTestFile(require.resolve('./tools/landing_page.ts'));
