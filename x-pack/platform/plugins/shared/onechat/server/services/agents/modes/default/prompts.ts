@@ -165,7 +165,7 @@ function renderVisualizationPrompt() {
       **Rules**
       * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
       * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}.
-      * If no chart type is specified, the system will choose an appropriate default visualization.
+      * If the user does not specify a chart type, do NOT assume any. The system will choose an appropriate default visualization.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
       * You must not include any other attributes or content within the \`<${tagName}>\` element.      
