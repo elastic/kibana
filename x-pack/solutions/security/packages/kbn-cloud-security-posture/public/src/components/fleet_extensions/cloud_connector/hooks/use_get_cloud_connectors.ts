@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { CloudConnectorResponse, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
+import type { CloudConnector, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -14,7 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 const fetchCloudConnectors = async (
   http: HttpStart,
   options?: CloudConnectorListOptions
-): Promise<CloudConnectorResponse[]> => {
+): Promise<CloudConnector[]> => {
   const queryParams = new URLSearchParams();
 
   if (options?.page !== undefined) {
@@ -27,7 +27,7 @@ const fetchCloudConnectors = async (
 
   const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}`;
 
-  return http.get<CloudConnectorResponse[]>(url);
+  return http.get<CloudConnector[]>(url);
 };
 
 export const useGetCloudConnectors = () => {

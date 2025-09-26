@@ -60,8 +60,7 @@ export const useCloudConnectorSetup = (
       // Handle undefined cases safely
       const updatedInputVars = updateInputVarsWithCredentials(
         inputVars as PackagePolicyConfigRecord,
-        credentials,
-        true
+        credentials
       );
       setNewConnectionCredentials(credentials);
 
@@ -75,7 +74,12 @@ export const useCloudConnectorSetup = (
       }
       updatedPolicy.cloud_connector_id = undefined;
 
-      updatePolicy({ updatedPolicy });
+      // Check if both required fields are filled to enable save button
+      const hasRequiredFields = Boolean(credentials.roleArn && credentials.externalId);
+      updatePolicy({
+        updatedPolicy,
+        isValid: hasRequiredFields || undefined,
+      });
     },
     [input.streams, newPolicy, updatePolicy]
   );

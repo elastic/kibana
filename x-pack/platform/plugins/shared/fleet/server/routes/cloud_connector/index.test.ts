@@ -8,10 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
-import type {
-  CloudProvider,
-  CloudConnectorResponse,
-} from '../../../common/types/models/cloud_connector';
+import type { CloudProvider, CloudConnector } from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
@@ -104,7 +101,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should accept valid AWS cloud provider', async () => {
-        const mockCloudConnector: CloudConnectorResponse = {
+        const mockCloudConnector: CloudConnector = {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
@@ -130,7 +127,7 @@ describe('Cloud Connector API', () => {
         await createCloudConnectorHandler(context, request, response);
 
         expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnector,
+          body: { item: mockCloudConnector },
         });
       });
     });
@@ -151,7 +148,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should handle valid query parameters', async () => {
-        const mockCloudConnectors: CloudConnectorResponse[] = [
+        const mockCloudConnectors: CloudConnector[] = [
           {
             id: 'test-id',
             name: 'test-connector',
@@ -175,7 +172,7 @@ describe('Cloud Connector API', () => {
         await getCloudConnectorsHandler(context, request, response);
 
         expect(response.ok).toHaveBeenCalledWith({
-          body: mockCloudConnectors,
+          body: { items: mockCloudConnectors },
         });
       });
     });
@@ -183,7 +180,7 @@ describe('Cloud Connector API', () => {
 
   describe('CREATE Cloud Connector', () => {
     it('should create cloud connector successfully', async () => {
-      const mockCloudConnector: CloudConnectorResponse = {
+      const mockCloudConnector: CloudConnector = {
         id: 'test-id',
         name: 'test-connector',
         cloudProvider: 'aws' as CloudProvider,
@@ -227,7 +224,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockCloudConnector,
+        body: { item: mockCloudConnector },
       });
     });
 
@@ -259,7 +256,7 @@ describe('Cloud Connector API', () => {
 
   describe('GET Cloud Connectors', () => {
     it('should get cloud connectors list successfully', async () => {
-      const mockCloudConnectors: CloudConnectorResponse[] = [
+      const mockCloudConnectors: CloudConnector[] = [
         {
           id: 'connector-1',
           name: 'aws-connector',
@@ -294,12 +291,12 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockCloudConnectors,
+        body: { items: mockCloudConnectors },
       });
     });
 
     it('should return empty list when no connectors exist', async () => {
-      const mockCloudConnectors: CloudConnectorResponse[] = [];
+      const mockCloudConnectors: CloudConnector[] = [];
 
       mockCloudConnectorService.getList.mockResolvedValue(mockCloudConnectors);
 
@@ -310,7 +307,7 @@ describe('Cloud Connector API', () => {
       await getCloudConnectorsHandler(context, request, response);
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: [],
+        body: { items: [] },
       });
     });
 
@@ -349,7 +346,7 @@ describe('Cloud Connector API', () => {
 
   describe('GET Cloud Connector by ID', () => {
     it('should get cloud connector by ID successfully', async () => {
-      const mockCloudConnector: CloudConnectorResponse = {
+      const mockCloudConnector: CloudConnector = {
         id: 'connector-123',
         name: 'aws-connector',
         namespace: '*',
@@ -382,7 +379,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockCloudConnector,
+        body: { item: mockCloudConnector },
       });
     });
 
@@ -429,7 +426,7 @@ describe('Cloud Connector API', () => {
 
   describe('UPDATE Cloud Connector', () => {
     it('should update cloud connector name successfully', async () => {
-      const mockUpdatedConnector: CloudConnectorResponse = {
+      const mockUpdatedConnector: CloudConnector = {
         id: 'connector-123',
         name: 'updated-aws-connector',
         namespace: '*',
@@ -468,7 +465,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockUpdatedConnector,
+        body: { item: mockUpdatedConnector },
       });
     });
 
@@ -481,7 +478,7 @@ describe('Cloud Connector API', () => {
         },
       };
 
-      const mockUpdatedConnector: CloudConnectorResponse = {
+      const mockUpdatedConnector: CloudConnector = {
         id: 'connector-123',
         name: 'aws-connector',
         namespace: '*',
@@ -514,7 +511,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockUpdatedConnector,
+        body: { item: mockUpdatedConnector },
       });
     });
 
@@ -530,7 +527,7 @@ describe('Cloud Connector API', () => {
         },
       };
 
-      const mockUpdatedConnector: CloudConnectorResponse = {
+      const mockUpdatedConnector: CloudConnector = {
         id: 'connector-123',
         name: 'fully-updated-connector',
         namespace: '*',
@@ -565,7 +562,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockUpdatedConnector,
+        body: { item: mockUpdatedConnector },
       });
     });
 
@@ -622,7 +619,7 @@ describe('Cloud Connector API', () => {
     });
 
     it('should handle empty update request', async () => {
-      const mockUpdatedConnector: CloudConnectorResponse = {
+      const mockUpdatedConnector: CloudConnector = {
         id: 'connector-123',
         name: 'aws-connector',
         namespace: '*',
@@ -657,7 +654,7 @@ describe('Cloud Connector API', () => {
       );
 
       expect(response.ok).toHaveBeenCalledWith({
-        body: mockUpdatedConnector,
+        body: { item: mockUpdatedConnector },
       });
     });
   });

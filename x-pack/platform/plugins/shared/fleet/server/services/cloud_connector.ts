@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
-  CloudConnectorResponse,
+  CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
@@ -17,7 +17,7 @@ import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
-} from '../routes/cloud_connector/handlers';
+} from '../../common/types/rest_spec/cloud_connector';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import {
@@ -33,20 +33,17 @@ export interface CloudConnectorServiceInterface {
   create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
-  ): Promise<CloudConnectorResponse>;
+  ): Promise<CloudConnector>;
   getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnectorResponse[]>;
-  getById(
-    soClient: SavedObjectsClientContract,
-    cloudConnectorId: string
-  ): Promise<CloudConnectorResponse>;
+  ): Promise<CloudConnector[]>;
+  getById(soClient: SavedObjectsClientContract, cloudConnectorId: string): Promise<CloudConnector>;
   update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
     updates: Partial<Pick<CreateCloudConnectorRequest, 'name' | 'vars'>>
-  ): Promise<CloudConnectorResponse>;
+  ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
@@ -64,7 +61,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
-  ): Promise<CloudConnectorResponse> {
+  ): Promise<CloudConnector> {
     const logger = this.getLogger('create');
 
     try {
@@ -112,13 +109,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       return {
         id: savedObject.id,
-        name: savedObject.attributes.name,
-        cloudProvider: savedObject.attributes.cloudProvider,
-        vars: savedObject.attributes.vars,
-        packagePolicyCount: savedObject.attributes.packagePolicyCount,
-        created_at: savedObject.attributes.created_at,
-        updated_at: savedObject.attributes.updated_at,
-        namespace: savedObject.attributes.namespace || undefined,
+        ...savedObject.attributes,
       };
     } catch (error) {
       logger.error('Failed to create cloud connector', error.message);
@@ -131,7 +122,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnectorResponse[]> {
+  ): Promise<CloudConnector[]> {
     const logger = this.getLogger('getList');
     logger.debug('Getting cloud connectors list');
 
@@ -148,13 +139,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       return cloudConnectors.saved_objects.map((so) => ({
         id: so.id,
-        name: so.attributes.name,
-        namespace: so.attributes.namespace || undefined,
-        cloudProvider: so.attributes.cloudProvider,
-        vars: so.attributes.vars,
-        packagePolicyCount: so.attributes.packagePolicyCount,
-        created_at: so.attributes.created_at,
-        updated_at: so.attributes.updated_at,
+        ...so.attributes,
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
@@ -167,7 +152,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   async getById(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string
-  ): Promise<CloudConnectorResponse> {
+  ): Promise<CloudConnector> {
     const logger = this.getLogger('getById');
 
     try {
@@ -182,13 +167,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       return {
         id: cloudConnector.id,
-        name: cloudConnector.attributes.name,
-        namespace: cloudConnector.attributes.namespace || undefined,
-        cloudProvider: cloudConnector.attributes.cloudProvider,
-        vars: cloudConnector.attributes.vars,
-        packagePolicyCount: cloudConnector.attributes.packagePolicyCount,
-        created_at: cloudConnector.attributes.created_at,
-        updated_at: cloudConnector.attributes.updated_at,
+        ...cloudConnector.attributes,
       };
     } catch (error) {
       logger.error('Failed to get cloud connector', error.message);
@@ -202,7 +181,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
     updates: Partial<UpdateCloudConnectorRequest>
-  ): Promise<CloudConnectorResponse> {
+  ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
 
     try {
@@ -257,13 +236,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       return {
         id: cloudConnectorId,
-        name: mergedAttributes.name,
-        cloudProvider: mergedAttributes.cloudProvider,
-        vars: mergedAttributes.vars,
-        packagePolicyCount: mergedAttributes.packagePolicyCount,
-        created_at: mergedAttributes.created_at,
-        updated_at: mergedAttributes.updated_at,
-        namespace: mergedAttributes.namespace || undefined,
+        ...mergedAttributes,
       };
     } catch (error) {
       logger.error('Failed to update cloud connector', error.message);

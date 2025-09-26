@@ -41,14 +41,16 @@ export const CreateCloudConnectorRequestSchema = {
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  namespace: schema.maybe(schema.string()),
-  cloudProvider: schema.string(),
-  vars: schema.recordOf(schema.string(), schema.any()),
-  packagePolicyCount: schema.number(),
-  created_at: schema.string(),
-  updated_at: schema.string(),
+  item: schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    namespace: schema.maybe(schema.string()),
+    cloudProvider: schema.string(),
+    vars: schema.recordOf(schema.string(), schema.any()),
+    packagePolicyCount: schema.number(),
+    created_at: schema.string(),
+    updated_at: schema.string(),
+  }),
 });
 
 export const GetCloudConnectorsRequestSchema = {
@@ -58,18 +60,20 @@ export const GetCloudConnectorsRequestSchema = {
   }),
 };
 
-export const GetCloudConnectorsResponseSchema = schema.arrayOf(
-  schema.object({
-    id: schema.string(),
-    name: schema.string(),
-    namespace: schema.maybe(schema.string()),
-    cloudProvider: schema.string(),
-    vars: schema.recordOf(schema.string(), schema.any()),
-    packagePolicyCount: schema.number(),
-    created_at: schema.string(),
-    updated_at: schema.string(),
-  })
-);
+export const GetCloudConnectorsResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      name: schema.string(),
+      namespace: schema.maybe(schema.string()),
+      cloudProvider: schema.string(),
+      vars: schema.recordOf(schema.string(), schema.any()),
+      packagePolicyCount: schema.number(),
+      created_at: schema.string(),
+      updated_at: schema.string(),
+    })
+  ),
+});
 
 export const GetCloudConnectorRequestSchema = {
   params: schema.object({
@@ -78,14 +82,16 @@ export const GetCloudConnectorRequestSchema = {
 };
 
 export const GetCloudConnectorResponseSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  namespace: schema.maybe(schema.string()),
-  cloudProvider: schema.string(),
-  vars: schema.recordOf(schema.string(), schema.any()),
-  packagePolicyCount: schema.number(),
-  created_at: schema.string(),
-  updated_at: schema.string(),
+  item: schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    namespace: schema.maybe(schema.string()),
+    cloudProvider: schema.string(),
+    vars: schema.recordOf(schema.string(), schema.any()),
+    packagePolicyCount: schema.number(),
+    created_at: schema.string(),
+    updated_at: schema.string(),
+  }),
 });
 
 export const DeleteCloudConnectorRequestSchema = {
@@ -137,12 +143,14 @@ export const UpdateCloudConnectorRequestSchema = {
 };
 
 export const UpdateCloudConnectorResponseSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  namespace: schema.maybe(schema.string()),
-  cloudProvider: schema.string(),
-  vars: schema.recordOf(schema.string(), schema.any()),
-  packagePolicyCount: schema.number(),
-  created_at: schema.string(),
-  updated_at: schema.string(),
+  item: schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    namespace: schema.maybe(schema.string()),
+    cloudProvider: schema.string(),
+    vars: schema.recordOf(schema.string(), schema.any()),
+    packagePolicyCount: schema.number(),
+    created_at: schema.string(),
+    updated_at: schema.string(),
+  }),
 });

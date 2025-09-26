@@ -78,7 +78,7 @@ import type {
   PackagePolicyAssetsMap,
   PreconfiguredInputs,
   CloudProvider,
-  CloudConnectorResponse,
+  CloudConnector,
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
@@ -2915,7 +2915,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
     agentPolicy: AgentPolicy
-  ): Promise<CloudConnectorResponse | undefined> {
+  ): Promise<CloudConnector | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
     const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
@@ -2933,7 +2933,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
-        const existingCloudConnector = await soClient.get<CloudConnectorResponse>(
+        const existingCloudConnector = await soClient.get<CloudConnector>(
           CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
           enrichedPackagePolicy.cloud_connector_id
         );

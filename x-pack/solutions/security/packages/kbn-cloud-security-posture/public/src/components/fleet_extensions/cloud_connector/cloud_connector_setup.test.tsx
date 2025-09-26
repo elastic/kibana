@@ -19,7 +19,7 @@ import { isCloudConnectorReusableEnabled } from './utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSetupProps } from './cloud_connector_setup';
 import type { UseQueryResult } from '@tanstack/react-query';
-import type { CloudConnectorResponse, CloudProvider } from '@kbn/fleet-plugin/public';
+import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
 
 // Mock child components
 jest.mock('./form/new_cloud_connector_form', () => ({
@@ -96,7 +96,7 @@ describe('CloudConnectorSetup', () => {
     id: string,
     name: string,
     provider: CloudProvider = 'aws'
-  ): CloudConnectorResponse => ({
+  ): CloudConnector => ({
     id,
     name,
     cloudProvider: provider,
@@ -113,14 +113,14 @@ describe('CloudConnectorSetup', () => {
   });
 
   const createMockQueryResult = (
-    items: CloudConnectorResponse[] = []
-  ): UseQueryResult<CloudConnectorResponse[], unknown> =>
+    items: CloudConnector[] = []
+  ): UseQueryResult<CloudConnector[], unknown> =>
     ({
       data: items,
       isLoading: false,
       isError: false,
       error: null,
-    } as UseQueryResult<CloudConnectorResponse[], unknown>);
+    } as UseQueryResult<CloudConnector[], unknown>);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -128,7 +128,7 @@ describe('CloudConnectorSetup', () => {
     mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
   });
 
-  const setupMocks = (cloudConnectors: CloudConnectorResponse[] = []) => {
+  const setupMocks = (cloudConnectors: CloudConnector[] = []) => {
     mockUseGetCloudConnectors.mockReturnValue(createMockQueryResult(cloudConnectors));
     mockUseCloudConnectorSetup.mockReturnValue({
       newConnectionCredentials: {},
@@ -188,7 +188,7 @@ describe('CloudConnectorSetup', () => {
         error: null,
         isSuccess: false,
         status: 'success',
-      } as unknown as UseQueryResult<CloudConnectorResponse[], unknown>);
+      } as unknown as UseQueryResult<CloudConnector[], unknown>);
       mockUseCloudConnectorSetup.mockReturnValue({
         newConnectionCredentials: {},
         setNewConnectionCredentials: mockSetNewConnectionCredentials,
@@ -215,7 +215,7 @@ describe('CloudConnectorSetup', () => {
         isLoading: false,
         isError: true,
         error: new Error('Query failed'),
-      } as unknown as UseQueryResult<CloudConnectorResponse[], unknown>);
+      } as unknown as UseQueryResult<CloudConnector[], unknown>);
       mockUseCloudConnectorSetup.mockReturnValue({
         newConnectionCredentials: {},
         setNewConnectionCredentials: mockSetNewConnectionCredentials,

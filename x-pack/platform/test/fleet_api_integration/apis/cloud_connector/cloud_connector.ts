@@ -52,14 +52,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         const body = response.body;
 
-        expect(body).to.have.property('id');
-        expect(body.name).to.equal('arn:aws:iam::123456789012:role/test-role');
-        expect(body.cloudProvider).to.equal('aws');
-        expect(body.vars).to.have.property('role_arn');
-        expect(body.vars).to.have.property('external_id');
-        expect(body.packagePolicyCount).to.equal(1);
-        expect(body).to.have.property('created_at');
-        expect(body).to.have.property('updated_at');
+        expect(body.item).to.have.property('id');
+        expect(body.item.name).to.equal('arn:aws:iam::123456789012:role/test-role');
+        expect(body.item.cloudProvider).to.equal('aws');
+        expect(body.item.vars).to.have.property('role_arn');
+        expect(body.item.vars).to.have.property('external_id');
+        expect(body.item.packagePolicyCount).to.equal(1);
+        expect(body.item).to.have.property('created_at');
+        expect(body.item).to.have.property('updated_at');
       });
 
       it('should return 400 when external_id is missing for AWS', async () => {
@@ -258,9 +258,9 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body).to.have.property('id');
-        expect(body.name).to.equal('arn:aws:iam::123456789012:role/test-role');
-        expect(body.vars.external_id.value).to.have.property('id', 'aBcDeFgHiJkLmNoPqRsT');
+        expect(body.item).to.have.property('id');
+        expect(body.item.name).to.equal('arn:aws:iam::123456789012:role/test-role');
+        expect(body.item.vars.external_id.value).to.have.property('id', 'aBcDeFgHiJkLmNoPqRsT');
       });
     });
 
@@ -287,16 +287,16 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-        createdConnectorId = body.id;
+        createdConnectorId = body.item.id;
       });
 
       it('should get list of cloud connectors', async () => {
         const { body } = await supertest.get(`/api/fleet/cloud_connectors`).expect(200);
 
-        expect(body).to.be.an('array');
-        expect(body.length).to.be.greaterThan(0);
+        expect(body.items).to.be.an('array');
+        expect(body.items.length).to.be.greaterThan(0);
 
-        const connector = body.find((c: any) => c.id === createdConnectorId);
+        const connector = body.items.find((c: any) => c.id === createdConnectorId);
         expect(connector).to.be.an('object');
         expect(connector.name).to.equal('arn:aws:iam::123456789012:role/test-role');
         expect(connector.cloudProvider).to.equal('aws');
@@ -313,8 +313,8 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/cloud_connectors`).expect(200);
 
-        expect(body).to.be.an('array');
-        expect(body.length).to.equal(0);
+        expect(body.items).to.be.an('array');
+        expect(body.items.length).to.equal(0);
       });
 
       it('should handle pagination parameters', async () => {
@@ -322,7 +322,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/cloud_connectors?page=1&perPage=10`)
           .expect(200);
 
-        expect(body).to.be.an('array');
+        expect(body.items).to.be.an('array');
       });
     });
 
@@ -349,7 +349,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-        createdConnectorId = body.id;
+        createdConnectorId = body.item.id;
       });
 
       it('should delete cloud connector successfully with force=false when packagePolicyCount is 1', async () => {
@@ -358,7 +358,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/cloud_connectors/${createdConnectorId}`)
           .expect(200);
 
-        expect(getBody.packagePolicyCount).to.equal(1);
+        expect(getBody.item.packagePolicyCount).to.equal(1);
 
         // Delete should fail with force=false due to packagePolicyCount > 0
         await supertest
@@ -376,7 +376,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/cloud_connectors/${createdConnectorId}`)
           .expect(200);
 
-        expect(getBody.packagePolicyCount).to.equal(1);
+        expect(getBody.item.packagePolicyCount).to.equal(1);
 
         // Delete with force=true should succeed
         const { body } = await supertest
@@ -469,7 +469,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-        createdConnectorId = body.id;
+        createdConnectorId = body.item.id;
       });
 
       afterEach(async () => {
@@ -487,17 +487,19 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/cloud_connectors/${createdConnectorId}`)
           .expect(200);
 
-        expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/get-by-id-role');
-        expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('packagePolicyCount', 1);
-        expect(body).to.have.property('created_at');
-        expect(body).to.have.property('updated_at');
-        expect(body.vars).to.have.property('role_arn');
-        expect(body.vars.role_arn.value).to.equal('arn:aws:iam::123456789012:role/get-by-id-role');
-        expect(body.vars).to.have.property('external_id');
-        expect(body.vars.external_id.value).to.have.property('id', 'getByIdTestId1234567');
-        expect(body.vars.external_id.value).to.have.property('isSecretRef', true);
+        expect(body.item).to.have.property('id', createdConnectorId);
+        expect(body.item).to.have.property('name', 'arn:aws:iam::123456789012:role/get-by-id-role');
+        expect(body.item).to.have.property('cloudProvider', 'aws');
+        expect(body.item).to.have.property('packagePolicyCount', 1);
+        expect(body.item).to.have.property('created_at');
+        expect(body.item).to.have.property('updated_at');
+        expect(body.item.vars).to.have.property('role_arn');
+        expect(body.item.vars.role_arn.value).to.equal(
+          'arn:aws:iam::123456789012:role/get-by-id-role'
+        );
+        expect(body.item.vars).to.have.property('external_id');
+        expect(body.item.vars.external_id.value).to.have.property('id', 'getByIdTestId1234567');
+        expect(body.item.vars.external_id.value).to.have.property('isSecretRef', true);
       });
 
       it('should return 400 for non-existent cloud connector id', async () => {
@@ -542,7 +544,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-        createdConnectorId = body.id;
+        createdConnectorId = body.item.id;
       });
 
       afterEach(async () => {
@@ -566,14 +568,16 @@ export default function (providerContext: FtrProviderContext) {
           .send(updateData)
           .expect(200);
 
-        expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'updated-connector-name');
-        expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('packagePolicyCount', 1);
-        expect(body).to.have.property('updated_at');
+        expect(body.item).to.have.property('id', createdConnectorId);
+        expect(body.item).to.have.property('name', 'updated-connector-name');
+        expect(body.item).to.have.property('cloudProvider', 'aws');
+        expect(body.item).to.have.property('packagePolicyCount', 1);
+        expect(body.item).to.have.property('updated_at');
         // Verify vars remain unchanged
-        expect(body.vars.role_arn.value).to.equal('arn:aws:iam::123456789012:role/original-role');
-        expect(body.vars.external_id.value.id).to.equal('originalTestId123456');
+        expect(body.item.vars.role_arn.value).to.equal(
+          'arn:aws:iam::123456789012:role/original-role'
+        );
+        expect(body.item.vars.external_id.value.id).to.equal('originalTestId123456');
       });
 
       it('should update cloud connector vars successfully', async () => {
@@ -596,15 +600,17 @@ export default function (providerContext: FtrProviderContext) {
           .send(updateData)
           .expect(200);
 
-        expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
-        expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('packagePolicyCount', 1);
-        expect(body).to.have.property('updated_at');
+        expect(body.item).to.have.property('id', createdConnectorId);
+        expect(body.item).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
+        expect(body.item).to.have.property('cloudProvider', 'aws');
+        expect(body.item).to.have.property('packagePolicyCount', 1);
+        expect(body.item).to.have.property('updated_at');
         // Verify vars are updated
-        expect(body.vars.role_arn.value).to.equal('arn:aws:iam::123456789012:role/updated-role');
-        expect(body.vars.external_id.value.id).to.equal('updatedTestId1234567');
-        expect(body.vars.external_id.value.isSecretRef).to.equal(true);
+        expect(body.item.vars.role_arn.value).to.equal(
+          'arn:aws:iam::123456789012:role/updated-role'
+        );
+        expect(body.item.vars.external_id.value.id).to.equal('updatedTestId1234567');
+        expect(body.item.vars.external_id.value.isSecretRef).to.equal(true);
       });
 
       it('should update both name and vars successfully', async () => {
@@ -628,16 +634,16 @@ export default function (providerContext: FtrProviderContext) {
           .send(updateData)
           .expect(200);
 
-        expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'fully-updated-connector');
-        expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('packagePolicyCount', 1);
-        expect(body).to.have.property('updated_at');
+        expect(body.item).to.have.property('id', createdConnectorId);
+        expect(body.item).to.have.property('name', 'fully-updated-connector');
+        expect(body.item).to.have.property('cloudProvider', 'aws');
+        expect(body.item).to.have.property('packagePolicyCount', 1);
+        expect(body.item).to.have.property('updated_at');
         // Verify both name and vars are updated
-        expect(body.vars.role_arn.value).to.equal(
+        expect(body.item.vars.role_arn.value).to.equal(
           'arn:aws:iam::123456789012:role/fully-updated-role'
         );
-        expect(body.vars.external_id.value.id).to.equal('fullyUpdatedId123456');
+        expect(body.item.vars.external_id.value.id).to.equal('fullyUpdatedId123456');
       });
 
       it('should handle empty update request', async () => {
@@ -649,14 +655,16 @@ export default function (providerContext: FtrProviderContext) {
           .send(updateData)
           .expect(200);
 
-        expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
-        expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('packagePolicyCount', 1);
-        expect(body).to.have.property('updated_at');
+        expect(body.item).to.have.property('id', createdConnectorId);
+        expect(body.item).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
+        expect(body.item).to.have.property('cloudProvider', 'aws');
+        expect(body.item).to.have.property('packagePolicyCount', 1);
+        expect(body.item).to.have.property('updated_at');
         // Verify vars remain unchanged
-        expect(body.vars.role_arn.value).to.equal('arn:aws:iam::123456789012:role/original-role');
-        expect(body.vars.external_id.value.id).to.equal('originalTestId123456');
+        expect(body.item.vars.role_arn.value).to.equal(
+          'arn:aws:iam::123456789012:role/original-role'
+        );
+        expect(body.item.vars.external_id.value.id).to.equal('originalTestId123456');
       });
 
       it('should validate AWS vars when updating', async () => {
@@ -773,7 +781,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/cloud_connectors/${createdConnectorId}`)
           .expect(200);
 
-        expect(originalConnector.packagePolicyCount).to.equal(1);
+        expect(originalConnector.item.packagePolicyCount).to.equal(1);
 
         // Update the connector
         const updateData = {
@@ -787,8 +795,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // Verify packagePolicyCount is preserved
-        expect(updatedConnector.packagePolicyCount).to.equal(1);
-        expect(updatedConnector.name).to.equal('updated-name-preserve-count');
+        expect(updatedConnector.item.packagePolicyCount).to.equal(1);
+        expect(updatedConnector.item.name).to.equal('updated-name-preserve-count');
       });
     });
   });

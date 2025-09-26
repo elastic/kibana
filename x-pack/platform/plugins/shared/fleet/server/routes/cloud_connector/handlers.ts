@@ -5,31 +5,30 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
+
 import { cloudConnectorService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
 import type {
-  CloudConnectorVars,
-  CloudProvider,
-} from '../../../common/types/models/cloud_connector';
-
-export interface CreateCloudConnectorRequest {
-  name: string;
-  vars: CloudConnectorVars;
-  cloudProvider: CloudProvider;
-}
-
-export interface UpdateCloudConnectorRequest {
-  name?: string;
-  vars?: CloudConnectorVars;
-  packagePolicyCount?: number;
-  cloudProvider?: CloudProvider;
-}
+  GetCloudConnectorsResponse,
+  GetOneCloudConnectorResponse,
+  CreateCloudConnectorResponse,
+  UpdateCloudConnectorResponse,
+  DeleteCloudConnectorResponse,
+} from '../../../common/types/rest_spec/cloud_connector';
+import type {
+  CreateCloudConnectorRequestSchema,
+  GetCloudConnectorRequestSchema,
+  GetCloudConnectorsRequestSchema,
+  UpdateCloudConnectorRequestSchema,
+  DeleteCloudConnectorRequestSchema,
+} from '../../types/rest_spec/cloud_connector';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
   undefined,
-  CreateCloudConnectorRequest
+  TypeOf<typeof CreateCloudConnectorRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
@@ -40,10 +39,13 @@ export const createCloudConnectorHandler: FleetRequestHandler<
   try {
     logger.info('Creating cloud connector');
     const cloudConnector = await cloudConnectorService.create(internalSoClient, request.body);
-    logger.info('Successfully created cloud connector');
-    return response.ok({ body: cloudConnector });
+    logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
+    const body: CreateCloudConnectorResponse = {
+      item: cloudConnector,
+    };
+    return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to create cloud connector', error.message);
+    logger.error(`Failed to create cloud connector`, error.message);
     return response.customError({
       statusCode: 400,
       body: {
@@ -55,7 +57,7 @@ export const createCloudConnectorHandler: FleetRequestHandler<
 
 export const getCloudConnectorsHandler: FleetRequestHandler<
   undefined,
-  { page?: string; perPage?: string }
+  TypeOf<typeof GetCloudConnectorsRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
@@ -72,7 +74,10 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     });
 
     logger.info('Successfully retrieved cloud connectors list');
-    return response.ok({ body: cloudConnectors });
+    const body: GetCloudConnectorsResponse = {
+      items: cloudConnectors,
+    };
+    return response.ok({ body });
   } catch (error) {
     logger.error('Failed to get cloud connectors list', error.message);
     return response.customError({
@@ -85,7 +90,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
 };
 
 export const getCloudConnectorHandler: FleetRequestHandler<
-  { cloudConnectorId: string },
+  TypeOf<typeof GetCloudConnectorRequestSchema.params>,
   undefined
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
@@ -99,9 +104,12 @@ export const getCloudConnectorHandler: FleetRequestHandler<
     logger.info(`Getting cloud connector ${cloudConnectorId}`);
     const result = await cloudConnectorService.getById(internalSoClient, cloudConnectorId);
     logger.info(`Successfully retrieved cloud connector ${cloudConnectorId}`);
-    return response.ok({ body: result });
+    const body: GetOneCloudConnectorResponse = {
+      item: result,
+    };
+    return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to get cloud connector', error.message);
+    logger.error(`Failed to get cloud connector ${cloudConnectorId}`, error.message);
     return response.customError({
       statusCode: 400,
       body: {
@@ -112,9 +120,9 @@ export const getCloudConnectorHandler: FleetRequestHandler<
 };
 
 export const updateCloudConnectorHandler: FleetRequestHandler<
-  { cloudConnectorId: string },
+  TypeOf<typeof UpdateCloudConnectorRequestSchema.params>,
   undefined,
-  UpdateCloudConnectorRequest
+  TypeOf<typeof UpdateCloudConnectorRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
@@ -131,9 +139,12 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
       request.body
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
-    return response.ok({ body: result });
+    const body: UpdateCloudConnectorResponse = {
+      item: result,
+    };
+    return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to update cloud connector', error.message);
+    logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error.message);
     return response.customError({
       statusCode: 400,
       body: {
@@ -144,8 +155,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 };
 
 export const deleteCloudConnectorHandler: FleetRequestHandler<
-  { cloudConnectorId: string },
-  { force?: boolean }
+  TypeOf<typeof DeleteCloudConnectorRequestSchema.params>,
+  TypeOf<typeof DeleteCloudConnectorRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
@@ -159,9 +170,12 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
     logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
     const result = await cloudConnectorService.delete(internalSoClient, cloudConnectorId, force);
     logger.info(`Successfully deleted cloud connector ${cloudConnectorId}`);
-    return response.ok({ body: result });
+    const body: DeleteCloudConnectorResponse = {
+      id: result.id,
+    };
+    return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to delete cloud connector', error.message);
+    logger.error(`Failed to delete cloud connector ${cloudConnectorId}`, error.message);
 
     return response.customError({
       statusCode: 400,

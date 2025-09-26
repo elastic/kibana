@@ -162,6 +162,21 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   return (
     <>
       {/* This shows the Phase 2 Reusable Cloud connector Form */}
+      {!reusableFeatureEnabled && (
+        <NewCloudConnectorForm
+          input={input}
+          templateName={templateName}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          cloud={cloud}
+          cloudProvider={cloudProvider}
+          credentials={newConnectionCredentials}
+          setCredentials={updatePolicyWithNewCredentials}
+        />
+      )}
       {reusableFeatureEnabled && (
         <CloudConnectorTabs
           tabs={tabs}

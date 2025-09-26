@@ -49,7 +49,7 @@ describe('updateInputVarsWithCredentials', () => {
       externalId: 'updated-external-id',
     };
 
-    const result = updateInputVarsWithCredentials(mockInputVars, credentials, false);
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
 
     expect(result?.external_id?.value).toBe('updated-external-id');
     expect(result?.['aws.credentials.external_id']?.value).toBe('updated-external-id');
@@ -61,7 +61,7 @@ describe('updateInputVarsWithCredentials', () => {
       externalId: 'updated-external-id',
     };
 
-    const result = updateInputVarsWithCredentials(mockInputVars, credentials, true);
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
 
     expect(result?.external_id).toEqual({ value: 'updated-external-id' });
     expect(result?.['aws.credentials.external_id']?.value).toBe('updated-external-id');
