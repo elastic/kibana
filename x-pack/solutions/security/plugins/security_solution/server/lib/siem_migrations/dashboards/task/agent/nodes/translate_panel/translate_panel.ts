@@ -6,7 +6,6 @@
  */
 
 import { Send } from '@langchain/langgraph';
-import { isRateLimitError } from '../../../../../common/task/util/is_rate_limiting';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
@@ -60,13 +59,8 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           comments: output.comments,
         };
       } catch (err) {
-        params.logger.error(
-          `Error translating dashboards :${nodeParams.dashboard_description} | panel ${nodeParams.parsed_panel.title}: ${err}`
-        );
-        if (isRateLimitError(err)) {
-          throw err;
-        }
         const message = `Error translating panel: ${err.toString()}`;
+        params.logger.error(message);
         translatedPanel = {
           index,
           title: nodeParams.parsed_panel.title,

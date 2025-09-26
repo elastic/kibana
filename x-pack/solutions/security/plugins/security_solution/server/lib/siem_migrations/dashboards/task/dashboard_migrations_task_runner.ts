@@ -63,7 +63,6 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
-
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new DashboardMigrationTelemetryClient(

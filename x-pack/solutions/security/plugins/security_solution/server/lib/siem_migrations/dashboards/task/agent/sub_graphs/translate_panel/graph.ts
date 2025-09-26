@@ -39,9 +39,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addNode('translateQuery', translateQueryNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('validation', validationNode, {
-      retryPolicy: RETRY_POLICY,
-    })
+    .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode, {
       retryPolicy: RETRY_POLICY,
     })
