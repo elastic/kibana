@@ -45,7 +45,7 @@ function getAliasName(name: string) {
   return name;
 }
 
-function getBackingIndexPattern(name: string) {
+function getIndexPattern(name: string) {
   return `${name}-*`;
 }
 
@@ -104,7 +104,6 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  * using plain indices.
  *
  * TODO:
- * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
 export class StorageIndexAdapter<
@@ -154,7 +153,7 @@ export class StorageIndexAdapter<
         name: getIndexTemplateName(this.storage.name),
         create: false,
         allow_auto_create: false,
-        index_patterns: getBackingIndexPattern(this.storage.name),
+        index_patterns: getIndexPattern(this.storage.name),
         _meta: {
           version,
         },
@@ -192,7 +191,7 @@ export class StorageIndexAdapter<
   private async getExistingIndices() {
     return wrapEsCall(
       this.esClient.indices.get({
-        index: getBackingIndexPattern(this.storage.name),
+        index: getIndexPattern(this.storage.name),
         allow_no_indices: true,
       })
     );
