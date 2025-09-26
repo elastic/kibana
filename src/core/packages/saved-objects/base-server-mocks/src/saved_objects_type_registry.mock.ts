@@ -16,7 +16,6 @@ const createRegistryMock = (): jest.Mocked<
 > => {
   const mock = lazyObject({
     setAccessControlEnabled: jest.fn(),
-    isAccessControlEnabled: jest.fn(),
     registerType: jest.fn(),
     getLegacyTypes: jest.fn().mockReturnValue([]),
     getType: jest.fn(),
@@ -36,6 +35,7 @@ const createRegistryMock = (): jest.Mocked<
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
     supportsAccessControl: jest.fn(),
+    isAccessControlEnabled: jest.fn(),
   });
 
   mock.getVisibleTypes.mockReturnValue([]);
