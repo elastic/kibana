@@ -18,12 +18,10 @@ import type {
   KibanaPageTemplateServices,
 } from '@kbn/shared-ux-page-kibana-template-types';
 
-import { noDataConfigArguments } from './no_data_config';
-import type { NoDataConfigArguments } from './no_data_config';
 import { solutionNavArguments, solutionNavProps } from './solution_nav';
 import type { SolutionNavArguments } from './solution_nav';
 
-type PropArguments = NoDataConfigArguments & SolutionNavArguments;
+type PropArguments = SolutionNavArguments;
 
 export type Params = ArgumentParams<PropArguments, {}> & NoDataConfigPageStorybookParams;
 
@@ -35,7 +33,6 @@ export class StorybookMock extends AbstractStorybookMock<
   PropArguments
 > {
   propArguments = {
-    ...noDataConfigArguments,
     ...solutionNavArguments,
   };
 
@@ -51,10 +48,6 @@ export class StorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        solution: this.getArgumentValue('solution', params),
-        logo: this.getArgumentValue('logo', params),
-        docsLink: this.getArgumentValue('docsLink', params),
-        pageTitle: this.getArgumentValue('pageTitle', params),
       },
       solutionNav: {
         name: this.getArgumentValue('name', params),

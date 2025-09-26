@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-
+import { compact, castArray } from 'lodash';
 import type { ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
 import type { Writer } from './writer';
@@ -33,7 +33,7 @@ export interface ToolingLogOptions {
    * that will be prepended to log messages.
    * Can be useful to identify which entity is emitting the log.
    */
-  context?: string;
+  context?: string | string[];
 }
 
 export class ToolingLog implements SomeDevLog {
@@ -41,7 +41,7 @@ export class ToolingLog implements SomeDevLog {
   private writers$: Rx.BehaviorSubject<Writer[]>;
   private readonly written$: Rx.Subject<Message>;
   private readonly type: string | undefined;
-  private readonly context: string | undefined;
+  private readonly context: string | string[] | undefined;
 
   constructor(writerConfig?: ToolingLogTextWriterConfig, options?: ToolingLogOptions) {
     this.indentWidth$ = options?.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
@@ -154,7 +154,17 @@ export class ToolingLog implements SomeDevLog {
     });
   }
 
-  private sendToWriters({ type, context }: { type: MessageTypes; context?: string }, args: any[]) {
+  public withContext(context: string) {
+    return new ToolingLog(undefined, {
+      parent: this,
+      context: compact([...castArray(this.context ?? []), context]),
+    });
+  }
+
+  private sendToWriters(
+    { type, context }: { type: MessageTypes; context?: string | string[] },
+    args: any[]
+  ) {
     const indent = this.indentWidth$.getValue();
     const writers = this.writers$.getValue();
     const msg: Message = {

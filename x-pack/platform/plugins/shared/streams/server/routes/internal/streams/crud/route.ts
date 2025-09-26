@@ -44,6 +44,9 @@ export const listStreamsRoute = createServerRoute({
     let canReadFailureStore = true;
 
     const dataStreams = await processAsyncInChunks(streamNames, async (streamNamesChunk) => {
+      if (streamNamesChunk.length === 0) {
+        return { data_streams: [] };
+      }
       const [{ read_failure_store: readFailureStore }, dataStreamsChunk] = await Promise.all([
         streamsClient.getPrivileges(streamNamesChunk),
         scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk }),
