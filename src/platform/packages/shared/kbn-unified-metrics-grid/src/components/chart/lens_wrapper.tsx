@@ -18,12 +18,7 @@ export type LensWrapperProps = {
   lensProps: LensProps;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
-const DEFAULT_DISABLED_ACTIONS = [
-  'ACTION_CUSTOMIZE_PANEL',
-  'ACTION_EXPORT_CSV',
-  // temporarily disabiling it until we figure out this action
-  'ACTION_OPEN_IN_DISCOVER',
-];
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
 
 export function LensWrapper({
   lensProps,

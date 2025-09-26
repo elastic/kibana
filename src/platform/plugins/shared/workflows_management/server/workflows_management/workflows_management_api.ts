@@ -38,7 +38,7 @@ export interface GetWorkflowsParams {
   limit: number;
   page: number;
   createdBy?: string[];
-  enabled?: boolean;
+  enabled?: boolean[];
   query?: string;
   _full?: boolean;
 }

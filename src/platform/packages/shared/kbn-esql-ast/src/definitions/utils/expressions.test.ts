@@ -314,6 +314,111 @@ describe('getExpressionType', () => {
       ]);
       expect(getExpressionType(getASTForExpression('test(1)'))).toBe('keyword');
     });
+
+    it('returns unknown when no signature matches the provided arguments', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'no_match',
+          description: 'No matching signature',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('no_match("foo")'))).toBe('unknown');
+    });
+
+    it('returns unknown when multiple signatures match and return types are ambiguous', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'ambiguous',
+          description: 'Ambiguous return type',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            { params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' },
+            { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('ambiguous(?param)'))).toBe('unknown');
+    });
+
+    it('returns the type when multiple signatures match and so do their types', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'ambiguous',
+          description: 'Ambiguous return type',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            { params: [{ name: 'arg', type: 'keyword' }], returnType: 'integer' },
+            { params: [{ name: 'arg', type: 'integer' }], returnType: 'integer' },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('ambiguous(?param)'))).toBe('integer');
+    });
+
+    it('returns unknown when the any matching signature has returnType any', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'returns_any',
+          description: 'Return type any',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [], returnType: 'any' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('returns_any()'))).toBe('unknown');
+    });
+
+    it('returns unknown when a function argument is of type unknown', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'takes_keyword',
+          description: 'Test function',
+          locationsAvailable: [Location.EVAL],
+          signatures: [{ params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('takes_keyword(unknownField)'))).toBe('unknown');
+    });
+
+    it('implicit casting within function parameter', () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'accepts_dates',
+          description: 'Test function',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'date' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('accepts_dates("")'))).toBe('keyword');
+      expect(
+        getExpressionType(
+          getASTForExpression('accepts_dates(keywordCol)'),
+          new Map([
+            [
+              'keywordCol',
+              {
+                name: 'keywordCol',
+                type: 'keyword',
+                location: { min: 0, max: 0 },
+                userDefined: true,
+              },
+            ],
+          ])
+        )
+      ).toBe('unknown');
+    });
   });
 
   describe('lists', () => {

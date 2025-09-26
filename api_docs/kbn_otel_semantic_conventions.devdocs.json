@@ -38,6 +38,54 @@
       },
       {
         "parentPluginId": "@kbn/otel-semantic-conventions",
+        "id": "def-common.prefixOTelField",
+        "type": "Function",
+        "tags": [],
+        "label": "prefixOTelField",
+        "description": [],
+        "signature": [
+          "(ecsFieldName: string, otelFieldName: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-semantic-conventions/src/resource_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-semantic-conventions",
+            "id": "def-common.prefixOTelField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ecsFieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-semantic-conventions/src/resource_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/otel-semantic-conventions",
+            "id": "def-common.prefixOTelField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "otelFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-semantic-conventions/src/resource_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/otel-semantic-conventions",
         "id": "def-common.processSemconvYaml",
         "type": "Function",
         "tags": [],
@@ -480,6 +528,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/otel-semantic-conventions",
+        "id": "def-common.RESOURCE_ECS_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "RESOURCE_ECS_FIELDS",
+        "description": [
+          "\nThe set of ECS (Elastic Common Schema) field names that are mapped to OpenTelemetry resource attributes, as defined by the OpenTelemetry Semantic Conventions.\n\nSee https://github.com/elastic/elasticsearch/blob/main/modules/ingest-otel/src/main/java/org/elasticsearch/ingest/otel/EcsOTelResourceAttributes.java"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-semantic-conventions/src/resource_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/otel-semantic-conventions",
         "id": "def-common.SemconvFieldName",

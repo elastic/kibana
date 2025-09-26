@@ -183,7 +183,7 @@
                 "label": "overwrites",
                 "description": [],
                 "signature": [
-                  "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 95: number; 99: number; } | undefined; }"
+                  "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 90: number; 95: number; 99: number; } | undefined; }"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
                 "deprecated": false,

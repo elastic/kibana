@@ -108,7 +108,7 @@ pageLoadAssetSize:
   navigation: 13598
   newsfeed: 12371
   noDataPage: 1749
-  observability: 160191
+  observability: 176467
   observabilityAIAssistant: 46941
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
@@ -161,7 +161,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67227
+  stackConnectors: 67939
   streams: 8494
   streamsApp: 12431
   streamsAppWrapper: 5787
