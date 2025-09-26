@@ -7,11 +7,20 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup, EuiText } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { css } from '@emotion/react';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
@@ -20,6 +29,7 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
   streamsRepositoryClient: StreamsRepositoryClient;
   coreApplication: CoreStart['application'];
   locator: StreamsAppLocator;
+  showShorterMessage: boolean;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
@@ -27,7 +37,9 @@ export function DiscoverFlyoutStreamProcessingLink({
   doc,
   locator,
   coreApplication,
+  showShorterMessage,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
+  const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
@@ -58,18 +70,30 @@ export function DiscoverFlyoutStreamProcessingLink({
     },
   });
 
+  const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+    defaultMessage: 'Parse content in Streams',
+  });
+
+  const shorterMessage = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+    defaultMessage: 'Parse',
+  });
+
   return (
-    <RedirectAppLinks coreStart={{ application: coreApplication }}>
-      <EuiLink href={href}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="sparkles" size="s" />
-          <EuiText size="xs">
-            {i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-              defaultMessage: 'Parse content in Streams',
-            })}
-          </EuiText>
-        </EuiFlexGroup>
-      </EuiLink>
-    </RedirectAppLinks>
+    <EuiToolTip content={message}>
+      <RedirectAppLinks coreStart={{ application: coreApplication }}>
+        <EuiLink href={href}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiIcon
+              type="sparkles"
+              size="s"
+              css={css`
+                margin-left: ${euiTheme.size.m};
+              `}
+            />
+            <EuiText size="xs">{showShorterMessage ? shorterMessage : message}</EuiText>
+          </EuiFlexGroup>
+        </EuiLink>
+      </RedirectAppLinks>
+    </EuiToolTip>
   );
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -15,18 +15,20 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
+  useResizeObserver,
 } from '@elastic/eui';
 import type { LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { ContentFrameworkSection } from '../..';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
-import { ContentFrameworkSection } from '../content_framework/lazy_content_framework_section';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
@@ -62,6 +64,10 @@ export function LogsOverviewHeader({
   const hasMessageField = field && value;
   const hasBadges = hasTimestamp || hasLogLevel || hasMessageField;
   const hasFlyoutHeader = hasMessageField || hasBadges;
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const { euiTheme } = useEuiTheme();
+  const dimensions = useResizeObserver(ref);
+  const isLargeFlyout = dimensions?.width ? dimensions.width > euiTheme.base * 32 : false;
 
   const accordionId = useGeneratedHtmlId({
     prefix: contentLabel,
@@ -71,7 +77,7 @@ export function LogsOverviewHeader({
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc: hit })}
+        renderFlyoutStreamProcessingLink({ doc: hit, showShorterMessage: !isLargeFlyout })}
       {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
           value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
@@ -95,6 +101,7 @@ export function LogsOverviewHeader({
         gutterSize="none"
         justifyContent="spaceBetween"
         responsive={false}
+        ref={setRef}
       >
         <EuiText color="subdued" size="xs">
           {field}
