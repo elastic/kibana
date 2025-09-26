@@ -6,6 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
-export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/trace_metrics_grid/lazy_trace_metrics_grid';
+function TraceMetricsGrid() {
+  return (
+    <div>
+      {i18n.translate('undefined.traceMetricsGrid.div.tracemetricsgridLabel', {
+        defaultMessage: 'TraceMetricsGrid',
+      })}
+    </div>
+  );
+}
+
+// eslint-disable-next-line import/no-default-export
+export default TraceMetricsGrid;

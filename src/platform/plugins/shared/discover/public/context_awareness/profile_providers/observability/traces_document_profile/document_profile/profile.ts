@@ -19,6 +19,7 @@ import type { DocumentProfileProvider } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
+import { createChartSection } from './accessors/chart_session';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
 
@@ -37,6 +38,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       },
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
+    getChartSectionConfiguration: createChartSection(),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;

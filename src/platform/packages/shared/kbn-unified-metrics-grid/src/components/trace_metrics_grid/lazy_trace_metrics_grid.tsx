@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
-export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/trace_metrics_grid/lazy_trace_metrics_grid';
+import React from 'react';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const LazyTraceMetricsGrid = dynamic(() => import('.'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
