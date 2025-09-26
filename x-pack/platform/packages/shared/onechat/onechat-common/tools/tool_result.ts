@@ -7,6 +7,7 @@
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { ChartType } from '@kbn/visualization-utils';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -69,11 +70,13 @@ export type ToolResult =
 
 export interface VisualizationElementAttributes {
   toolResultId?: string;
+  chartType?: ChartType;
 }
 
 export const visualizationElement = {
   tagName: 'visualization',
   attributes: {
     toolResultId: 'tool-result-id',
+    chartType: 'chart-type',
   },
 };

@@ -321,10 +321,7 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground =
-      props.isDirty ||
-      backgroundSearchState === SearchSessionState.Loading ||
-      backgroundSearchState === SearchSessionState.Completed;
+    const canSendToBackground = backgroundSearchState === SearchSessionState.Loading;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -627,7 +624,7 @@ export const QueryBarTopRow = React.memo(
           <SplitButton
             aria-label={buttonLabelCancel}
             color="text"
-            data-test-subj="queryCancelSplitButton"
+            data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
             onClick={onClickCancelButton}
@@ -635,7 +632,7 @@ export const QueryBarTopRow = React.memo(
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
             secondaryButtonIcon="clock"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size="s"
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -688,7 +685,7 @@ export const QueryBarTopRow = React.memo(
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitSplitButton"
+          data-test-subj="querySubmitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
