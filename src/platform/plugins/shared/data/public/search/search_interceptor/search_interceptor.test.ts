@@ -29,7 +29,7 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../session/constants';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../common/constants';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');

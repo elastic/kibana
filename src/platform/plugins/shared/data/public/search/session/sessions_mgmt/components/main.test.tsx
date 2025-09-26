@@ -19,7 +19,7 @@ import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../../common/constants';
 
 const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boolean }) => {
   const mockCoreSetup = coreMock.createSetup();
