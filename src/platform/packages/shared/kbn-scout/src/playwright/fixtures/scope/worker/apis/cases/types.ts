@@ -319,5 +319,5 @@ export interface Case {
 
   totalComment: number;
   totalAlerts: number;
-  comments?: Array<any>;
+  comments?: any[];
 }
