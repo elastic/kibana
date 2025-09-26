@@ -116,7 +116,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                 <StartTranslationButton
                   migrationId={migrationStats.id}
                   isStopped={isStopped}
-                  startMigration={showStartMigrationModal}
+                  startMigration={isStopped ? startMigration : showStartMigrationModal}
                   isStarting={isStarting}
                 />
               </EuiFlexItem>
