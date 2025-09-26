@@ -37,8 +37,5 @@ export const getSyntheticsTriggerTaskRun: SyntheticsRestApiRouteFactory = () => 
         throw new Error(`Unknown task type: ${taskType}`);
     }
 
-    if (taskType === 'cleanUpPackagePolicyTask') {
-      await scheduleCleanUpTask(server);
-    }
   },
 });
