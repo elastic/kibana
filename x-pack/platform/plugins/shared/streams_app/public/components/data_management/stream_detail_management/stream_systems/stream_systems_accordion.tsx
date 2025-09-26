@@ -24,6 +24,7 @@ export const StreamSystemsAccordion = ({
 }) => {
   return (
     <EuiAccordion
+      initialIsOpen={true}
       id="steam-systems-accordion"
       buttonContent={i18n.translate('xpack.streams.streamSystemsAccordion.buttonLabel', {
         defaultMessage: 'Stream systems',
