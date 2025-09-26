@@ -30,7 +30,12 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { AdditionalContext, AlertsTableProps, RenderContext } from '../types';
+import type {
+  AdditionalContext,
+  AlertsDataGridProps,
+  AlertsTableProps,
+  RenderContext,
+} from '../types';
 import { AlertsField } from '../types';
 import { AlertsTable } from './alerts_table';
 import { AlertsDataGrid } from './alerts_data_grid';
@@ -42,7 +47,7 @@ import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows'
 import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { defaultAlertsTableColumns } from '../configuration';
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -255,9 +260,12 @@ afterAll(() => {
 });
 
 // Storage mock
-const mockConfigurationStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
+const mockStorageData = new Map<string, string>();
+const mockStorageWrapper = {
+  get: jest.fn((key: string) => mockStorageData.get(key)),
+  set: jest.fn((key: string, value: string) => mockStorageData.set(key, value)),
+  remove: jest.fn((key: string) => mockStorageData.delete(key)),
+  clear: jest.fn(() => mockStorageData.clear()),
 };
 
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -276,7 +284,7 @@ describe('AlertsTable', () => {
     query: {},
     columns,
     pageSize: 10,
-    configurationStorage: mockConfigurationStorage as unknown as IStorageWrapper,
+    configurationStorage: mockStorageWrapper,
     services: {
       http: httpServiceMock.createStartContract(),
       application: {
@@ -306,18 +314,115 @@ describe('AlertsTable', () => {
   };
 
   let onPageIndexChange: RenderContext<AdditionalContext>['onPageIndexChange'];
+  let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
+  let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
     onPageIndexChange = props.renderContext.onPageIndexChange;
+    onToggleColumn = props.onToggleColumn;
+    onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
     return <ActualAlertsDataGrid {...props} />;
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStorageData.clear();
     mockSearchAlerts.mockResolvedValue(mockSearchAlertsResponse);
+  });
+
+  describe('Columns', () => {
+    describe('with no saved configuration', () => {
+      it('should show the default columns if the columns prop is not set', async () => {
+        render(<AlertsTable {...tableProps} columns={undefined} />);
+
+        for (const { id: columnId } of defaultAlertsTableColumns) {
+          expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
+        }
+      });
+
+      it('should show the columns defined in the columns prop', async () => {
+        render(<AlertsTable {...tableProps} />);
+
+        for (const { id: columnId } of columns) {
+          expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
+        }
+      });
+
+      it('should keep references to the initial `columns` and `visibleColumns` to reset to', async () => {
+        const testColumnId = 'test-column';
+
+        render(
+          <AlertsTable
+            {...tableProps}
+            columns={[{ id: testColumnId, displayAsText: 'Test' }]}
+            visibleColumns={[testColumnId]}
+          />
+        );
+
+        expect(await screen.findByTestId(`dataGridHeaderCell-test-column`)).toBeInTheDocument();
+
+        act(() => {
+          onToggleColumn(AlertsField.name);
+        });
+        act(() => {
+          onToggleColumn(testColumnId);
+        });
+
+        expect(
+          await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId(`dataGridHeaderCell-test-column`)).not.toBeInTheDocument();
+
+        act(() => {
+          onResetColumns();
+        });
+
+        expect(await screen.findByTestId(`dataGridHeaderCell-test-column`)).toBeInTheDocument();
+        expect(
+          screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe('with saved configuration', () => {
+      it('should show the columns saved in the configuration regardless of the columns prop value', async () => {
+        mockStorageData.set(
+          tableProps.id,
+          JSON.stringify({
+            columns: [{ id: 'savedColumnId' }],
+            visibleColumns: ['savedColumnId'],
+            sort: [],
+          })
+        );
+
+        render(<AlertsTable {...tableProps} />);
+
+        expect(await screen.findByTestId('dataGridHeaderCell-savedColumnId')).toBeInTheDocument();
+        for (const { id: columnId } of defaultAlertsTableColumns) {
+          expect(screen.queryByTestId(`dataGridHeaderCell-${columnId}`)).not.toBeInTheDocument();
+        }
+      });
+
+      it('should add default properties to saved columns', async () => {
+        mockStorageData.set(
+          tableProps.id,
+          JSON.stringify({
+            columns: [{ id: AlertsField.name }],
+            visibleColumns: [AlertsField.name],
+            sort: [],
+          })
+        );
+
+        render(<AlertsTable {...tableProps} />);
+
+        expect(
+          (await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)).textContent
+        ).toEqual('Name');
+      });
+    });
   });
 
   describe('Cases', () => {
@@ -685,17 +790,20 @@ describe('AlertsTable', () => {
     });
 
     it('should restore a default field that had been removed', async () => {
-      mockConfigurationStorage.get.mockReturnValueOnce({
-        columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
-        sort: [
-          {
-            [AlertsField.reason]: {
-              order: 'asc',
+      mockStorageData.set(
+        tableProps.id,
+        JSON.stringify({
+          columns: [{ id: AlertsField.reason }],
+          sort: [
+            {
+              [AlertsField.reason]: {
+                order: 'asc',
+              },
             },
-          },
-        ],
-        visibleColumns: [AlertsField.reason],
-      });
+          ],
+          visibleColumns: [AlertsField.reason],
+        })
+      );
 
       render(<AlertsTable {...tableProps} />);
 
@@ -705,35 +813,29 @@ describe('AlertsTable', () => {
       await userEvent.click(fieldCheckbox);
       await userEvent.click(screen.getByTestId('close'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-        const titles: string[] = [];
-        screen
-          .getByTestId('dataGridHeader')
-          .querySelectorAll('.euiDataGridHeaderCell__content')
-          .forEach((n) => titles.push(n?.getAttribute('title') ?? ''));
-        expect(titles).toContain('Name');
-      });
+      await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`);
+      const titles = Array.from(
+        screen.getByTestId('dataGridHeader').querySelectorAll('.euiDataGridHeaderCell__content')
+      ).map((n) => n?.getAttribute('title') ?? '');
+      expect(titles).toContain('Name');
     });
 
     it('should insert a new field as column when its not a default one', async () => {
       render(<AlertsTable {...tableProps} />);
 
       expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
-      await userEvent.click(screen.getByTestId('show-field-browser'));
+      await userEvent.click(await screen.findByTestId('show-field-browser'));
       const fieldCheckbox = screen.getByTestId(`field-${AlertsField.uuid}-checkbox`);
       await userEvent.click(fieldCheckbox);
       await userEvent.click(screen.getByTestId('close'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
-        expect(
-          screen
-            .queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)!
-            .querySelector('.euiDataGridHeaderCell__content')!
-            .getAttribute('title')
-        ).toBe(AlertsField.uuid);
-      });
+      await screen.findByTestId(`dataGridHeaderCell-${AlertsField.uuid}`);
+      expect(
+        screen
+          .queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)!
+          .querySelector('.euiDataGridHeaderCell__content')!
+          .getAttribute('title')
+      ).toBe(AlertsField.uuid);
     });
 
     it('should remove a field from the sort configuration too', async () => {
@@ -768,7 +870,7 @@ describe('AlertsTable', () => {
   testPersistentControls();
 
   const testInspectButton = () => {
-    describe('inspect button', () => {
+    describe('Inspect button', () => {
       it('should hide the inspect button by default', () => {
         render(<AlertsTable {...tableProps} />);
         expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
@@ -807,7 +909,7 @@ describe('AlertsTable', () => {
 
   describe('Error state', () => {
     beforeEach(() => {
-      mockConfigurationStorage.get.mockClear();
+      mockStorageData.clear();
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
         oldAlertsData: [],
@@ -909,11 +1011,11 @@ describe('AlertsTable', () => {
 
       await userEvent.click(resetButton);
 
-      expect(mockConfigurationStorage.set).toHaveBeenCalledWith(tableProps.id, {
-        columns,
-        sort: [],
-        visibleColumns: columns.map(({ id }) => id),
-      });
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [],
+        })
+      );
     });
 
     it('should go back to default state when reset button is clicked', async () => {
@@ -940,52 +1042,14 @@ describe('AlertsTable', () => {
 
       await userEvent.click(resetButton);
 
-      expect(mockConfigurationStorage.set).toHaveBeenNthCalledWith(1, tableProps.id, {
-        columns: [],
-        sort: [],
-        visibleColumns: [],
-      });
-
-      expect(mockConfigurationStorage.set).toHaveBeenNthCalledWith(2, tableProps.id, {
-        columns: [
-          {
-            id: AlertsField.name,
-            displayAsText: 'Name',
-            isSortable: false,
-          },
-          {
-            id: AlertsField.reason,
-            displayAsText: 'Reason',
-            isSortable: false,
-          },
-          {
-            id: ALERT_CASE_IDS,
-            displayAsText: 'Cases',
-            isSortable: false,
-            schema: 'string',
-          },
-          {
-            id: ALERT_MAINTENANCE_WINDOW_IDS,
-            displayAsText: 'Maintenance Windows',
-            isSortable: false,
-            schema: 'string',
-          },
-          {
-            id: ALERT_TIME_RANGE,
-            displayAsText: 'Time Range',
-            isSortable: false,
-            schema: 'string',
-          },
-        ],
-        sort: [],
-        visibleColumns: [
-          'kibana.alert.rule.name',
-          'kibana.alert.reason',
-          'kibana.alert.case_ids',
-          'kibana.alert.maintenance_window_ids',
-          'kibana.alert.time_range',
-        ],
-      });
+      expect(mockStorageWrapper.set).toHaveBeenCalledWith(
+        tableProps.id,
+        JSON.stringify({
+          columns: columns.map(({ id }) => ({ id })),
+          visibleColumns: columns.map(({ id }) => id),
+          sort: [],
+        })
+      );
     });
   });
 
