@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { Toolbar } from './toolbar';
+export { PopoverToolbar } from './popover_toolbar';
+export { FlyoutToolbar } from './flyout_toolbar';

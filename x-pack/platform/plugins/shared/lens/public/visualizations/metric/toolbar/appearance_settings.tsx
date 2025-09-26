@@ -48,6 +48,10 @@ const getDefaultLayoutConfig = (
   return config;
 };
 
+/**
+ * This component contains the actual settings UI.
+ * It is reused by both the Popover and the Flyout.
+ */
 export function AppearanceSettings({
   state,
   setState,
