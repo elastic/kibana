@@ -18,7 +18,7 @@ import {
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
-import { waitFor } from '@testing-library/dom';
+import { retry } from 'async';
 import type {
   SiemMigrationsClientDependencies,
   SiemMigrationsCreateClientParams,
@@ -64,7 +64,7 @@ describe('SiemRuleMigrationsService', () => {
       mockSetup.mockRejectedValueOnce(error);
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
-      await waitFor(() => {
+      await retry(async (): Promise<void> => {
         expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
     });

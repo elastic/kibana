@@ -15,7 +15,7 @@ export type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '../common';
-export { KibanaFeature, KibanaFeatureScope } from '../common';
+export { KibanaFeature } from '../common';
 
 export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 

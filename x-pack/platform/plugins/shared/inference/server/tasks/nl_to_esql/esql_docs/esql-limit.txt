@@ -19,51 +19,8 @@ The `LIMIT` command restricts the number of rows returned by a query. For exampl
 ```esql
 FROM index
 | WHERE field == "value"
-```
-
-is equivalent to:
-
-```esql
-FROM index
-| WHERE field == "value"
 | LIMIT 1000
 ```
-
-Queries cannot return more than 10,000 rows, regardless of the value specified in the `LIMIT` command. This is a configurable upper limit.
-
-### Overcoming the 10,000 Row Limit
-
-To address this limitation:
-- Modify the query to reduce the result set size by using `WHERE` to filter the data.
-- Perform post-query processing within the query itself. For example, use the `STATS` command to aggregate data.
-
-The 10,000-row limit applies only to the number of rows returned by the query, not to the number of documents processed. The query operates on the full dataset.
-
-Consider these examples:
-
-```esql
-FROM index
-| WHERE field0 == "value"
-| LIMIT 20000
-```
-
-and
-
-```esql
-FROM index
-| STATS AVG(field1) BY field2
-| LIMIT 20000
-```
-
-In both cases, the filtering by `field0` in the first query or the grouping by `field2` in the second query is applied to all documents in the `index`. However, the output is capped at 10,000 rows, even if more rows are available.
-
-### Configuring Limits
-
-The default and maximum limits can be adjusted using the following dynamic cluster settings:
-- `esql.query.result_truncation_default_size`
-- `esql.query.result_truncation_max_size`
-
-Increasing these limits may lead to higher memory usage, longer processing times, and increased internode traffic within and across clusters.
 
 ## Examples
 
@@ -79,9 +36,7 @@ FROM employees
 
 - Queries cannot return more than 10,000 rows, even if the `LIMIT` value exceeds this threshold.
 
-  To work around this limitation:
-
+To work around this limitation:
   - Reduce the size of the result set by modifying the query to only return relevant data. This can be achieved by using the WHERE command to select a smaller subset of the data.
   - Shift any post-query processing to the query itself. The ES|QL STATS ... BY command can be used to aggregate data within the query.
 
-- Adjusting the default or maximum limits can impact performance and resource usage.

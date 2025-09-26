@@ -321,7 +321,6 @@ describe('parseRecords', () => {
         actorsDocData: [
           '{"id":"user1","type":"entity","index":"test","entity":{"name":"john","type":"Identity"}}',
           '{"id":"ip1","type":"entity","index":"test","entity":{"name":"192.168.1.1","type":"ip"}}',
-          '{"id":"target1","type":"entity","index":"test","entity":{"name":"Target Service","type":"service"}}',
         ],
         badge: 1,
         docs: ['{"foo":"bar"}'],
@@ -353,15 +352,12 @@ describe('parseRecords', () => {
 
     const targetNode = result.nodes.find((n) => n.id === 'target1');
     expect(targetNode).toBeDefined();
-    expect(targetNode).toMatchObject({
-      label: 'Target Service',
-      icon: 'cloudStormy',
-      tag: 'service',
-    });
+    expect(targetNode?.shape).toEqual('rectangle');
+    expect(targetNode).not.toHaveProperty('tag');
+    expect(targetNode?.label).toBeUndefined();
 
     const target2Node = result.nodes.find((n) => n.id === 'target2');
     expect(target2Node).toBeDefined();
-    // No entity data for target2, so no tag should be present
     expect(target2Node).not.toHaveProperty('tag');
   });
 
@@ -401,5 +397,100 @@ describe('parseRecords', () => {
     const entity4Node = result.nodes.find((n) => n.id === 'entity4');
     expect(entity4Node).toBeDefined();
     expect(entity4Node).not.toHaveProperty('tag');
+  });
+
+  it('assigns correct documentsData with DOCUMENT_TYPE_ENTITY for matching entity IDs', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'connect',
+        actorIds: ['user1', 'host1'],
+        actorsDocData: [
+          '{"id":"user1","type":"entity","entity":{"name":"John Doe","type":"Identity"}}',
+          '{"id":"host1","type":"entity","entity":{"name":"server-01","type":"host"}}',
+        ],
+        targetsDocData: [
+          '{"id":"service1","type":"entity","entity":{"name":"web-service","type":"service"}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['service1'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    // Check user1 node - should only have actor document for user1
+    const user1Node = result.nodes.find((n) => n.id === 'user1') as any;
+    expect(user1Node).toBeDefined();
+    expect(user1Node.documentsData).toHaveLength(1);
+    expect(user1Node.documentsData[0]).toMatchObject({
+      id: 'user1',
+      type: 'entity',
+      entity: {
+        name: 'John Doe',
+        type: 'Identity',
+      },
+    });
+
+    // Check host1 node - should have both actor and target documents for host1
+    const host1Node = result.nodes.find((n) => n.id === 'host1') as any;
+    expect(host1Node).toBeDefined();
+    expect(host1Node.documentsData).toHaveLength(1);
+    expect(host1Node.documentsData[0]).toMatchObject({
+      id: 'host1',
+      type: 'entity',
+      entity: {
+        name: 'server-01',
+        type: 'host',
+      },
+    });
+
+    // Check service1 node - should only have target document for service1
+    const service1Node = result.nodes.find((n) => n.id === 'service1') as any;
+    expect(service1Node).toBeDefined();
+    expect(service1Node.documentsData).toHaveLength(1);
+    expect(service1Node.documentsData[0]).toMatchObject({
+      id: 'service1',
+      type: 'entity',
+      entity: {
+        name: 'web-service',
+        type: 'service',
+      },
+    });
+
+    // Verify that user2 document is not included in any node since user2 is not an actor or target
+    const allDocuments = result.nodes.flatMap((node: any) => node.documentsData || []);
+    const user2Documents = allDocuments.filter((doc: any) => doc.id === 'user2');
+    expect(user2Documents).toHaveLength(0);
+  });
+
+  it('handles empty documentsData when no matching entity documents exist', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'login',
+        actorIds: ['user1'],
+        actorsDocData: [],
+        targetsDocData: [],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['service1'],
+        isAlert: false,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    // Check user1 node - should have empty documentsData since no matching actor document
+    const user1Node = result.nodes.find((n) => n.id === 'user1') as any;
+    expect(user1Node).toBeDefined();
+    expect(user1Node.documentsData).toEqual([]);
+
+    // Check service1 node - should have empty documentsData since no matching target document
+    const service1Node = result.nodes.find((n) => n.id === 'service1') as any;
+    expect(service1Node).toBeDefined();
+    expect(service1Node.documentsData).toEqual([]);
   });
 });

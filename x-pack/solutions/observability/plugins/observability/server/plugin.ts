@@ -181,13 +181,13 @@ export class ObservabilityPlugin
         isDev: this.initContext.env.mode.dev,
       });
 
+      setEsqlRecommendedQueries(plugins.esql);
+
       this.metricExperienceEnabled$ = coreStart.featureFlags
         .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false)
         .pipe(takeUntil(this.pluginStop$))
         .subscribe((isMetricsExperienceEnabled) => {
-          if (isMetricsExperienceEnabled) {
-            setEsqlRecommendedQueries(plugins.esql);
-          } else {
+          if (!isMetricsExperienceEnabled) {
             unsetMetricsExperienceEsqlRecommendedQueries(plugins.esql);
           }
         });

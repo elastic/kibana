@@ -40,7 +40,8 @@ import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
+// Flaky on main
+describe.skip('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });

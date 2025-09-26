@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { z } from '@kbn/zod';
+import type { ZodError, z } from '@kbn/zod';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -23,28 +23,36 @@ import {
   visit,
 } from 'yaml';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
+import type { FormattedZodError, MockZodError } from './errors/invalid_yaml_schema';
+
+interface FormatValidationErrorResult {
+  message: string;
+  formattedError: FormattedZodError;
+}
 
 /**
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
-export function formatValidationError(error: any): { message: string; formattedError: any } {
+export function formatValidationError(error: ZodError | MockZodError): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
     const message = error?.message || String(error);
     return { message, formattedError: error };
   }
 
-  const formattedIssues = error.issues.map((issue: any) => {
+  const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
     // Handle discriminated union errors for type field
-    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+      formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
+    } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
     }
     // Handle literal type errors for type field (avoid listing all 1000+ options)
     else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
-      const receivedValue = issue.received;
+      const receivedValue = issue.received as string;
       if (receivedValue?.startsWith?.('elasticsearch.')) {
         formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
       } else if (receivedValue?.startsWith?.('kibana.')) {
@@ -56,6 +64,18 @@ export function formatValidationError(error: any): { message: string; formattedE
     // Handle union errors with too many options
     else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'triggers'
+    ) {
+      formattedMessage = `No triggers found. Add at least one trigger.`;
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'steps'
+    ) {
+      formattedMessage = `No steps found. Add at least one step.`;
     }
     // Return original message for other errors
     else {
@@ -78,7 +98,7 @@ export function formatValidationError(error: any): { message: string; formattedE
 
   return {
     message: formattedError.message,
-    formattedError,
+    formattedError: formattedError as FormattedZodError,
   };
 }
 
@@ -148,6 +168,13 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   try {
     let error: Error | undefined;
     const doc = parseDocument(yamlString);
+
+    if (doc.errors.length > 0) {
+      return {
+        success: false,
+        error: new InvalidYamlSyntaxError(doc.errors.map((err) => err.message).join(', ')),
+      };
+    }
 
     // Visit all pairs, and check if there're any non-scalar keys
     // TODO: replace with parseDocument(yamlString, { stringKeys: true }) when 'yaml' package updated to 2.6.1
@@ -348,7 +375,8 @@ export function getStepNode(document: Document, stepName: string): YAMLMap | nul
 
       const path = getPathFromAncestors(ancestors);
 
-      const isInSteps = path.length >= 3 && path[path.length - 3] === 'steps';
+      const isInSteps =
+        path.length >= 3 && (path[path.length - 3] === 'steps' || path[path.length - 3] === 'else');
 
       if (isValueMatch && isInSteps) {
         stepNode = ancestors[ancestors.length - 2] as YAMLMap;
@@ -358,4 +386,179 @@ export function getStepNode(document: Document, stepName: string): YAMLMap | nul
     },
   });
   return stepNode;
+}
+
+export function getStepNodeAtPosition(
+  document: Document,
+  absolutePosition: number
+): YAMLMap | null {
+  let stepNode: YAMLMap | null = null;
+  visit(document, {
+    Map(key, node, ancestors) {
+      if (!node.range) {
+        return;
+      }
+      const path = getPathFromAncestors(ancestors);
+
+      const hasTypeProp = typeof node.get('type') === 'string';
+
+      if (!hasTypeProp) {
+        return;
+      }
+
+      const isInSteps = path.includes('steps') || path.includes('else');
+
+      if (isInSteps && absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
+        // assign first found node
+        stepNode = node;
+        // but continue to find the deepest node
+      }
+    },
+  });
+  return stepNode;
+}
+
+export function getTriggerNodes(
+  yamlDocument: Document
+): Array<{ node: any; triggerType: string; typePair: any }> {
+  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        const triggerType = pair.value.value as string;
+        // Find the parent map node that contains this trigger
+        const triggerMapNode = ancestors[ancestors.length - 1];
+        triggerNodes.push({
+          node: triggerMapNode,
+          triggerType,
+          typePair: pair, // Store the actual type pair for precise positioning
+        });
+      }
+    },
+  });
+
+  return triggerNodes;
+}
+
+export function getStepNodesWithType(yamlDocument: Document): YAMLMap[] {
+  const stepNodes: YAMLMap[] = [];
+
+  if (!yamlDocument?.contents) {
+    return stepNodes;
+  }
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a step (not nested inside 'with' or other blocks)
+      const path = ancestors.slice();
+      let isMainStepType = false;
+
+      // Walk up the ancestors to see if we're in a steps array
+      // and ensure this type field is a direct child of a step, not nested in 'with'
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+
+        // If we encounter a 'with' field before finding 'steps', this is a nested type
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'with') {
+          return; // Skip this type field - it's inside a 'with' block
+        }
+
+        // If we find 'steps', this could be a main step type
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'steps') {
+          isMainStepType = true;
+          break;
+        }
+      }
+
+      if (isMainStepType && isScalar(pair.value)) {
+        // Find the step node (parent containing the type) - should be the immediate parent map
+        const immediateParent = ancestors[ancestors.length - 1];
+        if (isMap(immediateParent) && 'items' in immediateParent && immediateParent.items) {
+          // Ensure this is a step node by checking it has both 'name' and 'type' fields
+          const hasName = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'name'
+          );
+          const hasType = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+          );
+
+          if (hasName && hasType) {
+            stepNodes.push(immediateParent);
+          }
+        }
+      }
+    },
+  });
+
+  return stepNodes;
+}
+
+export function getTriggerNodesWithType(yamlDocument: Document): YAMLMap[] {
+  const triggerNodes: YAMLMap[] = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        // Find the trigger node (parent containing the type)
+        for (let i = path.length - 1; i >= 0; i--) {
+          const ancestor = path[i];
+          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
+            // Check if this map contains a type field
+            const hasType = ancestor.items.some(
+              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+            );
+            if (hasType) {
+              triggerNodes.push(ancestor);
+              break;
+            }
+          }
+        }
+      }
+    },
+  });
+
+  return triggerNodes;
 }

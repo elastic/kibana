@@ -47,29 +47,34 @@ describe('Observability plugin', () => {
   });
 
   describe('setup()', () => {
-    it('should set and unset recommended queries based on Metrics Experience flag', async () => {
+    it('should unset recommended queries when Metrics Experience flag is disabled', async () => {
       const plugin = new ObservabilityPlugin(pluginInitContext);
       plugin.setup(coreSetup, pluginsSetup as any);
       await Promise.resolve(); // Let .then() run
 
-      expect(setEsqlRecommendedQueries).not.toHaveBeenCalled();
-      subject.next(true); // Enable Metrics Experience feature flag
-      expect(setEsqlRecommendedQueries).toHaveBeenCalled();
+      expect(setEsqlRecommendedQueries).toHaveBeenCalled(); // Should always register queries
       subject.next(false); // Disable Metrics Experience feature flag
       expect(unsetMetricsExperienceEsqlRecommendedQueries).toHaveBeenCalled();
     });
   });
+
   describe('stop()', () => {
     it('should stop emitting feature flag changes after destroy', async () => {
       const plugin = new ObservabilityPlugin(pluginInitContext);
       plugin.setup(coreSetup, pluginsSetup as any);
       await Promise.resolve(); // Let .then() run
 
-      expect(setEsqlRecommendedQueries).toHaveBeenCalledTimes(0);
-      subject.next(true); // Enable Metrics Experience feature flag
       expect(setEsqlRecommendedQueries).toHaveBeenCalledTimes(1);
+
+      // Feature flag changes should only trigger unset function, not set function
+      subject.next(false); // Disable Metrics Experience feature flag
+      expect(unsetMetricsExperienceEsqlRecommendedQueries).toHaveBeenCalledTimes(1);
+      expect(setEsqlRecommendedQueries).toHaveBeenCalledTimes(1);
+
       plugin.stop();
-      subject.next(true); // Re-emit feature flag
+
+      subject.next(false); // Re-emit feature flag
+      expect(unsetMetricsExperienceEsqlRecommendedQueries).toHaveBeenCalledTimes(1);
       expect(setEsqlRecommendedQueries).toHaveBeenCalledTimes(1);
     });
   });
