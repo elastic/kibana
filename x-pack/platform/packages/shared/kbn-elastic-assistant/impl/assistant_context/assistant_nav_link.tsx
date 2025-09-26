@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiToolTip, EuiButton, EuiButtonEmpty, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useAssistantContext } from '../..';
+import { SparklesAnim, sparklesMaskDataUri } from './assets/sparkles_anim';
+import { SparklesWhite } from './assets/sparkles_white';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -22,20 +23,23 @@ const TOOLTIP_CONTENT = i18n.translate(
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
   }
 );
+
 const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assistantNavLink', {
-  defaultMessage: 'AI Assistant',
+  defaultMessage: 'Elastic Agent',
 });
 
 interface AssistantNavLinkProps {
   iconOnly?: boolean;
 }
 
+/** One gradient to rule them all */
+const CTA_GRAD = `linear-gradient(20deg, #0B64DD 10%, #1C9BEF 60%, #48EFCF 100%)`;
+
 export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }) => {
   const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
-  // useObserverable would change the order of re-renders that are tested against closely.
   useEffect(() => {
     const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
     return () => s.unsubscribe();
@@ -50,69 +54,134 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const EuiButtonBasicOrEmpty = EuiButtonEmpty; // Force project mode for testing
+  // const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
   const ButtonComponent = iconOnly ? EuiButtonIcon : EuiButtonBasicOrEmpty;
+  
+  // Choose the right icon based on chrome style (not iconOnly)
+  const IconComponent = chromeStyle === 'project' ? SparklesAnim : SparklesWhite;
+
+  /** Base styles shared by all variants */
+  const base = css`
+    --cta-grad: ${CTA_GRAD};
+
+    .euiButtonContent {
+      gap: ${euiTheme.size.s};
+      align-items: center;
+    }
+
+    /* Make sure the icon element can be masked/painted */
+    .euiButtonContent__icon {
+      width: 18px;
+      height: 18px;
+      position: relative;
+
+      /* Paint the shared gradient into the icon silhouette via CSS mask */
+      background-image: var(--cta-grad);
+      -webkit-mask: ${sparklesMaskDataUri} no-repeat center / 100% 100%;
+      mask: ${sparklesMaskDataUri} no-repeat center / 100% 100%;
+    }
+
+    /* Hide the inline SVG’s own paint (we use it as size/a11y only) */
+    .euiButtonContent__icon .euiIcon {
+      visibility: hidden;
+    }
+
+    /* Motion-safe hover */
+    transition: filter 160ms ease, transform 120ms ease;
+    &:active {
+      transform: translateY(0.5px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  `;
+
+  /** Primary (filled) */
+  const primary = css`
+    color: ${euiTheme.colors.ghost}; /* white text/icon */
+    background-image: var(--cta-grad);
+    border: none;
+
+    /* White icon for primary variant (handled by SparklesWhite component) */
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+    &:focus-visible {
+      outline: 2px solid ${euiTheme.colors.primary};
+      outline-offset: 2px;
+    }
+  `;
+
+  /** Secondary (outlined): gradient border + gradient text/icon */
+  const secondary = css`
+    /* Simple test: transparent background, gradient text */
+    background: transparent !important;
+    border: 2px solid var(--cta-grad) !important;
+    
+    /* Apply gradient to button and all children - this approach worked before */
+    background: var(--cta-grad) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    
+    /* Apply gradient to all children except icon (which uses CSS mask) */
+    *:not(.euiButtonContent__icon) {
+      background: var(--cta-grad) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
+    }
+
+    &:hover {
+      filter: brightness(1.03);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px ${euiTheme.colors.primary}33;
+    }
+  `;
+
+  /** Icon-only: gradient background for classic chrome, transparent for project chrome */
+  const iconOnlyCss = css`
+    background: ${chromeStyle === 'project' ? 'transparent' : 'var(--cta-grad)'} !important;
+    border: none;
+    width: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xl};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+  `;
 
   return (
     <EuiToolTip delay="long" content={TOOLTIP_CONTENT}>
-      <div
-        css={{
-          position: 'relative',
-          display: 'inline-block',
-          overflow: 'hidden',
-          marginTop: '4px',
-          borderRadius: '4px', // Match EUI button border radius
-          '&:hover > div:first-of-type': {
-            transform: iconOnly
-              ? 'translateX(45px) translateY(40px) rotate(11deg)'
-              : 'translateX(185px) translateY(85px) rotate(22deg)',
-          },
-        }}
+      <ButtonComponent
+        onClick={showOverlay}
+        size="s"
+        color="text" /* we fully control visuals via CSS */
+        display={iconOnly ? 'empty' : undefined}
+        iconType={IconComponent} /* conditional icon: gradient for project, white for classic */
+        data-test-subj="assistantNavLink"
+        aria-label={iconOnly ? LINK_LABEL : undefined}
+        css={[
+          base,
+          iconOnly
+            ? iconOnlyCss
+            : secondary // Force secondary variant for testing
+            // : chromeStyle === 'project'
+            // ? secondary // EuiButtonEmpty → outlined look
+            // : primary, // EuiButton → filled look
+        ]}
       >
-        <div
-          css={{
-            position: 'absolute',
-            // backgroundImage:
-            //   'linear-gradient(-40deg, #61A2FF 18%,rgb(198, 133, 235) 33%,rgb(232, 101, 208) 52%,rgb(247, 120, 167) 70%)',
-            backgroundImage: 'linear-gradient(20deg, #0B64DD 18%, #48EFCF 70%)',
-            height: iconOnly ? '100px' : '200px',
-            width: iconOnly ? '100px' : '320px',
-            top: iconOnly ? '-50px' : '-140px',
-            left: iconOnly ? '-60px' : '-190px',
-            borderRadius: '4px',
-            zIndex: -1,
-            transition: 'transform 0.8s ease',
-            transform: 'translateX(0px)',
-          }}
-        />
-        <ButtonComponent
-          onClick={showOverlay}
-          size="s"
-          color="text"
-          display={iconOnly ? 'fill' : undefined}
-          iconType={() => <AssistantIcon multicolor={false} />}
-          data-test-subj="assistantNavLink"
-          aria-label={iconOnly ? LINK_LABEL : undefined}
-          css={{
-            position: 'relative',
-            zIndex: 1,
-            // color: '#2b394f',
-            color: euiTheme.colors.textInverse,
-            backgroundColor: 'transparent !important',
-            overflow: 'hidden',
-            transition: 'color 0.3s ease',
-            '&:hover': {
-              backgroundColor: 'transparent !important',
-              color: '#2b394f',
-            },
-            '&::before': {
-              backgroundColor: 'transparent !important',
-            },
-          }}
-        >
-          {!iconOnly && LINK_LABEL}
-        </ButtonComponent>
-      </div>
+        {!iconOnly && LINK_LABEL}
+      </ButtonComponent>
     </EuiToolTip>
   );
 };
