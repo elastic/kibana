@@ -227,7 +227,7 @@ export const useConversationActions = () => {
         nextConversationId === newConversationId
           ? appPaths.chat.new
           : appPaths.chat.conversation({ conversationId: nextConversationId });
-      navigateToOnechatUrl(path, undefined, { shouldStickToBottom: false });
+      navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
       queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
