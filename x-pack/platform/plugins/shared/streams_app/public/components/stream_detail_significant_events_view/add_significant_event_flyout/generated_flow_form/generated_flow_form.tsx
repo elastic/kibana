@@ -39,6 +39,7 @@ export function GeneratedFlowForm({
   dataViews,
 }: Props) {
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+  const [isEditingQueries, setIsEditingQueries] = useState(false);
 
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
@@ -46,8 +47,8 @@ export function GeneratedFlowForm({
   };
 
   useEffect(() => {
-    setCanSave(selectedQueries.length > 0);
-  }, [selectedQueries, setCanSave]);
+    setCanSave(!isEditingQueries && selectedQueries.length > 0);
+  }, [selectedQueries, isEditingQueries, setCanSave]);
 
   if (!isGenerating && generatedQueries.length === 0) {
     return <AiFlowEmptyState />;
@@ -60,13 +61,13 @@ export function GeneratedFlowForm({
   return (
     <>
       <SignificantEventsGeneratedTable
+        setIsEditingQueries={setIsEditingQueries}
         isSubmitting={isSubmitting}
         generatedQueries={generatedQueries}
         onEditQuery={onEditQuery}
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        isGenerating={isGenerating}
         systems={systems}
         dataViews={dataViews}
       />
