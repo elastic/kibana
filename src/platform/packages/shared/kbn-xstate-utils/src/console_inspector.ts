@@ -18,7 +18,7 @@ import type {
 import { isDevMode } from './dev_tools';
 
 export const createConsoleInspector = () => {
-  if (isDevMode()) {
+  if (!isDevMode()) {
     return () => {};
   }
 
