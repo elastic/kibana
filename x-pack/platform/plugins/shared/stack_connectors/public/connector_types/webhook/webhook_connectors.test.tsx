@@ -527,9 +527,6 @@ describe('WebhookActionConnectorFields renders', () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
-      // webhookViewHeadersSwitch
-      // screen.debug(document.querySelectorAll('[data-test-subj="webhookHeaderPanel"]')[0]);
-
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.webhook',
@@ -540,7 +537,6 @@ describe('WebhookActionConnectorFields renders', () => {
             hasAuth: true,
             authType: AuthType.SSL,
             certType: SSLCertType.PFX,
-            // headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             headers: { 'content-type': 'text' },
           },
           secrets: {
