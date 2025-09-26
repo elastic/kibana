@@ -9,40 +9,23 @@
 
 import type { IStorage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
-export class Storage implements IStorageWrapper {
+export class LocalStorageWrapper implements IStorageWrapper {
   public store: IStorage;
 
   constructor(store: IStorage) {
     this.store = store;
   }
 
-  public get = (key: string) => {
+  public get = <T>(key: string) => {
     if (!this.store) {
       return null;
     }
 
-    const storageItem = this.store.getItem(key);
-    if (storageItem === null) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(storageItem);
-    } catch (error) {
-      return null;
-    }
+    return this.store.getItem(key) as T;
   };
 
-  public set = (key: string, value: any, includeUndefined = false) => {
-    const replacer = includeUndefined
-      ? (_: string, currentValue: any) =>
-          typeof currentValue === 'undefined' ? null : currentValue
-      : undefined;
-    try {
-      return this.store.setItem(key, JSON.stringify(value, replacer));
-    } catch (e) {
-      return false;
-    }
+  public set = <T>(key: string, value: T) => {
+    return this.store.setItem(key, value);
   };
 
   public remove = (key: string) => {
