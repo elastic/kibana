@@ -582,6 +582,41 @@ describe('Both modes', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
+       * WHEN I click on the “More” primary menu
+       * AND when I hover over another popover trigger
+       * THEN the popover attached to that trigger should not show
+       */
+      it('should not show another popover when the "More" popover is open', async () => {
+        // Security mock has exactly 13 primary menu items
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = screen.getByRole('button', {
+          name: 'More',
+        });
+
+        await userEvent.click(moreButton);
+
+        const morePopover = screen.getByRole('dialog', {
+          name: 'More',
+        });
+
+        expect(morePopover).toBeInTheDocument();
+
+        const investigationsLink = screen.getByRole('link', {
+          name: 'Investigations',
+        });
+
+        await userEvent.hover(investigationsLink);
+
+        const investigationsPopover = screen.queryByRole('dialog', {
+          name: 'Investigations',
+        });
+
+        expect(investigationsPopover).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
        * AND the initial active item is a primary menu item within the "More" menu
        * WHEN the navigation renders
        * THEN the "More" primary menu item itself is in an active state
