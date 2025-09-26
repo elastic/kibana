@@ -20,7 +20,7 @@ import type {
 export interface FleetApiService {
   integration: {
     install: (name: string) => Promise<any>;
-    delete: (name: string) => Promise<number>;
+    delete: (name: string) => Promise<any>;
   };
   agent_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
@@ -42,7 +42,7 @@ export interface FleetApiService {
       params?: BulkGetBody,
       queryParams?: Record<string, string>
     ) => Promise<any>;
-    delete: (id: string, isForceSet?: boolean) => Promise<number>;
+    delete: (id: string, isForceSet?: boolean) => Promise<any>;
   };
   outputs: {
     getOutputs: () => Promise<any>;
@@ -53,7 +53,7 @@ export interface FleetApiService {
       outputType: string,
       params?: FleetOutputBody
     ) => Promise<any>;
-    delete: (outputId: string) => Promise<number>;
+    delete: (outputId: string) => Promise<any>;
   };
   server_hosts: {
     get: () => Promise<any>;
@@ -62,12 +62,12 @@ export interface FleetApiService {
       hostUrls: string[],
       params?: FleetServerHostCreateBody
     ) => Promise<any>;
-    delete: (id: string) => Promise<number>;
+    delete: (id: string) => Promise<any>;
   };
   agent: {
     setup: () => Promise<any>;
     get: (queryParams: Record<string, any>) => Promise<any>;
-    delete: (agentId: string) => Promise<number>;
+    delete: (agentId: string) => Promise<any>;
   };
 }
 
@@ -79,7 +79,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           log,
           `fleetApi.integration.install [${name}]`,
           async () => {
-            return await kbnClient.request({
+            const response = await kbnClient.request({
               method: 'POST',
               path: `/api/fleet/epm/custom_integrations`,
               body: {
@@ -92,6 +92,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
                 ],
               },
             });
+            return {status: response.status};
           }
         );
       },
@@ -106,7 +107,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               path: `/api/fleet/epm/packages/${name}`,
               ignoreErrors: [400],
             });
-            return response.status;
+            return {status: response.status};
           }
         );
       },
@@ -220,7 +221,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               },
               ignoreErrors: [400],
             });
-            return response.status;
+            return {status: response.status};
           }
         );
       },
@@ -277,7 +278,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               path: `/api/fleet/outputs/${outputId}`,
               ignoreErrors: [400, 404],
             });
-            return response.status;
+            return {status: response.status};
           }
         );
       },
@@ -322,7 +323,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               path: `/api/fleet/fleet_server_hosts/${fleetServerHostId}`,
               ignoreErrors: [400, 404],
             });
-            return response.status;
+            return {status: response.status};
           }
         );
       },
@@ -361,7 +362,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               path: `/api/fleet/agents/${agentId}`,
               ignoreErrors: [400, 404],
             });
-            return response.status;
+            return {status: response.status};
           }
         );
       },

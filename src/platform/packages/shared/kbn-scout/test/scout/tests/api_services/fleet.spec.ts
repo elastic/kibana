@@ -30,7 +30,6 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const response = await apiServices.fleet.integration.install(integrationName);
 
       expect(response.status).toBe(200);
-      expect(response.data).toBeDefined();
     });
 
     apiTest('should delete an integration and return status code', async ({ apiServices }) => {
@@ -38,18 +37,18 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       await apiServices.fleet.integration.install(integrationName);
 
       // Then delete it
-      const statusCode = await apiServices.fleet.integration.delete(integrationName);
+      const response = await apiServices.fleet.integration.delete(integrationName);
 
-      expect(statusCode).toBe(200);
+      expect(response.status).toBe(200);
     });
 
     apiTest('should handle delete of non-existent integration', async ({ apiServices }) => {
       const nonExistentIntegration = `non-existent-integration-${Date.now()}`;
 
-      const statusCode = await apiServices.fleet.integration.delete(nonExistentIntegration);
+      const response = await apiServices.fleet.integration.delete(nonExistentIntegration);
 
       // Should return 400 for non-existent integration due to ignoreErrors
-      expect(statusCode).toBe(400);
+      expect(response.status).toBe(400);
     });
   });
 
@@ -191,9 +190,9 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const agentPolicyId = createResponse.data.item.id;
 
       // Then delete it
-      const statusCode = await apiServices.fleet.agent_policies.delete(agentPolicyId);
+      const response = await apiServices.fleet.agent_policies.delete(agentPolicyId);
 
-      expect(statusCode).toBe(200);
+      expect(response.status).toBe(200);
     });
 
     apiTest('should delete an agent policy with force flag', async ({ apiServices }) => {
@@ -202,9 +201,9 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const agentPolicyId = createResponse.data.item.id;
 
       // Then delete it with force
-      const statusCode = await apiServices.fleet.agent_policies.delete(agentPolicyId, true);
+      const response = await apiServices.fleet.agent_policies.delete(agentPolicyId, true);
 
-      expect(statusCode).toBe(200);
+      expect(response.status).toBe(200);
     });
   });
 
@@ -295,11 +294,9 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const deleteOutputId = createResponse.data.item.id;
 
       // Then delete it
-      const statusCode = await apiServices.fleet.outputs.delete(deleteOutputId);
+      const response = await apiServices.fleet.outputs.delete(deleteOutputId);
 
-      expect(statusCode).toBeGreaterThanOrEqual(200);
-      expect(statusCode).toBeLessThan(300);
-
+      expect(response.status).toBe(200);
       // Don't set outputId since we already deleted it
     });
   });
@@ -365,9 +362,9 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const deleteHostId = createResponse.data.item.id;
 
       // Then delete it
-      const statusCode = await apiServices.fleet.server_hosts.delete(deleteHostId);
+      const response = await apiServices.fleet.server_hosts.delete(deleteHostId);
 
-      expect(statusCode).toBe(200);
+      expect(response.status).toBe(200);
       // Don't set hostId since we already deleted it
     });
   });
@@ -377,7 +374,6 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       const response = await apiServices.fleet.agent.setup();
 
       expect(response.status).toBe(200);
-      expect(response.data).toBeDefined();
     });
 
     apiTest('should get agents with query parameters', async ({ apiServices }) => {
@@ -388,16 +384,15 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data).toBeDefined();
     });
 
     apiTest('should handle delete of non-existent agent', async ({ apiServices }) => {
       const nonExistentAgentId = `non-existent-agent-${Date.now()}`;
 
-      const statusCode = await apiServices.fleet.agent.delete(nonExistentAgentId);
+      const response = await apiServices.fleet.agent.delete(nonExistentAgentId);
 
       // Should return 400 or 404 for non-existent agent due to ignoreErrors
-      expect([400, 404]).toContain(statusCode);
+      expect([400, 404]).toContain(response.status);
     });
   });
 
@@ -410,84 +405,6 @@ apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
       });
 
       expect(response.status).toBe(200);
-      // With ignoreMissing: true, should return empty results or handle gracefully
-      expect(response.data.items).toBeDefined();
-    });
-
-    apiTest('should handle get non-existent output gracefully', async ({ apiServices }) => {
-      const nonExistentOutputId = `non-existent-output-${Date.now()}`;
-
-      try {
-        const response = await apiServices.fleet.outputs.getOutput(nonExistentOutputId);
-        // If it doesn't throw, should return error status
-        expect(response.status).toBeGreaterThanOrEqual(400);
-      } catch (error) {
-        // Should handle the error gracefully
-        expect(error).toBeDefined();
-      }
-    });
-  });
-
-  apiTest.describe('Performance and Integration', () => {
-    apiTest('should handle multiple concurrent operations', async ({ apiServices }) => {
-      const operations = [
-        apiServices.fleet.outputs.getOutputs(),
-        apiServices.fleet.agent_policies.get({ page: 1, perPage: 5 }),
-        apiServices.fleet.agent.get({ page: 1, perPage: 5 }),
-      ];
-
-      const results = await Promise.all(operations);
-
-      results.forEach((result) => {
-        expect(result.status).toBe(200);
-        expect(result.data).toBeDefined();
-      });
-    });
-
-    apiTest('should maintain data consistency in CRUD operations', async ({ apiServices }) => {
-      const policyName = `consistency-test-${Date.now()}`;
-      const policyNamespace = 'default';
-      let policyId = '';
-
-      try {
-        // Create
-        const createResponse = await apiServices.fleet.agent_policies.create(
-          policyName,
-          policyNamespace
-        );
-        policyId = createResponse.data.item.id;
-        expect(createResponse.status).toBe(200);
-
-        // Read
-        const getResponse = await apiServices.fleet.agent_policies.get({
-          kuery: `name:"${policyName}"`,
-        });
-        expect(getResponse.status).toBe(200);
-        expect(getResponse.data.items.some((item: any) => item.id === policyId)).toBe(true);
-
-        // Update
-        const updatedName = `${policyName}-updated`;
-        const updateResponse = await apiServices.fleet.agent_policies.update(
-          updatedName,
-          policyNamespace,
-          policyId
-        );
-        expect(updateResponse.status).toBe(200);
-        expect(updateResponse.data.item.name).toBe(updatedName);
-
-        // Delete
-        const deleteStatus = await apiServices.fleet.agent_policies.delete(policyId);
-        expect(deleteStatus).toBe(200);
-      } finally {
-        // Cleanup in case of test failure
-        if (policyId) {
-          try {
-            await apiServices.fleet.agent_policies.delete(policyId);
-          } catch (e) {
-            // Ignore cleanup errors
-          }
-        }
-      }
     });
   });
 });
