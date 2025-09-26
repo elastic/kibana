@@ -93,7 +93,7 @@ function generateOTelAttributesTransform(
       context = 'span';
       break;
     default:
-      throw new Error(`unexpected data stream type ${type}`);
+      throw new FleetError(`unexpected data stream type ${type}`);
   }
   return {
     [`transform/${suffix}-routing`]: {

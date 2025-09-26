@@ -48,6 +48,7 @@ export class DashboardPageControls extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
@@ -100,6 +101,7 @@ export class DashboardPageControls extends FtrService {
   public async openControlsMenu() {
     const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
     if (!isOpen) {
+      await this.dashboardAddPanel.clickTopNavAddMenu();
       await this.testSubjects.click('dashboard-controls-menu-button');
     }
   }

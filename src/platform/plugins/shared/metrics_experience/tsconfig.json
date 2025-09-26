@@ -17,6 +17,8 @@
     "@kbn/es-types",
     "@kbn/zod-helpers",
     "@kbn/core-feature-flags-server",
-    "@kbn/otel-semantic-conventions"
+    "@kbn/otel-semantic-conventions",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
   ]
 }

@@ -18899,7 +18899,8 @@
                                       "type": {
                                         "enum": [
                                           "input",
-                                          "output"
+                                          "output",
+                                          ""
                                         ],
                                         "type": "string"
                                       }
@@ -21011,7 +21012,8 @@
                                     "type": {
                                       "enum": [
                                         "input",
-                                        "output"
+                                        "output",
+                                        ""
                                       ],
                                       "type": "string"
                                     }
@@ -21504,7 +21506,8 @@
                                     "type": {
                                       "enum": [
                                         "input",
-                                        "output"
+                                        "output",
+                                        ""
                                       ],
                                       "type": "string"
                                     }

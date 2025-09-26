@@ -238,7 +238,13 @@ export default function ({ getService }: FtrProviderContext) {
         'update_anonymization',
         'manage_global_knowledge_base',
       ],
-      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAttackDiscovery: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_schedule',
+      ],
       securitySolutionCases: [
         'all',
         'read',
@@ -356,8 +362,7 @@ export default function ({ getService }: FtrProviderContext) {
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/235844
-  describe.skip('Privileges', () => {
+  describe('Privileges', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
