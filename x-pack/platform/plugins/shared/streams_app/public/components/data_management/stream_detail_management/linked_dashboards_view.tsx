@@ -9,6 +9,9 @@ import React, { useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { Streams } from '@kbn/streams-schema';
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiListGroup,
   EuiListGroupItem,
   EuiLoadingSpinner,
@@ -17,11 +20,15 @@ import {
 } from '@elastic/eui';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { i18n } from '@kbn/i18n';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useDashboardsFetch } from '../../../hooks/use_dashboards_fetch';
 
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
+  const context = useKibana();
   const dashboardsFetch = useDashboardsFetch(definition.stream.name);
-
+  const dashboardsLocator =
+    context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
   if (dashboardsFetch.loading) {
@@ -34,11 +41,22 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
 
   return dashboardsFetch.value && dashboardsFetch.value.dashboards.length ? (
     <>
-      <DashboardSelector
-        dashboards={dashboardsFetch.value.dashboards}
-        onSelect={setSelectedDashboard}
-        selectedDashboard={selectedDashboard}
-      />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <DashboardSelector
+            dashboards={dashboardsFetch.value.dashboards}
+            onSelect={setSelectedDashboard}
+            selectedDashboard={selectedDashboard}
+          />
+        </EuiFlexItem>
+        {dashboardsLocator && (
+          <EuiFlexItem grow={false}>
+            <EuiButton href={dashboardsLocator.getRedirectUrl({ dashboardId: selectedDashboard })}>
+              Open in Dashboards
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="xl" />
       {selectedDashboard && (
         <EuiPanel>

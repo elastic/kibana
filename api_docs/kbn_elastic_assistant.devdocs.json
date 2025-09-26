@@ -3083,7 +3083,7 @@
         "label": "ManagementSettingsTabs",
         "description": [],
         "signature": [
-          "\"connectors\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"knowledge_base\" | \"evaluation\""
+          "\"connectors\" | \"knowledge_base\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"evaluation\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "deprecated": false,

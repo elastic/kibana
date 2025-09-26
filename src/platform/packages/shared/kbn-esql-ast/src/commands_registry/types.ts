@@ -97,9 +97,11 @@ export type GetColumnsByTypeFn = (
   }
 ) => Promise<ISuggestionItem[]>;
 
+// TODO consider not exporting this
 export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
+  userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {
@@ -107,14 +109,18 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
+// TODO consider not exporting this
 export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
   // also, there are some cases where we can't yet infer the type of
   // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
+  userDefined: true;
+  location: ESQLLocation; // TODO should this be optional?
 }
+
+export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
 export interface ESQLPolicy {
   name: string;
@@ -126,13 +132,12 @@ export interface ESQLPolicy {
 export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
-  getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
+  getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  fields: Map<string, ESQLFieldWithMetadata>;
+  columns: Map<string, ESQLColumnData>;
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
@@ -214,6 +219,11 @@ export enum Location {
   RENAME = 'rename',
 
   /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
+
+  /**
    * In the JOIN command (used only for AS)
    */
   JOIN = 'join',
@@ -244,6 +254,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**

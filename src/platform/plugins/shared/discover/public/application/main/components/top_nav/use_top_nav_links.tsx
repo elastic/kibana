@@ -25,7 +25,6 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
-import { onSaveSearch } from './on_save_search';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -45,6 +44,7 @@ import {
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 /**
  * Helper function to build the top nav links
@@ -127,7 +127,7 @@ export const useTopNavLinks = ({
       if (!defaultMenu?.newItem?.disabled) {
         const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
           isEsqlMode && currentDataView.type === ESQL_TYPE
-            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+            ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
             : undefined;
         const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
           ? defaultEsqlState
@@ -259,8 +259,7 @@ export const useTopNavLinks = ({
         iconType: 'save',
         emphasize: true,
         run: (anchorElement: HTMLElement) => {
-          onSaveSearch({
-            savedSearch: state.savedSearchState.getState(),
+          onSaveDiscoverSession({
             services,
             state,
             onClose: () => {

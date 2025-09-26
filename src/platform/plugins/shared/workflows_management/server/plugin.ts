@@ -25,7 +25,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../common';
 import type { WorkflowsManagementConfig } from './config';
-import { workflowSavedObjectType } from './saved_objects/workflow';
+
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -147,7 +147,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     }
 
     // Register saved object types
-    core.savedObjects.registerType(workflowSavedObjectType);
 
     registerFeatures(plugins);
 
@@ -161,12 +160,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
 
-    // Get saved objects client from core
-    const getSavedObjectsClient = () =>
-      core
-        .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
-
     const getWorkflowExecutionEngine = () =>
       core
         .getStartServices()
@@ -175,7 +168,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
-      getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
       WORKFLOWS_STEP_EXECUTIONS_INDEX,
       WORKFLOWS_EXECUTION_LOGS_INDEX,

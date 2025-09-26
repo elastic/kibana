@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -25,7 +24,7 @@ export interface ToolContextMenuProps {
 
 export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   const { euiTheme } = useEuiTheme();
-  const { editTool, deleteTool, testTool, cloneTool } = useToolsActions();
+  const { editTool, deleteTool, testTool, cloneTool, viewTool } = useToolsActions();
   const [isOpen, setIsOpen] = useState(false);
 
   const editMenuItem = (
@@ -61,10 +60,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const testMenuItem = (
     <EuiContextMenuItem
-      icon="eye"
+      icon="play"
       key="test"
       size="s"
-      disabled // Not implemented
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);
@@ -88,9 +86,23 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
-  const menuItems = isEsqlTool(tool)
+  const viewMenuItem = (
+    <EuiContextMenuItem
+      icon="eye"
+      key="view"
+      size="s"
+      onClick={() => {
+        viewTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {labels.tools.viewToolButtonLabel}
+    </EuiContextMenuItem>
+  );
+
+  const menuItems = !tool.readonly
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
-    : [testMenuItem];
+    : [testMenuItem, viewMenuItem];
 
   return (
     <EuiPopover

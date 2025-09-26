@@ -20,6 +20,8 @@ export type ResourceIdentifierConstructor<I extends ItemDocument = ItemDocument>
 ) => ResourceIdentifier<I>;
 
 export abstract class ResourceIdentifier<I> {
+  public abstract fromOriginal(item?: OriginalItem<I>): Promise<SiemMigrationResourceBase[]>;
+
   protected identifier: VendorResourceIdentifier;
 
   constructor(protected readonly vendor: SiemMigrationVendor) {
@@ -27,7 +29,9 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
-  public abstract fromOriginal(item?: OriginalItem<I>): Promise<SiemMigrationResourceBase[]>;
+  public fromQuery(query: string): SiemMigrationResourceBase[] {
+    return this.identifier(query);
+  }
 
   public async fromOriginals(
     originalItem: OriginalItem<I>[]

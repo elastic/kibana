@@ -6,9 +6,9 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
+import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
+import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from '../types';
 import type { DataViewsState } from '../state_management';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext } from './helpers';
@@ -22,6 +22,26 @@ interface SuggestionsApiProps {
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
 }
+
+// Helper function to find compatible suggestion by chart type
+const findCompatibleSuggestion = (suggestionCandidates: Suggestion[], targetChartType: ChartType) =>
+  suggestionCandidates.find(
+    (s) => s.title.includes(targetChartType) || s.visualizationId.includes(targetChartType)
+  );
+
+// Helper function to merge suggestion with visual attributes if needed
+const createSuggestionWithAttributes = (
+  suggestion: Suggestion,
+  preferredVisAttributes: TypedLensByValueInput['attributes'] | undefined,
+  context: VisualizeFieldContext | VisualizeEditorContext
+) =>
+  preferredVisAttributes
+    ? mergeSuggestionWithVisContext({
+        suggestion,
+        visAttributes: preferredVisAttributes,
+        context,
+      })
+    : suggestion;
 
 export const suggestionsApi = ({
   context,
@@ -92,7 +112,15 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
+  }).filter(
+    (sug) =>
+      // Datatables are always return as hidden suggestions
+      // if the user has requested for a datatable (preferredChartType), we want to return it
+      // although it is a hidden suggestion
+      (sug.hide && sug.visualizationId === 'lnsDatatable') ||
+      // Filter out suggestions that are hidden and legacy metrics
+      (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
+  );
 
   // check if there is an XY chart suggested
   // if user has requested for a line or area, we want to sligthly change the state
@@ -113,24 +141,43 @@ export const suggestionsApi = ({
       },
     ];
   }
+
+  const chartTypeFromAttrs = preferredVisAttributes
+    ? mapVisToChartType(preferredVisAttributes.visualizationType)
+    : undefined;
+
+  const targetChartType = preferredChartType ?? chartTypeFromAttrs;
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
   const suggestionsList = [activeVisualization, ...newSuggestions];
-  if (suggestionsList.length > 1 && preferredChartType) {
-    const compatibleSuggestion = suggestionsList.find(
-      (s) => s.title.includes(preferredChartType) || s.visualizationId.includes(preferredChartType)
-    );
 
-    if (compatibleSuggestion) {
-      const suggestion = preferredVisAttributes
-        ? mergeSuggestionWithVisContext({
-            suggestion: compatibleSuggestion,
-            visAttributes: preferredVisAttributes,
-            context,
-          })
-        : compatibleSuggestion;
-
+  // Handle preferred chart type logic
+  if (targetChartType) {
+    // Special case for table when user hasn't changed chart type and there's only one suggestion
+    if (
+      !preferredChartType &&
+      suggestionsList.length === 1 &&
+      targetChartType === ChartType.Table
+    ) {
+      const suggestion = createSuggestionWithAttributes(
+        suggestionsList[0],
+        preferredVisAttributes,
+        context
+      );
       return [suggestion];
+    }
+
+    // General case: find compatible suggestion for preferred chart type
+    // Skip if user hasn't changed chart type, has multiple suggestions, and wants table
+    const shouldSkipSearch =
+      !preferredChartType && suggestionsList.length > 1 && targetChartType === ChartType.Table;
+
+    if (!shouldSkipSearch) {
+      const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
+      const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
+
+      return [createSuggestionWithAttributes(selectedSuggestion, preferredVisAttributes, context)];
     }
   }
 

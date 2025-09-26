@@ -47,6 +47,12 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
       },
     },
   },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 2,
+    },
+  },
 });
 
 export const getMisconfigurationAggregationCount = (
@@ -180,6 +186,12 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
           },
         },
       },
+    },
+  },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 2,
     },
   },
 });

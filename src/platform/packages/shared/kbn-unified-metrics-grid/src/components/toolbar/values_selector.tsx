@@ -8,8 +8,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { SelectableEntry } from '@kbn/unified-histogram';
-import { ToolbarSelector } from '@kbn/unified-histogram';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -19,19 +18,20 @@ import {
   EuiNotificationBadge,
   EuiText,
 } from '@elastic/eui';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
+import { ClearAllSection } from './clear_all_section';
 
 interface ValuesFilterProps {
   selectedDimensions: string[];
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
-  timeRange?: {
-    from?: string;
-    to?: string;
-  };
+  timeRange: TimeRange;
   onChange: (values: string[]) => void;
+  onClear: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
@@ -40,6 +40,7 @@ export const ValuesSelector = ({
   timeRange,
   disabled = false,
   indices = [],
+  onClear,
 }: ValuesFilterProps) => {
   const {
     data: values = [],
@@ -48,8 +49,8 @@ export const ValuesSelector = ({
   } = useDimensionsQuery({
     dimensions: selectedDimensions,
     indices,
-    from: timeRange?.from,
-    to: timeRange?.to,
+    from: timeRange.from,
+    to: timeRange.to,
   });
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
@@ -121,6 +122,22 @@ export const ValuesSelector = ({
     );
   }, [isLoading, selectedValues.length]);
 
+  const popoverContentBelowSearch = useMemo(() => {
+    return (
+      <ClearAllSection
+        selectedOptionsLength={selectedValues.length}
+        onClearAllAction={onClear}
+        selectedOptionsMessage={i18n.translate(
+          'metricsExperience.valuesSelector.selectedStatusMessage',
+          {
+            defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
+            values: { count: selectedValues.length },
+          }
+        )}
+      />
+    );
+  }, [selectedValues.length, onClear]);
+
   if (error) {
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
@@ -155,6 +172,7 @@ export const ValuesSelector = ({
       hasArrow={!isLoading}
       onChange={handleChange}
       disabled={disabled}
+      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };

@@ -7,11 +7,17 @@ date: 2025-06-16
 tags: ['terraform', 'tf', 'kibana','contributor', 'dev', 'http', 'api']
 ---
 
+<DocCallOut title="Think Holistically">
+These guidelines are **recommended but not mandatory**. Deviating from them will increase the effort required on the Terraform provider side to consume your APIs effectively. Adhering to these guidelines ensures smoother integration and reduces the implementation burden for infrastructure-as-code consumers.
+</DocCallOut>
+
 Kibana's role has expanded beyond the UI. APIs have become the backbone for how customers automate their workflows, build custom scripts, and create their own integrations. With GitOps becoming the standard and Terraform establishing itself as the go-to infrastructure-as-code tool, HTTP APIs are now business-critical. The rise in Search AI means that it's more important than ever to make sure our APIs are easily understood by LLMs.
 
 For Terraform to be a first class citizen, the provider needs to cover resources that weren't available before—think Dashboards, Visualizations, Data Views, and Detection Rules. This means we need to build REST APIs that follow the OpenAPI Specification properly, making it straightforward for teams to manage these resources as code through GitOps workflows.
 
 These guidelines will help you build APIs that are easy to use, whether someone's automating with scripts or managing infrastructure at scale.
+
+
 
 ## Terraform provider developer-friendly API design
 

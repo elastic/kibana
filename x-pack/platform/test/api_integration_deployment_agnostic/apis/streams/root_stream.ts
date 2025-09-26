@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
@@ -84,8 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/231900
-  describe.skip('Root stream', () => {
+  describe('Root stream', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -97,8 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow processing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -127,8 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow fields changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -155,8 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should allow routing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -186,14 +183,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: 'test',
       };
-      let threw = false;
-      try {
-        await indexDocument(esClient, 'logs.gcpcloud', doc);
-      } catch (e) {
-        threw = true;
-        expect(e.message).to.contain('stream.name is not set properly');
-      }
-      expect(threw).to.be(true);
+      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
+      // @ts-expect-error failure_store is not in the types, but in the actual response
+      expect(response.failure_store).to.be('used');
     });
   });
 }

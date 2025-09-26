@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates log documents based on the sample log parser.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { Serializable } from '@kbn/apm-synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
@@ -51,46 +55,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
-              steps: [
-                {
-                  customIdentifier: 'synth-step-0',
-                  action: 'dissect',
-                  where: {
-                    always: {},
-                  },
-                  from: 'attributes.user.name',
-                  pattern: 'user%{attributes.user.id}',
-                  ignore_failure: false,
-                  ignore_missing: false,
-                },
-                {
-                  customIdentifier: 'synth-step-1',
-                  action: 'manual_ingest_pipeline',
-                  where: {
-                    always: {},
-                  },
-                  processors: [
-                    {
-                      convert: {
-                        field: 'attributes.user.id',
-                        type: 'long',
-                        ignore_missing: true,
-                      },
-                    },
-                    {
-                      fail: {
-                        if: 'ctx.attributes?.user?.id != null && ctx.attributes.user.id > 2',
-                        message: 'User is not allowed',
-                      },
-                    },
-                  ],
-                  ignore_failure: false,
-                },
-              ],
+              steps: [],
             },
             wired: {
               fields: {
-                'attributes.user.id': { type: 'keyword' },
                 'attributes.process.name': { type: 'keyword', ignore_above: 18 },
               },
               routing: [],

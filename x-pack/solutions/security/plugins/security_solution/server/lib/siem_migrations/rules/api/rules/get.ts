@@ -73,11 +73,11 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
 
               const result = await ruleMigrationsClient.data.items.get(migrationId, options);
 
-              await siemMigrationAuditLogger.logGetMigrationRules({ migrationId });
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId });
               return res.ok({ body: result });
             } catch (error) {
               logger.error(error);
-              await siemMigrationAuditLogger.logGetMigrationRules({ migrationId, error });
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId, error });
               return res.badRequest({ body: error.message });
             }
           }

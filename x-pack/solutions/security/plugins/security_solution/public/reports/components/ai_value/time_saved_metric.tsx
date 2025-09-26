@@ -52,6 +52,13 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
         .echMetricText {
           padding: 8px 20px 60px;
         }
+        .euiPanel,
+        .embPanel,
+        .echMetric,
+        .echChartBackground,
+        .embPanel__hoverActions > span {
+          background-color: rgb(0, 0, 0, 0) !important;
+        }
       `}
     >
       <VisualizationEmbeddable

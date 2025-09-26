@@ -16,7 +16,11 @@ import type { NlToEsqlTaskParams, NlToEsqlTaskEvent } from './types';
 
 const loadDocBase = once(() => EsqlDocumentBase.load());
 
-export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
+export function naturalLanguageToEsql<TToolOptions extends ToolOptions>(
+  options: NlToEsqlTaskParams<TToolOptions>
+): Observable<NlToEsqlTaskEvent<TToolOptions>>;
+
+export function naturalLanguageToEsql({
   client,
   connectorId,
   tools,
@@ -28,10 +32,16 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   system,
   metadata,
   ...rest
-}: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+}: NlToEsqlTaskParams<ToolOptions>): Observable<NlToEsqlTaskEvent<ToolOptions>> {
   return from(loadDocBase()).pipe(
     switchMap((docBase) => {
-      const systemMessage = docBase.getSystemMessage();
+      const systemMessage = `You are a helpful assistant for generating and executing ES|QL queries.
+Your goal is to help the user construct an ES|QL query for their data.
+
+VERY IMPORTANT: When writing ES|QL queries, make sure to ONLY use commands, functions
+and operators listed in the current documentation.
+
+${docBase.getSystemMessage()}`;
       const messages: Message[] =
         'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 

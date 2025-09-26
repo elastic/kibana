@@ -15,7 +15,7 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
-import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';
+import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
@@ -99,7 +99,7 @@ const CaseContainerComponent: React.FC = () => {
       if (AIForSOC) {
         return <AiForSOCAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
       } else {
-        return <DetectionEngineAlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
+        return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
       }
     },
     [AIForSOC]

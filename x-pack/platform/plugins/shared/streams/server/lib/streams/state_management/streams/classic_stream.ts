@@ -28,6 +28,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { validateClassicFields } from '../../helpers/validate_fields';
+import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -186,6 +187,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     validateClassicFields(this._definition);
+    validateBracketsInFieldNames(this._definition);
 
     return { isValid: true, errors: [] };
   }

@@ -95,6 +95,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.DISSECT,
       Location.COMPLETION,
       Location.RENAME,
+      Location.RERANK,
     ],
     signatures: [
       {

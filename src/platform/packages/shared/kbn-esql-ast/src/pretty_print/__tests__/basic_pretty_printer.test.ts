@@ -646,6 +646,10 @@ describe('single line query', () => {
 
         expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
+
+      test('supports nested maps', () => {
+        assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
+      });
     });
 
     describe('literals expressions', () => {

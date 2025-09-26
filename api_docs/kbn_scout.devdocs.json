@@ -1132,7 +1132,15 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
-          "; }>"
+          "; } & { samlAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
+          "; preCreateSecurityIndexes: void; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "deprecated": false,

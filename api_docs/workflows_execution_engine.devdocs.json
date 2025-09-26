@@ -100,6 +100,53 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.cancelWorkflowExecution",
+          "type": "Function",
+          "tags": [],
+          "label": "cancelWorkflowExecution",
+          "description": [],
+          "signature": [
+            "(workflowExecutionId: string, spaceId: string) => Promise<void>"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.cancelWorkflowExecution.$1",
+              "type": "string",
+              "tags": [],
+              "label": "workflowExecutionId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.cancelWorkflowExecution.$2",
+              "type": "string",
+              "tags": [],
+              "label": "spaceId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -150,7 +197,7 @@
         "label": "WORKFLOWS_EXECUTION_LOGS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-execution-logs\""
+          "\".workflows-execution-logs\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,
@@ -165,7 +212,7 @@
         "label": "WORKFLOWS_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-executions\""
+          "\".workflows-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,
@@ -180,7 +227,7 @@
         "label": "WORKFLOWS_STEP_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-step-executions\""
+          "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,

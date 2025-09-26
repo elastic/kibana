@@ -40,9 +40,19 @@ export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, 
 };
 
 /**
+ * Tool call progress which were emitted during the tool execution
+ */
+export interface ToolCallProgress {
+  /**
+   * The full text message
+   */
+  message: string;
+}
+
+/**
  * Represents a tool call with the corresponding result.
  */
-export interface ToolCallWithResult<T = ToolResult[]> {
+export interface ToolCallWithResult {
   /**
    * Id of the tool call, as returned by the LLM
    */
@@ -56,14 +66,18 @@ export interface ToolCallWithResult<T = ToolResult[]> {
    */
   params: Record<string, any>;
   /**
+   * List of progress message which were send during that tool call
+   */
+  progression?: ToolCallProgress[];
+  /**
    * Result of the tool
    */
-  results: T;
+  results: ToolResult[];
 }
 
-export type ToolCallStep<T = ToolResult[]> = ConversationRoundStepMixin<
+export type ToolCallStep = ConversationRoundStepMixin<
   ConversationRoundStepType.toolCall,
-  ToolCallWithResult<T>
+  ToolCallWithResult
 >;
 
 export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): ToolCallStep => {
@@ -96,17 +110,19 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 /**
  * Defines all possible types for round steps.
  */
-export type ConversationRoundStep<T = ToolResult[]> = ToolCallStep<T> | ReasoningStep;
+export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
-export interface ConversationRound<T = ToolResult[]> {
+export interface ConversationRound {
+  /** unique id for this round */
+  id: string;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
-  steps: Array<ConversationRoundStep<T>>;
+  steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
   /** when tracing is enabled, contains the traceId associated with this round */

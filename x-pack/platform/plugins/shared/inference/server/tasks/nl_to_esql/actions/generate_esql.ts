@@ -32,7 +32,35 @@ import type { NlToEsqlTaskEvent } from '../types';
 
 const MAX_CALLS = 5;
 
-export const generateEsqlTask = <TToolOptions extends ToolOptions>({
+interface LlmEsqlTaskOptions {
+  documentationRequest: { commands?: string[]; functions?: string[] };
+  callCount?: number;
+}
+
+type LlmEsqlTask<TToolOptions extends ToolOptions = ToolOptions> = (
+  options: LlmEsqlTaskOptions
+) => Observable<NlToEsqlTaskEvent<TToolOptions>>;
+
+interface GenerateEsqlTaskOptions
+  extends Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'> {
+  connectorId: string;
+  systemMessage: string;
+  messages: Message[];
+  chatCompleteApi: ChatCompleteAPI;
+  docBase: EsqlDocumentBase;
+  logger: Pick<Logger, 'debug'>;
+  metadata?: ChatCompleteMetadata;
+  system?: string;
+  maxCallsAllowed?: number;
+}
+
+export function generateEsqlTask<TToolOptions extends ToolOptions>(
+  options: GenerateEsqlTaskOptions & {
+    toolOptions: TToolOptions;
+  }
+): LlmEsqlTask<TToolOptions>;
+
+export function generateEsqlTask({
   chatCompleteApi,
   connectorId,
   systemMessage,
@@ -46,31 +74,19 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   system,
   metadata,
   maxCallsAllowed = MAX_CALLS,
-}: {
-  connectorId: string;
-  systemMessage: string;
-  messages: Message[];
+}: GenerateEsqlTaskOptions & {
   toolOptions: ToolOptions;
-  chatCompleteApi: ChatCompleteAPI;
-  docBase: EsqlDocumentBase;
-  logger: Pick<Logger, 'debug'>;
-  metadata?: ChatCompleteMetadata;
-  system?: string;
-  maxCallsAllowed?: number;
-} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
+}): LlmEsqlTask {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
     callCount = 0,
-  }: {
-    documentationRequest: { commands?: string[]; functions?: string[] };
-    callCount?: number;
-  }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+  }: LlmEsqlTaskOptions): Observable<NlToEsqlTaskEvent<ToolOptions>> {
     const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
-    return merge(
+    const next$ = merge(
       of<
         OutputCompleteEvent<
           'request_documentation',
@@ -136,7 +152,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         ],
         toolChoice: !functionLimitReached ? toolChoice : ToolChoiceType.none,
         tools: functionLimitReached
-          ? {}
+          ? undefined
           : {
               ...tools,
               request_documentation: {
@@ -160,7 +176,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const toolCalls = generateEvent.toolCalls as ToolCall[];
+            const toolCalls = generateEvent.toolCalls;
             const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
             if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
@@ -193,8 +209,10 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         })
       )
     );
+
+    return next$;
   };
-};
+}
 
 const correctEsqlMistakes = ({
   content,
