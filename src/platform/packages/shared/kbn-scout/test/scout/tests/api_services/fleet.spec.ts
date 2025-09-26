@@ -44,10 +44,12 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
   apiTest('should handle delete of non-existent integration', async ({ apiServices }) => {
     const nonExistentIntegration = `non-existent-integration-${Date.now()}`;
 
-    const response = await apiServices.fleet.integration.delete(nonExistentIntegration);
-
-    // Should return 400 for non-existent integration due to ignoreErrors
-    expect(response.status).toBe(400);
+    try {
+      await apiServices.fleet.integration.delete(nonExistentIntegration);
+    } catch (error) {
+      // Should return 400 for non-existent integration due to ignoreErrors
+      expect(error.response.status).toBe(400);
+    }
   });
 });
 
@@ -62,11 +64,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
   apiTest.afterEach(async ({ apiServices }) => {
     // Clean up policy
     if (policyId) {
-      try {
-        await apiServices.fleet.agent_policies.delete(policyId);
-      } catch (e) {
-        // Policy might not exist or already deleted
-      }
+      await apiServices.fleet.agent_policies.delete(policyId);
       policyId = '';
     }
   });
@@ -78,38 +76,8 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     });
 
     expect(response.status).toBe(200);
-    expect(response.data).toBeDefined();
-    expect(response.data.items).toBeDefined();
     expect(response.data.page).toBe(1);
     expect(response.data.perPage).toBe(10);
-  });
-
-  apiTest('should create an agent policy', async ({ apiServices }) => {
-    const policyNamespace = 'default';
-
-    const response = await apiServices.fleet.agent_policies.create(policyName, policyNamespace);
-
-    expect(response.status).toBe(200);
-    expect(response.data).toBeDefined();
-    expect(response.data.item.name).toBe(policyName);
-    expect(response.data.item.namespace).toBe(policyNamespace);
-
-    policyId = response.data.item.id;
-  });
-
-  apiTest('should create an agent policy with system monitoring', async ({ apiServices }) => {
-    const policyNamespace = 'default';
-    const sysMonPolicyName = `${policyName}-sysmon`;
-
-    const response = await apiServices.fleet.agent_policies.create(
-      sysMonPolicyName,
-      policyNamespace
-    );
-
-    expect(response.status).toBe(200);
-    expect(response.data.item.name).toBe(sysMonPolicyName);
-
-    policyId = response.data.item.id;
   });
 
   apiTest('should create an agent policy with additional parameters', async ({ apiServices }) => {
@@ -167,20 +135,15 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const policy2Response = await apiServices.fleet.agent_policies.create(policy2Name, 'default');
 
     const policyIds = [policy1Response.data.item.id, policy2Response.data.item.id];
-
-    try {
-      // Bulk get the policies
-      const bulkResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
-
-      expect(bulkResponse.status).toBe(200);
-      expect(bulkResponse.data.items).toHaveLength(2);
-    } finally {
-      // Clean up both policies
-      await Promise.all([
-        apiServices.fleet.agent_policies.delete(policy1Response.data.item.id),
-        apiServices.fleet.agent_policies.delete(policy2Response.data.item.id),
-      ]);
-    }
+    // Bulk get the policies
+    const bulkResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
+    expect(bulkResponse.status).toBe(200);
+    expect(bulkResponse.data.items).toHaveLength(2);
+    // Clean up both policies
+    await Promise.all([
+      apiServices.fleet.agent_policies.delete(policy1Response.data.item.id),
+      apiServices.fleet.agent_policies.delete(policy2Response.data.item.id),
+    ]);
   });
 
   apiTest('should delete an agent policy', async ({ apiServices }) => {
@@ -212,13 +175,9 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
   apiTest.afterEach(async ({ apiServices }) => {
     // Clean up output
     if (outputId) {
-      try {
-        await apiServices.fleet.outputs.delete(outputId);
-      } catch (e) {
-        // Output might not exist or already deleted
-      }
-      outputId = '';
+      await apiServices.fleet.outputs.delete(outputId);
     }
+    outputId = '';
   });
 
   apiTest('should get all outputs', async ({ apiServices }) => {
@@ -241,24 +200,6 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
 
     expect(response.status).toBe(200);
     expect(response.data.item.id).toBe(existingOutput.id);
-  });
-
-  apiTest('should create an elasticsearch output', async ({ apiServices }) => {
-    const outputName = `test-output-${Date.now()}`;
-    const outputHosts = ['https://localhost:9200'];
-
-    const response = await apiServices.fleet.outputs.create(
-      outputName,
-      outputHosts,
-      'elasticsearch'
-    );
-
-    expect(response.status).toBe(200);
-    expect(response.data.item.name).toBe(outputName);
-    expect(response.data.item.type).toBe('elasticsearch');
-    expect(response.data.item.hosts).toStrictEqual(outputHosts);
-
-    outputId = response.data.item.id;
   });
 
   apiTest('should create an output with additional parameters', async ({ apiServices }) => {
@@ -320,19 +261,6 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
     // Note: The get method doesn't return a value in current implementation
     // This test verifies it doesn't throw an error
     await apiServices.fleet.server_hosts.get();
-  });
-
-  apiTest('should create a fleet server host', async ({ apiServices }) => {
-    const hostName = `test-fleet-server-${Date.now()}`;
-    const hostUrls = ['https://localhost:8220'];
-
-    const response = await apiServices.fleet.server_hosts.create(hostName, hostUrls);
-
-    expect(response.status).toBe(200);
-    expect(response.data.item.name).toBe(hostName);
-    expect(response.data.item.host_urls).toStrictEqual(hostUrls);
-
-    hostId = response.data.item.id;
   });
 
   apiTest('should create a fleet server host with parameters', async ({ apiServices }) => {

@@ -105,7 +105,6 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             const response = await kbnClient.request({
               method: 'DELETE',
               path: `/api/fleet/epm/packages/${name}`,
-              ignoreErrors: [400],
             });
             return { status: response.status };
           }
