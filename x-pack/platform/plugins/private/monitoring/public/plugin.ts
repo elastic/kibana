@@ -102,7 +102,7 @@ export class MonitoringPlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
         // Check if user has enterprise license
-        const license = await pluginsStart.licensing.license$.pipe(take(1)).toPromise();
+        const license = await plugins.licensing.license$.pipe(take(1)).toPromise();
         const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
 
         const deps: LegacyMonitoringStartPluginDependencies = {
