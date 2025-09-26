@@ -133,6 +133,9 @@ export enum FunctionDefinitionTypes {
   TIME_SERIES_AGG = 'time_series_agg',
 }
 
+export const grokSupportedDataTypes = ['int', 'long', 'double', 'float', 'boolean'] as const;
+export type GrokDataType = (typeof grokSupportedDataTypes)[number];
+
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
