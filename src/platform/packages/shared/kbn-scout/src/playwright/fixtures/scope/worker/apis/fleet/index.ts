@@ -15,7 +15,7 @@ import type {
   FleetOutputBody,
   FleetServerHostCreateBody,
   AgentPolicyUpdateBody,
-} from './data_helper';
+} from './types';
 
 export interface FleetApiService {
   integration: {
@@ -284,8 +284,8 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
     },
     server_hosts: {
       get: async () => {
-        await measurePerformanceAsync(log, `fleetApi.server_hosts.get`, async () => {
-          await kbnClient.request({
+        return await measurePerformanceAsync(log, `fleetApi.server_hosts.get`, async () => {
+          return await kbnClient.request({
             method: 'GET',
             path: `/api/fleet/fleet_server_hosts`,
           });
