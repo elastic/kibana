@@ -253,6 +253,11 @@ export interface ChartSectionProps {
    * Flag indicating that the chart is currently loading
    */
   isChartLoading?: boolean;
+
+  /**
+   * The current tab ID
+   */
+  tabId: string;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

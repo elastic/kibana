@@ -9,86 +9,87 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import type { MetricsExperienceState, MetricsExperienceTabState } from '../types';
+import { selectTab } from '../selectors/tabs';
 
-export interface MetricsGridState {
-  // Pagination state
-  currentPage: number;
+const initialState: MetricsExperienceState = {
+  tabs: {
+    byId: {},
+  },
+};
 
-  // Search state
-  searchTerm: string;
+export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
 
-  // UI state
-  isFullscreen: boolean;
+type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
-  // Dimension state
-  dimensions: string[];
+const withTab = <TAction extends TabAction>(
+  state: MetricsExperienceState,
+  action: TAction,
+  fn: (tab: MetricsExperienceTabState) => void
+) => {
+  const tab = selectTab(state, action.payload.tabId);
 
-  // Values state
-  valueFilters: string[];
-}
-
-const initialState: MetricsGridState = {
-  currentPage: 0,
-  searchTerm: '',
-  isFullscreen: false,
-  dimensions: [],
-  valueFilters: [],
+  if (tab) {
+    fn(tab);
+  }
 };
 
 export const metricsGridSlice = createSlice({
   name: 'metricsGrid',
   initialState,
   reducers: {
-    setCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
+    setCurrentPage: (state, action: TabAction<Pick<MetricsExperienceTabState, 'currentPage'>>) => {
+      return withTab(state, action, (tab) => {
+        tab.currentPage = action.payload.currentPage;
+      });
     },
-    setSearchTerm: (state, action: PayloadAction<string>) => {
-      state.searchTerm = action.payload;
-      // Reset to first page when search changes
-      state.currentPage = 0;
+    setSearchTerm: (state, action: TabAction<Pick<MetricsExperienceTabState, 'searchTerm'>>) => {
+      return withTab(state, action, (tab) => {
+        tab.searchTerm = action.payload.searchTerm;
+        // Reset to first page when search changes
+        tab.currentPage = 0;
+      });
     },
-    resetCurrentPage: (state) => {
-      state.currentPage = 0;
+    resetCurrentPage: (state, action: TabAction) => {
+      return withTab(state, action, (tab) => {
+        tab.currentPage = 0;
+      });
     },
-    setIsFullscreen: (state, action: PayloadAction<boolean>) => {
-      state.isFullscreen = action.payload;
+    setIsFullscreen: (
+      state,
+      action: TabAction<Pick<MetricsExperienceTabState, 'isFullscreen'>>
+    ) => {
+      return withTab(state, action, (tab) => {
+        tab.isFullscreen = action.payload.isFullscreen;
+      });
     },
-    toggleFullscreen: (state) => {
-      state.isFullscreen = !state.isFullscreen;
+    toggleFullscreen: (
+      state,
+      action: TabAction<Pick<MetricsExperienceTabState, 'isFullscreen'>>
+    ) => {
+      return withTab(state, action, (tab) => {
+        tab.isFullscreen = !tab.isFullscreen;
+      });
     },
-    setDimensions: (state, action: PayloadAction<string[]>) => {
-      state.dimensions = action.payload;
-      // Reset to first page when search changes
-      state.currentPage = 0;
+    setDimensions: (state, action: TabAction<Pick<MetricsExperienceTabState, 'dimensions'>>) => {
+      return withTab(state, action, (tab) => {
+        tab.dimensions = action.payload.dimensions;
+        // Reset to first page when search changes
+        tab.currentPage = 0;
+      });
     },
-    setValueFilters: (state, action: PayloadAction<string[]>) => {
-      state.valueFilters = action.payload;
-      // Reset to first page when search changes
-      state.currentPage = 0;
+    setValueFilters: (
+      state,
+      action: TabAction<Pick<MetricsExperienceTabState, 'valueFilters'>>
+    ) => {
+      return withTab(state, action, (tab) => {
+        tab.valueFilters = action.payload.valueFilters;
+        // Reset to first page when search changes
+        tab.currentPage = 0;
+      });
     },
-    resetIndexPattern: () => initialState,
+    resetIndexPattern: (state, action: TabAction) => withTab(state, action, () => {}),
   },
 });
 
-export const {
-  setCurrentPage,
-  setSearchTerm,
-  resetCurrentPage,
-  setIsFullscreen,
-  toggleFullscreen,
-  setDimensions,
-  setValueFilters,
-  resetIndexPattern,
-} = metricsGridSlice.actions;
-
-// Selectors
-export const selectCurrentPage = (state: { metricsGrid: MetricsGridState }) =>
-  state.metricsGrid.currentPage;
-export const selectSearchTerm = (state: { metricsGrid: MetricsGridState }) =>
-  state.metricsGrid.searchTerm;
-export const selectIsFullscreen = (state: { metricsGrid: MetricsGridState }) =>
-  state.metricsGrid.isFullscreen;
-export const selectDimensions = (state: { metricsGrid: MetricsGridState }) =>
-  state.metricsGrid.dimensions;
-export const selectValueFilters = (state: { metricsGrid: MetricsGridState }) =>
-  state.metricsGrid.valueFilters;
+export const metricsGridActions = metricsGridSlice.actions;

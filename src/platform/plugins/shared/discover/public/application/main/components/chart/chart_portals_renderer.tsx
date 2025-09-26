@@ -268,6 +268,7 @@ const CustomChartSectionWrapper = ({
       renderToggleActions={renderCustomChartToggleActions}
       input$={input$}
       requestParams={requestParams}
+      tabId={currentTabId}
       {...unifiedHistogramProps}
     />
   );

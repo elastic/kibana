@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { Provider } from 'react-redux';
+import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import { store } from '../store';
+import { createReduxStore } from '../store';
 import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
+import { TabsProvider } from '../context/tabs';
+import { InternalStateProvider } from '../store/hooks';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,18 +31,21 @@ const queryClient = new QueryClient({
 export const UnifiedMetricsExperienceGrid = (
   props: ChartSectionProps & { client?: MetricsExperienceClient }
 ) => {
+  const [internalState] = useState(() => createReduxStore());
   if (!props.client) {
     return null;
   }
 
   return (
-    <MetricsExperienceProvider value={{ client: props.client }}>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <MetricsExperienceGrid {...props} />
-        </QueryClientProvider>
-      </Provider>
-    </MetricsExperienceProvider>
+    <TabsProvider tabId={props.tabId}>
+      <MetricsExperienceProvider value={{ client: props.client }}>
+        <InternalStateProvider store={internalState}>
+          <QueryClientProvider client={queryClient}>
+            <MetricsExperienceGrid {...props} />
+          </QueryClientProvider>
+        </InternalStateProvider>
+      </MetricsExperienceProvider>
+    </TabsProvider>
   );
 };
 

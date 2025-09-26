@@ -45,6 +45,7 @@ export const MetricsExperienceGrid = ({
   searchSessionId,
   requestParams,
   services,
+  tabId,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
 }: ChartSectionProps) => {

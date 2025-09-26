@@ -10,12 +10,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { metricsGridSlice } from './slices/metrics_grid_slice';
 
-export const store = configureStore({
-  reducer: {
-    metricsGrid: metricsGridSlice.reducer,
-  },
-  devTools: process.env.NODE_ENV !== 'production',
-});
+export const createReduxStore = () =>
+  configureStore({
+    reducer: {
+      metricsGrid: metricsGridSlice.reducer,
+    },
+    devTools: process.env.NODE_ENV !== 'production',
+  });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type InternalStateStore = ReturnType<typeof createReduxStore>;
+export type RootState = ReturnType<InternalStateStore['getState']>;
+export type AppDispatch = InternalStateStore['dispatch'];
