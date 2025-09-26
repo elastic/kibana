@@ -77,6 +77,4 @@ export interface StreamsAppStartDependencies {
 
 export interface StreamsAppPublicSetup {}
 
-export interface StreamsAppPublicStart {
-  createStreamsApplicationComponent: () => StreamsApplicationComponentType;
-}
+export interface StreamsAppPublicStart {}

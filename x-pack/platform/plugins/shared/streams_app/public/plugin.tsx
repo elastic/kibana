@@ -28,7 +28,6 @@ import type {
   StreamsAppPublicStart,
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies,
-  StreamsApplicationProps,
 } from './types';
 import type { StreamsAppServices } from './services/types';
 import {
@@ -174,32 +173,6 @@ export class StreamsAppPlugin
       });
     });
 
-    return {
-      createStreamsApplicationComponent: () => {
-        return ({ appMountParameters }: StreamsApplicationProps) => {
-          const services: StreamsAppServices = {
-            dataStreamsClient: new DataStreamsStatsService()
-              .start({ http: coreStart.http })
-              .getClient(),
-            telemetryClient: this.telemetry.getClient(),
-          };
-
-          // Trigger fetch to ensure the time filter has an up-to-date time range when the app mounts.
-          // This is done to ensure that dynamic time ranges (like "Last 15 minutes") are applied like they
-          // would be in discover or dashboards.
-          pluginsStart.data.query.timefilter.timefilter.triggerFetch();
-
-          return (
-            <StreamsApplication
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              services={services}
-              appMountParameters={appMountParameters}
-              isServerless={this.context.env.packageInfo.buildFlavor === 'serverless'}
-            />
-          );
-        };
-      },
-    };
+    return {};
   }
 }
