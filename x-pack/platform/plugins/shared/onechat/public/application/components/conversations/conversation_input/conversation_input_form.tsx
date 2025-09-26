@@ -14,6 +14,7 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { useIsAgentIdValid } from '../../../hooks/agents/use_is_agent_id_valid';
 import { ConversationInputActions } from './conversation_input_actions';
 
 interface ConversationInputFormProps {
@@ -29,12 +30,11 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const [input, setInput] = useState('');
   const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const { agents, isFetched } = useOnechatAgents();
+  const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();
+  const isAgentIdValid = useIsAgentIdValid();
 
-  // Find the current agent from the agents array
-  const currentAgent = agents?.find((agent) => agent.id === agentId);
-  const shouldDisableTextArea = !currentAgent && isFetched && !!agentId;
+  const shouldDisableTextArea = !isAgentIdValid(agentId) && isFetched && !!agentId;
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {

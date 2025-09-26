@@ -16,7 +16,7 @@ import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
-import { useOnechatAgents } from './agents/use_agents';
+import { useIsAgentIdValid } from './agents/use_is_agent_id_valid';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -51,13 +51,7 @@ export const useConversationStatus = () => {
 
 const useGetNewConversationAgentId = () => {
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
-  const { agents } = useOnechatAgents();
-  const isAgentIdValid = (agentId?: string): agentId is string => {
-    if (!agentId) {
-      return false;
-    }
-    return agents.some((agent) => agent.id === agentId);
-  };
+  const isAgentIdValid = useIsAgentIdValid();
 
   // Ensure we always return a string
   return (): string => {
