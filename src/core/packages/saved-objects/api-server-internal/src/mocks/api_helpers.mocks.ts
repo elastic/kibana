@@ -101,6 +101,7 @@ const createPreflightCheckHelperMock = (): PreflightCheckHelperMock => {
     preflightCheckForUpsertAliasConflict: jest.fn(),
     preflightGetDocForUpdate: jest.fn(),
     preflightCheckNamespacesForUpdate: jest.fn(),
+    accessControlPreflightCheck: jest.fn(),
   };
 
   return mock;

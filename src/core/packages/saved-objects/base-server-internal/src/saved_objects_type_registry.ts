@@ -66,7 +66,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
     validateType(type);
-    this.types.set(type.name, deepFreeze(typeWithAccessControl) as SavedObjectsType);
+
+    if (process.env.NODE_ENV !== 'production') {
+      deepFreeze(typeWithAccessControl);
+    }
+    this.types.set(type.name, typeWithAccessControl);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */

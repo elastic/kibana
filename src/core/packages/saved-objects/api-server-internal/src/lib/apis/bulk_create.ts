@@ -19,6 +19,7 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { Either } from './utils';
@@ -48,8 +49,12 @@ type ExpectedResult = Either<
   { type: string; id?: string; error: Payload },
   {
     method: 'index' | 'create';
-    object: SavedObjectsBulkCreateObject & { id: string };
+    object: Omit<SavedObjectsBulkCreateObject, 'accessControl'> & {
+      id: string;
+      accessControl?: SavedObjectAccessControl;
+    };
     preflightCheckIndex?: number;
+    accessControlPreflightIndex?: number;
   }
 >;
 
@@ -88,6 +93,7 @@ export const performBulkCreate = async <T>(
   const updatedBy = createdBy;
 
   let preflightCheckIndexCounter = 0;
+  let accessControlPreflightIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
 
@@ -107,22 +113,32 @@ export const performBulkCreate = async <T>(
     }
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
-    const accessMode = options.accessControl?.accessMode;
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
+    const paramsIncludeAccessControl =
+      !!object.accessControl?.accessMode || !!options.accessControl?.accessMode;
 
-    if (!typeSupportsAccessControl && accessMode) {
-      const error = SavedObjectsErrorHelpers.createBadRequestError(
-        `The "accessMode" field is not supported for saved objects of type "${type}".`
-      );
-      return left({ id: requestId, type, error: errorContent(error) });
+    if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
+      return left({
+        id,
+        type,
+        error: {
+          ...errorContent(
+            SavedObjectsErrorHelpers.createBadRequestError(
+              `Cannot create a saved object of type "${type}" with an access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+            )
+          ),
+        },
+      });
     }
 
-    if (!createdBy && accessMode === 'read_only') {
-      const error = SavedObjectsErrorHelpers.createBadRequestError(
-        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
-      );
-      return left({ id: requestId, type, error: errorContent(error) });
-    }
+    const accessMode =
+      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default'; // options.accessControl?.accessMode;
+
+    const accessControlToWrite = setAccessControl({
+      typeSupportsAccessControl,
+      createdBy,
+      accessMode,
+    });
 
     return right({
       method,
@@ -130,13 +146,13 @@ export const performBulkCreate = async <T>(
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
-        accessControl: setAccessControl({
-          typeSupportsAccessControl,
-          createdBy,
-          accessMode,
-        }),
+        accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
+      ...(overwrite &&
+        typeSupportsAccessControl && {
+          accessControlPreflightIndex: accessControlPreflightIndexCounter++,
+        }),
     }) as ExpectedResult;
   });
 
@@ -163,9 +179,35 @@ export const performBulkCreate = async <T>(
     preflightCheckObjects
   );
 
+  const accessControlPreflightObjects = validObjects
+    .filter(({ value }) => value.accessControlPreflightIndex !== undefined)
+    .map(({ value }) => {
+      const { type, id, initialNamespaces } = value.object;
+      const namespaces = initialNamespaces ?? [namespaceString];
+      return { type, id, overwrite, namespaces };
+    });
+  const accessControlPreflightResponse = await preflightHelper.accessControlPreflightCheck(
+    accessControlPreflightObjects,
+    namespace
+  );
+
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
-    const { object, preflightCheckIndex: index } = element.value;
-    const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+    const { object, preflightCheckIndex, accessControlPreflightIndex } = element.value;
+
+    const preflightResult =
+      preflightCheckIndex !== undefined ? preflightCheckResponse[preflightCheckIndex] : undefined;
+
+    const AccessControlPreflightResult =
+      accessControlPreflightIndex !== undefined
+        ? accessControlPreflightResponse?.body.docs[accessControlPreflightIndex]
+        : undefined;
+
+    // ToDo: replace this ts expect error
+    // @ts-expect-error MultiGetHit._source is optional
+    const existingAccessControl = AccessControlPreflightResult?._source?.accessControl;
+    if (existingAccessControl) {
+      object.accessControl = existingAccessControl as SavedObjectAccessControl;
+    }
 
     return {
       type: object.type,
@@ -173,6 +215,7 @@ export const performBulkCreate = async <T>(
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
+      ...(object.accessControl && { accessControl: object.accessControl }),
     };
   });
 
@@ -251,7 +294,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
-        accessControl: object.accessControl,
+        ...(object.accessControl && { accessControl: object.accessControl }),
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),

@@ -8,3 +8,4 @@
 import { ReadOnlyObjectsPlugin } from './plugin';
 
 export const plugin = async () => new ReadOnlyObjectsPlugin();
+export { READ_ONLY_TYPE, NON_READ_ONLY_TYPE } from './plugin';

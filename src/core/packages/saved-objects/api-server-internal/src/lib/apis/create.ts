@@ -119,11 +119,13 @@ export const performCreate = async <T>(
     );
   }
 
-  const accessControlToWrite = setAccessControl({
-    typeSupportsAccessControl,
-    createdBy,
-    accessMode,
-  });
+  const accessControlToWrite =
+    preflightResult?.existingDocument?._source?.accessControl ??
+    setAccessControl({
+      typeSupportsAccessControl,
+      createdBy,
+      accessMode,
+    });
 
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,

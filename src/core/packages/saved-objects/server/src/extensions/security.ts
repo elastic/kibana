@@ -157,6 +157,18 @@ export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithE
   objectNamespace?: string;
 }
 
+export interface AccessControlAuthorizeResult {
+  type: string;
+  id: string;
+  name?: string;
+  requiresManageAccessControl: boolean;
+}
+
+export interface GetTypesRequiringAccessControlCheckResult {
+  typesRequiringAccessControl: Set<string>;
+  results: AccessControlAuthorizeResult[];
+}
+
 /**
  * The MultiNamespaceReferencesOptions interface contains options
  * specific for authorizing CollectMultiNamespaceReferences actions.
@@ -470,6 +482,10 @@ export interface ISavedObjectsSecurityExtension {
     params: AuthorizeChangeAccessControlParams,
     operation: 'changeAccessMode' | 'changeOwnership'
   ) => Promise<CheckAuthorizationResult<A>>;
+
+  getTypesRequiringAccessControlCheck: (
+    objects: AuthorizeObject[]
+  ) => GetTypesRequiringAccessControlCheckResult;
 
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action

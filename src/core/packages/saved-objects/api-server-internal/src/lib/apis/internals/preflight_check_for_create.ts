@@ -75,6 +75,7 @@ export interface PreflightCheckForCreateResult {
     metadata?: {
       spacesWithConflictingAliases?: string[];
       isNotOverwritable?: boolean;
+      // requiresManageAccessControl?: boolean;
     };
   };
 }
@@ -261,7 +262,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId'],
+      _source: ['type', 'namespaces', 'originId', 'accessControl'],
     });
     if (checkAliases) {
       for (const space of spaces) {

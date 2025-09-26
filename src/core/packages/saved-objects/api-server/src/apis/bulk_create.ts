@@ -66,8 +66,10 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   managed?: boolean;
 
   /**
-   * Access control settings for the saved object.
-   * For write-restricted and editable saved objects
+   * The access control settings for the object
+   *
+   * We specifically exclude the owner property, as that is set during the operation
+   * using the current user's profile ID.
    */
-  accessControl?: SavedObjectAccessControl;
+  accessControl?: Pick<SavedObjectAccessControl, 'accessMode'>;
 }
