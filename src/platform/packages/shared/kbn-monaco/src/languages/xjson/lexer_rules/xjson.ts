@@ -100,7 +100,7 @@ export const buildXjsonRules = (root: string = 'root') => {
     string_literal: [
       [/"""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
       [/\\""""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
-      [/./, { token: 'multi_string' }],
+      [/./, { token: 'string' }],
     ],
   };
 };
@@ -117,10 +117,12 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [
     ['{', '}'],
     ['[', ']'],
+    ['"""', '"""'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
     { open: '"', close: '"' },
+    { open: '"""', close: '"""' },
   ],
 };

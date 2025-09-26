@@ -15,7 +15,7 @@ import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
-import { deserializeJson, serializeXJson } from '../../../../helpers';
+import {  serializeXJson } from '../../../../helpers';
 
 export const JsonEditor = () => {
   const {
@@ -26,12 +26,64 @@ export const JsonEditor = () => {
     rules: {
       validate: (value) => {
         if (typeof value === 'string') {
-          return i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
-            {
-              defaultMessage: 'Invalid JSON format',
+          try {
+            const tripleQuoteRegex = /"""(.*?)"""/gs;
+            const hasTripleQuotes = tripleQuoteRegex.test(value);
+            console.log('hasTripleQuotes', hasTripleQuotes);
+            let parsedValue;
+            console.log('value', value);
+            console.log('parsedValue', parsedValue);
+            if (hasTripleQuotes) {
+              let placeholder = 'PLACEHOLDER';
+              let testString: string = value;
+              while (testString.includes(placeholder)) {
+                placeholder += '_';
+              }
+              testString = testString.replace(tripleQuoteRegex, () => `"${placeholder}"`);
+              parsedValue = JSON.parse(testString);
+            } else {
+              parsedValue = JSON.parse(value);
             }
-          );
+            console.log('parsedValue2', parsedValue);
+
+            if (!Array.isArray(parsedValue)) {
+              return i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
+                {
+                  defaultMessage: 'Expected an array',
+                }
+              );
+            }
+
+            const invalidProcessor = parsedValue.find((processor) => {
+              const processorType = Object.keys(processor)[0];
+              return (
+                processorType &&
+                !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
+              );
+            });
+            console.log('invalidProcessor', invalidProcessor);
+            if (invalidProcessor) {
+              return i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
+                {
+                  defaultMessage: 'Invalid processor type: {processorType}',
+                  values: {
+                    processorType: Object.keys(invalidProcessor)[0],
+                  },
+                }
+              );
+            }
+
+            return undefined;
+          } catch (e) {
+            return i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
+              {
+                defaultMessage: 'Invalid JSON format',
+              }
+            );
+          }
         }
         if (!Array.isArray(value)) {
           return i18n.translate(
@@ -72,7 +124,35 @@ export const JsonEditor = () => {
 
   const handleChange = (newValue: string) => {
     setValue(newValue);
-    field.onChange(deserializeJson(newValue));
+
+    let parsedValue;
+    console.log('newValue', newValue);
+    try {
+      parsedValue = JSON.parse(newValue);
+    } catch (e) {
+      try {
+        const tripleQuoteRegex = /"""(.*?)"""/gs;
+        const hasTripleQuotes = tripleQuoteRegex.test(newValue);
+        console.log('hasTripleQuotes', hasTripleQuotes);
+        if (hasTripleQuotes) {
+          let placeholder = 'PLACEHOLDER';
+          let testString = newValue;
+          while (testString.includes(placeholder)) {
+            placeholder += '_';
+          }
+          testString = newValue.replace(tripleQuoteRegex, (match, content) => `"${content}"`);
+          parsedValue = JSON.parse(testString);
+          console.log('parsedValue', parsedValue);
+        } else {
+          parsedValue = newValue;
+        }
+      } catch (finalError) {
+        console.log('finalError', finalError);
+        parsedValue = newValue;
+      }
+    }
+
+    field.onChange(parsedValue);
   };
 
   return (
