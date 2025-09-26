@@ -145,6 +145,7 @@ export const createThreatSignals = async ({
       index: inputIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
       allow_partial_search_results: true,
+      ignore_unavailable: true,
     })
   ).id;
   const reassignSourcePitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
