@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export class DocumentNotFoundError extends Error {
+export class DocumentVersionConflictError extends Error {
   constructor() {
-    super(`Document not found`);
+    super(
+      `Attempted to update document while another document update was happening. Try again in a few seconds.`
+    );
   }
 }

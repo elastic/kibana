@@ -15,7 +15,7 @@ describe('generateOtelcolConfig', () => {
     is_default: true,
     is_default_monitoring: true,
     name: 'default',
-    id: 'default',
+    id: 'fleet-default-output',
     hosts: ['http://localhost:9200'],
   };
 
@@ -263,6 +263,59 @@ describe('generateOtelcolConfig', () => {
           metrics: {
             receivers: ['forward'],
             exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should use the output id when it is not the default', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+    expect(generateOtelcolConfig(inputs, { ...defaultOutput, is_default: false })).toEqual({
+      receivers: {
+        'httpcheck/test-1-stream-id-1': {
+          targets: [
+            {
+              endpoints: ['https://epr.elastic.co'],
+            },
+          ],
+        },
+      },
+      processors: {
+        'transform/test-1-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/test-1-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "testing")',
+              ],
+            },
+          ],
+        },
+      },
+      connectors: {
+        forward: {},
+      },
+      exporters: {
+        'elasticsearch/fleet-default-output': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/test-1-stream-id-1': {
+            receivers: ['httpcheck/test-1-stream-id-1'],
+            processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
+            exporters: ['forward'],
+          },
+          metrics: {
+            receivers: ['forward'],
+            exporters: ['elasticsearch/fleet-default-output'],
           },
         },
       },

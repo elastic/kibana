@@ -30,7 +30,7 @@ export function getSchemaAtPath(
   schema: z.ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
-) {
+): z.ZodType | null {
   try {
     const segments = parsePath(path);
     if (!segments) {
@@ -40,6 +40,9 @@ export function getSchemaAtPath(
     let current = schema;
 
     for (const segment of segments) {
+      if (current instanceof z.ZodOptional) {
+        current = current.unwrap();
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -77,9 +80,15 @@ export function getSchemaAtPath(
         current = current.element;
       } else if (current instanceof z.ZodAny) {
         return z.any();
+      } else if (current instanceof z.ZodUnknown) {
+        return z.unknown();
       } else {
         return null;
       }
+    }
+
+    if (current instanceof z.ZodOptional) {
+      return current.unwrap();
     }
 
     return current;
@@ -153,6 +162,8 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'any';
     case 'ZodNull':
       return 'null';
+    case 'ZodUnknown':
+      return 'unknown';
     default:
       return 'unknown';
   }
