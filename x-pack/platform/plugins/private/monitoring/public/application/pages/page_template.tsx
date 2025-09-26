@@ -135,9 +135,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         )}
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
         <EuiSpacer size="m" />
-        {shouldShowAutoOpsPromotion && (
-          <AutoOpsPromotionCallout />
-        )}
+        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout />}
         <EuiSpacer size="m" />
         {tabs && (
           <EuiTabs size="l">

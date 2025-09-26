@@ -71,10 +71,12 @@ export const ManagementLandingPage = ({
   return (
     <EuiPageBody restrictWidth={true}>
       {shouldShowAutoOpsPromotion && (
-        <div css={css`max-width: 600px;`}>
-          <AutoOpsPromotionCallout
-            style={{ margin: `0 ${euiTheme.size.base}` }}
-          />
+        <div
+          css={css`
+            max-width: 600px;
+          `}
+        >
+          <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.base}` }} />
         </div>
       )}
       <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />

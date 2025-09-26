@@ -121,9 +121,7 @@ export function NoData(props) {
         <EuiPageBody restrictWidth={600}>
           {Legacy.shims.hasEnterpriseLicense && (
             <>
-              <AutoOpsPromotionCallout
-                style={{ margin: `0 ${euiTheme.size.l}` }}
-              />
+              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
               <EuiSpacer size="m" />
             </>
           )}
@@ -172,9 +170,7 @@ export function NoData(props) {
       <EuiPageBody restrictWidth={600}>
         {Legacy.shims.hasEnterpriseLicense && (
           <>
-            <AutoOpsPromotionCallout
-              style={{ margin: `0 ${euiTheme.size.l}` }}
-            />
+            <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
             <EuiSpacer size="m" />
           </>
         )}

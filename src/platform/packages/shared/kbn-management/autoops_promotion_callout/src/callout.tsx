@@ -12,8 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
-export interface AutoOpsPromotionCalloutProps extends EuiCallOutProps {
-}
+export type AutoOpsPromotionCalloutProps = EuiCallOutProps;
 
 export const AutoOpsPromotionCallout = ({
   ...overrideCalloutProps
