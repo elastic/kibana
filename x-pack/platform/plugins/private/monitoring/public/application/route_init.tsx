@@ -44,7 +44,7 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
   // TODO: check for setupMode too when the setup mode is migrated
   if (loaded && !cluster && !inSetupMode) {
-    // return <Redirect to="/no-data" />;
+    return <Redirect to="/no-data" />;
   }
 
   if (loaded && cluster) {

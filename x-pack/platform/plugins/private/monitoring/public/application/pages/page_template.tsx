@@ -115,7 +115,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
 
   const { supported, enabled } = getSetupModeState();
   const shouldShowAutoOpsPromotion =
-    showAutoOpsPromotion && Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
+    showAutoOpsPromotion && !Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
 
   return (
     <EuiPageTemplate
@@ -136,10 +136,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
         <EuiSpacer size="m" />
         {shouldShowAutoOpsPromotion && (
-          <AutoOpsPromotionCallout
-            cloudBaseUrl={Legacy.shims.cloudBaseUrl}
-            docsLink="https://www.elastic.co/elastic-observability/"
-          />
+          <AutoOpsPromotionCallout />
         )}
         <EuiSpacer size="m" />
         {tabs && (

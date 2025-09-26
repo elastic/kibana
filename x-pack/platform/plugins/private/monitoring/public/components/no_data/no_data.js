@@ -75,16 +75,6 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
-          {Legacy.shims.hasEnterpriseLicense && (
-            <>
-              <AutoOpsPromotionCallout
-                cloudBaseUrl={Legacy.shims.cloudBaseUrl}
-                docsLink="https://www.elastic.co/guide/en/cloud/current/ec-cloud-autoops.html"
-                style={{ margin: `0 ${euiTheme.size.l}` }}
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             title={
@@ -129,6 +119,14 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
+          {Legacy.shims.hasEnterpriseLicense && (
+            <>
+              <AutoOpsPromotionCallout
+                style={{ margin: `0 ${euiTheme.size.l}` }}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             body={
@@ -172,6 +170,14 @@ export function NoData(props) {
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
+        {Legacy.shims.hasEnterpriseLicense && (
+          <>
+            <AutoOpsPromotionCallout
+              style={{ margin: `0 ${euiTheme.size.l}` }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiIcon type="monitoringApp" size="xxl" />}
           title={

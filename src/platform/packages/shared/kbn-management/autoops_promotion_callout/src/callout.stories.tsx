@@ -16,12 +16,6 @@ export default {
   description: '',
 };
 
-export const DeleteManagedAssetsCallout = () => {
-  return <Component cloudBaseUrl="https://cloud-ui.com/auto_ops" />;
-};
-
-export const ErrorDeleteManagedAssetsCallout = () => {
-  return (
-    <Component cloudBaseUrl="https://cloud-ui.com/auto_ops" docsLink="https://docs.com/auto_ops" />
-  );
+export const AutoOpsPromotionCallout = () => {
+  return <Component />;
 };

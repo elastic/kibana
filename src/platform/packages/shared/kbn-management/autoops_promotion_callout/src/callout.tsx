@@ -7,41 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 export interface AutoOpsPromotionCalloutProps extends EuiCallOutProps {
-  cloudBaseUrl?: string;
-  docsLink?: string;
 }
 
 export const AutoOpsPromotionCallout = ({
-  cloudBaseUrl,
-  docsLink,
   ...overrideCalloutProps
 }: AutoOpsPromotionCalloutProps) => {
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+  };
+
+  if (isDismissed) {
+    return null;
+  }
+
   return (
     <EuiCallOut
       title={
         <FormattedMessage
           id="management.autoOpsPromotionCallout.title"
-          defaultMessage="This cluster is connected to AutoOps, our advanced cluster monitoring"
+          defaultMessage="New! Connect AutoOps to this self-managed cluster"
         />
       }
       color="accent"
       iconType="alert"
       data-test-subj="autoOpsPromotionCallout"
+      onDismiss={handleDismiss}
       {...overrideCalloutProps}
     >
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Simplify cluster management with insights tailored to your Elasticsearch operations and configuration. {learnMoreLink}"
+          defaultMessage="Connect this cluster to Elastic Cloud to get real-time issue detection, resolution paths, and enable Elastic Support to use AutoOps to assist you better. {learnMoreLink}"
           values={{
-            learnMoreLink: docsLink && (
-              <a href={docsLink} target="_blank" rel="noopener noreferrer">
+            learnMoreLink: (
+              <a href="#learn_more_link" target="_blank" rel="noopener noreferrer">
                 <FormattedMessage
                   id="management.autoOpsPromotionCallout.learnMore"
                   defaultMessage="Learn more"
@@ -51,21 +58,19 @@ export const AutoOpsPromotionCallout = ({
           }}
         />
       </p>
-      {cloudBaseUrl && (
-        <EuiButton
-          color="accent"
-          fill
-          size="s"
-          href={`${cloudBaseUrl || ''}/connect-cluster-services-portal`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FormattedMessage
-            id="management.autoOpsPromotionCallout.openButton"
-            defaultMessage="Open AutoOps"
-          />
-        </EuiButton>
-      )}
+      <EuiButton
+        color="accent"
+        fill
+        size="s"
+        href="https://cloud.elastic.co/connect-cluster-services-portal"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FormattedMessage
+          id="management.autoOpsPromotionCallout.openButton"
+          defaultMessage="Connect this cluster"
+        />
+      </EuiButton>
     </EuiCallOut>
   );
 };

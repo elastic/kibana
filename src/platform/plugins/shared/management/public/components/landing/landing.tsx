@@ -42,7 +42,8 @@ export const ManagementLandingPage = ({
 
   // Check if cloud services are available
   const isCloudEnabled = cloud?.isCloudEnabled || false;
-  const cloudBaseUrl = cloud?.baseUrl;
+  // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
+  const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
 
   useEffect(() => {
     onAppMounted('');
@@ -69,15 +70,9 @@ export const ManagementLandingPage = ({
 
   return (
     <EuiPageBody restrictWidth={true}>
-      {isCloudEnabled && hasEnterpriseLicense && (
-        <div
-          css={css`
-            max-width: 600px;
-          `}
-        >
+      {shouldShowAutoOpsPromotion && (
+        <div css={css`max-width: 600px;`}>
           <AutoOpsPromotionCallout
-            cloudBaseUrl={cloudBaseUrl}
-            docsLink="https://www.elastic.co/guide/en/cloud/current/ec-cloud-autoops.html"
             style={{ margin: `0 ${euiTheme.size.base}` }}
           />
         </div>
