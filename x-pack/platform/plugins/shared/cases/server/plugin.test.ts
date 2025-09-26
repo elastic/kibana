@@ -30,6 +30,7 @@ function getConfig(overrides = {}) {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     analytics: { index: { enabled: true } },
+    resilient: { additionalFields: { enabled: true } },
     ...overrides,
   };
 }
