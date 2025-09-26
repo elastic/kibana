@@ -190,10 +190,14 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
+        let overrides = INTERNAL_OVERRIDE_FIELDS[newProvider.service];
+        if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
+          overrides = undefined;
+        }
         const newProviderSchema: ConfigEntryView[] = mapProviderFields(
           taskType,
           newProvider,
-          enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+          overrides
         );
         setProviderSchema(newProviderSchema);
       }
@@ -246,12 +250,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
 
+      let overrides = INTERNAL_OVERRIDE_FIELDS[newProvider?.service ?? ''];
+      if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
+        overrides = undefined;
+      }
+
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(
-            newProvider.task_types[0],
-            newProvider,
-            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
-          )
+        ? mapProviderFields(newProvider.task_types[0], newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -414,12 +419,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
       // Update connector providerSchema
 
+      let overrides = INTERNAL_OVERRIDE_FIELDS[newProvider?.service ?? ''];
+      if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
+        overrides = undefined;
+      }
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(
-            config.taskType,
-            newProvider,
-            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
-          )
+        ? mapProviderFields(config.taskType, newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
