@@ -98,6 +98,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                     </p>
                     {migrationStats.last_execution?.total_execution_time_ms && (
                       <TotalExecutionTime
+                        migrationType="rule"
                         milliseconds={migrationStats.last_execution.total_execution_time_ms}
                       />
                     )}

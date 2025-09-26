@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiText, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DurationFormat } from '@kbn/field-formats-plugin/common';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import * as i18n from './translations';
 
 const getDurationFomatter = () => {
@@ -20,10 +21,23 @@ const getDurationFomatter = () => {
   });
 };
 
-export const TotalExecutionTime: React.FC<{ milliseconds: number }> = ({ milliseconds }) => {
+interface TotalExecutionTimeProps {
+  migrationType: MigrationType;
+  milliseconds: number;
+}
+
+export const TotalExecutionTime: React.FC<TotalExecutionTimeProps> = ({
+  milliseconds,
+  migrationType,
+}) => {
   const humanizedDuration = useMemo(() => {
     return getDurationFomatter().convert(milliseconds);
   }, [milliseconds]);
+
+  const toolTipContent = useMemo(
+    () => i18n.TOTAL_EXECUTION_TIME_TOOLTIP(migrationType === 'rule' ? 'rules' : 'dashboards'),
+    [migrationType]
+  );
 
   return (
     <EuiFlexGroup
@@ -35,10 +49,10 @@ export const TotalExecutionTime: React.FC<{ milliseconds: number }> = ({ millise
     >
       <EuiFlexItem grow={false}>
         <EuiIconTip
-          aria-label={i18n.TOTAL_EXECUTION_TIME_TOOLTIP}
+          aria-label={toolTipContent}
           type="info"
           size="m"
-          content={i18n.TOTAL_EXECUTION_TIME_TOOLTIP}
+          content={toolTipContent}
           color="warning"
         />
       </EuiFlexItem>

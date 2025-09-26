@@ -85,6 +85,7 @@ export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResult
                     </p>
                     {migrationStats.last_execution?.total_execution_time_ms && (
                       <TotalExecutionTime
+                        migrationType="dashboard"
                         milliseconds={migrationStats.last_execution.total_execution_time_ms}
                       />
                     )}
