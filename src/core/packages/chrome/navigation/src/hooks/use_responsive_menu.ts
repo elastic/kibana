@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefObject } from 'react';
+import type { MutableRefObject } from 'react';
 import { useCallback, useRef, useState, useLayoutEffect } from 'react';
 
 import type { MenuItem } from '../../types';
@@ -22,7 +22,11 @@ import { getStyleProperty } from '../utils/get_style_property';
  * @param menu - The menu element.
  * @param items - The menu items.
  */
-const cacheHeights = (ref: RefObject<number[]>, menu: HTMLElement, items: MenuItem[]): void => {
+const cacheHeights = (
+  ref: MutableRefObject<number[]>,
+  menu: HTMLElement,
+  items: MenuItem[]
+): void => {
   if (ref.current?.length !== items.length) {
     const children: Element[] = Array.from(menu.children);
 
@@ -77,7 +81,7 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
 };
 
 interface ResponsiveMenuState {
-  primaryMenuRef: RefObject<HTMLElement>;
+  primaryMenuRef: MutableRefObject<HTMLElement | null>;
   visibleMenuItems: MenuItem[];
   overflowMenuItems: MenuItem[];
 }
@@ -89,7 +93,7 @@ interface ResponsiveMenuState {
  * @returns Object with menu ref and partitioned menu items
  */
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
-  const primaryMenuRef = useRef<HTMLElement>(null);
+  const primaryMenuRef = useRef<HTMLElement | null>(null);
   const heightsCacheRef = useRef<number[]>([]);
 
   const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>(items);
