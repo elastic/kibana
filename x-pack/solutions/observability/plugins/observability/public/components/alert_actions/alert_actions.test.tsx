@@ -68,8 +68,8 @@ const config: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
-    managedOtlpServiceUrl: '',
   },
+  managedOtlpServiceUrl: '',
 };
 
 const getFormatterMock = jest.fn();

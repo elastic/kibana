@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
-  const securitySolutionApi = providerContext.getService('securitySolutionApi');
+  const entityAnalyticsApi = providerContext.getService('entityAnalyticsApi');
 
   describe('@ess CRUD API - Upsert', () => {
     describe('upsert user', () => {
@@ -78,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         log.info('Calling upsert api...');
-        const { statusCode } = await securitySolutionApi.upsertEntity({
+        const { statusCode } = await entityAnalyticsApi.upsertEntity({
           params: {
             entityType: 'user',
           },
