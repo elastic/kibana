@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import {
+  coreFeatureFlagsMock,
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
@@ -293,6 +294,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
   rollupsEnabled: true,
 });
 

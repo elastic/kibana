@@ -9,6 +9,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
+  coreFeatureFlagsMock,
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
@@ -311,6 +312,7 @@ const createSearchStrategyDependenciesMock = () => ({
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
