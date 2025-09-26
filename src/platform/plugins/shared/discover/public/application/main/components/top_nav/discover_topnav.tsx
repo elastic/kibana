@@ -241,7 +241,6 @@ export const DiscoverTopNav = ({
     <span css={floatingActionStyles}>
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
-        {...topNavProps}
         useBackgroundSearchButton={
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
