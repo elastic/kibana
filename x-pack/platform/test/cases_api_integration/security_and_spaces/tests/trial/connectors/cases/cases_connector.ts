@@ -1927,6 +1927,7 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      total_events: 0,
       observables: [],
       incremental_id: undefined,
     },
