@@ -37,6 +37,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
   DashboardMigrationTaskOutput
 > {
   private retriever: DashboardMigrationsRetriever;
+  protected readonly taskConcurrency = 3;
 
   constructor(
     public readonly migrationId: string,
@@ -62,6 +63,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
+
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new DashboardMigrationTelemetryClient(

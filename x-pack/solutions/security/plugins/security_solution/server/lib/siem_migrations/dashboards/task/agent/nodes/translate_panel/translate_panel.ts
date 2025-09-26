@@ -6,6 +6,7 @@
  */
 
 import { Send } from '@langchain/langgraph';
+import { isRateLimitError } from '../../../../../common/task/util/is_rate_limiting';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
@@ -21,6 +22,9 @@ export type TranslatePanelNode = ((
 ) => Promise<Partial<MigrateDashboardState>>) & {
   subgraph?: ReturnType<typeof getTranslatePanelGraph>;
 };
+
+/** Number of panels to be processed concurrently per dashboard */
+const DEFAULT_PANELS_CONCURRENCY = 4;
 
 export interface TranslatePanel {
   node: TranslatePanelNode;
@@ -41,7 +45,9 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         }
 
         // Invoke the subgraph to translate the panel
-        const output = await translatePanelSubGraph.invoke(nodeParams);
+        const output = await translatePanelSubGraph.invoke(nodeParams, {
+          maxConcurrency: DEFAULT_PANELS_CONCURRENCY,
+        });
 
         if (!output.elastic_panel) {
           throw new Error('No panel visualization generated');
@@ -54,7 +60,12 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           comments: output.comments,
         };
       } catch (err) {
-        params.logger.error(`Error translating panel: ${err}`);
+        params.logger.error(
+          `Error translating dashboards :${nodeParams.dashboard_description} | panel ${nodeParams.parsed_panel.title}: ${err}`
+        );
+        if (isRateLimitError(err)) {
+          throw err;
+        }
         const message = `Error translating panel: ${err.toString()}`;
         translatedPanel = {
           index,

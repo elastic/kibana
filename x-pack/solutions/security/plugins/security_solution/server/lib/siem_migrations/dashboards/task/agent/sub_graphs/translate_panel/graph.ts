@@ -17,6 +17,7 @@ import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
+import { RETRY_POLICY } from '../../constant';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);
@@ -32,11 +33,21 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     migrateDashboardConfigSchema
   )
     // Nodes
-    .addNode('inlineQuery', inlineQueryNode)
-    .addNode('translateQuery', translateQueryNode)
-    .addNode('validation', validationNode)
-    .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('ecsMapping', ecsMappingNode)
+    .addNode('inlineQuery', inlineQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('translateQuery', translateQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('validation', validationNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('fixQueryErrors', fixQueryErrorsNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('ecsMapping', ecsMappingNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translationResult', translationResultNode)
 

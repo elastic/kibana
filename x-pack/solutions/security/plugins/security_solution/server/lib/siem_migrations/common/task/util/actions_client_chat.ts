@@ -32,23 +32,27 @@ export class ActionsClientChat {
   }: CreateModelParams): Promise<ChatModel> {
     const { inferenceService } = this.dependencies;
 
-    return inferenceService.getChatModel({
-      request: this.request,
-      connectorId,
-      chatModelOptions: {
-        // not passing specific `model`, we'll always use the connector default model
-        // temperature may need to be parametrized in the future
-        temperature: 0.05,
-        // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
-        maxRetries: 1,
-        // Disable streaming explicitly
-        disableStreaming: true,
-        // Set a hard limit of 50 concurrent requests
-        maxConcurrency: 50,
-        telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
-        signal: abortController.signal,
-      },
-    });
+    try {
+      return inferenceService.getChatModel({
+        request: this.request,
+        connectorId,
+        chatModelOptions: {
+          // not passing specific `model`, we'll always use the connector default model
+          // temperature may need to be parametrized in the future
+          temperature: 0.05,
+          // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+          maxRetries: 1,
+          // Disable streaming explicitly
+          disableStreaming: true,
+          // Set a hard limit of 50 concurrent requests
+          maxConcurrency: 50,
+          telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
+          signal: abortController.signal,
+        },
+      });
+    } catch (error) {
+      throw new Error(`\n\n\nFailed to create model from connector ${connectorId}: ${error}`);
+    }
   }
 
   public getModelName(model: ChatModel): string | undefined {

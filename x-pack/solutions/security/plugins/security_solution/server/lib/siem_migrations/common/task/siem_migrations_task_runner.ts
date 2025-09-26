@@ -22,21 +22,12 @@ import type {
 } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import type { SiemMigrationTelemetryClient } from './siem_migrations_telemetry_client';
+import { RETRY_CONFIG } from '../constants';
 
-/** Number of concurrent item translations in the pool */
-const TASK_CONCURRENCY = 10 as const;
 /** Number of items loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
 /** The timeout of each individual agent invocation in minutes */
 const AGENT_INVOKE_TIMEOUT_MIN = 3 as const;
-
-/** Exponential backoff configuration to handle rate limit errors */
-const RETRY_CONFIG = {
-  initialRetryDelaySeconds: 1,
-  backoffMultiplier: 2,
-  maxRetries: 8,
-  // max waiting time 4m15s (1*2^8 = 256s)
-} as const;
 
 /** Executor sleep configuration
  * A sleep time applied at the beginning of each single item translation in the execution pool,
@@ -51,7 +42,7 @@ const EXECUTOR_SLEEP = {
 
 /** This limit should never be reached, it's a safety net to prevent infinite loops.
  * It represents the max number of consecutive rate limit recovery & failure attempts.
- * This can only happen when the API can not process TASK_CONCURRENCY translations at a time,
+ * This can only happen when the API can not process all concurrenct translations ( based on taskConcurrency ) at a time,
  * even after the executor sleep is increased on every attempt.
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
@@ -78,6 +69,8 @@ export abstract class SiemMigrationTaskRunner<
   private abort: ReturnType<typeof abortSignalToPromise>;
   private executorSleepMultiplier: number = EXECUTOR_SLEEP.initialValueSeconds;
   public isWaiting: boolean = false;
+  /** Number of concurrent items to process. Each item triggers one instance of graph */
+  protected abstract readonly taskConcurrency: number;
 
   constructor(
     public readonly migrationId: string,
@@ -124,7 +117,7 @@ export abstract class SiemMigrationTaskRunner<
     }
 
     const migrateItemTask = this.createMigrateItemTask(invocationConfig);
-    this.logger.debug(`Started translations. Concurrency is: ${TASK_CONCURRENCY}`);
+    this.logger.debug(`Started translations. Concurrency is: ${this.taskConcurrency}`);
 
     try {
       do {
@@ -139,7 +132,7 @@ export abstract class SiemMigrationTaskRunner<
         this.logger.debug(`Start processing batch of ${migrationItems.length} items`);
 
         const { errors } = await initPromisePool<Stored<I>, void, Error>({
-          concurrency: TASK_CONCURRENCY,
+          concurrency: this.taskConcurrency,
           abortSignal: this.abortController.signal,
           items: migrationItems,
           executor: async (migrationItem) => {
@@ -207,6 +200,10 @@ export abstract class SiemMigrationTaskRunner<
     const config: RunnableConfig<C> = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
       ...invocationConfig,
+      metadata: {
+        migrationId: this.migrationId,
+        concurrency: this.taskConcurrency,
+      },
       signal: this.abortController.signal,
     };
 
@@ -226,15 +223,16 @@ export abstract class SiemMigrationTaskRunner<
           );
           return result;
         } catch (error) {
+          this.logger.warn(`Error during rate limit backoff: ${error.toString()}`);
           if (!this.isRateLimitError(error) || retriesLeft === 0) {
             const logMessage =
               retriesLeft === 0
                 ? `Rate limit backoff completed unsuccessfully`
                 : `Rate limit backoff interrupted. ${error} `;
-            this.logger.debug(logMessage);
+            this.logger.warn(logMessage);
             throw error;
           }
-          this.logger.debug(`Rate limit backoff not completed, retries left: ${retriesLeft}`);
+          this.logger.warn(`Rate limit backoff not completed, retries left: ${retriesLeft}`);
         }
       }
     };
@@ -251,6 +249,7 @@ export abstract class SiemMigrationTaskRunner<
           await this.executorSleep(); // Random sleep, increased every time we hit the rate limit.
           return await invoke();
         } catch (error) {
+          this.logger.warn(`Error during migration item translation: ${error.toString()}`);
           if (!this.isRateLimitError(error) || recoverAttemptsLeft === 0) {
             throw error;
           }
