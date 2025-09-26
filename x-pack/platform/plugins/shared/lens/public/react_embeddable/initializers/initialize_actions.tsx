@@ -31,7 +31,7 @@ import type {
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
+  LensSerializedAPIConfig,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
 } from '../types';
@@ -246,7 +246,7 @@ export function initializeActionApi(
   getComparators: () => StateComparators<DynamicActionsSerializedState>;
   getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 } {
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
@@ -271,7 +271,7 @@ export function initializeActionApi(
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };

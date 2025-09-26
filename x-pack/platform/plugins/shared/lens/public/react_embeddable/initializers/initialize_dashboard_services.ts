@@ -12,12 +12,13 @@ import type {
   SerializedTitles,
   StateComparators,
   initializeTitleManager,
+  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -28,6 +29,8 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
+  LensSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
   LensSerializedState,
 } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -58,12 +61,12 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 /**
@@ -132,11 +135,17 @@ export function initializeDashboardServices(
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        const saveState = attributeService.extractReferences(
+          currentState
+        ) as unknown as SerializedPanelState<LensByRefSerializedAPIConfig>;
+        return saveState;
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        const saveState = attributeService.extractReferences(
+          byValueRuntimeState
+        ) as unknown as SerializedPanelState<LensSerializedState>;
+        return transformOutputState(saveState);
       },
     },
     anyStateChange$: merge(
@@ -165,7 +174,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
       internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
       internalApi.updateOverrides(lastSaved?.overrides);

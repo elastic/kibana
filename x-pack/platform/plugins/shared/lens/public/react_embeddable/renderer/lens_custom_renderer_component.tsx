@@ -10,7 +10,12 @@ import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type { LensApi, LensRendererProps, LensSerializedState } from '../types';
+import type {
+  LensApi,
+  LensRendererProps,
+  LensSerializedAPIConfig,
+  LensSerializedState,
+} from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 
@@ -138,7 +143,7 @@ export function LensRenderer({
   }, [showInspector, withDefaultActions, extraActions, lensApi]);
 
   return (
-    <EmbeddableRenderer<LensSerializedState, LensApi>
+    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       // TODO type this ParentApi, all these are untyped and some unused
