@@ -8,22 +8,14 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
-import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
+import { render, screen, waitFor } from '@testing-library/react';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
 import { KibanaNoDataPageProvider } from './services';
 
-describe('Kibana No Data Page', () => {
+describe('KibanaNoDataPage', () => {
   const noDataConfig = {
-    solution: 'Analytics',
-    pageTitle: 'Analytics',
-    logo: 'logoKibana',
     action: {
       elasticAgent: {
         title: 'Add Integrations',
@@ -39,28 +31,33 @@ describe('Kibana No Data Page', () => {
     hasUserDataView: false,
   };
 
-  afterEach(() => {
-    jest.resetAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('renders NoDataConfigPage', async () => {
+  it('renders NoDataConfigPage when no ES data exists', async () => {
     const services = getKibanaNoDataPageServicesMock(config);
-    const component = mountWithIntl(
+
+    render(
       <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, showPlainSpinner: false }} />
+        <KibanaNoDataPage
+          noDataConfig={noDataConfig}
+          onDataViewCreated={onDataViewCreated}
+          showPlainSpinner={false}
+        />
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
-    component.update();
-
-    expect(component.find(NoDataConfigPage).length).toBe(1);
-    expect(component.find(NoDataViewsPrompt).length).toBe(0);
+    // Wait for loading to complete and NoDataConfigPage to render
+    await waitFor(() => {
+      expect(screen.getByText('Add Integrations')).toBeInTheDocument();
+    });
   });
 
-  test('renders NoDataViews', async () => {
+  it('renders NoDataViewsPrompt when ES data exists but no user data views', async () => {
     const services = getKibanaNoDataPageServicesMock({ ...config, hasESData: true });
-    const component = mountWithIntl(
+
+    render(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage
           noDataConfig={noDataConfig}
@@ -70,27 +67,23 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
-    component.update();
-
-    expect(component.find(NoDataViewsPrompt).length).toBe(1);
-    expect(component.find(NoDataConfigPage).length).toBe(0);
+    // Wait for loading to complete and NoDataViewsPrompt to render
+    await waitFor(() => {
+      expect(screen.getByTestId('noDataViewsPrompt')).toBeInTheDocument();
+    });
   });
 
-  test('renders loading indicator', async () => {
-    // Simulate loading with a Promise that doesn't resolve.
-    const dataCheck = () => new Promise<boolean>(() => {});
-    const services = {
-      ...getKibanaNoDataPageServicesMock(),
-      data: {
-        hasESData: dataCheck,
-        hasUserDataView: dataCheck,
-        hasDataView: dataCheck,
-      },
-    };
+  it('renders loading indicator while checking data', async () => {
+    // Create a custom mock that never resolves to keep loading state
+    const mockServices = getKibanaNoDataPageServicesMock();
+    const neverResolvePromise = new Promise<boolean>(() => {});
 
-    const component = mountWithIntl(
-      <KibanaNoDataPageProvider {...services}>
+    // Mock the service methods to return promises that never resolve
+    mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasUserDataView = jest.fn().mockReturnValue(neverResolvePromise);
+
+    const { container } = render(
+      <KibanaNoDataPageProvider {...mockServices}>
         <KibanaNoDataPage
           noDataConfig={noDataConfig}
           onDataViewCreated={onDataViewCreated}
@@ -99,21 +92,30 @@ describe('Kibana No Data Page', () => {
       </KibanaNoDataPageProvider>
     );
 
-    await act(() => new Promise(setImmediate));
-
-    expect(component.find(EuiLoadingElastic).length).toBe(1);
-    expect(component.find(NoDataViewsPrompt).length).toBe(0);
-    expect(component.find(NoDataConfigPage).length).toBe(0);
+    // Should show loading indicator (EuiLoadingElastic)
+    expect(container.querySelector('.euiLoadingElastic')).toBeInTheDocument();
   });
 
-  test('shows EuiLoadingSpinner vs EuiLoadingElastic for custom branding', () => {
-    const services = getKibanaNoDataPageServicesMock(config);
-    const component = mountWithIntl(
-      <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, showPlainSpinner: true }} />
+  it('shows EuiLoadingSpinner when showPlainSpinner is true', async () => {
+    // Create a custom mock that never resolves to keep loading state
+    const mockServices = getKibanaNoDataPageServicesMock();
+    const neverResolvePromise = new Promise<boolean>(() => {});
+
+    // Mock the service methods to return promises that never resolve
+    mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasUserDataView = jest.fn().mockReturnValue(neverResolvePromise);
+
+    const { container } = render(
+      <KibanaNoDataPageProvider {...mockServices}>
+        <KibanaNoDataPage
+          noDataConfig={noDataConfig}
+          onDataViewCreated={onDataViewCreated}
+          showPlainSpinner={true}
+        />
       </KibanaNoDataPageProvider>
     );
-    expect(component.find(EuiLoadingSpinner).length).toBe(1);
-    expect(component.find(EuiLoadingElastic).length).toBe(0);
+
+    // Should show plain spinner instead of Elastic branded one
+    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 });

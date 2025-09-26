@@ -118,6 +118,12 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       iconType="plusInCircle"
       onClick={togglePopover}
       disabled={!canAddStep}
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.createStepButtonInlineAriaLabel',
+        {
+          defaultMessage: 'Create nested step',
+        }
+      )}
     />
   );
 

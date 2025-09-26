@@ -15,6 +15,7 @@ export const ConnectedNodesList = ({ children }: PropsWithChildren) => {
 
   return (
     <ul
+      data-test-subj="streamsAppStreamDetailEnrichmentConnectedNodesList"
       css={css`
         position: relative;
 

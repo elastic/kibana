@@ -36,7 +36,8 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
-import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -83,6 +84,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -110,8 +112,8 @@ export function StreamDetailEnrichmentContentImpl() {
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={detectedFields}
-            stream={definition.stream.name}
-            storedFields={[]}
+            definition={definition}
+            storedFields={definitionFields}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}
           />
@@ -162,7 +164,11 @@ export function StreamDetailEnrichmentContentImpl() {
       {hasChanges && (
         <ManagementBottomBar
           onCancel={resetChanges}
-          onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
+          onConfirm={
+            detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
+              ? openConfirmationModal
+              : saveChanges
+          }
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}

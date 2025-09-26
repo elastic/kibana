@@ -78,14 +78,18 @@ export function IlmSummary({
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-        <EuiText>
-          <h5>
-            {i18n.translate('xpack.streams.streamDetailLifecycle.ilmDataTiers', {
-              defaultMessage: 'ILM policy data tiers',
-            })}
-          </h5>
-        </EuiText>
-        {loading && <EuiLoadingSpinner size="s" />}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h5>
+                {i18n.translate('xpack.streams.streamDetailLifecycle.ilmDataTiers', {
+                  defaultMessage: 'ILM policy data tiers',
+                })}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{loading && <EuiLoadingSpinner size="s" />}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
