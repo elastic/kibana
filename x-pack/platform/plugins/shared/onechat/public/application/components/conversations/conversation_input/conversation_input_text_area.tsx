@@ -35,7 +35,7 @@ interface ConversationInputTextAreaProps {
   input: string;
   setInput: (input: string) => void;
   onSubmit: () => void;
-  shouldDisableTextArea: boolean;
+  disabled: boolean;
   agentId?: string;
 }
 
@@ -43,7 +43,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   input,
   setInput,
   onSubmit,
-  shouldDisableTextArea,
+  disabled,
   agentId,
 }) => {
   const conversationId = useConversationId();
@@ -86,7 +86,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
           }
         }}
         placeholder={
-          shouldDisableTextArea
+          disabled
             ? disabledPlaceholder
             : i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
                 defaultMessage: 'Ask anything',
@@ -96,7 +96,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
         inputRef={textAreaRef}
         fullWidth
         resize="none"
-        disabled={shouldDisableTextArea}
+        disabled={disabled}
       />
     </EuiFlexItem>
   );

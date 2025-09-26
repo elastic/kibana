@@ -35,7 +35,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const isAgentIdValid = useIsAgentIdValid();
 
   const shouldDisableTextArea = !isAgentIdValid(agentId) && isFetched && !!agentId;
-  const isSubmitDisabled = !input.trim() || isSendingMessage;
+  const isSubmitDisabled = !input.trim() || isSendingMessage || !isAgentIdValid(agentId);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -79,7 +79,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
         input={input}
         setInput={setInput}
         onSubmit={handleSubmit}
-        shouldDisableTextArea={shouldDisableTextArea}
+        disabled={shouldDisableTextArea}
         agentId={agentId}
       />
       {!shouldDisableTextArea && (
