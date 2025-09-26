@@ -356,7 +356,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -592,7 +592,7 @@
             "CustomFieldTypes",
             ".TOGGLE; value: boolean | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -2126,7 +2126,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2338,7 +2338,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; settings?: { syncAlerts: boolean; } | undefined; } & { status?: ",
+          ".NUMBER; value: number | null; })[] | undefined; settings?: ({ syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }) | undefined; } & { status?: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2425,7 +2425,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2532,7 +2532,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2791,7 +2791,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2988,7 +2988,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; extractObservables?: boolean | undefined; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3206,7 +3206,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; extractObservables?: boolean | undefined; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3648,7 +3648,7 @@
         "label": "UserActionFindResponse",
         "description": [],
         "signature": [
-          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts: boolean; }; }; } | { type: \"status\"; payload: { status: ",
+          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; }; } | { type: \"status\"; payload: { status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3830,7 +3830,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",

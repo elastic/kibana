@@ -40,10 +40,10 @@ export const KibanaNoDataPage = ({
       setHasUserDataViews(await hasUserDataView());
       setIsLoading(false);
     };
-    // TODO: add error handling
-    // https://github.com/elastic/kibana/issues/130913
-    checkData().catch(() => {
+    checkData().catch((e) => {
       setIsLoading(false);
+      // eslint-disable-next-line no-console
+      console.error(e);
     });
   }, [hasESData, hasUserDataView]);
 
