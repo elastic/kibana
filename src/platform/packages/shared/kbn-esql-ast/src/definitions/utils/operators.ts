@@ -8,9 +8,9 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
@@ -34,7 +34,7 @@ import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
-  return {
+  const suggestion: ISuggestionItem = {
     label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
@@ -44,8 +44,8 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
       value: '',
     },
     sortText: 'D',
-    command: hasArgs ? TRIGGER_SUGGESTION_COMMAND : undefined,
   };
+  return hasArgs ? withAutoSuggest(suggestion) : suggestion;
 }
 
 /**
