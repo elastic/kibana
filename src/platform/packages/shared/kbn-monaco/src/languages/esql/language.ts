@@ -10,13 +10,17 @@
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
-import { suggest, validateQuery, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
+import {
+  suggest,
+  validateQuery,
+  getHoverItem,
+  type ESQLCallbacks,
+} from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { getHoverItem } from './lib/hover/hover';
 import { monacoPositionToOffset } from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
 
@@ -72,7 +76,9 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
         position: monaco.Position,
         token: monaco.CancellationToken
       ) {
-        return getHoverItem(model, position, callbacks);
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        return getHoverItem(fullText, offset, callbacks);
       },
     };
   },
