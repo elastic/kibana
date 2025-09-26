@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createBoundingClientRectMock = (height: number) =>
-  jest.fn(() => ({
-    width: 100,
-    height,
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    x: 0,
-    y: 0,
-    toJSON: () => '',
-  }));
+import { PRIMARY_NAVIGATION_ID } from '../constants';
+
+const PRIMARY_NAVIGATION_HEIGHT = 603;
+
+export const mockClientHeight = (menuItemHeight: number) =>
+  Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+    configurable: true,
+    get() {
+      return this.id.includes(PRIMARY_NAVIGATION_ID)
+        ? PRIMARY_NAVIGATION_HEIGHT
+        : this['data-menu-item'] === 'true'
+        ? menuItemHeight
+        : 0;
+    },
+  });

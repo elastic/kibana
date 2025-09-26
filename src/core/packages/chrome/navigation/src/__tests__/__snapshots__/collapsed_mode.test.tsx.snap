@@ -7,7 +7,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-atvxkx-SideNav"
+      class="side-nav css-gz3nn4-SideNav"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -62,6 +62,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="sideNavPrimaryMenuItem-dashboards"
                 href="/dashboards"
                 label="Dashboards"
+                tabindex="0"
               >
                 <div
                   class="iconWrapper"
@@ -98,6 +99,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="sideNavPrimaryMenuItem-discover"
                 href="/discover"
                 label="Discover"
+                tabindex="-1"
               >
                 <div
                   class="iconWrapper"
@@ -132,6 +134,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-apps_overview"
               href="/apps_overview"
               label="Apps"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"

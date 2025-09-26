@@ -7,7 +7,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-1ww1r6i-SideNav"
+      class="side-nav css-qz4jpu-SideNav"
     >
       <div
         class="css-1aomi1g-wrapperStyles"
@@ -55,6 +55,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-dashboards"
               href="/dashboards"
               label="Dashboards"
+              tabindex="0"
             >
               <div
                 class="iconWrapper"
@@ -87,6 +88,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-discover"
               href="/discover"
               label="Discover"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"
@@ -120,6 +122,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-apps_overview"
               href="/apps_overview"
               label="Apps"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"

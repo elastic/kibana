@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EXPANDED_MENU_GAP = 16;
-export const COLLAPSED_MENU_GAP = 4;
+export const PRIMARY_NAVIGATION_ID = 'primary-navigation';
 export const MAX_MENU_ITEMS = 12;
 export const MAX_FOOTER_ITEMS = 5;
 export const POPOVER_HOVER_DELAY = 300;
