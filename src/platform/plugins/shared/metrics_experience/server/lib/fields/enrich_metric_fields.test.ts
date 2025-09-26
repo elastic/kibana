@@ -167,7 +167,6 @@ describe('enrichMetricFields', () => {
         {
           dimensions: [
             {
-              description: '',
               name: TEST_HOST_FIELD,
               type: 'keyword',
             },
