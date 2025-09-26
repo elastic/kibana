@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -16,6 +16,11 @@ import { timeUnits, extraTimeUnits } from '../constants';
 
 export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({ disabled }) => {
   const [open, setOpen] = useState(false);
+  const allUnits = useMemo(() => [...timeUnits, ...extraTimeUnits], []);
+  const labelFor = useCallback(
+    (value: string) => allUnits.find((unit) => unit.value === value)?.text ?? value,
+    [allUnits]
+  );
   return (
     <UseField
       path="retentionPeriodValue"
@@ -48,9 +53,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
                         color="text"
                         onClick={() => setOpen((isOpen) => !isOpen)}
                       >
-                        {[...timeUnits, ...extraTimeUnits].find(
-                          (option) => option.value === field.value
-                        )?.text ?? `${field.value}`}
+                        {labelFor(String(field.value))}
                       </EuiButton>
                     }
                   >
