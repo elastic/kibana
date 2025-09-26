@@ -60,7 +60,7 @@ describe('test getDataStateContainer', () => {
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!;
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
       scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
@@ -136,7 +136,7 @@ describe('test getDataStateContainer', () => {
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!;
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
       scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
@@ -173,7 +173,7 @@ describe('test getDataStateContainer', () => {
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!;
+    );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
@@ -217,7 +217,7 @@ describe('test getDataStateContainer', () => {
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!;
+    );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);

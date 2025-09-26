@@ -24,6 +24,7 @@ import {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
+  selectTabRuntimeState,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -144,11 +145,25 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const initializeDiscoverSession = useLatest(
     ({ nextDiscoverSessionId }: { nextDiscoverSessionId: string | undefined }) => {
-      initializeTabs({
-        discoverSessionId: nextDiscoverSessionId,
-      });
+      const persistedDiscoverSessionId = persistedDiscoverSession?.id;
+      const isSwitchingSession = Boolean(
+        persistedDiscoverSessionId && persistedDiscoverSessionId !== nextDiscoverSessionId
+      );
+
+      if (!persistedDiscoverSessionId || isSwitchingSession) {
+        initializeTabs({
+          discoverSessionId: nextDiscoverSessionId,
+          shouldClearAllTabs: isSwitchingSession,
+        });
+      } else {
+        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+        const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
+
+        currentTabStateContainer?.appState.updateUrlWithCurrentState();
+      }
     }
   );
 

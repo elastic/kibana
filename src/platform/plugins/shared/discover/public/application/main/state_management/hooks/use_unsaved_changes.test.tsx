@@ -145,12 +145,22 @@ describe('useUnsavedChanges', () => {
         }),
       ],
     };
-    await stateContainer.internalState.dispatch(
-      internalStateActions.updateDiscoverSessionAndTabs({
-        persistedDiscoverSession: newDiscoverSession,
-        selectedItem: newDiscoverSession.tabs[0],
-        items: newDiscoverSession.tabs,
-      })
+    stateContainer.internalState.dispatch(
+      internalStateActions.saveDiscoverSession.fulfilled(
+        {
+          discoverSession: newDiscoverSession,
+        },
+        'requestId',
+        {
+          newTitle: newDiscoverSession.title,
+          newCopyOnSave: false,
+          newTimeRestore: false,
+          newDescription: newDiscoverSession.description,
+          newTags: [],
+          isTitleDuplicateConfirmed: false,
+          onTitleDuplicate: () => {},
+        }
+      )
     );
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
     expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);

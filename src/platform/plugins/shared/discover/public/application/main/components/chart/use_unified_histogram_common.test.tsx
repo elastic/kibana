@@ -80,7 +80,7 @@ describe('useUnifiedHistogramCommon', () => {
     const histogramConfig = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!.unifiedHistogramConfig$;
+    ).unifiedHistogramConfig$;
 
     expect(histogramConfig.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]).toEqual(
       undefined

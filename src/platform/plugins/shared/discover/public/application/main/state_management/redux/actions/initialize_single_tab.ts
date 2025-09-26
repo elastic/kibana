@@ -66,7 +66,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     const { currentDataView$, stateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId)!;
+      selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available
@@ -84,13 +84,13 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     if (tabsEnabled) {
       const tabState = selectTab(getState(), tabId);
 
-      tabInitialGlobalState = cloneDeep(tabState?.globalState);
+      tabInitialGlobalState = cloneDeep(tabState.globalState);
 
-      if (tabState?.initialAppState) {
+      if (tabState.initialAppState) {
         tabInitialAppState = cloneDeep(tabState.initialAppState);
       }
 
-      if (tabState?.initialInternalState) {
+      if (tabState.initialInternalState) {
         tabInitialInternalState = cloneDeep(tabState.initialInternalState);
       }
     }

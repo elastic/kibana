@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
@@ -17,27 +17,14 @@ import {
 } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
-import { updateDiscoverSessionAndTabs } from './tabs';
-import type { TabsStateTransition } from '../types';
+import { updateTabs } from './tabs';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
-  async function resetDiscoverSessionThunkFn(
-    {
-      updatedDiscoverSession,
-      nextSelectedTabId,
-      transitioningFromTo,
-      previousTabIds,
-    }:
-      | {
-          updatedDiscoverSession?: DiscoverSession;
-          nextSelectedTabId?: string;
-          transitioningFromTo?: TabsStateTransition;
-          previousTabIds?: Record<string, string>;
-        }
-      | undefined = {},
+  async (
+    { updatedDiscoverSession }: { updatedDiscoverSession?: DiscoverSession } | undefined = {},
     { dispatch, getState, extra: { services, runtimeStateManager } }
-  ) {
+  ) => {
     const state = getState();
     const discoverSession = updatedDiscoverSession ?? state.persistedDiscoverSession;
 
@@ -45,28 +32,16 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       return;
     }
 
-    const selectedTabId = nextSelectedTabId ?? state.tabs.unsafeCurrentId;
-
     // If an updated session is provided, we know it has just been saved and all tab state is up to date.
     // Otherwise we're resetting the current session, and need to detect changes to mark tabs for refetch.
     const unsavedTabIds = updatedDiscoverSession ? [] : state.tabs.unsavedIds;
 
-    const getPreviousTabId = (tab: DiscoverSessionTab) => previousTabIds?.[tab.id] ?? tab.id;
-
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
-        const tabId = getPreviousTabId(tab);
-        const shouldMigrateToAnotherId = tabId !== tab.id;
+        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
-        const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+        const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-
-        if (shouldMigrateToAnotherId && tabRuntimeState && tabStateContainer) {
-          // If the tab id has changed, we need to migrate the runtime state to another id.
-          tabStateContainer.actions.stopSyncing();
-        }
-
-        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
         if (tabStateContainer) {
           const savedSearch = await fromSavedObjectTabToSavedSearch({
@@ -77,7 +52,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           const dataView = savedSearch.searchSource.getField('index');
 
           if (dataView) {
-            dispatch(setDataView({ tabId, dataView }));
+            dispatch(setDataView({ tabId: tab.id, dataView }));
           }
 
           tabStateContainer.savedSearchState.set(savedSearch);
@@ -85,21 +60,14 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           tabStateContainer.appState.resetInitialState();
         }
 
-        if (shouldMigrateToAnotherId && tabRuntimeState && tabStateContainer) {
-          // If the tab id has changed, we need to migrate the runtime state to another id.
-          runtimeStateManager.tabs.byId[tab.id] = tabRuntimeState;
-          tabRuntimeState.migratedToAnotherId$.next(tab.id);
-          tabStateContainer.actions.migrateToTabId(tab.id);
-        }
-
         const tabState = fromSavedObjectTabToTabState({
           tab,
-          existingTab: selectTab(state, tabId),
+          existingTab: selectTab(state, tab.id),
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.
         // We don't need to do this for the current tab since it's already being synced.
-        if (tabId !== selectedTabId && unsavedTabIds.includes(tabId)) {
+        if (tab.id !== state.tabs.unsafeCurrentId && unsavedTabIds.includes(tab.id)) {
           tabState.forceFetchOnSelect = true;
         }
 
@@ -107,15 +75,8 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       })
     );
 
-    const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
+    const selectedTab = allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId) ?? allTabs[0];
 
-    await dispatch(
-      updateDiscoverSessionAndTabs({
-        items: allTabs,
-        selectedItem: selectedTab,
-        persistedDiscoverSession: discoverSession,
-        transitioningFromTo,
-      })
-    );
+    await dispatch(updateTabs({ items: allTabs, selectedItem: selectedTab }));
   }
 );

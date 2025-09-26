@@ -27,7 +27,6 @@ import {
 } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
-import { TabsStateTransition } from '../types';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -56,8 +55,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
-    let nextSelectedTabId = state.tabs.unsafeCurrentId;
-    const previousTabIds: Record<string, string> = {};
     const currentTabs = selectAllTabs(state);
     const adHocDataViews = new Map<
       string,
@@ -71,7 +68,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
         let updatedTab: DiscoverSessionTab;
@@ -95,16 +92,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               services,
             })
           );
-        }
-
-        if (newCopyOnSave) {
-          // to avoid id conflicts, we need to assign a new id to the tab if we're creating a new discover session
-          const newTabId = uuidv4();
-          if (tab.id === nextSelectedTabId) {
-            nextSelectedTabId = newTabId;
-          }
-          updatedTab.id = newTabId;
-          previousTabIds[newTabId] = tab.id;
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -218,20 +205,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      const transitioningFromTo = !state.persistedDiscoverSession?.id
-        ? TabsStateTransition.savingFromNonPersistedToNewPersisted
-        : newCopyOnSave
-        ? TabsStateTransition.savingFromPersistedToNewPersisted
-        : undefined;
-
-      await dispatch(
-        resetDiscoverSession({
-          updatedDiscoverSession: discoverSession,
-          nextSelectedTabId,
-          transitioningFromTo,
-          previousTabIds,
-        })
-      ).unwrap();
+      await dispatch(resetDiscoverSession({ updatedDiscoverSession: discoverSession })).unwrap();
     }
 
     return { discoverSession };

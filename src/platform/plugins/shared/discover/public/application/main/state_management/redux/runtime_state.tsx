@@ -37,7 +37,6 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
-  migratedToAnotherId?: string;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -49,7 +48,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
-  tabs: { byId: Record<string, ReactiveTabRuntimeState | undefined> };
+  tabs: { byId: Record<string, ReactiveTabRuntimeState> };
 };
 
 export const createRuntimeStateManager = (): RuntimeStateManager => ({
@@ -94,7 +93,6 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    migratedToAnotherId$: new BehaviorSubject<string | undefined>(undefined),
   };
 };
 
@@ -153,8 +151,7 @@ export const useCurrentTabRuntimeState = <T,>(
   selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
 ) => {
   const { currentTabId } = useCurrentTabContext();
-  // TODO: Handle the case where runtime state is undefined
-  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)!));
+  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
 export type CombinedRuntimeState = DiscoverRuntimeState & Pick<TabRuntimeState, 'currentDataView'>;

@@ -88,7 +88,7 @@ const UnifiedHistogramGuard = ({
   panelsToggle,
 }: UnifiedHistogramGuardProps) => {
   const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
-  const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId)!;
+  const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
   const currentScopedProfilesManager = useRuntimeState(
@@ -146,7 +146,7 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     const histogramConfig$ = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    )!.unifiedHistogramConfig$;
+    ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
       ...histogramConfig$.getValue(),

@@ -8,12 +8,10 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import type { DiscoverInternalState } from '../types';
-import { TabsBarVisibility, type TabState } from '../types';
+import type { DiscoverInternalState, RecentlyClosedTabState } from '../types';
+import { TabsBarVisibility } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
-export const selectOpenTab = (state: DiscoverInternalState, tabId: string): TabState | undefined =>
-  state.tabs.allIds.includes(tabId) ? state.tabs.byId[tabId] : undefined;
 
 export const selectAllTabs = createSelector(
   [
@@ -23,8 +21,16 @@ export const selectAllTabs = createSelector(
   (allIds, byId) => allIds.map((id) => byId[id])
 );
 
-export const selectRecentlyClosedTabs = (state: DiscoverInternalState) =>
-  state.tabs.recentlyClosedTabs;
+export const selectRecentlyClosedTabs = createSelector(
+  [
+    (state: DiscoverInternalState) => state.tabs.recentlyClosedTabIds,
+    (state: DiscoverInternalState) => state.tabs.byId,
+  ],
+  (recentlyClosedTabIds, byId) =>
+    recentlyClosedTabIds
+      .map((id) => byId[id])
+      .filter((tab) => tab && 'closedAt' in tab) as RecentlyClosedTabState[]
+);
 
 export const selectIsTabsBarHidden = createSelector(
   (state: DiscoverInternalState) => state.tabsBarVisibility,

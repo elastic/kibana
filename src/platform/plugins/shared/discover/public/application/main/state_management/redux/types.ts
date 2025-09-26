@@ -80,11 +80,6 @@ export enum TabsBarVisibility {
   hidden = 'hidden',
 }
 
-export enum TabsStateTransition {
-  savingFromNonPersistedToNewPersisted = 'savingFromNonPersistedToNewPersisted',
-  savingFromPersistedToNewPersisted = 'savingFromPersistedToNewPersisted',
-}
-
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   userId: string | undefined;
@@ -99,11 +94,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    transitioningFromTo: TabsStateTransition | undefined;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
     unsavedIds: string[];
-    recentlyClosedTabs: RecentlyClosedTabState[];
+    recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,

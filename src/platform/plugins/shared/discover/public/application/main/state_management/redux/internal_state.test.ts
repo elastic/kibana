@@ -45,10 +45,10 @@ describe('InternalStateStore', () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(
-      selectTabRuntimeState(runtimeStateManager, tabId)!.currentDataView$.value
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
     ).toBeUndefined();
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    expect(selectTabRuntimeState(runtimeStateManager, tabId)!.currentDataView$.value).toBe(
+    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
     );
   });

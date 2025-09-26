@@ -39,7 +39,7 @@ import {
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, initializeTabs } from './actions';
+import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
@@ -59,11 +59,10 @@ const initialState: DiscoverInternalState = {
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
-    transitioningFromTo: undefined,
     byId: {},
     allIds: [],
     unsavedIds: [],
-    recentlyClosedTabs: [],
+    recentlyClosedTabIds: [],
     unsafeCurrentId: '',
   },
 };
@@ -95,28 +94,6 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setPersistedDiscoverSession: (
-      state,
-      action: PayloadAction<{
-        persistedDiscoverSession: DiscoverInternalState['persistedDiscoverSession'];
-      }>
-    ) => {
-      state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
-    },
-
-    setTabsInitializationStarted: (state) => {
-      state.tabs.areInitializing = true;
-    },
-
-    setTabsTransitioningStarted: (
-      state,
-      action: PayloadAction<{
-        transitioningFromTo: DiscoverInternalState['tabs']['transitioningFromTo'];
-      }>
-    ) => {
-      state.tabs.transitioningFromTo = action.payload.transitioningFromTo;
-    },
-
     setTabs: (
       state,
       action: PayloadAction<{
@@ -125,11 +102,8 @@ export const internalStateSlice = createSlice({
         recentlyClosedTabs: RecentlyClosedTabState[];
       }>
     ) => {
-      // RecentlyClosedTabs here is a safeguard that currentTab/selectTab will not be undefined in runtime while switching between tabs
-      // (otherwise we need to update types everywhere too).
-      // If id in open tabs matches one of recently closed tabs, we prefer the open tab state in this merge.
       state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState>
+        Record<string, TabState | RecentlyClosedTabState>
       >(
         (acc, tab) => ({
           ...acc,
@@ -140,7 +114,7 @@ export const internalStateSlice = createSlice({
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
-      state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
+      state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -295,18 +269,24 @@ export const internalStateSlice = createSlice({
       state.savedDataViews = action.payload;
     });
 
+    builder.addCase(initializeTabs.pending, (state) => {
+      state.tabs.areInitializing = true;
+    });
+
     builder.addCase(initializeTabs.fulfilled, (state, action) => {
-      if (!action.payload) {
-        return;
-      }
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     });
 
+    builder.addCase(saveDiscoverSession.fulfilled, (state, action) => {
+      if (action.payload.discoverSession) {
+        state.persistedDiscoverSession = action.payload.discoverSession;
+      }
+    });
+
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
       state.tabs.areInitializing = false;
-      state.tabs.transitioningFromTo = undefined;
     });
   },
 });

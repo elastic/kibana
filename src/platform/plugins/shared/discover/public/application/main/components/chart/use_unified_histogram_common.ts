@@ -35,7 +35,7 @@ export const useUnifiedHistogramCommon = ({
     const histogramConfig$ = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       currentTabId
-    )!.unifiedHistogramConfig$;
+    ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
       ...histogramConfig$.getValue(),
