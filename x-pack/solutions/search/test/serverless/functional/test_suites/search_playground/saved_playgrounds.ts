@@ -55,8 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
-        // await pageObjects.searchPlayground.PlaygroundStartChatPage.closetLLMCostTour();
         // Add a connector to the playground
+
         await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
@@ -66,6 +66,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Select indices
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+
+        // Select created openai connector
         await pageObjects.searchPlayground.PlaygroundChatPage.selectConnector(openaiConnectorName);
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToExist();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToBeEnabled();
