@@ -59,6 +59,7 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
+import { EditorStateProvider } from '../lib/state/state';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -1283,133 +1284,114 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <div css={styles.container} ref={containerRef}>
-      <ActionsMenuPopover
-        anchorPosition="upCenter"
-        offset={32}
-        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
-        container={containerRef.current ?? undefined}
-        closePopover={closeActionsPopover}
-        onActionSelected={onActionSelected}
-        isOpen={actionsPopoverOpen}
-        panelProps={{ css: styles.actionsMenuPopoverPanel }}
-      />
-      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
-      {/* Floating Elasticsearch step actions */}
-      <EuiFlexGroup
-        className="elasticsearch-step-actions"
-        gutterSize="xs"
-        responsive={false}
-        style={editorActionsCss}
-        justifyContent="center"
-        alignItems="center"
-      >
-        <EuiFlexItem
-          grow={false}
-          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
+    <EditorStateProvider editor={editorRef.current}>
+      <div css={styles.container} ref={containerRef}>
+        <ActionsMenuPopover
+          anchorPosition="upCenter"
+          offset={32}
+          button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+          container={containerRef.current ?? undefined}
+          closePopover={closeActionsPopover}
+          onActionSelected={onActionSelected}
+          isOpen={actionsPopoverOpen}
+          panelProps={{ css: styles.actionsMenuPopoverPanel }}
+        />
+        <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+        {/* Floating Elasticsearch step actions */}
+        <ElasticsearchStepActions onStepActionClicked={onStepActionClicked} />
+        <div
+          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
         >
-          <ElasticsearchStepActions
-            actionsProvider={unifiedProvidersRef.current?.actions}
-            http={http}
-            notifications={notifications as any}
-            esHost={esHost}
-            kibanaHost={kibanaHost}
-            onStepActionClicked={onStepActionClicked}
+          {hasChanges ? (
+            <div
+              css={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 6px',
+                color: euiTheme.colors.accent,
+                cursor: 'pointer',
+                borderRadius: euiTheme.border.radius.small,
+                '&:hover': {
+                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                },
+              }}
+              onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+              role="button"
+              tabIndex={0}
+              aria-pressed={showDiffHighlight}
+              aria-label={
+                showDiffHighlight
+                  ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                      defaultMessage: 'Hide diff highlighting',
+                    })
+                  : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                      defaultMessage: 'Show diff highlighting',
+                    })
+              }
+              onKeyDown={() => {}}
+              title={
+                showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+              }
+            >
+              <EuiIcon type="dot" />
+              <span>
+                <FormattedMessage
+                  id="workflows.workflowDetail.yamlEditor.unsavedChanges"
+                  defaultMessage="Unsaved changes"
+                />
+              </span>
+            </div>
+          ) : (
+            <div
+              css={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 6px',
+                color: euiTheme.colors.textSubdued,
+              }}
+            >
+              <EuiIcon type="check" />
+              <span>
+                <FormattedMessage
+                  id="workflows.workflowDetail.yamlEditor.saved"
+                  defaultMessage="Saved"
+                />{' '}
+                {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
+              </span>
+            </div>
+          )}
+        </div>
+        <div css={styles.editorContainer}>
+          <YamlEditor
+            editorDidMount={handleEditorDidMount}
+            editorWillUnmount={handleEditorWillUnmount}
+            onChange={handleChange}
+            options={editorOptions}
+            schemas={schemas}
+            suggestionProvider={completionProvider}
+            {...props}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <div
-        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-      >
-        {hasChanges ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.accent,
-              cursor: 'pointer',
-              borderRadius: euiTheme.border.radius.small,
-              '&:hover': {
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              },
+        </div>
+        <div css={styles.validationErrorsContainer}>
+          <WorkflowYAMLValidationErrors
+            isMounted={isEditorMounted}
+            error={errorValidating}
+            validationErrors={validationErrors}
+            onErrorClick={(error) => {
+              if (!editorRef.current) {
+                return;
+              }
+              navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
             }}
-            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={showDiffHighlight}
-            aria-label={
-              showDiffHighlight
-                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
-                    defaultMessage: 'Hide diff highlighting',
-                  })
-                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
-                    defaultMessage: 'Show diff highlighting',
-                  })
-            }
-            onKeyDown={() => {}}
-            title={
-              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
-            }
-          >
-            <EuiIcon type="dot" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                defaultMessage="Unsaved changes"
-              />
-            </span>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.textSubdued,
-            }}
-          >
-            <EuiIcon type="check" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.saved"
-                defaultMessage="Saved"
-              />{' '}
-              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-            </span>
-          </div>
-        )}
+            rightSide={<WorkflowYAMLEditorShortcuts />}
+          />
+        </div>
       </div>
-      <div css={styles.editorContainer}>
-        <YamlEditor
-          editorDidMount={handleEditorDidMount}
-          editorWillUnmount={handleEditorWillUnmount}
-          onChange={handleChange}
-          options={editorOptions}
-          schemas={schemas}
-          suggestionProvider={completionProvider}
-          {...props}
-        />
-      </div>
-      <div css={styles.validationErrorsContainer}>
-        <WorkflowYAMLValidationErrors
-          isMounted={isEditorMounted}
-          error={errorValidating}
-          validationErrors={validationErrors}
-          onErrorClick={(error) => {
-            if (!editorRef.current) {
-              return;
-            }
-            navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
-          }}
-          rightSide={<WorkflowYAMLEditorShortcuts />}
-        />
-      </div>
-    </div>
+    </EditorStateProvider>
   );
 };
 

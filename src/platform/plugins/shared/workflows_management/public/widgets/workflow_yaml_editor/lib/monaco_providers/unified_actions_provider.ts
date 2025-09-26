@@ -9,13 +9,15 @@
 
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
-import type YAML from 'yaml';
+import YAML from 'yaml';
 import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
 import { getMonacoConnectorHandler } from './provider_registry';
 import type { ActionContext, ProviderConfig } from './provider_interfaces';
 import { getStepRange } from '../step_detection_utils';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 100;
+
+type YamlPath = Array<string | number>;
 
 /**
  * Unified actions provider that provides floating action buttons for all connector types
@@ -40,6 +42,26 @@ export class UnifiedActionsProvider {
     this.setupEventListeners();
   }
 
+  private updateFocusedStepMetadata() {
+    const model = this.editor.getModel();
+    const position = this.editor.getPosition();
+    const yamlDocument = this.getYamlDocument();
+
+    // const result = indexYamlDocument(this.getYamlDocument()!, model!);
+    // console.log('indexYamlDocument result', result);
+
+    // yamlDocument?.contents[0].console.log(this.getYamlDocument());
+
+    // const subbb = model?.getValueInRange({
+    //   startLineNumber: 0,
+    //   startColumn: 0,
+    //   endLineNumber: position?.lineNumber! + 1,
+    //   endColumn: 0,
+    // });
+
+    // console.log(subbb);
+  }
+
   /**
    * Setup event listeners for position changes
    */
@@ -54,6 +76,7 @@ export class UnifiedActionsProvider {
       // Always update after debounce, but don't clear immediately
       // The updateHighlightAndActions will determine if we're in a different step
       debouncedHighlight();
+      this.updateFocusedStepMetadata();
     });
 
     // Note: Removed onDidChangeModelContent listener to prevent highlighting
@@ -64,6 +87,7 @@ export class UnifiedActionsProvider {
       // Update action button positions when scrolling
       if (this.currentStepNode && this.currentConnectorType) {
         this.updateActionButtonPositions();
+        this.updateFocusedStepMetadata();
       }
     });
   }

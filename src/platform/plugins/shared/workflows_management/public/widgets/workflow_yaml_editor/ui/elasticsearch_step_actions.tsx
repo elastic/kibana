@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -17,45 +17,71 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { monaco } from '@kbn/monaco';
 import { RunStepButton } from './run_step_button';
+import { useEditorState } from '../lib/state/state';
+import type { StepInfo } from '../lib/state/index_yaml_document';
 
 export interface ElasticsearchStepActionsProps {
-  actionsProvider: any; // We'll make this optional since we're transitioning to unified providers
-  http: HttpSetup;
-  notifications: NotificationsSetup;
-  esHost?: string;
-  kibanaHost?: string;
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> = ({
-  actionsProvider,
-  http,
-  notifications,
-  esHost,
-  kibanaHost,
   onStepActionClicked,
 }) => {
   const styles = useMemoCss(componentStyles);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // Use state to force re-renders when actions change
-  const [, setRefreshTrigger] = useState(0);
+  const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
+  const { workflowMetadata, editor } = useEditorState();
 
-  // Listen for action updates - force refresh every 100ms when actions might change
+  const cursorPosition = editor?.getPosition();
+
+  const currentStep = useMemo(() => {
+    if (!cursorPosition || !workflowMetadata) {
+      return null;
+    }
+
+    return (
+      Object.values(workflowMetadata.steps!).find((stepIfo) => {
+        if (
+          stepIfo.lineStart <= cursorPosition.lineNumber &&
+          cursorPosition.lineNumber <= stepIfo.lineEnd
+        ) {
+          return stepIfo;
+        }
+      }) || null
+    );
+  }, [workflowMetadata, cursorPosition]);
+
+  const currentStepRef = useRef(currentStep);
+  currentStepRef.current = currentStep;
+
+  const updateContainerPosition = (
+    stepInfo: StepInfo | null,
+    _editor: monaco.editor.IStandaloneCodeEditor | null
+  ) => {
+    if (!_editor || !stepInfo) {
+      return;
+    }
+
+    setPositionStyles({
+      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+      right: '0px',
+    });
+  };
+
+  useEffect(
+    () => updateContainerPosition(currentStep, editor),
+    [editor, currentStep, setPositionStyles]
+  );
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshTrigger((prev) => prev + 1);
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentStep = actionsProvider?.getCurrentElasticsearchStep();
-  const currentActions = actionsProvider?.getCurrentActions?.() || [];
+    editor?.onDidScrollChange(() => updateContainerPosition(currentStepRef.current, editor));
+  }, [editor, setPositionStyles]);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -76,7 +102,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   );
 
   const items = [
-    ...(currentActions?.map((action: any, index: number) => (
+    ...([]?.map((action: any, index: number) => (
       <EuiContextMenuItem
         data-test-subj={`actionButton-${action.id}`}
         key={action.id || index}
@@ -91,14 +117,25 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
     )) || []),
   ];
 
+  if (!currentStep) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup css={styles.buttonsGroup} gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      id="shit"
+      css={styles.container}
+      style={positionStyles ? positionStyles : {}}
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+    >
       {currentStep && (
         <EuiFlexItem grow={false}>
           <RunStepButton
             onClick={() =>
               onStepActionClicked?.({
-                stepId: currentStep.name as string,
+                stepId: currentStep.stepId as string,
                 actionType: 'run',
               })
             }
@@ -124,8 +161,10 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
 };
 
 const componentStyles = {
-  buttonsGroup: ({ euiTheme }: UseEuiTheme) =>
+  container: ({ euiTheme }: UseEuiTheme) =>
     css({
+      position: 'absolute',
+      zIndex: 1002, // Above the highlighting and pseudo-element
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       padding: euiTheme.size.xs,
       borderRadius: euiTheme.border.radius.small,
