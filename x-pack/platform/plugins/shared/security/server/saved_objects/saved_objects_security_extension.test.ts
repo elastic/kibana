@@ -26,11 +26,8 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import { MANAGE_ACCESS_CONTROL_ACTION } from './access_control_service';
-import {
-  AuditAction,
-  SavedObjectsSecurityExtension,
-  SecurityAction,
-} from './saved_objects_security_extension';
+import { AuditAction, SavedObjectsSecurityExtension } from './saved_objects_security_extension';
+import { SecurityAction } from './types';
 import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 

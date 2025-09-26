@@ -56,9 +56,9 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
-import { SecurityAction } from '.';
 import { AccessControlService, MANAGE_ACCESS_CONTROL_ACTION } from './access_control_service';
 import { isAuthorizedInAllSpaces } from './authorization_utils';
+import { SecurityAction } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { savedObjectEvent } from '../audit';
 

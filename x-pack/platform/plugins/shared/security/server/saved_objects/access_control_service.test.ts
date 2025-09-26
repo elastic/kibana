@@ -9,6 +9,7 @@ import type { AuthenticatedUser, ISavedObjectTypeRegistry } from '@kbn/core/serv
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import { AccessControlService } from './access_control_service';
+import { SecurityAction } from './types';
 
 describe('AccessControlService', () => {
   // Mock type registry (expand to satisfy ISavedObjectTypeRegistry)
@@ -44,6 +45,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
     });
@@ -60,6 +62,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
     });
@@ -75,6 +78,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
     });
@@ -91,6 +95,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
     });
@@ -107,6 +112,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
     });
@@ -123,6 +129,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
     });
@@ -163,6 +170,7 @@ describe('AccessControlService', () => {
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
+        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
       expect(typesRequiringAccessControl.has('visualization')).toBe(false);
