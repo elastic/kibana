@@ -7,7 +7,6 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
-import { OTEL_COMPONENT_TEMPLATES } from '../../../constants';
 
 import { packagePolicyService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
@@ -176,22 +175,6 @@ describe('deleteESAsset', () => {
 
     expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
   });
-
-  test.each(OTEL_COMPONENT_TEMPLATES)(
-    'should not delete otel components templates',
-    async (templateId) => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
-      await deleteESAsset(
-        {
-          id: templateId,
-          type: ElasticsearchAssetType.componentTemplate,
-        },
-        esClient
-      );
-
-      expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
-    }
-  );
 
   it('should delete @package components template', async () => {
     const esClient = elasticsearchServiceMock.createInternalClient();

@@ -9,7 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { FleetError } from '../../../../errors';
 import {
-  OTEL_COMPONENT_TEMPLATES,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
@@ -40,10 +39,6 @@ async function deleteComponentTemplate(
   logger: Logger,
   name: string
 ): Promise<void> {
-  if (OTEL_COMPONENT_TEMPLATES.includes(name)) {
-    logger.info(`Skipping deletion of prebuilt OTEL component template: ${name}`);
-    return;
-  }
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
     try {
