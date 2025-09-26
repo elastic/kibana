@@ -15,8 +15,7 @@ import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
-import { serializeXJson } from '../../../../helpers';
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { serializeXJson, parseXJsonOrString } from '../../../../helpers';
 
 export const JsonEditor = () => {
   const {
@@ -27,42 +26,39 @@ export const JsonEditor = () => {
     rules: {
       validate: (value) => {
         if (typeof value === 'string') {
-          try {
-            const parsed = JSON.parse(XJson.collapseLiteralStrings(value));
-
-            if (!Array.isArray(parsed)) {
-              return i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
-                { defaultMessage: 'Expected an array' }
-              );
-            }
-
-            const invalidProcessor = parsed.find((processor: Record<string, unknown>) => {
-              const processorType = Object.keys(processor)[0];
-              return (
-                processorType &&
-                !elasticsearchProcessorTypes.includes(
-                  processorType as ElasticsearchProcessorType
-                )
-              );
-            });
-            if (invalidProcessor) {
-              return i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
-                {
-                  defaultMessage: 'Invalid processor type: {processorType}',
-                  values: { processorType: Object.keys(invalidProcessor)[0] },
-                }
-              );
-            }
-
-            return undefined;
-          } catch (e) {
+          const parsed = parseXJsonOrString(value);
+          if (typeof parsed === 'string') {
             return i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
               { defaultMessage: 'Invalid JSON format' }
             );
           }
+
+          if (!Array.isArray(parsed)) {
+            return i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
+              { defaultMessage: 'Expected an array' }
+            );
+          }
+
+          const invalidProcessor = parsed.find((processor: Record<string, unknown>) => {
+            const processorType = Object.keys(processor)[0];
+            return (
+              processorType &&
+              !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
+            );
+          });
+          if (invalidProcessor) {
+            return i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
+              {
+                defaultMessage: 'Invalid processor type: {processorType}',
+                values: { processorType: Object.keys(invalidProcessor)[0] },
+              }
+            );
+          }
+
+          return undefined;
         }
 
         if (!Array.isArray(value)) {
@@ -101,14 +97,7 @@ export const JsonEditor = () => {
 
   const handleChange = (newValue: string) => {
     setValue(newValue);
-
-    let parsed: unknown = newValue;
-    try {
-      parsed = JSON.parse(XJson.collapseLiteralStrings(newValue));
-    } catch {
-    }
-
-    field.onChange(parsed);
+    field.onChange(parseXJsonOrString(newValue));
   };
 
   return (

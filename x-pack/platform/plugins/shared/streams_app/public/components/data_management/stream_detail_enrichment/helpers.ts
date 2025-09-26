@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -19,6 +20,14 @@ export const deserializeJson = (input: string) => {
   try {
     return JSON.parse(input);
   } catch (e) {
+    return input;
+  }
+};
+
+export const parseXJsonOrString = (input: string): unknown => {
+  try {
+    return JSON.parse(XJson.collapseLiteralStrings(input));
+  } catch {
     return input;
   }
 };
