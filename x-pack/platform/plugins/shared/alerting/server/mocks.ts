@@ -13,6 +13,7 @@ import {
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import { lazyObject } from '@kbn/lazy-object';
 import { rulesClientMock } from './rules_client.mock';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { Alert, AlertFactoryDoneUtils } from './alert';
@@ -27,17 +28,18 @@ import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 export { rulesClientMock };
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<AlertingServerSetup> = {
+  const mock: jest.Mocked<AlertingServerSetup> = lazyObject({
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
-    frameworkAlerts: {
+    frameworkAlerts: lazyObject({
       enabled: jest.fn(),
       getContextInitializationPromise: jest.fn(),
-    },
+    }),
     getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
-  };
+  });
+
   return mock;
 };
 
@@ -57,7 +59,7 @@ const createShareStartMock = () => {
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<AlertingServerStart> = {
+  const mock: jest.Mocked<AlertingServerStart> = lazyObject({
     listTypes: jest.fn(),
     getType: jest.fn(),
     getAllTypes: jest.fn(),
@@ -65,7 +67,7 @@ const createStartMock = () => {
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
-  };
+  });
   return mock;
 };
 
@@ -79,7 +81,7 @@ export const createAlertFactoryMock = {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext
   >() => {
-    const mock = {
+    const mock = lazyObject({
       hasScheduledActions: jest.fn(),
       isThrottled: jest.fn(),
       getScheduledActionOptions: jest.fn(),
@@ -91,7 +93,7 @@ export const createAlertFactoryMock = {
       updateLastScheduledActions: jest.fn(),
       toJSON: jest.fn(),
       toRaw: jest.fn(),
-    };
+    });
 
     // support chaining
     mock.replaceState.mockReturnValue(mock);
@@ -106,48 +108,48 @@ export const createAlertFactoryMock = {
     ActionGroupIds extends string = string
   >() => {
     const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
-      {
+      lazyObject({
         getRecoveredAlerts: jest.fn().mockReturnValue([]),
-      };
+      });
     return mock;
   },
 };
 
 const createAbortableSearchClientMock = () => {
-  const mock = {
+  const mock = lazyObject({
     search: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createAbortableSearchServiceMock = () => {
-  return {
+  return lazyObject({
     asInternalUser: createAbortableSearchClientMock(),
     asCurrentUser: createAbortableSearchClientMock(),
-  };
+  });
 };
 
 const createRuleMonitoringServiceMock = () => {
-  const mock = {
+  const mock = lazyObject({
     setLastRunMetricsTotalSearchDurationMs: jest.fn(),
     setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
     setLastRunMetricsTotalAlertsDetected: jest.fn(),
     setLastRunMetricsTotalAlertsCreated: jest.fn(),
     setLastRunMetricsGapDurationS: jest.fn(),
-  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
+  }) as unknown as jest.Mocked<PublicRuleMonitoringService>;
 
   return mock;
 };
 
 const createRuleLastRunServiceMock = () => {
-  const mock = {
+  const mock = lazyObject({
     getLastRunErrors: jest.fn(),
     getLastRunWarnings: jest.fn(),
     getLastRunOutcomeMessages: jest.fn(),
     getLastRunResults: jest.fn(),
     getLastRunSetters: jest.fn(),
-  } as unknown as jest.Mocked<PublicRuleResultService>;
+  }) as unknown as jest.Mocked<PublicRuleResultService>;
 
   return mock;
 };
@@ -158,15 +160,15 @@ const createRuleExecutorServicesMock = <
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
   const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();
-  return {
-    alertFactory: {
+  return lazyObject({
+    alertFactory: lazyObject({
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
-      alertLimit: {
+      alertLimit: lazyObject({
         getValue: jest.fn().mockReturnValue(1000),
         setLimitReached: jest.fn(),
-      },
+      }),
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
-    },
+    }),
     alertsClient: publicAlertsClientMock.create(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
@@ -176,10 +178,11 @@ const createRuleExecutorServicesMock = <
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     search: createAbortableSearchServiceMock(),
     share: createShareStartMock(),
-    shouldStopExecution: () => true,
-    shouldWriteAlerts: () => true,
+    shouldStopExecution: () => true as boolean,
+    shouldWriteAlerts: () => true as boolean,
     uiSettingsClient: uiSettingsServiceMock.createClient(),
-  };
+    getAsyncSearchClient: jest.fn().mockReturnValue(createAbortableSearchClientMock()),
+  });
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
 

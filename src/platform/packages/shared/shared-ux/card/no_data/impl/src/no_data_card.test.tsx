@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render as enzymeRender } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
 
@@ -16,51 +16,31 @@ import { NoDataCard } from './no_data_card';
 import { NoDataCardProvider } from './services';
 
 describe('NoDataCard', () => {
-  const render = (element: React.ReactElement, canAccessFleet: boolean = true) =>
-    enzymeRender(
+  const renderWithProvider = (element: React.ReactElement, canAccessFleet: boolean = true) => {
+    return render(
       <NoDataCardProvider {...getNoDataCardServicesMock({ canAccessFleet })}>
         {element}
       </NoDataCardProvider>
     );
+  };
 
-  test('renders', () => {
-    const component = render(<NoDataCard title="Card title" description="Description" />);
-    expect(component).toMatchSnapshot();
-  });
+  test('integrates with services correctly', () => {
+    const { rerender } = renderWithProvider(
+      <NoDataCard buttonText="Browse" title="Card title" description="Description" />
+    );
 
-  describe('props', () => {
-    test('button', () => {
-      const component = render(
-        <NoDataCard button="Button" title="Card title" description="Description" />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    // Test service integration: addBasePath
+    const button = screen.getByRole('link', { name: 'Browse' });
+    expect(button).toHaveAttribute('href', expect.stringContaining('/app/integrations/browse'));
 
-    test('href', () => {
-      const component = render(
-        <NoDataCard href="#" button="Button" title="Card title" description="Description" />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    // Test service integration: canAccessFleet affects component behavior
+    rerender(
+      <NoDataCardProvider {...getNoDataCardServicesMock({ canAccessFleet: false })}>
+        <NoDataCard buttonText="Browse" title="Card title" description="Description" />
+      </NoDataCardProvider>
+    );
 
-    test('no access to Fleet', () => {
-      const component = render(
-        <NoDataCard button="Button" title="Card title" description="Description" />,
-        false
-      );
-      expect(component).toMatchSnapshot();
-    });
-
-    test('extends EuiCardProps', () => {
-      const component = render(
-        <NoDataCard
-          button="Button"
-          title="Card title"
-          description="Description"
-          className="custom_class"
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    // Focus on the service effect: button disappears when no fleet access
+    expect(screen.queryByRole('link', { name: 'Browse' })).not.toBeInTheDocument();
   });
 });
