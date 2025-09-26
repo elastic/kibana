@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import expect from '@kbn/expect';
 import { expect as rawExpect } from 'expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
@@ -1299,7 +1299,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
           pkgPolicy.id ===
-          `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+          uuidv5(
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`,
+            uuidv5.DNS
+          )
       );
       expect(packagePolicy.name).eql(
         `${projectMonitors.monitors[0].id}-${project}-default-${testPrivateLocationName}`
@@ -1360,7 +1363,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
           pkgPolicy.id ===
-          `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+          uuidv5(
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`,
+            uuidv5.DNS
+          )
       );
       expect(packagePolicy.name).eql(
         `${httpProjectMonitors.monitors[1].id}-${project}-default-${testPrivateLocationName}`
@@ -1421,7 +1427,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
           pkgPolicy.id ===
-          `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+          uuidv5(
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`,
+            uuidv5.DNS
+          )
       );
 
       expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1488,7 +1497,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
           pkgPolicy.id ===
-          `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+          uuidv5(
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`,
+            uuidv5.DNS
+          )
       );
 
       expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1568,7 +1580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const configId = monitorsResponse.body.monitors[0].id;
       const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-      const policyId = `${id}-${testPolicyId}`;
+      const policyId = uuidv5(`${id}-${testPolicyId}`, uuidv5.DNS);
 
       const packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
@@ -1612,7 +1624,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const configId2 = monitorsResponse.body.monitors[0].id;
       const id2 = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-      const policyId2 = `${id}-${testPolicyId}`;
+      const policyId2 = uuidv5(`${id2}-${testPolicyId}`, uuidv5.DNS);
 
       const packagePolicy2 = apiResponsePolicy2.body.items.find(
         (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2

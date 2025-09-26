@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type {
   ProjectMonitorsRequest,
@@ -465,9 +465,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              privateLocation.id
+            uuidv5(
+              `${savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${
+                privateLocation.id
+              }`,
+              uuidv5.DNS
+            )
         );
         expect(packagePolicy.policy_id).to.be(privateLocation.id);
 
