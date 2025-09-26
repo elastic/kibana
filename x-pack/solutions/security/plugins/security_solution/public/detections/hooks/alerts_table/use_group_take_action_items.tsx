@@ -156,7 +156,7 @@ export const useGroupTakeActionsItems = ({
       selectedGroup: string;
       reason?: AlertClosingReason;
     }) => {
-      if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+      if (status === 'closed' && query && !(await promptAlertCloseConfirmation({ query }))) {
         return;
       }
       if (query) {

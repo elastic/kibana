@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { RoutingConditionEditor } from '../condition_editor';
+import { RoutingConditionEditor } from './routing_condition_editor';
 import { EditRoutingRuleControls } from './control_bars';
 import { StreamNameFormRow } from './stream_name_form_row';
 import type { RoutingDefinitionWithUIAttributes } from './types';
