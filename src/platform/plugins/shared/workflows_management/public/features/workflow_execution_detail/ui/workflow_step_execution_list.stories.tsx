@@ -481,6 +481,26 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionList> = {
   },
 };
 
+export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionList> = {
+  args: {
+    isLoading: false,
+    error: null,
+    execution: {
+      id: 'db38b255-ec34-4048-8b77-776081cb3a97',
+      spaceId: 'default',
+      workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+      workflowDefinition: definition,
+      yaml,
+      status: ExecutionStatus.RUNNING,
+      triggeredBy: 'manual',
+      startedAt: '2025-09-02T20:43:57.441Z',
+      finishedAt: '2025-09-02T20:44:15.945Z',
+      duration: 18504,
+      stepExecutions: [],
+    },
+  },
+};
+
 export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionList> = {
   args: {
     isLoading: false,

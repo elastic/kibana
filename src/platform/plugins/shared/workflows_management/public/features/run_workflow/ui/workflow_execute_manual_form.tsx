@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto, WorkflowInputSchema, WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
@@ -38,7 +38,7 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
 };
 
 interface WorkflowExecuteManualFormProps {
-  workflow: WorkflowDetailDto | WorkflowListItemDto;
+  definition: WorkflowYaml | null;
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
@@ -52,11 +52,11 @@ const defaultWorkflowInputsMappings: Record<string, any> = {
   choice: (input: any) => `Select an option: ${input.options.join(', ')}`,
 };
 
-const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemDto): string => {
+const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
   const inputPlaceholder: Record<string, any> = {};
 
-  if (workflow?.definition!.inputs) {
-    workflow.definition!.inputs.forEach((input: any) => {
+  if (definition.inputs) {
+    definition.inputs.forEach((input: any) => {
       let placeholder: string | number | boolean | ((input: any) => string) =
         defaultWorkflowInputsMappings[input.type];
       if (typeof placeholder === 'function') {
@@ -70,21 +70,21 @@ const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemD
 };
 
 export const WorkflowExecuteManualForm = ({
-  workflow,
+  definition,
   value,
   setValue,
   errors,
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(workflow?.definition!.inputs || []),
-    [workflow?.definition]
+    () => makeWorkflowInputsValidator(definition?.inputs || []),
+    [definition?.inputs]
   );
 
   const handleChange = useCallback(
     (data: string) => {
       setValue(data);
-      if (workflow?.definition!.inputs) {
+      if (definition?.inputs) {
         try {
           const res = inputsValidator.safeParse(JSON.parse(data));
           if (!res.success) {
@@ -99,14 +99,14 @@ export const WorkflowExecuteManualForm = ({
         }
       }
     },
-    [setValue, workflow?.definition, inputsValidator, setErrors]
+    [setValue, definition?.inputs, inputsValidator, setErrors]
   );
 
   useEffect(() => {
-    if (!value && workflow) {
-      handleChange(getDefaultWorkflowInput(workflow));
+    if (!value && definition) {
+      handleChange(getDefaultWorkflowInput(definition));
     }
-  }, [workflow, value, handleChange]);
+  }, [definition, value, handleChange]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -115,7 +115,13 @@ export const WorkflowExecuteManualForm = ({
       {errors && (
         <>
           <EuiFlexItem>
-            <EuiCallOut title="Input data is not valid" color="danger" iconType="help" size="s">
+            <EuiCallOut
+              title="Input data is not valid"
+              color="danger"
+              iconType="help"
+              size="s"
+              announceOnMount
+            >
               <p>{errors}</p>
             </EuiCallOut>
           </EuiFlexItem>

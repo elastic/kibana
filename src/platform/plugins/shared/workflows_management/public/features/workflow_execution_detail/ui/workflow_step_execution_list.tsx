@@ -19,11 +19,13 @@ import {
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
+  EuiSkeletonCircle,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -118,6 +120,49 @@ function convertTreeToEuiTreeViewItems(
   });
 }
 
+function TreeViewSkeleton() {
+  const styles = useMemoCss(treeViewSkeletonStyles);
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" css={styles.row}>
+      <EuiFlexItem css={styles.icon} grow={false}>
+        <EuiSkeletonCircle size="s" css={styles.iconSkeleton} />
+      </EuiFlexItem>
+      <EuiFlexItem css={styles.name}>
+        <EuiSkeletonText size="m" lines={1} css={styles.textSkeleton} />
+      </EuiFlexItem>
+      <EuiFlexItem css={styles.duration} grow={false}>
+        <EuiSkeletonText size="m" lines={1} css={styles.textSkeleton} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+const treeViewSkeletonStyles = {
+  row: css({
+    // height: '20px',
+    padding: '0 16px 0 8px',
+  }),
+  icon: css({
+    flexBasis: '16px',
+  }),
+  iconSkeleton: css({
+    width: '16px',
+    height: '16px',
+  }),
+  name: css({
+    flexBasis: '80%',
+  }),
+  duration: css({
+    flexBasis: '24px',
+  }),
+  textSkeleton: css({
+    '& > span': {
+      marginBlockStart: 0,
+      transform: 'none',
+    },
+  }),
+};
+
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
   isLoading: boolean;
@@ -142,7 +187,7 @@ export const WorkflowStepExecutionList = ({
 
   let content: React.ReactNode = null;
 
-  if (isLoading && !execution) {
+  if (isLoading || !execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -173,7 +218,12 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution) {
+  } else if (
+    !execution ||
+    (execution.stepExecutions.length === 0 && isInProgressStatus(execution.status))
+  ) {
+    content = <TreeViewSkeleton />;
+  } else if (!execution || execution.stepExecutions.length === 0) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -182,7 +232,7 @@ export const WorkflowStepExecutionList = ({
           <h2>
             <FormattedMessage
               id="workflows.workflowStepExecutionList.noExecutionFound"
-              defaultMessage="No step executions yet"
+              defaultMessage="No step executions found"
             />
           </h2>
         }

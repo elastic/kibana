@@ -18,7 +18,6 @@ export interface StepExecutionProviderOptions {
   getYamlDocument: () => YAML.Document | null;
   getStepExecutions: () => WorkflowStepExecutionDto[];
   getHighlightStep: () => string | null;
-  isReadOnly: () => boolean;
 }
 
 /**
@@ -29,7 +28,6 @@ export class StepExecutionProvider {
   private getYamlDocument: () => YAML.Document | null;
   private getStepExecutions: () => WorkflowStepExecutionDto[];
   private getHighlightStep: () => string | null;
-  private isReadOnly: () => boolean;
   private decorationsCollection: monaco.editor.IEditorDecorationsCollection | null = null;
   private isDisposed = false;
 
@@ -38,7 +36,6 @@ export class StepExecutionProvider {
     this.getYamlDocument = options.getYamlDocument;
     this.getStepExecutions = options.getStepExecutions;
     this.getHighlightStep = options.getHighlightStep;
-    this.isReadOnly = options.isReadOnly;
 
     this.updateDecorations();
 
@@ -78,7 +75,7 @@ export class StepExecutionProvider {
 
       // Only apply step execution decorations in readonly mode (Executions view)
       // This prevents interference with interactive highlighting
-      if (!model || !yamlDocument || !this.isReadOnly()) {
+      if (!model || !yamlDocument) {
         /*
         console.log('🎯 StepExecutionProvider: Skipping decoration update', {
           hasModel: !!model,
