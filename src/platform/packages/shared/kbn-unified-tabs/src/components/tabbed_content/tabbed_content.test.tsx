@@ -340,6 +340,7 @@ describe('TabbedContent', () => {
         eventName: 'tabClosedOthers',
         tabId: firstTab.id,
         totalTabsOpen: 3,
+        remainingTabsCount: 1,
         closedTabsCount: 2,
       });
     });
