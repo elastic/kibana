@@ -9,12 +9,14 @@ import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ScheduleType } from '@kbn/reporting-server';
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
 import { getCounters } from '..';
 import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import type { ReportingJobResponse } from '../../../types';
 import type { RequestParams } from './request_handler';
 import { RequestHandler } from './request_handler';
+import { getUserTriple } from '../get_user';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
@@ -58,11 +60,23 @@ export class GenerateRequestHandler extends RequestHandler<
       spaceId,
     };
 
+    let apiKey: SecurityApiKey | null = null;
+    if (user && user.api_key) {
+      const startDeps = await reporting.getPluginStartDeps();
+      const { security } = startDeps;
+      if (security) {
+        apiKey = await security.authc.apiKeys.getAPIKey(req, user.api_key.id);
+      }
+    }
+
+    const createdBy = getUserTriple({ user, apiKey });
+
     // Add the report to ReportingStore to show as pending
     const report = await store.addReport(
       new Report({
         jobtype: jobType,
-        created_by: user ? user.username : false,
+        // here use triple
+        created_by: createdBy,
         payload,
         migration_version: version,
         space_id: spaceId || DEFAULT_SPACE_ID,

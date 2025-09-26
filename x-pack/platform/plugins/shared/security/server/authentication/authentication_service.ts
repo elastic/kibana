@@ -78,6 +78,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
+    | 'getAPIKey'
   >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
@@ -394,6 +395,7 @@ export class AuthenticationService {
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        getAPIKey: apiKeys.getAPIKey.bind(apiKeys),
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {

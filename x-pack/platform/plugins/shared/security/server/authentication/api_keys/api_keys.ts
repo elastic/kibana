@@ -7,6 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+
 import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
@@ -247,6 +249,31 @@ export class APIKeys implements APIKeysType {
       this.logger.error(`Failed to update API key: ${error.message}`);
       throw error;
     }
+    return result;
+  }
+
+  async getAPIKey(request: KibanaRequest, id: string) {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug(`Trying to get API key by id=${id} as internal user`);
+
+    let result: SecurityApiKey | null = null;
+    try {
+      const { api_keys: apiKeys } = await this.clusterClient
+        .asScoped(request)
+        .asCurrentUser.security.getApiKey({ id });
+
+      if (apiKeys && apiKeys.length > 0) {
+        result = apiKeys[0];
+      }
+      this.logger.debug(`API key by id=${id} was retrieved successfully as internal user`);
+    } catch (e) {
+      this.logger.error(`Failed to get API key by id=${id} as internal user: ${e.message}`);
+      throw e;
+    }
+
     return result;
   }
 

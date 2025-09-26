@@ -14,6 +14,7 @@ import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { ScheduleType } from '@kbn/reporting-server';
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
 import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import type {
@@ -29,6 +30,7 @@ import {
   transformRawScheduledReportToTaskParams,
 } from './lib';
 import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
+import { getUserTriple } from '../get_user';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -162,11 +164,23 @@ export class ScheduleRequestHandler extends RequestHandler<
 
     // TODO - extract saved object references before persisting
 
+    let apiKey: SecurityApiKey | null = null;
+    if (user && user.api_key) {
+      const startDeps = await reporting.getPluginStartDeps();
+      const { security } = startDeps;
+      if (security) {
+        apiKey = await security.authc.apiKeys.getAPIKey(req, user.api_key.id);
+      }
+    }
+
+    const createdBy = getUserTriple({ user, apiKey });
+
     const attributes = {
       createdAt: moment.utc().toISOString(),
       // we've already checked that user exists in handleRequest
       // this fallback is just to satisfy the type
-      createdBy: user ? user.username : 'unknown',
+      // here use triple
+      createdBy: createdBy || 'unknown',
       enabled: true,
       jobType,
       meta: {
