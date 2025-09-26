@@ -248,10 +248,10 @@ export const topNavStrings = {
   },
   backgroundSearch: {
     label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {
-      defaultMessage: 'Background search',
+      defaultMessage: 'Background searches',
     }),
     description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
-      defaultMessage: 'Open background search',
+      defaultMessage: 'Open background searches',
     }),
   },
 };

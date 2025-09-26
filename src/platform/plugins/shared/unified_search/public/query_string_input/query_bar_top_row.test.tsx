@@ -190,13 +190,13 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   describe('when background search is enabled', () => {
-    const data = dataPluginMock.createStartContract();
-    const session = getSessionServiceMock({
-      state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
-    });
-    data.search.session = session;
-
     describe('when it is NOT loading', () => {
+      const data = dataPluginMock.createStartContract();
+      const session = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
+      });
+      data.search.session = session;
+
       describe('when the user clicks the main button', () => {
         it('should call the submit callback', async () => {
           // Given
@@ -248,6 +248,12 @@ describe('QueryBarTopRowTopRow', () => {
 
     describe('when it is loading', () => {
       const isLoading = true;
+
+      const data = dataPluginMock.createStartContract();
+      const loadingSession = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Loading).asObservable(),
+      });
+      data.search.session = loadingSession;
 
       describe('when the user clicks the main button', () => {
         it('should call the cancel callback', async () => {
