@@ -114,7 +114,9 @@ export class LensServerPlugin
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
 
     const builder = new LensConfigBuilder();
+
     plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, getLensServerTransforms(builder));
+
     registerLensAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,

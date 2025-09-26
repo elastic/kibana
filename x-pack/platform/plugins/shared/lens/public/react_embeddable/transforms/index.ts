@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export { getLensPublicTransforms } from './transforms';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+
+import type { LensTransforms } from '../../../server/transforms/types';
+import { getTransformOut } from './transform_out';
+import { getTransformIn } from './transform_in';
+
+export function getLensPublicTransforms(builder: LensConfigBuilder): LensTransforms {
+  return {
+    transformIn: getTransformIn(builder),
+    transformOut: getTransformOut(builder),
+  };
+}
