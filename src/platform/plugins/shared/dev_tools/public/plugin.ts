@@ -21,7 +21,6 @@ import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import type { CreateDevToolArgs, DevToolApp } from './dev_tool';
 import { createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
-import { devAppFlexStyles } from './styles';
 
 export interface DevToolsSetup {
   /**
@@ -37,7 +36,11 @@ export interface DevToolsSetup {
   register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
 
-const devAppWrapperClassName = cssClassName(devAppFlexStyles);
+const devAppWrapperClassName = cssClassName`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
 
 export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private readonly devTools = new Map<string, DevToolApp>();
