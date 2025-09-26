@@ -46,13 +46,13 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName
 );
 
 interface AgentSelectDropdownProps {
-  selectedAgentId?: string;
+  selectedAgent?: AgentDefinition;
   onAgentChange: (agentId: string) => void;
   agents?: AgentDefinition[];
 }
 
 export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
-  selectedAgentId,
+  selectedAgent,
   onAgentChange,
   agents = [],
 }) => {
@@ -61,19 +61,14 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const selectedAgent = useMemo(
-    () => agents.find((agent) => agent.id === selectedAgentId),
-    [agents, selectedAgentId]
-  );
-
   const options: EuiSelectableOption[] = useMemo(
     () =>
       agents.map((agent) => ({
         key: agent.id,
         label: agent.name,
-        checked: agent.id === selectedAgentId ? 'on' : undefined,
+        checked: agent.id === selectedAgent?.id ? 'on' : undefined,
       })),
-    [agents, selectedAgentId]
+    [agents, selectedAgent?.id]
   );
 
   const handleAgentChange = useCallback(

@@ -39,7 +39,7 @@ export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps>
     </EuiText>
   ) : (
     <AgentSelectDropdown
-      selectedAgentId={agentId}
+      selectedAgent={currentAgent}
       onAgentChange={handleAgentChange}
       agents={agents}
     />
