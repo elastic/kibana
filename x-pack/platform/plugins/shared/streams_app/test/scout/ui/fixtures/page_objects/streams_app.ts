@@ -445,8 +445,8 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
 
-  async getProcessorsListItems(expectProcessors: boolean = true) {
-    const timeout = expectProcessors ? 15_000 : 2_000;
+  private async getStepListItems(testId: string, expectItems: boolean = true) {
+    const timeout = expectItems ? 15_000 : 2_000;
 
     try {
       await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
@@ -456,7 +456,11 @@ export class StreamsApp {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorBlock').all();
+    return this.page.getByTestId(testId).all();
+  }
+
+  async getProcessorsListItems(expectProcessors: boolean = true) {
+    return this.getStepListItems('streamsAppProcessorBlock', expectProcessors);
   }
 
   async getProcessorsListItemsFast() {
@@ -464,16 +468,13 @@ export class StreamsApp {
     return this.getProcessorsListItems(false);
   }
 
-  async getConditionsListItems() {
-    try {
-      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
-        timeout: 15_000,
-      });
-    } catch {
-      // If the list is not visible, it might be empty or not rendered yet
-      return [];
-    }
-    return this.page.getByTestId('streamsAppConditionBlock').all();
+  async getConditionsListItems(expectConditions: boolean = true) {
+    return this.getStepListItems('streamsAppConditionBlock', expectConditions);
+  }
+
+  async getConditionsListItemsFast() {
+    // Fast method for when no conditions are expected - uses minimal timeout
+    return this.getConditionsListItems(false);
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
