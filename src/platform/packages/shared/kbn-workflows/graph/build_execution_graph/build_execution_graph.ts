@@ -27,7 +27,6 @@ import type {
   StepWithTimeout,
 } from '../../spec/schema';
 import type {
-  GraphNode,
   AtomicGraphNode,
   EnterConditionBranchNode,
   EnterForeachNode,
@@ -51,7 +50,10 @@ import type {
   ExitFallbackPathNode,
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
+  GraphNodeUnion,
+  WorkflowGraphType,
 } from '../types';
+import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
 const flowControlStepTypes = new Set(['if', 'foreach']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
@@ -64,7 +66,7 @@ interface GraphBuildContext {
   /**
    * Stack of nodes to keep track of the current position in the graph and avoid cycles
    */
-  stack: GraphNode[];
+  stack: GraphNodeUnion[];
 
   /** Used to construct predictable unique node IDs */
   parentKey: string;
@@ -85,7 +87,7 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   return parts.join('_');
 }
 
-function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
+function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -122,7 +124,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
     const step = currentStep as BaseStep & StepWithTimeout;
     return handleTimeout(
       getStepId(step, context),
-      step.type,
+      'step_level_timeout',
       step.timeout!,
       visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
       context
@@ -148,9 +150,12 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
   return visitAtomicStep(currentStep, context);
 }
 
-export function visitWaitStep(currentStep: WaitStep, context: GraphBuildContext): graphlib.Graph {
+export function visitWaitStep(
+  currentStep: WaitStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   const waitNode: WaitGraphNode = {
     id: getStepId(currentStep, context),
     type: 'wait',
@@ -165,9 +170,12 @@ export function visitWaitStep(currentStep: WaitStep, context: GraphBuildContext)
   return graph;
 }
 
-export function visitHttpStep(currentStep: HttpStep, context: GraphBuildContext): graphlib.Graph {
+export function visitHttpStep(
+  currentStep: HttpStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   const httpNode: HttpGraphNode = {
     id: getStepId(currentStep, context),
     type: 'http',
@@ -185,8 +193,8 @@ export function visitHttpStep(currentStep: HttpStep, context: GraphBuildContext)
 export function visitElasticsearchStep(
   currentStep: ElasticsearchStep,
   context: GraphBuildContext
-): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const elasticsearchNode: ElasticsearchGraphNode = {
     id: getStepId(currentStep, context),
     stepId: getStepId(currentStep, context),
@@ -204,8 +212,8 @@ export function visitElasticsearchStep(
 export function visitKibanaStep(
   currentStep: KibanaStep,
   context: GraphBuildContext
-): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const kibanaNode: KibanaGraphNode = {
     id: getStepId(currentStep, context),
     stepId: getStepId(currentStep, context),
@@ -220,9 +228,12 @@ export function visitKibanaStep(
   return graph;
 }
 
-export function visitAtomicStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
+export function visitAtomicStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   const atomicNode: AtomicGraphNode = {
     id: getStepId(currentStep, context),
     type: 'atomic',
@@ -237,8 +248,12 @@ export function visitAtomicStep(currentStep: BaseStep, context: GraphBuildContex
   return graph;
 }
 
-function createIfGraph(stepId: string, ifStep: IfStep, context: GraphBuildContext): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+function createIfGraph(
+  stepId: string,
+  ifStep: IfStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const enterConditionNodeId = `enterCondition_${stepId}`;
   const exitConditionNodeId = `exitCondition_${stepId}`;
   const ifElseStep = ifStep as IfStep;
@@ -336,7 +351,7 @@ function visitOnFailure(
   context: GraphBuildContext
 ): any {
   const stepId = getStepId(currentStep, context);
-  const onFailureGraphNode: GraphNode = {
+  const onFailureGraphNode: GraphNodeUnion = {
     id: `onFailure_${stepId}`,
     type: 'on-failure',
     stepId,
@@ -373,11 +388,11 @@ function visitOnFailure(
 
 function handleTimeout(
   stepId: string,
-  stepType: string,
+  stepType: 'workflow_level_timeout' | 'step_level_timeout',
   timeout: string,
-  innerGraph: graphlib.Graph,
+  innerGraph: graphlib.Graph<GraphNodeUnion>,
   context: GraphBuildContext
-): graphlib.Graph {
+): graphlib.Graph<GraphNodeUnion> {
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
@@ -393,7 +408,7 @@ function handleTimeout(
     stepId,
     stepType,
   };
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
   graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
   graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
   context.stack.push(enterTimeoutZone);
@@ -405,8 +420,8 @@ function handleTimeout(
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph | null {
-  const stackEntry: GraphNode = {
+): graphlib.Graph<GraphNodeUnion> | null {
+  const stackEntry: GraphNodeUnion = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
     stepId: getStepId(step, context),
@@ -424,12 +439,12 @@ function handleStepLevelOnFailure(
 function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph | null {
+): graphlib.Graph<GraphNodeUnion> | null {
   if (flowControlStepTypes.has(step.type) || disallowedWorkflowLevelOnFailureSteps.has(step.type)) {
     return null;
   }
 
-  const stackEntry: GraphNode = {
+  const stackEntry: GraphNodeUnion = {
     id: `workflowLevelOnFailure_${getStepId(step, { ...context, parentKey: '' })}`,
     type: 'workflow-level-on-failure',
     stepId: getStepId(step, { ...context, parentKey: '' }),
@@ -450,8 +465,8 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: graphlib.Graph): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
   const enterContinueNode: EnterContinueNode = {
@@ -475,10 +490,10 @@ function createContinue(stepId: string, innerGraph: graphlib.Graph): graphlib.Gr
 
 function createRetry(
   stepId: string,
-  innerGraph: graphlib.Graph,
+  innerGraph: WorkflowGraphType,
   retry: WorkflowRetry
-): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const enterRetryNodeId = `enterRetry_${stepId}`;
   const exitNodeId = `exitRetry_${stepId}`;
   const enterRetryNode: EnterRetryNode = {
@@ -502,8 +517,8 @@ function createRetry(
   return graph;
 }
 
-function createNormalPath(stepId: string, normalPathGraph: graphlib.Graph): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+function createNormalPath(stepId: string, normalPathGraph: WorkflowGraphType): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
   const exitNormalPathNodeId = `exitNormalPath_${stepId}`;
   const enterNormalPathNode: EnterNormalPathNode = {
@@ -533,11 +548,11 @@ function createFallbackPath(
   stepId: string,
   fallbackSteps: BaseStep[],
   context: GraphBuildContext
-): graphlib.Graph {
+): WorkflowGraphType {
   const workflowLevelOnFailure = context.stack.find(
     (node) => node.type === 'workflow-level-on-failure'
   );
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   const enterFallbackPathNodeId = `enterFallbackPath_${stepId}`;
   const exitFallbackPathNodeId = `exitFallbackPath_${stepId}`;
   const enterFallbackPathNode: EnterFallbackPathNode = {
@@ -574,11 +589,11 @@ function createFallbackPath(
 
 function createFallback(
   stepId: string,
-  normalPathGraph: graphlib.Graph,
+  normalPathGraph: WorkflowGraphType,
   fallbackPathSteps: BaseStep[],
   context: GraphBuildContext
-): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
   const enterTryBlockNodeId = `enterTryBlock_${stepId}`;
   const exitTryBlockNodeId = `exitTryBlock_${stepId}`;
   const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
@@ -610,10 +625,13 @@ function createFallback(
   return graph;
 }
 
-function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+function createStepsSequence(
+  steps: BaseStep[],
+  context: GraphBuildContext
+): graphlib.Graph<GraphNodeUnion> {
+  const graph = createTypedGraph({ directed: true });
 
-  let previousGraph: graphlib.Graph | null = null;
+  let previousGraph: graphlib.Graph<GraphNodeUnion> | null = null;
 
   for (let i = 0; i < steps.length; i++) {
     const currentGraph = visitAbstractStep(steps[i], context);
@@ -647,8 +665,8 @@ function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): gra
 }
 
 function insertGraphBetweenNodes(
-  graph: graphlib.Graph,
-  subGraph: graphlib.Graph,
+  graph: WorkflowGraphType,
+  subGraph: WorkflowGraphType,
   startNodeId: string,
   endNodeId: string
 ): void {
@@ -682,7 +700,7 @@ function createForeachGraph(
   foreachStep: ForEachStep,
   context: GraphBuildContext
 ): any {
-  const graph = new graphlib.Graph({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   const enterForeachNodeId = `enterForeach_${stepId}`;
   const exitNodeId = `exitForeach_${stepId}`;
   const enterForeachNode: EnterForeachNode = {
@@ -727,7 +745,9 @@ function createForeachGraphForStepWithForeach(
   return createForeachGraph(generatedStepId, foreachStep, context);
 }
 
-export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
+export function convertToWorkflowGraph(
+  workflowSchema: WorkflowYaml
+): graphlib.Graph<GraphNodeUnion> {
   const context: GraphBuildContext = {
     settings: workflowSchema.settings,
     stack: [],

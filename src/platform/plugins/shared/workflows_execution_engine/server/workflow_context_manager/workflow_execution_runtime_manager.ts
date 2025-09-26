@@ -9,7 +9,7 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
 import type { RunStepResult } from '../step/node_implementation';
@@ -90,7 +90,7 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
-  public getCurrentNode(): GraphNode | null {
+  public getCurrentNode(): GraphNodeUnion | null {
     if (!this.workflowExecution.currentNodeId) {
       return null;
     }

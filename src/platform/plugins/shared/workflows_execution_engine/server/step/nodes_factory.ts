@@ -15,18 +15,20 @@ import type {
   EnterIfNode,
   EnterNormalPathNode,
   EnterRetryNode,
-  EnterTimeoutZoneNode,
   EnterTryBlockNode,
   ExitConditionBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  ExitTimeoutZoneNode,
-  GraphNode,
   HttpGraphNode,
+  GraphNodeUnion,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
+import {
+  isEnterWorkflowTimeoutZone,
+  isExitWorkflowTimeoutZone,
+} from '@kbn/workflows/graph/types/guards';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { NodeImplementation } from './node_implementation';
 // Import schema and inferred types
@@ -156,9 +158,9 @@ export class NodesFactory {
       case 'exit-fallback-path':
         return new ExitFallbackPathNodeImpl(node as ExitFallbackPathNode, this.workflowRuntime);
       case 'enter-timeout-zone':
-        if ((node as EnterTimeoutZoneNode).stepType === 'workflow_level_timeout') {
+        if (isEnterWorkflowTimeoutZone(node)) {
           return new EnterWorkflowTimeoutZoneNodeImpl(
-            node as EnterTimeoutZoneNode,
+            node,
             this.workflowRuntime,
             this.workflowExecutionState,
             contextManager
@@ -166,13 +168,13 @@ export class NodesFactory {
         }
 
         return new EnterStepTimeoutZoneNodeImpl(
-          node as EnterTimeoutZoneNode,
+          node,
           this.workflowRuntime,
           this.workflowExecutionState,
           contextManager
         );
       case 'exit-timeout-zone':
-        if ((node as ExitTimeoutZoneNode).stepType === 'workflow_level_timeout') {
+        if (isExitWorkflowTimeoutZone(node)) {
           return new ExitWorkflowTimeoutZoneNodeImpl(this.workflowRuntime);
         }
 
@@ -226,7 +228,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       default:
-        throw new Error(`Unknown node type: ${(node as GraphNode).stepType}`);
+        throw new Error(`Unknown node type: ${(node as GraphNodeUnion).stepType}`);
     }
   }
 }

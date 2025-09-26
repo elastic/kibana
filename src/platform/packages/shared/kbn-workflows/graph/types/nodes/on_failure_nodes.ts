@@ -86,12 +86,28 @@ export const ExitFallbackPathNodeSchema = GraphNodeSchema.extend({
 });
 export type ExitFallbackPathNode = z.infer<typeof ExitFallbackPathNodeSchema>;
 
+export const OnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('on-failure'),
+});
+export type OnFailureNode = z.infer<typeof OnFailureNodeSchema>;
+
+export const StepLevelOnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('step-level-on-failure'),
+});
+export type StepLevelOnFailureNode = z.infer<typeof StepLevelOnFailureNodeSchema>;
+
+export const WorkflowLevelOnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('workflow-level-on-failure'),
+});
+export type WorkflowLevelOnFailureNode = z.infer<typeof WorkflowLevelOnFailureNodeSchema>;
+
 // Timeout handling nodes - stack-based timeout management
 export const EnterTimeoutZoneNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-timeout-zone'),
   timeout: z.string(),
   isInternalStep: z.boolean().default(true),
+  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
 });
 export type EnterTimeoutZoneNode = z.infer<typeof EnterTimeoutZoneNodeSchema>;
 
@@ -99,5 +115,6 @@ export const ExitTimeoutZoneNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-timeout-zone'),
   isInternalStep: z.boolean().default(true),
+  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
 });
 export type ExitTimeoutZoneNode = z.infer<typeof ExitTimeoutZoneNodeSchema>;

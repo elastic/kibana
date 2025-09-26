@@ -14,10 +14,11 @@ export {
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
 export type {
-  GraphNode,
   AtomicGraphNode,
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
+  EnterForeachNodeConfiguration,
+  EnterForeachNodeConfigurationSchema,
   EnterForeachNode,
   EnterIfNode,
   EnterRetryNode,
@@ -40,5 +41,25 @@ export type {
   ExitFallbackPathNode,
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
-  UnionExecutionGraphNode,
+  GraphNodeUnion,
+} from './types';
+
+export {
+  isAtomic,
+  isElasticsearch,
+  isKibana,
+  isHttp,
+  isWait,
+  isEnterForeach,
+  isEnterIf,
+  isEnterRetry,
+  isEnterTryBlock,
+  isEnterNormalPath,
+  isExitForeach,
+  isExitIf,
+  isExitRetry,
+  isExitTryBlock,
+  isExitNormalPath,
+  isEnterContinue,
+  isExitContinue,
 } from './types';
