@@ -481,10 +481,12 @@ export class SessionService {
 
   /**
    * Continue previous search session
-   * Can be used to share a running search session between different apps, so they can reuse search cache
+   * Can be used to restore all the information of a previous search session after a new one has been started. It is useful
+   * to continue a session in different apps or across different discover tabs.
    *
    * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
    * @param sessionId
+   * @param keepSearches indicates if restoring the session also restores the tracked searches or starts with an empty tracking list
    */
   public continue(sessionId: string, keepSearches = false) {
     const sessionSnapshot = this.sessionSnapshots.get(sessionId);
