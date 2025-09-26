@@ -112,6 +112,11 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "resilient": Object {
+            "additionalFields": Object {
+              "enabled": true,
+            },
+          },
           "stack": Object {
             "enabled": true,
           },
