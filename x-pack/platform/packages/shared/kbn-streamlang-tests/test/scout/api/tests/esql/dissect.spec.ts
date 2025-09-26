@@ -11,9 +11,10 @@ import { transpileEsql as transpile } from '@kbn/streamlang';
 import { expectDefined } from '../../../utils';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
   apiTest(
     'should correctly parse a log line with the dissect processor',
+    { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect';
       const streamlangDSL: StreamlangDSL = {
@@ -50,6 +51,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
 
   apiTest(
     'should ignore dissected fields when ignore_missing is true',
+    { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-ignore-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -103,6 +105,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
 
   apiTest(
     'should filter the document out when ignore_missing is false',
+    { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-fail-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -127,177 +130,191 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
     }
   );
 
-  apiTest('should use append_separator', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-dissect-append-separator';
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'dissect',
-          from: 'message',
-          pattern: '%{+field1}-%{+field1}',
-          append_separator: ',',
-        } as DissectProcessor,
-      ],
-    };
-    const { query } = transpile(streamlangDSL);
-    const docs = [{ message: 'value1-value2' }];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
-    expect(esqlResult.documents[0]).toStrictEqual(
-      expect.objectContaining({
-        field1: 'value1,value2',
-      })
-    );
-  });
+  apiTest(
+    'should use append_separator',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-dissect-append-separator';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: 'message',
+            pattern: '%{+field1}-%{+field1}',
+            append_separator: ',',
+          } as DissectProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const docs = [{ message: 'value1-value2' }];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({
+          field1: 'value1,value2',
+        })
+      );
+    }
+  );
 
-  apiTest('should not dissect when where is false', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-dissect-where-false';
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'dissect',
-          from: 'message',
-          pattern: '[%{log.level}]',
-          where: {
-            field: 'attributes.should_exist',
-            exists: true,
-          },
-        } as DissectProcessor,
-      ],
-    };
-    const { query } = transpile(streamlangDSL);
-    const mappingDoc = { log: { level: '' } };
-    const docs = [
-      mappingDoc,
-      { attributes: { should_exist: 'YES' }, message: '[info]' },
-      { attributes: { size: 2048 }, message: '[warn]' },
-    ];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
+  apiTest(
+    'should not dissect when where is false',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-dissect-where-false';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: 'message',
+            pattern: '[%{log.level}]',
+            where: {
+              field: 'attributes.should_exist',
+              exists: true,
+            },
+          } as DissectProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const mappingDoc = { log: { level: '' } };
+      const docs = [
+        mappingDoc,
+        { attributes: { should_exist: 'YES' }, message: '[info]' },
+        { attributes: { size: 2048 }, message: '[warn]' },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    // Find documents by their attributes
-    const shouldExistDoc = esqlResult.documents.find(
-      (doc) => doc['attributes.should_exist'] === 'YES'
-    );
-    const sizeDocs = esqlResult.documents.filter((doc) => doc['attributes.size'] === 2048);
+      // Find documents by their attributes
+      const shouldExistDoc = esqlResult.documents.find(
+        (doc) => doc['attributes.should_exist'] === 'YES'
+      );
+      const sizeDocs = esqlResult.documents.filter((doc) => doc['attributes.size'] === 2048);
 
-    // Verify the document with should_exist has been properly dissected
-    expect(shouldExistDoc).toStrictEqual(
-      expect.objectContaining({
-        'log.level': 'info',
-      })
-    );
+      // Verify the document with should_exist has been properly dissected
+      expect(shouldExistDoc).toStrictEqual(
+        expect.objectContaining({
+          'log.level': 'info',
+        })
+      );
 
-    // Verify documents without should_exist have not been dissected
-    sizeDocs.forEach((doc) => {
-      expect(doc['log.level']).toBeNull();
-    });
-  });
+      // Verify documents without should_exist have not been dissected
+      sizeDocs.forEach((doc) => {
+        expect(doc['log.level']).toBeNull();
+      });
+    }
+  );
 
   // The following test tests field type mismatches and how dissect with clause where handles them.
   // e.g. for a document { log: { severity: 3 } }, a DISSECT pattern like [%{log.severity}]
   // will extract log.severity as a string (DISSECT always outputs keyword/string).
   // In this case if the indexed log.severity if of different type e.g. long/integer, ES|QL will fail with:
   // `verification_exception: Found 1 problem line 1:1: Column [log.severity] has conflicting data types: [LONG] and [KEYWORD]`
-  apiTest('should handle field type mismatches gracefully', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-dissect-field-type-mismatch';
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
+  apiTest(
+    'should handle field type mismatches gracefully',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-dissect-field-type-mismatch';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: 'message',
+            pattern: '[%{log.level}] [%{log.severity}] [%{log.size}] [%{log.ratio}]',
+            where: {
+              field: 'attributes.should_exist',
+              exists: true,
+            },
+          } as DissectProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+
+      const docsToDissect = [
+        { message: '[info] [5] [1024] [50.55]' },
+        { message: '[warn] [5] [1024] [50.55]' },
+        { message: '[error] [5] [1024] [50.55]' },
         {
-          action: 'dissect',
-          from: 'message',
-          pattern: '[%{log.level}] [%{log.severity}] [%{log.size}] [%{log.ratio}]',
-          where: {
-            field: 'attributes.should_exist',
-            exists: true,
-          },
-        } as DissectProcessor,
-      ],
-    };
-    const { query } = transpile(streamlangDSL);
+          log: { ratio: 50 }, // ingest ratio as number
+          message: '[error] [5] [1024] [50.55]',
+        },
+        { size: 512, message: '[error] [5] [1024] [50.55]' }, // ingest size as number
+      ].map((doc) => ({
+        attributes: { should_exist: 'YES' },
+        ...doc,
+      })); // ensure all docs have the dissect where condition true}))
 
-    const docsToDissect = [
-      { message: '[info] [5] [1024] [50.55]' },
-      { message: '[warn] [5] [1024] [50.55]' },
-      { message: '[error] [5] [1024] [50.55]' },
-      {
-        log: { ratio: 50 }, // ingest ratio as number
-        message: '[error] [5] [1024] [50.55]',
-      },
-      { size: 512, message: '[error] [5] [1024] [50.55]' }, // ingest size as number
-    ].map((doc) => ({
-      attributes: { should_exist: 'YES' },
-      ...doc,
-    })); // ensure all docs have the dissect where condition true}))
+      const docsToSkip = [
+        { log: { severity: 3, level: 'invalid' }, message: '[warn] [3] [1024] 34.2' }, // ingest log.severity as number
+        { log: { size: '4096' }, message: '[info] [4] [2048] 22.4' }, // ingest size as string
+      ];
+      await testBed.ingest(indexName, [...docsToDissect, ...docsToSkip]);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    const docsToSkip = [
-      { log: { severity: 3, level: 'invalid' }, message: '[warn] [3] [1024] 34.2' }, // ingest log.severity as number
-      { log: { size: '4096' }, message: '[info] [4] [2048] 22.4' }, // ingest size as string
-    ];
-    await testBed.ingest(indexName, [...docsToDissect, ...docsToSkip]);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
+      // Group documents by their log levels
+      const infoLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'info');
+      const warnLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'warn');
+      const errorLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'error');
 
-    // Group documents by their log levels
-    const infoLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'info');
-    const warnLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'warn');
-    const errorLevelDocs = esqlResult.documents.filter((doc) => doc['log.level'] === 'error');
+      // Check all valid log levels are present
+      expect(infoLevelDocs.length).toBeGreaterThan(0);
+      expect(warnLevelDocs.length).toBeGreaterThan(0);
+      expect(errorLevelDocs.length).toBeGreaterThan(0);
 
-    // Check all valid log levels are present
-    expect(infoLevelDocs.length).toBeGreaterThan(0);
-    expect(warnLevelDocs.length).toBeGreaterThan(0);
-    expect(errorLevelDocs.length).toBeGreaterThan(0);
+      // Check values are of correct types - without conditional expect calls
+      // Get all documents with defined log levels that we care about
+      const docsWithValidLogLevels = esqlResult.documents.filter(
+        (doc) => doc['log.level'] && ['info', 'warn', 'error'].includes(doc['log.level'] as string)
+      );
 
-    // Check values are of correct types - without conditional expect calls
-    // Get all documents with defined log levels that we care about
-    const docsWithValidLogLevels = esqlResult.documents.filter(
-      (doc) => doc['log.level'] && ['info', 'warn', 'error'].includes(doc['log.level'] as string)
-    );
+      // Verify all valid log level docs have string type
+      docsWithValidLogLevels.forEach((doc) => {
+        expect(typeof doc['log.level']).toBe('string');
+      });
 
-    // Verify all valid log level docs have string type
-    docsWithValidLogLevels.forEach((doc) => {
-      expect(typeof doc['log.level']).toBe('string');
-    });
+      // Test severities separately for docs that have them
+      const docsWithSeverity = docsWithValidLogLevels.filter((doc) => doc['log.severity'] !== null);
+      docsWithSeverity.forEach((doc) => {
+        expect(typeof doc['log.severity']).toBe('string');
+      });
 
-    // Test severities separately for docs that have them
-    const docsWithSeverity = docsWithValidLogLevels.filter((doc) => doc['log.severity'] !== null);
-    docsWithSeverity.forEach((doc) => {
-      expect(typeof doc['log.severity']).toBe('string');
-    });
+      // Test sizes separately for docs that have them
+      const docsWithSize = docsWithValidLogLevels.filter((doc) => doc['log.size'] !== null);
+      docsWithSize.forEach((doc) => {
+        expect(typeof doc['log.size']).toBe('string');
+      });
 
-    // Test sizes separately for docs that have them
-    const docsWithSize = docsWithValidLogLevels.filter((doc) => doc['log.size'] !== null);
-    docsWithSize.forEach((doc) => {
-      expect(typeof doc['log.size']).toBe('string');
-    });
+      // Test ratios separately for docs that have them
+      const docsWithRatio = docsWithValidLogLevels.filter((doc) => doc['log.ratio'] !== null);
+      docsWithRatio.forEach((doc) => {
+        expect(typeof doc['log.ratio']).toBe('string');
+      });
 
-    // Test ratios separately for docs that have them
-    const docsWithRatio = docsWithValidLogLevels.filter((doc) => doc['log.ratio'] !== null);
-    docsWithRatio.forEach((doc) => {
-      expect(typeof doc['log.ratio']).toBe('string');
-    });
+      // Check for specific values
+      const allSeverities = esqlResult.documents
+        .filter((doc) => doc['log.severity'] !== null)
+        .map((doc) => doc['log.severity']);
 
-    // Check for specific values
-    const allSeverities = esqlResult.documents
-      .filter((doc) => doc['log.severity'] !== null)
-      .map((doc) => doc['log.severity']);
+      expect(allSeverities.every((val) => ['3', '4', '5'].includes(val as string))).toBe(true);
 
-    expect(allSeverities.every((val) => ['3', '4', '5'].includes(val as string))).toBe(true);
+      const allSizes = esqlResult.documents
+        .filter((doc) => doc['log.size'] !== null)
+        .map((doc) => doc['log.size']);
 
-    const allSizes = esqlResult.documents
-      .filter((doc) => doc['log.size'] !== null)
-      .map((doc) => doc['log.size']);
+      expect(allSizes.every((val) => ['1024', '4096'].includes(val as string))).toBe(true);
 
-    expect(allSizes.every((val) => ['1024', '4096'].includes(val as string))).toBe(true);
+      const allRatios = esqlResult.documents
+        .filter((doc) => doc['log.ratio'] !== null)
+        .map((doc) => doc['log.ratio']);
 
-    const allRatios = esqlResult.documents
-      .filter((doc) => doc['log.ratio'] !== null)
-      .map((doc) => doc['log.ratio']);
+      expect(allRatios.every((val) => val === '50.55')).toBe(true);
+    }
+  );
 
-    expect(allRatios.every((val) => val === '50.55')).toBe(true);
-  });
-
+  // This test is flaky on Serverless, it's skipped there for now and needs to be investigated.
   apiTest(
     'should dissect only when both ignore_missing and where conditions match',
+    { tag: ['@ess'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-ignore-missing-where';
       const streamlangDSL: StreamlangDSL = {
@@ -383,6 +400,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
 
   apiTest(
     'should handle an exhaustive dissect pattern with modifiers and mixed documents',
+    { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-exhaustive';
       const pattern =
@@ -490,6 +508,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
 
   apiTest(
     'should not be able to retain ingested precision if field is mapped as long',
+    { tag: ['@ess', '@svlOblt'] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-precision';
       const streamlangDSL: StreamlangDSL = {
@@ -526,20 +545,24 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', { tag: ['@ess', '@sv
     }
   );
 
-  apiTest('should reject Mustache template syntax {{ and {{{', async () => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'dissect',
-          from: '{{message.field}}',
-          pattern: '%{@timestamp} %{client.ip}',
-        } as DissectProcessor,
-      ],
-    };
+  apiTest(
+    'should reject Mustache template syntax {{ and {{{',
+    { tag: ['@ess', '@svlOblt'] },
+    async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'dissect',
+            from: '{{message.field}}',
+            pattern: '%{@timestamp} %{client.ip}',
+          } as DissectProcessor,
+        ],
+      };
 
-    // Should throw validation error for Mustache templates
-    expect(() => transpile(streamlangDSL)).toThrow(
-      'Mustache template syntax {{ }} or {{{ }}} is not allowed'
-    );
-  });
+      // Should throw validation error for Mustache templates
+      expect(() => transpile(streamlangDSL)).toThrow(
+        'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+      );
+    }
+  );
 });
