@@ -225,7 +225,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('connectLLMButton');
         await testSubjects.click('connectLLMButton');
       },
-      async closetLLMCostTour(){
+      async closetLLMCostTour() {
         await testSubjects.existOrFail('elasticLLMCostsTourCloseBtn');
         await testSubjects.click('elasticLLMCostsTourCloseBtn');
       },
@@ -542,17 +542,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         });
       },
 
-      async selectConnector(name:string){
+      async selectConnector(name: string) {
         await testSubjects.existOrFail('summarizationPanel');
         await testSubjects.existOrFail('summarizationModelSelect');
         await testSubjects.click('summarizationModelSelect');
-        await retry.try(async () => {
-          await testSubjects.existOrFail(`summarization_model_select_${name}_gpt-4o`)
-          await testSubjects.click(`summarization_model_select_${name}_gpt-4o`);
-        }, undefined, 200);
-
+        await retry.try(
+          async () => {
+            await testSubjects.existOrFail(`summarization_model_select_${name}_gpt-4o`);
+            await testSubjects.click(`summarization_model_select_${name}_gpt-4o`);
+          },
+          undefined,
+          200
+        );
+      },
     },
-  },
     PlaygroundStartSearchPage: {
       async expectPlaygroundStartSearchPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
