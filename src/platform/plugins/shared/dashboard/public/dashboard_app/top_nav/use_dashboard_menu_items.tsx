@@ -13,14 +13,18 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+<<<<<<< HEAD
 
+=======
+import useObservable from 'react-use/lib/useObservable';
+>>>>>>> 6ba1dae16ade79097ea4f86a8a49e49dbbc31def
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { coreServices, shareService } from '../../services/kibana_services';
+import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
@@ -38,6 +42,7 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
+  const appId = useObservable(coreServices.application.currentAppId$);
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -189,6 +194,18 @@ export const useDashboardMenuItems = ({
         run: () => resetChanges(true),
       } as TopNavMenuData,
 
+      backgroundSearch: {
+        ...topNavStrings.backgroundSearch,
+        id: 'backgroundSearch',
+        iconType: 'clock',
+        iconOnly: true,
+        testId: 'backgroundSearchButton',
+        run: () =>
+          dataService.search.showSearchSessionsFlyout({
+            appId,
+          }),
+      } as TopNavMenuData,
+
       share: {
         ...topNavStrings.share,
         id: 'share',
@@ -247,6 +264,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     resetChanges,
     isResetting,
+    appId,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -283,7 +301,7 @@ export const useDashboardMenuItems = ({
   }, []);
 
   const viewModeTopNavConfig = useMemo(() => {
-    const { showWriteControls } = getDashboardCapabilities();
+    const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
@@ -296,12 +314,17 @@ export const useDashboardMenuItems = ({
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
+    const backgroundSearch =
+      storeSearchSession && dataService.search.isBackgroundSearchEnabled
+        ? [menuItems.backgroundSearch]
+        : [];
 
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
+      ...backgroundSearch,
       ...shareMenuItem,
       ...editMenuItem,
     ];
@@ -313,6 +336,7 @@ export const useDashboardMenuItems = ({
     menuItems.interactiveSave,
     menuItems.edit,
     menuItems.fullScreen,
+    menuItems.backgroundSearch,
     hasExportIntegration,
     dashboardApi.isManaged,
     showResetChange,
@@ -320,6 +344,8 @@ export const useDashboardMenuItems = ({
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
+    const { storeSearchSession } = getDashboardCapabilities();
+
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
       ? ([
@@ -344,9 +370,13 @@ export const useDashboardMenuItems = ({
     }
 
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+    const backgroundSearch =
+      storeSearchSession && dataService.search.isBackgroundSearchEnabled
+        ? [menuItems.backgroundSearch]
+        : [];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...backgroundSearch, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
@@ -359,6 +389,7 @@ export const useDashboardMenuItems = ({
     menuItems.switchToViewMode,
     menuItems.quickSave,
     menuItems.add,
+    menuItems.backgroundSearch,
     hasExportIntegration,
     lastSavedId,
     showResetChange,

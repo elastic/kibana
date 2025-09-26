@@ -254,6 +254,14 @@ export const topNavStrings = {
       defaultMessage: 'Add content to your dashboard',
     }),
   },
+  backgroundSearch: {
+    label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {
+      defaultMessage: 'Background searches',
+    }),
+    description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
+      defaultMessage: 'Open background searches',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
