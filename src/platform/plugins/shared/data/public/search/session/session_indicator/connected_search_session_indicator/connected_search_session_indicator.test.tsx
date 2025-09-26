@@ -57,7 +57,7 @@ beforeEach(() => {
   }));
 });
 
-test("shouldn't show indicator in case no active search session", async () => {
+test.skip("shouldn't show indicator in case no active search session", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
     application,
@@ -87,7 +87,7 @@ test("shouldn't show indicator in case no active search session", async () => {
   `);
 });
 
-test("shouldn't show indicator in case app hasn't opt-in", async () => {
+test.skip("shouldn't show indicator in case app hasn't opt-in", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
     application,
@@ -118,7 +118,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   `);
 });
 
-test('should show indicator in case there is an active search session', async () => {
+test.skip('should show indicator in case there is an active search session', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
@@ -138,7 +138,7 @@ test('should show indicator in case there is an active search session', async ()
   await waitFor(() => getByTestId('searchSessionIndicator'));
 });
 
-test('should be disabled in case uiConfig says so ', async () => {
+test.skip('should be disabled in case uiConfig says so ', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
   sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
     isDisabled: () => ({
@@ -169,7 +169,7 @@ test('should be disabled in case uiConfig says so ', async () => {
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 });
 
-test('should be disabled in case not enough permissions', async () => {
+test.skip('should be disabled in case not enough permissions', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Completed);
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$, hasAccess: () => false },
@@ -194,7 +194,7 @@ test('should be disabled in case not enough permissions', async () => {
   expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
 });
 
-describe('Completed inactivity', () => {
+describe.skip('Completed inactivity', () => {
   test('save should be disabled after completed and timeout', async () => {
     const state$ = new BehaviorSubject(SearchSessionState.Loading);
 

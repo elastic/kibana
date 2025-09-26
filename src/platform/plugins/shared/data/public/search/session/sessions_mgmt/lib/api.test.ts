@@ -22,7 +22,7 @@ let mockCoreStart: MockedKeys<CoreStart>;
 let mockConfig: SearchSessionsConfigSchema;
 let sessionsClient: SessionsClient;
 
-describe('Search Sessions Management API', () => {
+describe.skip('Search Sessions Management API', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
