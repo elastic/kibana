@@ -14,10 +14,10 @@ failedConfigs=""
 # Parallel execution tuning (can be overridden via env)
 #   JEST_MAX_PARALLEL: number of concurrent Jest config processes
 #   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
-# NOTE: MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
+# NOTE: JEST_MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
 # It can still be overridden by exporting JEST_MAX_PARALLEL.
-MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
-MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
+JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
+JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
 
 if [[ "$1" == 'jest.config.js' ]]; then
   # unit tests
@@ -62,7 +62,7 @@ fi
 echo "+++ ⚠️ WARNING ⚠️"
 echo "
   console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
-  of noise on CI without any percevable benefit, so they have been disabled. If you want to log
+  of noise on CI without any perceivable benefit, so they have been disabled. If you want to log
   output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
@@ -74,14 +74,15 @@ CONFIGS_CSV=$(echo "$configs" | tr '\n' ',' | sed 's/,$//')
 
 echo "--- Running combined jest_all for configs ($TEST_TYPE)"
 echo "$configs"
+echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
-node_opts="--max-old-space-size=${MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
+node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
 if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
 
 echo "actual full command is:"
-echo "NODE_OPTIONS=\"$node_opts\" NODE_ENV="test" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests"
+echo "NODE_OPTIONS=\"$node_opts\" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests"
 echo ""
 
 set +e
