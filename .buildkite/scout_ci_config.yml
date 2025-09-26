@@ -1,5 +1,5 @@
-# Define which plugins should be run or skipped in Scout CI pipeline
-ui_tests:
+# Define which plugins and packages should be run or skipped in Kibana CI pipeline
+plugins:
   enabled:
     - apm
     - discover_enhanced
@@ -7,4 +7,8 @@ ui_tests:
     - observability_onboarding
     - painless_lab
     - security_solution
+  disabled:
+
+packages:
+  enabled:
   disabled:
