@@ -5,7 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { FleetError } from '../../../../errors';
 import {
@@ -25,7 +25,7 @@ export const deleteComponentTemplates = async (
   await pMap(
     componentTemplateIds,
     async (componentTemplateId) => {
-      await deleteComponentTemplate(esClient, logger, componentTemplateId);
+      await deleteComponentTemplate(esClient, componentTemplateId);
       logger.info(`Deleted: ${componentTemplateId}`);
     },
     {
@@ -34,11 +34,7 @@ export const deleteComponentTemplates = async (
   );
 };
 
-async function deleteComponentTemplate(
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  name: string
-): Promise<void> {
+async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
     try {
