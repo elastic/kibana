@@ -139,7 +139,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     return () => observer.disconnect();
   }, [isCollapsed, items, recalculateMenuLayout]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     recalculateMenuLayout();
   }, [isCollapsed, recalculateMenuLayout]);
 
