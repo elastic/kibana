@@ -91,6 +91,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         : // For now we need to be able to create old SO, this may be moved to the config builder
           ({
             ...requestBodyData,
+            // fix type mismatches, null -> undefined
             description: requestBodyData.description ?? undefined,
             visualizationType: requestBodyData.visualizationType,
           } satisfies LensCreateIn['data']);

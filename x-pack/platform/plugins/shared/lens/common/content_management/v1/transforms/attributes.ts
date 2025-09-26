@@ -6,16 +6,19 @@
  */
 
 import type { LensAttributes } from '../../../../server/content_management';
+import type { LensSOAttributesV0 } from '../../../../server/content_management/v0';
 
 /**
  * Cleanup null and loose SO attribute types
  * - `description` should not allow `null`
  * - `visualizationType` should not allow `null` or `undefined`
  */
-export function attributesCleanup(attributes: LensAttributes): LensAttributes {
+export function attributesCleanup(attributes: LensSOAttributesV0): LensAttributes {
   return {
     ...attributes,
+    // fix type mismatches, null -> undefined
     description: attributes.description ?? undefined,
-    visualizationType: attributes.visualizationType ?? 'lnsXY', // default to XY
+    // fix type mismatches, null | undefined -> string
+    visualizationType: attributes.visualizationType ?? 'lnsXY', // should never happen but default to XY
   };
 }
