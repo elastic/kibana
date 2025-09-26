@@ -7,6 +7,7 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
+import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -386,7 +387,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             icon: 'editorCodeBlock',
           },
           {
-            id: 'ingestAndManageData',
+            id: INGEST_AND_MANAGE_DATA_NAV_ID,
             title: i18n.translate('xpack.observability.obltNav.ingestAndManageData', {
               defaultMessage: 'Ingest and manage data',
               description:
@@ -454,7 +455,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ],
           },
           {
-            id: 'stack_management',
+            id: STACK_MANAGEMENT_NAV_ID,
             title: i18n.translate('xpack.observability.obltNav.management', {
               defaultMessage: 'Stack Management',
             }),
