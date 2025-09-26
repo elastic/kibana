@@ -364,8 +364,8 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
+          behaviors: {
+            new_country_login: false,
           },
         },
       };
@@ -390,9 +390,9 @@ describe('EntityStoreCrudClient', () => {
               attributes: {
                 Privileged: true,
               },
-              lifecycle: {
+              behaviors: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                First_seen: '1995-12-17T03:24:00',
+                New_country_login: false,
               },
             },
           },
