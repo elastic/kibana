@@ -83,7 +83,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Get an agent',
+      summary: 'Get an agent by ID',
       description:
         'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.',
       options: {
