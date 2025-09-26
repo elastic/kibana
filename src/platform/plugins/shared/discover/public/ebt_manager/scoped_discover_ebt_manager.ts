@@ -16,6 +16,7 @@ import {
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -25,7 +26,6 @@ import {
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
-  TABS_EVENT_NAME,
   TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
@@ -53,21 +53,6 @@ enum QueryFieldsUsageEventName {
   esqlQuery = 'esqlQuery',
 }
 
-export enum TabsEventName {
-  tabCreated = 'tabCreated',
-  tabClosed = 'tabClosed',
-  tabSwitched = 'tabSwitched',
-  tabReordered = 'tabReordered',
-  tabDuplicated = 'tabDuplicated',
-  tabClosedOthers = 'tabClosedOthers',
-  tabClosedToTheRight = 'tabClosedToTheRight',
-  tabRenamed = 'tabRenamed',
-  tabsLimitReached = 'tabsLimitReached',
-  tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
-  tabsRestoredOnLoad = 'tabsRestoredOnLoad',
-  tabSelectRecentlyClosed = 'tabSelectRecentlyClosed',
-}
-
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
@@ -80,7 +65,7 @@ interface QueryFieldsUsageEventData {
 }
 
 interface TabsEventData {
-  [TABS_EVENT_NAME]: TabsEventName;
+  [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName;
 }
 
 interface ContextualProfileResolvedEventData {
@@ -356,18 +341,12 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
-  public trackTabsEvent({
-    eventName,
-    payload,
-  }: {
-    eventName: TabsEventName;
-    payload?: Record<string, string | number>;
-  }) {
+  public trackTabsEvent({ eventName, ...payload }: TabsEBTEvent) {
     if (!this.reportEvent) {
       return;
     }
     const eventData: TabsEventData = {
-      [TABS_EVENT_NAME]: eventName,
+      [TabsEventDataKeys.TABS_EVENT_NAME]: eventName,
       ...payload,
     };
 

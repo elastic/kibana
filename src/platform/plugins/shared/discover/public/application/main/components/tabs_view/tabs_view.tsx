@@ -22,7 +22,6 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
-import { TabsEventName } from '../../../../ebt_manager';
 
 const MAX_TABS_COUNT = 25;
 
@@ -42,11 +41,8 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
-    (eventName, payload) => {
-      if (!Object.values(TabsEventName).includes(eventName as TabsEventName)) {
-        return;
-      }
-      void scopedEbtManager.trackTabsEvent({ eventName: eventName as TabsEventName, payload });
+    (event) => {
+      void scopedEbtManager.trackTabsEvent(event);
     },
     [scopedEbtManager]
   );

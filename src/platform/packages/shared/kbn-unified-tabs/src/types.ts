@@ -61,4 +61,39 @@ export interface TabsServices {
   };
 }
 
-export type TabsEBTPayload = Record<string, string | number>;
+export enum TabsEventName {
+  tabCreated = 'tabCreated',
+  tabClosed = 'tabClosed',
+  tabSwitched = 'tabSwitched',
+  tabReordered = 'tabReordered',
+  tabDuplicated = 'tabDuplicated',
+  tabClosedOthers = 'tabClosedOthers',
+  tabClosedToTheRight = 'tabClosedToTheRight',
+  tabRenamed = 'tabRenamed',
+  tabsLimitReached = 'tabsLimitReached',
+  tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
+  tabsRestoredOnLoad = 'tabsRestoredOnLoad',
+  tabSelectRecentlyClosed = 'tabSelectRecentlyClosed',
+}
+
+export enum TabsEventDataKeys {
+  TABS_EVENT_NAME = 'eventName',
+  TAB_ID = 'tabId',
+  TOTAL_TABS_OPEN = 'totalTabsOpen',
+  FROM_INDEX = 'fromIndex',
+  TO_INDEX = 'toIndex',
+  REMAINING_TABS_COUNT = 'remainingTabsCount',
+  CLOSED_TABS_COUNT = 'closedTabsCount',
+  SHORTCUT_USED = 'shortcutUsed',
+}
+
+export interface TabsEBTEvent {
+  [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName;
+  [TabsEventDataKeys.TAB_ID]?: string;
+  [TabsEventDataKeys.TOTAL_TABS_OPEN]?: number;
+  [TabsEventDataKeys.FROM_INDEX]?: number;
+  [TabsEventDataKeys.TO_INDEX]?: number;
+  [TabsEventDataKeys.REMAINING_TABS_COUNT]?: number;
+  [TabsEventDataKeys.CLOSED_TABS_COUNT]?: number;
+  [TabsEventDataKeys.SHORTCUT_USED]?: string;
+}

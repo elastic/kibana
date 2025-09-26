@@ -33,7 +33,8 @@ import {
   keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices, TabsEBTPayload } from '../../types';
+import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
+import { TabsEventDataKeys, TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
@@ -72,7 +73,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[], movedTabId: string) => void;
-  onEBTEvent: (eventName: string, payload?: TabsEBTPayload) => void;
+  onEBTEvent: (event: TabsEBTEvent) => void;
 };
 
 export interface TabsBarApi {
@@ -112,8 +113,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
 
     const emitOnKeyUsedEvent = useCallback(
       (shortcut: string) => {
-        onEBTEvent('tabsKeyboardShortcutsUsed', {
-          shortcutUsed: shortcut,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabsKeyboardShortcutsUsed,
+          [TabsEventDataKeys.SHORTCUT_USED]: shortcut,
         });
       },
       [onEBTEvent]
@@ -143,7 +145,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         tabsContainerElement,
       });
 
-    const onTabsLimitReached = useLatest(() => onEBTEvent('tabsLimitReached'));
+    const onTabsLimitReached = useLatest(() =>
+      onEBTEvent({ [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabsLimitReached })
+    );
 
     useEffect(() => {
       if (hasReachedMaxItemsCount) {

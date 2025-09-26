@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { TabsEventDataKeys } from '@kbn/unified-tabs';
 import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
@@ -30,18 +31,7 @@ export const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved
 export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
-/**
- * Tabs actions, i.e. when user renames tab, reorders tabs, closes tab, reaches tabs limit etc
- */
 export const TABS_EVENT_TYPE = 'discover_tabs';
-export const TABS_EVENT_NAME = 'eventName';
-export const TAB_ID = 'tabId';
-export const TOTAL_TABS_OPEN = 'totalTabsOpen';
-export const REMAINING_TABS_COUNT = 'remainingTabsCount';
-export const CLOSED_TABS_COUNT = 'closedTabsCount';
-export const FROM_INDEX = 'fromIndex';
-export const TO_INDEX = 'toIndex';
-export const SHORTCUT_USED = 'shortcutUsed';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -143,56 +133,56 @@ export const registerDiscoverEBTManagerAnalytics = (
   core.analytics.registerEventType({
     eventType: TABS_EVENT_TYPE,
     schema: {
-      [TABS_EVENT_NAME]: {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: {
         type: 'keyword',
         _meta: {
           description:
             'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
         },
       },
-      [TOTAL_TABS_OPEN]: {
+      [TabsEventDataKeys.TOTAL_TABS_OPEN]: {
         type: 'integer',
         _meta: {
           description: 'The number of total tabs open at the time of an event',
           optional: true,
         },
       },
-      [REMAINING_TABS_COUNT]: {
+      [TabsEventDataKeys.REMAINING_TABS_COUNT]: {
         type: 'integer',
         _meta: {
           description: 'The number of remaining tabs after an event',
           optional: true,
         },
       },
-      [CLOSED_TABS_COUNT]: {
+      [TabsEventDataKeys.CLOSED_TABS_COUNT]: {
         type: 'integer',
         _meta: {
           description: 'The number of tabs closed in a single action',
           optional: true,
         },
       },
-      [TAB_ID]: {
+      [TabsEventDataKeys.TAB_ID]: {
         type: 'keyword',
         _meta: {
           description: 'The unique identifier of the tab',
           optional: true,
         },
       },
-      [FROM_INDEX]: {
+      [TabsEventDataKeys.FROM_INDEX]: {
         type: 'integer',
         _meta: {
           description: 'The original index of the tab being moved',
           optional: true,
         },
       },
-      [TO_INDEX]: {
+      [TabsEventDataKeys.TO_INDEX]: {
         type: 'integer',
         _meta: {
           description: 'The new index of the tab being moved',
           optional: true,
         },
       },
-      [SHORTCUT_USED]: {
+      [TabsEventDataKeys.SHORTCUT_USED]: {
         type: 'keyword',
         _meta: {
           description: 'The keyboard key used for tab navigation',

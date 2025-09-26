@@ -24,7 +24,14 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabsServices, TabPreviewData, TabsEBTPayload } from '../../types';
+import {
+  type TabItem,
+  type TabsServices,
+  type TabPreviewData,
+  type TabsEBTEvent,
+  TabsEventName,
+  TabsEventDataKeys,
+} from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 
@@ -39,7 +46,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'unsavedItemIds' 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
-  onEBTEvent: (eventName: string, payload?: TabsEBTPayload) => void;
+  onEBTEvent: (event: TabsEBTEvent) => void;
 }
 
 export interface TabbedContentState {
@@ -90,9 +97,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       changeState((prevState) => {
         const nextState = replaceTabWith(prevState, item, editedItem);
 
-        onEBTEvent('tabRenamed', {
-          tabId: item.id,
-          totalTabsOpen: prevState.items.length,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabRenamed,
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
         return nextState;
@@ -103,11 +111,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   // Debounced tabSwitched EBT event sender
   const debouncedTabSwitched = useMemo(
-    () =>
-      debounce(
-        (payload: TabsEBTPayload) => onEBTEvent('tabSwitched', payload),
-        TAB_SWITCH_DEBOUNCE_MS
-      ),
+    () => debounce((event: TabsEBTEvent) => onEBTEvent(event), TAB_SWITCH_DEBOUNCE_MS),
     [onEBTEvent]
   );
 
@@ -118,15 +122,21 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         const prevItems = prevState.items;
         const nextState = selectTab(prevState, item);
 
-        const payload = {
-          tabId: item.id,
-          fromIndex: prevItems.findIndex(
+        const eventPayload = {
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex(
             (singleItem) => singleItem.id === prevState.selectedItem?.id
           ),
-          toIndex: nextState.items.findIndex((singleItem) => singleItem.id === item.id),
-          totalTabsOpen: prevItems.length,
+          [TabsEventDataKeys.TO_INDEX]: nextState.items.findIndex(
+            (singleItem) => singleItem.id === item.id
+          ),
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevItems.length,
         };
-        debouncedTabSwitched(payload);
+
+        debouncedTabSwitched({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSwitched,
+          ...eventPayload,
+        });
 
         return nextState;
       });
@@ -139,9 +149,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       changeState((prevState) => {
         const newState = selectRecentlyClosedTab(prevState, item);
 
-        onEBTEvent('tabSelectRecentlyClosed', {
-          tabId: item.id,
-          totalTabsOpen: prevState.items.length,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
         return newState;
@@ -158,10 +169,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
         }
 
-        onEBTEvent('tabClosed', {
-          totalTabsOpen: prevState.items.length,
-          remainingTabsCount: nextState.items.length,
-          tabId: item.id,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosed,
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
         });
 
         return nextState;
@@ -180,11 +192,12 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           return nextState;
         }
 
-        onEBTEvent('tabReordered', {
-          fromIndex: prevItems.findIndex((item) => item.id === movedTabId),
-          toIndex: reorderedItems.findIndex((item) => item.id === movedTabId),
-          totalTabsOpen: prevState.items.length,
-          tabId: movedTabId,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabReordered,
+          [TabsEventDataKeys.TAB_ID]: movedTabId,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex((item) => item.id === movedTabId),
+          [TabsEventDataKeys.TO_INDEX]: reorderedItems.findIndex((item) => item.id === movedTabId),
         });
 
         return nextState;
@@ -199,9 +212,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     changeState((prevState) => {
       const nextState = addTab(prevState, newItem, maxItemsCount);
 
-      onEBTEvent('tabCreated', {
-        totalTabsOpen: prevState.items.length,
-        tabId: newItem.id,
+      onEBTEvent({
+        [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabCreated,
+        [TabsEventDataKeys.TAB_ID]: newItem.id,
+        [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
       });
 
       return nextState;
@@ -230,9 +244,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       changeState((prevState) => {
         const nextState = insertTabAfter(prevState, newItem, item, maxItemsCount);
 
-        onEBTEvent('tabDuplicated', {
-          tabId: item.id,
-          totalTabsOpen: prevState.items.length,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabDuplicated,
+          [TabsEventDataKeys.TAB_ID]: newItem.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
         return nextState;
@@ -246,10 +261,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       changeState((prevState) => {
         const nextState = closeOtherTabs(prevState, item);
 
-        onEBTEvent('tabClosedOthers', {
-          tabId: item.id,
-          totalTabsOpen: prevState.items.length,
-          closedTabsCount: prevState.items.length - nextState.items.length,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedOthers,
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
         });
 
         return nextState;
@@ -263,11 +279,12 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       changeState((prevState) => {
         const nextState = closeTabsToTheRight(prevState, item);
 
-        onEBTEvent('tabClosedToTheRight', {
-          tabId: item.id,
-          totalTabsOpen: prevState.items.length,
-          closedTabsCount: prevState.items.length - nextState.items.length,
-          remainingTabsCount: nextState.items.length,
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedToTheRight,
+          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
+          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
         });
 
         return nextState;
