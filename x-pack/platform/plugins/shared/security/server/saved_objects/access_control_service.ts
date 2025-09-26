@@ -93,8 +93,6 @@ export class AccessControlService {
     const unauthorizedTypes: Set<string> = new Set();
 
     for (const type of typesRequiringAccessControl) {
-      console.log('type', type);
-      console.log('typeMap', typeMap);
       const typeAuth = typeMap.get(type);
       const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
       if (!accessControlAuth) {
