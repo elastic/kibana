@@ -16,6 +16,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
@@ -108,7 +109,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     tabsContainerRef.current = tabsContainerElement;
     const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
     const moveFocusToItemIdRef = useRef<string | null>(null);
-    const hasSentMaxReachedEventRef = useRef(false);
 
     const emitOnKeyUsedEvent = useCallback(
       (shortcut: string) => {
@@ -143,14 +143,13 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         tabsContainerElement,
       });
 
+    const onTabsLimitReached = useLatest(() => onEBTEvent('tabsLimitReached'));
+
     useEffect(() => {
-      if (hasReachedMaxItemsCount && !hasSentMaxReachedEventRef.current) {
-        hasSentMaxReachedEventRef.current = true;
-        onEBTEvent('tabsLimitReached');
-      } else if (!hasReachedMaxItemsCount) {
-        hasSentMaxReachedEventRef.current = false;
+      if (hasReachedMaxItemsCount) {
+        onTabsLimitReached.current();
       }
-    }, [hasReachedMaxItemsCount, onEBTEvent]);
+    }, [hasReachedMaxItemsCount, onTabsLimitReached]);
 
     useEffect(() => {
       if (selectedItem && tabsContainerRef.current) {
