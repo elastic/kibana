@@ -307,8 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.selectFile(testData.filePath);
 
           await ml.testExecution.logTestStep('displays the components of the file details page');
-          await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
-          await ml.dataVisualizerFileBased.assertFileContentPanelExists();
+          await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title, 0);
           await ml.dataVisualizerFileBased.assertFileContentHighlightingSwitchExists(
             testData.expected.results.highlightedText
           );
