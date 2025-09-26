@@ -47,7 +47,7 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DataTableToolbar } from './components/toolbar';
+import { Toolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
@@ -707,7 +707,7 @@ export const getDatatableVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <DataTableToolbar {...props} />;
+    return <Toolbar {...props} />;
   },
 
   onEditAction(state, event) {
