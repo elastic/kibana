@@ -9,6 +9,7 @@ import type { RegisterRuleTypesParams } from './types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
+import { register as registerEsqlQuery } from './esql';
 
 export * from './constants';
 
@@ -18,4 +19,5 @@ export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams, isServ
     registerGeoContainment(params);
   }
   registerEsQuery(params, isServerless);
+  registerEsqlQuery(params, isServerless);
 }
