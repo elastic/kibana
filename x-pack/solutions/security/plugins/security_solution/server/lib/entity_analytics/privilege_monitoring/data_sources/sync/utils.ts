@@ -13,3 +13,10 @@ export const getErrorFromBulkResponse = (resp: BulkResponse): ErrorCause[] =>
         .map((item) => item.index?.error ?? item.update?.error)
         .filter((e): e is ErrorCause => e !== undefined)
     : [];
+
+export const errorsMsg = (errors: ErrorCause[]): string => {
+  if (errors.length > 0) {
+    return errors.map((e) => `${e.type}: ${e.reason}`).join('; ');
+  }
+  return 'No errors found';
+};

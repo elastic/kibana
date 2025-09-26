@@ -222,6 +222,32 @@ export const PrivMonUtils = (
     return res.body;
   };
 
+  const setIntegrationUserPrivilege = async ({
+    id,
+    isPrivileged,
+    indexPattern,
+  }: {
+    id: string;
+    isPrivileged: boolean;
+    indexPattern: string;
+  }) => {
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+      script: {
+        lang: 'painless',
+        source: `
+      if (ctx._source.user == null) ctx._source.user = new HashMap();
+      ctx._source.user.is_privileged = params.new_privileged_status;
+      ctx._source.user.roles = new ArrayList();      
+    `,
+        params: { new_privileged_status: isPrivileged },
+      },
+    });
+  };
+
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
@@ -231,6 +257,7 @@ export const PrivMonUtils = (
     initPrivMonEngineWithoutAuth,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
+    setIntegrationUserPrivilege,
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
   };
