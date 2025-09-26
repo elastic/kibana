@@ -580,7 +580,7 @@ describe('EntityStoreCrudClient', () => {
       );
     });
 
-    it('when valid update entities', async () => {
+    it('when valid create entities', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
 
@@ -653,7 +653,7 @@ describe('EntityStoreCrudClient', () => {
       expect(esClientMock.bulk).toMatchSnapshot();
     });
 
-    it('when valid update entity using force', async () => {
+    it('when valid create entity using force', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
 
