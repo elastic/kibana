@@ -122,9 +122,11 @@ export class EuiComboBoxWrapper {
   }
 
   async clear() {
-    const currentValue = await this.getSelectedValue();
-    const selectedOptionsCount = await this.comboBoxSelectedOptions.count();
-    if (currentValue === '' && selectedOptionsCount === 0) {
+    const inputValue = await this.getSelectedValue();
+    const inputPillsCount = await this.comboBoxSelectedOptions.count();
+    // multi-selection combobox input has no value, but only "pills", so we need to check both
+    if (inputValue === '' && inputPillsCount === 0) {
+      // no need to clean, it is empty
       return;
     }
     await this.comboBoxClearButton.click();
