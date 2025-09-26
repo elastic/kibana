@@ -196,6 +196,15 @@ describe('<SimplePrivilegeForm>', () => {
           role,
         });
       },
+      role: {
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {},
+          },
+        ],
+      },
     });
     const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
