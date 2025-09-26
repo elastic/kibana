@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MutableRefObject } from 'react';
-import { useCallback, useRef, useState, useLayoutEffect, useEffect } from 'react';
+import type { RefObject } from 'react';
+import { useCallback, useRef, useState, useLayoutEffect } from 'react';
 
 import type { MenuItem } from '../../types';
 import { MAX_MENU_ITEMS } from '../constants';
@@ -22,11 +22,7 @@ import { getStyleProperty } from '../utils/get_style_property';
  * @param menu - The menu element.
  * @param items - The menu items.
  */
-const cacheHeights = (
-  ref: MutableRefObject<number[]>,
-  menu: HTMLElement,
-  items: MenuItem[]
-): void => {
+const cacheHeights = (ref: RefObject<number[]>, menu: HTMLElement, items: MenuItem[]): void => {
   if (ref.current?.length !== items.length) {
     const children: Element[] = Array.from(menu.children);
 
@@ -81,7 +77,7 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
 };
 
 interface ResponsiveMenuState {
-  primaryMenuRef: MutableRefObject<HTMLElement>;
+  primaryMenuRef: RefObject<HTMLElement>;
   visibleMenuItems: MenuItem[];
   overflowMenuItems: MenuItem[];
 }
