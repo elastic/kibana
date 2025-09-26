@@ -44,7 +44,7 @@ import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
-import { useStartDashboardsMigrationModal } from '../start_dashboards_migration_modal';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';

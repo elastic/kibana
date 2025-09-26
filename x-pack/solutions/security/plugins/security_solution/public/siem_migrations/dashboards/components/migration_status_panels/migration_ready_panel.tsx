@@ -18,7 +18,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
-import { useStartDashboardsMigrationModal } from '../start_dashboards_migration_modal';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 
 export interface MigrationReadyPanelProps {
   migrationStats: DashboardMigrationStats;

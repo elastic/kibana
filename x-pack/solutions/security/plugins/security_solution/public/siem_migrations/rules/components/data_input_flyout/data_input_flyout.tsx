@@ -25,7 +25,7 @@ import { RulesDataInput } from './steps/rules/rules_data_input';
 import { DataInputStep } from './steps/constants';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
-import { useStartRulesMigrationModal } from '../start_rules_migration_modal';
+import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import type { RuleMigrationStats } from '../../types';
 
 interface MissingResourcesIndexed {

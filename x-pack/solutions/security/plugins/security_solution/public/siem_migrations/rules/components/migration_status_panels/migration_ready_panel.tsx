@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
-import { useStartRulesMigrationModal } from '../start_rules_migration_modal';
+import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;

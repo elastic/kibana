@@ -7,15 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
-import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
-import type { DashboardMigrationTranslationStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import { useIsOpenState } from '../../../common/hooks/use_is_open_state';
+import type { DashboardMigrationTranslationStats } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from './translations';
-import type { DashboardMigrationStats } from '../../types';
-import { StartMigrationModal } from '../../../common/components';
-import type { MigrationSettingsBase } from '../../../common/types';
-import type { OnSuccess } from '../../logic/use_start_migration';
-import { useStartMigration } from '../../logic/use_start_migration';
+import type { DashboardMigrationStats } from '../types';
+import { StartMigrationModal } from '../../common/components';
+import type { MigrationSettingsBase } from '../../common/types';
+import type { OnSuccess } from '../logic/use_start_migration';
+import { useStartMigration } from '../logic/use_start_migration';
 
 interface UseStartDashboardsMigrationModalProps {
   type: 'start' | 'retry' | 'reprocess';

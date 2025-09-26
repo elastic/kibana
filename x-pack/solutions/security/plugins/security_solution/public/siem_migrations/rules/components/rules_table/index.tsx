@@ -52,7 +52,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
-import { useStartRulesMigrationModal } from '../start_rules_migration_modal';
+import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';

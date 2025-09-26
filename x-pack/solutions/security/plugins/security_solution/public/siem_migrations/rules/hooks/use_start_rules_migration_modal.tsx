@@ -8,15 +8,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
-import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
-import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
+import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import { useIsOpenState } from '../../../common/hooks/use_is_open_state';
 import * as i18n from './translations';
-import type { RuleMigrationStats } from '../../types';
-import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '../../../common/components';
-import type { MigrationSettingsBase } from '../../../common/types';
-import type { OnSuccess } from '../../logic/use_start_migration';
-import { useStartMigration } from '../../logic/use_start_migration';
+import type { RuleMigrationStats } from '../types';
+import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '../../common/components';
+import type { MigrationSettingsBase } from '../../common/types';
+import type { OnSuccess } from '../logic/use_start_migration';
+import { useStartMigration } from '../logic/use_start_migration';
 
 interface UseStartRulesMigrationModalProps {
   type: 'start' | 'retry' | 'reprocess';

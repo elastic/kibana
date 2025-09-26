@@ -28,7 +28,7 @@ import { DashboardsUploadStep } from './steps/upload_dashboards';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { DashboardUploadSteps } from './steps/constants';
-import { useStartDashboardsMigrationModal } from '../start_dashboards_migration_modal';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 
 interface DashboardMigrationDataInputFlyoutProps {
