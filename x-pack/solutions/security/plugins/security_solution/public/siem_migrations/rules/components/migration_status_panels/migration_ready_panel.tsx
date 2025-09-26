@@ -11,7 +11,7 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import type { RuleMigrationStats } from '../../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import {
   useMigrationDataInputContext,
   MigrationsLastError,
@@ -22,6 +22,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -61,11 +62,15 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
   }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
-  const {
-    isLoading: isStarting,
-    modal: startMigrationModal,
-    showModal: showStartMigrationModal,
-  } = useStartRulesMigrationModal({ type: 'start', migrationStats });
+  const { startMigration, isLoading: isStarting } = useStartMigration();
+  const onStartMigrationWithSettings = useCallback(
+    (settings: RuleMigrationSettings) => {
+      startMigration(migrationStats.id, undefined, settings);
+    },
+    [migrationStats.id, startMigration]
+  );
+  const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+    useStartRulesMigrationModal({ type: 'start', migrationStats, onStartMigrationWithSettings });
 
   return (
     <>

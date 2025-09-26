@@ -21,7 +21,10 @@ import {
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { DashboardsUploadStep } from './steps/upload_dashboards';
@@ -30,6 +33,8 @@ import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { DashboardUploadSteps } from './steps/constants';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
+import { useStartMigration } from '../../logic/use_start_migration';
+import type { MigrationSettingsBase } from '../../../common/types';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -98,15 +103,25 @@ export const DashboardMigrationDataInputFlyout = React.memo(
       setDataInputStep(DashboardUploadSteps.End);
     }, []);
 
-    const {
-      isLoading: isStartLoading,
-      modal: startMigrationModal,
-      showModal: showStartMigrationModal,
-    } = useStartDashboardsMigrationModal({
-      type: isRetry ? 'retry' : 'start',
-      migrationStats,
-      onStartSuccess: onClose,
-    });
+    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        if (migrationStats?.id) {
+          startMigration(
+            migrationStats.id,
+            isRetry ? SiemMigrationRetryFilter.FAILED : undefined,
+            settings
+          );
+        }
+      },
+      [isRetry, migrationStats?.id, startMigration]
+    );
+    const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+      useStartDashboardsMigrationModal({
+        type: isRetry ? 'retry' : 'start',
+        migrationStats,
+        onStartMigrationWithSettings,
+      });
     const onTranslateButtonClick = useCallback(() => {
       if (migrationStats?.id) {
         showStartMigrationModal();

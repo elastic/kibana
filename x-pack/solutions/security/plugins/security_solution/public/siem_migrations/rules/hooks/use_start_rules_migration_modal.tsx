@@ -9,30 +9,25 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import { useIsOpenState } from '../../../common/hooks/use_is_open_state';
 import * as i18n from './translations';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '../../common/components';
 import type { MigrationSettingsBase } from '../../common/types';
-import type { OnSuccess } from '../logic/use_start_migration';
-import { useStartMigration } from '../logic/use_start_migration';
 
 interface UseStartRulesMigrationModalProps {
   type: 'start' | 'retry' | 'reprocess';
   migrationStats?: RuleMigrationStats;
   translationStats?: RuleMigrationTranslationStats;
-  onStartSuccess?: OnSuccess;
+  onStartMigrationWithSettings: (settings: RuleMigrationSettings) => void;
 }
 
 export const useStartRulesMigrationModal = ({
   type,
   migrationStats,
   translationStats,
-  onStartSuccess,
+  onStartMigrationWithSettings,
 }: UseStartRulesMigrationModalProps) => {
-  const { startMigration, isLoading } = useStartMigration(onStartSuccess);
-
   const { isOpen: isModalVisible, open: showModal, close: closeModal } = useIsOpenState(false);
 
   const defaultSettingsForModal = useMemo(
@@ -65,17 +60,6 @@ export const useStartRulesMigrationModal = ({
     }
   }, [type]);
 
-  const retryFilter = useMemo(() => {
-    switch (type) {
-      case 'start':
-        return undefined;
-      case 'retry':
-        return SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED;
-      case 'reprocess':
-        return SiemMigrationRetryFilter.FAILED;
-    }
-  }, [type]);
-
   const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
     !defaultSettingsForModal.skipPrebuiltRulesMatching
   );
@@ -91,16 +75,14 @@ export const useStartRulesMigrationModal = ({
     );
   }, [enablePrebuiltRulesMatching]);
 
-  const onStartMigrationWithSettings = useCallback(
+  const handleStartMigrationWithSettings = useCallback(
     (settings: MigrationSettingsBase) => {
-      if (migrationStats?.id) {
-        startMigration(migrationStats.id, retryFilter, {
-          ...settings,
-          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
-        });
-      }
+      onStartMigrationWithSettings({
+        ...settings,
+        skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
+      });
     },
-    [enablePrebuiltRulesMatching, migrationStats?.id, retryFilter, startMigration]
+    [enablePrebuiltRulesMatching, onStartMigrationWithSettings]
   );
 
   const modal = useMemo(() => {
@@ -112,7 +94,7 @@ export const useStartRulesMigrationModal = ({
         title={title}
         description={description}
         defaultSettings={defaultSettingsForModal}
-        onStartMigrationWithSettings={onStartMigrationWithSettings}
+        onStartMigrationWithSettings={handleStartMigrationWithSettings}
         onClose={closeModal}
         additionalSettings={prebuiltRulesMatchingSwitch}
       />
@@ -121,11 +103,11 @@ export const useStartRulesMigrationModal = ({
     closeModal,
     defaultSettingsForModal,
     description,
+    handleStartMigrationWithSettings,
     isModalVisible,
-    onStartMigrationWithSettings,
     prebuiltRulesMatchingSwitch,
     title,
   ]);
 
-  return { isLoading, modal, showModal, closeModal };
+  return { modal, showModal, closeModal };
 };

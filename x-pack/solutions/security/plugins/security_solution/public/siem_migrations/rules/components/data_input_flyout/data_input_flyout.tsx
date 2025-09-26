@@ -20,13 +20,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../../common/siem_migrations/constants';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { DataInputStep } from './steps/constants';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationStats } from '../../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 interface MissingResourcesIndexed {
   macros: string[];
@@ -86,15 +90,25 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       setDataInputStep(DataInputStep.End);
     }, []);
 
-    const {
-      isLoading: isStartLoading,
-      modal: startMigrationModal,
-      showModal: showStartMigrationModal,
-    } = useStartRulesMigrationModal({
-      type: isRetry ? 'retry' : 'start',
-      migrationStats,
-      onStartSuccess: onClose,
-    });
+    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: RuleMigrationSettings) => {
+        if (migrationStats?.id) {
+          startMigration(
+            migrationStats.id,
+            isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
+            settings
+          );
+        }
+      },
+      [isRetry, migrationStats?.id, startMigration]
+    );
+    const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+      useStartRulesMigrationModal({
+        type: isRetry ? 'retry' : 'start',
+        migrationStats,
+        onStartMigrationWithSettings,
+      });
     const onTranslateButtonClick = useCallback(() => {
       if (migrationStats?.id) {
         showStartMigrationModal();

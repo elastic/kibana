@@ -19,6 +19,8 @@ import { useGetMissingResources } from '../../../common/hooks/use_get_missing_re
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
+import { useStartMigration } from '../../logic/use_start_migration';
+import type { MigrationSettingsBase } from '../../../common/types';
 
 export interface MigrationReadyPanelProps {
   migrationStats: DashboardMigrationStats;
@@ -57,11 +59,19 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     return i18n.DASHBOARD_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
   }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
-  const {
-    isLoading: isStarting,
-    modal: startMigrationModal,
-    showModal: showStartMigrationModal,
-  } = useStartDashboardsMigrationModal({ type: 'start', migrationStats });
+  const { startMigration, isLoading: isStarting } = useStartMigration();
+  const onStartMigrationWithSettings = useCallback(
+    (settings: MigrationSettingsBase) => {
+      startMigration(migrationId, undefined, settings);
+    },
+    [migrationId, startMigration]
+  );
+  const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+    useStartDashboardsMigrationModal({
+      type: 'start',
+      migrationStats,
+      onStartMigrationWithSettings,
+    });
 
   return (
     <>

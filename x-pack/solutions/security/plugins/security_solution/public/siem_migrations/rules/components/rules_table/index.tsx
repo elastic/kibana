@@ -38,9 +38,10 @@ import { BulkActions } from './bulk_actions';
 import {
   MigrationTranslationResult,
   SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
+  SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
+import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
@@ -53,6 +54,7 @@ import {
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -267,16 +269,20 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const {
-      isLoading: isStarting,
-      modal: reprocessMigrationModal,
-      showModal: showReprocessMigrationModal,
-    } = useStartRulesMigrationModal({
-      type: 'reprocess',
-      migrationStats,
-      translationStats,
-      onStartSuccess: refetchData,
-    });
+    const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: RuleMigrationSettings) => {
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationId, startMigration]
+    );
+    const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
+      useStartRulesMigrationModal({
+        type: 'reprocess',
+        migrationStats,
+        translationStats,
+        onStartMigrationWithSettings,
+      });
 
     const isRulesLoading = isPrebuiltRulesLoading || isDataLoading || isTableLoading || isStarting;
 

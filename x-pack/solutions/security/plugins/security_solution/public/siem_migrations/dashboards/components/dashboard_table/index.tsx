@@ -31,6 +31,7 @@ import { useMigrationDashboardsTableColumns } from '../../hooks/use_migration_da
 import { useGetMigrationDashboards } from '../../logic/use_get_migration_dashboards';
 import {
   MigrationTranslationResult,
+  SiemMigrationRetryFilter,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
@@ -38,13 +39,14 @@ import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { EmptyMigration, SearchField } from '../../../common/components';
-import type { FilterOptionsBase } from '../../../common/types';
+import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/types';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -164,16 +166,20 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(migrationId);
 
-    const {
-      isLoading: isRetryLoading,
-      modal: reprocessMigrationModal,
-      showModal: showReprocessMigrationModal,
-    } = useStartDashboardsMigrationModal({
-      type: 'reprocess',
-      migrationStats,
-      translationStats,
-      onStartSuccess: refetchData,
-    });
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationId, startMigration]
+    );
+    const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
+      useStartDashboardsMigrationModal({
+        type: 'reprocess',
+        migrationStats,
+        translationStats,
+        onStartMigrationWithSettings,
+      });
 
     const [isTableLoading, setTableLoading] = useState(false);
 
