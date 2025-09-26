@@ -8,6 +8,9 @@
 import { SearchSecureService } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import { services as serverlessServices } from '@kbn/test-suites-serverless/api_integration/services';
 import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
+import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/entity_analytics.gen';
+import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
@@ -19,4 +22,7 @@ export const services = {
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   supertest: SecuritySolutionServerlessSuperTest,
   kibana_ebt_server: KibanaEBTServerProvider,
+  detectionsApi: DetectionsApiProvider,
+  entityAnalyticsApi: EntityAnalyticsApiProvider,
+  exceptionsApi: ExceptionsApiProvider,
 };
