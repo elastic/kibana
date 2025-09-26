@@ -341,6 +341,7 @@ FROM books METADATA _score
     descriptionOptions: {
       description:
         'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
     },
     openLinksInNewTab: true,
     preview: true,
