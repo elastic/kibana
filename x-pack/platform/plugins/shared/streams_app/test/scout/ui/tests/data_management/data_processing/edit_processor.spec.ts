@@ -69,7 +69,7 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
     // Confirm deletion in modal
     await pageObjects.streams.confirmDeleteInModal();
 
-    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(0);
+    expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
     await expect(page.getByTestId('fullText')).toBeHidden();
   });
 

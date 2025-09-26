@@ -9,11 +9,23 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
+import { EuiComboBoxWrapper } from '@kbn/scout';
 import type { ProcessorType } from '@kbn/streamlang';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly processorFieldComboBox;
+  public readonly conditionEditorFieldComboBox;
+  constructor(private readonly page: ScoutPage) {
+    this.processorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorFieldSelectorComboFieldText'
+    );
+    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorFieldText'
+    );
+  }
 
   async goto() {
     await this.page.gotoApp('streams');
@@ -163,7 +175,7 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.fillConditionFieldInput(field);
+      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
       await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
@@ -329,25 +341,12 @@ export class StreamsApp {
     await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
   }
 
-  async fillProcessorFieldInput(value: string) {
-    await this.fillFieldInput('streamsAppProcessorFieldSelectorComboFieldText', value);
-  }
-
-  async fillConditionFieldInput(value: string) {
-    await this.fillFieldInput('streamsAppConditionEditorFieldText', value);
-  }
-
-  // Utility function to fill eui combobox inputs
-  async fillFieldInput(dataTestSubj: string, value: string) {
-    const comboBoxInput = this.page.getByTestId(dataTestSubj);
-    await comboBoxInput.click();
-    // Clear the combo box input
-    // We need the below check for headed tests on MacOS to work around a Playwright issue
-    await this.page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
-    await this.page.keyboard.press('Backspace');
-
-    // Now type new stuff
-    await comboBoxInput.pressSequentially(value, { delay: 50 });
+  async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
+    const isCustomValue = options?.isCustomValue || false;
+    if (isCustomValue) {
+      return await this.processorFieldComboBox.setCustomSingleOption(value);
+    }
+    await this.processorFieldComboBox.selectSingleOption(value);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -380,16 +379,23 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
 
-  async getProcessorsListItems() {
+  async getProcessorsListItems(expectProcessors: boolean = true) {
+    const timeout = expectProcessors ? 15_000 : 2_000;
+
     try {
       await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
-        timeout: 15_000,
+        timeout,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
     return this.page.getByTestId('streamsAppProcessorBlock').all();
+  }
+
+  async getProcessorsListItemsFast() {
+    // Fast method for when no processors are expected - uses minimal timeout
+    return this.getProcessorsListItems(false);
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {

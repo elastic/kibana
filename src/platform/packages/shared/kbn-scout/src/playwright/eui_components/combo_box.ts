@@ -122,6 +122,10 @@ export class EuiComboBoxWrapper {
   }
 
   async clear() {
+    const currentValue = await this.getSelectedValue();
+    if (currentValue === '') {
+      return;
+    }
     await this.comboBoxClearButton.click();
     await this.page.keyboard.press('Escape');
     // Wait for the input to be cleared with a timeout
