@@ -95,6 +95,8 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
         },
         effective_lifecycle: {
           dsl: {},
@@ -135,6 +137,7 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          failure_store: true,
         },
         dashboards: [],
         queries: [],

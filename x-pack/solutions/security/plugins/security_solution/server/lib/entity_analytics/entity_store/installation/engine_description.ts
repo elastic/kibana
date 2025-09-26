@@ -6,7 +6,7 @@
  */
 
 import { assign, concat } from 'lodash/fp';
-import type { EntityStoreCapability } from '@kbn/entities-schema';
+import { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   EntityType,
   InitEntityEngineRequestBody,
@@ -25,7 +25,7 @@ import type { EntityEngineInstallationDescriptor } from './types';
 import { merge } from '../../../../../common/utils/objects/merge';
 import { defaultOptions } from '../constants';
 
-const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
+export const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   service: serviceEntityEngineDescription,
@@ -40,7 +40,7 @@ interface EngineDescriptionParams {
   defaultIndexPatterns: string[];
 }
 
-const ENABLED_CAPABILITIES: EntityStoreCapability[] = []; // empty until new capability is enabled
+const ENABLED_CAPABILITIES: EntityStoreCapability[] = [EntityStoreCapability.CRUD_API];
 
 export const createEngineDescription = (params: EngineDescriptionParams) => {
   const { entityType, namespace, config, requestParams = {}, defaultIndexPatterns } = params;

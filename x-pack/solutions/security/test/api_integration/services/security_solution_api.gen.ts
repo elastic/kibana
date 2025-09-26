@@ -22,6 +22,7 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
 import type { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
@@ -223,6 +224,11 @@ import type {
   UpsertDashboardMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
+import type {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -290,6 +296,17 @@ If asset criticality records already exist for the specified entities, those rec
     ) {
       return supertest
         .post(getRouteUrlForSpace('/api/asset_criticality/bulk', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Cancel a running or pending response action (Applies only to some agent types).
+     */
+    cancelAction(props: CancelActionProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/api/endpoint/action/cancel', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -2338,6 +2355,27 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
+      * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
+
+      */
+    upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
+    /**
      * Creates or updates resources for an existing SIEM rules migration
      */
     upsertRuleMigrationResources(
@@ -2364,6 +2402,9 @@ export interface AlertsMigrationCleanupProps {
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
@@ -2740,6 +2781,11 @@ export interface UpdateWorkflowInsightProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

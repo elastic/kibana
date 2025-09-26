@@ -2771,7 +2771,6 @@
       "matchDepNames": [
         "expose-loader",
         "html-loader",
-        "jsondiffpatch",
         "object-path-immutable",
         "postcss-prefix-selector",
         "safe-squel",
@@ -2797,8 +2796,7 @@
         "@types/extract-zip",
         "@types/pdfmake",
         "extract-zip",
-        "pdfmake",
-        "puppeteer"
+        "pdfmake"
       ],
       "reviewers": [
         "team:kibana-presentation",
@@ -2815,6 +2813,26 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "puppeteer",
+      "matchDepNames": [
+        "puppeteer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Reporting Services",
+        "Team:ResponseOps",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
     },
     {
       "groupName": "turf",
@@ -4103,13 +4121,13 @@
         "nunjucks"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4122,13 +4140,13 @@
         "oas"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4142,13 +4160,13 @@
         "@types/seedrandom"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
