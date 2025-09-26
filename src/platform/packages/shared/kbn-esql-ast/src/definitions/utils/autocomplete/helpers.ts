@@ -349,6 +349,14 @@ export async function suggestForExpression({
             // so we can only suggest operators that accept any type as a left operand
             leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
             ignored: ['='],
+            allowed:
+              expressionType === 'boolean' && position === 'after_literal'
+                ? [
+                    ...logicalOperators
+                      .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
+                      .map(({ name }) => name),
+                  ]
+                : undefined,
           },
           hasMinimumLicenseRequired,
           activeProduct
@@ -742,5 +750,23 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
+  };
+}
+
+/**
+ * Given a suggestion item, decorates it with editor.action.triggerSuggest
+ * that triggers the autocomplete dialog again after accepting the suggestion.
+ *
+ * If the suggestion item already has a custom command, it will preserve it.
+ */
+export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+  return {
+    ...suggestionItem,
+    command: suggestionItem.command
+      ? suggestionItem.command
+      : {
+          title: 'Trigger Suggestion Dialog',
+          id: 'editor.action.triggerSuggest',
+        },
   };
 }

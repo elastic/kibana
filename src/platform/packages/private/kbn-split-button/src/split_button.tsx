@@ -67,12 +67,12 @@ export const SplitButton = ({
     isLoading: isLoading || isMainButtonLoading,
     'data-icon': iconType,
     ...mainButtonProps,
-    'data-test-subj': mainButtonProps['data-test-subj'] + '-primary-button',
+    'data-test-subj': mainButtonProps['data-test-subj'],
   };
 
   return (
     <div
-      data-test-subj={mainButtonProps['data-test-subj']}
+      data-test-subj={mainButtonProps['data-test-subj'] + '-container'}
       css={[styles.container, hasTransparentBorder && styles.containerWithGap]}
     >
       {iconOnly && iconType ? (

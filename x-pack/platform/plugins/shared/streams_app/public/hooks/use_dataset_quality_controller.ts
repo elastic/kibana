@@ -12,11 +12,13 @@ import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
+import { useTimefilter } from './use_timefilter';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 
 export const useDatasetQualityController = (
@@ -33,6 +35,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
+  const { timeState, setTime } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -53,6 +56,11 @@ export const useDatasetQualityController = (
           view: (Streams.WiredStream.Definition.is(definition.stream)
             ? 'wired'
             : 'classic') as DatasetQualityView,
+          timeRange: {
+            from: timeState.timeRange.from,
+            to: timeState.timeRange.to,
+            refresh: DEFAULT_DATEPICKER_REFRESH,
+          },
         };
       }
 
@@ -80,6 +88,7 @@ export const useDatasetQualityController = (
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
+            setTime,
           });
         }
       );
@@ -99,6 +108,9 @@ export const useDatasetQualityController = (
     definition.stream.name,
     saveStateInUrl,
     definition.stream,
+    timeState.timeRange.from,
+    timeState.timeRange.to,
+    setTime,
   ]);
 
   return controller;

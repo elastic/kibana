@@ -2443,7 +2443,7 @@
         "tags": [],
         "label": "EsqlToolParam",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2459,7 +2459,7 @@
             "signature": [
               "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2472,7 +2472,7 @@
             "description": [
               "\nDescription of the parameter's purpose or expected values."
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2488,7 +2488,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3481,7 +3481,7 @@
         "description": [
           "\nCommon ES Field Types"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3979,7 +3979,7 @@
           },
           ">; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4009,7 +4009,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4039,7 +4039,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4054,7 +4054,7 @@
         "signature": [
           "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4078,7 +4078,7 @@
           "IndexSearchToolConfig",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/index_search.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/index_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

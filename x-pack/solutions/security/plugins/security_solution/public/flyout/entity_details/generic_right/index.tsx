@@ -179,6 +179,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+  const fields = getGenericEntity.data.fields || {};
 
   return (
     <>
@@ -201,6 +202,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
         scopeId={scopeId}
         isPreviewMode={isPreviewMode ?? false}
         entityId={entity.id}
+        entityFields={fields}
       />
     </>
   );

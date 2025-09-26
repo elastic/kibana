@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -32,7 +33,7 @@ import {
   type ICommandContext,
   type ICommandCallbacks,
 } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
+import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
@@ -141,14 +142,11 @@ export async function autocomplete(
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
-            // if there is already a command, we don't want to override it
-            if (suggestion.command) return suggestion;
-            return {
+            return withAutoSuggest({
               ...suggestion,
               text: `${suggestion.text} `,
-              command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
-            };
+            });
           });
         },
         () => []

@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const PREBUILT_RULE_ID = 'prebuilt-rule';
   const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
@@ -201,7 +201,7 @@ export default ({ getService }: FtrProviderContext): void => {
         version: 3,
       });
 
-      await securitySolutionApi
+      await detectionsApi
         .createRule({
           body: CUSTOM_RULE,
         })

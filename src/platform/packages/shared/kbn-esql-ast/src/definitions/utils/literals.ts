@@ -8,7 +8,7 @@
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
@@ -25,22 +25,25 @@ export const buildConstantsDefinitions = (
   options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
   documentationValue?: string
 ): ISuggestionItem[] =>
-  userConstants.map((label) => ({
-    label,
-    text:
-      label +
-      (options?.addComma ? ',' : '') +
-      (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
-    kind: 'Constant',
-    detail:
-      detail ??
-      i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
-        defaultMessage: `Constant`,
-      }),
-    ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
-    sortText: sortText ?? 'A',
-    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
-  }));
+  userConstants.map((label) => {
+    const suggestion: ISuggestionItem = {
+      label,
+      text:
+        label +
+        (options?.addComma ? ',' : '') +
+        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
+      kind: 'Constant',
+      detail:
+        detail ??
+        i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
+          defaultMessage: `Constant`,
+        }),
+      ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
+      sortText: sortText ?? 'A',
+    };
+
+    return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
+  });
 
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;

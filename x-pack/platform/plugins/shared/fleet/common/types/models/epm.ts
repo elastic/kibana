@@ -26,6 +26,7 @@ export enum InstallStatus {
   installing = 'installing',
   reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
+  rollingBack = 'rolling_back',
 }
 
 export interface DefaultPackagesInstallationError {

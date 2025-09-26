@@ -91,7 +91,6 @@ export const WhereBlock = ({
     <>
       <EuiPanel
         data-test-subj="streamsAppConditionBlock"
-        paddingSize="m"
         hasShadow={false}
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
         css={
@@ -103,6 +102,8 @@ export const WhereBlock = ({
               `
             : css`
                 border: ${euiTheme.border.thin};
+                padding: ${euiTheme.size.m};
+                border-radius: ${euiTheme.size.s};
               `
         }
       >
@@ -114,14 +115,14 @@ export const WhereBlock = ({
         {isUnderEdit ? (
           <WhereBlockConfiguration stepRef={stepRef} ref={freshBlockRef} />
         ) : (
-          <EuiFlexGroup direction="column">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 {hasChildren ? (
                   <EuiFlexItem
                     grow={false}
                     css={css`
-                      margin-left: -${euiTheme.size.m};
+                      margin-left: -${euiTheme.size.xxs};
                     `}
                   >
                     <EuiButtonIcon
@@ -153,7 +154,7 @@ export const WhereBlock = ({
             </EuiFlexItem>
             {hasChildren && !isExpanded && (
               <EuiFlexItem>
-                <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="m">
+                <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="s">
                   <NestedChildrenProcessingSummary
                     childIds={descendantIds!}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
@@ -165,7 +166,7 @@ export const WhereBlock = ({
         )}
         {hasChildren && isExpanded && (
           <>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <ConnectedNodesList>
               {childSteps.map((childStep) => (
                 <li key={childStep.id}>

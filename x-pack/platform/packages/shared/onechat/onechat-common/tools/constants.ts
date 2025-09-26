@@ -6,7 +6,7 @@
  */
 
 import { ToolType } from './definition';
-import { internalNamespaces } from './namespaces';
+import { internalNamespaces } from '../base/namespaces';
 
 const platformCoreTool = (toolName: string) => {
   return `${internalNamespaces.platformCore}.${toolName}`;

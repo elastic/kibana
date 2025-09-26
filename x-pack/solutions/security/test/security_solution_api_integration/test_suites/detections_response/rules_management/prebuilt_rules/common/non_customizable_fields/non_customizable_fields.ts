@@ -26,7 +26,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const retryService = getService('retry');
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID_A,
@@ -72,13 +72,13 @@ export default ({ getService }: FtrProviderContext) => {
         await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
 
-        const { body: existingRule } = await securitySolutionApi
+        const { body: existingRule } = await detectionsApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID_A },
           })
           .expect(200);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .updateRule({
             body: getCustomQueryRuleParams({
               ...existingRule,

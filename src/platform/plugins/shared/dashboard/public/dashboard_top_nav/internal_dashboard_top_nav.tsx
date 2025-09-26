@@ -386,7 +386,10 @@ export function InternalDashboardTopNav({
           }
         }}
         onSavedQueryIdChange={setSavedQueryId}
-        useBackgroundSearchButton={dataService.search.isBackgroundSearchEnabled}
+        useBackgroundSearchButton={
+          dataService.search.isBackgroundSearchEnabled &&
+          getDashboardCapabilities().storeSearchSession
+        }
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
