@@ -34,8 +34,8 @@ import type { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-
 import type { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
 import type { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
 
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
-import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

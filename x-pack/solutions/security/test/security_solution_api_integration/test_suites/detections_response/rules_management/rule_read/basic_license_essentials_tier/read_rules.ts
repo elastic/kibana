@@ -26,7 +26,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -45,9 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to read a single rule using rule_id', async () => {
         await createRule(supertest, log, getSimpleRule());
 
-        const { body } = await securitySolutionApi
-          .readRule({ query: { rule_id: 'rule-1' } })
-          .expect(200);
+        const { body } = await detectionsApi.readRule({ query: { rule_id: 'rule-1' } }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
@@ -58,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to read a single rule using id', async () => {
         const createRuleBody = await createRule(supertest, log, getSimpleRule());
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .readRule({ query: { id: createRuleBody.id } })
           .expect(200);
 
@@ -71,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to read a single rule with an auto-generated rule_id', async () => {
         const createRuleBody = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .readRule({ query: { rule_id: createRuleBody.rule_id } })
           .expect(200);
 
@@ -85,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 404 if given a fake id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .readRule({ query: { id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' } })
           .expect(404);
 
@@ -96,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 404 if given a fake rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .readRule({ query: { rule_id: 'fake_id' } })
           .expect(404);
 
