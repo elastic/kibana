@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Test requires access to Elastic Maps Service
   // Do not skip test if failure is "Test requires access to Elastic Maps Service (EMS). EMS is not available"
-  describe('choropleth chart', () => {
+  describe.only('choropleth chart', () => {
     before('', async () => {
       await maps.expectEmsToBeAvailable();
     });
