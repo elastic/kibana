@@ -339,7 +339,7 @@ export const runTask = async ({
           await riskScoreService.resetToZero({
             entityType: identifierType,
             refresh: 'wait_for',
-            entities: result.entities[identifierType],
+            excludedEntities: result.entities[identifierType],
           });
         }
 
