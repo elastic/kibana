@@ -6,8 +6,8 @@
  */
 
 import axios from 'axios';
-import { format, parse } from 'url';
-import { castArray, first, pick, pickBy } from 'lodash';
+import { format } from 'url';
+import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
@@ -48,25 +48,24 @@ export function registerKibanaFunction({
         required: ['method', 'pathname'] as const,
       },
     },
-    ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request } = resources;
+    async ({ arguments: { method, pathname, body, query } }, signal) => {
+      const { request, logger, context } = resources;
+      const core = await context.core;
 
-      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
+      // @ts-expect-error: coreStart is not defined in the type
+      const basePath = core.coreStart?.http?.basePath?.serverBasePath;
 
-      const origin = first(castArray(request.headers.origin));
+      const { protocol, host } = request.rewrittenUrl || request.url;
 
       const nextUrl = {
         host,
         protocol,
-        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
-        pathname: pathnameFromRequest.replace(
-          '/internal/observability_ai_assistant/chat/complete',
-          pathname
-        ),
+        pathname: basePath && !pathname.startsWith(basePath) ? `${basePath}${pathname}` : pathname,
         query: query ? (query as Record<string, string>) : undefined,
       };
 
       const copiedHeaderNames = [
+        'authorization',
         'accept-encoding',
         'accept-language',
         'accept',
@@ -88,15 +87,17 @@ export function registerKibanaFunction({
         );
       });
 
-      return axios({
+      logger.debug(`Calling Kibana API: ${method} ${format(nextUrl)}`);
+
+      const response = await axios({
         method,
         headers,
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,
-      }).then((response) => {
-        return { content: response.data };
       });
+
+      return { content: response.data };
     }
   );
 }
