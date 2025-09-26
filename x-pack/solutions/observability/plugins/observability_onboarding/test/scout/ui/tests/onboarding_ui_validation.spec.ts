@@ -88,7 +88,7 @@ test.describe('Onboarding UI Validation', () => {
 
       await test.step('navigates correctly when OTel logs card is clicked', async () => {
         await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-logs');
-        expect(page.url()).toContain('/otel-logs');
+        expect(page.url()).toContain('/intentionally-incorrect-url-to-test-error-state');
       });
 
       await test.step('supports deep-linking to host category', async () => {
