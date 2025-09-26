@@ -46,7 +46,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       if (!Object.values(TabsEventName).includes(eventName as TabsEventName)) {
         return;
       }
-      void scopedEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
+      void scopedEbtManager.trackTabsEvent({ eventName: eventName as TabsEventName, payload });
     },
     [scopedEbtManager]
   );

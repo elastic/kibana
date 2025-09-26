@@ -356,7 +356,7 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
-  public trackTabs({
+  public trackTabsEvent({
     eventName,
     payload,
   }: {
