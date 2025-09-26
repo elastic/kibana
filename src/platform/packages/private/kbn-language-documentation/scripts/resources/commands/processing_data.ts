@@ -506,6 +506,126 @@ FROM employees
     },
   },
   {
+    name: 'rerank',
+    labelDefaultMessage: 'RERANK',
+    descriptionDefaultMessage: `### RERANK
+\`RERANK\` uses an inference model to compute a new relevance score
+for an initial set of documents, directly within your ES|QL queries.
+
+\`\`\` esql
+RERANK [column =] query ON field [, field, ...] [WITH { "inference_id" : "my_inference_endpoint" }]
+\`\`\`
+
+**Usage**
+
+Typically, you first use a \`WHERE\` clause with a function like \`MATCH\` to
+retrieve an initial set of documents. This set is often sorted by \`_score\` and
+reduced to the top results (for example, 100) using \`LIMIT\`. The \`RERANK\`
+command then processes this smaller, refined subset, which is a good balance
+between performance and accuracy.
+
+**Parameters**
+
+\`column\`
+:   (Optional) The name of the output column containing the reranked scores.
+If not specified, the results will be stored in a column named \`_score\`.
+If the specified column already exists, it will be overwritten with the new
+results.
+
+\`query\`
+:   The query text used to rerank the documents. This is typically the same
+query used in the initial search.
+
+\`field\`
+:   One or more fields to use for reranking. These fields should contain the
+text that the reranking model will evaluate.
+
+\`my_inference_endpoint\`
+:   The ID of the inference endpoint to use for the task.
+The inference endpoint must be configured with the \`rerank\` task type.
+
+**Requirements**
+
+To use this command, you must deploy your reranking model in Elasticsearch as
+an [inference endpoint](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put)
+with the
+task type \`rerank\`.
+
+#### Handling timeouts
+
+\`RERANK\` commands may time out when processing large datasets or complex
+queries. The default timeout is 10 minutes, but you can increase this limit if
+necessary. Refer to [the documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/rerank#handling-timeouts) for more details.
+
+**Examples**
+
+Rerank search results using a simple query and a single field:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit")
+| SORT _score DESC
+| LIMIT 100
+| RERANK "hobbit" ON description WITH { "inference_id" : "test_reranker" }
+| LIMIT 3
+| KEEP title, _score
+\`\`\`
+
+| title:text | _score:double |
+| --- | --- |
+| Poems from the Hobbit | 0.0015673980815336108 |
+| A Tolkien Compass: Including J. R. R. Tolkien's Guide to the Names in The Lord of the Rings | 0.007936508394777775 |
+| Return of the King Being the Third Part of The Lord of the Rings | 9.960159659385681E-4 |
+
+Rerank search results using a query and multiple fields, and store the new score
+in a column named \`rerank_score\`:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH { "inference_id" : "test_reranker" }
+| SORT rerank_score
+| LIMIT 3
+| KEEP title, _score, rerank_score
+\`\`\`
+
+| title:text | _score:double | rerank_score:double |
+| --- | --- | --- |
+| Return of the Shadow | 2.8181066513061523 | 5.740527994930744E-4 |
+| Return of the King Being the Third Part of The Lord of the Rings | 3.6248698234558105 | 9.000900317914784E-4 |
+| The Lays of Beleriand | 1.3002015352249146 | 9.36329597607255E-4 |
+
+Combine the original score with the reranked score:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH { "inference_id" : "test_reranker" }
+| EVAL original_score = _score, _score = rerank_score + original_score
+| SORT _score
+| LIMIT 3
+| KEEP title, original_score, rerank_score, _score
+\`\`\`
+
+| title:text | _score:double | rerank_score:double | rerank_score:double |
+| --- | --- | --- | --- |
+| Poems from the Hobbit | 4.012462615966797 | 0.001396648003719747 | 0.001396648003719747 |
+| The Lord of the Rings - Boxed Set | 3.768855094909668 | 0.0010020040208473802 | 0.001396648003719747 |
+| Return of the King Being the Third Part of The Lord of the Rings | 3.6248698234558105 | 9.000900317914784E-4 | 0.001396648003719747 |
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
+  },
+  {
     name: 'sample',
     labelDefaultMessage: 'SAMPLE',
     descriptionDefaultMessage: `### SAMPLE
