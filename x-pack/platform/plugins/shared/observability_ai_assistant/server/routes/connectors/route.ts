@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { FindActionResult } from '@kbn/actions-plugin/server';
-import { isSupportedConnector } from '@kbn/inference-common';
+import { InferenceConnectorType, isSupportedConnector } from '@kbn/inference-common';
+import { inferenceEndpointExists } from '@kbn/inference-endpoint-plugin/server/lib/inference_endpoint_exists';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
@@ -16,7 +17,8 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   handler: async (resources): Promise<FindActionResult[]> => {
-    const { request, plugins } = resources;
+    const { request, plugins, context } = resources;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     const actionsClient = await (
       await plugins.actions.start()
@@ -34,11 +36,20 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
         ),
       actionsClient.getAll(),
     ]);
-
-    return connectors.filter(
-      (connector) =>
-        availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector)
-    );
+    return connectors.filter(async (connector) => {
+      if (connector.actionTypeId === InferenceConnectorType.Inference) {
+        const isInferenceEndpointExists = await inferenceEndpointExists(
+          esClient,
+          connector?.config?.inferenceId
+        );
+        return (
+          availableTypes.includes(connector.actionTypeId) &&
+          isSupportedConnector(connector) &&
+          isInferenceEndpointExists
+        );
+      }
+      return availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector);
+    });
   },
 });
 

@@ -15,8 +15,6 @@ import {
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { useKibana } from './use_kibana';
-import { isInferenceEndpointExists } from './inference_endpoint_exists';
-import { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from '../utils/get_elastic_managed_llm_connector';
 import {
   type InferenceConnector,
   getInferenceConnectorInfo,
@@ -48,7 +46,7 @@ export function useGenAIConnectorsWithoutContext(
 ): UseGenAIConnectorsResult {
   const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
   const {
-    services: { http, uiSettings },
+    services: { uiSettings },
   } = useKibana();
 
   const defaultConnector = uiSettings!.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
@@ -87,61 +85,30 @@ export function useGenAIConnectorsWithoutContext(
 
   const fetchConnectors = useCallback(async () => {
     setLoading(true);
-
-    assistant
-      .callApi('GET /internal/observability_ai_assistant/connectors', {
+    try {
+      let results = await assistant.callApi('GET /internal/observability_ai_assistant/connectors', {
         signal: controller.signal,
-      })
-      .then((results) => {
-        return results
-          .reduce<Promise<FindActionResult[]>>(async (result, connector) => {
-            if (
-              connector.actionTypeId !== INFERENCE_CONNECTOR_ACTION_TYPE_ID ||
-              (connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
-                (await isInferenceEndpointExists(
-                  http,
-                  (connector as FindActionResult)?.config?.inferenceId
-                )))
-            ) {
-              return [...(await result), connector];
-            }
-
-            return result;
-          }, Promise.resolve([]))
-          .then((_connectors) => {
-            if (isConnectorSelectionRestricted) {
-              const defaultC = _connectors.find((con) => con.id === defaultConnector);
-              _connectors = defaultC ? [defaultC] : [];
-            }
-            setConnectors(_connectors);
-            setLastUsedConnector((connectorId) => {
-              if (
-                connectorId &&
-                _connectors.findIndex((result) => result.id === connectorId) === -1
-              ) {
-                return '';
-              }
-              return connectorId;
-            });
-
-            setError(undefined);
-          });
-      })
-      .catch((err) => {
-        setError(err);
-        setConnectors(undefined);
-      })
-      .finally(() => {
-        setLoading(false);
       });
-  }, [
-    assistant,
-    controller.signal,
-    http,
-    setLastUsedConnector,
-    isConnectorSelectionRestricted,
-    defaultConnector,
-  ]);
+      if (isConnectorSelectionRestricted) {
+        const defaultC = results.find((con) => con.id === defaultConnector);
+        results = defaultC ? [defaultC] : [];
+      }
+      setConnectors(results);
+      setLastUsedConnector((connectorId) => {
+        if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
+          return '';
+        }
+        return connectorId;
+      });
+      setError(undefined);
+    } catch (err) {
+      setError(err);
+      setConnectors(undefined);
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assistant, controller.signal, isConnectorSelectionRestricted, defaultConnector, setLoading]);
 
   useEffect(() => {
     fetchConnectors();
@@ -149,7 +116,7 @@ export function useGenAIConnectorsWithoutContext(
     return () => {
       controller.abort();
     };
-  }, [assistant, controller, fetchConnectors, setLastUsedConnector]);
+  }, [controller, fetchConnectors]);
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.id === id);
