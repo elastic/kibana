@@ -36,6 +36,5 @@ export const getSyntheticsTriggerTaskRun: SyntheticsRestApiRouteFactory = () => 
       default:
         throw new Error(`Unknown task type: ${taskType}`);
     }
-
   },
 });
