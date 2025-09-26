@@ -149,6 +149,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        lastCleanUpAt: expect.anything(),
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
@@ -189,6 +190,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(task.syncGlobalParams).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        lastCleanUpAt: expect.anything(),
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 2,
         lastTotalMWs: 1,
@@ -226,6 +228,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       expect(result.error).toBe(error);
       expect(result.state).toEqual({
+        lastCleanUpAt: expect.anything(),
         lastStartedAt: taskInstance.startedAt?.toISOString(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
