@@ -411,9 +411,11 @@ export class SavedMap {
 
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
-    this._attributes.title = newTitle;
-    this._attributes.description = newDescription;
-    await this._syncAttributesWithStore();
+    this._attributes = {
+      title: newTitle,
+      ...(newDescription ? { description: newDescription } : {}),
+      ...(await this._getStoreAttributes()),
+    };
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
     if (saveByReference) {
@@ -508,28 +510,28 @@ export class SavedMap {
     return;
   }
 
-  private async _syncAttributesWithStore() {
+  private async _getStoreAttributes() {
     const state: MapStoreState = this._store.getState();
-    const layerList = getLayerListRaw(state);
-    const layerListConfigOnly = copyPersistentState(layerList);
-    this._attributes!.layers = layerListConfigOnly;
-    this._attributes!.adHocDataViews = await this._getAdHocDataViews();
-    this._attributes!.zoom = getMapZoom(state);
-    this._attributes!.center = getMapCenter(state);
-    this._attributes!.timeFilters = getTimeFilters(state);
-    this._attributes!.refreshInterval = getTimeFilter().getRefreshInterval();
-    this._attributes!.query = getQuery(state);
-    this._attributes!.filters = getFilters(state);
     const mapSettings = getMapSettings(state);
-    this._attributes!.settings = {
-      ...mapSettings,
-      // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
-      customIcons: mapSettings.customIcons.map((icon) => {
-        return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-      }),
+    return {
+      adHocDataViews: await this._getAdHocDataViews(),
+      center: getMapCenter(state),
+      filters: getFilters(state),
+      isLayerTOCOpen: getIsLayerTOCOpen(state),
+      layers: copyPersistentState(getLayerListRaw(state)),
+      openTOCDetails: getOpenTOCDetails(state),
+      query: getQuery(state),
+      refreshInterval: getTimeFilter().getRefreshInterval(),
+      settings: {
+        ...mapSettings,
+        // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
+        customIcons: mapSettings.customIcons.map((icon) => {
+          return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+        }),
+      },
+      timeFilters: getTimeFilters(state),
+      zoom: getMapZoom(state),
     };
-    this._attributes!.isLayerTOCOpen = getIsLayerTOCOpen(state);
-    this._attributes!.openTOCDetails = getOpenTOCDetails(state);
   }
 
   private async _getAdHocDataViews() {
