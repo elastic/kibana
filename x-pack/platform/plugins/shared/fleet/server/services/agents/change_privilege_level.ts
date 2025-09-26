@@ -21,7 +21,7 @@ import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgentById, getAgents, getAgentsByKuery, openPointInTime } from './crud';
 import {
-  BulkChangePrivilegeAgentsBatch,
+  bulkChangePrivilegeAgentsBatch,
   ChangePrivilegeActionRunner,
 } from './change_privilege_runner';
 
@@ -87,7 +87,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await BulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, options);
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, options);
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -100,7 +100,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    return await BulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, options);
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, options);
   } else {
     return await new ChangePrivilegeActionRunner(
       esClient,

@@ -29,7 +29,7 @@ import { getPackagesWithRootAccess } from './change_privilege_level';
 
 export class ChangePrivilegeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await BulkChangePrivilegeAgentsBatch(
+    return await bulkChangePrivilegeAgentsBatch(
       this.esClient,
       this.soClient,
       agents,
@@ -46,7 +46,7 @@ export class ChangePrivilegeActionRunner extends ActionRunner {
   }
 }
 
-export async function BulkChangePrivilegeAgentsBatch(
+export async function bulkChangePrivilegeAgentsBatch(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agents: Agent[],

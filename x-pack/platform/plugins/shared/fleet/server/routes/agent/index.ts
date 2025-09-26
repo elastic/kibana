@@ -1019,7 +1019,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         options: {
           tags: ['oas-tag:Elastic Agents'],
           availability: {
-            since: '9.2.0',
+            since: '9.3.0',
             stability: 'experimental',
           },
         },
