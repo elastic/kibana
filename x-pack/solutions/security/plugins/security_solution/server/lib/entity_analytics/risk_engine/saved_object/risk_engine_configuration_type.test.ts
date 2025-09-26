@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  SavedObjectsModelVersion,
+  SavedObjectModelTransformationContext,
+} from '@kbn/core-saved-objects-server';
 import { riskEngineConfigurationType } from './risk_engine_configuration_type';
 
 describe('riskEngineConfigurationType', () => {
@@ -31,7 +35,9 @@ describe('riskEngineConfigurationType', () => {
 
   describe('version 3 migration', () => {
     it('should add filters field to existing configurations', () => {
-      const version3 = riskEngineConfigurationType.modelVersions?.[3];
+      const version3 = (
+        riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
+      )?.['3'];
       expect(version3).toBeDefined();
 
       const mockDocument = {
@@ -59,7 +65,10 @@ describe('riskEngineConfigurationType', () => {
 
       const result =
         version3?.changes[1]?.type === 'data_backfill'
-          ? version3.changes[1].backfillFn(mockDocument)
+          ? version3.changes[1].backfillFn(
+              mockDocument,
+              {} as SavedObjectModelTransformationContext
+            )
           : null;
 
       expect(result).toEqual({
@@ -71,7 +80,9 @@ describe('riskEngineConfigurationType', () => {
     });
 
     it('should preserve existing filters if they exist', () => {
-      const version3 = riskEngineConfigurationType.modelVersions?.[3];
+      const version3 = (
+        riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
+      )?.['3'];
       expect(version3).toBeDefined();
 
       const existingFilters = [{ entity_types: ['host'], filter: 'agent.type: filebeat' }];
@@ -102,7 +113,10 @@ describe('riskEngineConfigurationType', () => {
 
       const result =
         version3?.changes[1]?.type === 'data_backfill'
-          ? version3.changes[1].backfillFn(mockDocument)
+          ? version3.changes[1].backfillFn(
+              mockDocument,
+              {} as SavedObjectModelTransformationContext
+            )
           : null;
 
       expect(result).toEqual({
