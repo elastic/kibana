@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { RuleMigrationDataInputContextProvider } from './context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 import { MigrationDataInputFlyout } from './data_input_flyout';
 
 interface RuleMigrationDataInputWrapperProps {
@@ -34,12 +34,12 @@ export const RuleMigrationDataInputWrapper = React.memo<
   }, []);
 
   return (
-    <RuleMigrationDataInputContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
+    <MigrationDataInputContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
       {children}
       {isFlyoutOpen && (
         <MigrationDataInputFlyout onClose={closeFlyout} migrationStats={flyoutMigrationStats} />
       )}
-    </RuleMigrationDataInputContextProvider>
+    </MigrationDataInputContextProvider>
   );
 });
 RuleMigrationDataInputWrapper.displayName = 'RuleMigrationDataInputWrapper';

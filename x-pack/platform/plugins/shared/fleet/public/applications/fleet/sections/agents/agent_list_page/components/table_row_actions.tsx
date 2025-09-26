@@ -62,6 +62,7 @@ export const TableRowActions: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
   if (
+    authz.fleet.allAgents &&
     !agentPolicy?.is_protected &&
     !isFleetServerAgent &&
     agentMigrationsEnabled &&

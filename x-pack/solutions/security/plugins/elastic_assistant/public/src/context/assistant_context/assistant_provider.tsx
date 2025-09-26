@@ -39,6 +39,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    settings,
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
@@ -104,6 +105,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    settings,
   });
 
   useEffect(() => {

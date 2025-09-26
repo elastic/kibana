@@ -99,6 +99,22 @@
             "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowExecutionProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

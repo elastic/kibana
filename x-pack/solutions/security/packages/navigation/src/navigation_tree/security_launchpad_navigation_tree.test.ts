@@ -92,14 +92,18 @@ describe('createLaunchpadNavigationTree', () => {
         iconV2: 'launch',
         children: [
           {
-            id: SecurityPageName.landing,
-            link: securityLink(SecurityPageName.landing),
-            renderAs: 'item',
-          },
-          {
-            id: SecurityPageName.aiValue,
-            link: securityLink(SecurityPageName.aiValue),
-            renderAs: 'item',
+            children: [
+              {
+                id: SecurityPageName.landing,
+                link: securityLink(SecurityPageName.landing),
+                renderAs: 'item',
+              },
+              {
+                id: SecurityPageName.aiValue,
+                link: securityLink(SecurityPageName.aiValue),
+                renderAs: 'item',
+              },
+            ],
           },
         ],
       });

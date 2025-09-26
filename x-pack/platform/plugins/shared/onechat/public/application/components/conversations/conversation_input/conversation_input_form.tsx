@@ -9,7 +9,7 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useSendMessage } from '../../../context/send_message_context';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
