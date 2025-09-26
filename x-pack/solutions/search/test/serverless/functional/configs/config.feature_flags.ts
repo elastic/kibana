@@ -26,8 +26,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--feature_flags.overrides.core.chrome.projectSideNav=v2',
         `--uiSettings.overrides.agentBuilder:enabled=true`,
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
-        `--uiSettings.overrides.queryRules:queryRulesEnabled=true`,
-        '--xpack.searchQueryRules.enabled=true',
       ],
     },
     // load tests in the index file
