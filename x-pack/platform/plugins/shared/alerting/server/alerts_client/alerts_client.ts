@@ -74,6 +74,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
@@ -214,7 +215,7 @@ export class AlertsClient<
           .flat();
 
         const alerts = await this.search({
-          size: maxAlertLimit * 2,
+          size: (maxAlertLimit || DEFAULT_MAX_ALERTS) * 2,
           seq_no_primary_term: true,
           query: {
             bool: {
