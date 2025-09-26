@@ -17,7 +17,7 @@ To debug and resolve the issue, follow these steps:
 
 1. Since 8.7.0, Endpoint diagnostics contain a file named analysis.txt that contains information about what may cause this issue. As of 8.11.2, Elastic Agent diagnostics automatically include Endpoint diagnostics. For previous versions, you can gather Endpoint diagnostics by running:
 
-- c:\Program Files\Elastic\Endpoint\elastic-endpoint.exe diagnostics
+- C:\Program Files\Elastic\Endpoint\elastic-endpoint.exe diagnostics
 
 2. Make sure nothing else on your device is listening on ports 6788 or 6789 by running:
 
@@ -26,3 +26,7 @@ To debug and resolve the issue, follow these steps:
 3. Make sure localhost can be resolved to 127.0.0.1 by running:
 
 - ping -4 localhost
+
+If communication issues occur on the gRPC channel, the Endpoint will begin logging detailed gRPC debug output. Logs will start with a message like:
+
+"Connection to Agent failed %zd times consecutively. Exposing gRPC log until connection becomes successful."

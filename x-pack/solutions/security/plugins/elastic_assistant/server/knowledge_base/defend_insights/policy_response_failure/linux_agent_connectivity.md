@@ -26,3 +26,7 @@ To debug and resolve the issue, follow these steps:
 3. Make sure localhost can be resolved to 127.0.0.1 by running:
 
 - ping -4 -c 1 localhost
+
+If communication issues occur on the gRPC channel, the Endpoint will begin logging detailed gRPC debug output. Logs will start with a message like:
+
+"Connection to Agent failed %zd times consecutively. Exposing gRPC log until connection becomes successful."
