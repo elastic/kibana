@@ -29,29 +29,39 @@ function FieldsMetadataProvider({
   children: React.ReactNode;
   fields: MetricField[];
 } & Pick<ChartSectionProps, 'services'>) {
-  const { useFieldsMetadata } = services.fieldsMetadata;
   const [accumulatedMetadata, setAccumulatedMetadata] = useState<
     FindFieldsMetadataResponsePayload['fields']
   >({});
   const seenFields = useRef<Set<string>>(new Set());
 
-  const unseenFields = useMemo(
-    () => (fields || []).filter((field) => !seenFields.current.has(field.name)),
-    [fields]
+  const isFieldsMetadataAvailable = useMemo(
+    () => !!services.fieldsMetadata,
+    [services.fieldsMetadata]
   );
 
-  const { fieldsMetadata: newMetadata, loading } = useFieldsMetadata(
-    {
-      fieldNames: unseenFields.map((field) => field.name),
-      attributes: ['description'],
-    },
-    [unseenFields]
+  const unseenFields = useMemo(
+    () =>
+      isFieldsMetadataAvailable
+        ? (fields || [])
+            .filter((field) => !seenFields.current.has(field.name))
+            .map((field) => field.name)
+        : [],
+    [fields, isFieldsMetadataAvailable]
   );
+
+  const { fieldsMetadata: newMetadata, loading } =
+    services.fieldsMetadata?.useFieldsMetadata(
+      {
+        fieldNames: unseenFields,
+        attributes: ['description'],
+      },
+      [unseenFields]
+    ) ?? {};
 
   useEffect(() => {
     if (newMetadata && Object.keys(newMetadata).length > 0) {
       unseenFields.forEach((field) => {
-        seenFields.current.add(field.name);
+        seenFields.current.add(field);
       });
 
       setAccumulatedMetadata((prev) => ({ ...prev, ...newMetadata }));
@@ -61,7 +71,7 @@ function FieldsMetadataProvider({
   const contextValue = useMemo(
     () => ({
       fieldsMetadata: accumulatedMetadata,
-      isFieldsMetadataLoading: loading,
+      isFieldsMetadataLoading: loading ?? false,
     }),
     [accumulatedMetadata, loading]
   );

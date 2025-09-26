@@ -56,7 +56,7 @@ export interface UnifiedHistogramServices {
   expressions: ExpressionsStart;
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
-  fieldsMetadata: FieldsMetadataPublicStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 /**
