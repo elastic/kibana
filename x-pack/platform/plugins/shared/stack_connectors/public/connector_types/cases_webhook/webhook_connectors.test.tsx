@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('../../common/use_secret_headers', () => ({
+jest.mock('../../common/auth/use_secret_headers.tsx', () => ({
   useSecretHeaders: jest.fn().mockReturnValue({ data: [] }),
 }));
 
