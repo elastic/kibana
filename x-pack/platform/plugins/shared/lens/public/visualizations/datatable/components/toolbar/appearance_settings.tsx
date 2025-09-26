@@ -8,16 +8,16 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { DataGridDensity, RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
-import type { DatatableVisualizationState } from '../visualization';
-import { RowHeightMode } from '../../../../common/types';
-import { DEFAULT_PAGE_SIZE } from './table_basic';
+import type { DatatableVisualizationState } from '../../visualization';
+import { RowHeightMode } from '../../../../../common/types';
+import { DEFAULT_PAGE_SIZE } from '../table_basic';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
-} from './constants';
+} from '../constants';
 
 type LineCounts = {
   [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
@@ -25,7 +25,7 @@ type LineCounts = {
 
 const LEGACY_SINGLE_ROW_HEIGHT_MODE = 'single';
 
-export function DatatableAppearanceSettings({
+export function AppearanceSettings({
   state,
   setState,
 }: {
