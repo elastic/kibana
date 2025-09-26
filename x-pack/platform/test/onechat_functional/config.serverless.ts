@@ -6,7 +6,7 @@
  */
 
 import { oneChatFunctionalServices } from '../onechat/services/functional';
-import { createServerlessTestConfig } from '../onechat/common/functional_config';
+import { createServerlessTestConfig } from '../onechat/common/config';
 
 export default createServerlessTestConfig({
   serverlessProject: 'es',

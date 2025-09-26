@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../onechat/common/functional_config';
+import { createStatefulTestConfig } from '../onechat/common/config';
 import { oneChatFunctionalServices } from '../onechat/services/functional';
 
 export default createStatefulTestConfig({
