@@ -25,9 +25,6 @@ import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { getTechnicalPreviewWarning } from './utils';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
 export function registerChatRoutes({
   router,
@@ -63,9 +60,24 @@ export function registerChatRoutes({
       meta: { description: 'The user input message to send to the agent.' },
     }),
     capabilities: schema.maybe(
-      schema.object({
-        visualizations: schema.maybe(schema.boolean()),
-      })
+      schema.object(
+        {
+          visualizations: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.',
+          },
+        }
+      )
     ),
   });
 
@@ -107,9 +119,10 @@ export function registerChatRoutes({
       },
       access: 'public',
       summary: 'Converse with an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Send a message to an agent. Use this endpoint to have conversations with AI agents, continue existing conversations, and enable advanced features like external integrations and visualization capabilities.',
       options: {
-        tags: ['oas-tag:elastic agent builder'],
+        tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -171,9 +184,10 @@ export function registerChatRoutes({
       },
       access: 'public',
       summary: 'Converse with an agent and stream events',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Send a message to an agent with real-time streaming events. Use this endpoint to have conversations with AI agents and receive live updates as the agent processes your request.',
       options: {
-        tags: ['oas-tag:elastic agent builder'],
+        tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',

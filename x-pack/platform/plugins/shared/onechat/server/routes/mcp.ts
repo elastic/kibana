@@ -14,10 +14,7 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
-import { getTechnicalPreviewWarning } from './utils';
 import { MCP_SERVER_PATH } from '../../common/mcp';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server');
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -33,9 +30,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
       options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
+        tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
@@ -151,9 +149,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
       options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
+        tags: ['mcp', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -189,9 +188,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
       options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
+        tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',

@@ -47,14 +47,19 @@ actions:
         description: Connector documentation
         url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
       x-displayName: 'Connectors'
-  - target: '$.tags[?(@.name=="elastic agent builder")]'
+  - target: '$.tags[?(@.name=="agent builder")]'
     description: Change tag description and displayName
     update:
-      # description: 
+      description: >
+        Use the Agent Builder APIs to create, and manage AI agents and tools.
+        Chat with agents to perform tasks and workflows and execute tools.
+      externalDocs:
+        description: Agent Builder documentation
+        url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
       # externalDocs:
         # description: 
         # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
-      x-displayName: 'Elastic Agent Builder'
+      x-displayName: 'Agent Builder'
   # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
