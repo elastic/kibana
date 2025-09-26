@@ -30,12 +30,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 
 interface AssistantNavLinkProps {
   iconOnly?: boolean;
+  variant?: 'primary' | 'secondary' | 'tertiary';
 }
 
 /** One gradient to rule them all */
 const CTA_GRAD = `linear-gradient(20deg, #0B64DD 10%, #1C9BEF 60%, #48EFCF 100%)`;
 
-export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }) => {
+export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, variant = 'primary' }) => {
   const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
@@ -54,12 +55,11 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = EuiButtonEmpty; // Force project mode for testing
-  // const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
   const ButtonComponent = iconOnly ? EuiButtonIcon : EuiButtonBasicOrEmpty;
   
-  // Choose the right icon based on chrome style (not iconOnly)
-  const IconComponent = chromeStyle === 'project' ? SparklesAnim : SparklesWhite;
+  // Choose the right icon based on variant
+  const IconComponent = variant === 'primary' ? SparklesWhite : SparklesAnim;
 
   /** Base styles shared by all variants */
   const base = css`
@@ -117,24 +117,16 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
 
   /** Secondary (outlined): gradient border + gradient text/icon */
   const secondary = css`
-    /* Simple test: transparent background, gradient text */
     background: transparent !important;
     border: 2px solid var(--cta-grad) !important;
+    color: ${euiTheme.colors.text} !important; /* Fallback text color */
     
-    /* Apply gradient to button and all children - this approach worked before */
-    background: var(--cta-grad) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    color: transparent !important;
-    
-    /* Apply gradient to all children except icon (which uses CSS mask) */
-    *:not(.euiButtonContent__icon) {
+    /* Simple gradient text test */
+    .euiButtonContent__content {
       background: var(--cta-grad) !important;
       -webkit-background-clip: text !important;
       background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
-      color: transparent !important;
     }
 
     &:hover {
@@ -145,10 +137,62 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
     }
   `;
 
-  /** Icon-only: gradient background for classic chrome, transparent for project chrome */
-  const iconOnlyCss = css`
-    background: ${chromeStyle === 'project' ? 'transparent' : 'var(--cta-grad)'} !important;
+  /** Tertiary (minimal): no background/border + gradient text/icon */
+  const tertiary = css`
+    background: transparent !important;
+    border: none !important;
+    color: ${euiTheme.colors.text} !important; /* Fallback text color */
+    
+    /* Apply gradient text */
+    .euiButtonContent__content {
+      background: var(--cta-grad) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+    }
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px ${euiTheme.colors.primary}33;
+    }
+  `;
+
+  /** Icon-only Primary: gradient background + white sparkles */
+  const iconOnlyPrimary = css`
+    background: var(--cta-grad) !important;
     border: none;
+    width: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xl};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+  `;
+
+  /** Icon-only Secondary: transparent background + gradient border + gradient sparkles */
+  const iconOnlySecondary = css`
+    background: transparent !important;
+    border: 2px solid var(--cta-grad) !important;
+    width: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xl};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      filter: brightness(1.03);
+    }
+  `;
+
+  /** Icon-only Tertiary: no background/border + gradient sparkles */
+  const iconOnlyTertiary = css`
+    background: transparent !important;
+    border: none !important;
     width: ${euiTheme.size.xl};
     height: ${euiTheme.size.xl};
     display: inline-flex;
@@ -173,11 +217,8 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false }
         css={[
           base,
           iconOnly
-            ? iconOnlyCss
-            : secondary // Force secondary variant for testing
-            // : chromeStyle === 'project'
-            // ? secondary // EuiButtonEmpty → outlined look
-            // : primary, // EuiButton → filled look
+            ? (variant === 'primary' ? iconOnlyPrimary : variant === 'secondary' ? iconOnlySecondary : iconOnlyTertiary)
+            : (variant === 'primary' ? primary : variant === 'secondary' ? secondary : tertiary),
         ]}
       >
         {!iconOnly && LINK_LABEL}
