@@ -13,6 +13,7 @@ import type { SearchStrategyDependencies } from '../../types';
 import type { EqlSearchStrategyRequest } from '../../../../common';
 import { firstValueFrom } from 'rxjs';
 import { getMockSearchConfig } from '../../../../config.mock';
+import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 
 const getMockEqlResponse = () => ({
   body: {
@@ -79,6 +80,7 @@ describe('EQL search strategy', () => {
             },
           },
         },
+        featureFlags: coreFeatureFlagsMock.createStart(),
       } as unknown as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',

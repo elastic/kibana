@@ -11,6 +11,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../common/constants';
 import type { SearchConfigSchema } from '../../../config';
 import type {
   EqlSearchStrategyRequest,
@@ -54,7 +55,10 @@ export const eqlSearchStrategyProvider = (
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
-        const hasBackgroundSearch = await featureFlags.getBooleanValue('', false);
+        const hasBackgroundSearch = await featureFlags.getBooleanValue(
+          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+          false
+        );
 
         const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
           uiSettingsClient
