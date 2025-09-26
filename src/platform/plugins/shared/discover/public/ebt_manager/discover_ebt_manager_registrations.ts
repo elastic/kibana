@@ -41,7 +41,7 @@ export const REMAINING_TABS_COUNT = 'remainingTabsCount';
 export const CLOSED_TABS_COUNT = 'closedTabsCount';
 export const FROM_INDEX = 'fromIndex';
 export const TO_INDEX = 'toIndex';
-export const KEY_USED = 'keyUsed';
+export const SHORTCUT_USED = 'shortcutUsed';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -192,7 +192,7 @@ export const registerDiscoverEBTManagerAnalytics = (
           optional: true,
         },
       },
-      [KEY_USED]: {
+      [SHORTCUT_USED]: {
         type: 'keyword',
         _meta: {
           description: 'The keyboard key used for tab navigation',
