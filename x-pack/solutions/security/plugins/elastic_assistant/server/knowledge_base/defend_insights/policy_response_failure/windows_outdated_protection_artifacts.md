@@ -2,7 +2,7 @@
 type: policy_response_failure
 action.name: download_global_artifacts
 action.message: "Global artifacts snapshot {version} does not match target snapshot: {date}"
-os: [Windows, MacOS, Linux]
+os: [Windows]
 date: "2025-08-15"
 ---
 
