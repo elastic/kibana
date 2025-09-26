@@ -1360,7 +1360,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Get an agent",
+        "summary": "Get an agent by ID",
         "tags": [
           "agent builder"
         ],
