@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasProtectedNamespaceName, isInProtectedNamespace } from './namespaces';
+import { hasNamespaceName, isInProtectedNamespace } from '../base/namespaces';
 
 export const toolIdRegexp =
   /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
@@ -42,12 +42,12 @@ export const validateToolId = ({
   if (toolId.length > toolIdMaxLength) {
     return `Tool ids are limited to ${toolIdMaxLength} characters.`;
   }
-  if (hasProtectedNamespaceName(toolId)) {
-    return `Tool id cannot have the same name as a reserved namespaces`;
+  if (hasNamespaceName(toolId)) {
+    return `Tool id cannot have the same name as a reserved namespace.`;
   }
   if (!builtIn) {
     if (isInProtectedNamespace(toolId)) {
-      return `Tool id is using a protected namespaces.`;
+      return `Tool id is using a protected namespace.`;
     }
   }
 };
