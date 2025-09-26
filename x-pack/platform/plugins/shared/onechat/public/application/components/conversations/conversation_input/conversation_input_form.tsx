@@ -73,6 +73,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
       aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
         defaultMessage: 'Message input form',
       })}
+      aria-disabled={shouldDisableTextArea}
     >
       <ConversationInputTextArea
         input={input}
