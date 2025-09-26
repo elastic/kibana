@@ -34,7 +34,7 @@ const createRegistryMock = (): jest.Mocked<
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
     supportsAccessControl: jest.fn(),
-  };
+  });
 
   mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
