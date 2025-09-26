@@ -47,7 +47,7 @@ describe('bulkCreate', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       severity: CaseSeverity.LOW,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [{ uid: '1' }],
@@ -125,6 +125,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -171,6 +172,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
@@ -253,6 +255,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -293,6 +296,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
@@ -1253,7 +1257,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',
@@ -1287,7 +1291,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',
