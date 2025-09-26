@@ -84,7 +84,8 @@ describe('TabbedContent', () => {
       items: [...initialItems, NEW_TAB],
       selectedItem: NEW_TAB,
     });
-    expect(onEBTEvent).toHaveBeenCalledWith('tabCreated', {
+    expect(onEBTEvent).toHaveBeenCalledWith({
+      eventName: 'tabCreated',
       tabId: NEW_TAB.id,
       totalTabsOpen: initialItems.length,
     });
@@ -127,7 +128,8 @@ describe('TabbedContent', () => {
       items: [secondTab],
       selectedItem: secondTab,
     });
-    expect(onEBTEvent).toHaveBeenCalledWith('tabClosed', {
+    expect(onEBTEvent).toHaveBeenCalledWith({
+      eventName: 'tabClosed',
       tabId: firstTab.id,
       totalTabsOpen: 2,
       remainingTabsCount: 1,
@@ -178,7 +180,8 @@ describe('TabbedContent', () => {
       duplicatedFromId: firstTab.id,
     };
     await waitFor(() => {
-      expect(onEBTEvent).toHaveBeenCalledWith('tabDuplicated', {
+      expect(onEBTEvent).toHaveBeenCalledWith({
+        eventName: 'tabDuplicated',
         tabId: firstTab.id,
         totalTabsOpen: 2,
       });
@@ -285,7 +288,8 @@ describe('TabbedContent', () => {
 
     await userEvent.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
     await waitFor(() => {
-      expect(onEBTEvent).toHaveBeenCalledWith('tabSwitched', {
+      expect(onEBTEvent).toHaveBeenCalledWith({
+        eventName: 'tabSwitched',
         tabId: secondTab.id,
         fromIndex: 0,
         toIndex: 1,
@@ -332,7 +336,8 @@ describe('TabbedContent', () => {
         items: [firstTab],
         selectedItem: firstTab,
       });
-      expect(onEBTEvent).toHaveBeenCalledWith('tabClosedOthers', {
+      expect(onEBTEvent).toHaveBeenCalledWith({
+        eventName: 'tabClosedOthers',
         tabId: firstTab.id,
         totalTabsOpen: 3,
         closedTabsCount: 2,
@@ -372,7 +377,8 @@ describe('TabbedContent', () => {
         items: [firstTab, secondTab],
         selectedItem: secondTab,
       });
-      expect(onEBTEvent).toHaveBeenCalledWith('tabClosedToTheRight', {
+      expect(onEBTEvent).toHaveBeenCalledWith({
+        eventName: 'tabClosedToTheRight',
         tabId: secondTab.id,
         totalTabsOpen: 4,
         closedTabsCount: 2,
