@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../../types';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
 
 export const ENRICH_MODES = [

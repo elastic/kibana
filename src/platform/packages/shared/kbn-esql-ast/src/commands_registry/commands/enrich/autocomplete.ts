@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../../definitions/utils/operators';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import type { ESQLCommand, ESQLSource } from '../../../types';
 import {
   commaCompleteItem,

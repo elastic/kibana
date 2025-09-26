@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, withTriggerSuggestionDialog } from '../../complete_items';
+import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';

@@ -9,10 +9,8 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import {
-  listCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../commands_registry/complete_items';
+import { listCompleteItem } from '../../commands_registry/complete_items';
+import { withTriggerSuggestionDialog } from './autocomplete/helpers';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,

@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 
 export async function autocomplete(
   query: string,

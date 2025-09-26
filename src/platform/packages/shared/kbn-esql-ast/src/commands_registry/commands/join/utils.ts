@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils';
 import { isColumn } from '../../../ast/is';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
@@ -15,11 +16,7 @@ import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
-import {
-  commaCompleteItem,
-  pipeCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 import type { ICommand } from '../../registry';
 import type {

@@ -25,7 +25,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
-import { withTriggerSuggestionDialog } from '../../commands_registry/complete_items';
+import { withTriggerSuggestionDialog } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';

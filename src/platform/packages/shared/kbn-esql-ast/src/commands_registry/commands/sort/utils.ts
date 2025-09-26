@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
@@ -15,7 +16,6 @@ import {
   commaCompleteItem,
   isColumn,
 } from '../../../..';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =

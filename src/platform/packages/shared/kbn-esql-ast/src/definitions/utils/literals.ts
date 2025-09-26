@@ -8,7 +8,7 @@
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../commands_registry/complete_items';
+import { withTriggerSuggestionDialog } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';

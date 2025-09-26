@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommandOption, ESQLCommand } from '../../../types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import {
-  commaCompleteItem,
-  pipeCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../ast/is';
 
 export const METADATA_FIELDS = [

@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type {
   ESQLAstItem,
@@ -27,7 +28,6 @@ import {
 import { Walker } from '../../../walker';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../../types';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
 

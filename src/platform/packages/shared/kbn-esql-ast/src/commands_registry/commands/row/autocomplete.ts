@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -15,7 +16,6 @@ import {
   getNewUserDefinedColumnSuggestion,
 } from '../../complete_items';
 import { Location } from '../../types';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import { getFunctionSuggestions } from '../../../definitions/utils';
 import { isRestartingExpression } from '../../../definitions/utils/shared';
 

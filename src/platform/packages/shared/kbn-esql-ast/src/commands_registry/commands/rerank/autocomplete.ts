@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
@@ -25,12 +26,7 @@ import {
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import {
-  pipeCompleteItem,
-  commaCompleteItem,
-  withCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../complete_items';
+import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
 export const QUERY_TEXT = 'Your search query' as const;

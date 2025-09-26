@@ -11,6 +11,7 @@ import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
+import { withTriggerSuggestionDialog } from '../definitions/utils/autocomplete/helpers';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -218,21 +219,3 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     }),
     sortText: '1',
   });
-
-/**
- * Given a suggestion item, decorates it with editor.action.triggerSuggest
- * that triggers the autocomplete dialog again after accepting the suggestion.
- *
- * If the suggestion item already has a custom command, it will preserve it.
- */
-export function withTriggerSuggestionDialog(suggestionItem: ISuggestionItem): ISuggestionItem {
-  return {
-    ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        },
-  };
-}

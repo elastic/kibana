@@ -8,11 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 import {
   pipeCompleteItem,
   assignCompletionItem,

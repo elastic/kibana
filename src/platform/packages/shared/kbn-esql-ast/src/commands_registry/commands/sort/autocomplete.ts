@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import {
   columnExists as _columnExists,
@@ -14,11 +15,7 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand } from '../../../types';
-import {
-  commaCompleteItem,
-  pipeCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {

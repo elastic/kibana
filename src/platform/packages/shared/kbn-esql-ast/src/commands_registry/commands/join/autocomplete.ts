@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,
   handleFragment,
@@ -14,11 +15,7 @@ import {
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import {
-  pipeCompleteItem,
-  commaCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';

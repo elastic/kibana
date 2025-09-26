@@ -744,3 +744,21 @@ export function createInferenceEndpointToCompletionItem(
     text: inferenceEndpoint.inference_id,
   };
 }
+
+/**
+ * Given a suggestion item, decorates it with editor.action.triggerSuggest
+ * that triggers the autocomplete dialog again after accepting the suggestion.
+ *
+ * If the suggestion item already has a custom command, it will preserve it.
+ */
+export function withTriggerSuggestionDialog(suggestionItem: ISuggestionItem): ISuggestionItem {
+  return {
+    ...suggestionItem,
+    command: suggestionItem.command
+      ? suggestionItem.command
+      : {
+          title: 'Trigger Suggestion Dialog',
+          id: 'editor.action.triggerSuggest',
+        },
+  };
+}

@@ -11,11 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
-import {
-  pipeCompleteItem,
-  commaCompleteItem,
-  withTriggerSuggestionDialog,
-} from '../../commands_registry/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
+import { withTriggerSuggestionDialog } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
 import { fuzzySearch } from './shared';

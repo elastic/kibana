@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { pipeCompleteItem } from '../../complete_items';
@@ -15,7 +16,6 @@ import {
   buildUserDefinedColumnsDefinitions,
   findFinalWord,
 } from '../../../definitions/utils/autocomplete/helpers';
-import { withTriggerSuggestionDialog } from '../../complete_items';
 
 export enum Position {
   VALUE = 'value',
