@@ -119,14 +119,21 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
   const secondary = css`
     background: transparent !important;
     border: 2px solid var(--cta-grad) !important;
-    color: ${euiTheme.colors.text} !important; /* Fallback text color */
     
-    /* Simple gradient text test */
-    .euiButtonContent__content {
+    /* Apply gradient to button and all children - this approach worked before */
+    background: var(--cta-grad) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    
+    /* Apply gradient to all children except icon (which uses CSS mask) */
+    *:not(.euiButtonContent__icon) {
       background: var(--cta-grad) !important;
       -webkit-background-clip: text !important;
       background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
     }
 
     &:hover {
