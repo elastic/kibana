@@ -210,6 +210,45 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.convertTimeseriesCommandToFrom",
+        "type": "Function",
+        "tags": [],
+        "label": "convertTimeseriesCommandToFrom",
+        "description": [
+          "\nConverts timeseries (TS) commands to FROM commands in an ES|QL query"
+        ],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.convertTimeseriesCommandToFrom.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The ES|QL query string"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The modified query with TS commands converted to FROM commands"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.extractCategorizeTokens",
         "type": "Function",
         "tags": [],
