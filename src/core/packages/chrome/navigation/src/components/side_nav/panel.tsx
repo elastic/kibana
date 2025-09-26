@@ -40,7 +40,10 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
     <div
       role="region"
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
-        defaultMessage: `Side panel for ${openerNode.label}`,
+        defaultMessage: `Side panel for {label}`,
+        values: {
+          label: openerNode.label,
+        },
       })}
       data-test-subj={`side-navigation-panel-${openerNode.id}`}
       ref={ref}
