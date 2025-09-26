@@ -76,12 +76,12 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
                 id="xpack.fleet.integrations.rollbackPackage.uploadedTooltip"
                 defaultMessage="This integration was installed by upload and cannot be rolled back."
               />
-            ) : (
+            ) : isCustomPackage ? (
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.customTooltip"
-                defaultMessage="This integration type cannot be rolled back."
+                defaultMessage="Custom integrations cannot be rolled back."
               />
-            )
+            ) : null
           }
         >
           {rollbackButton}

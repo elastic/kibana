@@ -176,7 +176,7 @@ export function useInstalledIntegrationsActions() {
             'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackInProgressDescription',
             {
               defaultMessage:
-                'The integrations and the policies are rolling back to the previous version.',
+                'Selected integrations and policies are rolling back to the previous version.',
             }
           ),
         });
