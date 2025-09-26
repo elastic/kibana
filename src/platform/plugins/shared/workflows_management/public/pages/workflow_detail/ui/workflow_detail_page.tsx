@@ -19,6 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -48,12 +49,13 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const styles = useMemoCss(componentStyles);
-  const { application, chrome, uiSettings, notifications } = useKibana().services;
+  const { application, uiSettings, notifications } = useKibana().services;
   const {
     data: workflow,
     isLoading: isLoadingWorkflow,
     error: workflowError,
   } = useWorkflowDetail(id);
+  useWorkflowsBreadcrumbs(workflow?.name);
 
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
@@ -66,20 +68,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  chrome!.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-      href: application!.getUrlForApp('workflows', { path: '/' }),
-    },
-    { text: workflow?.name ?? 'Workflow Detail' },
-  ]);
-
-  chrome!.docTitle.change([
-    workflow?.name ?? 'Workflow Detail',
-    i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-  ]);
-
   const { updateWorkflow, runWorkflow, runIndividualStep } = useWorkflowActions();
+
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow =
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&

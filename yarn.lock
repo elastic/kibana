@@ -2084,26 +2084,26 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/natural-compare/-/natural-compare-1.1.0.tgz#75f0642ad64701ffa9d42f1d7ada3b83f4e67cf3"
   integrity sha512-yuctPJs5lRXoI8LkpVZGAV6n+DKOuEsfpfcIDQ8ZjWHwazqk1QjBc4jMlof0UlZHyUqv4dwsOTooMiAmtzvwXA==
 
-"@dnd-kit/accessibility@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-3.1.0.tgz#1054e19be276b5f1154ced7947fc0cb5d99192e0"
-  integrity sha512-ea7IkhKvlJUv9iSHJOnxinBcoOI3ppGnnL+VDJ75O45Nss6HtZd8IdN8touXPDtASfeI2T2LImb8VOZcL47wjQ==
+"@dnd-kit/accessibility@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-3.1.1.tgz#3b4202bd6bb370a0730f6734867785919beac6af"
+  integrity sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==
   dependencies:
     tslib "^2.0.0"
 
-"@dnd-kit/core@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-6.1.0.tgz#e81a3d10d9eca5d3b01cbf054171273a3fe01def"
-  integrity sha512-J3cQBClB4TVxwGo3KEjssGEXNJqGVWx17aRTZ1ob0FliR5IjYgTxl5YJbKTzA6IzrtelotH19v6y7uoIRUZPSg==
+"@dnd-kit/core@^6.3.1":
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-6.3.1.tgz#4c36406a62c7baac499726f899935f93f0e6d003"
+  integrity sha512-xkGBRQQab4RLwgXxoqETICr6S5JlogafbhNsidmrkVv2YRs5MLwpjoF2qpiGjQt8S9AoxtIV603s0GIUpY5eYQ==
   dependencies:
-    "@dnd-kit/accessibility" "^3.1.0"
+    "@dnd-kit/accessibility" "^3.1.1"
     "@dnd-kit/utilities" "^3.2.2"
     tslib "^2.0.0"
 
-"@dnd-kit/sortable@^8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@dnd-kit/sortable/-/sortable-8.0.0.tgz#086b7ac6723d4618a4ccb6f0227406d8a8862a96"
-  integrity sha512-U3jk5ebVXe1Lr7c2wU7SBZjcWdQP+j7peHJfCspnA81enlu88Mgd7CC8Q+pub9ubP7eKVETzJW+IBAhsqbSu/g==
+"@dnd-kit/sortable@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/sortable/-/sortable-10.0.0.tgz#1f9382b90d835cd5c65d92824fa9dafb78c4c3e8"
+  integrity sha512-+xqhmIIzvAYMGfBYYnbKuNicfSsk4RksY2XdmJhT+HAC01nix6fHCztU68jooFiMUB01Ky3F0FyOvhG/BZrWkg==
   dependencies:
     "@dnd-kit/utilities" "^3.2.2"
     tslib "^2.0.0"
@@ -4240,6 +4240,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bench@link:src/platform/packages/shared/kbn-bench":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
@@ -4301,10 +4305,6 @@
   uid ""
 
 "@kbn/charts-theme@link:src/platform/packages/shared/kbn-charts-theme":
-  version "0.0.0"
-  uid ""
-
-"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
   version "0.0.0"
   uid ""
 
@@ -5332,6 +5332,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-server-benchmarks@link:src/platform/packages/shared/kbn-core-server-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-status-common@link:src/core/packages/status/common":
   version "0.0.0"
   uid ""
@@ -5553,6 +5557,10 @@
   uid ""
 
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-sources-registry-plugin@link:x-pack/platform/plugins/shared/data_sources_registry":
   version "0.0.0"
   uid ""
 
@@ -6428,6 +6436,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/jest-benchmarks@link:src/platform/packages/shared/kbn-jest-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
@@ -6580,7 +6592,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lock-manager@link:packages/kbn-lock-manager":
+"@kbn/lock-manager@link:src/platform/packages/shared/kbn-lock-manager":
   version "0.0.0"
   uid ""
 
@@ -7137,6 +7149,10 @@
   uid ""
 
 "@kbn/profiler-cli@link:x-pack/platform/packages/shared/kbn-profiler-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/profiler@link:src/platform/packages/shared/kbn-profiler":
   version "0.0.0"
   uid ""
 
@@ -8673,6 +8689,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
   version "0.0.0"
   uid ""
 
@@ -12949,10 +12969,10 @@
   dependencies:
     "@types/sizzle" "*"
 
-"@types/jquery@^3.5.32":
-  version "3.5.32"
-  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.32.tgz#3eb0da20611b92c7c49ebed6163b52a4fdc57def"
-  integrity sha512-b9Xbf4CkMqS02YH8zACqN1xzdxc3cO735Qe5AbSUFmyOiaWAbcpqh9Wna+Uk0vgACvoQHpWDg2rGdHkYPLmCiQ==
+"@types/jquery@^3.5.33":
+  version "3.5.33"
+  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.33.tgz#f42f40bac3edd84abdc9f6297d28e570fe463b35"
+  integrity sha512-SeyVJXlCZpEki5F0ghuYe+L+PprQta6nRZqhONt9F13dWBtR/ftoaIbdRQ7cis7womE+X2LKhsDdDtkkDhJS6g==
   dependencies:
     "@types/sizzle" "*"
 
@@ -16161,7 +16181,7 @@ chalk-template@^0.4.0:
   dependencies:
     chalk "^4.1.2"
 
-chalk@2.4.2, chalk@^2.3.0, chalk@^2.4.1, chalk@^2.4.2:
+chalk@2.4.2, chalk@^2.4.1, chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
   integrity sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==
@@ -18495,7 +18515,7 @@ diacritics@1.3.0:
   resolved "https://registry.yarnpkg.com/diacritics/-/diacritics-1.3.0.tgz#3efa87323ebb863e6696cebb0082d48ff3d6f7a1"
   integrity sha1-PvqHMj67hj5mls67AILUj/PW96E=
 
-diff-match-patch@^1.0.0, diff-match-patch@^1.0.5:
+diff-match-patch@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
   integrity sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==
@@ -19462,10 +19482,10 @@ eslint-plugin-node@^11.1.0:
     resolve "^1.10.1"
     semver "^6.1.0"
 
-eslint-plugin-playwright@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.2.0.tgz#d7eda21e670274fc0c006e11ba5cc2c8417b2a6e"
-  integrity sha512-qSQpAw7RcSzE3zPp8FMGkthaCWovHZ/BsXtpmnGax9vQLIovlh1bsZHEa2+j2lv9DWhnyeLM/qZmp7ffQZfQvg==
+eslint-plugin-playwright@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.2.2.tgz#f722649b0bf04acd8fef39184249710335b10a6f"
+  integrity sha512-j0jKpndIPOXRRP9uMkwb9l/nSmModOU3452nrFdgFJoEv/435J1onk8+aITzjDW8DfypxgmVaDMdmVIa6F7I0w==
   dependencies:
     globals "^13.23.0"
 
@@ -23734,14 +23754,6 @@ jsonc-parser@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/jsonc-parser/-/jsonc-parser-3.2.0.tgz#31ff3f4c2b9793f89c67212627c51c6394f88e76"
   integrity sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==
-
-jsondiffpatch@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/jsondiffpatch/-/jsondiffpatch-0.4.1.tgz#9fb085036767f03534ebd46dcd841df6070c5773"
-  integrity sha512-t0etAxTUk1w5MYdNOkZBZ8rvYYN5iL+2dHCCx/DpkFm/bW28M6y5nUS83D4XdZiHy35Fpaw6LBb+F88fHZnVCw==
-  dependencies:
-    chalk "^2.3.0"
-    diff-match-patch "^1.0.0"
 
 jsondiffpatch@0.6.0:
   version "0.6.0"

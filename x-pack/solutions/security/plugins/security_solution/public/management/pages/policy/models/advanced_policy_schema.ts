@@ -2313,6 +2313,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.firewall_anti_tamper',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
+      {
+        defaultMessage:
+          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.alerts.hash.md5',
     first_supported_version: '8.16',
     documentation: i18n.translate(

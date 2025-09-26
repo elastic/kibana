@@ -90,7 +90,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         </EuiFlexItem>
       )}
 
-      {view === 'classic' && (
+      {view === 'dataQuality' && (
         <>
           <Summary />
           <EuiSpacer size="m" />
@@ -115,7 +115,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
             openAlertFlyout={openAlertFlyout}
             displayActions={{
               displayCreateRuleButton: selectedQualityCard === 'degraded',
-              displayEditFailureStore: selectedQualityCard === 'failed',
+              displayEditFailureStore: selectedQualityCard === 'failed' && view !== 'wired', // Don't allow editing failure store for Wired Streams
             }}
           />
         </EuiSplitPanel.Inner>
