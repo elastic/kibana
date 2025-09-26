@@ -80,7 +80,11 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
-  settings: {} as SettingsStart,
+  settings: {
+    client: {
+      get: jest.fn(),
+    },
+  } as unknown as SettingsStart,
 };
 jest.mock('../../assistant_context');
 
