@@ -485,7 +485,7 @@ describe('CloudConnectorSetup', () => {
       mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
       setupMocks([]);
 
-      const { container } = renderComponent();
+      renderComponent();
 
       expect(mockIsCloudConnectorReusableEnabled).toHaveBeenCalledWith(
         mockPackageInfo.version,
