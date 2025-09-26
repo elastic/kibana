@@ -50,8 +50,8 @@ describe('getScoutPlaywrightConfigs', () => {
     expect(configs.size).toBe(5);
     expect(configs.get('plugin_a')).toEqual({
       configs: [
-        'x-pack/platform/plugins/private/plugin_a/ui_tests/playwright.config.ts',
-        'x-pack/platform/plugins/private/plugin_a/ui_tests/parallel.playwright.config.ts',
+        'x-pack/platform/plugins/private/plugin_a/test/scout/ui/playwright.config.ts',
+        'x-pack/platform/plugins/private/plugin_a/test/scout/ui/parallel.playwright.config.ts',
       ],
       usesParallelWorkers: true,
       group: 'platform',
