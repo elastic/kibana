@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
@@ -26,7 +27,6 @@ import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
 export const QUERY_TEXT = 'Your search query' as const;
@@ -169,13 +169,10 @@ async function handleOnFieldList({
       );
 
       return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => {
-        // if there is already a command, we don't want to override it
-        if (suggestion.command) return suggestion;
-        return {
+        return withAutoSuggest({
           ...suggestion,
           rangeToReplace,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        };
+        });
       });
     },
     // complete: get next actions suggestions for completed field
@@ -240,12 +237,13 @@ export function buildNextActions(options?: { withSpaces?: boolean }): ISuggestio
     sortText: '01',
   });
 
-  items.push({
-    ...commaCompleteItem,
-    text: commaCompleteItem.text + ' ',
-    sortText: '02',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  });
+  items.push(
+    withAutoSuggest({
+      ...commaCompleteItem,
+      text: commaCompleteItem.text + ' ',
+      sortText: '02',
+    })
+  );
 
   items.push({
     ...pipeCompleteItem,
