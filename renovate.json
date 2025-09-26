@@ -89,8 +89,7 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip",
-        "backport:current-major"
+        "release_note:skip"
       ],
       "enabled": true,
       "matchManagers": [
@@ -1189,8 +1188,7 @@
       ],
       "labels": [
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1228,7 +1226,6 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
         "Team:Operations",
         "Team:Core"
       ],
@@ -1250,7 +1247,6 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
         "Team:Operations",
         "Team:QA"
       ],
@@ -1316,9 +1312,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1339,9 +1333,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1363,9 +1355,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1386,9 +1376,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1425,8 +1413,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1464,8 +1451,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1484,8 +1470,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1506,8 +1491,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1535,8 +1519,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2212,8 +2195,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2233,8 +2215,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2260,8 +2241,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "dependencyDashboardApproval": true,
       "minimumReleaseAge": "14 days",
@@ -2296,8 +2276,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2796,8 +2775,7 @@
         "@types/extract-zip",
         "@types/pdfmake",
         "extract-zip",
-        "pdfmake",
-        "puppeteer"
+        "pdfmake"
       ],
       "reviewers": [
         "team:kibana-presentation",
@@ -2814,6 +2792,26 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "puppeteer",
+      "matchDepNames": [
+        "puppeteer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Reporting Services",
+        "Team:ResponseOps",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
     },
     {
       "groupName": "turf",
@@ -4397,7 +4395,6 @@
         "Team:Monitoring",
         "Team:Core",
         "Team:Security",
-        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
@@ -4560,8 +4557,7 @@
       ],
       "labels": [
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -4679,7 +4675,6 @@
       ],
       "labels": [
         "Team:Operations",
-        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",

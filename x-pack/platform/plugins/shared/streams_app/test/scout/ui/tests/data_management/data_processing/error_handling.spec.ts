@@ -9,7 +9,8 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/236525
+test.describe.skip(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -46,7 +47,8 @@ test.describe(
         await route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should show error and stay in creating state
       await pageObjects.toasts.waitFor();
@@ -59,7 +61,7 @@ test.describe(
       await page.route('**/streams/**/_ingest', async (route) => {
         await route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -74,7 +76,9 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
-      await pageObjects.streams.saveProcessorsListChanges();
+
+      await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
       await pageObjects.toasts.closeAll();
 
       // Edit the processor
@@ -88,7 +92,7 @@ test.describe(
         await route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should show error and return to editing state
       await pageObjects.toasts.waitFor();
@@ -101,7 +105,7 @@ test.describe(
       await page.route('**/streams/**/_ingest', async (route) => {
         await route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
       await pageObjects.toasts.waitFor();

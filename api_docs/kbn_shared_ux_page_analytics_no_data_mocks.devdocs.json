@@ -42,9 +42,21 @@
             "text": "AbstractStorybookMock"
           },
           "<",
-          "AnalyticsNoDataPageProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageProps",
+            "text": "AnalyticsNoDataPageProps"
+          },
           ", ",
-          "AnalyticsNoDataPageServices",
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageServices",
+            "text": "AnalyticsNoDataPageServices"
+          },
           ", {}, ServiceArguments>"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
@@ -274,7 +286,13 @@
                 "text": "Params"
               },
               ") => ",
-              "AnalyticsNoDataPageServices"
+              {
+                "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+                "section": "def-public.AnalyticsNoDataPageServices",
+                "text": "AnalyticsNoDataPageServices"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
             "deprecated": false,
@@ -369,7 +387,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "AnalyticsNoDataPageServices"
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageServices",
+            "text": "AnalyticsNoDataPageServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
         "deprecated": false,
@@ -387,7 +411,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "AnalyticsNoDataPageServices"
+          {
+            "pluginId": "@kbn/shared-ux-page-analytics-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageAnalyticsNoDataTypesPluginApi",
+            "section": "def-public.AnalyticsNoDataPageServices",
+            "text": "AnalyticsNoDataPageServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
         "deprecated": false,
@@ -423,7 +453,7 @@
             "section": "def-common.ArgumentParams",
             "text": "ArgumentParams"
           },
-          "<PropArguments, ServiceArguments> & ",
+          "<ServiceArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
             "scope": "public",
