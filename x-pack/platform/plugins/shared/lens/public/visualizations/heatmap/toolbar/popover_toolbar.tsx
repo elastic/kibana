@@ -13,19 +13,16 @@ import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { VisualizationToolbarProps } from '../../types';
+import type { VisualizationToolbarProps } from '../../../types';
+import { LegendSettingsPopover, ToolbarPopover } from '../../../shared_components';
+
+import type { HeatmapVisualizationState } from '../types';
+import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import {
-  LegendSettingsPopover,
-  ToolbarPopover,
-  ValueLabelsSettings,
-  ToolbarTitleSettings,
-  AxisTicksSettings,
-  AxisLabelOrientationSelector,
-  allowedOrientations,
-} from '../../shared_components';
-import type { Orientation } from '../../shared_components';
-import type { HeatmapVisualizationState } from './types';
-import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+  HeatmapHorizontalAxisSettings,
+  HeatmapTitlesAndTextSettings,
+  HeatmapVerticalAxisSettings,
+} from './style_settings';
 
 const PANEL_STYLE = {
   width: '500px',
@@ -48,7 +45,7 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
   },
 ];
 
-export const HeatmapToolbar = memo(
+export const HeatmapPopoverToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {
     const { state, setState, frame } = props;
 
@@ -62,10 +59,9 @@ export const HeatmapToolbar = memo(
 
     const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
-    const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
-
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {/* titles ans text */}
         <EuiFlexItem grow={false}>
           <ToolbarPopover
             title={i18n.translate('xpack.lens.shared.titlesAndTextLabel', {
@@ -76,20 +72,13 @@ export const HeatmapToolbar = memo(
             data-test-subj="lnsTextOptionsPopover"
             panelStyle={PANEL_STYLE}
           >
-            <ValueLabelsSettings
-              valueLabels={state?.gridConfig.isCellLabelVisible ? 'show' : 'hide'}
-              onValueLabelChange={(newMode) => {
-                setState({
-                  ...state,
-                  gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'show' },
-                });
-              }}
-            />
+            <HeatmapTitlesAndTextSettings {...props} />
           </ToolbarPopover>
         </EuiFlexItem>
-
+        {/* axis */}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            {/* vertical axis */}
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.verticalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when vertical axis is enabled.',
@@ -106,37 +95,10 @@ export const HeatmapToolbar = memo(
                 buttonDataTestSubj="lnsHeatmapVerticalAxisButton"
                 panelStyle={PANEL_STYLE}
               >
-                <ToolbarTitleSettings
-                  settingId="yLeft"
-                  title={state?.gridConfig.yTitle}
-                  updateTitleState={({ title, visible }) => {
-                    setState({
-                      ...state,
-                      gridConfig: {
-                        ...state.gridConfig,
-                        yTitle: title,
-                        isYAxisTitleVisible: visible,
-                      },
-                    });
-                  }}
-                  isTitleVisible={state?.gridConfig.isYAxisTitleVisible}
-                />
-                <AxisTicksSettings
-                  axis="yLeft"
-                  updateTicksVisibilityState={(visible) => {
-                    setState({
-                      ...state,
-                      gridConfig: {
-                        ...state.gridConfig,
-                        isYAxisLabelVisible: visible,
-                      },
-                    });
-                  }}
-                  isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
-                />
+                <HeatmapVerticalAxisSettings {...props} />
               </ToolbarPopover>
             </TooltipWrapper>
-
+            {/* horizontal axis */}
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.horizontalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when horizontal axis is enabled.',
@@ -153,56 +115,12 @@ export const HeatmapToolbar = memo(
                 buttonDataTestSubj="lnsHeatmapHorizontalAxisButton"
                 panelStyle={PANEL_STYLE}
               >
-                <ToolbarTitleSettings
-                  settingId="x"
-                  title={state?.gridConfig.xTitle}
-                  updateTitleState={({ title, visible }) =>
-                    setState({
-                      ...state,
-                      gridConfig: {
-                        ...state.gridConfig,
-                        xTitle: title,
-                        isXAxisTitleVisible: visible,
-                      },
-                    })
-                  }
-                  isTitleVisible={state?.gridConfig.isXAxisTitleVisible}
-                />
-                <AxisTicksSettings
-                  axis="x"
-                  updateTicksVisibilityState={(visible) => {
-                    setState({
-                      ...state,
-                      gridConfig: {
-                        ...state.gridConfig,
-                        isXAxisLabelVisible: visible,
-                      },
-                    });
-                  }}
-                  isAxisLabelVisible={isXAxisLabelVisible}
-                />
-                {isXAxisLabelVisible && (
-                  <AxisLabelOrientationSelector
-                    axis="x"
-                    selectedLabelOrientation={
-                      allowedOrientations.includes(
-                        state.gridConfig.xAxisLabelRotation as Orientation
-                      )
-                        ? (state.gridConfig.xAxisLabelRotation as Orientation)
-                        : 0 // Default to 0 if the value is not valid
-                    }
-                    setLabelOrientation={(orientation) => {
-                      setState({
-                        ...state,
-                        gridConfig: { ...state.gridConfig, xAxisLabelRotation: orientation },
-                      });
-                    }}
-                  />
-                )}
+                <HeatmapHorizontalAxisSettings {...props} />
               </ToolbarPopover>
             </TooltipWrapper>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {/* legend */}
         <EuiFlexItem grow={false}>
           <LegendSettingsPopover
             legendOptions={legendOptions}
