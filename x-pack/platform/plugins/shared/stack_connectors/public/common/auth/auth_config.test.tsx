@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
-jest.mock('../use_secret_headers', () => ({
+jest.mock('./use_secret_headers', () => ({
   useSecretHeaders: jest.fn().mockReturnValue([]),
 }));
 

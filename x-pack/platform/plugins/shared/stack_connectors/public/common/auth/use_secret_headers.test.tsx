@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
@@ -18,8 +20,18 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 const customWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
+    },
   });
+
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

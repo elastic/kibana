@@ -24,7 +24,7 @@ import {
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
-import { useSecretHeaders } from '../use_secret_headers';
+import { useSecretHeaders } from './use_secret_headers';
 import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
