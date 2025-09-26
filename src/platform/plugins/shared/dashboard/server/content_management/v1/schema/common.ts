@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { FilterStateStore } from '@kbn/es-query';
+import { filterSchema, querySchema } from '@kbn/es-query-server';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -175,60 +175,6 @@ export const optionsSchema = schema.object({
   }),
 });
 
-export const filterSchema = schema.object(
-  {
-    meta: schema.object(
-      {
-        alias: schema.maybe(schema.nullable(schema.string())),
-        disabled: schema.maybe(schema.boolean()),
-        negate: schema.maybe(schema.boolean()),
-        controlledBy: schema.maybe(schema.string()),
-        group: schema.maybe(schema.string()),
-        index: schema.maybe(schema.string()),
-        isMultiIndex: schema.maybe(schema.boolean()),
-        type: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        params: schema.maybe(schema.any()),
-        field: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    $state: schema.maybe(
-      schema.object({
-        store: schema.oneOf(
-          [
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
-          ],
-          {
-            meta: {
-              description:
-                "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-            },
-          }
-        ),
-      })
-    ),
-  },
-  { meta: { description: 'A filter for the search source.' } }
-);
-
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string({
-    meta: { description: 'The query language such as KQL or Lucene.' },
-  }),
-});
-
 export const searchSourceSchema = schema.object(
   {
     type: schema.maybe(schema.string()),
@@ -273,8 +219,9 @@ export const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-export const dashboardAdditionalAttributes = {
-  // Search
+export const dashboardState = {
+  controlGroupInput: schema.maybe(controlsGroupSchema),
+  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
   kibanaSavedObjectMeta: schema.object(
     {
       searchSource: schema.maybe(searchSourceSchema),
@@ -286,39 +233,31 @@ export const dashboardAdditionalAttributes = {
       defaultValue: {},
     }
   ),
-  // Time
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  refreshInterval: schema.maybe(refreshIntervalSchema),
-
-  // Dashboard Content
-  controlGroupInput: schema.maybe(controlsGroupSchema),
-  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-};
-
-export const searchResultsAttributes = {
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
-  timeRestore: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to restore time upon viewing this dashboard' },
-  }),
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
   tags: schema.maybe(
     schema.arrayOf(
       schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
     )
   ),
+  timeFrom: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  timeRestore: schema.boolean({
+    defaultValue: false,
+    meta: { description: 'Whether to restore time upon viewing this dashboard' },
+  }),
+  timeTo: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
+//
 export const dashboardAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -344,8 +283,7 @@ export const dashboardAPICreateResultSchema = schema.object(
 );
 
 export const dashboardResponseAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
@@ -410,8 +348,7 @@ export const dashboardResolveMetaSchema = {
 };
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });

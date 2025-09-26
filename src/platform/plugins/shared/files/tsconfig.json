@@ -35,6 +35,7 @@
     "@kbn/core-lifecycle-server-internal",
     "@kbn/cbor",
     "@kbn/lazy-object",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

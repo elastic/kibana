@@ -156,6 +156,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       deployTrainedModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-deploy-models`,
       documentLevelSecurity: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level`,
       e5Model: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
+      elasticInferenceService: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis`,
       elser: `${ELASTIC_DOCS}solutions/search/semantic-search/semantic-search-semantic-text`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: isServerless
@@ -692,6 +693,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     spaces: {
       kibanaLegacyUrlAliases: `${ELASTIC_DOCS}extend/kibana/legacy-url-aliases`,
       kibanaDisableLegacyUrlAliasesApi: `${KIBANA_APIS}operation/operation-post-spaces-disable-legacy-url-aliases`,
+      kibanaManageSpaces: `${ELASTIC_DOCS}deploy-manage/manage-spaces`,
     },
     watcher: {
       jiraAction: `${ELASTIC_DOCS}explore-analyze/alerts-cases/watcher/actions-jira`,

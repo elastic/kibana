@@ -11,7 +11,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { MapAttributes } from '../../../../common/content_management';
 import { getMapClient } from '../../../content_management';
-import { injectReferences } from '../../../../common/migrations/references';
 
 export interface SharingSavedObjectProps {
   outcome?: SavedObjectsResolveResponse['outcome'];
@@ -35,10 +34,8 @@ export async function loadFromLibrary(savedObjectId: string): Promise<{
     throw savedObject.error;
   }
 
-  const { attributes } = injectReferences(savedObject);
-
   return {
-    attributes,
+    attributes: savedObject.attributes,
     sharingSavedObjectProps: {
       aliasTargetId,
       outcome,

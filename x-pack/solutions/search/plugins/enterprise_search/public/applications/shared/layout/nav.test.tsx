@@ -47,13 +47,6 @@ const baseNavItems = [
         name: 'Playground',
       },
       {
-        'data-test-subj': 'searchSideNav-Connectors',
-        href: '/app/elasticsearch/content/connectors',
-        id: 'connectors',
-        items: undefined,
-        name: 'Connectors',
-      },
-      {
         'data-test-subj': 'searchSideNav-SearchApplications',
         href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
@@ -102,16 +95,6 @@ const mockNavLinks = [
     id: 'elasticsearchIndexManagement',
     title: 'Index Management',
     url: '/app/elasticsearch/index_management',
-  },
-  {
-    id: 'enterpriseSearchContent:connectors',
-    title: 'Connectors',
-    url: '/app/elasticsearch/content/connectors',
-  },
-  {
-    id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web Crawlers',
-    url: '/app/elasticsearch/content/crawlers',
   },
   {
     id: 'searchPlayground',

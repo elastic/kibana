@@ -18,23 +18,29 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLoadingElastic,
 } from '@elastic/eui';
-import type { System } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 import { StreamSystemsTable } from './stream_systems_table';
 
 export const StreamSystemsFlyout = ({
   systems,
   closeFlyout,
   isLoading,
+  definition,
 }: {
   isLoading: boolean;
   systems: System[];
   closeFlyout: () => void;
+  definition: Streams.all.Definition;
 }) => {
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
-  const addToStream = () => {};
+  const { addSystemsToStream } = useStreamSystemsApi(definition);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   return (
     <EuiFlyout
       ownFocus
@@ -70,20 +76,34 @@ export const StreamSystemsFlyout = ({
             systems={systems}
             selectedSystems={selectedSystems}
             setSelectedSystems={setSelectedSystems}
+            definition={definition}
           />
         ) : (
-          <p>
-            <FormattedMessage
-              id="xpack.streams.streamSystemsFlyout.loading"
-              defaultMessage="Loading..."
-            />
-          </p>
+          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
+            <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
+              <EuiLoadingElastic size="xxl" />
+              <EuiSpacer size="m" />
+              <EuiText>
+                <p>
+                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.analyzingDataWithGenLabel', {
+                    defaultMessage: 'Analyzing data with Gen AI …',
+                  })}
+                </p>
+                <p>
+                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.pleaseWaitWhileWeLabel', {
+                    defaultMessage: 'Please wait while we identify systems.',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              isLoading={isUpdating}
               iconType="cross"
               onClick={closeFlyout}
               flush="left"
@@ -98,7 +118,18 @@ export const StreamSystemsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={addToStream} fill isDisabled={selectedSystems.length === 0}>
+            <EuiButton
+              isLoading={isUpdating}
+              onClick={() => {
+                setIsUpdating(true);
+                addSystemsToStream(selectedSystems).finally(() => {
+                  closeFlyout();
+                  setIsUpdating(false);
+                });
+              }}
+              fill
+              isDisabled={selectedSystems.length === 0}
+            >
               <FormattedMessage
                 id="xpack.streams.streamSystemsFlyout.addToStreamButton"
                 defaultMessage="Add to stream"

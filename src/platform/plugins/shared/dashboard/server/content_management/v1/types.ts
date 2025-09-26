@@ -19,11 +19,12 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { WithRequiredProperty } from '@kbn/utility-types';
+import type { filterSchema, querySchema } from '@kbn/es-query-server';
 import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
 
-export type DashboardFilter = TypeOf<typeof schema.filterSchema>;
-export type DashboardQuery = TypeOf<typeof schema.querySchema>;
+export type DashboardFilter = TypeOf<typeof filterSchema>;
+export type DashboardQuery = TypeOf<typeof querySchema>;
 export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 
 // Panel config has some defined types but also allows for custom keys added by embeddables
