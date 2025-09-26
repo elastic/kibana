@@ -19,37 +19,42 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-import { GetAgentDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
-import { GetAgentPolicyRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
-import { GetAgentsRequestQueryInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
-import { OsqueryCreateLiveQueryRequestBodyInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import { OsqueryCreatePacksRequestBodyInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import { OsqueryCreateSavedQueryRequestBodyInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import { OsqueryDeletePacksRequestParamsInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import { OsqueryDeleteSavedQueryRequestParamsInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import { OsqueryFindLiveQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import { OsqueryFindPacksRequestQueryInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import { OsqueryFindSavedQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import { OsqueryGetLiveQueryDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import {
+import type {
+  GetAgentDetailsRequestParamsInput,
+  GetAgentPolicyRequestParamsInput,
+  GetAgentsRequestQueryInput,
+} from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
+import type {
+  OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryFindLiveQueriesRequestQueryInput,
+  OsqueryGetLiveQueryDetailsRequestParamsInput,
   OsqueryGetLiveQueryResultsRequestQueryInput,
   OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import { OsqueryGetPacksDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import { OsqueryGetSavedQueryDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import {
+import type {
+  OsqueryCreatePacksRequestBodyInput,
+  OsqueryDeletePacksRequestParamsInput,
+  OsqueryFindPacksRequestQueryInput,
+  OsqueryGetPacksDetailsRequestParamsInput,
   OsqueryUpdatePacksRequestParamsInput,
   OsqueryUpdatePacksRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import {
+import type {
+  OsqueryCreateSavedQueryRequestBodyInput,
+  OsqueryDeleteSavedQueryRequestParamsInput,
+  OsqueryFindSavedQueriesRequestQueryInput,
+  OsqueryGetSavedQueryDetailsRequestParamsInput,
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
+import type {
+  ReadAssetsStatusRequestQueryInput,
+  UpdateAssetsStatusRequestQueryInput,
+} from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
