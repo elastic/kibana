@@ -18,8 +18,6 @@ import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import { useLensProps } from './hooks/use_lens_props';
-import { TooltipContent } from './tooltip_content';
-import { useFieldsMetadataContext } from '../context/fields_metadata';
 
 const ChartSizes = {
   s: 230,
@@ -39,7 +37,6 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
-const TooltipContentMemo = React.memo(TooltipContent);
 export const Chart = ({
   abortController,
   metric,
@@ -57,8 +54,6 @@ export const Chart = ({
 }: ChartProps) => {
   const { euiTheme } = useEuiTheme();
   const chartRef = useRef<HTMLDivElement>(null);
-
-  const { fieldsMetadata = {} } = useFieldsMetadataContext();
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
   const { SaveModalComponent } = services.lens;
@@ -117,12 +112,6 @@ export const Chart = ({
         <>
           <LensWrapperMemo
             lensProps={lensProps}
-            description={
-              <TooltipContentMemo
-                metric={metric}
-                description={fieldsMetadata[metric.name]?.description}
-              />
-            }
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}

@@ -17,7 +17,6 @@ import { useMetricsGridState } from '../../hooks';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
-  description: React.ReactNode;
   onViewDetails: () => void;
   onCopyToDashboard: () => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
@@ -26,7 +25,6 @@ const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV']
 
 export function LensWrapper({
   lensProps,
-  description,
   services,
   onBrushEnd,
   onFilter,
@@ -51,14 +49,13 @@ export function LensWrapper({
     }
 
     & .embPanel__header {
-      display: none;
+      visibility: hidden;
     }
 
     & .lnsExpressionRenderer {
       width: 100%;
       margin: auto;
       box-shadow: none;
-      padding-top: ${euiTheme.size.l};
     }
 
     & .echLegend .echLegendList {
@@ -79,24 +76,18 @@ export function LensWrapper({
   });
 
   return (
-    <>
-      <div css={chartCss}>
-        <ChartTitle
-          searchTerm={searchTerm}
-          title={lensProps.attributes.title}
-          truncation="end"
-          description={description}
-        />
-        <EmbeddableComponent
-          {...lensProps}
-          extraActions={extraActions}
-          abortController={abortController}
-          disabledActions={DEFAULT_DISABLED_ACTIONS}
-          withDefaultActions
-          onBrushEnd={onBrushEnd}
-          onFilter={onFilter}
-        />
-      </div>
-    </>
+    <div css={chartCss}>
+      <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
+      <EmbeddableComponent
+        {...lensProps}
+        title={lensProps.attributes.title}
+        extraActions={extraActions}
+        abortController={abortController}
+        disabledActions={DEFAULT_DISABLED_ACTIONS}
+        withDefaultActions
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+      />
+    </div>
   );
 }

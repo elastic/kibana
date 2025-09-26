@@ -6,80 +6,57 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  EuiTextTruncate,
-  type EuiTextTruncationTypes,
-  useEuiTheme,
-  EuiHighlight,
-  euiTextTruncate,
-  EuiToolTip,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { useEuiTheme, EuiHighlight, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highlight_colors';
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 export const ChartTitle = ({
   searchTerm,
   title,
-  description,
-  truncation,
 }: {
   searchTerm: string;
   title: string;
   description?: React.ReactNode;
-  truncation: EuiTextTruncationTypes;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
 
-  // styles here were copied from use_hover_actions_styles.tsx
-  const { captionStyles, headerStyles } = useMemo(() => {
+  const { headerStyles, chartTitleCss } = useMemo(() => {
     return {
-      captionStyles: css`
+      headerStyles: css`
         position: absolute;
         width: 100%;
-        height: ${euiTheme.size.l};
+        max-height: ${euiTheme.size.l};
         z-index: ${Number(euiTheme.levels.content) + 1};
-
         transition: outline-color ${euiTheme.animation.extraFast},
           z-index ${euiTheme.animation.extraFast};
         transition-delay: ${euiTheme.animation.fast};
-      `,
-      headerStyles: css`
+
         overflow: hidden;
         height: 100%;
         line-height: ${euiTheme.size.l};
         padding: 0px ${euiTheme.size.s};
-        display: flex;
-        flex-wrap: nowrap;
-        column-gap: ${euiTheme.size.s};
-        align-items: center;
 
-        > * {
-          min-width: 0;
-          flex: 1 !important;
-          max-width: 90% !important;
-        }
+        pointer-events: none;
+      `,
+      chartTitleCss: css`
+        ${euiTextTruncate()};
+
+        font-weight: ${euiTheme.font.weight.bold};
       `,
     };
   }, [
     euiTheme.size.l,
     euiTheme.size.s,
+    euiTheme.levels.content,
     euiTheme.animation.extraFast,
     euiTheme.animation.fast,
-    euiTheme.levels.content,
+    euiTheme.font.weight.bold,
   ]);
 
-  const chartTitleCss = css`
-    ${euiTextTruncate()};
-
-    font-weight: ${euiTheme.font.weight.bold};
-  `;
-
-  const titleElement = useMemo(() => {
-    return (
+  return (
+    <div css={headerStyles} className="metricsExperienceChartTitle">
       <span css={chartTitleCss}>
         {searchTerm ? (
           <EuiHighlight
@@ -96,51 +73,9 @@ export const ChartTitle = ({
             {title}
           </EuiHighlight>
         ) : (
-          <EuiTextTruncate truncation={truncation} text={title} />
+          title
         )}
       </span>
-    );
-  }, [searchTerm, colors, title, truncation, chartTitleCss]);
-
-  if (!description) {
-    return titleElement;
-  }
-
-  return (
-    <figcaption css={captionStyles} className="metricsExperienceChartTitle">
-      <div css={headerStyles}>
-        {description ? (
-          <EuiToolTip
-            content={description}
-            delay="regular"
-            position="top"
-            anchorProps={{
-              'data-test-subj': 'metricsExperienceChartTooltipAnchor',
-            }}
-            anchorClassName="eui-fullWidth"
-          >
-            <h2
-              css={css`
-                overflow: hidden;
-              `}
-            >
-              <EuiScreenReaderOnly>
-                <span id={title}>
-                  {i18n.translate('metricsExperience.chart.panelTitle.ariaLabel', {
-                    defaultMessage: 'Panel: {title}',
-                    values: {
-                      title,
-                    },
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-              {titleElement}
-            </h2>
-          </EuiToolTip>
-        ) : (
-          titleElement
-        )}
-      </div>
-    </figcaption>
+    </div>
   );
 };
