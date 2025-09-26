@@ -10,18 +10,16 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { PreviewDataSparkPlot } from './add_significant_event_flyout/common/preview_data_spark_plot';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
-import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
-import type { Flow, SaveData } from './add_significant_event_flyout/types';
+import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
-import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
 import { NoSystemsEmptyState } from './empty_state/no_systems';
 import { StreamSystemsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_systems_flyout';
@@ -34,10 +32,6 @@ interface Props {
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const {
-    core: { notifications },
-    services: { telemetryClient },
-  } = useKibana();
   const {
     timeState: { start, end },
   } = useTimefilter();
@@ -58,7 +52,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     start,
     end,
   });
-  const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
+  const { removeQuery } = useSignificantEventsApi({
     name: definition.stream.name,
     start,
     end,
@@ -68,6 +62,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
+
+  const [query, setQuery] = useState<string>('');
 
   if (!significantEventsFetchState.value) {
     return <LoadingPanel size="xxl" />;
@@ -85,80 +81,20 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   ) : null;
 
-  const editFlyout = isEditFlyoutOpen ? (
-    <AddSignificantEventFlyout
-      definition={definition.stream}
-      query={queryToEdit}
-      onSave={async (data: SaveData) => {
-        const streamType = getStreamTypeFromDefinition(definition.stream);
-
-        switch (data.type) {
-          case 'single':
-            await upsertQuery(data.query).then(
-              () => {
-                notifications.toasts.addSuccess({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedSingle.successfullyToastTitle',
-                    { defaultMessage: `Saved significant event query successfully` }
-                  ),
-                });
-                telemetryClient.trackSignificantEventsCreated({
-                  count: 1,
-                  stream_type: streamType,
-                });
-                setIsEditFlyoutOpen(false);
-                significantEventsFetchState.refresh();
-              },
-              (error) => {
-                notifications.showErrorDialog({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedSingle.errorToastTitle',
-                    { defaultMessage: `Could not save significant event query` }
-                  ),
-                  error,
-                });
-              }
-            );
-            break;
-          case 'multiple':
-            await bulk(data.queries.map((query) => ({ index: query }))).then(
-              () => {
-                notifications.toasts.addSuccess({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
-                    { defaultMessage: `Saved significant events queries successfully` }
-                  ),
-                });
-                telemetryClient.trackSignificantEventsCreated({
-                  count: data.queries.length,
-                  stream_type: streamType,
-                });
-                setIsEditFlyoutOpen(false);
-                significantEventsFetchState.refresh();
-              },
-              (error) => {
-                notifications.showErrorDialog({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedMultiple.errorToastTitle',
-                    { defaultMessage: 'Could not save significant events queries' }
-                  ),
-                  error,
-                });
-              }
-            );
-            break;
-        }
-      }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedSystems([]);
-      }}
+  const editFlyout = (
+    <EditSignificantEventFlyout
+      setIsEditFlyoutOpen={setIsEditFlyoutOpen}
+      isEditFlyoutOpen={isEditFlyoutOpen}
+      definition={definition}
+      refresh={significantEventsFetchState.refresh}
+      queryToEdit={queryToEdit}
+      setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
-      initialSelectedSystems={selectedSystems}
+      selectedSystems={selectedSystems}
+      setSelectedSystems={setSelectedSystems}
       systems={systems}
     />
-  ) : null;
+  );
 
   const noSystems = systems.length === 0;
   const noSignificantEvents =
@@ -223,7 +159,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               <StreamsAppSearchBar
                 showQueryInput
                 showDatePicker
-                onQuerySubmit={() => {}}
+                onQuerySubmit={(queryN) => {
+                  setQuery(queryN);
+                }}
                 query={{
                   query: '',
                   language: 'text',
