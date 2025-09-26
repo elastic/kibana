@@ -647,10 +647,10 @@
       },
       "settings": {
         "properties": {
-          "syncAlerts": {
+          "extractObservables": {
             "type": "boolean"
           },
-          "extractObservables": {
+          "syncAlerts": {
             "type": "boolean"
           }
         }
@@ -676,6 +676,9 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
         "type": "integer"
       },
       "updated_at": {

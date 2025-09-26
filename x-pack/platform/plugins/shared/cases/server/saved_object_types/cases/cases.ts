@@ -200,6 +200,9 @@ export const createCaseSavedObjectType = (
       total_comments: {
         type: 'integer',
       },
+      total_events: {
+        type: 'integer',
+      },
       category: {
         type: 'keyword',
       },

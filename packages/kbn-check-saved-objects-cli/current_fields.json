@@ -193,6 +193,7 @@
     "title",
     "total_alerts",
     "total_comments",
+    "total_events",
     "updated_at",
     "updated_by",
     "updated_by.email",
