@@ -65,7 +65,7 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
 
   const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
   let testFiles: string[] = [];
-  let resolvedConfigPath: string | undefined;
+  let resolvedConfigPath: string = parsedArguments.config ?? '';
 
   // Handle config discovery if no config was explicitly provided
   if (!parsedArguments.config) {
@@ -90,9 +90,10 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   // Resolve Jest configuration
   const baseConfig = await resolveJestConfig(parsedArguments, resolvedConfigPath);
 
-  // Set up Scout reporter if enabled
-  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
-    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
+  // Scout reporter relies on the JEST_CONFIG_PATH environment variable to be set
+  // to build its complete output
+  if (SCOUT_REPORTER_ENABLED) {
+    process.env.JEST_CONFIG_PATH = relative(currentWorkingDirectory, resolvedConfigPath);
   }
 
   log.debug('Setting up Jest with shared cache directory...');
@@ -126,7 +127,7 @@ interface ParsedJestArguments {
  * @returns Object containing parsed arguments and any unknown flags
  * @throws Error if unknown flags are detected
  */
-function parseJestArguments(): ParsedJestArguments {
+export function parseJestArguments(): ParsedJestArguments {
   const unknownFlags: string[] = [];
   const parsedArguments = getopts(process.argv.slice(NODE_ARGV_SLICE_INDEX), {
     ...jestFlags,
@@ -164,7 +165,7 @@ function parseJestArguments(): ParsedJestArguments {
  * @param configNames - Array of config file names to search for (in priority order)
  * @returns Path to the first config file found, or null if none found
  */
-function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null {
+export function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null {
   let currentPath = startPath;
 
   while (currentPath !== REPO_ROOT && currentPath !== resolve(currentPath, '..')) {
@@ -190,7 +191,7 @@ function findConfigInDirectoryTree(startPath: string, configNames: string[]): st
  * @returns Path to discovered config file
  * @throws Error if no config file is found
  */
-function discoverJestConfig(
+export function discoverJestConfig(
   testFiles: string[],
   currentWorkingDirectory: string,
   configName: string,
@@ -232,7 +233,7 @@ function discoverJestConfig(
  * @returns Promise resolving to Jest initial options
  * @throws Error if config cannot be resolved or file doesn't exist
  */
-async function resolveJestConfig(
+export async function resolveJestConfig(
   parsedArguments: any,
   resolvedConfigPath?: string
 ): Promise<Config.InitialOptions> {
@@ -285,7 +286,7 @@ interface JestExecutionContext {
  * @param baseConfig - Base Jest configuration
  * @returns Jest execution context with processed arguments (already sliced for Jest consumption)
  */
-async function prepareJestExecution(
+export async function prepareJestExecution(
   baseConfig: Config.InitialOptions
 ): Promise<JestExecutionContext> {
   const cacheDirectory = join(REPO_ROOT, JEST_CACHE_DIR);
@@ -353,7 +354,7 @@ export function commonBasePath(paths: string[] = [], sep = osSep): string {
  * @param flag - Flag name (without the -- prefix)
  * @returns New array with the specified flag and its values removed
  */
-function removeFlagFromArgv(argv: string[], flag: string): string[] {
+export function removeFlagFromArgv(argv: string[], flag: string): string[] {
   const filteredArguments: string[] = [];
   const longFlag = `--${flag}`;
 
