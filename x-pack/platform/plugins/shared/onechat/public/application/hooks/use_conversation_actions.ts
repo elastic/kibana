@@ -12,7 +12,7 @@ import type {
   ToolCallProgress,
   ToolCallStep,
 } from '@kbn/onechat-common';
-import { isToolCallStep, isConversationNotFoundError } from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
