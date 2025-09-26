@@ -33,6 +33,3 @@ export { BedrockLogo };
 
 export { MicrosoftDefenderEndpointLogo } from '../connector_types/microsoft_defender_endpoint/logo';
 export { INFERENCE_CONNECTOR_ID } from '../../common/inference/constants';
-
-export { useSecretHeaders } from './use_secret_headers';
-export type { UseSecretHeaders } from './use_secret_headers';

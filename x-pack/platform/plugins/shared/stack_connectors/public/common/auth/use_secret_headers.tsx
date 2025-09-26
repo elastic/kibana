@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -18,10 +19,12 @@ export function useSecretHeaders(connectorId?: string) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const query = useQuery<string[], ServerError>(
+  return useQuery<string[], ServerError>(
     ['secretHeaders', connectorId],
     async () => {
-      return await http.get<string[]>(`/internal/stack_connectors/${connectorId}/secret_headers`);
+      return await http.get<string[]>(
+        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/${connectorId}/secret_headers`
+      );
     },
     {
       enabled: Boolean(connectorId),
@@ -36,7 +39,5 @@ export function useSecretHeaders(connectorId?: string) {
       },
     }
   );
-
-  return query || {};
 }
 export type UseSecretHeaders = ReturnType<typeof useSecretHeaders>;
