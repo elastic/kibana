@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { buildFiltersForEntityType } from './calculate_risk_scores';
+import { buildFiltersForEntityType, calculateRiskScores } from './calculate_risk_scores';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
+
+import { allowedExperimentalValues } from '../../../../common';
 
 describe('buildFiltersForEntityType', () => {
   const mockUserFilter = { term: { 'user.name': 'test-user' } };
@@ -33,7 +38,7 @@ describe('buildFiltersForEntityType', () => {
     });
   });
 
-  it('should apply entity-specific custom filters', () => {
+  it('should apply entity-specific custom filters (exclusive)', () => {
     const customFilters = [
       { entity_types: ['host'], filter: 'agent.type: filebeat' },
       { entity_types: ['user'], filter: 'user.name: ubuntu' },
@@ -55,40 +60,48 @@ describe('buildFiltersForEntityType', () => {
       mockExcludeAlertTags
     );
 
-    // Host filters should include the host-specific filter
+    // Host filters should exclude the host-specific filter (must_not)
     expect(hostFilters).toHaveLength(5);
     expect(hostFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          should: expect.arrayContaining([
-            expect.objectContaining({
-              match: expect.objectContaining({
-                'agent.type': 'filebeat',
-              }),
+          must_not: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'agent.type': 'filebeat',
+                  }),
+                }),
+              ]),
             }),
-          ]),
+          }),
         }),
       })
     );
 
-    // User filters should include the user-specific filter
+    // User filters should exclude the user-specific filter (must_not)
     expect(userFilters).toHaveLength(5);
     expect(userFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          should: expect.arrayContaining([
-            expect.objectContaining({
-              match: expect.objectContaining({
-                'user.name': 'ubuntu',
-              }),
+          must_not: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'user.name': 'ubuntu',
+                  }),
+                }),
+              ]),
             }),
-          ]),
+          }),
         }),
       })
     );
   });
 
-  it('should apply multiple filters for the same entity type', () => {
+  it('should apply multiple exclusive filters for the same entity type', () => {
     const customFilters = [
       { entity_types: ['host'], filter: 'agent.type: filebeat' },
       { entity_types: ['host'], filter: 'host.os.name: linux' },
@@ -179,5 +192,52 @@ describe('buildFiltersForEntityType', () => {
         }),
       })
     );
+  });
+});
+
+describe('calculateRiskScores()', () => {
+  let params: Parameters<typeof calculateRiskScores>[0];
+  let esClient: ElasticsearchClient;
+  let logger: Logger;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    logger = loggingSystemMock.createLogger();
+    params = {
+      afterKeys: {},
+      assetCriticalityService: assetCriticalityServiceMock.create(),
+      esClient,
+      logger,
+      index: 'index',
+      pageSize: 500,
+      range: { start: 'now - 15d', end: 'now' },
+      runtimeMappings: {},
+      experimentalFeatures: allowedExperimentalValues,
+    };
+  });
+
+  describe('inputs', () => {
+    it('builds a filter on @timestamp based on the provided range', async () => {
+      await calculateRiskScores(params);
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
+          },
+        ])
+      );
+    });
+
+    it('drops an empty object filter if specified by the caller', async () => {
+      params.filter = {};
+      await calculateRiskScores(params);
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([{}]));
+    });
   });
 });

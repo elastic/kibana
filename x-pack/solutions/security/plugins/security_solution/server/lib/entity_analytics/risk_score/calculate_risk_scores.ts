@@ -137,13 +137,15 @@ export const buildFiltersForEntityType = (
     });
   }
 
-  // Add entity-specific custom filters
+  // Add entity-specific custom filters (EXCLUSIVE - exclude matching alerts)
   customFilters
     .filter((f) => f.entity_types.includes(entityType))
     .forEach((f) => {
       try {
         const esQuery = toElasticsearchQuery(fromKueryExpression(f.filter));
-        filters.push(esQuery);
+        filters.push({
+          bool: { must_not: esQuery },
+        });
       } catch (error) {
         // Log warning but don't fail the entire query
         // Note: Invalid KQL filters are silently ignored to prevent query failures
