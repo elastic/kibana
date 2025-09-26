@@ -117,7 +117,7 @@
         "label": "LazyPackageCard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, titleBadge, descriptionLineClamp, maxCardHeight, minCardHeight, showDescription, showReleaseBadge, hasDataStreams, }: ",
+          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, titleBadge, titleSize, descriptionLineClamp, maxCardHeight, minCardHeight, showDescription, showReleaseBadge, hasDataStreams, }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -2404,6 +2404,20 @@
             "description": [],
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.titleSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titleSize",
+            "description": [],
+            "signature": [
+              "\"s\" | \"xs\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
             "deprecated": false,
@@ -6404,7 +6418,7 @@
             "label": "add_integration_to_policy",
             "description": [],
             "signature": [
-              "({ pkgkey, integration, agentPolicyId, useMultiPageLayout }: ",
+              "({ pkgkey, integration, agentPolicyId, useMultiPageLayout, prerelease, }: ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -6423,7 +6437,7 @@
                 "id": "def-public.pagePathGetters.add_integration_to_policy.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ pkgkey, integration, agentPolicyId, useMultiPageLayout }",
+                "label": "{\n    pkgkey,\n    integration,\n    agentPolicyId,\n    useMultiPageLayout,\n    prerelease,\n  }",
                 "description": [],
                 "signature": [
                   {
