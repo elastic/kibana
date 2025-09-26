@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import {
+  withAutoSuggest,
+  suggestForExpression,
+} from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
-import { type ISuggestionItem, type ICommandContext } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
@@ -32,20 +34,27 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
+
+  const functionsSpecificSuggestions = await suggestForExpression({
+    query,
+    expressionRoot,
+    command,
     cursorPosition,
+    location: Location.DISSECT,
+    context,
     callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
+  });
+
+  if (functionsSpecificSuggestions.length > 0) {
     return functionsSpecificSuggestions;
   }
+
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(

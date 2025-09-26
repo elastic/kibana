@@ -8,40 +8,31 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { uniq } from 'lodash';
 import {
   isAssignment,
   isColumn,
   isFunctionExpression,
-  isList,
   isLiteral,
   isOptionNode,
 } from '../../../ast/is';
-import {
-  allStarConstant,
-  commaCompleteItem,
-  listCompleteItem,
-} from '../../../commands_registry/complete_items';
+import { allStarConstant, commaCompleteItem } from '../../../commands_registry/complete_items';
 import { getLocationInfo } from '../../../commands_registry/location';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
-  ICommandCallbacks,
   ICommandContext,
   ISuggestionItem,
   ItemKind,
 } from '../../../commands_registry/types';
-import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
 import { comparisonFunctions } from '../../all_operators';
 import { timeUnitsToSuggest } from '../../constants';
 import type { FunctionParameter, FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes, isNumericType } from '../../types';
-import { correctQuerySyntax, findAstPosition } from '../ast';
+import { findAstPosition } from '../ast';
 import { getColumnExists } from '../columns';
-import { getExpressionType } from '../expressions';
 import {
   filterFunctionSignatures,
   getAllFunctions,
@@ -49,13 +40,8 @@ import {
   getFunctionSuggestions,
 } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals } from '../literals';
-import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
-import {
-  getFieldsOrFunctionsSuggestions,
-  getValidSignaturesAndTypesToSuggestNext,
-  pushItUpInTheList,
-} from './helpers';
+import { getValidSignaturesAndTypesToSuggestNext, pushItUpInTheList } from './helpers';
 
 function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
@@ -128,6 +114,8 @@ const getCommandAndOptionWithinFORK = (
   };
 };
 
+// TODO: Remove this function - all logic has been migrated to suggestForExpression in helpers.ts
+// Only called by getInsideFunctionsSuggestions which is also obsolete (no commands use it anymore)
 export async function getFunctionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
@@ -175,13 +163,7 @@ export async function getFunctionArgsSuggestions(
   };
 
   const { compatibleParamDefs, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
-    getValidSignaturesAndTypesToSuggestNext(
-      functionNode,
-      references,
-      filteredFnDefinition,
-      fullText,
-      offset
-    );
+    getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
   const arg: ESQLAstItem = enrichedArgs[argIndex];
 
   // Whether to prepend comma to suggestion string
@@ -411,135 +393,3 @@ export async function getFunctionArgsSuggestions(
   }
   return suggestions;
 }
-
-function isOperator(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
-}
-
-async function getListArgsSuggestions(
-  innerText: string,
-  commands: ESQLCommand[],
-  getFieldsByType: GetColumnsByTypeFn,
-  columnMap: Map<string, ESQLColumnData>,
-  offset: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct
-) {
-  const suggestions = [];
-  const { command, node } = findAstPosition(commands, offset);
-
-  // node is supposed to be the function who support a list argument (like the "in" operator)
-  // so extract the type of the first argument and suggest fields of that type
-  if (node && isFunctionExpression(node)) {
-    const list = node?.args[1];
-
-    if (isList(list)) {
-      const noParens = list.location.min === 0 && list.location.max === 0;
-
-      if (noParens) {
-        suggestions.push(listCompleteItem);
-
-        return suggestions;
-      }
-    }
-
-    const [firstArg] = node.args;
-    if (isColumn(firstArg)) {
-      const argType = getExpressionType(firstArg, columnMap);
-      if (argType) {
-        // do not propose existing columns again
-        const otherArgs = isList(list)
-          ? list.values
-          : node.args.filter(Array.isArray).flat().filter(isColumn);
-        suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            [argType],
-            getLocationInfo(offset, command, commands, false).id,
-            getFieldsByType,
-            {
-              functions: true,
-              columns: true,
-            },
-            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
-            hasMinimumLicenseRequired,
-            activeProduct
-          ))
-        );
-      }
-    }
-  }
-  return suggestions;
-}
-
-function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
-  return node.name !== '=' && command.name !== 'enrich';
-}
-
-// TODO: merge this into suggestForExpression
-export const getInsideFunctionsSuggestions = async (
-  query: string,
-  cursorPosition?: number,
-  callbacks?: ICommandCallbacks,
-  context?: ICommandContext
-) => {
-  const innerText = query.substring(0, cursorPosition);
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
-  const { node, command, containingFunction } = findAstPosition(ast, cursorPosition ?? 0);
-  if (!node) {
-    return undefined;
-  }
-
-  if (node.type === 'literal' && node.literalType === 'keyword') {
-    // command ... "<here>"
-    return [];
-  }
-  if (node.type === 'function') {
-    // For now, we don't suggest for expressions within any function besides CASE
-    // e.g. CASE(field != /)
-    //
-    // So, it is handled as a special branch...
-    if (
-      containingFunction?.name === 'case' &&
-      !Array.isArray(node) &&
-      node?.subtype === 'binary-expression'
-    ) {
-      return await getSuggestionsToRightOfOperatorExpression({
-        queryText: innerText,
-        location: getLocationInfo(cursorPosition ?? 0, command, ast, false).id,
-        rootOperator: node,
-        getExpressionType: (expression) => getExpressionType(expression, context?.columns),
-        getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-        activeProduct: context?.activeProduct,
-      });
-    }
-    if (['in', 'not in'].includes(node.name)) {
-      // // command ... a in ( <here> )
-      // return { type: 'list' as const, command, node, option, containingFunction };
-      return await getListArgsSuggestions(
-        innerText,
-        ast,
-        callbacks?.getByType ?? (() => Promise.resolve([])),
-        context?.columns ?? new Map(),
-        cursorPosition ?? 0,
-        callbacks?.hasMinimumLicenseRequired,
-        context?.activeProduct
-      );
-    }
-    if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
-      // command ... fn( <here> )
-      return await getFunctionArgsSuggestions(
-        innerText,
-        ast,
-        callbacks?.getByType ?? (() => Promise.resolve([])),
-        query,
-        cursorPosition ?? 0,
-        context,
-        callbacks?.hasMinimumLicenseRequired
-      );
-    }
-  }
-
-  return undefined;
-};

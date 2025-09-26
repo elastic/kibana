@@ -8,7 +8,11 @@
  */
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
+import {
+  expectSuggestions,
+  getFieldNamesByType,
+  mockFieldsWithTypes,
+} from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
@@ -36,21 +40,29 @@ describe('DISSECT Autocomplete', () => {
     mockCallbacks = getMockCallbacks();
 
     const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedFields);
   });
 
   it('suggests fields after DISSECT', async () => {
+    const contextWithoutControls = {
+      ...mockContext,
+      supportsControls: false,
+    };
+
+    const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+
     await dissectExpectSuggestions(
       'from a | DISSECT ',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      expectedStringFields,
+      mockCallbacks,
+      contextWithoutControls
     );
+
     await dissectExpectSuggestions(
       'from a | DISSECT key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      expectedStringFields.map((fieldName) => `${fieldName} `),
+      mockCallbacks,
+      contextWithoutControls
     );
   });
 
@@ -82,5 +94,29 @@ describe('DISSECT Autocomplete', () => {
       `from a | DISSECT keywordField ${constantPattern} append_separator = ":" /`,
       ['| ']
     );
+  });
+
+  describe('expressions in functions', () => {
+    it('suggests fields inside function calls', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      mockFieldsWithTypes(mockCallbacks, expectedStringFields);
+
+      await dissectExpectSuggestions(
+        'from a | DISSECT CONCAT(',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('suggests fields in nested functions', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      mockFieldsWithTypes(mockCallbacks, expectedStringFields);
+
+      await dissectExpectSuggestions(
+        'from a | DISSECT CONCAT(TRIM(',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
   });
 });

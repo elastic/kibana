@@ -8,7 +8,6 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import { Walker } from '../../../walker';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isAssignment, isColumn } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
@@ -33,31 +32,28 @@ import {
   columnExists as _columnExists,
   getControlSuggestionIfSupported,
   suggestForExpression,
-  within,
+  buildFunctionParameterContext,
+  type FunctionParameterContext,
 } from '../../../definitions/utils/autocomplete/helpers';
+import {
+  getFunctionsToIgnoreForStats,
+  isAggFunctionUsedAlready,
+  isTimeseriesAggUsedAlready,
+} from '../../../definitions/utils/autocomplete/functions';
+import { getAllFunctions } from '../../../definitions/utils/functions';
+import { FunctionDefinitionTypes } from '../../../definitions/types';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
-
-function alreadyUsedColumns(command: ESQLCommand) {
-  const byOption = command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
-    | ESQLCommandOption
-    | undefined;
-
-  const columnNodes = (byOption?.args.filter(
-    (arg) => !Array.isArray(arg) && arg.type === 'column'
-  ) ?? []) as ESQLColumn[];
-
-  return columnNodes.map((node) => node.parts.join('.'));
-}
+import { within } from '../../../ast/location';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -77,18 +73,66 @@ export async function autocomplete(
     lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    query,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (
-    functionsSpecificSuggestions &&
-    cursorPosition &&
-    Walker.findFunction(command, (fn) => within(cursorPosition, fn.location))
-  ) {
-    return functionsSpecificSuggestions;
+  // Find the innermost function containing the cursor
+  // Filter for 'variadic-call' subtype to exclude operators like '='
+  let foundFunction: ESQLFunction | null = null;
+  if (cursorPosition) {
+    const allFunctions: ESQLFunction[] = [];
+    Walker.walk(command, {
+      visitFunction: (fn) => {
+        if (within(cursorPosition, fn)) {
+          allFunctions.push(fn);
+        }
+      },
+    });
+    // Find the innermost variadic-call function (not binary expressions like '=')
+    foundFunction =
+      allFunctions
+        .filter((fn) => fn.subtype === 'variadic-call')
+        .sort((a, b) => {
+          // Sort by location to get the innermost function
+          const aSize = a.location.max - a.location.min;
+          const bSize = b.location.max - b.location.min;
+          return aSize - bSize; // Smaller range = more inner function
+        })[0] || null;
+  }
+
+  if (foundFunction && foundFunction.subtype === 'variadic-call') {
+    // Build STATS-specific filtering context
+    const functionParameterContext = buildCustomFilteringContext(command, foundFunction, context);
+    const isInBy = isNodeWithinByClause(foundFunction, command);
+    const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
+
+    // Determine the appropriate location based on context
+    let location: Location;
+    if (isInBy) {
+      // BY clause always uses EVAL location
+      location = Location.EVAL;
+    } else if (isTimeseriesSource && isAggFunctionUsedAlready(command, command.args.length - 1)) {
+      // Inside aggregate function with TS source command
+      location = Location.STATS_TIMESERIES;
+    } else {
+      // Regular STATS context
+      location = Location.STATS;
+    }
+
+    const functionsSpecificSuggestions = await suggestForExpression({
+      query,
+      expressionRoot: foundFunction,
+      command,
+      cursorPosition,
+      location,
+      context,
+      callbacks,
+      options: {
+        // Pass STATS-specific filtering context to be preserved in recursive calls
+        functionParameterContext,
+      },
+    });
+
+    if (functionsSpecificSuggestions.length > 0) {
+      return functionsSpecificSuggestions;
+    }
   }
 
   switch (pos) {
@@ -104,7 +148,9 @@ export async function autocomplete(
       }
 
       const expressionSuggestions = await getExpressionSuggestions({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         expressionRoot,
         location: Location.STATS,
         context,
@@ -149,7 +195,9 @@ export async function autocomplete(
       }
 
       const expressionSuggestions = await getExpressionSuggestions({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         expressionRoot,
         location: Location.STATS,
         context,
@@ -176,14 +224,16 @@ export async function autocomplete(
       }
 
       const suggestions = await suggestForExpression({
-        innerText,
-        getColumnsByType: callbacks?.getByType,
+        query,
         expressionRoot,
+        command,
+        cursorPosition,
         location: Location.STATS_WHERE,
-        preferredExpressionType: 'boolean',
         context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-        activeProduct: context?.activeProduct,
+        callbacks,
+        options: {
+          preferredExpressionType: 'boolean',
+        },
       });
 
       // Is this a complete boolean expression?
@@ -218,7 +268,9 @@ export async function autocomplete(
       const ignoredColumns = alreadyUsedColumns(command);
 
       return getExpressionSuggestions({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         expressionRoot,
         location: Location.STATS_BY,
         context,
@@ -245,7 +297,9 @@ export async function autocomplete(
       const ignoredColumns = alreadyUsedColumns(command);
 
       return getExpressionSuggestions({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         expressionRoot,
         location: Location.STATS_BY,
         context,
@@ -265,8 +319,12 @@ export async function autocomplete(
   }
 }
 
+// TODO: Verify if ignoredColumns parameter is redundant since suggestForExpression
+// already calculates ignored columns internally via deriveIgnoredColumns()
 async function getExpressionSuggestions({
-  innerText,
+  query,
+  command,
+  cursorPosition,
   expressionRoot,
   location,
   context,
@@ -277,7 +335,9 @@ async function getExpressionSuggestions({
   suggestColumns = true,
   ignoredColumns = [],
 }: {
-  innerText: string;
+  query: string;
+  command: ESQLCommand;
+  cursorPosition: number;
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
   context?: ICommandContext;
@@ -289,19 +349,24 @@ async function getExpressionSuggestions({
   ignoredColumns?: string[];
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
+  const innerText = query.substring(0, cursorPosition);
 
   if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
+    const modifiedCallbacks = suggestColumns ? callbacks : { ...callbacks, getByType: undefined };
+
     suggestions.push(
       ...(await suggestForExpression({
-        innerText,
+        query,
         expressionRoot,
+        command,
+        cursorPosition,
         location,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-        activeProduct: context?.activeProduct,
         context,
-        getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
-        advanceCursorAfterInitialColumn,
-        ignoredColumnsForEmptyExpression: ignoredColumns,
+        callbacks: modifiedCallbacks,
+        options: {
+          advanceCursorAfterInitialColumn,
+          ignoredColumnsForEmptyExpression: ignoredColumns,
+        },
       }))
     );
   }
@@ -319,4 +384,69 @@ async function getExpressionSuggestions({
   }
 
   return suggestions;
+}
+
+function getByOption(command: ESQLCommand): ESQLCommandOption | undefined {
+  return command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
+    | ESQLCommandOption
+    | undefined;
+}
+
+function isNodeWithinByClause(node: ESQLSingleAstItem, command: ESQLCommand): boolean {
+  const byOption = getByOption(command);
+
+  return byOption ? within(node, byOption) : false;
+}
+
+function alreadyUsedColumns(command: ESQLCommand) {
+  const byOption = getByOption(command);
+  const columnNodes = (byOption?.args.filter(
+    (arg) => !Array.isArray(arg) && arg.type === 'column'
+  ) ?? []) as ESQLColumn[];
+
+  return columnNodes.map((node) => node.parts.join('.'));
+}
+
+// Builds function filtering context: always ignore grouping functions,
+// in main STATS clause also filter conflicting aggregate functions
+function buildCustomFilteringContext(
+  command: ESQLCommand,
+  foundFunction: ESQLFunction | null,
+  context?: ICommandContext
+): FunctionParameterContext | undefined {
+  if (!foundFunction) {
+    return undefined;
+  }
+
+  const basicContext = buildFunctionParameterContext(foundFunction, context);
+
+  if (!basicContext) {
+    return undefined;
+  }
+
+  const statsSpecificFunctionsToIgnore: string[] = [];
+  // Always ignore grouping functions in all contexts
+  statsSpecificFunctionsToIgnore.push(
+    ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+  );
+
+  const finalCommandArgIndex = command.args.length - 1;
+  const isInBy = isNodeWithinByClause(foundFunction, command);
+
+  if (!isInBy) {
+    statsSpecificFunctionsToIgnore.push(
+      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
+        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+        : []),
+      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
+        : [])
+    );
+  }
+
+  return {
+    ...basicContext,
+    functionsToIgnore: [...basicContext.functionsToIgnore, ...statsSpecificFunctionsToIgnore],
+  };
 }

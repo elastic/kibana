@@ -25,6 +25,7 @@ import {
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
+  suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
@@ -36,7 +37,6 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -95,7 +95,7 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -107,15 +107,21 @@ export async function autocomplete(
 
   const endpoints = context?.inferenceEndpoints;
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
+  // Only call suggestForExpression if cursor is inside the prompt expression
+  if (prompt && cursorPosition <= prompt.location.max) {
+    const functionsSpecificSuggestions = await suggestForExpression({
+      query,
+      expressionRoot: prompt,
+      command,
+      cursorPosition,
+      location: Location.COMPLETION,
+      context,
+      callbacks,
+    });
 
-  if (functionsSpecificSuggestions?.length) {
-    return functionsSpecificSuggestions;
+    if (functionsSpecificSuggestions.length > 0) {
+      return functionsSpecificSuggestions;
+    }
   }
 
   switch (position) {

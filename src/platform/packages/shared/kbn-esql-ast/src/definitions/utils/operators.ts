@@ -17,10 +17,10 @@ import {
   type FunctionParameterType,
   type FunctionDefinition,
   type SupportedDataType,
-  type ArrayType,
   FunctionDefinitionTypes,
   isParameterType,
   isReturnType,
+  isArrayType,
 } from '../types';
 import { operatorsDefinitions, logicalOperators } from '../all_operators';
 import {
@@ -94,7 +94,7 @@ const getNullCheckOperators = () => {
 };
 
 /** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
-export const getNullCheckOperatorSuggestions = (
+const getNullCheckOperatorSuggestions = (
   queryText: string,
   location: Location,
   leftParamType: FunctionParameterType
@@ -118,19 +118,16 @@ export const getNullCheckOperatorSuggestions = (
   });
 };
 
-export function isArrayType(type: string): type is ArrayType {
-  return type.endsWith('[]');
-}
-
 function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
-  previousType: string
+  previousType: SupportedDataType | 'unknown'
 ) {
   // Retrieve list of all 'right' supported types that match the left hand side of the function
-  return fnDef && Array.isArray(fnDef?.signatures)
+  return fnDef
     ? fnDef.signatures
         .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
-        .map(({ params }) => params[1]?.type)
+        .map(({ params }) => params[1]?.type as SupportedDataType | 'unknown')
+        .filter((type) => type !== undefined && !isArrayType(type))
     : [previousType];
 }
 
@@ -162,9 +159,9 @@ export async function getSuggestionsToRightOfOperatorExpression({
   activeProduct?: PricingProduct | undefined;
 }) {
   const suggestions = [];
-  const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
+  const { complete, reason } = checkFunctionInvocationComplete(operator, getExpressionType);
 
-  if (isFnComplete.complete) {
+  if (complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
     const operatorReturnType = getExpressionType(operator);
@@ -200,28 +197,12 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
     const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
 
-    if (isFnComplete.reason === 'tooFewArgs') {
+    if (reason === 'tooFewArgs') {
       const fnDef = getFunctionDefinition(operator.name);
-      if (
-        fnDef?.signatures.every(({ params }) =>
-          params.some(({ type }) => isArrayType(type as string))
-        )
-      ) {
+
+      if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
         suggestions.push(listCompleteItem);
       } else {
-        const finalType = leftArgType || 'any';
-        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
-
-        // this is a special case with AND/OR
-        // <COMMAND> expression AND/OR <suggest>
-        // technically another boolean value should be suggested, but it is a better experience
-        // to actually suggest a wider set of fields/functions
-        const typeToUse =
-          finalType === 'boolean' &&
-          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
-            ? ['any']
-            : supportedTypes;
-
         const couldBeNullCheck = getNullCheckOperators().some(({ name }) =>
           name.startsWith(operator.name.toLowerCase())
         );
@@ -231,10 +212,22 @@ export async function getSuggestionsToRightOfOperatorExpression({
             ...getNullCheckOperatorSuggestions(
               queryText,
               location,
-              finalType === 'unknown' || finalType === 'unsupported' ? 'any' : finalType
+              leftArgType === 'unknown' || leftArgType === 'unsupported' ? 'any' : leftArgType
             )
           );
         } else {
+          // this is a special case with AND/OR
+          // <COMMAND> expression AND/OR <suggest>
+          // technically another boolean value should be suggested, but it is a better experience
+          // to actually suggest a wider set of fields/functions
+          const isAndOrWithBooleanLeft =
+            leftArgType === 'boolean' &&
+            (operator.name === 'and' || operator.name === 'or') &&
+            getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR;
+
+          const typeToUse = isAndOrWithBooleanLeft
+            ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
+            : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
           // TODO replace with fields callback + function suggestions
           suggestions.push(
             ...(await getFieldsOrFunctionsSuggestions(
@@ -267,7 +260,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
      *
      * I believe this is only used in WHERE and probably bears some rethinking.
      */
-    if (isFnComplete.reason === 'wrongTypes') {
+    if (reason === 'wrongTypes') {
       if (leftArgType && preferredExpressionType) {
         // suggest something to complete the operator
         if (

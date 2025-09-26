@@ -19,7 +19,7 @@ import {
   withCompleteItem,
   assignCompletionItem,
 } from '../../complete_items';
-import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
+import { expectSuggestions, suggest, DATE_DIFF_TIME_UNITS } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
@@ -412,6 +412,16 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, {
         contains: expected,
       });
+    });
+  });
+
+  describe('function parameter constraints', () => {
+    test('constantOnly constraint - DATE_DIFF should suggest only constants, not fields in ON clause', async () => {
+      await expectRerankSuggestions(
+        'from a | rerank "query" ON field = DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
     });
   });
 });

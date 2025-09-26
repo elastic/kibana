@@ -12,44 +12,38 @@ import { suggestForExpression } from '../../../definitions/utils/autocomplete/he
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
+
   const innerText = query.substring(0, cursorPosition);
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
-  const suggestions = await suggestForExpression({
-    innerText,
-    getColumnsByType: callbacks.getByType,
-    expressionRoot,
-    location: Location.WHERE,
-    preferredExpressionType: 'boolean',
-    context,
-    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-    activeProduct: context?.activeProduct,
-  });
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
+  const suggestions = await suggestForExpression({
+    query,
+    expressionRoot,
+    command,
     cursorPosition,
+    location: Location.WHERE,
+    context,
     callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
-  }
+    options: {
+      preferredExpressionType: 'boolean',
+    },
+  });
 
   // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
   const expressionType = getExpressionType(expressionRoot, context?.columns);
+
   if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
     suggestions.push(pipeCompleteItem);
   }

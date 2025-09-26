@@ -25,7 +25,6 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
@@ -39,7 +38,7 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(0, cursorPosition);
@@ -49,17 +48,6 @@ export async function autocomplete(
   }
 
   const { position, context: positionContext } = getPosition(innerText, command);
-
-  const insideFunctionSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-
-  if (insideFunctionSuggestions?.length) {
-    return insideFunctionSuggestions;
-  }
 
   switch (position) {
     case CaretPosition.RERANK_KEYWORD: {
@@ -117,7 +105,9 @@ export async function autocomplete(
 
     case CaretPosition.ON_EXPRESSION: {
       return handleOnExpression({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         callbacks,
         context,
         expressionRoot: positionContext?.expressionRoot,
@@ -192,25 +182,32 @@ async function handleOnFieldList({
 }
 
 async function handleOnExpression({
-  innerText,
+  query,
+  command,
+  cursorPosition,
   callbacks,
   context,
   expressionRoot,
 }: {
-  innerText: string;
+  query: string;
+  command: ESQLCommand;
+  cursorPosition: number;
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
 }): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const suggestions = await suggestForExpression({
-    innerText,
-    getColumnsByType: callbacks.getByType,
+    query,
     expressionRoot,
+    command,
+    cursorPosition,
     location: Location.RERANK,
-    preferredExpressionType: 'boolean',
     context,
-    hasMinimumLicenseRequired: callbacks.hasMinimumLicenseRequired,
-    activeProduct: context?.activeProduct,
+    callbacks,
+    options: {
+      preferredExpressionType: 'boolean',
+    },
   });
 
   if (expressionRoot) {

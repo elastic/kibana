@@ -23,7 +23,7 @@ import type {
   SupportedDataType,
 } from '../types';
 import { getFunctionDefinition } from './functions';
-import { isArrayType } from './operators';
+import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';

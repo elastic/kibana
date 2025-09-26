@@ -15,7 +15,7 @@ import type { Location } from '../commands_registry/types';
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
  */
-export const fieldTypes = [
+export const fieldTypes: readonly string[] = [
   'boolean',
   'date',
   'double',
@@ -36,7 +36,7 @@ export const fieldTypes = [
   'unsupported',
   'date_nanos',
   'function_named_parameters',
-] as const;
+];
 
 export type FieldType = (typeof fieldTypes)[number];
 
@@ -81,7 +81,7 @@ export const userDefinedTypes = [
  * the capabilities of the client-side engines grow.
  * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
  */
-export const dataTypes = [
+export const dataTypes: readonly string[] = [
   ...fieldTypes,
   'null',
   'time_duration',
@@ -90,7 +90,7 @@ export const dataTypes = [
   'geohash',
   'geohex',
   'geotile',
-] as const;
+];
 
 export type SupportedDataType = (typeof dataTypes)[number];
 
@@ -100,7 +100,7 @@ export type SupportedDataType = (typeof dataTypes)[number];
  *
  * The fate of these is uncertain. They may be removed in the future.
  */
-const arrayTypes = [
+const arrayTypes: readonly string[] = [
   'double[]',
   'unsigned_long[]',
   'long[]',
@@ -121,9 +121,13 @@ const arrayTypes = [
   'geo_shape[]',
   'version[]',
   'date_nanos[]',
-] as const;
+];
 
 export type ArrayType = (typeof arrayTypes)[number];
+
+export function isArrayType(type: string): type is ArrayType {
+  return arrayTypes.includes(type);
+}
 
 export enum FunctionDefinitionTypes {
   AGG = 'agg',
@@ -144,16 +148,15 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
 export const isFieldType = (str: string | undefined): str is FieldType =>
-  typeof str !== undefined && ([...fieldTypes] as string[]).includes(str as string);
+  str !== undefined && fieldTypes.includes(str);
 
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
-  typeof str !== undefined &&
+  str !== undefined &&
   str !== 'unsupported' &&
-  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
+  (str === 'any' || dataTypes.includes(str) || arrayTypes.includes(str));
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
-  str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
+  str !== 'unsupported' && (str === 'unknown' || str === 'any' || dataTypes.includes(str));
 
 export interface FunctionParameter {
   name: string;
@@ -403,17 +406,14 @@ export const ESQL_NUMERIC_DECIMAL_TYPES = [
   'counter_double',
 ] as const;
 
-export const ESQL_NUMBER_TYPES = [
+export const ESQL_NUMBER_TYPES: readonly string[] = [
   'integer',
   'counter_integer',
   ...ESQL_NUMERIC_DECIMAL_TYPES,
-] as const;
+];
 
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
-  );
+  return typeof type === 'string' && (type === 'decimal' || ESQL_NUMBER_TYPES.includes(type));
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

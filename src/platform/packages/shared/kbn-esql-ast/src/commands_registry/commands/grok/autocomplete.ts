@@ -7,32 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import {
+  withAutoSuggest,
+  suggestForExpression,
+} from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
+
+  const functionsSpecificSuggestions = await suggestForExpression({
+    query,
+    expressionRoot,
+    command,
     cursorPosition,
+    location: undefined,
+    context,
     callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
+  });
+
+  if (functionsSpecificSuggestions.length > 0) {
     return functionsSpecificSuggestions;
   }
 

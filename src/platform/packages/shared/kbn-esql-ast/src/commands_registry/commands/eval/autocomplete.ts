@@ -28,7 +28,7 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -56,13 +56,13 @@ export async function autocomplete(
   }
 
   const suggestions = await suggestForExpression({
-    innerText,
-    getColumnsByType: callbacks?.getByType,
+    query,
     expressionRoot,
+    command,
+    cursorPosition,
     location: Location.EVAL,
     context,
-    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-    activeProduct: context?.activeProduct,
+    callbacks,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);
@@ -72,13 +72,18 @@ export async function autocomplete(
     );
   }
 
+  const insideFunction =
+    lastArg && isFunctionExpression(lastArg) && within(cursorPosition || 0, lastArg);
+
   if (
     // don't suggest finishing characters if incomplete expression
     isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&
-    (!isColumn(expressionRoot) || insideAssignment)
+    (!isColumn(expressionRoot) || insideAssignment) &&
+    // don't suggest finishing characters if we're inside a function
+    !insideFunction
   ) {
     suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' });
   }
