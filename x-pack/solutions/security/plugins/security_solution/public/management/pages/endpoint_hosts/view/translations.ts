@@ -66,24 +66,58 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
     remediationButton: {
-      ariaLabel: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
-        {
-          defaultMessage: 'Create trusted app',
-        }
-      ),
-      tooltipContent: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipContent',
-        {
-          defaultMessage: 'Create trusted app',
-        }
-      ),
-      tooltipNoPermissions: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipNoPermissions',
-        {
-          defaultMessage: 'You do not have the privileges required to perform this operation.',
-        }
-      ),
+      incompatibleAntivirus: {
+        ariaLabel: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonAriaLabel',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        actionText: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonActionText',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        tooltipContent: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonTooltipContent',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        tooltipNoPermissions: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonTooltipNoPermissions',
+          {
+            defaultMessage: 'You do not have the privileges required to perform this operation.',
+          }
+        ),
+      },
+      policyResponseFailure: {
+        ariaLabel: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonAriaLabel',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+        actionText: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonActionText',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+        expandMessage: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonExpandMessage',
+          {
+            defaultMessage: 'view more',
+          }
+        ),
+        collapseMessage: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonCollapseMessage',
+          {
+            defaultMessage: 'view less',
+          }
+        ),
+      },
     },
   },
   toasts: {
