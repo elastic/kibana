@@ -119,7 +119,6 @@ export const Navigation = ({
             return (
               <SideNav.Popover
                 key={item.id}
-                container={document.documentElement}
                 hasContent={getHasSubmenu(item)}
                 isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
                 label={item.label}
@@ -167,7 +166,6 @@ export const Navigation = ({
 
           {overflowMenuItems.length > 0 && (
             <SideNav.Popover
-              container={document.documentElement}
               hasContent
               isSidePanelOpen={false}
               label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuLabel', {
@@ -274,7 +272,6 @@ export const Navigation = ({
                 isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
                 label={item.label}
                 persistent={false}
-                container={document.documentElement}
                 trigger={
                   <SideNav.FooterItem
                     isHighlighted={item.id === visuallyActivePageId}

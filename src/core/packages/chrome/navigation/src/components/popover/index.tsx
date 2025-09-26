@@ -26,7 +26,7 @@ import {
 } from '../../constants';
 
 export interface SideNavPopoverProps {
-  container: HTMLElement;
+  container?: HTMLElement;
   children?: ReactNode | ((closePopover: () => void) => ReactNode);
   hasContent: boolean;
   isSidePanelOpen: boolean;
