@@ -68,8 +68,6 @@ test('renders RangeControlEditor', async () => {
 });
 
 test('handleOptionsChange - step', async () => {
-  const user = userEvent.setup();
-
   render(
     <Wrapper>
       <RangeControlEditor
@@ -92,19 +90,17 @@ test('handleOptionsChange - step', async () => {
   const input = screen.getByTestId('rangeControlSizeInput0') as HTMLInputElement;
 
   await act(async () => {
-    await user.clear(input);
-    await user.type(input, '0.5');
+    await userEvent.clear(input);
+    await userEvent.type(input, '1.5');
     input.blur();
   });
 
   expect(handleFieldNameChange).not.toHaveBeenCalled();
   expect(handleIndexPatternChange).not.toHaveBeenCalled();
-  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'step', 0.5);
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'step', 1.5);
 });
 
 test('handleOptionsChange - decimalPlaces', async () => {
-  const user = userEvent.setup();
-
   render(
     <Wrapper>
       <RangeControlEditor
@@ -127,8 +123,8 @@ test('handleOptionsChange - decimalPlaces', async () => {
   const input = screen.getByTestId('rangeControlDecimalPlacesInput0') as HTMLInputElement;
 
   await act(async () => {
-    await user.clear(input);
-    await user.type(input, '2');
+    await userEvent.clear(input);
+    await userEvent.type(input, '2');
     input.blur();
   });
 
