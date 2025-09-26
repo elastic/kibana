@@ -147,6 +147,7 @@ export function ServiceGroupTemplate({
       environmentFilter={environmentFilter}
       showServiceGroupSaveButton={!isAllServices}
       showServiceGroupsNav={isAllServices}
+      showTracesInDiscoverCallout={isAllServices}
       showEnablementCallout
       selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}

@@ -21,6 +21,7 @@ import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_gr
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -42,7 +43,8 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
-  showEnablementCallout = false,
+  showEnablementCallout = false, // TODO remove this? It seems is not being used anywhere
+  showTracesInDiscoverCallout = false,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -53,6 +55,7 @@ export function ApmMainTemplate({
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
   showEnablementCallout?: boolean;
+  showTracesInDiscoverCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -131,11 +134,14 @@ export function ApmMainTemplate({
           ...pageHeader,
           pageTitle: pageHeader?.pageTitle ?? pageTitle,
           children: (
-            <EuiFlexGroup direction="column">
+            <>
               {showServiceGroupsNav && selectedNavButton && (
-                <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+                <EuiFlexGroup direction="column">
+                  <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+                </EuiFlexGroup>
               )}
-            </EuiFlexGroup>
+              {showTracesInDiscoverCallout && <TracesInDiscoverCallout />}
+            </>
           ),
         }}
         {...pageTemplateProps}
