@@ -22,11 +22,15 @@ const COLORS = {
 const DEFAULTS = {
   WARN_THRESHOLD: 300,
   MAX_TESTS_SHOWN: 10,
+  SHOW_ALL_SLOW_TESTS: false,
 };
 
 /**
  * Custom Jest reporter that only adds slow test information and warnings
- * without duplicating the default Jest output
+ * without duplicating the default Jest output.
+ *
+ * By default shows the 10 slowest tests. Set SHOW_ALL_SLOW_TESTS=true
+ * environment variable to display all slow tests instead of truncating.
  */
 class SlowTestReporter extends BaseReporter {
   constructor(globalConfig, options = {}) {
@@ -34,6 +38,7 @@ class SlowTestReporter extends BaseReporter {
     this._options = {
       warnOnSlowerThan: DEFAULTS.WARN_THRESHOLD,
       color: true,
+      showAllSlowTests: process.env.SHOW_ALL_SLOW_TESTS === 'true' || DEFAULTS.SHOW_ALL_SLOW_TESTS,
       ...options,
     };
     this._slowTests = [];
@@ -70,7 +75,9 @@ class SlowTestReporter extends BaseReporter {
 
   _logSlowTests() {
     const sortedTests = [...this._slowTests].sort((a, b) => b.duration - a.duration);
-    const testsToShow = sortedTests.slice(0, DEFAULTS.MAX_TESTS_SHOWN);
+    const testsToShow = this._options.showAllSlowTests
+      ? sortedTests
+      : sortedTests.slice(0, DEFAULTS.MAX_TESTS_SHOWN);
 
     // Group tests by file path
     const testsByFile = testsToShow.reduce((acc, test) => {
@@ -88,10 +95,13 @@ class SlowTestReporter extends BaseReporter {
       tests.forEach((test) => this._logSlowTestUnderFile(test));
     });
 
-    const remainingCount = this._slowTests.length - DEFAULTS.MAX_TESTS_SHOWN;
-    if (remainingCount > 0) {
-      const message = ` ... and ${remainingCount} others`;
-      this.log(this._colorText(message, COLORS.GREY));
+    // Show truncation info if not showing all tests
+    if (!this._options.showAllSlowTests && this._slowTests.length > DEFAULTS.MAX_TESTS_SHOWN) {
+      const remainingCount = this._slowTests.length - DEFAULTS.MAX_TESTS_SHOWN;
+      const mainMessage = ` ... and ${remainingCount} others`;
+      const hint = `Set SHOW_ALL_SLOW_TESTS=true to see all slow tests`;
+      this.log(this._colorText(mainMessage, COLORS.GREY));
+      this.log(`   💡 ${this._colorText(hint, `${COLORS.GREY}${COLORS.ITALIC}`)}`);
     }
 
     // Add the timing guidance note at the end
