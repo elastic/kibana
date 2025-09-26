@@ -46,10 +46,11 @@ security:
 tags:
   - name: agent builder
     description: |
-      Use the Agent Builder APIs to create, and manage AI agents and tools. Chat with agents to perform tasks and workflows and execute tools.
+      Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
     externalDocs:
-      description: Agent Builder documentation
-      url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      description: Learn about working with Agent Builder programmatically
+      url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
     x-displayName: Agent Builder
   - name: alerting
     description: |
@@ -823,7 +824,7 @@ paths:
                         message: Hello! How can I help you today?
                       type: response
           description: Indicates a successful response
-      summary: A2A Task Endpoint
+      summary: Send A2A task
       tags:
         - agent builder
       x-state: Technical Preview
@@ -886,7 +887,7 @@ paths:
                     url: http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent
                     version: 0.1.0
           description: Indicates a successful response
-      summary: A2A Agent Card
+      summary: Get A2A agent card
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1136,7 +1137,7 @@ paths:
                     name: Search Index Helper
                     type: chat
           description: Indicates a successful response
-      summary: Get an agent
+      summary: Get an agent by ID
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1378,7 +1379,7 @@ paths:
           name: product_name
   /api/agent_builder/converse:
     post:
-      description: 'Send a message to an agent. Use this endpoint to have conversations with AI agents, continue existing conversations, and enable advanced features like external integrations and visualization capabilities.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1404,7 +1405,7 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
@@ -1451,7 +1452,7 @@ paths:
                         tool_id: platform.core.search
                         type: tool_call
           description: Indicates a successful response
-      summary: Converse with an agent
+      summary: Send chat message
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1460,7 +1461,7 @@ paths:
           name: product_name
   /api/agent_builder/converse/async:
     post:
-      description: 'Send a message to an agent with real-time streaming events. Use this endpoint to have conversations with AI agents and receive live updates as the agent processes your request.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent''s thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1486,7 +1487,7 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
@@ -1548,7 +1549,7 @@ paths:
                               message: Hello! How can I help you today?
                       event: round_complete
           description: Indicates a successful response
-      summary: Converse with an agent and stream events
+      summary: Send chat message (streaming)
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1557,7 +1558,7 @@ paths:
           name: product_name
   /api/agent_builder/mcp:
     delete:
-      description: 'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'DELETE requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: delete-agent-builder-mcp
       parameters: []
       responses:
@@ -1574,7 +1575,7 @@ paths:
                     message: Method not allowed
                     statusCode: 405
           description: Indicates a Method Not Allowed response
-      summary: MCP server
+      summary: Delete MCP server (not supported)
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1582,7 +1583,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'GET requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-mcp
       parameters: []
       responses:
@@ -1599,7 +1600,7 @@ paths:
                     message: Method not allowed
                     statusCode: 405
           description: Indicates a Method Not Allowed response
-      summary: MCP server
+      summary: Get MCP server (not supported)
       tags:
         - agent builder
       x-state: Technical Preview
@@ -1607,7 +1608,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: 'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-mcp
       parameters: []
       requestBody:
@@ -1646,7 +1647,7 @@ paths:
                         name: elastic-mcp-server
                         version: 0.0.1
           description: Indicates a successful response
-      summary: MCP server
+      summary: Send MCP request
       tags:
         - agent builder
       x-state: Technical Preview
