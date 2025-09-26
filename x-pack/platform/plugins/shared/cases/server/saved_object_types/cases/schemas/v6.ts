@@ -4,5 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
+import { casesSchema as casesSchemaV5 } from './v5';
 
-export * from './v6';
+export const casesSchema = casesSchemaV5.extends({
+  total_events: schema.number(),
+});

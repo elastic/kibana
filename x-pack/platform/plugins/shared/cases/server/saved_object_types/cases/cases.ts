@@ -25,6 +25,7 @@ import {
   modelVersion5,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
+import { modelVersion6 } from './model_versions/model_version_6';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
@@ -268,6 +269,7 @@ export const createCaseSavedObjectType = (
     3: modelVersion3,
     4: modelVersion4,
     5: modelVersion5,
+    6: modelVersion6,
   },
   management: {
     importableAndExportable: true,
