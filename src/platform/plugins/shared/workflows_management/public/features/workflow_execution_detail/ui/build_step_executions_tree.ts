@@ -44,6 +44,10 @@ function getStepTreeType(
   return 'unknown';
 }
 
+function isVisibleStepType(stepType: string): boolean {
+  return !['workflow_level_timeout'].includes(stepType);
+}
+
 /**
  * Builds a deterministic step path from a stack of execution entries.
  *
@@ -82,17 +86,19 @@ export function buildStepExecutionsTree(
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
   const computedPathsMap: Map<string, string[]> = new Map();
 
-  stepExecutions.forEach((stepExecution) => {
-    const computedPath = [
-      ...(stepExecution.scopeStack ? flattenStackFrames(stepExecution.scopeStack) : []),
-      stepExecution.stepId,
-    ];
-    const key = computedPath.join('>');
-    computedPathsMap.set(stepExecution.id!, computedPath);
-    stepExecutionsMap.set(key, {
-      ...stepExecution,
+  stepExecutions
+    .filter((stepExecution) => isVisibleStepType(stepExecution.stepType!))
+    .forEach((stepExecution) => {
+      const computedPath = [
+        ...(stepExecution.scopeStack ? flattenStackFrames(stepExecution.scopeStack) : []),
+        stepExecution.stepId,
+      ];
+      const key = computedPath.join('>');
+      computedPathsMap.set(stepExecution.id!, computedPath);
+      stepExecutionsMap.set(key, {
+        ...stepExecution,
+      });
     });
-  });
 
   for (const { id } of stepExecutionsMap.values()) {
     const computedPath = computedPathsMap.get(id!)!;

@@ -45,7 +45,6 @@ export const searchStepExecutions = async ({
       query: {
         bool: {
           must: mustQueries,
-          must_not: [{ term: { isInternalStep: true } }],
         },
       },
       sort: 'startedAt:desc',
@@ -60,9 +59,6 @@ export const searchStepExecutions = async ({
     return (
       response.hits.hits
         .map((hit) => hit._source as EsWorkflowStepExecution)
-        // TODO: It should be filtered on ES side
-        // This does not work because there is no proper mapping configuration for isInternalStep field
-        .filter((step): step is EsWorkflowStepExecution => !step.isInternalStep)
         // TODO: It should be sorted on ES side
         // This sort is needed to ensure steps are returned in the execution order
         .sort((fst, scd) => fst.globalExecutionIndex - scd.globalExecutionIndex)

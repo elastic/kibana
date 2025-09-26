@@ -227,8 +227,6 @@ export class WorkflowExecutionRuntimeManager {
           id: this.getCurrentStepExecutionId(),
           stepId: currentNode.stepId,
           stepType: currentNode.stepType,
-          // Is set to true if the step is an internal step and shouldn't be visible
-          isInternalStep: 'isInternalStep' in currentNode && currentNode.isInternalStep === true,
           scopeStack: this.workflowExecution.scopeStack,
           topologicalIndex: this.topologicalOrder.indexOf(currentNode.id),
           status: ExecutionStatus.RUNNING,

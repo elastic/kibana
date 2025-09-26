@@ -396,7 +396,6 @@ function handleTimeout(
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
-    isInternalStep: true,
     stepId,
     stepType,
     timeout,
@@ -404,7 +403,6 @@ function handleTimeout(
   const exitTimeoutZone: ExitTimeoutZoneNode = {
     id: `exitTimeoutZone_${stepId}`,
     type: 'exit-timeout-zone',
-    isInternalStep: true,
     stepId,
     stepType,
   };
