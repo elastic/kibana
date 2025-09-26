@@ -11,12 +11,12 @@ import {
   modeDescription,
   ENRICH_MODES,
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
-import { getHoverItem } from '../hover';
+import { getHoverItem } from '..';
 import { policies, setupTestbed } from './fixtures';
 
 const assertGetHoverItem = async (statement: string, triggerString: string, expected: string[]) => {
   const kit = setupTestbed(statement, triggerString);
-  const { contents } = await getHoverItem(kit.model, kit.position, kit.callbacks);
+  const { contents } = await getHoverItem(statement, kit.offset, kit.callbacks);
   const result = contents.map(({ value }) => value).sort();
 
   expect(result).toEqual(expected.sort());

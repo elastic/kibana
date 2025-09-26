@@ -9,8 +9,6 @@
 
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { FieldType } from '@kbn/esql-ast';
-import type { monaco } from '../../../../../monaco_imports';
-import type { HoverMonacoModel } from '../hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
@@ -64,22 +62,11 @@ function createCustomCallbackMocks() {
   };
 }
 
-function createModelAndPosition(text: string, string: string) {
-  return {
-    model: {
-      getValue: () => text,
-    } as HoverMonacoModel,
-    position: { lineNumber: 1, column: text.lastIndexOf(string) + 1 } as monaco.Position,
-  };
-}
-
 export const setupTestbed = (statement: string, triggerString: string) => {
-  const { model, position } = createModelAndPosition(statement, triggerString);
   const callbacks = createCustomCallbackMocks();
   const testbed = {
-    model,
-    position,
     callbacks,
+    offset: statement.lastIndexOf(triggerString),
   };
 
   return testbed;
