@@ -20,17 +20,14 @@ import { css } from '@emotion/react';
 import { Settings } from './settings';
 import { Variables } from './variables';
 
-const useStyles = () => {
-  return {
-    fullHeightPanel: css`
-      height: 100%;
-    `,
-  };
+const styles = {
+  fullHeightPanel: css`
+    height: 100%;
+  `,
 };
 
 export function Config() {
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
-  const styles = useStyles();
 
   return (
     <EuiPanel
