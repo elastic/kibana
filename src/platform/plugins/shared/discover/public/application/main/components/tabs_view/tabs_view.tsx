@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
@@ -18,6 +18,7 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
@@ -35,9 +36,9 @@ export const TabsView = (props: SingleTabViewProps) => {
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
 
-  const tabsEbtManager = useMemo(
-    () => services.ebtManager.createScopedEBTManager(),
-    [services.ebtManager]
+  const scopedEbtManager = useCurrentTabRuntimeState(
+    props.runtimeStateManager,
+    (state) => state.scopedEbtManager$
   );
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
@@ -45,9 +46,9 @@ export const TabsView = (props: SingleTabViewProps) => {
       if (!Object.values(TabsEventName).includes(eventName as TabsEventName)) {
         return;
       }
-      void tabsEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
+      void scopedEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
     },
-    [tabsEbtManager]
+    [scopedEbtManager]
   );
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
