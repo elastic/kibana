@@ -194,6 +194,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                       data-test-subj="streamsAppProcessorConfigurationButton"
                       color="danger"
                       onClick={handleDelete}
+                      size="s"
                     >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',

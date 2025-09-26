@@ -53,9 +53,3 @@ export {
   type TabularDataResult,
   type OtherResult,
 } from './tool_result';
-export {
-  internalNamespaces,
-  protectedNamespaces,
-  isInProtectedNamespace,
-  hasProtectedNamespaceName,
-} from './namespaces';
