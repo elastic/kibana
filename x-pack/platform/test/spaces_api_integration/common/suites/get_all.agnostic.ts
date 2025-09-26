@@ -86,7 +86,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       'securitySolutionNotes',
       'securitySolutionSiemMigrations',
       'securitySolutionTimeline',
-      'siemV3',
+      'siemV4',
       'slo',
       'streams',
       'uptime',
