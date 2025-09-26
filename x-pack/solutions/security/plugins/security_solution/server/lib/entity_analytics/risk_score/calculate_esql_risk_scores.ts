@@ -111,10 +111,10 @@ export const calculateScoresWithESQL = async (
     responses.forEach(({ entityType, response }) => {
       if (
         response?.aggregations &&
-        (response.aggregations as Record<string, unknown>)[entityType]
+        (response.aggregations as unknown as Record<string, unknown>)[entityType]
       ) {
         (combinedAggregations as Record<string, unknown>)[entityType] = (
-          response.aggregations as Record<string, unknown>
+          response.aggregations as unknown as Record<string, unknown>
         )[entityType];
       }
     });
@@ -136,7 +136,7 @@ export const calculateScoresWithESQL = async (
         if (entities.length === 0) {
           return Promise.resolve([
             entityType as EntityType,
-            { afterKey: afterKey as EntityAfterKey, scores: [] },
+            { afterKey: (afterKey as EntityAfterKey) || {}, scores: [] },
             entities,
           ] satisfies ESQLResults[number]);
         }
@@ -195,9 +195,9 @@ export const calculateScoresWithESQL = async (
             logger.error(`Query: ${query}`);
             return [
               entityType as EntityType,
-              { afterKey: afterKey as EntityAfterKey, scores: [] },
+              { afterKey: (afterKey as EntityAfterKey) || {}, scores: [] },
               entities,
-            ];
+            ] satisfies ESQLResults[number];
           });
       }
     );
@@ -209,7 +209,7 @@ export const calculateScoresWithESQL = async (
       entities: Record<EntityType, string[]>;
     }>(
       (res, [entityType, { afterKey, scores }, entities]) => {
-        res.after_keys[entityType] = afterKey;
+        res.after_keys[entityType] = afterKey || {};
         res.scores[entityType] = scores;
         res.entities[entityType] = entities;
         return res;
