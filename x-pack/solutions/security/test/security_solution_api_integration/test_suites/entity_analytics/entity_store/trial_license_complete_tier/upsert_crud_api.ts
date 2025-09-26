@@ -152,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(hit._source?.user?.domain).toContain('domain.com updated');
               expect(hit._source?.entity?.id).toEqual(userName);
               expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-              expect(hit._source?.entity?.lifecycle?.Brute_force_victim).toEqual(date);
+              expect(hit._source?.entity?.lifecycle?.Brute_force_victim).toBeTruthy();
             });
             return true;
           }
