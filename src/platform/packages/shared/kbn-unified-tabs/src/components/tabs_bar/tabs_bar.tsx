@@ -62,7 +62,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
-  onEvent: (eventName: string, payload?: TabsEBTPayload) => void;
+  onEBTEvent: (eventName: string, payload?: TabsEBTPayload) => void;
 };
 
 export interface TabsBarApi {
@@ -86,7 +86,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onReorder,
       onClose,
       getPreviewData,
-      onEvent,
+      onEBTEvent,
     },
     componentRef
   ) => {
@@ -102,11 +102,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
 
     const emitOnKeyUsedEvent = useCallback(
       (key: string) => {
-        onEvent('tabsKeyboardShortcutsUsed', {
+        onEBTEvent('tabsKeyboardShortcutsUsed', {
           keyUsed: key,
         });
       },
-      [onEvent]
+      [onEBTEvent]
     );
 
     const moveFocusToNextSelectedItem = useCallback((item: TabItem) => {
@@ -136,11 +136,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     useEffect(() => {
       if (hasReachedMaxItemsCount && !hasSentMaxReachedEventRef.current) {
         hasSentMaxReachedEventRef.current = true;
-        onEvent('tabsLimitReached');
+        onEBTEvent('tabsLimitReached');
       } else if (!hasReachedMaxItemsCount) {
         hasSentMaxReachedEventRef.current = false;
       }
-    }, [hasReachedMaxItemsCount, onEvent]);
+    }, [hasReachedMaxItemsCount, onEBTEvent]);
 
     useEffect(() => {
       if (selectedItem && tabsContainerRef.current) {

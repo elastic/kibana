@@ -39,7 +39,7 @@ export const TabsView = (props: SingleTabViewProps) => {
     [services.ebtManager]
   );
 
-  const onEvent: UnifiedTabsProps['onEvent'] = useCallback(
+  const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (eventName, payload) => {
       if (!Object.values(TabsEventName).includes(eventName as TabsEventName)) {
         return;
@@ -76,7 +76,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
-      onEvent={onEvent}
+      onEBTEvent={onEvent}
     />
   );
 };

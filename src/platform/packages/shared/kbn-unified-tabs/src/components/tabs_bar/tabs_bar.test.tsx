@@ -34,7 +34,7 @@ describe('TabsBar', () => {
     const onClose = jest.fn();
     const onReorder = jest.fn();
     const getPreviewData = jest.fn();
-    const onEvent = jest.fn();
+    const onEBTEvent = jest.fn();
 
     const selectedItem = items[0];
 
@@ -59,7 +59,7 @@ describe('TabsBar', () => {
         onClose={onClose}
         onReorder={onReorder}
         getPreviewData={getPreviewData}
-        onEvent={onEvent}
+        onEBTEvent={onEBTEvent}
       />
     );
 
