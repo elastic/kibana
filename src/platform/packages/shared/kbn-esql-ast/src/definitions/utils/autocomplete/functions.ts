@@ -8,9 +8,8 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 
-import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import { getLocationInfo } from '../../../commands_registry/location';
+import { uniq } from 'lodash';
 import {
   isAssignment,
   isColumn,
@@ -24,6 +23,7 @@ import {
   commaCompleteItem,
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
+import { getLocationInfo } from '../../../commands_registry/location';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
@@ -36,7 +36,7 @@ import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
 import { comparisonFunctions } from '../../all_operators';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
+import { timeUnitsToSuggest } from '../../constants';
 import type { FunctionParameter, FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../ast';
@@ -48,7 +48,7 @@ import {
   getFunctionDefinition,
   getFunctionSuggestions,
 } from '../functions';
-import { getCompatibleLiterals, getDateLiterals } from '../literals';
+import { buildConstantsDefinitions, getCompatibleLiterals } from '../literals';
 import { getSuggestionsToRightOfOperatorExpression } from '../operators';
 import { buildValueDefinitions } from '../values';
 import {
@@ -143,6 +143,11 @@ export async function getFunctionArgsSuggestions(
   if (!node) {
     return [];
   }
+
+  const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
+    return Array.from(new Set(paramDefs.map(({ type }) => type)));
+  };
+
   let command = astContext.command;
   if (astContext.command?.name === 'fork') {
     const { command: forkCommand } =
@@ -169,7 +174,7 @@ export async function getFunctionArgsSuggestions(
     columns: columnMap,
   };
 
-  const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
+  const { compatibleParamDefs, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
     getValidSignaturesAndTypesToSuggestNext(
       functionNode,
       references,
@@ -188,7 +193,7 @@ export async function getFunctionArgsSuggestions(
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
     fnDefinition.name === 'case' ||
     // If the type is explicitly a boolean condition
-    typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
+    compatibleParamDefs.some((t) => t && t.type === 'boolean' && t.name === 'condition');
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
@@ -201,7 +206,7 @@ export async function getFunctionArgsSuggestions(
     !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
-    typesToSuggestNext
+    compatibleParamDefs
       .map((d) => d.suggestedValues)
       .filter((d) => d)
       .flat()
@@ -273,13 +278,9 @@ export async function getFunctionArgsSuggestions(
     // (e.g. if func1's first parameter is constant-only, any nested functions should
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
-    const constantOnlyParamDefs = typesToSuggestNext.filter(
+    const constantOnlyParamDefs = compatibleParamDefs.filter(
       (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
-
-    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
-      return Array.from(new Set(paramDefs.map(({ type }) => type)));
-    };
 
     const supportsControls = Boolean(context?.supportsControls);
     const variables = context?.variables;
@@ -287,7 +288,7 @@ export async function getFunctionArgsSuggestions(
     // Literals
     suggestions.push(
       ...getCompatibleLiterals(
-        getTypesFromParamDefs(constantOnlyParamDefs) as string[],
+        getTypesFromParamDefs(constantOnlyParamDefs),
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
@@ -326,7 +327,7 @@ export async function getFunctionArgsSuggestions(
             : // @TODO: have a way to better suggest constant only params
               ensureKeywordAndText(
                 getTypesFromParamDefs(
-                  typesToSuggestNext.filter((d) => !d.constantOnly)
+                  compatibleParamDefs.filter((d) => !d.constantOnly)
                 ) as FunctionParameterType[]
               ),
           [],
@@ -341,7 +342,7 @@ export async function getFunctionArgsSuggestions(
     );
 
     // Functions
-    if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+    if (compatibleParamDefs.every((d) => !d.fieldsOnly)) {
       const location = getLocationInfo(
         offset,
         command,
@@ -355,7 +356,7 @@ export async function getFunctionArgsSuggestions(
             returnTypes: canBeBooleanCondition
               ? ['any']
               : (ensureKeywordAndText(
-                  getTypesFromParamDefs(typesToSuggestNext)
+                  getTypesFromParamDefs(compatibleParamDefs)
                 ) as FunctionParameterType[]),
             ignored: fnToIgnore,
           },
@@ -367,34 +368,24 @@ export async function getFunctionArgsSuggestions(
         }))
       );
     }
-
-    if (
-      (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
-        ['where', 'eval'].includes(command.name) &&
-        !FULL_TEXT_SEARCH_FUNCTIONS.includes(fnDefinition.name)) ||
-      (['stats', 'inline stats'].includes(command.name) &&
-        typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
-    )
-      suggestions.push(
-        ...getDateLiterals({
-          addComma: shouldAddComma,
-          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-        })
-      );
   }
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
-    if (command.name !== 'stats' && command.name !== 'inline stats') {
-      if (isLiteral(arg) && isNumericType(arg.literalType)) {
-        // ... | EVAL fn(2 <suggest>)
-        suggestions.push(
-          ...getCompatibleLiterals(['time_literal_unit'], {
-            addComma: shouldAddComma,
-            advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-          })
-        );
-      }
+    if (
+      isLiteral(arg) &&
+      isNumericType(arg.literalType) &&
+      (getTypesFromParamDefs(compatibleParamDefs).includes('time_duration') ||
+        getTypesFromParamDefs(compatibleParamDefs).includes('date_period'))
+    ) {
+      suggestions.push(
+        ...buildConstantsDefinitions(
+          timeUnitsToSuggest.map(({ name }) => name),
+          undefined,
+          undefined,
+          { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+        )
+      );
     }
     // Suggest comparison functions for boolean conditions
     if (canBeBooleanCondition) {
@@ -462,7 +453,7 @@ async function getListArgsSuggestions(
           : node.args.filter(Array.isArray).flat().filter(isColumn);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            [argType as string],
+            [argType],
             getLocationInfo(offset, command, commands, false).id,
             getFieldsByType,
             {

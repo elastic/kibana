@@ -6,39 +6,37 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
-import { uniqBy } from 'lodash';
-import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLocation } from '../../../types';
+import { uniq, uniqBy } from 'lodash';
+import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import type {
-  ISuggestionItem,
   GetColumnsByTypeFn,
   ICommandContext,
+  ISuggestionItem,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from '../literals';
-import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition } from '../../types';
-import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
-import { getOverlapRange } from '../shared';
-import { argMatchesParamType, getExpressionType } from '../expressions';
-import { getColumnByName, isParamExpressionType } from '../shared';
-import { getFunctionSuggestions } from '../functions';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
+import { Walker } from '../../../walker';
 import { logicalOperators } from '../../all_operators';
+import { EDITOR_MARKER } from '../../constants';
+import type { FunctionDefinition, FunctionParameterType, Signature } from '../../types';
+import { isParameterType, type SupportedDataType } from '../../types';
+import { argMatchesParamType, getExpressionType } from '../expressions';
+import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
+import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import {
   getOperatorSuggestion,
   getOperatorSuggestions,
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
-import { Walker } from '../../../walker';
-
-export const within = (position: number, location: ESQLLocation | undefined) =>
-  Boolean(location && location.min <= position && location.max >= position);
+import { getColumnByName, getOverlapRange, isParamExpressionType } from '../shared';
+import { buildValueDefinitions } from '../values';
 
 export const shouldBeQuotedText = (
   text: string,
@@ -152,7 +150,7 @@ export function getFragmentData(innerText: string) {
  * TODO — split this into distinct functions, one for fields, one for functions, one for literals
  */
 export async function getFieldsOrFunctionsSuggestions(
-  types: string[],
+  types: (SupportedDataType | 'unknown')[],
   location: Location,
   getFieldsByType: GetColumnsByTypeFn,
   {
@@ -223,6 +221,7 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 type ExpressionPosition =
   | 'after_column'
   | 'after_function'
+  | 'in_function'
   | 'after_not'
   | 'after_operator'
   | 'after_literal'
@@ -274,7 +273,7 @@ export const getExpressionPosition = (
     }
 
     if (isFunctionExpression(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
-      return 'after_function';
+      return within(innerText.length, expressionRoot) ? 'in_function' : 'after_function';
     }
 
     if (isFunctionExpression(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
@@ -288,6 +287,11 @@ export const getExpressionPosition = (
 
   return 'empty_expression';
 };
+
+interface FunctionParameterContext {
+  paramDefinitions: Signature['params'];
+  functionsToIgnore: string[];
+}
 
 /**
  * Creates suggestion within an expression.
@@ -309,6 +313,7 @@ export async function suggestForExpression({
   hasMinimumLicenseRequired,
   activeProduct,
   ignoredColumnsForEmptyExpression = [],
+  functionParameterContext,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -322,6 +327,7 @@ export async function suggestForExpression({
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
+  functionParameterContext?: FunctionParameterContext;
 }): Promise<ISuggestionItem[]> {
   const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
 
@@ -329,6 +335,41 @@ export async function suggestForExpression({
 
   const position = getExpressionPosition(innerText, expressionRoot);
   switch (position) {
+    case 'in_function': {
+      const fn = expressionRoot as ESQLFunction;
+      const fnDefinition = getFunctionDefinition(fn.name);
+
+      if (!fnDefinition || !context) {
+        break;
+      }
+
+      const newFunctionParameterContext: FunctionParameterContext = {
+        paramDefinitions: getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition)
+          .compatibleParamDefs,
+        functionsToIgnore: [fn.name],
+      };
+
+      const lastArg = (expressionRoot as ESQLFunction).args.slice(-1)[0] as ESQLAstItem;
+
+      const startingNewParameterExpression = /,\s*$/.test(innerText);
+      const newExpressionRoot = startingNewParameterExpression
+        ? undefined
+        : ((Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem);
+
+      return suggestForExpression({
+        expressionRoot: newExpressionRoot,
+        innerText,
+        getColumnsByType,
+        location,
+        preferredExpressionType,
+        context,
+        advanceCursorAfterInitialColumn,
+        hasMinimumLicenseRequired,
+        activeProduct,
+        ignoredColumnsForEmptyExpression,
+        functionParameterContext: newFunctionParameterContext,
+      });
+    }
     /**
      * After a literal, column, or complete (non-operator) function call
      */
@@ -441,8 +482,38 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
+      let acceptedTypes: FunctionParameterType[] = ['any'];
+
+      /** Is this expression within a function parameter context? */
+      if (functionParameterContext) {
+        const { paramDefinitions } = functionParameterContext;
+
+        const suggestedValues = uniq(
+          paramDefinitions
+            .map((d) => d.suggestedValues)
+            .filter((d) => d)
+            .flat()
+        ) as string[];
+
+        if (suggestedValues.length) {
+          return buildValueDefinitions(suggestedValues);
+        }
+
+        acceptedTypes = ensureKeywordAndText(paramDefinitions.map((p) => p.type));
+
+        suggestions.push(
+          ...getCompatibleLiterals(
+            acceptedTypes,
+            {
+              supportsControls: context?.supportsControls,
+            },
+            context?.variables
+          )
+        );
+      }
+
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
-        'any',
+        acceptedTypes,
         ignoredColumnsForEmptyExpression,
         {
           advanceCursor: advanceCursorAfterInitialColumn,
@@ -451,7 +522,11 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
+        ...getFunctionSuggestions(
+          { location, returnTypes: acceptedTypes },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -475,7 +550,7 @@ export async function suggestForExpression({
       return;
     } else if (hasNonWhitespacePrefix) {
       // get index of first char of final word
-      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+      const lastNonWhitespaceIndex = innerText.search(/\b\w(?=\w*$)/);
       s.rangeToReplace = {
         start: lastNonWhitespaceIndex,
         end: innerText.length,
@@ -519,6 +594,17 @@ export function getControlSuggestion(
       : []),
   ];
 }
+
+// Helper to ensure both keyword and text types are present
+const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+  if (types.includes('keyword') && !types.includes('text')) {
+    types.push('text');
+  }
+  if (types.includes('text') && !types.includes('keyword')) {
+    types.push('keyword');
+  }
+  return types;
+};
 
 const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
@@ -580,7 +666,7 @@ function getValidFunctionSignaturesForPreviousArgs(
  * @param argIndex: the index of the argument to suggest for
  * @returns
  */
-function getCompatibleTypesToSuggestNext(
+function getCompatibleParamDefs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
@@ -621,9 +707,7 @@ function strictlyGetParamAtPosition(
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
   context: ICommandContext,
-  fnDefinition: FunctionDefinition,
-  fullText: string,
-  offset: number
+  fnDefinition: FunctionDefinition
 ) {
   const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
   const enrichedArgs = node.args.map((arg, idx) => ({
@@ -636,7 +720,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
   >;
 
   // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
+  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER); // NOTE: I think this is checking if the cursor is after a comma.
   let argIndex = Math.max(node.args.length, 0);
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;
@@ -648,7 +732,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex
   );
   // Retrieve unique of types that are compatiable for the current arg
-  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
+  const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);
   const hasMoreMandatoryArgs = !validSignatures
     // Types available to suggest next after this argument is completed
     .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
@@ -657,22 +741,11 @@ export function getValidSignaturesAndTypesToSuggestNext(
     // no need to suggest comma
     .some((p) => p === null || p?.optional === true);
 
-  // Whether to prepend comma to suggestion string
-  // E.g. if true, "fieldName" -> "fieldName, "
-  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
-  const shouldAddComma =
-    hasMoreMandatoryArgs &&
-    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
-    !alreadyHasComma;
-  const currentArg = enrichedArgs[argIndex];
   return {
-    shouldAddComma,
-    typesToSuggestNext,
-    validSignatures,
+    compatibleParamDefs,
     hasMoreMandatoryArgs,
     enrichedArgs,
     argIndex,
-    currentArg,
   };
 }
 

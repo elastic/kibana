@@ -516,6 +516,33 @@ describe('functions arg suggestions', () => {
     });
   });
 
+  /**
+   * The function definitions should contain both `text` and `keyword` types for parameters that accept either.
+   *
+   * However, there is a special case that can't be covered in the function definitions: variadic functions.
+   *
+   * For example, the `COALESCE` function definition has several signatures that include `minParams`
+   *
+   * {
+   *  params: [
+   *    {
+   *      name: 'first',
+   *      type: 'keyword',
+   *      optional: false,
+   *    },
+   *  ],
+   *  returnType: 'keyword',
+   *  minParams: 1,
+   * },
+   *
+   * This signature means that you can have [1, infinity) keyword-type parameters.
+   *
+   * However, there is no way in our function definitions to say that you can have
+   * [1, infinity) keyword OR text parameters, mixed together.
+   *
+   * So, we cover this case with logic to supplement the limitations of the definitions.
+   * We do the same on the validation side.
+   */
   it('treats text and keyword as interchangeable', async () => {
     setTestFunctions([
       {
