@@ -585,7 +585,7 @@ FROM books METADATA _score
 | WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
 | SORT _score DESC
 | LIMIT 100
-| RERANK rerank_score = "hobbit" ON description, author WITH { "inference_id" : "test_reranker" }
+| RERANK rerank_score = "hobbit" ON description, author WITH '{ "inference_id" : "test_reranker" }'
 | SORT rerank_score
 | LIMIT 3
 | KEEP title, _score, rerank_score
