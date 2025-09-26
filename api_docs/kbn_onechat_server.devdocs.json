@@ -583,18 +583,28 @@
           {
             "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.ExecutableTool.schema",
-            "type": "Uncategorized",
+            "type": "Function",
             "tags": [],
             "label": "schema",
             "description": [
               "\nTool's input schema, defined as a zod schema."
             ],
             "signature": [
-              "TSchema"
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<TSchema>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/onechat-server",
