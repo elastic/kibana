@@ -19,7 +19,7 @@ export function useSecretHeaders(connectorId?: string) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const query = useQuery<string[], ServerError>(
+  return useQuery<string[], ServerError>(
     ['secretHeaders', connectorId],
     async () => {
       return await http.get<string[]>(
@@ -39,7 +39,5 @@ export function useSecretHeaders(connectorId?: string) {
       },
     }
   );
-
-  return query || {};
 }
 export type UseSecretHeaders = ReturnType<typeof useSecretHeaders>;
