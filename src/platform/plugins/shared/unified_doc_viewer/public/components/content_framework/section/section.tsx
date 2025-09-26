@@ -21,13 +21,22 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiTourStep,
+  useEuiTheme,
 } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { i18n } from '@kbn/i18n';
 
 interface BaseAction {
   icon: IconType;
   ariaLabel: string;
   dataTestSubj?: string;
   label?: string;
+  tour?: {
+    title: string;
+    subtitle: string;
+    content: React.ReactNode;
+  };
 }
 
 type Action =
@@ -48,6 +57,8 @@ export interface ContentFrameworkSectionProps {
   hasPadding?: boolean;
 }
 
+const sectionTourStorageKey = 'contentFramework.sectionTourDismissed';
+
 export function ContentFrameworkSection({
   id,
   title,
@@ -62,38 +73,89 @@ export function ContentFrameworkSection({
   hasPadding = true,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
+  const [dismissedTours, setDismissedTours] = useLocalStorage<string[]>(sectionTourStorageKey, []);
+  const { euiTheme } = useEuiTheme();
 
+  const dismissTour = (actionName: string) => {
+    setDismissedTours(dismissedTours ? [...dismissedTours, actionName] : [actionName]);
+  };
+
+  const renderActionButton = ({ icon, ariaLabel, dataTestSubj, label, onClick, href }: Action) => {
+    const size = 'xs';
+    const buttonProps = onClick ? { onClick } : { href };
+
+    return (
+      <>
+        {label ? (
+          <EuiButtonEmpty
+            size={size}
+            iconType={icon}
+            aria-label={ariaLabel}
+            data-test-subj={dataTestSubj}
+            {...buttonProps}
+          >
+            {label}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButtonIcon
+            size={size}
+            iconType={icon}
+            aria-label={ariaLabel}
+            data-test-subj={dataTestSubj}
+            {...buttonProps}
+          />
+        )}
+      </>
+    );
+  };
   const renderActions = () => (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-      {actions?.map((action, idx) => {
-        const { icon, onClick, ariaLabel, label, dataTestSubj, href } = action;
-        const size = 'xs';
-        const buttonProps = onClick ? { onClick } : { href };
-        return (
-          <EuiFlexItem grow={false} key={idx}>
-            {label ? (
-              <EuiButtonEmpty
-                size={size}
-                iconType={icon}
-                aria-label={ariaLabel}
-                data-test-subj={dataTestSubj}
-                {...buttonProps}
-              >
-                {label}
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonIcon
-                size={size}
-                iconType={icon}
-                aria-label={ariaLabel}
-                data-test-subj={dataTestSubj}
-                {...buttonProps}
-              />
-            )}
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+        {actions?.map((action, idx) => {
+          const { ariaLabel, tour } = action;
+          return (
+            <EuiFlexItem grow={false} key={idx}>
+              {tour ? (
+                <EuiTourStep
+                  content={tour?.content}
+                  isStepOpen={!dismissedTours?.includes(ariaLabel)}
+                  maxWidth={350}
+                  onFinish={() => {}}
+                  step={1}
+                  stepsTotal={1}
+                  title={tour?.title}
+                  subtitle={tour?.subtitle}
+                  footerAction={
+                    <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'unifiedDocViewer.contentFramework.section.tourStep.okButton',
+                        {
+                          defaultMessage: 'Close {action} tour',
+                          values: { action: ariaLabel },
+                        }
+                      )}
+                      onClick={() => {
+                        dismissTour(ariaLabel);
+                      }}
+                    >
+                      {i18n.translate(
+                        'unifiedDocViewer.contentFramework.section.tourStep.okButtonLabel',
+                        { defaultMessage: 'OK' }
+                      )}
+                    </EuiButtonEmpty>
+                  }
+                  zIndex={Number(euiTheme.levels.flyout)}
+                >
+                  {renderActionButton(action)}
+                </EuiTourStep>
+              ) : (
+                renderActionButton(action)
+              )}
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    </>
   );
 
   useEffect(() => {
