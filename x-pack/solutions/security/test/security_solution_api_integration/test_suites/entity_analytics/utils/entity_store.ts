@@ -14,7 +14,7 @@ export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
