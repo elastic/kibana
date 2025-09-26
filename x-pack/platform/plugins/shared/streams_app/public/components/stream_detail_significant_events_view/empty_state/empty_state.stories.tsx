@@ -29,7 +29,13 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <NoSignificantEventsEmptyState onAddClick={() => {}} />
+      <NoSignificantEventsEmptyState
+        onGenerateSuggestionsClick={() => {}}
+        onManualEntryClick={() => {}}
+        onSystemsChange={() => {}}
+        selectedSystems={[]}
+        systems={[]}
+      />
     </EuiPanel>
   );
 };
