@@ -16,26 +16,30 @@ This documentation is being automatically generated using an
  it may be removed or modified at any time. If you have any questions, feedback or concerns, please create an issue using
   the label `APIDocs`, or reach out to the Kibana Tech Leads
  who are temporarily owning and maintaining this system.
- </DocCallOut>
+</DocCallOut>
 
- ## What is included
+## API docs contribution guidelines
 
- Every plugin that 
- <DocLink id="kibPlatformIntro" section="public-plugin-api" text="exposes functionality for other plugins to use"/> will have
- API documentation automatically generated (note this system 
- does *not* handle REST APIs).
+To learn more about how to write docs specifically for our [API references](https://www.elastic.co/docs/api/), refer to the [Contribute to Elastic API docs](https://www.elastic.co/docs/extend/contribute/api-docs/).
 
- <DocCallOut title="@internal tags">API items that have an `@internal` in the comment are not 
- included in the documentation system.</DocCallOut> 
+## What is included
 
- ## How it works
+Every plugin that 
+<DocLink id="kibPlatformIntro" section="public-plugin-api" text="exposes functionality for other plugins to use"/> will have
+API documentation automatically generated (note this system 
+does *not* handle REST APIs).
 
- If you change or delete a public plugin API, or add a new one, you will have to run the command `node scripts/build_api_docs` in order to update the
- docs in your PR, or CI will fail. When this happens, consider:
+<DocCallOut title="@internal tags">API items that have an `@internal` in the comment are not 
+included in the documentation system.</DocCallOut> 
+
+## How it works
+
+If you change or delete a public plugin API, or add a new one, you will have to run the command `node scripts/build_api_docs` in order to update the
+docs in your PR, or CI will fail. When this happens, consider:
  
- 1. If this affects an existing API item, have you emailed the `kibana-contributors` list with a heads up? It's important to give advance 
- notice, since there may be corner cases you aren't aware of, even if your PR passes CI.
- 2. If the change you are making aren't relevant to contributors, consider a) making the API private, or b) adding the `@internal` flag to it.
+1. If this affects an existing API item, have you emailed the `kibana-contributors` list with a heads up? It's important to give advance 
+notice, since there may be corner cases you aren't aware of, even if your PR passes CI.
+2. If the change you are making aren't relevant to contributors, consider a) making the API private, or b) adding the `@internal` flag to it.
 
 ## Q & A 
 

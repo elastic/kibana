@@ -49,15 +49,15 @@ export default function ({ getService }: FtrProviderContext) {
     },
     logs: {
       data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     nanos: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/nanos',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     sales: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/sales',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     bigIntIdField: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/big_int_id_field',

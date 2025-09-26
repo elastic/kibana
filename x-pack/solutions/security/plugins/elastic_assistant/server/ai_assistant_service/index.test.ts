@@ -10,7 +10,10 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStream,
+  IndicesGetDataStreamResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -85,7 +88,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       next_generation_managed_by: 'Data stream lifecycle',
       prefer_ilm: false,
       rollover_on_write: false,
-    },
+    } as Partial<IndicesDataStream> as IndicesDataStream,
   ],
 };
 
@@ -134,6 +137,7 @@ describe('AI Assistant Service', () => {
         getStatus: jest.fn(),
         install: jest.fn(),
         update: jest.fn(),
+        updateAll: jest.fn(),
         uninstall: jest.fn(),
       }),
     };

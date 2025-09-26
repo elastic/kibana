@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
 import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
@@ -17,7 +17,11 @@ export const SearchHomepagePage = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
-
+  useEffect(() => {
+    if (searchNavigation) {
+      searchNavigation.breadcrumbs.setSearchBreadCrumbs([]);
+    }
+  }, [searchNavigation]);
   useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(

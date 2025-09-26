@@ -9,7 +9,7 @@
 
 import React, { ReactElement } from 'react';
 
-import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiToolTip, EuiIconTip } from '@elastic/eui';
 
 export interface FormRowProps {
   label: string;
@@ -32,9 +32,7 @@ export function FormRow(props: FormRowProps) {
 
   const label = props.warningMsg ? (
     <>
-      <EuiToolTip position="top" content={props.warningMsg}>
-        <EuiIcon type="warning" />
-      </EuiToolTip>
+      <EuiIconTip content={props.warningMsg} type="warning" position="top" />
       {props.label}
     </>
   ) : (

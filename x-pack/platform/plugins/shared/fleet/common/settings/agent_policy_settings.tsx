@@ -41,6 +41,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       name: 'agent_limits_go_max_procs',
     },
     schema: z.number().int().min(0),
+    example_value: 10,
   },
   {
     name: 'agent.download.timeout',
@@ -60,6 +61,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       name: 'agent_download_timeout',
     },
     schema: zodStringWithDurationValidation,
+    example_value: '10m',
   },
   {
     name: 'agent.download.target_directory',
@@ -82,6 +84,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
     schema: z.string(),
+    example_value: '/tmp/test',
   },
   {
     name: 'agent.logging.metrics.period',
@@ -104,6 +107,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: zodStringWithDurationValidation,
+    example_value: '10m',
   },
   {
     name: 'agent.logging.level',
@@ -123,6 +127,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-log-level',
     schema: z.enum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
+    example_value: 'info',
   },
   {
     name: 'agent.logging.to_files',
@@ -141,6 +146,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: z.boolean().default(true),
+    example_value: true,
   },
   {
     name: 'agent.logging.files.rotateeverybytes',
@@ -159,6 +165,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: z.number().int().min(0),
+    example_value: 10,
   },
   {
     name: 'agent.logging.files.keepfiles',
@@ -177,15 +184,19 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: z.number().int().min(0),
+    example_value: 10,
   },
   {
     name: 'agent.logging.files.interval',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle', {
-      defaultMessage: 'Agent logging number of files',
-    }),
+    title: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalTitle',
+      {
+        defaultMessage: 'Agent logging file rotation interval',
+      }
+    ),
     description: (
       <FormattedMessage
-        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription"
+        id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalDescription"
         defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
       />
     ),
@@ -195,5 +206,52 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: zodStringWithDurationValidation,
+    example_value: '10m',
+  },
+  {
+    name: 'agent.monitoring._runtime_experimental',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
+      defaultMessage: 'Monitoring runtime (experimental)',
+    }),
+    description: (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDescription"
+        defaultMessage="Change how the Beat inputs used for Elastic Agent self-monitored are executed."
+      />
+    ),
+    api_field: {
+      name: 'agent_monitoring_runtime_experimental',
+    },
+    schema: z.enum(['', 'process', 'otel']).default(''),
+    example_value: 'otel',
+    options: [
+      {
+        value: '',
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDefaultLabel',
+          {
+            defaultMessage: 'Default',
+          }
+        ),
+      },
+      {
+        value: 'process',
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeProcessLabel',
+          {
+            defaultMessage: 'Process',
+          }
+        ),
+      },
+      {
+        value: 'otel',
+        text: i18n.translate(
+          'xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeOtelLabel',
+          {
+            defaultMessage: 'OTel',
+          }
+        ),
+      },
+    ],
   },
 ];

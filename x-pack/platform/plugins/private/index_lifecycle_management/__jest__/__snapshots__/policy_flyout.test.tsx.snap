@@ -22,6 +22,7 @@ exports[`View policy flyout shows all phases 1`] = `
         <h1
           class="euiTitle emotion-euiTitle-m"
           data-test-subj="policyFlyoutTitle"
+          id="generated-id"
         >
           test
         </h1>

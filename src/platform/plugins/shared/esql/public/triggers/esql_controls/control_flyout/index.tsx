@@ -138,12 +138,12 @@ export function ESQLControlsFlyout({
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !controlState?.availableOptions.length
+        !controlState?.availableOptions?.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.availableOptions.length,
+    controlState?.availableOptions?.length,
     esqlVariables,
     variableName,
     variableType,
@@ -154,7 +154,7 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.availableOptions.length) {
+    if (controlState && controlState.availableOptions?.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);

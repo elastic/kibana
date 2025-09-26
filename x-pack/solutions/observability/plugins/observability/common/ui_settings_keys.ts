@@ -30,3 +30,4 @@ export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostD
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
 export const apmEnableServiceMapApiV2 = 'observability:apmEnableServiceMapApiV2';
+export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

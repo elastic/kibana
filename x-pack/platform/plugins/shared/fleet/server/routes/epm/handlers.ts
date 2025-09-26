@@ -627,6 +627,7 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
@@ -636,8 +637,10 @@ export const getInputsHandler: FleetRequestHandler<
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
 };
 
 // Don't expose the whole SO in the API response, only selected fields

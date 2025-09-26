@@ -83,7 +83,6 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-      onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -318,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
-    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
   describe('Privileges', () => {

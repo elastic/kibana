@@ -193,6 +193,20 @@ EOF
   vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
 }
 
+# Acquire credentials for legacy vault if needed
+{
+  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
+  export VAULT_ROLE_ID
+  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
+  export VAULT_SECRET_ID
+}
+
+# Inject moon remote-cache credentials on CI
+if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+  MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
+  export MOON_REMOTE_CACHE_TOKEN
+fi
+
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
   source "$PIPELINE_PRE_COMMAND"

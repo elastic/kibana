@@ -287,29 +287,46 @@ const AlertsTableContent = typedForwardRef(
       trackScores,
     });
 
+    /*
+     * if prevQueryParams is directly compared without selective prop assignment to a new object,
+     * deepEqual will return a false negative, even if the objects are structurally identical.
+     */
     useEffect(() => {
-      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        ruleTypeIds,
-        consumers,
-        fields,
-        query,
-        sort,
-        runtimeMappings,
-        minScore,
-        trackScores,
-        // Go back to the first page if the query changes
-        pageIndex: !deepEqual(prevQueryParams, {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => {
+        const resetPageIndex = !deepEqual(
+          {
+            ruleTypeIds: prevQueryParams.ruleTypeIds,
+            consumers: prevQueryParams.consumers,
+            fields: prevQueryParams.fields,
+            query: prevQueryParams.query,
+            sort: prevQueryParams.sort,
+            runtimeMappings: prevQueryParams.runtimeMappings,
+            trackScores: prevQueryParams.trackScores,
+          },
+          {
+            ruleTypeIds,
+            consumers,
+            fields,
+            query,
+            sort,
+            runtimeMappings,
+            trackScores,
+          }
+        );
+        return {
           ruleTypeIds,
           consumers,
           fields,
           query,
           sort,
           runtimeMappings,
-        })
-          ? 0
-          : oldPageIndex,
-        pageSize: oldPageSize,
-      }));
+          minScore,
+          trackScores,
+          // Go back to the first page if the query changes
+          pageIndex: resetPageIndex ? 0 : oldPageIndex,
+          pageSize: oldPageSize,
+        };
+      });
     }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
@@ -321,12 +338,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -334,6 +353,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded(alerts, columns);
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError, queryParams]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -420,6 +449,32 @@ const AlertsTableContent = typedForwardRef(
       },
       [id, visibleColumns]
     );
+
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
+      if (fieldWithSortingError) {
+        const newSort = queryParams.sort.filter(
+          (sortField) => !deepEqual(sortField, fieldWithSortingError)
+        );
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        storageAlertsTable.current = {
+          columns: DEFAULT_COLUMNS,
+          sort: DEFAULT_SORT,
+          visibleColumns: DEFAULT_COLUMNS.map((c) => c.id),
+        };
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(DEFAULT_SORT);
+        onResetColumns();
+      }
+    }, [setSort, storageRef, queryParams, id, fieldWithSortingError, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -611,6 +666,9 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}

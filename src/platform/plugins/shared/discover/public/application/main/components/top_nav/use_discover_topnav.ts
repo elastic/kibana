@@ -21,6 +21,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
 import { useAdHocDataViews, useCurrentDataView } from '../../state_management/redux';
+import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -54,6 +55,7 @@ export const useDiscoverTopNav = ({
     inspector: services.inspector,
     stateContainer,
   });
+  const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({
     dataView,
@@ -64,6 +66,7 @@ export const useDiscoverTopNav = ({
     adHocDataViews,
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
+    hasShareIntegration,
   });
 
   return {

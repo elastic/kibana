@@ -835,6 +835,7 @@ class AgentPolicyService {
       skipValidation?: boolean;
       bumpRevision?: boolean;
       requestSpaceId?: string;
+      isRequiredVersionsAuthorized?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('update');
@@ -853,13 +854,20 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
-    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
+
+    validateRequiredVersions(
+      agentPolicy.name ?? id,
+      agentPolicy.required_versions,
+      existingAgentPolicy.required_versions,
+      options?.isRequiredVersionsAuthorized
+    );
+
     try {
       await this.runExternalCallbacks('agentPolicyUpdate', agentPolicy);
     } catch (error) {

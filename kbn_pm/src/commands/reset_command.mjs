@@ -12,7 +12,11 @@ import Path from 'path';
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import { findPluginCleanPaths, readCleanPatterns } from '../lib/find_clean_paths.mjs';
+import {
+  collectBazelPaths,
+  findPluginCleanPaths,
+  readCleanPatterns,
+} from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -37,8 +41,10 @@ export const command = {
       Path.resolve(REPO_ROOT, 'node_modules'),
       Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
       Path.resolve(REPO_ROOT, 'data'),
-      Path.resolve(REPO_ROOT, 'target'),
       Path.resolve(REPO_ROOT, '.es'),
+      Path.resolve(REPO_ROOT, 'target'),
+      Path.resolve(REPO_ROOT, '.moon', 'cache'),
+      ...collectBazelPaths(),
       ...readCleanPatterns(REPO_ROOT),
       ...(await findPluginCleanPaths(log)),
     ]);

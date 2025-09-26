@@ -10,11 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import {
   SavedObjectSaveModalOrigin,
+  ShowSaveModalMinimalSaveModalProps,
   OnSaveProps,
+  SaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
@@ -29,7 +31,9 @@ import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { checkForDuplicateTitle } from '../../content_management';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
+  LazySavedObjectSaveModalDashboardWithSaveResult
+);
 
 export function getTopNavConfig({
   savedMap,
@@ -169,7 +173,7 @@ export function getTopNavConfig({
               dashboardId?: string | null;
               addToLibrary: boolean;
             }
-          ) => {
+          ): Promise<SaveResult> => {
             try {
               await checkForDuplicateTitle(
                 {
@@ -210,7 +214,7 @@ export function getTopNavConfig({
           }),
         };
 
-        let saveModal;
+        let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
         if (savedMap.hasOriginatingApp()) {
           saveModal = (
@@ -234,7 +238,7 @@ export function getTopNavConfig({
           );
         } else {
           saveModal = (
-            <SavedObjectSaveModalDashboard
+            <SavedObjectSaveModalDashboardWithSaveResult
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               mustCopyOnSaveMessage={

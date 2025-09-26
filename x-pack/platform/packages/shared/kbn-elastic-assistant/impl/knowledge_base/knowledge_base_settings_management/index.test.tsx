@@ -24,9 +24,9 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { AssistantSpaceIdProvider, useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -34,6 +34,7 @@ const mockContext = {
   http: {
     get: jest.fn(),
   },
+  docLinks: docLinksServiceMock.createStartContract(),
   selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -46,7 +47,6 @@ jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_
 jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
 jest.mock('../../assistant/settings/use_settings_updater/use_knowledge_base_updater');
-jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
 jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
 jest.mock(
@@ -161,9 +161,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
         security_labs_exists: true,
       },
       isFetched: true,
-    });
-    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
-      data: { indices: ['index-1', 'index-2'] },
     });
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
       data: { data: mockData },

@@ -354,12 +354,22 @@ describe('Pipeline Editor', () => {
           expect(find(`processors>${processorIndex}.inlineTextInputNonEditableText`).text()).toBe(
             description
           );
-          expect(
-            (
-              find(`processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`).props()
-                .className as string
-            ).includes('--displayNone')
-          ).toBe(!descriptionVisible);
+
+          const descriptionContainer = find(
+            `processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`
+          );
+
+          expect(descriptionContainer.exists()).toBe(true);
+
+          if (descriptionVisible) {
+            expect(
+              window.getComputedStyle(descriptionContainer.getDOMNode()).getPropertyValue('display')
+            ).not.toBe('none');
+          } else {
+            expect(
+              window.getComputedStyle(descriptionContainer.getDOMNode()).getPropertyValue('display')
+            ).toBe('none');
+          }
         };
 
       const assertScriptProcessor = createAssertForProcessor('0');

@@ -52,6 +52,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
       <>
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiModal
+          aria-labelledby="all-cases-modal-title"
           onClose={closeModal}
           data-test-subj="all-cases-modal"
           css={css`
@@ -60,7 +61,9 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
           `}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id="all-cases-modal-title">
+              {i18n.SELECT_CASE_TITLE}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <AllCasesList

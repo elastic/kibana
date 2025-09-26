@@ -6,12 +6,10 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
   - src/platform/test/functional/firefox/config.base.ts
-  - x-pack/test/functional/config.base.js
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
   - x-pack/platform/test/functional_with_es_ssl/config.base.ts
-  - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/platform/test/fleet_api_integration/config.base.ts
   - x-pack/platform/test/functional_basic/apps/ml/config.base.ts

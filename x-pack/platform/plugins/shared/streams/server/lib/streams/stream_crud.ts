@@ -68,7 +68,7 @@ export async function getUnmanagedElasticsearchAssets({
     name: templateName,
   });
   if (template.index_templates.length) {
-    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+    template.index_templates[0].index_template.composed_of?.forEach((componentTemplateName) => {
       componentTemplates.push(componentTemplateName);
     });
   }
@@ -142,7 +142,7 @@ async function fetchComponentTemplates(
     .map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .filter((template) => template.index_template.composed_of?.includes(componentTemplate.name))
         .map((template) => template.name),
     }));
 }

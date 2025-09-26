@@ -96,6 +96,7 @@ export type PackageSpecCategory =
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'

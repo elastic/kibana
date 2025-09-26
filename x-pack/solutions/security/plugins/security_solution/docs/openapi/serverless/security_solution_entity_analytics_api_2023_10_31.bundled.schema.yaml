@@ -219,7 +219,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -1380,6 +1380,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
@@ -1549,8 +1550,7 @@ components:
           description: >-
             The number of risk input documents that contributed to the Category
             1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: >-
             The contribution of Category 1 to the overall risk score
@@ -1558,8 +1558,7 @@ components:
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number

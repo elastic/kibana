@@ -72,6 +72,7 @@ const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
+  totalWithAlerts: long,
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -118,7 +119,12 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   userActions: { all: { ...countSchema, maxOnACase: long } },
   comments: { all: { ...countSchema, maxOnACase: long } },
-  alerts: { all: { ...countSchema, maxOnACase: long } },
+  alerts: {
+    all: { ...countSchema, maxOnACase: long },
+    obs: { ...countSchema, maxOnACase: long },
+    sec: { ...countSchema, maxOnACase: long },
+    main: { ...countSchema, maxOnACase: long },
+  },
   connectors: {
     all: {
       all: { totalAttached: long },

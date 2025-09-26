@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 
 import { GraphSavePolicy } from '../types/config';
 
@@ -26,7 +27,7 @@ export function SaveModal({
   savePolicy,
   hasData,
 }: {
-  onSave: (props: OnSaveGraphProps) => void;
+  onSave: (props: OnSaveGraphProps) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
   description: string;
@@ -37,9 +38,9 @@ export function SaveModal({
   const [newDescription, setDescription] = useState(description);
   const [dataConsent, setDataConsent] = useState(false);
   return (
-    <SavedObjectSaveModal
-      onSave={(props) => {
-        onSave({ ...props, newDescription, dataConsent });
+    <SavedObjectSaveModalWithSaveResult
+      onSave={async (props) => {
+        return onSave({ ...props, newDescription, dataConsent });
       }}
       onClose={onClose}
       title={title}

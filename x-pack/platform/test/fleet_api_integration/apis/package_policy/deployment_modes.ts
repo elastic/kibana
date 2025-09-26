@@ -656,6 +656,67 @@ export default function (providerContext: FtrProviderContext) {
             });
         });
       });
+      describe('default_only policy template with no deployment mode', () => {
+        it('should allow default inputs only for default deployment mode', async () => {
+          // Test default deployment mode (should succeed)
+          const { body: defaultResponse } = await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `deployment-test-cloudwatch-default-${uuidv4()}`,
+              description:
+                'Test input in default mode without explicit policy template deployment mode declaration',
+              namespace: 'default',
+              policy_id: agentPolicyId,
+              package: {
+                name: 'deployment_modes_test',
+                version: '1.0.0',
+              },
+              inputs: [
+                {
+                  type: 'cloudwatch',
+                  policy_template: 'no_deployment_mode_default_only',
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(defaultResponse.item.inputs).to.have.length(1);
+          expect(defaultResponse.item.inputs[0].type).to.be('cloudwatch');
+
+          // Test agentless deployment mode (should fail)
+          await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `deployment-test-cloudwatch-agentless-${uuidv4()}`,
+              description:
+                'Test input in agentless mode without explicit policy template deployment mode declaration',
+              namespace: 'default',
+              policy_id: agentlessAgentPolicyId,
+              package: {
+                name: 'deployment_modes_test',
+                version: '1.0.0',
+              },
+              inputs: [
+                {
+                  type: 'cloudwatch',
+                  policy_template: 'no_deployment_mode_default_only',
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+            })
+            .expect(400)
+            .then((response) => {
+              expect(response.body.message).to.contain(
+                "Input cloudwatch in deployment_modes_test is not allowed for deployment mode 'agentless'"
+              );
+            });
+        });
+      });
     });
   });
 }

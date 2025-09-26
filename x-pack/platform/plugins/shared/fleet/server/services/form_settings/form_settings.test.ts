@@ -71,5 +71,15 @@ describe('form_settings', () => {
       } as any);
       expect(res).toEqual({ 'test.foo.default_value': 'test' });
     });
+
+    it('dot not render empty values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          test_foo_default_value: 'test',
+          test_foo_empty_value: '',
+        },
+      } as any);
+      expect(res).toEqual({ 'test.foo.default_value': 'test' });
+    });
   });
 });

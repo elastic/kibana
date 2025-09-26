@@ -73,6 +73,7 @@ import type {
   PolicySecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
 } from '../../common/types';
 import {
   FleetError,
@@ -107,7 +108,7 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -125,7 +126,7 @@ import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
 import {
-  canDeployAsAgentlessOrThrow,
+  canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
@@ -329,6 +330,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (useSpaceAwareness) {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        basePkgInfo
+      );
     }
 
     // trailing whitespace causes issues creating API keys
@@ -392,7 +401,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
-      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+      canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
@@ -621,7 +630,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-          canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+          canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
@@ -1081,7 +1090,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1173,7 +1187,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdate,
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+      canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
@@ -1209,15 +1223,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    if ((packagePolicyUpdate.policy_ids?.length ?? 0) > 1) {
-      for (const policyId of packagePolicyUpdate.policy_ids) {
-        const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-        if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
-          throw new FleetError(
-            'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
-          );
-        }
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+        throw new FleetError(
+          'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+        );
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        pkgInfo
+      );
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1342,10 +1362,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           isEndpointPolicy &&
           ((assignedInOldPolicy && !assignedInNewPolicy) ||
             (!assignedInOldPolicy && assignedInNewPolicy));
-        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        });
+        if (options?.bumpRevision !== false) {
+          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          });
+        }
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
@@ -1552,7 +1574,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+            canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
             if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({
@@ -2079,19 +2101,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-          // disable some inputs in case of agentless integration
-          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
-            ? false
-            : input.enabled;
 
           return {
             ...defaultInput,
-            enabled,
+            enabled: input.enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled,
+              enabled: input.enabled,
             })),
           } as NewPackagePolicyInput;
         });
@@ -3213,7 +3231,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 

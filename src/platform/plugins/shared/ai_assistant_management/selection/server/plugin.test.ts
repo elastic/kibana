@@ -15,6 +15,11 @@ import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantManagementSelectionPlugin } from './plugin';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 
 describe('plugin', () => {
   beforeEach(() => {
@@ -73,7 +78,7 @@ describe('plugin', () => {
         },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(3);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -81,6 +86,25 @@ describe('plugin', () => {
           value: AIAssistantType.Observability,
         },
       });
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: NO_DEFAULT_CONNECTOR,
+          }),
+        })
+      );
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: false,
+          }),
+        })
+      );
     });
 
     it('registers correct uiSettings for serverless security', () => {
@@ -99,7 +123,7 @@ describe('plugin', () => {
         },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(3);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -107,6 +131,25 @@ describe('plugin', () => {
           value: AIAssistantType.Security,
         },
       });
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: NO_DEFAULT_CONNECTOR,
+          }),
+        })
+      );
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: false,
+          }),
+        })
+      );
     });
 
     it('registers correct uiSettings for serverless search', () => {
@@ -125,13 +168,31 @@ describe('plugin', () => {
         },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(3);
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: AIAssistantType.Default,
         },
       });
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: NO_DEFAULT_CONNECTOR,
+          }),
+        })
+      );
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: false,
+          }),
+        })
+      );
     });
   });
 
@@ -177,13 +238,32 @@ describe('plugin', () => {
 
       aiAssistantManagementSelectionPlugin.setup(coreSetup, setupDeps);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(3);
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: AIAssistantType.Observability,
         },
       });
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: NO_DEFAULT_CONNECTOR,
+          }),
+        })
+      );
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
+            readonlyMode: 'ui',
+            readonly: false,
+            value: false,
+          }),
+        })
+      );
     });
   });
 });

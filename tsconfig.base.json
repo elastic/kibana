@@ -18,8 +18,12 @@
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],
       "@kbn/ai-assistant-common/*": ["x-pack/platform/packages/shared/ai-assistant/common/*"],
+      "@kbn/ai-assistant-connector-selector-action": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action"],
+      "@kbn/ai-assistant-connector-selector-action/*": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/*"],
       "@kbn/ai-assistant-cta": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta"],
       "@kbn/ai-assistant-cta/*": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/*"],
+      "@kbn/ai-assistant-default-llm-setting": ["x-pack/platform/packages/shared/ai-assistant-default-llm-setting"],
+      "@kbn/ai-assistant-default-llm-setting/*": ["x-pack/platform/packages/shared/ai-assistant-default-llm-setting/*"],
       "@kbn/ai-assistant-icon": ["x-pack/platform/packages/shared/ai-assistant/icon"],
       "@kbn/ai-assistant-icon/*": ["x-pack/platform/packages/shared/ai-assistant/icon/*"],
       "@kbn/ai-assistant-management-plugin": ["src/platform/plugins/shared/ai_assistant_management/selection"],
@@ -1106,6 +1110,8 @@
       "@kbn/index-management-shared-types/*": ["x-pack/platform/packages/shared/index-management/index_management_shared_types/*"],
       "@kbn/index-patterns-test-plugin": ["src/platform/test/plugin_functional/plugins/index_patterns"],
       "@kbn/index-patterns-test-plugin/*": ["src/platform/test/plugin_functional/plugins/index_patterns/*"],
+      "@kbn/indices-metadata-plugin": ["x-pack/platform/plugins/private/indices_metadata"],
+      "@kbn/indices-metadata-plugin/*": ["x-pack/platform/plugins/private/indices_metadata/*"],
       "@kbn/inference-cli": ["x-pack/platform/packages/shared/kbn-inference-cli"],
       "@kbn/inference-cli/*": ["x-pack/platform/packages/shared/kbn-inference-cli/*"],
       "@kbn/inference-common": ["x-pack/platform/packages/shared/ai-infra/inference-common"],
@@ -1746,6 +1752,8 @@
       "@kbn/security-solution-side-nav/*": ["x-pack/solutions/security/packages/side-nav/*"],
       "@kbn/security-solution-storybook-config": ["x-pack/solutions/security/packages/storybook/config"],
       "@kbn/security-solution-storybook-config/*": ["x-pack/solutions/security/packages/storybook/config/*"],
+      "@kbn/security-solution-test-api-clients": ["x-pack/solutions/security/packages/test-api-clients"],
+      "@kbn/security-solution-test-api-clients/*": ["x-pack/solutions/security/packages/test-api-clients/*"],
       "@kbn/security-solution-upselling": ["x-pack/solutions/security/packages/upselling"],
       "@kbn/security-solution-upselling/*": ["x-pack/solutions/security/packages/upselling/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/platform/test/security_functional/plugins/test_endpoints"],
@@ -2032,12 +2040,8 @@
       "@kbn/test-jest-helpers/*": ["src/platform/packages/shared/kbn-test-jest-helpers/*"],
       "@kbn/test-subj-selector": ["src/platform/packages/shared/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
-      "@kbn/test-suites-serverless": ["x-pack/test_serverless"],
-      "@kbn/test-suites-serverless/*": ["x-pack/test_serverless/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
-      "@kbn/test-suites-xpack": ["x-pack/test"],
-      "@kbn/test-suites-xpack/*": ["x-pack/test/*"],
       "@kbn/test-suites-xpack-chat": ["x-pack/solutions/chat/test"],
       "@kbn/test-suites-xpack-chat/*": ["x-pack/solutions/chat/test/*"],
       "@kbn/test-suites-xpack-observability": ["x-pack/solutions/observability/test"],
@@ -2245,6 +2249,9 @@
       "@kbn/zod-helpers": ["src/platform/packages/shared/kbn-zod-helpers"],
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
+      // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
+      // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
+      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.

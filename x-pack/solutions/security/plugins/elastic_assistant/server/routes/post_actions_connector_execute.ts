@@ -105,7 +105,6 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          let messages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -208,7 +207,7 @@ export const postActionsConnectorExecuteRoute = (
               context: ctx,
               logger,
               inference,
-              messages: (newMessage ? [newMessage] : messages) ?? [],
+              messages: newMessage ? [newMessage] : [],
               onLlmResponse,
               onNewReplacements,
               replacements: latestReplacements,

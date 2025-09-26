@@ -185,13 +185,12 @@ describe('Reporting Plugin', () => {
   describe('features registration', () => {
     it('registers Kibana manage scheduled reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for self-managed
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
         id: 'manageReporting',
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {
@@ -212,12 +211,11 @@ describe('Reporting Plugin', () => {
       plugin = new ReportingPlugin(serverlessInitContext);
 
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for serverless
       expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(1, {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
@@ -229,7 +227,6 @@ describe('Reporting Plugin', () => {
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {

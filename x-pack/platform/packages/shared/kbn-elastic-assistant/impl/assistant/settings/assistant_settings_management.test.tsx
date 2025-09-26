@@ -24,7 +24,14 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+
+const mockSetSelectedSettingsTab = jest.fn();
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -35,7 +42,24 @@ const mockContext = {
   assistantAvailability: {
     isAssistantEnabled: true,
     isAssistantManagementEnabled: true,
+    hasConnectorsAllPrivilege: true,
   },
+  settings: {
+    client: {
+      get: jest.fn((key) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
+        }
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
+          return false;
+        }
+        return undefined;
+      }),
+    },
+  },
+  selectedSettingsTab: null,
+  setSelectedSettingsTab: mockSetSelectedSettingsTab,
+  navigateToApp: jest.fn(),
 };
 
 const mockDataViews = {
@@ -48,6 +72,7 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
+  settings: {} as SettingsStart,
 };
 jest.mock('../../assistant_context');
 
@@ -105,6 +130,34 @@ describe('AssistantSettingsManagement', () => {
     });
 
     expect(queryByTestId(`bottom-bar`)).not.toBeInTheDocument();
+  });
+
+  describe('useEffect behavior', () => {
+    it('calls onTabChange and clears contextSettingsTab when contextSettingsTab is set', () => {
+      const contextWithTab = {
+        ...mockContext,
+        selectedSettingsTab: SYSTEM_PROMPTS_TAB,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).toHaveBeenCalledWith(SYSTEM_PROMPTS_TAB);
+      expect(mockSetSelectedSettingsTab).toHaveBeenCalledWith(null);
+    });
+
+    it('does not call onTabChange when contextSettingsTab is null', () => {
+      const contextWithoutTab = {
+        ...mockContext,
+        selectedSettingsTab: null,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithoutTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).not.toHaveBeenCalled();
+      expect(mockSetSelectedSettingsTab).not.toHaveBeenCalled();
+    });
   });
 
   describe.each([

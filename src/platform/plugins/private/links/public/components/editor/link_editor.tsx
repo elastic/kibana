@@ -122,6 +122,7 @@ export const LinkEditor = ({
                 }
                 setSelectedLinkType(id as LinkType);
               }}
+              name="linkType"
             />
           </EuiFormRow>
           <LinkDestination

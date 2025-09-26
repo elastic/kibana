@@ -10,7 +10,8 @@ import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
 
-test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+// fails due to https://github.com/elastic/kibana/pull/231394 not being backported yet
+test.describe.skip('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await esClient.indices.putIndexTemplate({

@@ -197,7 +197,7 @@ MV_MEDIAN: returns the median value of a multivalued field
 MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
 MV_MIN: returns the min value of a multivalued field
 MV_PERCENTILE: returns the specified percentile of a multivalued field
-MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+MV_SLICE: extract a subset of a multivalued field using specified start and end index values
 MV_SORT: sorts a multivalued field in lexicographical order.
 MV_SUM: returns the sum of all values of a multivalued field
 MV_ZIP: combines the values from two multivalued fields with a specified delimiter

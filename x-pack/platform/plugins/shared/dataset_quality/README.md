@@ -26,7 +26,7 @@ The deployment-agnostic API tests are located in [`x-pack/solutions/observabilit
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/ion_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
 node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
@@ -117,17 +117,17 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/a
 ##### Server
 
 ```
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 ```
 
 ##### Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/$1
 ```

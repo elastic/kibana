@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
-import { executeRegexRuleTask } from './execute_regex_rule_task';
+import type { AnonymizationRegexWorkerTaskPayload } from './types';
+import { executeRegexRulesTask } from './execute_regex_rule_task';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ rule, records }: AnonymizationRegexWorkerTaskPayload) {
-  return executeRegexRuleTask({ rule, records });
+export default function ({ rules, records }: AnonymizationRegexWorkerTaskPayload) {
+  return executeRegexRulesTask({ rules, records });
 }

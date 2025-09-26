@@ -401,6 +401,7 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: { value: {} },
                 policy: {
                   value: policyFactory(),
                 },

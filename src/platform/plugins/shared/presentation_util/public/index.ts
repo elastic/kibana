@@ -21,6 +21,7 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,

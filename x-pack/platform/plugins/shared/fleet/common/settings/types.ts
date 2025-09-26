@@ -19,4 +19,9 @@ export interface SettingsConfig {
     name: string;
   };
   hidden?: boolean;
+  options?: Array<{
+    value: string;
+    text: string;
+  }>;
+  example_value?: string | number | boolean;
 }

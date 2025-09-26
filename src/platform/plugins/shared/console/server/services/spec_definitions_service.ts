@@ -8,7 +8,7 @@
  */
 
 import _, { merge } from 'lodash';
-import globby from 'globby';
+import { globSync } from 'fs';
 import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
@@ -104,13 +104,13 @@ export class SpecDefinitionsService {
 
   private loadJSONDefinitionsFiles() {
     // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
-    const generatedFiles = globby.sync(
+    const generatedFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER, '*.json'))
     );
-    const overrideFiles = globby.sync(
+    const overrideFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER, '*.json'))
     );
-    const manualFiles = globby.sync(
+    const manualFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, MANUAL_SUBFOLDER, '*.json'))
     );
 

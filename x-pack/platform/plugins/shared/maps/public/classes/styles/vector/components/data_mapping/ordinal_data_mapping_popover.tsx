@@ -10,13 +10,12 @@ import React, { Fragment } from 'react';
 import {
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiRange,
   EuiSuperSelect,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
 import { i18n } from '@kbn/i18n';
@@ -130,19 +129,19 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     const sigmaInput = props.fieldMetaOptions.isEnabled ? (
       <EuiFormRow
         label={
-          <EuiToolTip
-            anchorClassName="eui-alignMiddle"
-            content={i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaTooltipContent', {
-              defaultMessage: `To de-emphasize outliers, set sigma to a smaller value. Smaller sigmas move the min and max closer to the median.`,
-            })}
-          >
-            <span>
-              {i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaLabel', {
-                defaultMessage: 'Sigma',
-              })}{' '}
-              <EuiIcon type="question" color="subdued" />
-            </span>
-          </EuiToolTip>
+          <span>
+            {i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaLabel', {
+              defaultMessage: 'Sigma',
+            })}{' '}
+            <EuiIconTip
+              anchorClassName="eui-alignMiddle"
+              content={i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaTooltipContent', {
+                defaultMessage: `To de-emphasize outliers, set sigma to a smaller value. Smaller sigmas move the min and max closer to the median.`,
+              })}
+              type="question"
+              color="subdued"
+            />
+          </span>
         }
         display="columnCompressed"
       >
@@ -172,7 +171,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               disabled={!props.supportsFieldMetaFromLocalData}
               compressed
             />{' '}
-            <EuiToolTip
+            <EuiIconTip
               content={
                 <EuiText>
                   <p>
@@ -189,9 +188,9 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
                   </p>
                 </EuiText>
               }
-            >
-              <EuiIcon type="question" color="subdued" />
-            </EuiToolTip>
+              type="question"
+              color="subdued"
+            />
           </>
         </EuiFormRow>
 

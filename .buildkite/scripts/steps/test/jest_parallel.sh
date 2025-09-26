@@ -114,4 +114,8 @@ echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
 
+# Scout reporter
+echo "--- Upload Scout reporter events to AppEx QA's team cluster"
+node scripts/scout upload-events --dontFailOnError
+
 exit $exitCode

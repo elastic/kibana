@@ -17,6 +17,7 @@
       "management",
       "observabilityAIAssistant",
       "ml",
+      "licensing"
     ],
     "optionalPlugins": [
       "home",

@@ -23,6 +23,8 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('DeleteProjectMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
