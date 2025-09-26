@@ -45,7 +45,7 @@ const TIME_SYSTEM_DESCRIPTIONS = {
   }),
 };
 
-export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
+export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue' | 'getAllDecorations'>;
 
 /**
  * @todo Monaco dependencies are not necesasry here: (1) replace {@link HoverMonacoModel}
@@ -132,47 +132,56 @@ export async function getHoverItem(
     }
   }
 
-  if (node.type === 'source' && node.sourceType === 'policy') {
-    const source = node as ESQLSource;
-    const { getPolicyMetadata } = getPolicyHelper(callbacks);
-    const policyMetadata = await getPolicyMetadata(node.name);
-    if (policyMetadata) {
-      hoverContent.contents.push(
-        ...[
-          {
-            value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
-              defaultMessage: '**Indexes**',
-            })}: ${policyMetadata.sourceIndices.join(', ')}`,
-          },
-          {
-            value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
-              defaultMessage: '**Matching field**',
-            })}: ${policyMetadata.matchField}`,
-          },
-          {
-            value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
-              defaultMessage: '**Fields**',
-            })}: ${policyMetadata.enrichFields.join(', ')}`,
-          },
-        ]
-      );
-    }
-
-    if (!!source.prefix) {
-      const mode = ENRICH_MODES.find(
-        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
-      )!;
-      if (mode) {
+  if (node.type === 'source') {
+    if (node.sourceType === 'policy') {
+      const source = node as ESQLSource;
+      const { getPolicyMetadata } = getPolicyHelper(callbacks);
+      const policyMetadata = await getPolicyMetadata(node.name);
+      if (policyMetadata) {
         hoverContent.contents.push(
           ...[
-            { value: modeDescription },
             {
-              value: `**${mode.name}**: ${mode.description}`,
+              value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
+                defaultMessage: '**Indexes**',
+              })}: ${policyMetadata.sourceIndices.join(', ')}`,
+            },
+            {
+              value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
+                defaultMessage: '**Matching field**',
+              })}: ${policyMetadata.matchField}`,
+            },
+            {
+              value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
+                defaultMessage: '**Fields**',
+              })}: ${policyMetadata.enrichFields.join(', ')}`,
             },
           ]
         );
       }
+
+      if (!!source.prefix) {
+        const mode = ENRICH_MODES.find(
+          ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+        )!;
+        if (mode) {
+          hoverContent.contents.push(
+            ...[
+              { value: modeDescription },
+              {
+                value: `**${mode.name}**: ${mode.description}`,
+              },
+            ]
+          );
+        }
+      }
     }
+
+    // //HD
+    const decorations = model.getAllDecorations();
+    const lookupJoinDecorations = decorations.filter((decoration) =>
+      decoration.options.inlineClassName?.includes('lookupIndexBadge')
+    );
+    // console.log('lookupJoinDecorations shown!', lookupJoinDecorations);
   }
 
   return hoverContent;
