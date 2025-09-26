@@ -320,6 +320,27 @@ describe('rule_details', () => {
               />
             </EuiLink>
           </EuiText>
+          <EuiLiveAnnouncer>
+            Cannot run rule, 
+            <EuiText
+              size="xs"
+            >
+              test
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
+          </EuiLiveAnnouncer>
         </EuiPanel>
       `);
     });
@@ -481,6 +502,7 @@ describe('rule_details', () => {
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
           <React.Fragment>
             <EuiButtonEmpty
+              aria-label="Edit"
               data-test-subj="openEditRuleFlyoutButton"
               disabled={false}
               iconType="pencil"
@@ -548,6 +570,7 @@ describe('rule_details', () => {
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"
@@ -611,6 +634,7 @@ describe('rule_details', () => {
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"

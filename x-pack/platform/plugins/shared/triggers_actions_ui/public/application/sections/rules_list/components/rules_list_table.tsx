@@ -799,7 +799,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
             >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                  {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (
+                  {rule.isEditable &&
+                  isRuleTypeEditableInContext(rule.ruleTypeId) &&
+                  !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                       <EuiButtonIcon
                         color={'primary'}
