@@ -169,4 +169,30 @@ export class MonitoringEntitySourceDescriptorClient {
       }
     }
   }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    try {
+      await this.update({
+        ...source,
+        integrations: {
+          syncData: {
+            lastUpdateProcessed: lastProcessedMarker,
+          },
+        },
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Error updating last processed marker:', error);
+    }
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
+  }
 }

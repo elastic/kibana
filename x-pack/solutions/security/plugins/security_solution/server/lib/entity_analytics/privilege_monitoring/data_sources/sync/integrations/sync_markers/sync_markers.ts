@@ -6,7 +6,10 @@
  */
 
 import datemath from '@kbn/datemath';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
+import { MonitoringEntitySourceDescriptorClient } from '../../../../saved_objects';
 
 const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run, look back over last month
 
@@ -16,26 +19,35 @@ const parseOrThrow = (expr: string): string => {
   return date.toDate().toISOString();
 };
 
-export const createSyncMarkersService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const updateLastProcessedMarker = async (marker: string): Promise<void> => {
-    // update latest processed to saved object
-    // eslint-disable-next-line no-console
-    console.log('Updating last processed marker to', marker);
+export const createSyncMarkersService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
+  const { deps } = dataClient;
+  const monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
+    soClient,
+    namespace: deps.namespace,
+  });
+  const updateLastProcessedMarker = async (
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> => {
+    await monitoringIndexSourceClient.updateLastProcessedMarker(source, lastProcessedMarker);
   };
-  const getLastProcessedMarker = async (): Promise<string> => {
-    // replace with check if saved object exists
-    const firstRun = true;
-    // if(!so.lastProcessed) { firstRun = true } just do the return below, no need for extra boolean
-    if (firstRun) {
+  const getLastProcessedMarker = async (source: MonitoringEntitySource): Promise<string> => {
+    const lastProcessedMarker = await monitoringIndexSourceClient.getLastProcessedMarker(source);
+    // if last processed doesn't exist, return default of now-1M. This is assumed first run for this source.
+    if (!lastProcessedMarker) {
       return parseOrThrow(FIRST_RUN_DEFAULT_RANGE);
+    } else {
+      return lastProcessedMarker;
     }
-    return 'now-10y'; // replace with actual value from saved object
   };
 
-  const updateLastFullSyncMarker = async (namespace: string, marker: string): Promise<void> => {
+  const updateLastFullSyncMarker = async (marker: string): Promise<void> => {
     // update latest full sync to saved object
   };
-  const getLastFullSyncMarker = async (namespace: string): Promise<string> => {
+  const getLastFullSyncMarker = async (): Promise<string> => {
     // get latest full sync from saved object
     return 'now-10y'; // replace with actual value from saved object
   };

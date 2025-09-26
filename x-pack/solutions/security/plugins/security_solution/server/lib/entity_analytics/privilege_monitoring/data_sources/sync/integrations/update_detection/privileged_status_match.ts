@@ -6,6 +6,7 @@
  */
 
 import { uniq } from 'lodash';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
@@ -53,9 +54,13 @@ export interface PrivMatchersAggregation {
   };
 }
 
-export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createPatternMatcherService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
   const searchService = createSearchService(dataClient);
-  const syncMarkerService = createSyncMarkersService(dataClient);
+  const syncMarkerService = createSyncMarkersService(dataClient, soClient);
+
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonIntegrationsUser[]> => {
@@ -75,7 +80,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     const script = buildMatcherScript(source.matchers[0]);
     // the last processed user from previous task run.
-    const lastProcessedTimeStamp = await syncMarkerService.getLastProcessedMarker();
+    const lastProcessedTimeStamp = await syncMarkerService.getLastProcessedMarker(source);
 
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
@@ -83,7 +88,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     const users: PrivMonIntegrationsUser[] = [];
 
     // In the search should be ALL since last task sync, not just this run.
-    let runMaxProcessedTimestamp = lastProcessedTimeStamp; // latest seen during THIS run of the task.
+    let maxProcessedTimeStamp = lastProcessedTimeStamp; // latest seen during THIS run of the task.
 
     try {
       while (fetchMore) {
@@ -100,10 +105,10 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
         if (buckets.length && aggregations) {
           const privMonUsers = await extractPrivMonUsers(aggregations, source.matchers[0]);
           // update running max timestamp seen
-          runMaxProcessedTimestamp = privMonUsers.reduce((max, user) => {
+          maxProcessedTimeStamp = privMonUsers.reduce((max, user) => {
             const timestamp = user.latestDocForUser?._source?.['@timestamp'];
             return timestamp && timestamp > max ? timestamp : max;
-          }, runMaxProcessedTimestamp);
+          }, maxProcessedTimeStamp);
 
           users.push(...privMonUsers);
         }
@@ -114,7 +119,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
       }
 
       dataClient.log('info', `Found ${users.length} privileged users from matchers.`);
-      await syncMarkerService.updateLastProcessedMarker(runMaxProcessedTimestamp);
+      await syncMarkerService.updateLastProcessedMarker(source, maxProcessedTimeStamp);
       return users;
     } catch (error) {
       dataClient.log('error', `Error finding privileged users from matchers: ${error.message}`);
