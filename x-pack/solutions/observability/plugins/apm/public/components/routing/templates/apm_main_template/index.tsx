@@ -43,7 +43,6 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
-  showEnablementCallout = false, // TODO remove this? It seems is not being used anywhere
   showTracesInDiscoverCallout = false,
   selectedNavButton,
   ...pageTemplateProps
@@ -54,7 +53,6 @@ export function ApmMainTemplate({
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
-  showEnablementCallout?: boolean;
   showTracesInDiscoverCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &

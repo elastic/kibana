@@ -148,7 +148,6 @@ export function ServiceGroupTemplate({
       showServiceGroupSaveButton={!isAllServices}
       showServiceGroupsNav={isAllServices}
       showTracesInDiscoverCallout={isAllServices}
-      showEnablementCallout
       selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >
