@@ -227,13 +227,12 @@ function buildHostTransformDocument(
 
 async function ensureTransformStarted(providerContext: FtrProviderContext): Promise<void> {
   const es = providerContext.getService('es');
-  const { acknowledged } = await es.transform.startTransform(
+  await es.transform.startTransform(
     {
       transform_id: HOST_TRANSFORM_ID,
     },
     { ignore: [409] }
   );
-  expect(acknowledged).to.be(true);
 }
 
 async function createDocumentsAndTriggerTransform(
