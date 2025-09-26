@@ -41,7 +41,8 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
     });
   }
 
-  typedState.attributes.references = matchedReferences;
+  // TODO temporary fix for layer ref lookup
+  typedState.attributes.references.push(...matchedReferences);
 
   return typedState as unknown as EmbeddableStateWithType;
 };
