@@ -278,30 +278,27 @@ describe('ESQLEditor', () => {
     });
   });
 
-  it('should render client warnings if the clientWarning prop is set', async () => {
+  it('should render warning if the warning and mergeExternalMessages props are set', async () => {
     const user = userEvent.setup();
 
     mockValidate.mockResolvedValue({
       errors: [],
-      warnings: [{ message: 'Data warning example', severity: 'warning' }],
+      warnings: [],
     });
 
     renderWithI18n(
       renderESQLEditorComponent({
         ...props,
-        clientWarning: 'Client warning example',
+        warning: 'Client warning example',
+        mergeExternalMessages: true,
       })
     );
 
     await waitFor(() => {
-      expect(screen.getByText('2 warnings')).toBeInTheDocument();
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('2 warnings'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Data warning example')).toBeInTheDocument();
-    });
+    await user.click(screen.getByText('1 warning'));
 
     await waitFor(() => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();

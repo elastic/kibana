@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -117,7 +117,7 @@ export const EsqlQueryExpression: React.FC<
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
-  const [showKeepWarning, setShowKeepWarning] = useState<boolean>(false);
+  const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
   const [touched, setTouched] = useState<boolean>(false);
 
   useDebounce(
@@ -127,19 +127,19 @@ export const EsqlQueryExpression: React.FC<
       }
       const {
         ast: { commands },
+        tokens,
       } = EsqlQuery.fromSrc(query.esql);
-      setShowKeepWarning(!commands.some((command) => command.name === 'keep'));
+
+      if (!commands.some((command) => command.name === 'keep')) {
+        const lastLine = tokens[tokens.length - 1];
+        setKeepWarning(`"Line ${lastLine?.line || 1}:0: ${keepRecommendedWarning}"`);
+      } else {
+        setKeepWarning(undefined);
+      }
     },
     500,
     [isEdit, query]
   );
-
-  const clientWarning = useMemo(() => {
-    if (touched && showKeepWarning) {
-      return keepRecommendedWarning;
-    }
-    return undefined;
-  }, [touched, showKeepWarning]);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -281,7 +281,7 @@ export const EsqlQueryExpression: React.FC<
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
-          clientWarning={clientWarning}
+          warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
           hideRunQueryText
@@ -290,6 +290,7 @@ export const EsqlQueryExpression: React.FC<
           editorIsInline
           expandToFitQueryOnMount
           hasOutline
+          mergeExternalMessages
         />
       </EuiFormRow>
       <EuiSpacer />
