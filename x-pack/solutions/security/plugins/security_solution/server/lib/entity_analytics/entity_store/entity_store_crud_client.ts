@@ -18,9 +18,9 @@ import type {
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import {
   BadCRUDRequestError,
-  DocumentNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
+  DocumentVersionConflictError,
 } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
@@ -94,10 +94,11 @@ export class EntityStoreCrudClient {
         source: painlessUpdate,
         lang: 'painless',
       },
+      conflicts: 'proceed',
     });
 
-    if ((updateByQueryResp.updated || 0) < 1) {
-      throw new DocumentNotFoundError();
+    if (updateByQueryResp.version_conflicts) {
+      throw new DocumentVersionConflictError();
     }
 
     await this.esClient.create({
