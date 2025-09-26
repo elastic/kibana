@@ -8,6 +8,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_wo
 
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Endpoint related user role migrations without Endpoint product line', function () {
-    loadTestFile(require.resolve('./siem_v3_global_artifact_management'));
+    loadTestFile(require.resolve('./siem_base_privileges'));
   });
 }
