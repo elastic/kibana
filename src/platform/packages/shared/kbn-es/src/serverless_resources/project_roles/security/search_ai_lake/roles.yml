@@ -46,6 +46,7 @@ _search_ai_lake_analyst:
         - "logs-*"
       privileges:
         - "read"
+        - "view_index_matadata"
     - names:
         - "synthetics-*-"
         - "metrics-*-"
@@ -70,7 +71,7 @@ _search_ai_lake_analyst:
         - "feature_indexPatterns.read"
         - "feature_fleetv2.read"
       resources: "*"
-  run_as: []
+  run_as: [ ]
 
 _search_ai_lake_soc_manager:
   metadata:
@@ -88,7 +89,6 @@ _search_ai_lake_soc_manager:
         - "auditbeat-*"
         - "endgame-*"
         - "filebeat-*"
-        - "logs-*"
         - "packetbeat-*"
         - "winlogbeat-*"
         - "logstash-*"
@@ -97,6 +97,13 @@ _search_ai_lake_soc_manager:
       privileges:
         - "read"
         - "write"
+  indices:
+    - names:
+        - "logs-*"
+      privileges:
+        - "read"
+        - "view_index_matadata"
+        - "write
     - names:
         - ".alerts-security*"
         - ".siem-signals-*"
