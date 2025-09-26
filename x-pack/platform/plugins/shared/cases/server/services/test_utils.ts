@@ -160,6 +160,7 @@ export const basicCaseFields: CaseAttributes = {
   external_service: null,
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],

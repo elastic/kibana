@@ -51,8 +51,9 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
         severity: 'medium',
       },
     ]);
+
     expect(status).toBe(200);
-    expect(cases.length).toBe(1);
+    expect(cases).toHaveLength(1);
     expect(cases[0].severity).toBe('medium');
   });
 
@@ -159,6 +160,6 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest('should search for a case by category', async ({ apiServices }) => {
     const { data: cases, status } = await apiServices.cases.find({ category: 'test' });
     expect(status).toBe(200);
-    expect(cases.length).toBe(1);
+    expect(cases).toHaveLength(1);
   });
 });
