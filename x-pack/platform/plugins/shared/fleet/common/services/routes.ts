@@ -103,6 +103,14 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
+  getBulkRollbackPath: () => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_PATTERN;
+  },
+
+  getBulkRollbackInfoPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
