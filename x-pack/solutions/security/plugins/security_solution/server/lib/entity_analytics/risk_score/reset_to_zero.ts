@@ -23,7 +23,7 @@ export interface ResetToZeroDependencies {
   entityType: EntityType;
   assetCriticalityService: AssetCriticalityService;
   logger: Logger;
-  entities: string[];
+  excludedEntities: string[];
   refresh?: 'wait_for';
 }
 
@@ -37,14 +37,18 @@ export const resetToZero = async ({
   assetCriticalityService,
   logger,
   refresh,
-  entities,
+  excludedEntities,
 }: ResetToZeroDependencies): Promise<void> => {
   const { alias } = await getIndexPatternDataStream(spaceId);
   const entityField = EntityTypeToIdentifierField[entityType];
-  const excludedEntities = `AND ${entityField} NOT IN (${entities.map((e) => `"${e}"`).join(',')})`;
+  const excludedEntitiesClause = `AND ${entityField} NOT IN (${excludedEntities
+    .map((e) => `"${e}"`)
+    .join(',')})`;
   const esql = /* sql */ `
     FROM ${alias} 
-    | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0 ${entities.length > 0 ? excludedEntities : ''}
+    | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0 ${
+    excludedEntities.length > 0 ? excludedEntitiesClause : ''
+  }
     | STATS count = count(${entityField}) BY ${entityField}
     | KEEP ${entityField}
     `;
