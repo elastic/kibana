@@ -485,12 +485,6 @@ export class SessionService {
    *
    * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
    * @param sessionId
-   *
-   * TODO: remove this functionality in favor of separate architecture for client side search cache
-   * that won't interfere with saving search sessions
-   * https://github.com/elastic/kibana/issues/121543
-   *
-   * @deprecated
    */
   public continue(sessionId: string, keepSearches = false) {
     const sessionSnapshot = this.sessionSnapshots.get(sessionId);
