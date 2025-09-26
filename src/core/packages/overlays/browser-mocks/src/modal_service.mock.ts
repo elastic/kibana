@@ -10,23 +10,23 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { OverlayModalStart } from '@kbn/core-overlays-browser';
 import type { ModalService } from '@kbn/core-overlays-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<OverlayModalStart> = {
+  const startContract: jest.Mocked<OverlayModalStart> = lazyObject({
     open: jest.fn().mockReturnValue({
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
     openConfirm: jest.fn().mockResolvedValue(true),
-  };
+  });
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<ModalService>> = {
-    start: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
+  const mocked: jest.Mocked<PublicMethodsOf<ModalService>> = lazyObject({
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  });
   return mocked;
 };
 

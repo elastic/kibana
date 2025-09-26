@@ -14,7 +14,8 @@
   ],
   "kbn_references": [
     "@kbn/logging-mocks",
-    "@kbn/core-logging-browser-internal"
+    "@kbn/core-logging-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

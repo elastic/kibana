@@ -7,12 +7,14 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RunAgentFn } from '@kbn/onechat-server';
-import type { AgentClient } from './client';
+import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { AgentRegistry } from './agent_registry';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentsServiceSetup {}
+export interface AgentsServiceSetup {
+  register(agent: BuiltInAgentDefinition): void;
+}
 
 export interface AgentsServiceStart {
   execute: RunAgentFn;
-  getScopedClient: (opts: { request: KibanaRequest }) => Promise<AgentClient>;
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
 }

@@ -44,10 +44,10 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
       borderRadius="none"
       css={css`
         overflow: auto;
-        padding: ${euiTheme.size.m};
+        padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
-          margin-bottom: ${euiTheme.size.m};
+          margin-bottom: ${euiTheme.size.s};
         }
       `}
     >

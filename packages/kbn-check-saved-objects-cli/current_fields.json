@@ -185,6 +185,7 @@
     "observables.value",
     "owner",
     "settings",
+    "settings.extractObservables",
     "settings.syncAlerts",
     "severity",
     "status",
@@ -207,6 +208,7 @@
     "created_at",
     "created_by",
     "created_by.username",
+    "eventId",
     "externalReferenceAttachmentTypeId",
     "owner",
     "persistableStateAttachmentTypeId",
@@ -618,8 +620,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -817,6 +817,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",

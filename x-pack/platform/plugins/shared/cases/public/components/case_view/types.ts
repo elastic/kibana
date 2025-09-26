@@ -9,7 +9,7 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import type { CasesNavigation } from '../links';
 import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
-import type { UseFetchAlertData } from '../../../common/ui';
+import type { UseFetchAlertData, CaseViewEventsTableProps } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;
@@ -18,6 +18,7 @@ export interface CaseViewBaseProps {
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
   renderAlertsTable?: ComponentType<CaseViewAlertsTableProps>;
+  renderEventsTable?: ComponentType<CaseViewEventsTableProps>;
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
   /**
    * A React `Ref` that Exposes data refresh callbacks.

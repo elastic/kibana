@@ -21,8 +21,6 @@ export interface UseAddToCaseActions {
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
-  isActiveTimelines: boolean;
-  isInDetections: boolean;
   refetch?: (() => void) | undefined;
 }
 
@@ -32,8 +30,6 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
-  isActiveTimelines,
-  isInDetections,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -44,6 +40,18 @@ export const useAddToCaseActions = ({
   }, [ecsData]);
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
+    if (!isAlert) {
+      return ecsData?._id
+        ? [
+            {
+              eventId: ecsData?._id ?? '',
+              index: ecsData?._index ?? '',
+              type: AttachmentType.event,
+            },
+          ]
+        : [];
+    }
+
     return ecsData?._id
       ? [
           {
@@ -54,7 +62,7 @@ export const useAddToCaseActions = ({
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
+  }, [casesUi.helpers, ecsData, isAlert, nonEcsData]);
 
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
@@ -99,12 +107,7 @@ export const useAddToCaseActions = ({
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (
-      (isActiveTimelines || isInDetections) &&
-      userCasesPermissions.createComment &&
-      userCasesPermissions.read &&
-      isAlert
-    ) {
+    if (userCasesPermissions.createComment && userCasesPermissions.read) {
       return [
         // add to existing case menu item
         {
@@ -128,11 +131,8 @@ export const useAddToCaseActions = ({
     }
     return [];
   }, [
-    isActiveTimelines,
-    isInDetections,
     userCasesPermissions.createComment,
     userCasesPermissions.read,
-    isAlert,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,

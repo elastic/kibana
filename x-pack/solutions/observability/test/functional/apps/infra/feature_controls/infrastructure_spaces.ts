@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('~noDataPage');
+        await testSubjects.existOrFail('kbnNoDataPage');
       });
     });
 
@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('~noDataPage');
+        await testSubjects.existOrFail('kbnNoDataPage');
       });
     });
 
@@ -143,7 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('~noDataPage');
+        await testSubjects.existOrFail('kbnNoDataPage');
       });
     });
   });
