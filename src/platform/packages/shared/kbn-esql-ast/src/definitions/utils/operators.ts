@@ -89,13 +89,17 @@ export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
     .map(getOperatorSuggestion);
 };
 
+const getNullCheckOperators = () => {
+  return operatorsDefinitions.filter(({ name }) => name === 'is null' || name === 'is not null');
+};
+
 /** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
-export const getOperatorsSuggestionsAfterIs = (
+export const getNullCheckOperatorSuggestions = (
   queryText: string,
   location: Location,
   leftParamType: FunctionParameterType
 ): ISuggestionItem[] => {
-  const candidates = ['is null', 'is not null'];
+  const candidates = getNullCheckOperators().map(({ name }) => name);
   const queryLower = queryText.toLowerCase();
   const queryNormalized = queryLower.replace(/\s+/g, ' ').replace(/\s+$/, ' ');
   const allowedOperators = candidates.filter((candidate) => {
@@ -218,11 +222,13 @@ export async function getSuggestionsToRightOfOperatorExpression({
             ? ['any']
             : supportedTypes;
 
-        // Special case: if we have an incomplete unary operator that starts with "is", suggest the complete forms
-        const isUnaryIs = operator.name.startsWith('is ');
-        if (isUnaryIs) {
+        const couldBeNullCheck = getNullCheckOperators().some(({ name }) =>
+          name.startsWith(operator.name.toLowerCase())
+        );
+
+        if (couldBeNullCheck) {
           suggestions.push(
-            ...getOperatorsSuggestionsAfterIs(
+            ...getNullCheckOperatorSuggestions(
               queryText,
               location,
               finalType === 'unknown' || finalType === 'unsupported' ? 'any' : finalType
