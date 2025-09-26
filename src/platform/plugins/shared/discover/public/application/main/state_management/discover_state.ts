@@ -144,12 +144,7 @@ export interface DiscoverStateContainer {
     /**
      * Stop syncing the state containers started by initializeAndSync
      */
-    stopSyncing: (newTabId?: string) => void;
-    /**
-     * Migrating to another tab id if it was regenerated on save as new discover session
-     * @param newTabId
-     */
-    migrateToTabId: (newTabId: string) => void;
+    stopSyncing: () => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -221,15 +216,14 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
-  tabId: originalTabId,
+  tabId,
   services,
   customizationContext,
   stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  let tabId = originalTabId;
-  let injectCurrentTab = createTabActionInjector(tabId);
+  const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
   /**
@@ -262,7 +256,7 @@ export function getDiscoverStateContainer({
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = selectTab(internalState.getState(), tabId)?.globalState;
+      const state = selectTab(internalState.getState(), tabId).globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
         internalState.dispatch(
           injectCurrentTab(internalStateActions.setGlobalState)({
@@ -298,7 +292,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
@@ -390,7 +384,7 @@ export function getDiscoverStateContainer({
     });
 
     // clears pinned filters
-    const globalState = selectTab(internalState.getState(), tabId)?.globalState;
+    const globalState = selectTab(internalState.getState(), tabId).globalState;
     internalState.dispatch(
       injectCurrentTab(internalStateActions.setGlobalState)({
         globalState: {
@@ -427,14 +421,7 @@ export function getDiscoverStateContainer({
   };
 
   let internalStopSyncing = () => {};
-
-  const migrateToTabId = (newTabId: string) => {
-    tabId = newTabId;
-    injectCurrentTab = createTabActionInjector(newTabId);
-    appStateContainer.migrateToTabId(newTabId);
-    dataStateContainer.migrateToTabId(newTabId);
-  };
-
+  
   const stopSyncing = () => {
     internalStopSyncing();
     internalStopSyncing = () => {};
@@ -485,7 +472,7 @@ export function getDiscoverStateContainer({
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
@@ -534,7 +521,7 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const scopedEbtManager = scopedEbtManager$.getValue();
     const { fieldsMetadata } = services;
 
@@ -583,11 +570,11 @@ export function getDiscoverStateContainer({
     addLog('undoSavedSearchChanges');
 
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    const globalState = selectTab(internalState.getState(), tabId)?.globalState;
+    const globalState = selectTab(internalState.getState(), tabId).globalState;
     const globalStateUpdate = restoreStateFromSavedSearch({ savedSearch: nextSavedSearch });
 
     // a saved search can't have global (pinned) filters so we can reset global filters state
-    if (globalState?.filters) {
+    if (globalState.filters) {
       globalStateUpdate.filters = [];
     }
 
@@ -653,7 +640,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
-      migrateToTabId,
       fetchData,
       onChangeDataView,
       createAndAppendAdHocDataView,

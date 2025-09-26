@@ -65,7 +65,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     const { currentDataView$, stateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId)!;
+      selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available

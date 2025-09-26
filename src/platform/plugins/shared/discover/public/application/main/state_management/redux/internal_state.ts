@@ -26,6 +26,7 @@ import {
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import {
@@ -59,11 +60,11 @@ const initialState: DiscoverInternalState = {
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
-    transitioningFromTo: undefined,
     byId: {},
     allIds: [],
     unsavedIds: [],
-    recentlyClosedTabs: [],
+    recentlyClosedTabsById: {},
+    recentlyClosedTabIds: [],
     unsafeCurrentId: '',
   },
 };
@@ -95,42 +96,16 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setPersistedDiscoverSession: (
-      state,
-      action: PayloadAction<{
-        persistedDiscoverSession: DiscoverInternalState['persistedDiscoverSession'];
-      }>
-    ) => {
-      state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
-    },
-
-    setTabsInitializationStarted: (state) => {
-      state.tabs.areInitializing = true;
-    },
-
-    setTabsTransitioningStarted: (
-      state,
-      action: PayloadAction<{
-        transitioningFromTo: DiscoverInternalState['tabs']['transitioningFromTo'];
-      }>
-    ) => {
-      state.tabs.transitioningFromTo = action.payload.transitioningFromTo;
-    },
-
     setTabs: (
       state,
       action: PayloadAction<{
         allTabs: TabState[];
         selectedTabId: string;
         recentlyClosedTabs: RecentlyClosedTabState[];
+        updatedDiscoverSession?: DiscoverSession;
       }>
     ) => {
-      // RecentlyClosedTabs here is a safeguard that currentTab/selectTab will not be undefined in runtime while switching between tabs
-      // (otherwise we need to update types everywhere too).
-      // If id in open tabs matches one of recently closed tabs, we prefer the open tab state in this merge.
-      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState>
-      >(
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
           [tab.id]:
@@ -139,8 +114,19 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
+      state.tabs.recentlyClosedTabsById = action.payload.recentlyClosedTabs.reduce<
+        Record<string, RecentlyClosedTabState>
+      >(
+        (acc, tab) => ({
+          ...acc,
+          [tab.id]: tab,
+        }),
+        {}
+      );
+      state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
-      state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
+      state.persistedDiscoverSession =
+        action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -295,10 +281,11 @@ export const internalStateSlice = createSlice({
       state.savedDataViews = action.payload;
     });
 
+    builder.addCase(initializeTabs.pending, (state) => {
+      state.tabs.areInitializing = true;
+    });
+
     builder.addCase(initializeTabs.fulfilled, (state, action) => {
-      if (!action.payload) {
-        return;
-      }
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
@@ -306,7 +293,6 @@ export const internalStateSlice = createSlice({
 
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
       state.tabs.areInitializing = false;
-      state.tabs.transitioningFromTo = undefined;
     });
   },
 });
@@ -337,7 +323,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
       (action, listenerApi) => {
-        const { persistedDiscoverSession } = listenerApi.getState();
+        const discoverSession =
+          action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
@@ -347,7 +334,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
           action.payload,
           getTabAppState,
           getTabInternalState,
-          persistedDiscoverSession?.id
+          discoverSession?.id
         );
       },
       MIDDLEWARE_THROTTLE_MS,

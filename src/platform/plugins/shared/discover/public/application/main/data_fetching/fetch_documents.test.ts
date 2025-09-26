@@ -28,7 +28,7 @@ const getDeps = (): CommonFetchParams => {
   const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
     runtimeStateManager,
     getCurrentTab().id
-  )!;
+  );
   appState.update({ sampleSize: 100 });
   return {
     dataSubjects: dataState.data$,

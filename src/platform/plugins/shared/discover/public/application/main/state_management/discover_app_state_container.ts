@@ -69,11 +69,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   updateUrlWithCurrentState: () => Promise<void>;
   /**
-   * Migrating to another tab id if it was regenerated on save as new discover session
-   * @param newTabId
-   */
-  migrateToTabId: (newTabId: string) => void;
-  /**
    * Replaces the current state in URL with the given state
    * @param newState
    * @param merge if true, the given state is merged with the current state
@@ -192,7 +187,7 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param services
  */
 export const getDiscoverAppStateContainer = ({
-  tabId: originalTabId,
+  tabId,
   stateStorage,
   internalState,
   savedSearchContainer,
@@ -204,8 +199,6 @@ export const getDiscoverAppStateContainer = ({
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  let tabId = originalTabId;
-  let injectCurrentTab = createTabActionInjector(tabId);
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
     savedSearch: savedSearchContainer.getState(),
@@ -267,7 +260,7 @@ export const getDiscoverAppStateContainer = ({
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState?.globalState ?? {};
+    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
 
     return { time, refreshInterval, filters };
   };
@@ -402,12 +395,6 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
-  const migrateToTabId = (newTabId: string) => {
-    addLog('[appState] migrateToTabId', { newTabId });
-    tabId = newTabId;
-    injectCurrentTab = createTabActionInjector(newTabId);
-  };
-
   const getPrevious = () => previousState;
 
   return {
@@ -418,7 +405,6 @@ export const getDiscoverAppStateContainer = ({
     resetToState,
     resetInitialState,
     updateUrlWithCurrentState,
-    migrateToTabId,
     replaceUrlState,
     update,
     getAppStateFromSavedSearch,

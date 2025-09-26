@@ -19,7 +19,9 @@ import React from 'react';
 import {
   fromSavedSearchToSavedObjectTab,
   internalStateActions,
+  selectAllTabs,
   selectHasUnsavedChanges,
+  selectRecentlyClosedTabs,
 } from '../redux';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { getConnectedCustomizationService } from '../../../../customizations';
@@ -145,11 +147,13 @@ describe('useUnsavedChanges', () => {
         }),
       ],
     };
-    await stateContainer.internalState.dispatch(
-      internalStateActions.updateDiscoverSessionAndTabs({
-        persistedDiscoverSession: newDiscoverSession,
-        selectedItem: newDiscoverSession.tabs[0],
-        items: newDiscoverSession.tabs,
+    const state = stateContainer.internalState.getState();
+    stateContainer.internalState.dispatch(
+      internalStateActions.setTabs({
+        allTabs: selectAllTabs(state),
+        selectedTabId: state.tabs.unsafeCurrentId,
+        recentlyClosedTabs: selectRecentlyClosedTabs(state),
+        updatedDiscoverSession: newDiscoverSession,
       })
     );
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);

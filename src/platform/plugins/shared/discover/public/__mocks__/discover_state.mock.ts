@@ -130,11 +130,11 @@ export function getDiscoverStateMock({
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId
   );
-  tabRuntimeState?.customizationService$.next({
+  tabRuntimeState.customizationService$.next({
     ...createCustomizationService(),
     cleanup: async () => {},
   });
-  tabRuntimeState?.stateContainer$.next(container);
+  tabRuntimeState.stateContainer$.next(container);
   if (finalSavedSearch) {
     container.savedSearchState.set(finalSavedSearch);
   }

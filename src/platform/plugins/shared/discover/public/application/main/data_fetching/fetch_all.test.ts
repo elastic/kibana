@@ -72,7 +72,7 @@ describe('test fetchAll', () => {
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
-    )!;
+    );
     deps = {
       dataSubjects: subjects,
       reset: false,

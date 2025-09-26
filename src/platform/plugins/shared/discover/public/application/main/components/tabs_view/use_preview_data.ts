@@ -95,7 +95,7 @@ const getPreviewDataObservable = (
   tabId: string,
   initialAppState: TabState['initialAppState'] | undefined
 ) =>
-  selectTabRuntimeState(runtimeStateManager, tabId)!.stateContainer$.pipe(
+  selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         return of({
