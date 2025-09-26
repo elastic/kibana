@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { RoutingConditionEditor } from '../condition_editor';
 import { AddRoutingRuleControls } from './control_bars';
 import {
   selectCurrentRule,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import { RoutingConditionEditor } from './routing_condition_editor';
 import { StreamNameFormRow } from './stream_name_form_row';
 
 export function NewRoutingStreamEntry() {

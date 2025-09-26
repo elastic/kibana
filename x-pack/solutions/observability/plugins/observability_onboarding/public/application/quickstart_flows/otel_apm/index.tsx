@@ -153,7 +153,7 @@ export function OtelApmQuickstartFlow() {
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelApm.onceYourKubernetesInfrastructureLabel"
-                    defaultMessage="After running the previous command, go to the Service Inventory to explore your traces, logs, and metrics."
+                    defaultMessage="Go to the Service Inventory to explore your traces, logs, and metrics."
                   />
                 </p>
                 <EuiSpacer />

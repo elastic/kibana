@@ -17,13 +17,15 @@ function getNoDataConfigDetails({
   addDataUrl: string;
 }) {
   return {
-    title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
-      defaultMessage: 'Add data',
+    title: i18n.translate('xpack.apm.noDataConfig.title', {
+      defaultMessage: 'Monitor your applications',
     }),
     href: addDataUrl,
-    description: i18n.translate('xpack.apm.ux.overview.agent.description', {
-      defaultMessage:
-        'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
+    description: i18n.translate('xpack.apm.noDataConfig.description', {
+      defaultMessage: 'Collect traces, metrics, and logs from your application.',
+    }),
+    buttonText: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+      defaultMessage: 'Add data',
     }),
   };
 }
@@ -50,16 +52,15 @@ export function getNoDataConfig({
   });
 
   return {
-    solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
-      defaultMessage: 'Observability',
-    }),
     action: {
       elasticAgent: {
         title: noDataConfigDetails.title,
         description: noDataConfigDetails.description,
         href: noDataConfigDetails.href,
+        buttonText: noDataConfigDetails.buttonText,
+        'data-test-subj': 'apmNoDataCard',
+        docsLink,
       },
     },
-    docsLink,
   };
 }

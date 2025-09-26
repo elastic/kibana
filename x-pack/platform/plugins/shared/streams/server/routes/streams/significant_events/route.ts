@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { badRequest } from '@hapi/boom';
 import type {
   SignificantEventsGenerateResponse,
@@ -153,7 +152,7 @@ const readSignificantEventsRoute = createServerRoute({
 });
 
 const generateSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
+  endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
@@ -161,6 +160,15 @@ const generateSignificantEventsRoute = createServerRoute({
       currentDate: dateFromString.optional(),
       from: dateFromString,
       to: dateFromString,
+    }),
+    body: z.object({
+      system: z
+        .object({
+          name: NonEmptyString,
+          filter: conditionSchema,
+          description: z.string(),
+        })
+        .optional(),
     }),
   }),
   options: {
@@ -196,6 +204,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
+          system: params.body.system,
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
