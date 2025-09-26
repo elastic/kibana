@@ -7,15 +7,15 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { HeatmapToolbar } from './toolbar_component';
+import { HeatmapPopoverToolbar } from './popover_toolbar';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { FramePublicAPI } from '../../types';
-import type { HeatmapVisualizationState } from './types';
+import type { FramePublicAPI } from '../../../types';
+import type { HeatmapVisualizationState } from '../types';
 import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
 
-type Props = ComponentProps<typeof HeatmapToolbar>;
+type Props = ComponentProps<typeof HeatmapPopoverToolbar>;
 
 const defaultProps: Props = {
   state: {
@@ -39,7 +39,7 @@ const defaultProps: Props = {
 };
 
 const renderComponent = (props: Partial<Props> = {}) => {
-  return render(<HeatmapToolbar {...defaultProps} {...props} />);
+  return render(<HeatmapPopoverToolbar {...defaultProps} {...props} />);
 };
 
 const clickButtonByName = async (name: string | RegExp, container?: HTMLElement) => {
@@ -77,7 +77,7 @@ describe('HeatmapToolbar', () => {
     expect(orientationGroup).toBeInTheDocument();
 
     rerender(
-      <HeatmapToolbar
+      <HeatmapPopoverToolbar
         {...defaultProps}
         state={{
           ...defaultProps.state,
