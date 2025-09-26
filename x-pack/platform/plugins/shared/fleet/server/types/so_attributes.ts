@@ -153,7 +153,7 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
 }
 
-interface OutputSoBaseAttributes {
+export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
@@ -169,7 +169,7 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
-  write_to_logs_streams?: boolean;
+  write_to_logs_streams?: boolean | null;
   secrets?: {
     ssl?: {
       key?: { id: string };
@@ -184,7 +184,7 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
 
 export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
   secrets?: {
     service_token?: { id: string };
     ssl?: {
@@ -193,7 +193,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   };
   sync_integrations?: boolean;
   kibana_url?: string;
-  kibana_api_key?: string;
+  kibana_api_key?: string | null;
   sync_uninstalled_integrations?: boolean;
 }
 
