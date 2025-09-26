@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const from = '2017-06-10T14:00:00.000Z';
   // next day to include alerts generated in the tests
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       const testRunUuid = uuidv4();
       const ruleName = `Test Rule - ${testRunUuid}`;
 
-      await securitySolutionApi.createRule({
+      await detectionsApi.createRule({
         body: {
           name: ruleName,
           description: 'test rule',

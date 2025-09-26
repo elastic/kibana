@@ -6592,7 +6592,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lock-manager@link:packages/kbn-lock-manager":
+"@kbn/lock-manager@link:src/platform/packages/shared/kbn-lock-manager":
   version "0.0.0"
   uid ""
 
@@ -7697,6 +7697,10 @@
   uid ""
 
 "@kbn/security-solution-storybook-config@link:x-pack/solutions/security/packages/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-test-api-clients@link:x-pack/solutions/security/packages/test-api-clients":
   version "0.0.0"
   uid ""
 

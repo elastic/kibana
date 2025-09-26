@@ -95,6 +95,8 @@ import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
 
+import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
+
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
 };
@@ -708,14 +710,15 @@ export const rollbackPackageHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
-  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
-  const internalSoClientWithoutSpaceExtension =
-    appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const spaceId = fleetContext.spaceId;
+  const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
+    { name: pkgName },
+  ]);
+
   try {
     const body: RollbackPackageResponse = await rollbackInstallation({
       esClient,
-      savedObjectsClient: internalSoClientWithoutSpaceExtension,
+      currentUserPolicyIds: packagePolicyIdsForCurrentUser[pkgName],
       pkgName,
       spaceId,
     });
