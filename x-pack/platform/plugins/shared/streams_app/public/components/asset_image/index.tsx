@@ -85,6 +85,13 @@ const imageSets = {
       defaultMessage: 'Bar chart sample',
     }),
   },
+  checklist: {
+    light: () => import('./checklist.svg'),
+    dark: () => import('./checklist.svg'),
+    alt: i18n.translate('xpack.streams.checklistImage', {
+      defaultMessage: 'Checklist',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
