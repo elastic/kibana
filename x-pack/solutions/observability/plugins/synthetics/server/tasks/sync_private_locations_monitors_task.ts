@@ -44,6 +44,7 @@ interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
   lastTotalParams: number;
   lastTotalMWs: number;
+  lastCleanUpAt?: string; // Track last clean up time
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -74,6 +75,15 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
+  /**
+   * Determines if the daily cleanup should run (i.e., if 24h have passed since lastCleanUpAt)
+   */
+  private shouldRunDailyCleanup(lastCleanUpAt: string | undefined, now: Date): boolean {
+    if (!lastCleanUpAt) return true;
+    const last = moment(lastCleanUpAt);
+    return moment(now).diff(last, 'hours') >= 24;
+  }
+
   public async runTask({
     taskInstance,
   }: {
@@ -89,6 +99,7 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
+    let lastCleanUpAt = taskInstance.state.lastCleanUpAt;
 
     try {
       this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
@@ -96,7 +107,10 @@ export class SyncPrivateLocationMonitorsTask {
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
 
-      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient);
+      const { performSync, lastCleanUpAt: newLastCleanup } =
+        await this.cleanUpDuplicatedPackagePolicies(soClient, taskInstance.state, startedAt);
+
+      lastCleanUpAt = newLastCleanup;
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       const { totalMWs, totalParams, hasDataChanged } = await this.hasAnyDataChanged({
@@ -129,6 +143,7 @@ export class SyncPrivateLocationMonitorsTask {
           lastStartedAt: startedAt.toISOString(),
           lastTotalParams,
           lastTotalMWs,
+          lastCleanUpAt,
         },
       };
     }
@@ -137,6 +152,7 @@ export class SyncPrivateLocationMonitorsTask {
         lastStartedAt: startedAt.toISOString(),
         lastTotalParams,
         lastTotalMWs,
+        lastCleanUpAt,
       },
     };
   }
@@ -400,10 +416,22 @@ export class SyncPrivateLocationMonitorsTask {
     this.serverSetup.logger.debug(`[syncGlobalParams] ${message} `);
   };
 
-  async cleanUpDuplicatedPackagePolicies(soClient: SavedObjectsClientContract) {
+  async cleanUpDuplicatedPackagePolicies(
+    soClient: SavedObjectsClientContract,
+    taskState: Partial<TaskState>,
+    startedAt: Date
+  ) {
     const { fleet } = this.serverSetup.pluginsStart;
     const { logger } = this.serverSetup;
     let performSync = false;
+    let lastCleanUpAt = taskState.lastCleanUpAt;
+
+    const shouldRunCleanUp = this.shouldRunDailyCleanup(lastCleanUpAt, startedAt);
+    if (!shouldRunCleanUp) {
+      return { performSync, lastCleanUpAt };
+    }
+
+    lastCleanUpAt = startedAt.toISOString();
 
     try {
       const esClient = this.serverSetup.coreStart?.elasticsearch?.client.asInternalUser;
@@ -471,10 +499,10 @@ export class SyncPrivateLocationMonitorsTask {
           spaceIds: ['*'],
         });
       }
-      return { performSync };
+      return { performSync, lastCleanUpAt };
     } catch (e) {
       logger.error(e);
-      return { performSync };
+      return { performSync, lastCleanUpAt };
     }
   }
 }
