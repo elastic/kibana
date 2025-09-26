@@ -34,6 +34,7 @@ export const buildSecurityApi = ({
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
+        getAPIKey: (request, id) => getAuthc().apiKeys.getAPIKey(request, id),
       },
     },
     audit: {

@@ -62,10 +62,9 @@ export class GenerateRequestHandler extends RequestHandler<
 
     let apiKey: SecurityApiKey | null = null;
     if (user && user.api_key) {
-      const startDeps = await reporting.getPluginStartDeps();
-      const { security } = startDeps;
-      if (security) {
-        apiKey = await security.authc.apiKeys.getAPIKey(req, user.api_key.id);
+      const { securityService } = await reporting.getPluginStartDeps();
+      if (securityService) {
+        apiKey = await securityService.authc.apiKeys.getAPIKey(req, user.api_key.id);
       }
     }
 
