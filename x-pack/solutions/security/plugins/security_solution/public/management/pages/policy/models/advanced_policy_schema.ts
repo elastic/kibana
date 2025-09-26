@@ -453,7 +453,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
       {
-        defaultMessage: "A value of 'false' disables the filtering of file backed images and CDROM volumes. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CDROM volumes. Default: true.",
       }
     ),
   },
@@ -946,7 +947,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
       {
-        defaultMessage: "A value of 'false' disables the filtering of file backed images and CDROM volumes. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CDROM volumes. Default: true.",
       }
     ),
   },
