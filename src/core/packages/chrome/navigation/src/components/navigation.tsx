@@ -83,7 +83,7 @@ export const Navigation = ({
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
     isCollapsed,
-    items
+    items.primaryItems
   );
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
