@@ -34,7 +34,7 @@ import { LabelWithTooltip } from './label_with_tooltip';
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
-  const { formData, baseErrors, plugins } = useRuleFormState();
+  const { formData, baseErrors, plugins, selectedRuleType } = useRuleFormState();
   const { contentManagement } = plugins;
 
   const dispatch = useRuleFormDispatch();
@@ -140,28 +140,32 @@ export const RuleDetails = () => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiFormRow
-        fullWidth
-        label={
-          <LabelWithTooltip
-            labelContent={RULE_INVESTIGATION_GUIDE_LABEL}
-            tooltipContent={RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT}
-          />
-        }
-        labelAppend={OptionalFieldLabel}
-        isInvalid={
-          (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
-          MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
-        }
-      >
-        <InvestigationGuideEditor
-          setRuleParams={onSetArtifacts}
-          value={formData.artifacts?.investigation_guide?.blob ?? ''}
-        />
-      </EuiFormRow>
-      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
-      <EuiSpacer size="xxl" />
+      {selectedRuleType?.id !== 'esql' && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFormRow
+            fullWidth
+            label={
+              <LabelWithTooltip
+                labelContent={RULE_INVESTIGATION_GUIDE_LABEL}
+                tooltipContent={RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT}
+              />
+            }
+            labelAppend={OptionalFieldLabel}
+            isInvalid={
+              (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
+              MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
+            }
+          >
+            <InvestigationGuideEditor
+              setRuleParams={onSetArtifacts}
+              value={formData.artifacts?.investigation_guide?.blob ?? ''}
+            />
+          </EuiFormRow>
+          {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+          <EuiSpacer size="xxl" />
+        </>
+      )}
     </>
   );
 };
