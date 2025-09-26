@@ -12,3 +12,8 @@ export {
   type AgentConfiguration,
 } from './definition';
 export { agentIdRegexp, validateAgentId } from './agent_ids';
+export {
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  getKibanaDefaultAgentCapabilities,
+} from './capabilities';

@@ -649,6 +649,9 @@
         "properties": {
           "syncAlerts": {
             "type": "boolean"
+          },
+          "extractObservables": {
+            "type": "boolean"
           }
         }
       },
@@ -2707,6 +2710,9 @@
   "maintenance-window": {
     "dynamic": false,
     "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },

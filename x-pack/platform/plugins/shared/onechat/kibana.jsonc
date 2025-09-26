@@ -28,7 +28,8 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces"
+      "spaces",
+      "workflowsManagement"
     ],
     "extraPublicDirs": []
   }
