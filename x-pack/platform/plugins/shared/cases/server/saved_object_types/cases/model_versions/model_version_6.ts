@@ -24,7 +24,7 @@ export const modelVersion6: SavedObjectsModelVersion = {
     {
       type: 'data_backfill',
       backfillFn: (_doc) => {
-        return { attributes: { total_events: -1 } };
+        return { attributes: { total_events: 0 } };
       },
     },
   ],
