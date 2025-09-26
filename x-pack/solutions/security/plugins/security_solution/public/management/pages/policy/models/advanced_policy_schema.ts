@@ -948,7 +948,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
       {
         defaultMessage:
-          "A value of 'false' disables the filtering of file backed images and CDROM volumes. Default: true.",
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
       }
     ),
   },
