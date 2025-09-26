@@ -13,6 +13,5 @@ if [[ "${RUN_FULL_CHECK:-}" == "true" ]]; then
 else
   echo "Running type-check with caches..."
   export NODE_OPTIONS="--max-old-space-size=8192"
-  yarn moon ci :typecheck -c 2 \
-    --base $BUILDKITE_PULL_REQUEST_BASE_BRANCH
+  yarn moon run :typecheck -c 2 --affected --remote -u
 fi
