@@ -55,7 +55,7 @@ export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, settings },
   } = useKibana();
 
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
@@ -64,6 +64,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   const { data: aiConnectors } = useLoadConnectors({
     http,
     inferenceEnabled,
+    settings,
   });
 
   // for showing / hiding anonymized data:
