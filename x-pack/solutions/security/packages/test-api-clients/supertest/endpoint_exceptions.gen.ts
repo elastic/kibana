@@ -19,15 +19,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-<<<<<<<< HEAD:x-pack/test/api_integration/services/security_solution_endpoint_exceptions_api.gen.ts
-import { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
-import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
-import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
-import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
-import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
-import { FtrProviderContext } from '../ftr_provider_context';
-========
 import type { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
 import type { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
 import type { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
@@ -35,8 +26,10 @@ import type { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolutio
 import type { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
->>>>>>>> 6a69d0ebd27 ([Security Solution] Remove duplicated services used in integration tests (#235221)):x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_exceptions.gen.ts
+
+function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
+  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
+}
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -47,7 +40,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     createEndpointList(kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint_list', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint_list', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -57,7 +50,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     createEndpointListItem(props: CreateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -68,7 +61,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     deleteEndpointListItem(props: DeleteEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .delete(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -79,7 +72,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     findEndpointListItems(props: FindEndpointListItemsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint_list/items/_find', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint_list/items/_find', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -90,7 +83,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     readEndpointListItem(props: ReadEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -101,7 +94,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     updateEndpointListItem(props: UpdateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/api/endpoint_list/items', kibanaSpace))
+        .put(getRouteUrlForSpace('/api/endpoint_list/items', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
