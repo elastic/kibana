@@ -42,7 +42,7 @@ export interface CloudConnectorServiceInterface {
   update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
-    updates: Partial<Pick<CreateCloudConnectorRequest, 'name' | 'vars'>>
+    updates: Partial<CreateCloudConnectorRequest>
   ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
@@ -137,9 +137,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.debug('Successfully retrieved cloud connectors list');
 
-      return cloudConnectors.saved_objects.map((so) => ({
-        id: so.id,
-        ...so.attributes,
+      return cloudConnectors.saved_objects.map((savedObject) => ({
+        id: savedObject.id,
+        ...savedObject.attributes,
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
