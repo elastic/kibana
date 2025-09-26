@@ -7,11 +7,12 @@
 
 import type {
   ConversationRound,
+  ConversationWithoutRounds,
   ReasoningStep,
   ToolCallProgress,
   ToolCallStep,
 } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import { isToolCallStep, isConversationNotFoundError } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
@@ -26,13 +27,39 @@ import { usePrefetchAgentById } from './agents/use_agent_by_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useNavigation } from './use_navigation';
+import { useOnechatServices } from './use_onechat_service';
 
 const pendingRoundId = '__pending__';
+
+/**
+ * Determines the next conversation ID to navigate to after deleting a conversation.
+ * @param conversationList - The list of all conversations
+ * @param deletedConversationId - The ID of the conversation being deleted
+ * @returns The ID of the next conversation to navigate to
+ */
+const getNextConversationId = (
+  conversationList: ConversationWithoutRounds[],
+  deletedConversationId: string
+): string => {
+  const currentIndex = conversationList.findIndex((conv) => conv.id === deletedConversationId);
+
+  if (currentIndex !== -1 && currentIndex < conversationList.length - 1) {
+    // If not the last conversation, go to the next one
+    return conversationList[currentIndex + 1].id;
+  } else if (currentIndex !== -1 && currentIndex > 0) {
+    // If it's the last conversation but not the first, go to the previous one
+    return conversationList[currentIndex - 1].id;
+  } else {
+    // If it's the only conversation or first conversation, go to new chat
+    return newConversationId;
+  }
+};
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -56,8 +83,8 @@ export const useConversationActions = () => {
     };
   }, []);
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
-    // Navigate to the new conversation if user is still on the "new" conversation page
-    if (!conversationId && shouldAllowConversationRedirectRef.current) {
+    // Navigate to the conversation if redirect is allowed
+    if (shouldAllowConversationRedirectRef.current) {
       const path = appPaths.chat.conversation({ conversationId: nextConversationId });
       const params = undefined;
       const state = { shouldStickToBottom: false };
@@ -186,6 +213,23 @@ export const useConversationActions = () => {
       // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
+    },
+    deleteConversation: async (id: string) => {
+      const conversationList =
+        queryClient.getQueryData<ConversationWithoutRounds[]>(queryKeys.conversations.all) || [];
+
+      await conversationsService.delete({ conversationId: id });
+      // Find next conversation to redirect to
+      const nextConversationId = getNextConversationId(conversationList, id);
+
+      // Navigate to the determined conversation
+      const path =
+        nextConversationId === newConversationId
+          ? appPaths.chat.new
+          : appPaths.chat.conversation({ conversationId: nextConversationId });
+      navigateToOnechatUrl(path, undefined, { shouldStickToBottom: false });
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
