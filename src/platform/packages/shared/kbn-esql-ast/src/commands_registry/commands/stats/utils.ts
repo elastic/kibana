@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type {
   ESQLAstItem,
@@ -79,7 +79,7 @@ export const getPosition = (command: ESQLCommand, innerText: string): CaretPosit
   return 'expression_without_assignment';
 };
 
-export const byCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
   text: 'BY ',
   kind: 'Reference',
@@ -87,7 +87,7 @@ export const byCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const whereCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'WHERE',
   text: 'WHERE ',
   kind: 'Reference',
@@ -189,7 +189,7 @@ export const getCommaAndPipe = (
   columnExists: (name: string) => boolean
 ): ISuggestionItem[] => {
   const pipeSuggestion = { ...pipeCompleteItem };
-  const commaSuggestion = withTriggerSuggestionDialog({
+  const commaSuggestion = withAutoSuggest({
     ...commaCompleteItem,
     text: ', ',
   });

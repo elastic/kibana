@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../commands_registry/types';
-import { withTriggerSuggestionDialog } from '../../../..';
+import { withAutoSuggest } from './helpers';
 
 /**
  * This function provides suggestions for map expressions within a command.
@@ -44,7 +44,7 @@ export function getCommandMapExpressionSuggestions(
     );
 
     return availableParamNames.map((paramName) =>
-      withTriggerSuggestionDialog({
+      withAutoSuggest({
         label: paramName,
         kind: 'Constant',
         asSnippet: true,

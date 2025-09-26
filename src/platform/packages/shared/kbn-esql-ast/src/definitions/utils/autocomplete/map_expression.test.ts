@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../commands_registry/types';
-import { withTriggerSuggestionDialog } from '../../../..';
+import { withAutoSuggest } from './helpers';
 import { getCommandMapExpressionSuggestions } from './map_expression';
 
 describe('getCommandMapExpressionSuggestions', () => {
@@ -25,7 +25,7 @@ describe('getCommandMapExpressionSuggestions', () => {
       const query = '{';
       const suggestions = getCommandMapExpressionSuggestions(query, availableParameters);
       expect(suggestions).toEqual([
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           label: 'param1',
           kind: 'Constant',
           asSnippet: true,
@@ -33,7 +33,7 @@ describe('getCommandMapExpressionSuggestions', () => {
           detail: 'param1',
           sortText: '1',
         }),
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           label: 'param2',
           kind: 'Constant',
           asSnippet: true,

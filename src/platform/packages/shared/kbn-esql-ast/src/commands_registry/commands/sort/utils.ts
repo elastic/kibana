@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
@@ -54,28 +54,28 @@ export const getSortPos = (query: string, command: ESQLCommand): SortPosition | 
 };
 
 export const sortModifierSuggestions = {
-  ASC: withTriggerSuggestionDialog({
+  ASC: withAutoSuggest({
     label: 'ASC',
     text: 'ASC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-ASC',
   }),
-  DESC: withTriggerSuggestionDialog({
+  DESC: withAutoSuggest({
     label: 'DESC',
     text: 'DESC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-DESC',
   }),
-  NULLS_FIRST: withTriggerSuggestionDialog({
+  NULLS_FIRST: withAutoSuggest({
     label: 'NULLS FIRST',
     text: 'NULLS FIRST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS FIRST',
   }),
-  NULLS_LAST: withTriggerSuggestionDialog({
+  NULLS_LAST: withAutoSuggest({
     label: 'NULLS LAST',
     text: 'NULLS LAST',
     detail: '',
@@ -111,7 +111,7 @@ export const getSuggestionsAfterCompleteExpression = (
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem };
-  const commaSuggestion = withTriggerSuggestionDialog({
+  const commaSuggestion = withAutoSuggest({
     ...commaCompleteItem,
     text: ', ',
   });

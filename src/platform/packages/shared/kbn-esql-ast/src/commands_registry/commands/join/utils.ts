@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils';
 import { isColumn } from '../../../ast/is';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
@@ -177,7 +177,7 @@ export const suggestFields = async (
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // fie<suggest>
       return fieldSuggestions.map((suggestion) => {
-        return withTriggerSuggestionDialog({
+        return withAutoSuggest({
           ...suggestion,
           text: suggestion.text,
           rangeToReplace,
@@ -194,7 +194,7 @@ export const suggestFields = async (
       if (fieldSuggestions.length > 1) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
       return finalSuggestions.map<ISuggestionItem>((s) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           ...s,
           filterText: fragment,
           text: fragment + s.text,

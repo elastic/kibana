@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -39,8 +39,8 @@ export async function autocomplete(
   // ROW col0 = 23 /
   else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
-      withTriggerSuggestionDialog(pipeCompleteItem),
-      withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' }),
+      withAutoSuggest(pipeCompleteItem),
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
     ];
   }
 

@@ -10,7 +10,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
-import { withTriggerSuggestionDialog } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
@@ -45,7 +45,7 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     sortText: 'D',
   };
-  return hasArgs ? withTriggerSuggestionDialog(suggestion) : suggestion;
+  return hasArgs ? withAutoSuggest(suggestion) : suggestion;
 }
 
 /**

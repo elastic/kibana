@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { isColumn } from '../../../ast/is';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
@@ -43,7 +43,7 @@ export async function autocomplete(
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>
       return fieldSuggestions.map((suggestion) => {
-        return withTriggerSuggestionDialog({
+        return withAutoSuggest({
           ...suggestion,
           text: suggestion.text,
           rangeToReplace,
@@ -56,7 +56,7 @@ export async function autocomplete(
       if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
       return finalSuggestions.map<ISuggestionItem>((s) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           ...s,
           filterText: fragment,
           text: fragment + s.text,

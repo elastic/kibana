@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../../definitions/utils/operators';
@@ -152,7 +152,7 @@ export async function autocomplete(
       const word = findPreviousWord(innerText);
       if (policyMetadata.enrichFields.includes(unescapeColumnName(word))) {
         // complete field name
-        return [pipeCompleteItem, withTriggerSuggestionDialog(commaCompleteItem)];
+        return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
       } else {
         // not recognized as a field name, assume new user-defined column name
         return getOperatorSuggestions(
@@ -170,7 +170,7 @@ export async function autocomplete(
     }
 
     case Position.WITH_AFTER_COMPLETE_CLAUSE: {
-      return [pipeCompleteItem, withTriggerSuggestionDialog(commaCompleteItem)];
+      return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
     }
 
     default:

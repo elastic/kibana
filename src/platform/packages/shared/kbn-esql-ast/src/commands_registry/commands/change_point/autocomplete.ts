@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { pipeCompleteItem } from '../../complete_items';
@@ -65,7 +65,7 @@ export const getPosition = (query: string, command: ESQLCommand): Position | und
   }
 };
 
-export const onSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+export const onSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
@@ -75,7 +75,7 @@ export const onSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const asSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+export const asSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'AS',
   text: 'AS ',
   kind: 'Reference',
@@ -128,16 +128,14 @@ export async function autocomplete(
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
       return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           ...v,
           text: v.text + ', ',
         })
       );
     }
     case Position.AS_P_VALUE_COLUMN: {
-      return buildUserDefinedColumnsDefinitions(['pValue']).map((v) =>
-        withTriggerSuggestionDialog(v)
-      );
+      return buildUserDefinedColumnsDefinitions(['pValue']).map((v) => withAutoSuggest(v));
     }
     case Position.AFTER_AS_CLAUSE: {
       return [pipeCompleteItem];

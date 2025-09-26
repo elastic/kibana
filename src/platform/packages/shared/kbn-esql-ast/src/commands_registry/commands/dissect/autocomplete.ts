@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
@@ -16,7 +16,7 @@ import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
-const appendSeparatorCompletionItem: ISuggestionItem = withTriggerSuggestionDialog({
+const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
     defaultMessage:
       'The character(s) that separate the appended fields. Default to empty string ("").',
@@ -61,7 +61,7 @@ export async function autocomplete(
   }
   // DISSECT field pattern /
   else if (commandArgs.length === 2) {
-    return [withTriggerSuggestionDialog(pipeCompleteItem), appendSeparatorCompletionItem];
+    return [withAutoSuggest(pipeCompleteItem), appendSeparatorCompletionItem];
   }
   // DISSECT field APPEND_SEPARATOR = /
   else if (/append_separator\s*=\s*$/i.test(innerText)) {
@@ -69,13 +69,13 @@ export async function autocomplete(
   }
   // DISSECT field APPEND_SEPARATOR = ":" /
   else if (commandArgs.some((arg) => !Array.isArray(arg) && arg.type === 'option')) {
-    return [withTriggerSuggestionDialog(pipeCompleteItem)];
+    return [withAutoSuggest(pipeCompleteItem)];
   }
 
   // DISSECT /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
   return fieldSuggestions.map((sug) =>
-    withTriggerSuggestionDialog({
+    withAutoSuggest({
       ...sug,
       text: `${sug.text} `,
     })

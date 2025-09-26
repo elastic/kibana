@@ -25,7 +25,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
-import { withTriggerSuggestionDialog } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
@@ -78,7 +78,7 @@ export const buildFieldsDefinitions = (
       }),
       sortText: 'D',
     };
-    return openSuggestions ? withTriggerSuggestionDialog(suggestion) : suggestion;
+    return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 };
 
@@ -258,7 +258,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
-  return withTriggerSuggestionDialog({
+  return withAutoSuggest({
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -410,7 +410,7 @@ export const buildColumnSuggestions = (
       sortText,
     };
 
-    return options?.openSuggestions ? withTriggerSuggestionDialog(suggestion) : suggestion;
+    return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 
   const suggestions = [...fieldsSuggestions];

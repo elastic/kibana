@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,
   handleFragment,
@@ -54,7 +54,7 @@ export async function autocomplete(
       }
 
       return filteredMnemonics.map(([mnemonic, description], i) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           label: mnemonic,
           text: mnemonic + ' $0',
           asSnippet: true,
@@ -104,7 +104,7 @@ export async function autocomplete(
     }
 
     case 'after_index': {
-      const suggestion: ISuggestionItem = withTriggerSuggestionDialog({
+      const suggestion: ISuggestionItem = withAutoSuggest({
         label: 'ON',
         text: 'ON ',
         detail: i18n.translate('kbn-esql-ast.esql.autocomplete.join.onKeyword', {

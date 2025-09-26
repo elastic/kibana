@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
@@ -89,7 +89,7 @@ export async function autocomplete(
   );
 }
 
-const newBranchSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   kind: 'Issue',
   label: i18n.translate('kbn-esql-ast.esql.suggestions.newBranchLabel', {
     defaultMessage: 'New branch',

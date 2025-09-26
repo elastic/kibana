@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import {
   columnExists as _columnExists,
@@ -114,7 +114,7 @@ export async function autocomplete(
         prependSpace(sortModifierSuggestions.NULLS_FIRST),
         prependSpace(sortModifierSuggestions.NULLS_LAST),
       ].map((suggestion) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           ...suggestion,
           filterText: fragment,
           text: fragment + suggestion.text,
@@ -129,7 +129,7 @@ export async function autocomplete(
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
         pipeCompleteItem,
-        withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' }),
+        withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
         rangeToReplace: nullsPrefixRange,
@@ -143,7 +143,7 @@ export async function autocomplete(
         { ...pipeCompleteItem, text: ' | ' },
         { ...commaCompleteItem, text: ', ' },
       ].map((suggestion) =>
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           ...suggestion,
           filterText: fragment,
           text: fragment + suggestion.text,
@@ -153,7 +153,7 @@ export async function autocomplete(
     }
 
     case 'after_nulls': {
-      return [pipeCompleteItem, withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' })];
+      return [pipeCompleteItem, withAutoSuggest({ ...commaCompleteItem, text: ', ' })];
     }
 
     default: {

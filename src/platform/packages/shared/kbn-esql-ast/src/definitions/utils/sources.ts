@@ -12,7 +12,7 @@ import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
-import { withTriggerSuggestionDialog } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
 import { fuzzySearch } from './shared';
@@ -52,7 +52,7 @@ export const buildSourcesDefinitions = (
   sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
 ): ISuggestionItem[] =>
   sources.map(({ name, isIntegration, title, type }) =>
-    withTriggerSuggestionDialog({
+    withAutoSuggest({
       label: title ?? name,
       text: getSafeInsertSourceText(name),
       asSnippet: isIntegration,
@@ -148,13 +148,13 @@ export async function additionalSourcesSuggestions(
         return definitions;
       } else {
         const _suggestions: ISuggestionItem[] = [
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             ...pipeCompleteItem,
             filterText: fragment,
             text: fragment + ' | ',
             rangeToReplace,
           }),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             ...commaCompleteItem,
             filterText: fragment,
             text: fragment + ', ',
@@ -189,7 +189,7 @@ export const specialIndicesToSuggestions = (
 
   for (const index of indices) {
     mainSuggestions.push(
-      withTriggerSuggestionDialog({
+      withAutoSuggest({
         label: index.name,
         text: index.name + ' ',
         kind: 'Issue',
@@ -203,7 +203,7 @@ export const specialIndicesToSuggestions = (
     if (index.aliases) {
       for (const alias of index.aliases) {
         aliasSuggestions.push(
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             label: alias,
             text: alias + ' $0',
             asSnippet: true,

@@ -8,7 +8,7 @@
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
@@ -42,9 +42,7 @@ export const buildConstantsDefinitions = (
       sortText: sortText ?? 'A',
     };
 
-    return options?.advanceCursorAndOpenSuggestions
-      ? withTriggerSuggestionDialog(suggestion)
-      : suggestion;
+    return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 
 export function getDateLiterals(options?: {

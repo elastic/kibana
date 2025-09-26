@@ -11,7 +11,7 @@ import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
-import { withTriggerSuggestionDialog } from '../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -35,10 +35,10 @@ function buildCharCompleteItem(
     detail,
     sortText,
   };
-  return advanceCursorAndOpenSuggestions ? withTriggerSuggestionDialog(suggestion) : suggestion;
+  return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
 }
 
-export const pipeCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '|',
   text: '| ',
   kind: 'Keyword',
@@ -68,7 +68,7 @@ export const commaCompleteItem = buildCharCompleteItem(
   { sortText: 'B', quoted: false }
 );
 
-export const byCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
   text: 'BY ',
   kind: 'Reference',
@@ -76,7 +76,7 @@ export const byCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const whereCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'WHERE',
   text: 'WHERE ',
   kind: 'Reference',
@@ -84,7 +84,7 @@ export const whereCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const onCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const onCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
@@ -92,7 +92,7 @@ export const onCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const withCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'WITH',
   text: 'WITH { $0 }',
   asSnippet: true,
@@ -102,7 +102,7 @@ export const withCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
 });
 
 export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
-  return withTriggerSuggestionDialog({
+  return withAutoSuggest({
     label,
     text: `${label} = `,
     kind: 'Variable',
@@ -113,7 +113,7 @@ export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionIte
   });
 };
 
-export const assignCompletionItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const assignCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.autocomplete.newVarDoc', {
     defaultMessage: 'Define a new column',
   }),
@@ -149,7 +149,7 @@ export const semiColonCompleteItem = buildCharCompleteItem(
   { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
 );
 
-export const listCompleteItem: ISuggestionItem = withTriggerSuggestionDialog({
+export const listCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '( ... )',
   text: '( $0 )',
   asSnippet: true,
@@ -183,7 +183,7 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
       if (commandDefinition.metadata.preview) {
         detail = `[${techPreviewLabel}] ${detail}`;
       }
-      const suggestion: ISuggestionItem = withTriggerSuggestionDialog({
+      const suggestion: ISuggestionItem = withAutoSuggest({
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
         kind: 'Method',
@@ -207,7 +207,7 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
 export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem = (
   histogramBarTarget: number = 50
 ) =>
-  withTriggerSuggestionDialog({
+  withAutoSuggest({
     label: i18n.translate('kbn-esql-ast.esql.autocomplete.addDateHistogram', {
       defaultMessage: 'Add date histogram',
     }),

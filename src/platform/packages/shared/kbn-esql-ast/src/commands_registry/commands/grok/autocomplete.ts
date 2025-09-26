@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
@@ -51,13 +51,13 @@ export async function autocomplete(
   }
   // GROK field pattern /
   else if (commandArgs.length === 2) {
-    return [withTriggerSuggestionDialog(pipeCompleteItem)];
+    return [withAutoSuggest(pipeCompleteItem)];
   }
 
   // GROK /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
   return fieldSuggestions.map((sug) => {
-    return withTriggerSuggestionDialog({
+    return withAutoSuggest({
       ...sug,
       text: `${sug.text} `,
     });

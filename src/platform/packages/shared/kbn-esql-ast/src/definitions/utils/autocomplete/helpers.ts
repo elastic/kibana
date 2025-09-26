@@ -751,7 +751,7 @@ export function createInferenceEndpointToCompletionItem(
  *
  * If the suggestion item already has a custom command, it will preserve it.
  */
-export function withTriggerSuggestionDialog(suggestionItem: ISuggestionItem): ISuggestionItem {
+export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
   return {
     ...suggestionItem,
     command: suggestionItem.command

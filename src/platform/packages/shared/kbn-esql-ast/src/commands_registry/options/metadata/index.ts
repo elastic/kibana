@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommandOption, ESQLCommand } from '../../../types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
@@ -25,7 +25,7 @@ export const METADATA_FIELDS = [
   '_score',
 ];
 
-export const metadataSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
@@ -66,7 +66,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
           })),
         (fragment, rangeToReplace) => {
           const _suggestions = [
-            withTriggerSuggestionDialog({
+            withAutoSuggest({
               ...pipeCompleteItem,
               text: fragment + ' | ',
               filterText: fragment,
@@ -75,7 +75,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
           ];
           if (filteredMetaFields.length > 1) {
             _suggestions.push(
-              withTriggerSuggestionDialog({
+              withAutoSuggest({
                 ...commaCompleteItem,
                 text: fragment + ', ',
                 filterText: fragment,

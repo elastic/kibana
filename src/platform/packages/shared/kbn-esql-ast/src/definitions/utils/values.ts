@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
 
 export const buildValueDefinitions = (
@@ -26,7 +26,5 @@ export const buildValueDefinitions = (
       kind: 'Value',
     };
 
-    return options?.advanceCursorAndOpenSuggestions
-      ? withTriggerSuggestionDialog(suggestion)
-      : suggestion;
+    return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });

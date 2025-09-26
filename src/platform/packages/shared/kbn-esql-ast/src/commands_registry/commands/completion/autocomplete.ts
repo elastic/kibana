@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -142,7 +142,7 @@ export async function autocomplete(
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
-            return withTriggerSuggestionDialog({
+            return withAutoSuggest({
               ...suggestion,
               text: `${suggestion.text} `,
               rangeToReplace,

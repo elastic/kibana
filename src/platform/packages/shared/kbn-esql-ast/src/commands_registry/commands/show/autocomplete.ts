@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -23,7 +23,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // SHOW INFO /
   if (/INFO\s+$/i.test(innerText)) {
-    return [withTriggerSuggestionDialog(pipeCompleteItem)];
+    return [withAutoSuggest(pipeCompleteItem)];
   }
   // SHOW LOLZ /
   else if (/SHOW\s+\S+\s+$/i.test(innerText)) {

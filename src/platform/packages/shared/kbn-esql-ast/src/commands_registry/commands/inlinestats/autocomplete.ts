@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
@@ -36,7 +36,7 @@ export async function autocomplete(
 
     if ('STATS'.startsWith(afterInline) && afterInline.length <= 'INLINE'.length) {
       return [
-        withTriggerSuggestionDialog({
+        withAutoSuggest({
           label: 'STATS',
           text: 'STATS ',
           kind: 'Keyword',
@@ -54,7 +54,7 @@ export async function autocomplete(
 
   if ('INLINE'.startsWith(trimmedInput) && trimmedInput.length <= 'INLINE'.length) {
     return [
-      withTriggerSuggestionDialog({
+      withAutoSuggest({
         label: 'INLINE STATS',
         text: 'INLINE STATS ',
         kind: 'Keyword',

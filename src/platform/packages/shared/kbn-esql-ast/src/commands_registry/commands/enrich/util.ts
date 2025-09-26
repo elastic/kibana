@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { withTriggerSuggestionDialog } from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../../types';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
@@ -37,7 +37,7 @@ export const buildPoliciesDefinitions = (
   policies: Array<{ name: string; sourceIndices: string[] }>
 ): ISuggestionItem[] =>
   policies.map(({ name: label, sourceIndices }) =>
-    withTriggerSuggestionDialog({
+    withAutoSuggest({
       label,
       text: getSafeInsertText(label, { dashSupported: true }) + ' ',
       kind: 'Class',
@@ -133,7 +133,7 @@ export const modeDescription = i18n.translate('kbn-esql-ast.esql.definitions.ccq
 });
 
 export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, description }) =>
-  withTriggerSuggestionDialog({
+  withAutoSuggest({
     label: `_${name}`,
     text: `_${name}:$0`,
     asSnippet: true,
@@ -148,7 +148,7 @@ export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, des
   })
 );
 
-export const onSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+export const onSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
@@ -158,7 +158,7 @@ export const onSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
   sortText: '1',
 });
 
-export const withSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
+export const withSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'WITH',
   text: 'WITH ',
   kind: 'Reference',
@@ -173,7 +173,7 @@ export const buildMatchingFieldsDefinition = (
   fields: string[]
 ): ISuggestionItem[] =>
   fields.map((label) =>
-    withTriggerSuggestionDialog({
+    withAutoSuggest({
       label,
       text: getSafeInsertText(label) + ' ',
       kind: 'Variable',
