@@ -14,7 +14,7 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
-import { useIsAgentIdValid } from '../../../hooks/agents/use_is_agent_id_valid';
+import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
 
 interface ConversationInputFormProps {
@@ -32,10 +32,12 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const { euiTheme } = useEuiTheme();
   const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();
-  const isAgentIdValid = useIsAgentIdValid();
 
-  const shouldDisableTextArea = !isAgentIdValid(agentId) && isFetched && !!agentId;
-  const isSubmitDisabled = !input.trim() || isSendingMessage || !isAgentIdValid(agentId);
+  const validateAgentId = useValidateAgentId();
+  const isAgentIdValid = validateAgentId(agentId);
+
+  const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
+  const isSubmitDisabled = !input.trim() || isSendingMessage || !isAgentIdValid;
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {

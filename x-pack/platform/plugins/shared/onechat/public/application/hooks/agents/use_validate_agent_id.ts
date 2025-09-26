@@ -8,12 +8,12 @@
 import { useCallback, useMemo } from 'react';
 import { useOnechatAgents } from './use_agents';
 
-export const useIsAgentIdValid = () => {
+export const useValidateAgentId = () => {
   const { agents } = useOnechatAgents();
 
   const agentIds = useMemo(() => new Set(agents.map((agent) => agent.id)), [agents]);
 
-  const isAgentIdValid = useCallback(
+  const validateAgentId = useCallback(
     (agentId?: string): agentId is string => {
       if (!agentId) {
         return false;
@@ -23,5 +23,5 @@ export const useIsAgentIdValid = () => {
     [agentIds]
   );
 
-  return isAgentIdValid;
+  return validateAgentId;
 };
