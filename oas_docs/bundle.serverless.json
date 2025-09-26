@@ -923,7 +923,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "A2A Task Endpoint",
+        "summary": "Send A2A task",
         "tags": [
           "agent builder"
         ],
@@ -1009,7 +1009,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "A2A Agent Card",
+        "summary": "Get A2A agent card",
         "tags": [
           "agent builder"
         ],
@@ -1692,7 +1692,7 @@
     },
     "/api/agent_builder/converse": {
       "post": {
-        "description": "Send a message to an agent. Use this endpoint to have conversations with AI agents, continue existing conversations, and enable advanced features like external integrations and visualization capabilities.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-converse",
         "parameters": [
           {
@@ -1724,7 +1724,7 @@
                 "properties": {
                   "agent_id": {
                     "default": "elastic-ai-agent",
-                    "description": "The ID of the agent to converse with. Defaults to the default Elastic AI agent.",
+                    "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
                   },
                   "capabilities": {
@@ -1806,7 +1806,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Converse with an agent",
+        "summary": "Send chat message",
         "tags": [
           "agent builder"
         ],
@@ -1815,7 +1815,7 @@
     },
     "/api/agent_builder/converse/async": {
       "post": {
-        "description": "Send a message to an agent with real-time streaming events. Use this endpoint to have conversations with AI agents and receive live updates as the agent processes your request.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-converse-async",
         "parameters": [
           {
@@ -1847,7 +1847,7 @@
                 "properties": {
                   "agent_id": {
                     "default": "elastic-ai-agent",
-                    "description": "The ID of the agent to converse with. Defaults to the default Elastic AI agent.",
+                    "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent.",
                     "type": "string"
                   },
                   "capabilities": {
@@ -1958,7 +1958,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Converse with an agent and stream events",
+        "summary": "Send chat message (streaming)",
         "tags": [
           "agent builder"
         ],
@@ -1967,7 +1967,7 @@
     },
     "/api/agent_builder/mcp": {
       "delete": {
-        "description": "Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "DELETE requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "delete-agent-builder-mcp",
         "parameters": [],
         "responses": {
@@ -1992,14 +1992,14 @@
             "description": "Indicates a Method Not Allowed response"
           }
         },
-        "summary": "MCP server",
+        "summary": "Delete MCP server (not supported)",
         "tags": [
           "agent builder"
         ],
         "x-state": "Technical Preview"
       },
       "get": {
-        "description": "Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "GET requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "get-agent-builder-mcp",
         "parameters": [],
         "responses": {
@@ -2024,14 +2024,14 @@
             "description": "Indicates a Method Not Allowed response"
           }
         },
-        "summary": "MCP server",
+        "summary": "Get MCP server (not supported)",
         "tags": [
           "agent builder"
         ],
         "x-state": "Technical Preview"
       },
       "post": {
-        "description": "Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-mcp",
         "parameters": [],
         "requestBody": {
@@ -2089,7 +2089,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "MCP server",
+        "summary": "Send MCP request",
         "tags": [
           "agent builder"
         ],
