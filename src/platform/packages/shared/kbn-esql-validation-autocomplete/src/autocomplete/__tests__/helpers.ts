@@ -8,7 +8,7 @@
  */
 import { camelCase } from 'lodash';
 import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
-import { withTriggerSuggestionDialog, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   Location,
@@ -406,7 +406,7 @@ export const attachTriggerCommand = (
   s: string | PartialSuggestionWithText
 ): PartialSuggestionWithText =>
   typeof s === 'string'
-    ? withTriggerSuggestionDialog({
+    ? withAutoSuggest({
         text: s,
       } as ISuggestionItem)
-    : withTriggerSuggestionDialog(s as ISuggestionItem);
+    : withAutoSuggest(s as ISuggestionItem);

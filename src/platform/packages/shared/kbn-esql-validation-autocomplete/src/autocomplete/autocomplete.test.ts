@@ -10,7 +10,7 @@ import {
   esqlCommandRegistry,
   TIME_SYSTEM_PARAMS,
   timeUnitsToSuggest,
-  withTriggerSuggestionDialog,
+  withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
 } from '@kbn/esql-ast';
@@ -586,8 +586,8 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM /',
         [
-          withTriggerSuggestionDialog({ text: 'index1' } as ISuggestionItem),
-          withTriggerSuggestionDialog({ text: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
         undefined,
         [
@@ -602,8 +602,8 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index/',
         [
-          withTriggerSuggestionDialog({ text: 'index1' } as ISuggestionItem),
-          withTriggerSuggestionDialog({ text: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
         undefined,
         [
@@ -623,15 +623,15 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1/',
         [
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index1 | ',
             filterText: 'index1',
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index1, ',
             filterText: 'index1',
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index1 METADATA ',
             filterText: 'index1',
           } as ISuggestionItem),
@@ -655,15 +655,15 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index2 | ',
             filterText: 'index2',
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index2, ',
             filterText: 'index2',
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'index2 METADATA ',
             filterText: 'index2',
           } as ISuggestionItem),
@@ -691,17 +691,17 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM foo$bar/',
         [
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'foo$bar | ',
             filterText: 'foo$bar',
             rangeToReplace: { start: 5, end: 12 },
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'foo$bar, ',
             filterText: 'foo$bar',
             rangeToReplace: { start: 5, end: 12 },
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
             rangeToReplace: { start: 5, end: 12 },
@@ -721,9 +721,9 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM i*/',
         [
-          withTriggerSuggestionDialog({ text: 'i* | ', filterText: 'i*' } as ISuggestionItem),
-          withTriggerSuggestionDialog({ text: 'i*, ', filterText: 'i*' } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({ text: 'i* | ', filterText: 'i*' } as ISuggestionItem),
+          withAutoSuggest({ text: 'i*, ', filterText: 'i*' } as ISuggestionItem),
+          withAutoSuggest({
             text: 'i* METADATA ',
             filterText: 'i*',
           } as ISuggestionItem),
@@ -903,11 +903,11 @@ describe('autocomplete', () => {
         );
         // comma if there's even one more field
         testSuggestions('FROM a METADATA _id, _ignored, _index, _source/', [
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             filterText: '_source',
             text: '_source | ',
           } as ISuggestionItem),
-          withTriggerSuggestionDialog({
+          withAutoSuggest({
             filterText: '_source',
             text: '_source, ',
           } as ISuggestionItem),
@@ -916,7 +916,7 @@ describe('autocomplete', () => {
         testSuggestions(
           'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
           [
-            withTriggerSuggestionDialog({
+            withAutoSuggest({
               filterText: '_version',
               text: '_version | ',
             } as ISuggestionItem),
