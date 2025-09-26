@@ -26,6 +26,7 @@ import {
   UrlStateProvider,
   type ListingPageUrlState,
   type PageUrlState,
+  useUrlState,
 } from '@kbn/ml-url-state';
 
 import { useAppDependencies } from '../../app_dependencies';
@@ -107,7 +108,7 @@ export const TransformManagement: FC = () => {
   const styles = useStyles();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
-    getDefaultTransformListState()
+    useUrlState('_a')?.[0] || getDefaultTransformListState()
   );
 
   const {
@@ -242,6 +243,9 @@ export const TransformManagement: FC = () => {
       target="_blank"
       iconType="question"
       data-test-subj="documentationLink"
+      aria-label={i18n.translate('xpack.transform.transformList.transformDocsLinkAriaLabel', {
+        defaultMessage: 'Transform documentation link',
+      })}
     >
       <FormattedMessage
         id="xpack.transform.transformList.transformDocsLinkText"

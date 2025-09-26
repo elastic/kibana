@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { TransformDisplayText } from '../../../slo_details/components/unhealthy_transform_display_text';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
 export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
-  const { http } = useKibana().services;
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
@@ -39,7 +29,6 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
   if (isLoading || isError || results === undefined || results?.length === 0) {
     return null;
   }
-
   const unhealthySloList = results.filter((result) => result.health.overall === 'unhealthy');
   if (unhealthySloList.length === 0) {
     return null;
@@ -91,61 +80,24 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
             />
             <ul>
               {unhealthyRollupTransforms.map((result) => (
-                <li>
-                  {getSLOTransformId(result.sloId, result.sloRevision)}
-                  <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        data-test-subj="sloHealthCalloutCopyButton"
-                        aria-label={i18n.translate(
-                          'xpack.slo.sloList.healthCallout.copyToClipboard',
-                          { defaultMessage: 'Copy to clipboard' }
-                        )}
-                        color="text"
-                        iconType="copy"
-                        onClick={copy}
-                      />
-                    )}
-                  </EuiCopy>
+                <li key={result.sloId}>
+                  <TransformDisplayText
+                    textSize="xs"
+                    transformId={getSLOTransformId(result.sloId, result.sloRevision)}
+                  />
                 </li>
               ))}
-
               {unhealthySummaryTransforms.map((result) => (
-                <li>
-                  {getSLOSummaryTransformId(result.sloId, result.sloRevision)}
-                  <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        data-test-subj="sloHealthCalloutCopyButton"
-                        aria-label={i18n.translate(
-                          'xpack.slo.sloList.healthCallout.copyToClipboard',
-                          { defaultMessage: 'Copy to clipboard' }
-                        )}
-                        color="text"
-                        iconType="copy"
-                        onClick={copy}
-                      />
-                    )}
-                  </EuiCopy>
+                <li key={result.sloId}>
+                  <TransformDisplayText
+                    textSize="xs"
+                    transformId={getSLOSummaryTransformId(result.sloId, result.sloRevision)}
+                  />
                 </li>
               ))}
             </ul>
           </EuiFlexItem>
           <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="sloHealthCalloutInspectTransformButton"
-                color="danger"
-                size="s"
-                fill
-                href={http?.basePath.prepend('/app/management/data/transform')}
-              >
-                <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.buttonTransformLabel"
-                  defaultMessage="Inspect transform"
-                />
-              </EuiButton>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="sloHealthCalloutDimissButton"
