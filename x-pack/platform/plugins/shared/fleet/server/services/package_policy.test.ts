@@ -60,7 +60,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
-import { FleetError, PackagePolicyValidationError } from '../errors';
+import { FleetError, PackagePolicyValidationError, PackagePolicyRequestError } from '../errors';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
@@ -72,6 +72,7 @@ import {
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
   _normalizePackagePolicyKuery,
+  validatePackagePolicyId,
 } from './package_policy';
 import { appContextService } from '.';
 
@@ -327,6 +328,7 @@ describe('Package policy service', () => {
   describe('create', () => {
     beforeEach(() => {
       jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+      jest.clearAllMocks();
     });
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -451,8 +453,216 @@ describe('Package policy service', () => {
       ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
     });
 
-    beforeEach(() => {
-      jest.clearAllMocks();
+    it('should validate package policy ID when custom ID is provided', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      mockAgentPolicyGet();
+
+      // Test with invalid ID - should throw the specific validation error
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'invalid@id', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrow(PackagePolicyRequestError);
+
+      // Test with specific invalid character and verify exact error message
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'invalid@id', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrow(
+        "Invalid package policy ID: 'invalid@id'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+      );
+
+      // Test another invalid character pattern
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'invalid space id', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrow(PackagePolicyRequestError);
+    });
+
+    it('should accept valid package policy ID when custom ID is provided', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'valid-test_id.123',
+        attributes: {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      // Test with valid ID containing allowed characters - should not throw
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        { id: 'valid-test_id.123', skipUniqueNameVerification: true }
+      );
+
+      expect(result.id).toBe('valid-test_id.123');
+
+      // Test another valid pattern with all allowed characters
+      soClient.create.mockResolvedValueOnce({
+        id: 'test_policy-1.example',
+        attributes: {
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      const result2 = await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        { id: 'test_policy-1.example', skipUniqueNameVerification: true }
+      );
+
+      expect(result2.id).toBe('test_policy-1.example');
+    });
+
+    it('should not validate package policy ID when no custom ID is provided', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'auto-generated-uuid',
+        attributes: {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      // Test without custom ID - should succeed without validation (auto-generated UUIDs are valid)
+      const result = await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        { skipUniqueNameVerification: true }
+      );
+
+      expect(result.id).toBe('auto-generated-uuid');
     });
 
     it('should handle cloud connector variables when supports_cloud_connector is true', async () => {
@@ -982,6 +1192,188 @@ describe('Package policy service', () => {
         name: 'Test Package Policy 2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should validate all package policy IDs in bulk create', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      mockAgentPolicyGet();
+
+      // Test with mixed valid and invalid IDs in the batch - should throw for invalid ones
+      await expect(
+        packagePolicyService.bulkCreate(soClient, esClient, [
+          {
+            id: 'valid-id-1',
+            name: 'Test Package Policy 1',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test_agent_policy',
+            policy_ids: ['test_agent_policy'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          {
+            id: 'invalid@id',
+            name: 'Test Package Policy 2',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test_agent_policy',
+            policy_ids: ['test_agent_policy'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+        ])
+      ).rejects.toThrow(PackagePolicyRequestError);
+
+      // Test with only invalid IDs
+      await expect(
+        packagePolicyService.bulkCreate(soClient, esClient, [
+          {
+            id: 'invalid space',
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test_agent_policy',
+            policy_ids: ['test_agent_policy'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+        ])
+      ).rejects.toThrow(
+        "Invalid package policy ID: 'invalid space'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+      );
+    });
+
+    it('should accept all valid package policy IDs in bulk create', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'valid-id_1.test',
+            attributes: {
+              name: 'Test Package Policy 1',
+              namespace: 'test',
+              enabled: true,
+              policy_id: 'test_agent_policy',
+              policy_ids: ['test_agent_policy'],
+              inputs: [],
+            },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+          {
+            id: 'valid-id-2_test',
+            attributes: {
+              name: 'Test Package Policy 2',
+              namespace: 'test',
+              enabled: true,
+              policy_id: 'test_agent_policy',
+              policy_ids: ['test_agent_policy'],
+              inputs: [],
+            },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet();
+
+      // Test with all valid IDs using different allowed character patterns
+      const result = await packagePolicyService.bulkCreate(soClient, esClient, [
+        {
+          id: 'valid-id_1.test',
+          name: 'Test Package Policy 1',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test_agent_policy',
+          policy_ids: ['test_agent_policy'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+        {
+          id: 'valid-id-2_test',
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test_agent_policy',
+          policy_ids: ['test_agent_policy'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+      ]);
+
+      expect(result.created).toHaveLength(2);
+      expect(result.created[0].id).toBe('valid-id_1.test');
+      expect(result.created[1].id).toBe('valid-id-2_test');
+    });
+
+    it('should handle package policies without IDs in bulk create', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'auto-generated-id-1',
+            attributes: {
+              name: 'Test Package Policy 1',
+              namespace: 'test',
+              enabled: true,
+              policy_id: 'test_agent_policy',
+              policy_ids: ['test_agent_policy'],
+              inputs: [],
+            },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet();
+
+      // Test with no IDs provided - should succeed without validation (IDs will be auto-generated)
+      const result = await packagePolicyService.bulkCreate(soClient, esClient, [
+        {
+          name: 'Test Package Policy 1',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test_agent_policy',
+          policy_ids: ['test_agent_policy'],
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        },
+      ]);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.created[0].id).toBe('auto-generated-id-1');
     });
   });
 
@@ -7630,5 +8022,108 @@ describe('_normalizePackagePolicyKuery', () => {
       `fleet-package-policies.name:test`
     );
     expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+});
+
+describe('validatePackagePolicyId', () => {
+  it('should accept valid IDs with letters and numbers', () => {
+    expect(() => validatePackagePolicyId('validId123')).not.toThrow();
+  });
+
+  it('should accept valid IDs with dots', () => {
+    expect(() => validatePackagePolicyId('valid.id.with.dots')).not.toThrow();
+  });
+
+  it('should accept valid IDs with underscores', () => {
+    expect(() => validatePackagePolicyId('valid_id_with_underscores')).not.toThrow();
+  });
+
+  it('should accept valid IDs with hyphens', () => {
+    expect(() => validatePackagePolicyId('valid-id-with-hyphens')).not.toThrow();
+  });
+
+  it('should accept valid IDs with mixed allowed characters', () => {
+    expect(() => validatePackagePolicyId('valid_id-123.mixed')).not.toThrow();
+  });
+
+  it('should reject IDs with spaces', () => {
+    expect(() => validatePackagePolicyId('invalid id with spaces')).toThrow(
+      PackagePolicyRequestError
+    );
+    expect(() => validatePackagePolicyId('invalid id with spaces')).toThrow(
+      "Invalid package policy ID: 'invalid id with spaces'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+    );
+  });
+
+  it('should reject IDs with special characters', () => {
+    expect(() => validatePackagePolicyId('invalid@id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid@id')).toThrow(
+      "Invalid package policy ID: 'invalid@id'. IDs can only contain letters, numbers, dots, underscores, and hyphens."
+    );
+  });
+
+  it('should reject IDs with slashes', () => {
+    expect(() => validatePackagePolicyId('invalid/id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid\\id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with parentheses', () => {
+    expect(() => validatePackagePolicyId('invalid(id)')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with brackets', () => {
+    expect(() => validatePackagePolicyId('invalid[id]')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalid{id}')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with colon', () => {
+    expect(() => validatePackagePolicyId('invalid:id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with semicolon', () => {
+    expect(() => validatePackagePolicyId('invalid;id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with plus sign', () => {
+    expect(() => validatePackagePolicyId('invalid+id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with equals sign', () => {
+    expect(() => validatePackagePolicyId('invalid=id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with percent sign', () => {
+    expect(() => validatePackagePolicyId('invalid%id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject IDs with dollar sign', () => {
+    expect(() => validatePackagePolicyId('invalid$id')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should reject empty string', () => {
+    expect(() => validatePackagePolicyId('')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle edge case - single character IDs', () => {
+    expect(() => validatePackagePolicyId('a')).not.toThrow();
+    expect(() => validatePackagePolicyId('1')).not.toThrow();
+    expect(() => validatePackagePolicyId('.')).not.toThrow();
+    expect(() => validatePackagePolicyId('_')).not.toThrow();
+    expect(() => validatePackagePolicyId('-')).not.toThrow();
+    expect(() => validatePackagePolicyId('!')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle unicode characters', () => {
+    expect(() => validatePackagePolicyId('invalid€id')).toThrow(PackagePolicyRequestError);
+    expect(() => validatePackagePolicyId('invalidŒid')).toThrow(PackagePolicyRequestError);
+  });
+
+  it('should handle numeric-only IDs', () => {
+    expect(() => validatePackagePolicyId('123456')).not.toThrow();
+  });
+
+  it('should handle long valid IDs', () => {
+    const longValidId = 'a'.repeat(100) + '123.' + '_'.repeat(50) + '-test';
+    expect(() => validatePackagePolicyId(longValidId)).not.toThrow();
   });
 });
