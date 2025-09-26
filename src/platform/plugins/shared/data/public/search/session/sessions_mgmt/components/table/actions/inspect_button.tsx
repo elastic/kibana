@@ -15,10 +15,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../../../../common/constants';
 import type { UISession } from '../../../types';
 import type { IClickActionDescriptor } from './types';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

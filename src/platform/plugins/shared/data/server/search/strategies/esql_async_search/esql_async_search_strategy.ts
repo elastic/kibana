@@ -14,6 +14,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../common/constants';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
@@ -83,7 +84,7 @@ export const esqlAsyncSearchStrategyProvider = (
       ...getCommonDefaultAsyncGetParams(
         searchConfig,
         options,
-        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+        await featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
       ),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
       ...(request.params?.wait_for_completion_timeout
@@ -113,7 +114,7 @@ export const esqlAsyncSearchStrategyProvider = (
   ) {
     const { dropNullColumns, ...requestParams } = request.params ?? {};
     const hasSearchSessions = await featureFlags.getBooleanValue(
-      'search.backgroundSearchEnabled',
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
       false
     );
 

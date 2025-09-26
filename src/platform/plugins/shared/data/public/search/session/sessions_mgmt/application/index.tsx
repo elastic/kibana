@@ -9,6 +9,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../../common/constants';
 import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
@@ -19,7 +20,6 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 export class SearchSessionsMgmtApp {
   constructor(

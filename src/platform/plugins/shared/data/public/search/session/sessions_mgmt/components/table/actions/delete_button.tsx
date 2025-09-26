@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../../../../common/constants';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
 import type { UISession } from '../../../types';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;

@@ -12,12 +12,12 @@ import type { ApplicationStart, FeatureFlagsStart, NotificationsStart } from '@k
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../../common/constants';
 import type { SearchSessionStatusResponse } from '../../../../../common';
 import type { SearchSessionSavedObject } from '../types';
 import type { ISessionsClient } from '../../sessions_client';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 interface SearchSessionManagementDeps {
   notifications: NotificationsStart;

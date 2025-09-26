@@ -13,6 +13,7 @@ import { catchError, tap } from 'rxjs';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../common/constants';
 import type { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -54,7 +55,7 @@ export const enhancedEsSearchStrategyProvider = (
       getDefaultAsyncGetParams(
         searchConfig,
         options,
-        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+        await featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
       ).keep_alive;
 
     const { body, headers } = await client.asyncSearch.status(
@@ -85,7 +86,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...getDefaultAsyncGetParams(
         searchConfig,
         options,
-        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+        await featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
       ),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
       ...(request.params?.wait_for_completion_timeout
@@ -116,7 +117,7 @@ export const enhancedEsSearchStrategyProvider = (
         uiSettingsClient,
         searchConfig,
         options,
-        await featureFlags.getBooleanValue('search.backgroundSearchEnabled', false)
+        await featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
       )),
       ...request.params,
     };

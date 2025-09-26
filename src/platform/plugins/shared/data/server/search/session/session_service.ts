@@ -24,6 +24,7 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../common/constants';
 import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
@@ -472,7 +473,7 @@ export class SearchSessionService implements ISearchSessionService {
 
   private async isEnabled() {
     const hasBackgroundSearch = await this.featureFlags?.getBooleanValue(
-      'search.backgroundSearchEnabled',
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
       false
     );
 

@@ -31,6 +31,7 @@ import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/publ
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../common/constants';
 import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
@@ -78,7 +79,6 @@ import { registerSearchSessionsMgmtIfNeeded } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from './session/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

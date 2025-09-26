@@ -19,7 +19,7 @@ describe('request utils', () => {
           defaultExpiration: moment.duration(3, 'd'),
         },
       });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {});
+      const params = getDefaultAsyncSubmitParams(mockConfig, {}, false);
       expect(params).toHaveProperty('keep_alive', '60000ms');
     });
 
@@ -30,10 +30,14 @@ describe('request utils', () => {
           defaultExpiration: moment.duration(3, 'd'),
         },
       });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+          isStored: true,
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_alive', '259200000ms');
     });
 
@@ -44,10 +48,14 @@ describe('request utils', () => {
           defaultExpiration: moment.duration(3, 'd'),
         },
       });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+          isStored: true,
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_alive', '60000ms');
     });
 
@@ -58,27 +66,39 @@ describe('request utils', () => {
           enabled: false,
         },
       });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_alive', '60000ms');
     });
 
     // unskip when SQL has full session support https://github.com/elastic/kibana/issues/127880
     test.skip('Uses `keep_on_completion` if sessions enabled', async () => {
       const mockConfig = getMockSearchConfig({});
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_on_completion', true);
     });
 
     // remove when SQL has full session support https://github.com/elastic/kibana/issues/127880
     test("Don't use `keep_on_completion` if sessions enabled", async () => {
       const mockConfig = getMockSearchConfig({});
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_on_completion', false);
     });
 
@@ -89,9 +109,13 @@ describe('request utils', () => {
           enabled: false,
         },
       });
-      const params = getDefaultAsyncSubmitParams(mockConfig, {
-        sessionId: 'foo',
-      });
+      const params = getDefaultAsyncSubmitParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+        },
+        false
+      );
       expect(params).toHaveProperty('keep_on_completion', false);
     });
   });
@@ -104,7 +128,7 @@ describe('request utils', () => {
           enabled: true,
         },
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {});
+      const params = getDefaultAsyncGetParams(mockConfig, {}, false);
       expect(params).toHaveProperty('wait_for_completion_timeout');
     });
 
@@ -115,7 +139,7 @@ describe('request utils', () => {
           enabled: true,
         },
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {});
+      const params = getDefaultAsyncGetParams(mockConfig, {}, false);
       expect(params).toHaveProperty('keep_alive', '60000ms');
     });
 
@@ -127,11 +151,15 @@ describe('request utils', () => {
           enabled: true,
         },
       });
-      const params = getDefaultAsyncGetParams(mockConfig, {
-        sessionId: 'foo',
-        isStored: true,
-        isSearchStored: true,
-      });
+      const params = getDefaultAsyncGetParams(
+        mockConfig,
+        {
+          sessionId: 'foo',
+          isStored: true,
+          isSearchStored: true,
+        },
+        false
+      );
       expect(params).not.toHaveProperty('keep_alive');
     });
 
@@ -142,7 +170,7 @@ describe('request utils', () => {
           enabled: false,
         },
       });
-      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' }, false);
       expect(params).toHaveProperty('keep_alive', '60000ms');
     });
   });

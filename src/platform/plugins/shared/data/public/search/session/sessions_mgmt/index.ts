@@ -18,8 +18,9 @@ import type {
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../common/constants';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SEARCH_SESSIONS_MANAGEMENT_ID, BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';

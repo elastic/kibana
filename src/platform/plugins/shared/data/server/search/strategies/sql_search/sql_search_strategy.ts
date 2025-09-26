@@ -14,6 +14,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { type SqlQuerySqlFormat } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../common/constants';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -50,7 +51,7 @@ export const sqlSearchStrategyProvider = (
       let headers: IncomingHttpHeaders;
       let meta: DiagnosticResult['meta'];
       const hasBackgroundSearch = await featureFlags.getBooleanValue(
-        'search.backgroundSearchEnabled',
+        BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
         false
       );
 

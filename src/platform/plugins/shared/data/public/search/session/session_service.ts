@@ -31,6 +31,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../common/constants';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type {
@@ -45,7 +46,7 @@ import {
 } from './search_session_state';
 import type { ISessionsClient } from './sessions_client';
 import type { NowProviderInternalContract } from '../../now_provider';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
