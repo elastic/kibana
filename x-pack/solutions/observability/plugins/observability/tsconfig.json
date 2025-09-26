@@ -132,6 +132,7 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/page-attachment-schema",
     "@kbn/licensing-types",
+    "@kbn/deeplinks-management"
   ],
   "exclude": ["target/**/*"]
 }
