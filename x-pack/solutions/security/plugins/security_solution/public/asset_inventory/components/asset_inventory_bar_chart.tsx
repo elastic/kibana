@@ -122,8 +122,11 @@ export const handleElementClick = (
 
   const filters: Filter[] = [createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index)];
 
-  // Only add sub_type filter if it's not "Uncategorized" (indicating missing field)
-  if (subtype && subtype !== 'Uncategorized') {
+  // Check if this is an "Uncategorized" entry (now formatted as "[EntityType] (uncategorized)")
+  const isUncategorized = subtype && subtype.endsWith('(uncategorized)');
+
+  // Only add sub_type filter if it's not an "Uncategorized" entry (indicating missing field)
+  if (subtype && !isUncategorized) {
     filters.push(createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index));
   } else {
     filters.push(createNotExistsAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, index));
