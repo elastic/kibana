@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const [PREBUILT_RULE_ID_A, PREBUILT_RULE_ID_B] = ['prebuilt-rule-a', 'prebuilt-rule-b'];
   const [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B] = [
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -226,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })

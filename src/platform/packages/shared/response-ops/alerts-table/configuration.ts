@@ -20,9 +20,9 @@ import {
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_LABEL } from './translations';
+import type { AlertsTableSortCombinations } from './types';
 
 const columns = [
   {
@@ -124,7 +124,7 @@ const columns = [
 
 export { columns as defaultAlertsTableColumns };
 
-const sort: SortCombinations[] = [
+const sort: AlertsTableSortCombinations[] = [
   {
     [TIMESTAMP]: {
       order: 'desc',

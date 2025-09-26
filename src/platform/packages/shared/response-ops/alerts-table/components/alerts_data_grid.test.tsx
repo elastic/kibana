@@ -66,11 +66,13 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
   leadingControlColumns: [],
   trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
+  columnVisibility: {
+    visibleColumns: mockColumns.map((c) => c.id),
+    setVisibleColumns: mockOnChangeVisibleColumns,
+  },
   'data-test-subj': 'testTable',
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
@@ -445,8 +447,10 @@ describe('AlertsDataGrid', () => {
             toolbarVisibility={{
               showColumnSelector: true,
             }}
-            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
-            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+            columnVisibility={{
+              visibleColumns: mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay),
+              setVisibleColumns: mockOnChangeVisibleColumns,
+            }}
           />
         );
         const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');

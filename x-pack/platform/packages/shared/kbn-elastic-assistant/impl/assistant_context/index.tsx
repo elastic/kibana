@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -88,6 +89,7 @@ export interface AssistantProviderProps {
   nameSpace?: string;
   navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
+  settings: SettingsStart;
   toasts?: IToasts;
   currentAppId: string;
   productDocBase: ProductDocBasePluginStart;
@@ -129,6 +131,7 @@ export interface UseAssistantContext {
   selectedSettingsTab: ModalSettingsTabs | null;
   contentReferencesVisible: boolean;
   showAnonymizedValues: boolean;
+  settings: SettingsStart;
   setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
   setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -179,6 +182,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     getUrlForApp,
     http,
     inferenceEnabled = false,
+    settings,
     navigateToApp,
     nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
     productDocBase,
@@ -318,6 +322,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       getComments,
       getUrlForApp,
       http,
+      settings,
       inferenceEnabled,
       knowledgeBase: {
         ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
@@ -331,6 +336,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
+
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       contentReferencesVisible: contentReferencesVisible ?? true,
@@ -365,6 +371,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       basePromptContexts,
       currentUser,
       docLinks,
+      settings,
       getComments,
       getUrlForApp,
       http,

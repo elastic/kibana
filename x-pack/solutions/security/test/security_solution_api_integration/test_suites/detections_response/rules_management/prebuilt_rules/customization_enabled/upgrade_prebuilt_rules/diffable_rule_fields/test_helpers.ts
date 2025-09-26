@@ -199,13 +199,13 @@ export function testFieldUpgradesToMergedValue(
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const deps = {
     es,
     supertest,
     log,
-    securitySolutionApi,
+    detectionsApi,
   };
 
   it('upgrades to MERGED value', async () => {
@@ -234,7 +234,7 @@ export function testFieldUpgradesToMergedValue(
       ],
     });
 
-    const upgradedRule = await securitySolutionApi.readRule({
+    const upgradedRule = await detectionsApi.readRule({
       query: { rule_id: DEFAULT_TEST_RULE_ID },
     });
 
@@ -273,13 +273,13 @@ export function testFieldUpgradesToResolvedValue(
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const deps = {
     es,
     supertest,
     log,
-    securitySolutionApi,
+    detectionsApi,
   };
 
   it('upgrades to RESOLVED value', async () => {
@@ -308,7 +308,7 @@ export function testFieldUpgradesToResolvedValue(
       ],
     });
 
-    const upgradedRule = await deps.securitySolutionApi.readRule({
+    const upgradedRule = await deps.detectionsApi.readRule({
       query: { rule_id: DEFAULT_TEST_RULE_ID },
     });
 
