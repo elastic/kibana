@@ -135,7 +135,7 @@ export const getPackagePolicyIdsForCurrentUser = async (
       searchFields: ['package.name'],
       search: pkg.name,
       spaceIds: ['*'],
-      fields: ['id'],
+      fields: ['id', 'name'],
     });
     packagePolicyIdsByPackageName[pkg.name] = packagePolicySORes.saved_objects.map((so) => so.id);
   }
