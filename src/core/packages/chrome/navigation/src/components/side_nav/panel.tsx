@@ -14,10 +14,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useRovingIndex } from '../../hooks/use_roving_index';
+import type { MenuItem } from '../../../types';
 
 export interface SideNavPanelProps {
   children: ReactNode;
   footer?: ReactNode;
+  openerNode: MenuItem;
 }
 
 /**
@@ -27,7 +29,7 @@ export interface SideNavPanelProps {
  *
  * TODO: pass ref to EuiPanel
  */
-export const SideNavPanel = ({ children, footer }: SideNavPanelProps): JSX.Element => {
+export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -38,8 +40,9 @@ export const SideNavPanel = ({ children, footer }: SideNavPanelProps): JSX.Eleme
     <div
       role="region"
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
-        defaultMessage: 'Side panel',
+        defaultMessage: `Side panel for ${openerNode.label}`,
       })}
+      data-test-subj={`side-navigation-panel-${openerNode.id}`}
       ref={ref}
     >
       <EuiPanel

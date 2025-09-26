@@ -164,7 +164,7 @@ describe('Collapsed mode', () => {
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -233,6 +233,7 @@ describe('Collapsed mode', () => {
         const dashboardsLink = screen.getByRole('link', {
           name: 'Dashboards',
         });
+
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
         await userEvent.click(dashboardsLink);
@@ -240,7 +241,7 @@ describe('Collapsed mode', () => {
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -455,7 +456,7 @@ describe('Collapsed mode', () => {
         });
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -496,7 +497,7 @@ describe('Collapsed mode', () => {
         });
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -550,7 +551,7 @@ describe('Collapsed mode', () => {
         expect(mlAnomalyExplorerLink).toHaveAttribute('data-highlighted', 'true');
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();

@@ -200,12 +200,11 @@ describe('Both modes', () => {
           name: /Apps/i,
         });
 
-        // Parent should be visually highlighted but not have aria-current since child is the actual active item
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).not.toHaveAttribute('aria-current', 'page');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         const tlsCertificatesLink = within(sidePanel).getByRole('link', {
@@ -266,12 +265,11 @@ describe('Both modes', () => {
 
         await userEvent.click(appsLink);
 
-        // Parent should be both current and highlighted (since parent and first child have same ID)
         expect(appsLink).toHaveAttribute('aria-current', 'page');
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -330,7 +328,7 @@ describe('Both modes', () => {
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         const childLink = within(sidePanel).getByRole('link', {
@@ -366,7 +364,7 @@ describe('Both modes', () => {
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         let overviewLink = within(sidePanel).getByRole('link', {
@@ -668,12 +666,11 @@ describe('Both modes', () => {
           name: 'Settings',
         });
 
-        // Parent should be highlighted but not current (child is current)
         expect(settingsLink).toHaveAttribute('data-highlighted', 'true');
         expect(settingsLink).not.toHaveAttribute('aria-current', 'page');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -708,12 +705,11 @@ describe('Both modes', () => {
 
         await userEvent.click(settingsLink);
 
-        // Parent should be both current and highlighted (since parent and first child have same ID)
         expect(settingsLink).toHaveAttribute('aria-current', 'page');
         expect(settingsLink).toHaveAttribute('data-highlighted', 'true');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -747,7 +743,7 @@ describe('Both modes', () => {
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         let integrationsLink = within(sidePanel).getByRole('link', {
@@ -935,7 +931,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Apps',
@@ -960,7 +956,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tlsCertificatesLink = within(sidePanel).getByRole('link', {
           name: 'TLS certificates Beta',
@@ -987,7 +983,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Machine learning',
         });
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Machine learning',
@@ -1014,7 +1010,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Infrastructure',
         });
         const hostsLink = within(sidePanel).getByRole('link', {
           name: 'Hosts Tech preview',
@@ -1041,7 +1037,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tracesLink = within(sidePanel).getByRole('link', {
           name: /traces/i,
@@ -1066,7 +1062,7 @@ describe('Both modes', () => {
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tracesLink = within(sidePanel).getByRole('link', {
           name: /traces/i,
@@ -1125,7 +1121,7 @@ describe('Both modes', () => {
       const solutionLogo = screen.getByRole('link', { name: 'Observability homepage' });
       const discoverLink = screen.getByRole('link', { name: 'Discover' });
       const gettingStartedLink = screen.getByRole('link', { name: 'Getting started' });
-      const sidePanel = screen.getByRole('region', { name: 'Side panel' });
+      const sidePanel = screen.getByRole('region', { name: 'Side panel for Apps' });
       const serviceInventoryLink = within(sidePanel).getByRole('link', {
         name: 'Service inventory',
       });

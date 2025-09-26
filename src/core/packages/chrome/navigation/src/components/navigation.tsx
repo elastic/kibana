@@ -78,7 +78,7 @@ export const Navigation = ({
     visuallyActivePageId,
     visuallyActiveSubpageId,
     isSidePanelOpen,
-    sidePanelContent,
+    openerNode,
   } = useNavigation(isCollapsed, items, logo.id, activeItemId);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
@@ -120,7 +120,7 @@ export const Navigation = ({
               <SideNav.Popover
                 key={item.id}
                 hasContent={getHasSubmenu(item)}
-                isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+                isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                 label={item.label}
                 trigger={
                   <SideNav.PrimaryMenuItem
@@ -269,7 +269,7 @@ export const Navigation = ({
               <SideNav.Popover
                 key={item.id}
                 hasContent={getHasSubmenu(item)}
-                isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+                isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
                 label={item.label}
                 persistent={false}
                 trigger={
@@ -314,14 +314,10 @@ export const Navigation = ({
         </SideNav.Footer>
       </SideNav>
 
-      {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel footer={sidePanelFooter}>
-          <SecondaryMenu
-            badgeType={sidePanelContent.badgeType}
-            isPanel
-            title={sidePanelContent.label}
-          >
-            {sidePanelContent.sections?.map((section) => (
+      {isSidePanelOpen && openerNode && (
+        <SideNav.Panel footer={sidePanelFooter} openerNode={openerNode}>
+          <SecondaryMenu badgeType={openerNode.badgeType} isPanel title={openerNode.label}>
+            {openerNode.sections?.map((section) => (
               <SecondaryMenu.Section key={section.id} label={section.label}>
                 {section.items.map((subItem) => (
                   <SecondaryMenu.Item

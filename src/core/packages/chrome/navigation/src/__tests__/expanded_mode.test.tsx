@@ -150,7 +150,7 @@ describe('Expanded mode', () => {
         await userEvent.click(appsLink);
 
         const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -232,7 +232,7 @@ describe('Expanded mode', () => {
         await userEvent.click(dashboardsLink);
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -263,7 +263,7 @@ describe('Expanded mode', () => {
         await userEvent.keyboard('{enter}');
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -434,7 +434,7 @@ describe('Expanded mode', () => {
         await userEvent.click(anomalyExplorerLink);
 
         const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Machine learning',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -488,7 +488,7 @@ describe('Expanded mode', () => {
         await userEvent.click(coverageLink);
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
