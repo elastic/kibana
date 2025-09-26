@@ -29,7 +29,7 @@ export const AD_ADMIN_ROLES: string[] = ['Domain Admins', 'Enterprise Admins'];
 
 export const INTEGRATION_MATCHERS_DETAILED: Record<IntegrationType, Matcher> = {
   okta: { fields: ['user.roles'], values: OKTA_ADMIN_ROLES },
-  ad: { fields: ['user.roles'], values: AD_ADMIN_ROLES },
+  // ad: { fields: ['user.roles'], values: AD_ADMIN_ROLES },
 };
 
 export const getMatchersFor = (integration: IntegrationType): Matcher[] => [
@@ -45,12 +45,12 @@ export const integrationsSourceIndex = (namespace: string, integrationName: stri
 export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
   '/api/entity_analytics/monitoring/privileges/privileges';
 
-export const INTEGRATION_TYPES = ['okta', 'ad'] as const;
+export const INTEGRATION_TYPES = ['okta' /* 'ad'*/] as const;
 export type IntegrationType = (typeof INTEGRATION_TYPES)[number];
 
 export const STREAM_INDEX_PATTERNS: Record<IntegrationType, (namespace: string) => string> = {
   okta: (namespace) => `logs-entityanalytics_okta.user-${namespace}`,
-  ad: (namespace) => `logs-entityanalytics_ad.user-${namespace}`,
+  // ad: (namespace) => `logs-entityanalytics_ad.user-${namespace}`,
 };
 
 export const getStreamPatternFor = (integration: IntegrationType, namespace: string): string =>
