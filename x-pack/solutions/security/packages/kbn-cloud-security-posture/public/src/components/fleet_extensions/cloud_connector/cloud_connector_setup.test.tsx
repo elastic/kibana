@@ -20,6 +20,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSetupProps } from './cloud_connector_setup';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
+import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 
 // Mock child components
 jest.mock('./form/new_cloud_connector_form', () => ({
@@ -48,6 +49,9 @@ jest.mock('./utils', () => ({
 
 // Get typed references to mocked components and hooks
 const mockCloudConnectorTabs = CloudConnectorTabs as jest.MockedFunction<typeof CloudConnectorTabs>;
+const mockNewCloudConnectorForm = NewCloudConnectorForm as jest.MockedFunction<
+  typeof NewCloudConnectorForm
+>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
   typeof useGetCloudConnectors
 >;
@@ -477,7 +481,7 @@ describe('CloudConnectorSetup', () => {
       expect(mockCloudConnectorTabs).toHaveBeenCalled();
     });
 
-    it('should not render CloudConnectorTabs when reusable feature is disabled', () => {
+    it('should not render NewCloudConnectorForm when reusable feature is disabled', () => {
       mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
       setupMocks([]);
 
@@ -488,8 +492,7 @@ describe('CloudConnectorSetup', () => {
         defaultProps.templateName
       );
       expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
-      // Should render nothing when feature is disabled
-      expect(container.firstChild).toBeNull();
+      expect(mockNewCloudConnectorForm).toHaveBeenCalled();
     });
   });
 });
