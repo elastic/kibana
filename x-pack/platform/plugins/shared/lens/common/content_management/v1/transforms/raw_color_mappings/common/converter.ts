@@ -34,7 +34,11 @@ export function convertToRawColorMappings(
     }),
     specialAssignments: colorMapping.specialAssignments.map((oldAssignment, i) => {
       const isBadColor = isLegacyLoopMode && i === 0;
-      const newColor = isBadColor ? fixColorMode(oldAssignment.color) : oldAssignment.color;
+      const newColor = isBadColor
+        ? ({
+            type: 'loop',
+          } satisfies ColorMapping.Config['specialAssignments'][number]['color'])
+        : oldAssignment.color;
 
       if (isValidColorMappingAssignment(oldAssignment)) {
         return {
@@ -49,16 +53,6 @@ export function convertToRawColorMappings(
         rules: [oldAssignment.rule],
       };
     }),
-  };
-}
-
-function fixColorMode(
-  color: DeprecatedColorMappingConfig['specialAssignments'][number]['color']
-): ColorMapping.Config['specialAssignments'][number]['color'] {
-  if (color.type === 'loop') return color;
-
-  return {
-    type: 'loop',
   };
 }
 
