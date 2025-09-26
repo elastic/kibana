@@ -29,7 +29,7 @@ import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
-import { useFieldsMetadataContext } from '../context/fields_metadata';
+import { useFieldsMetadataContext } from '../../context/fields_metadata';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;

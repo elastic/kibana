@@ -17,7 +17,7 @@ import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
-import { FieldsMetadataProvider } from './context/fields_metadata';
+import { FieldsMetadataProvider } from '../context/fields_metadata';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
