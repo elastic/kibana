@@ -19,12 +19,10 @@ import {
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
-  EuiSkeletonCircle,
-  EuiSkeletonText,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
@@ -44,7 +42,8 @@ function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | nu
       stepType === 'foreach' ||
       stepType === 'if-branch' ||
       stepType === 'if') &&
-    !item.children.length
+    !item.children.length &&
+    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
   ) {
     return ExecutionStatus.SKIPPED;
   }
@@ -120,51 +119,9 @@ function convertTreeToEuiTreeViewItems(
   });
 }
 
-function TreeViewSkeleton() {
-  const styles = useMemoCss(treeViewSkeletonStyles);
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" css={styles.row}>
-      <EuiFlexItem css={styles.icon} grow={false}>
-        <EuiSkeletonCircle size="s" css={styles.iconSkeleton} />
-      </EuiFlexItem>
-      <EuiFlexItem css={styles.name}>
-        <EuiSkeletonText size="m" lines={1} css={styles.textSkeleton} />
-      </EuiFlexItem>
-      <EuiFlexItem css={styles.duration} grow={false}>
-        <EuiSkeletonText size="m" lines={1} css={styles.textSkeleton} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-const treeViewSkeletonStyles = {
-  row: css({
-    // height: '20px',
-    padding: '0 16px 0 8px',
-  }),
-  icon: css({
-    flexBasis: '16px',
-  }),
-  iconSkeleton: css({
-    width: '16px',
-    height: '16px',
-  }),
-  name: css({
-    flexBasis: '80%',
-  }),
-  duration: css({
-    flexBasis: '24px',
-  }),
-  textSkeleton: css({
-    '& > span': {
-      marginBlockStart: 0,
-      transform: 'none',
-    },
-  }),
-};
-
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
+  definition: WorkflowYaml | null;
   isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -178,6 +135,7 @@ export const WorkflowStepExecutionList = ({
   isLoading,
   error,
   execution,
+  definition,
   onStepExecutionClick,
   selectedId,
   onClose,
@@ -218,12 +176,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (
-    !execution ||
-    (execution.stepExecutions.length === 0 && isInProgressStatus(execution.status))
-  ) {
-    content = <TreeViewSkeleton />;
-  } else if (!execution || execution.stepExecutions.length === 0) {
+  } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -238,10 +191,34 @@ export const WorkflowStepExecutionList = ({
         }
       />
     );
-  } else if (execution.workflowDefinition) {
+  } else if (definition) {
+    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
+      (step, index) => ({
+        stepId: step.name,
+        stepType: step.type,
+        status: ExecutionStatus.PENDING,
+        id: `${step.name}-${step.type}-${index}`,
+        scopeStack: [],
+        workflowRunId: '',
+        workflowId: '',
+        startedAt: '',
+        finishedAt: '',
+        children: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        topologicalIndex: 0,
+      })
+    );
     const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
+    const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
     for (const stepExecution of execution.stepExecutions) {
+      stepExecutionNameMap.set(stepExecution.stepId, stepExecution);
       stepExecutionMap.set(stepExecution.id, stepExecution);
+    }
+    for (const skeletonStepExecution of skeletonStepExecutions) {
+      if (!stepExecutionNameMap.has(skeletonStepExecution.stepId)) {
+        stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
+      }
     }
     const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(

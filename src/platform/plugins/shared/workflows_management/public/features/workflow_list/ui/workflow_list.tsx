@@ -254,7 +254,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             }),
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled) ??
+              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled, false) ??
               i18n.translate('workflows.workflowList.run', {
                 defaultMessage: 'Run',
               }),
@@ -431,7 +431,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       />
       {executeWorkflow && (
         <WorkflowExecuteModal
-          workflow={executeWorkflow}
+          definition={executeWorkflow.definition}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
         />

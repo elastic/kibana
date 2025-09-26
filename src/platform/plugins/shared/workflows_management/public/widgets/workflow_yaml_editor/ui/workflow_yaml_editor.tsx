@@ -1864,5 +1864,6 @@ const componentStyles = {
   validationErrorsContainer: css({
     flexShrink: 0,
     overflow: 'hidden',
+    zIndex: 2, // to overlay the editor flying action buttons
   }),
 };

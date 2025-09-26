@@ -455,6 +455,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
         },
       ],
     },
+    definition,
     selectedId: '7c08bf0e-c78f-4b6e-8ef5-23863cb1923a',
     onStepExecutionClick: () => {},
   },
@@ -498,6 +499,7 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionLis
       duration: 18504,
       stepExecutions: [],
     },
+    definition,
   },
 };
 

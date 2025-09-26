@@ -60,6 +60,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
 
+  const showExecutionSidebar = activeTab === 'executions' || selectedExecutionId;
+
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
@@ -197,13 +199,21 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         onSuccess: ({ workflowExecutionId }) => {
           notifications?.toasts.addSuccess(
             i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
-              defaultMessage: 'Workflow testrun started',
+              defaultMessage: 'Workflow test run started',
             }),
             {
               toastLifeTimeMs: 3000,
             }
           );
           setSelectedExecution(workflowExecutionId);
+        },
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
+              defaultMessage: 'Failed to test workflow',
+            }),
+          });
         },
       }
     );
@@ -354,7 +364,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {(activeTab === 'executions' || selectedExecutionId) && (
+        {showExecutionSidebar && (
           <EuiFlexItem css={styles.sidebar}>
             {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
             {workflow && selectedExecutionId && (

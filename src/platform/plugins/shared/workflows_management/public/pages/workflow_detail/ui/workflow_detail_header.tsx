@@ -89,10 +89,6 @@ export const WorkflowDetailHeader = ({
     return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled, false);
   }, [isValid, canRunWorkflow, isEnabled]);
 
-  const testWorkflowTooltipContent = useMemo(() => {
-    return getRunWorkflowTooltipContent(isValid, canTestWorkflow, isEnabled, true);
-  }, [isValid, canTestWorkflow, isEnabled]);
-
   const handleRunClickWithUnsavedCheck = () => {
     if (hasUnsavedChanges) {
       setShowRunConfirmation(true);
@@ -174,22 +170,6 @@ export const WorkflowDetailHeader = ({
                 />
               </EuiToolTip>
               <EuiFlexItem grow={false} css={styles.separator} />
-              <EuiToolTip content={testWorkflowTooltipContent}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="beaker"
-                  size="s"
-                  disabled={isLoading || !canTestWorkflow || !isValid}
-                  onClick={handleTestClick}
-                  title={testWorkflowTooltipContent ?? undefined}
-                  aria-label={i18n.translate(
-                    'workflows.workflowDetailHeader.testWorkflow.ariaLabel',
-                    {
-                      defaultMessage: 'Test workflow',
-                    }
-                  )}
-                />
-              </EuiToolTip>
               <EuiToolTip content={runWorkflowTooltipContent}>
                 <EuiButtonIcon
                   color="success"
