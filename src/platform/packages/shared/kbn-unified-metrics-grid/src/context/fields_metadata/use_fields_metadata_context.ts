@@ -8,7 +8,7 @@
  */
 
 import { useContext } from 'react';
-import { FieldsMetadataContext } from './fields_metadata_context';
+import { FieldsMetadataContext } from './fields_metadata_provider';
 
 export function useFieldsMetadataContext() {
   const context = useContext(FieldsMetadataContext);
