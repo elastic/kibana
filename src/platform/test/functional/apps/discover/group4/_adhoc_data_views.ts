@@ -166,29 +166,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // trigger data view id update
       await discover.addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
       // save first search
       await discover.saveSearch('logst*-ss-_bytes-runtimefield');
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       // remove field and create with the same name, but different value
       await unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await discover.removeField('_bytes-runtimefield');
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // trigger data view id update
       await discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
       await unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
-      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // open searches on dashboard
       await dashboard.navigateToApp();

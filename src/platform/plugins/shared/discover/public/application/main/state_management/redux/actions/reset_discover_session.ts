@@ -99,7 +99,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.
         // We don't need to do this for the current tab since it's already being synced.
-        if (tabId !== selectedTabId && unsavedTabIds.includes(tabId)) {
+        if ((tabId !== selectedTabId && unsavedTabIds.includes(tabId)) || tabState.id !== tabId) {
           tabState.forceFetchOnSelect = true;
         }
 
