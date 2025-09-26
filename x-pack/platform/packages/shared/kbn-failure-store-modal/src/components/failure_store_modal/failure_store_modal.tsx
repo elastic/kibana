@@ -6,10 +6,11 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -87,7 +88,7 @@ const editFailureStoreFormSchema: FormSchema = {
 
 export interface FailureStoreFormProps {
   failureStoreEnabled: boolean;
-  defaultRetentionPeriod: string;
+  defaultRetentionPeriod?: string;
   customRetentionPeriod?: string;
 }
 
@@ -98,7 +99,7 @@ interface FailureStoreFormData {
 
 interface Props {
   onCloseModal: () => void;
-  onSaveModal: (data: FailureStoreFormData) => void;
+  onSaveModal: (data: FailureStoreFormData) => Promise<void> | void;
   failureStoreProps: FailureStoreFormProps;
 }
 
@@ -107,10 +108,13 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   onSaveModal,
   failureStoreProps,
 }) => {
+  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const onSubmitForm = async () => {
+    setIsSaveInProgress(true);
     const { isValid, data } = await form.submit();
 
     if (!isValid) {
+      setIsSaveInProgress(false);
       return;
     }
 
@@ -121,22 +125,36 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         newFailureStoreConfig.customRetentionPeriod = `${data.retentionPeriodValue}${data.retentionPeriodUnit}`;
       }
     }
-    onSaveModal(newFailureStoreConfig);
+    await onSaveModal(newFailureStoreConfig);
+    setIsSaveInProgress(false);
   };
 
   const modalTitleId = useGeneratedHtmlId();
 
-  const defaultRetentionPeriod = splitSizeAndUnits(failureStoreProps.defaultRetentionPeriod);
+  const defaultRetentionPeriod = failureStoreProps.defaultRetentionPeriod
+    ? splitSizeAndUnits(failureStoreProps.defaultRetentionPeriod)
+    : null;
   const customRetentionPeriod = failureStoreProps.customRetentionPeriod
     ? splitSizeAndUnits(failureStoreProps.customRetentionPeriod)
     : null;
+  const retentionPeriodUnit = customRetentionPeriod
+    ? customRetentionPeriod.unit
+    : defaultRetentionPeriod
+    ? defaultRetentionPeriod.unit
+    : 'd';
+
+  const retentionPeriodValue = customRetentionPeriod
+    ? customRetentionPeriod.size
+    : defaultRetentionPeriod
+    ? defaultRetentionPeriod.size
+    : '30';
 
   const { form } = useForm({
     defaultValue: {
       failureStore: failureStoreProps.failureStoreEnabled ?? false,
       periodType: failureStoreProps.customRetentionPeriod ? 'custom' : 'default',
-      retentionPeriodValue: customRetentionPeriod?.size ?? defaultRetentionPeriod.size,
-      retentionPeriodUnit: customRetentionPeriod?.unit ?? defaultRetentionPeriod.unit,
+      retentionPeriodValue,
+      retentionPeriodUnit,
     },
     schema: editFailureStoreFormSchema,
     id: 'editFailureStoreForm',
@@ -157,13 +175,17 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       'retentionPeriodValue',
       isCustomPeriod && customRetentionPeriod
         ? customRetentionPeriod.size
-        : defaultRetentionPeriod.size
+        : defaultRetentionPeriod
+        ? defaultRetentionPeriod.size
+        : '30'
     );
     form.setFieldValue(
       'retentionPeriodUnit',
       isCustomPeriod && customRetentionPeriod
         ? customRetentionPeriod.unit
-        : defaultRetentionPeriod.unit
+        : defaultRetentionPeriod
+        ? defaultRetentionPeriod.unit
+        : 'd'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodType]);
@@ -229,33 +251,47 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
               />
 
               <EuiFormRow>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <UseField
-                      path={'retentionPeriodValue'}
-                      component={NumericField}
-                      euiFieldProps={{
-                        options: failureStorePeriodOptions,
-                        disabled: !isCustomPeriod,
-                        min: 0,
-                        placeholder: defaultRetentionPeriod.size,
-                        'data-test-subj': 'selectFailureStorePeriodValue',
-                      }}
+                {isCustomPeriod || defaultRetentionPeriod ? (
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
+                      <UseField
+                        path={'retentionPeriodValue'}
+                        component={NumericField}
+                        euiFieldProps={{
+                          options: failureStorePeriodOptions,
+                          disabled: !isCustomPeriod,
+                          min: 0,
+                          placeholder: retentionPeriodValue,
+                          'data-test-subj': 'selectFailureStorePeriodValue',
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UseField
+                        path={'retentionPeriodUnit'}
+                        component={SelectField}
+                        euiFieldProps={{
+                          options: timeUnits,
+                          disabled: !isCustomPeriod,
+                          placeholder: retentionPeriodUnit,
+                          'data-test-subj': 'selectFailureStoreRetentionPeriodUnit',
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiCallOut
+                    announceOnMount
+                    typeof="info"
+                    size="m"
+                    data-test-subj="defaultRetentionCallout"
+                  >
+                    <FormattedMessage
+                      id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
+                      defaultMessage="This will pull the default value set at the cluster level."
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <UseField
-                      path={'retentionPeriodUnit'}
-                      component={SelectField}
-                      euiFieldProps={{
-                        options: timeUnits,
-                        disabled: !isCustomPeriod,
-                        placeholder: defaultRetentionPeriod.unit,
-                        'data-test-subj': 'selectFailureStoreRetentionPeriodUnit',
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  </EuiCallOut>
+                )}
               </EuiFormRow>
               <EuiFormRow>
                 <EuiText size="s" color="subdued">
@@ -274,6 +310,9 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButtonEmpty
           data-test-subj="failureStoreModalCancelButton"
           onClick={() => onCloseModal()}
+          aria-label={i18n.translate('xpack.failureStoreModal.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
         >
           <FormattedMessage
             id="xpack.failureStoreModal.cancelButtonLabel"
@@ -284,7 +323,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButton
           fill
           type="submit"
-          isLoading={false}
+          isLoading={isSaveInProgress}
           data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}
