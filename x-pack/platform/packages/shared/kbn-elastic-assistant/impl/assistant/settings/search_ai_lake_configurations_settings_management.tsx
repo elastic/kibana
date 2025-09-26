@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AIForSOCConnectorSettingsManagement } from '../../connectorland/ai_for_soc_connector_settings_management';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -43,7 +42,6 @@ interface Props {
   dataViews: DataViewsContract;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
-  settings: SettingsStart;
 }
 
 /**
@@ -51,12 +49,13 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab, settings }) => {
+  ({ dataViews, onTabChange, currentTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -68,8 +67,12 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
 
