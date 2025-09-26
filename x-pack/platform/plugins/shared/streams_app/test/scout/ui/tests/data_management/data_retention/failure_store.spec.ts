@@ -65,7 +65,6 @@ test.describe(
           .getByTestId('failureStoreRetention-metric-subtitle')
           .getByText('Custom retention period')
       ).toBeVisible();
-      await pageObjects.streams.closeToasts();
     });
 
     test('should disable failure store for classic streams', async ({ page, pageObjects }) => {
@@ -78,7 +77,6 @@ test.describe(
       await expect(
         page.getByTestId('disabledFailureStorePanel').getByText('Failure store disabled')
       ).toBeVisible();
-      await pageObjects.streams.closeToasts();
     });
 
     test('should enable failure store for classic streams', async ({ page, pageObjects }) => {
@@ -96,7 +94,6 @@ test.describe(
           .getByTestId('failureStoreRetention-metric-subtitle')
           .getByText('Default retention period')
       ).toBeVisible();
-      await pageObjects.streams.closeToasts();
     });
 
     test('should not allow edit failure store for wired streams', async ({

@@ -257,11 +257,6 @@ export class StreamsApp {
     await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
   }
 
-  async expectToastVisible() {
-    // Check if at least one element appears and is visible.
-    await expect(this.page.getByTestId('toastCloseButton').first()).toBeVisible();
-  }
-
   async saveRuleOrder() {
     await this.page.getByRole('button', { name: 'Change routing' }).click();
   }
@@ -537,18 +532,6 @@ export class StreamsApp {
   /**
    * Share utility methods
    */
-  async closeToasts() {
-    await this.expectToastVisible();
-    // Check if at least one element appears and is visible.
-
-    // Get an array of all locators and loop through them
-    const allCloseButtons = this.page.getByTestId('toastCloseButton');
-    for (const button of await allCloseButtons.all()) {
-      await button.click();
-    }
-
-    await expect(this.page.getByTestId('toastCloseButton')).toHaveCount(0);
-  }
 
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
