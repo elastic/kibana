@@ -16,6 +16,9 @@ const createEntityStoreDataClientMock = () =>
     list: jest.fn(),
     delete: jest.fn(),
     searchEntities: jest.fn(),
+    status: jest.fn(),
+    isEngineRunning: jest.fn(),
+    isCapabilityEnabled: jest.fn(),
   } as unknown as jest.Mocked<EntityStoreDataClient>);
 
 export const entityStoreDataClientMock = { create: createEntityStoreDataClientMock };

@@ -420,6 +420,7 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.spaces.defaultSolution
     xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
     xpack.task_manager.auto_calculate_default_ech_capacity

@@ -6,11 +6,24 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
+import type {
+  SecurityServiceStart,
+  ElasticsearchServiceStart,
+  KibanaRequest,
+} from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
-import { createClient } from './client';
+import {
+  createBuiltinAgentRegistry,
+  createBuiltinProviderFn,
+  registerBuiltinAgents,
+  type BuiltinAgentRegistry,
+} from './builtin';
+import { createPersistedProviderFn } from './persisted';
+import { createAgentRegistry } from './agent_registry';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -18,17 +31,29 @@ export interface AgentsServiceSetupDeps {
 
 export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
+  spaces?: SpacesPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
   toolsService: ToolsServiceStart;
 }
 
 export class AgentsService {
+  private builtinRegistry: BuiltinAgentRegistry;
+
   private setupDeps?: AgentsServiceSetupDeps;
+
+  constructor() {
+    this.builtinRegistry = createBuiltinAgentRegistry();
+  }
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-    return {};
+
+    registerBuiltinAgents({ registry: this.builtinRegistry });
+
+    return {
+      register: (agent) => this.builtinRegistry.register(agent),
+    };
   }
 
   start(startDeps: AgentsServiceStartDeps): AgentsServiceStart {
@@ -37,20 +62,28 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, toolsService } = startDeps;
+    const { getRunner, security, elasticsearch, spaces, toolsService } = startDeps;
 
-    const getScopedClient: AgentsServiceStart['getScopedClient'] = ({ request }) => {
-      return createClient({
+    const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
+    const persistedProviderFn = createPersistedProviderFn({
+      elasticsearch,
+      security,
+      toolsService,
+      logger,
+    });
+
+    const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      return createAgentRegistry({
         request,
-        toolsService,
-        logger,
-        security,
-        elasticsearch,
+        space,
+        builtinProvider: await builtinProviderFn({ request, space }),
+        persistedProvider: await persistedProviderFn({ request, space }),
       });
     };
 
     return {
-      getScopedClient,
+      getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },

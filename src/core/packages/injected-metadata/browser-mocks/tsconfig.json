@@ -13,7 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/core-injected-metadata-browser-internal"
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

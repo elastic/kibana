@@ -86,6 +86,7 @@ export const esqlFormValidationSchema = z
             Object.values(EsqlToolFieldType).includes(data)
           ),
           source: z.nativeEnum(EsqlParamSource),
+          optional: z.boolean(),
         })
       )
       .superRefine((params, ctx) => {

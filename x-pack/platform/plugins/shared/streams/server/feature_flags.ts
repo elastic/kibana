@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -55,6 +56,24 @@ export function registerFeatureFlags(
       value: false,
       description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
         defaultMessage: 'Enable Group streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+    },
+  });
+
+  core.uiSettings.register({
+    [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsContentPacksSettingsName', {
+        defaultMessage: 'Streams content packs',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.streamsContentPacksSettingsDescription', {
+        defaultMessage: 'Enable Streams content packs.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

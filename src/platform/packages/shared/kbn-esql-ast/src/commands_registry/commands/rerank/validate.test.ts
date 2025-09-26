@@ -20,6 +20,13 @@ describe('RERANK Validation', () => {
       rerankExpectErrors('FROM index | RERANK ?q ON keywordField', []);
     });
 
+    test('Support ON clause validation for boolean expressions', () => {
+      rerankExpectErrors(
+        'FROM index | RERANK col0="some text" ON textField=textField LIKE "a*"',
+        []
+      );
+    });
+
     test('unsupported field type', () => {
       rerankExpectErrors('FROM index | RERANK col0=2 ON keywordField', [
         'RERANK query must be of type text. Found integer',

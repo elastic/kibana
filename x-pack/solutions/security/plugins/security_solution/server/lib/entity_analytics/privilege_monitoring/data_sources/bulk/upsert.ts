@@ -6,8 +6,54 @@
  */
 
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import type { PrivMonBulkUser } from '../../types';
+import type { PrivMonBulkUser, PrivMonIntegrationsUser } from '../../types';
 
+/** Script to update privileged status and sources array based on new status from source
+ * If new status is false, remove source from sources array, and if sources array is empty, set is_privileged to false
+ * If new status is true, add source to sources array if not already present, and set is_privileged to true
+ */
+export const UPDATE_SCRIPT_SOURCE = `
+if (params.new_privileged_status == false) {
+  if (ctx._source.user.is_privileged == true) {
+    if (ctx._source.labels.sources == null) {
+      ctx._source.labels.sources = [];
+    }
+   ctx._source.labels.sources.removeAll(params.labels.sources);
+    if (ctx._source.labels.sources.size() == 0) {
+      ctx._source.user.is_privileged = false;
+    }
+  }
+} else if (params.new_privileged_status == true) {
+  if (ctx._source.labels.sources == null) {
+    ctx._source.labels.sources = [];
+  }
+
+  if (ctx._source.user.is_privileged != true) {
+    ctx._source.user.is_privileged = true;
+  }
+
+  if (!ctx._source.labels.sources.contains(params.labels.sources[0])) {
+    ctx._source.labels.sources.add(params.labels.sources[0]);
+  }
+}
+`;
+
+export const INDEX_SCRIPT = `
+              if (ctx._source.labels == null) {
+                ctx._source.labels = new HashMap();
+              }
+              if (ctx._source.labels.source_ids == null) {
+                ctx._source.labels.source_ids = new ArrayList();
+              }
+              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
+                ctx._source.labels.source_ids.add(params.source_id);
+              }
+              if (!ctx._source.labels.sources.contains("index")) {
+                ctx._source.labels.sources.add("index");
+              }
+
+              ctx._source.user.is_privileged = true;
+            `;
 /**
  * Builds a list of Elasticsearch bulk operations to upsert privileged users.
  *
@@ -97,3 +143,72 @@ export const bulkUpsertOperationsFactory =
     dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
     return ops;
   };
+
+type ParamsBuilder<T extends PrivMonBulkUser> = (
+  user: T,
+  sourceLabel?: Object
+) => Record<string, unknown>;
+
+export const bulkUpsertOperationsFactoryShared =
+  (dataClient: PrivilegeMonitoringDataClient) =>
+  <T extends PrivMonBulkUser>(
+    users: T[],
+    updateScriptSource: string,
+    opts: {
+      buildUpdateParams: ParamsBuilder<T>;
+      buildCreateDoc: ParamsBuilder<T>;
+      shouldCreate?: (user: T) => boolean;
+    },
+    sourceLabel?: Object // required for index ops
+  ): object[] => {
+    const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
+    const ops: object[] = [];
+    dataClient.log('debug', `Building bulk operations for ${users.length} users`);
+    for (const user of users) {
+      if (user.existingUserId) {
+        ops.push(
+          { update: { _index: dataClient.index, _id: user.existingUserId } },
+          { script: { source: updateScriptSource, params: buildUpdateParams(user, sourceLabel) } } // user should have latestDoc and labels
+        );
+      } else if (shouldCreate(user)) {
+        ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
+      }
+    }
+    return ops;
+  };
+
+export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
+
+  return (usersChunk: PrivMonIntegrationsUser[]) =>
+    buildOps(usersChunk, UPDATE_SCRIPT_SOURCE, {
+      buildUpdateParams: (user) => ({
+        new_privileged_status: user.isPrivileged,
+        labels: user.labels,
+      }),
+      buildCreateDoc: (user) => ({
+        user: { name: user.username, is_privileged: user.isPrivileged },
+        labels: user.labels,
+      }),
+      shouldCreate: (user) => user.isPrivileged,
+    });
+};
+
+export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
+  const indexOperations = (usersChunk: PrivMonBulkUser[]) =>
+    buildOps(
+      usersChunk,
+      INDEX_SCRIPT,
+      {
+        // TODO: https://github.com/elastic/security-team/issues/14071 - index -> index_sync label
+        buildUpdateParams: (user) => ({ source_id: user.sourceId }),
+        buildCreateDoc: (user, sourceLabel) => ({
+          user: { name: user.username, is_privileged: true },
+          labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
+        }),
+      },
+      'index_sync'
+    );
+  return indexOperations;
+};

@@ -110,6 +110,7 @@ describe('Migrate handlers', () => {
 
       expect(AgentService.migrateSingleAgent).toHaveBeenCalledWith(
         mockElasticsearchClient,
+        mockSavedObjectsClient,
         agentId,
         mockAgentPolicy,
         mockAgent,

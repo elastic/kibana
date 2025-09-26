@@ -37,7 +37,7 @@
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:27:29Z",
       "tags": ["existingTag"],
-      "agent": {"id": "agent2", "version": "9.0.0"}
+      "agent": {"id": "agent2", "version": "9.2.0"}
     }
   }
 }

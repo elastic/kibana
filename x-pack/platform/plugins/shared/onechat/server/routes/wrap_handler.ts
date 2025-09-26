@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, RequestHandler } from '@kbn/core/server';
+import type { Logger, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isOnechatError } from '@kbn/onechat-common';
 
@@ -19,10 +19,10 @@ export interface RouteWrapConfig {
 
 export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
-  <P, Q, B>(
-    handler: RequestHandler<P, Q, B>,
+  <P, Q, B, Context extends RequestHandlerContext>(
+    handler: RequestHandler<P, Q, B, Context>,
     { featureFlag = AGENT_BUILDER_ENABLED_SETTING_ID }: RouteWrapConfig = {}
-  ): RequestHandler<P, Q, B> => {
+  ): RequestHandler<P, Q, B, Context> => {
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
         const { uiSettings } = await ctx.core;

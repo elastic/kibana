@@ -47,6 +47,7 @@ export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
 
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
+export const OTEL_TEMPLATE_SUFFIX = 'otel';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 export const DATA_STREAM_TYPE_VAR_NAME = 'data_stream.type';

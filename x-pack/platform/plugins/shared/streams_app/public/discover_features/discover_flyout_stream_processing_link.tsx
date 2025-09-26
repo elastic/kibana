@@ -7,7 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -63,9 +63,11 @@ export function DiscoverFlyoutStreamProcessingLink({
       <EuiLink href={href}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiIcon type="sparkles" size="s" />
-          {i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Parse content in Streams',
-          })}
+          <EuiText size="xs">
+            {i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+              defaultMessage: 'Parse content in Streams',
+            })}
+          </EuiText>
         </EuiFlexGroup>
       </EuiLink>
     </RedirectAppLinks>

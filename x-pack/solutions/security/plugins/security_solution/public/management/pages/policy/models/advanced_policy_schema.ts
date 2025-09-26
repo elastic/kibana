@@ -1761,7 +1761,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default is true from 9.2.0",
+          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default is true since 9.2.0",
       }
     ),
   },
@@ -1937,7 +1937,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
       {
         defaultMessage:
-          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default is true from 9.2.0",
+          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default is true since 9.2.0",
       }
     ),
   },
@@ -2298,6 +2298,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for security events collection. Set to false to disable the provider. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.security.event_disabled',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
+      {
+        defaultMessage:
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.firewall_anti_tamper',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
+      {
+        defaultMessage:
+          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
       }
     ),
   },

@@ -48,7 +48,8 @@ import { login, loginWithUser } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
-describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: Skipped due to https://github.com/elastic/kibana/issues/235416
+describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
   const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
   const secondaryUser = isServerless ? 'elastic_serverless' : 'elastic';

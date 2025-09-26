@@ -45,7 +45,7 @@ describe('<SplitButton />', () => {
       setup({ iconType: primaryButtonIcon });
 
       // When
-      const primaryButton = screen.getByTestId('split-button-primary-button');
+      const primaryButton = screen.getByTestId('split-button');
 
       // Then
       expect(primaryButton).toBeVisible();
@@ -74,7 +74,7 @@ describe('<SplitButton />', () => {
       const { user, onMainButtonClick } = setup();
 
       // When
-      const primaryButton = screen.getByTestId('split-button-primary-button');
+      const primaryButton = screen.getByTestId('split-button');
       await user.click(primaryButton);
 
       // Then

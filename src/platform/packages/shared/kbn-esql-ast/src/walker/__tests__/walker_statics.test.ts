@@ -15,6 +15,7 @@ import type {
   ESQLAstItem,
   ESQLAstRerankCommand,
   ESQLCommandOption,
+  ESQLIntegerLiteral,
   ESQLMap,
   ESQLStringLiteral,
 } from '../../types';
@@ -555,6 +556,16 @@ describe('Walker static methods', () => {
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456');
     });
 
+    test('can replace using a callback', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123');
+      Walker.replace(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246');
+    });
+
     test('can find node by predicate function', () => {
       const { ast } = EsqlQuery.fromSrc('FROM index | EVAL a = "x" | WHERE a == 123 | LIMIT 10');
       const newNode = Builder.expression.literal.integer(456);
@@ -598,6 +609,16 @@ describe('Walker static methods', () => {
       Walker.replaceAll(ast, { type: 'literal', value: 123 }, newNode);
 
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 456');
+    });
+
+    test('can replace using a callback all matches', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      Walker.replaceAll(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246 AND b > 246');
     });
 
     test('returns list of updated nodes', () => {

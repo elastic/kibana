@@ -13,7 +13,7 @@ import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 
 export default ({ getService }: FtrProviderContextWithSpaces) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const spaces = getService('spaces');
   const namespace = uuidv4().substring(0, 8);
   const supertest = getService('supertest');
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
       describe('get', () => {
         it('should return the host entity engine', async () => {
-          const getResponse = await api
+          const getResponse = await entityAnalyticsApi
             .getEntityEngine(
               {
                 params: { entityType: 'host' },
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
         });
 
         it('should return the user entity engine', async () => {
-          const getResponse = await api
+          const getResponse = await entityAnalyticsApi
             .getEntityEngine(
               {
                 params: { entityType: 'user' },
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
       describe('list', () => {
         it('should return the list of entity engines', async () => {
-          const { body } = await api.listEntityEngines(namespace).expect(200);
+          const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
 
           // @ts-expect-error body is any
           const sortedEngines = body.engines.sort((a, b) => a.type.localeCompare(b.type));
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should stop the entity engine', async () => {
-        await api
+        await entityAnalyticsApi
           .stopEntityEngine(
             {
               params: { entityType: 'host' },
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        const { body } = await api
+        const { body } = await entityAnalyticsApi
           .getEntityEngine(
             {
               params: { entityType: 'host' },
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       });
 
       it('should start the entity engine', async () => {
-        await api
+        await entityAnalyticsApi
           .startEntityEngine(
             {
               params: { entityType: 'host' },
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        const { body } = await api
+        const { body } = await entityAnalyticsApi
           .getEntityEngine(
             {
               params: { entityType: 'host' },
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       it('should delete the host entity engine', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
-        await api
+        await entityAnalyticsApi
           .deleteEntityEngine(
             {
               params: { entityType: 'host' },
@@ -195,7 +195,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
       it('should delete the user entity engine', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
-        await api
+        await entityAnalyticsApi
           .deleteEntityEngine(
             {
               params: { entityType: 'user' },

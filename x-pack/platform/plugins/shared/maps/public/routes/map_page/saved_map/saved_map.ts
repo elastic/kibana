@@ -58,7 +58,6 @@ import type { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { extractReferences } from '../../../../common/migrations/references';
 import { getByReferenceState, getByValueState } from '../../../react_embeddable/library_transforms';
 import type {
   MapByReferenceState,
@@ -483,12 +482,9 @@ export class SavedMap {
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
-        const { attributes, references } = extractReferences({
-          attributes: this._attributes,
-        });
         const { id: savedObjectId } = await saveToLibrary(
-          attributes,
-          [...references, ...tagReferences],
+          this._attributes,
+          tagReferences,
           newCopyOnSave
             ? undefined
             : (this._mapEmbeddableState as MapByReferenceState)?.savedObjectId

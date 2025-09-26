@@ -583,18 +583,28 @@
           {
             "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.ExecutableTool.schema",
-            "type": "Uncategorized",
+            "type": "Function",
             "tags": [],
             "label": "schema",
             "description": [
               "\nTool's input schema, defined as a zod schema."
             ],
             "signature": [
-              "TSchema"
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<TSchema>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/onechat-server",
@@ -645,7 +655,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+                  " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
                 "deprecated": false,
@@ -1441,7 +1451,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; toolId: string; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+                  " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/runner.ts",
                 "deprecated": false,
@@ -2291,7 +2301,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+              " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
             "deprecated": false,
@@ -2318,7 +2328,7 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+          " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
         "deprecated": false,
@@ -2733,7 +2743,7 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; toolId: string; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+          " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/runner.ts",
         "deprecated": false,
@@ -2789,7 +2799,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; toolId: string; toolParams: TParams; defaultConnectorId?: string | undefined; }"
+              " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/runner.ts",
             "deprecated": false,

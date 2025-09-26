@@ -46,7 +46,6 @@ export type OverviewProps = DocViewRenderProps & {
 };
 
 export function Overview({
-  columns,
   hit,
   filter,
   onAddColumn,
@@ -106,11 +105,11 @@ export function Overview({
             duration={duration || 0}
           />
           <EuiSpacer size="m" />
-          {showWaterfall && docId ? (
+          {showWaterfall ? (
             <TraceWaterfall
               dataView={dataView}
               traceId={traceId}
-              serviceName={serviceName || ''}
+              serviceName={serviceName}
               docId={docId}
             />
           ) : null}

@@ -6,7 +6,6 @@
  */
 
 import type { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
-import { extractReferences } from '../../common/migrations/references';
 import { getCore, getCoreOverlays } from '../kibana_services';
 import type { MapAttributes } from '../../common/content_management';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
@@ -44,17 +43,13 @@ export function initializeLibraryTransforms(
     },
     saveToLibrary: async (title: string) => {
       const state = serializeByValue();
-      const { attributes, references } = extractReferences({
-        attributes: state.rawState.attributes,
-      });
       const {
         item: { id: savedObjectId },
       } = await getMapClient().create({
         data: {
-          ...attributes,
+          ...state.rawState.attributes,
           title,
         },
-        options: { references },
       });
       return savedObjectId;
     },

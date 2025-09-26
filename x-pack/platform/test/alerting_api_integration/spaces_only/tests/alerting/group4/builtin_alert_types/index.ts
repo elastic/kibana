@@ -12,5 +12,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./long_running'));
     loadTestFile(require.resolve('./cancellable'));
     loadTestFile(require.resolve('./auto_recover'));
+    loadTestFile(require.resolve('./async_search'));
   });
 }

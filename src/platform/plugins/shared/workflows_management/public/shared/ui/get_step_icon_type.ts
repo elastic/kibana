@@ -21,8 +21,9 @@ export const getStepIconType = (stepType: string) => {
     case 'slack':
       iconType = 'logoSlack';
       break;
+    case 'inference':
     case 'inference.completion':
-    case 'inference.unified_inference':
+    case 'inference.unified_completion':
       iconType = 'sparkles';
       break;
     case 'manual':

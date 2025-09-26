@@ -26,10 +26,10 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import { type RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { DataInputStep } from './steps/constants';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 interface MissingResourcesIndexed {
   macros: string[];

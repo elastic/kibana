@@ -14,3 +14,5 @@ export const INTEGRATION_ADDED_POP_UP = '[data-test-subj="postInstallAddAgentMod
 export const QUEUE_URL = '.euiFieldText';
 
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
+
+export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';

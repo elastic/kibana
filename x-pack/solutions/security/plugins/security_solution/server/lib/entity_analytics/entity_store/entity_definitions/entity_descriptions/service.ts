@@ -6,7 +6,7 @@
  */
 
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 import { collectValues as collect, newestValue } from './field_utils';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
@@ -26,6 +26,7 @@ export const serviceEntityEngineDescription: EntityDescription = {
       set: {
         field: 'entity.type',
         value: SERVICE_ENTITY_TYPE,
+        override: false,
       },
     },
   ],
@@ -41,5 +42,25 @@ export const serviceEntityEngineDescription: EntityDescription = {
     collect({ source: 'service.type' }),
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
+    ...getEntityFieldsDescriptions('service'),
+
+    collect({
+      source: `service.entity.relationships.Communicates_with`,
+      destination: 'entity.relationships.Communicates_with',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `service.entity.relationships.Depends_on`,
+      destination: 'entity.relationships.Depends_on',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `service.entity.relationships.Dependent_of`,
+      destination: 'entity.relationships.Dependent_of',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
   ],
 };

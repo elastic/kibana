@@ -295,7 +295,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const config = this.initializerContext.config.get();
-    if (config.search.sessions.enabled) {
+    if (
+      config.search.sessions.enabled &&
+      !coreStart.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
+    ) {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(

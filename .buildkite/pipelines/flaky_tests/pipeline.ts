@@ -34,6 +34,19 @@ if (Number.isNaN(concurrency)) {
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
 
+function getScoutConfigGroupType(configPath: string): string | null {
+  // Match platform paths: x-pack/platform/... or src/platform/...
+  if (/^(x-pack|src)\/platform\//.test(configPath)) {
+    return 'platform';
+  }
+  // Match solution paths: x-pack/solutions/<solution>/plugins/...
+  const match = configPath.match(/^x-pack\/solutions\/([^/]+)\/plugins\//);
+  if (match) {
+    return match[1];
+  }
+  return null;
+}
+
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -55,6 +68,7 @@ function getTestSuitesFromJson(json: string) {
   const testSuites: Array<
     | { type: 'group'; key: string; count: number }
     | { type: 'ftrConfig'; ftrConfig: string; count: number }
+    | { type: 'scoutConfig'; scoutConfig: string; count: number }
   > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -67,8 +81,8 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
     }
 
     if (item.type === 'ftrConfig') {
@@ -80,6 +94,20 @@ function getTestSuitesFromJson(json: string) {
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    if (item.type === 'scoutConfig') {
+      const scoutConfig = item.scoutConfig;
+      if (typeof scoutConfig !== 'string') {
+        fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      testSuites.push({
+        type: 'scoutConfig',
+        scoutConfig,
         count,
       });
       continue;
@@ -152,6 +180,33 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
+      cancel_on_build_failing: true,
+      retry: {
+        automatic: [{ exit_status: '-1', limit: 3 }],
+      },
+    });
+    continue;
+  }
+
+  if (testSuite.type === 'scoutConfig') {
+    const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
+    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
+
+    steps.push({
+      command: `.buildkite/scripts/steps/test/scout_configs.sh`,
+      env: {
+        SCOUT_CONFIG: testSuite.scoutConfig,
+        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+      },
+      key: `scout-suite-${suiteIndex++}`,
+      label: `${testSuite.scoutConfig}`,
+      parallelism: testSuite.count,
+      concurrency,
+      concurrency_group: process.env.UUID,
+      concurrency_method: 'eager',
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      depends_on: 'build',
+      timeout_in_minutes: 60,
       cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],

@@ -25,6 +25,7 @@ import type {
 import type { IntegrationType } from '../../../common/data_stream_details';
 import type { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import type { FailedDocsErrorSortField, QualityIssueSortField } from '../../hooks';
+import type { DatasetQualityView } from '../../controller/dataset_quality_details';
 
 export type QualityIssueType = QualityIssue['type'];
 
@@ -80,7 +81,7 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
-  view: 'classic' | 'streams';
+  view: DatasetQualityView;
 }
 
 export interface WithDataStreamDetails {

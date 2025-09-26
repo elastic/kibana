@@ -952,7 +952,9 @@ export function defineRoutes(
           reason: 'This route is opted out from authorization',
         },
       },
-      validate: {},
+      validate: {
+        body: schema.any(),
+      },
     },
     async (
       context: RequestHandlerContext,
@@ -962,6 +964,7 @@ export function defineRoutes(
       try {
         const [_, { alerting }] = await core.getStartServices();
         const rulesClient = await alerting.getRulesClientWithRequest(req);
+        const { rule_type_id: ruleTypeId, ...rest } = req.body;
 
         return res.ok({
           body: await rulesClient.create({
@@ -970,10 +973,11 @@ export function defineRoutes(
               name: 'Internal Rule',
               schedule: { interval: '1m' },
               tags: [],
-              alertTypeId: 'test.internal-rule-type',
               consumer: 'alertsFixture',
               params: {},
               actions: [],
+              ...rest,
+              alertTypeId: 'test.internal-rule-type',
             },
           }),
         });

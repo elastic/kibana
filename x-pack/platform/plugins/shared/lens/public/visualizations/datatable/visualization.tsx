@@ -11,7 +11,12 @@ import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { CUSTOM_PALETTE, applyPaletteParams, getOverridePaletteStops } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  applyPaletteParams,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
@@ -150,12 +155,25 @@ export const getDatatableVisualization = ({
 
     const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
-      const accessor = column.columnId;
+      const newColumn = { ...column };
+      const accessor = newColumn.columnId;
       const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
-      if (column.palette && (isNumeric || isBucketable)) {
+
+      if (newColumn.palette && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
+
+        if (!showColorByTerms && newColumn.colorMapping) {
+          // switched from terms to values
+          delete newColumn.colorMapping;
+        }
+
+        if (showColorByTerms && !newColumn.colorMapping) {
+          // switched from values to terms
+          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+        }
+
         const currentData = frame?.activeData?.[state.layerId];
-        const palette = paletteMap.get(column.palette?.name ?? '');
+        const palette = paletteMap.get(newColumn.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
               .filter(({ id }) => getOriginalId(id) === accessor)
@@ -169,7 +187,7 @@ export const getDatatableVisualization = ({
             name: defaultPaletteParams.name,
           };
           return {
-            ...column,
+            ...newColumn,
             palette: {
               ...newPalette,
               params: {
@@ -180,7 +198,7 @@ export const getDatatableVisualization = ({
         }
       }
 
-      return column;
+      return newColumn;
     });
 
     return {

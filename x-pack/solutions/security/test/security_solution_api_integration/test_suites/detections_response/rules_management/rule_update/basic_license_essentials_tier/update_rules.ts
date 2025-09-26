@@ -28,7 +28,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
         delete updatedRule.id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
+        const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -81,11 +81,11 @@ export default ({ getService }: FtrProviderContext) => {
           required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
         };
 
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
         });
 
-        const { body: updatedRuleResponse } = await securitySolutionApi
+        const { body: updatedRuleResponse } = await detectionsApi
           .updateRule({
             body: ruleUpdateProperties,
           })
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(updatedRuleResponse).toMatchObject(expectedRule);
 
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
           updatedRule.name = 'some other name';
           delete updatedRule.id;
 
-          const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
+          const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(403);
 
           expect(body).toEqual({
             message: 'Your license does not support machine learning. Please upgrade your license.',
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
         delete updatedRule.id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
+        const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(200);
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.id = createdBody.id;
         delete updatedRule.rule_id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
+        const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.severity = 'low';
         updatedRule.enabled = false;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(200);
+        const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
@@ -193,13 +193,13 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_id = 'some id';
 
         // update a simple rule's timeline_title
-        await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
+        await detectionsApi.updateRule({ body: ruleUpdate }).expect(200);
 
         const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
         // update a simple rule's name
-        const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate2 }).expect(200);
+        const { body } = await detectionsApi.updateRule({ body: ruleUpdate2 }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         simpleRule.id = '5096dec6-b6b9-4d8d-8f93-6c2602079d9d';
         delete simpleRule.rule_id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: simpleRule }).expect(404);
+        const { body } = await detectionsApi.updateRule({ body: simpleRule }).expect(404);
 
         expect(body).toEqual({
           status_code: 404,
@@ -228,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
         simpleRule.rule_id = 'fake_id';
         delete simpleRule.id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: simpleRule }).expect(404);
+        const { body } = await detectionsApi.updateRule({ body: simpleRule }).expect(404);
 
         expect(body).toEqual({
           status_code: 404,
@@ -247,11 +247,11 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: 100,
           });
 
-          await securitySolutionApi.createRule({
+          await detectionsApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 200 }),
           });
 
-          const { body: updatedRuleResponse } = await securitySolutionApi
+          const { body: updatedRuleResponse } = await detectionsApi
             .updateRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
@@ -264,11 +264,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('does NOT update a rule when max_signals is less than 1', async () => {
-          await securitySolutionApi.createRule({
+          await detectionsApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
           });
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .updateRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'rule-1',
@@ -290,14 +290,14 @@ export default ({ getService }: FtrProviderContext) => {
             required_fields: [],
           });
 
-          await securitySolutionApi.createRule({
+          await detectionsApi.createRule({
             body: getCustomQueryRuleParams({
               rule_id: 'required-fields-default-value-test',
               required_fields: [{ name: 'host.name', type: 'keyword' }],
             }),
           });
 
-          const { body: updatedRuleResponse } = await securitySolutionApi
+          const { body: updatedRuleResponse } = await detectionsApi
             .updateRule({
               body: getCustomQueryRuleParams({
                 rule_id: 'required-fields-default-value-test',
