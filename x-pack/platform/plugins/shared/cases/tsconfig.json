@@ -101,8 +101,7 @@
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
     "@kbn/cases-ai",
-    "@kbn/lazy-object",
-    "@kbn/securitysolution-ecs"
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*"
