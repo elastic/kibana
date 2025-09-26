@@ -258,7 +258,6 @@ export function getDiscoverStateContainer({
     internalState,
     savedSearchContainer,
     services,
-    injectCurrentTab,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
@@ -291,7 +290,6 @@ export function getDiscoverStateContainer({
     runtimeStateManager,
     savedSearchContainer,
     setDataView,
-    injectCurrentTab,
     getCurrentTab,
   });
 
@@ -432,8 +430,9 @@ export function getDiscoverStateContainer({
 
   const migrateToTabId = (newTabId: string) => {
     tabId = newTabId;
-    appStateContainer.migrateToTabId(newTabId);
     injectCurrentTab = createTabActionInjector(newTabId);
+    appStateContainer.migrateToTabId(newTabId);
+    dataStateContainer.migrateToTabId(newTabId);
   };
 
   const stopSyncing = () => {

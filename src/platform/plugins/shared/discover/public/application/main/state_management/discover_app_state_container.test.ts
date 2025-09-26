@@ -25,7 +25,6 @@ import type { InternalStateStore, TabState } from './redux';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
-  createTabActionInjector,
   selectTab,
   internalStateActions,
 } from './redux';
@@ -78,7 +77,6 @@ describe('Test discover app state container', () => {
       internalState,
       savedSearchContainer: savedSearchState,
       services: discoverServiceMock,
-      injectCurrentTab: createTabActionInjector(getCurrentTab().id),
     });
 
   test('hasChanged returns whether the current state has changed', async () => {

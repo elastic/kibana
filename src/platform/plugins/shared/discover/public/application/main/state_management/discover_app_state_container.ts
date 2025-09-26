@@ -45,7 +45,8 @@ import {
   isEsqlSource,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
+import type { DiscoverInternalState, InternalStateStore } from './redux';
+import { createTabActionInjector } from './redux';
 import { internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
@@ -196,16 +197,15 @@ export const getDiscoverAppStateContainer = ({
   internalState,
   savedSearchContainer,
   services,
-  injectCurrentTab,
 }: {
   tabId: string;
   stateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
-  injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
   let tabId = originalTabId;
+  let injectCurrentTab = createTabActionInjector(tabId);
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
     savedSearch: savedSearchContainer.getState(),
@@ -405,6 +405,7 @@ export const getDiscoverAppStateContainer = ({
   const migrateToTabId = (newTabId: string) => {
     addLog('[appState] migrateToTabId', { newTabId });
     tabId = newTabId;
+    injectCurrentTab = createTabActionInjector(newTabId);
   };
 
   const getPrevious = () => previousState;

@@ -13,7 +13,7 @@ import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { DiscoverAppStateContainer } from '../discover_app_state_container';
-import type { InternalStateStore, TabActionInjector } from '../redux';
+import type { InternalStateStore, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
@@ -27,12 +27,12 @@ export const buildEsqlFetchSubscribe = ({
   internalState,
   appStateContainer,
   dataSubjects,
-  injectCurrentTab,
+  getCurrentTab,
 }: {
   internalState: InternalStateStore;
   appStateContainer: DiscoverAppStateContainer;
   dataSubjects: SavedSearchData;
-  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }) => {
   let prevEsqlData: {
     initialFetch: boolean;
@@ -93,7 +93,8 @@ export const buildEsqlFetchSubscribe = ({
         // Reset all default profile state when index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+            internalStateActions.setResetDefaultProfileState({
+              tabId: getCurrentTab().id,
               resetDefaultProfileState: {
                 columns: true,
                 rowHeight: true,
@@ -154,7 +155,8 @@ export const buildEsqlFetchSubscribe = ({
     // due to transformational commands, reset the associated default profile state
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
-        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        internalStateActions.setResetDefaultProfileState({
+          tabId: getCurrentTab().id,
           resetDefaultProfileState: {
             columns: true,
             rowHeight: false,
