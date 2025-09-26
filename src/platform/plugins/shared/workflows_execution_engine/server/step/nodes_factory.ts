@@ -28,7 +28,9 @@ import type {
 import {
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
-} from '@kbn/workflows/graph/types/guards';
+  isEnterStepTimeoutZone,
+  isExitStepTimeoutZone,
+} from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { NodeImplementation } from './node_implementation';
 // Import schema and inferred types
@@ -167,18 +169,22 @@ export class NodesFactory {
           );
         }
 
-        return new EnterStepTimeoutZoneNodeImpl(
-          node,
-          this.workflowRuntime,
-          this.workflowExecutionState,
-          contextManager
-        );
+        if (isEnterStepTimeoutZone(node)) {
+          return new EnterStepTimeoutZoneNodeImpl(
+            node,
+            this.workflowRuntime,
+            this.workflowExecutionState,
+            contextManager
+          );
+        }
       case 'exit-timeout-zone':
         if (isExitWorkflowTimeoutZone(node)) {
           return new ExitWorkflowTimeoutZoneNodeImpl(this.workflowRuntime);
         }
 
-        return new ExitStepTimeoutZoneNodeImpl(this.workflowRuntime);
+        if (isExitStepTimeoutZone(node)) {
+          return new ExitStepTimeoutZoneNodeImpl(this.workflowRuntime);
+        }
       case 'enter-if':
         return new EnterIfNodeImpl(
           node as EnterIfNode,

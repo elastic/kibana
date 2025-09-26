@@ -57,7 +57,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       id: 'test-workflow-timeout-zone',
       type: 'enter-timeout-zone',
       stepId: 'workflowTimeoutStep',
-      stepType: 'workflow-timeout',
+      stepType: 'workflow_level_timeout',
       timeout: '60s',
     };
 

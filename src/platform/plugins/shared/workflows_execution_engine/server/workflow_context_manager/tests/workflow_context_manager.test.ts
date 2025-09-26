@@ -15,7 +15,7 @@ import type {
   StackFrame,
   WorkflowYaml,
 } from '@kbn/workflows';
-import type { GraphNode, UnionExecutionGraphNode } from '@kbn/workflows/graph';
+import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -27,9 +27,9 @@ jest.mock('../../utils', () => ({
 }));
 
 describe('WorkflowContextManager', () => {
-  const fakeNode: GraphNode = {
+  const fakeNode: AtomicGraphNode = {
     id: 'testStep',
-    type: 'console',
+    type: 'atomic',
     stepId: 'fake_id',
     stepType: 'fake_type',
   };
@@ -60,7 +60,7 @@ describe('WorkflowContextManager', () => {
     } as any;
 
     const underTest = new WorkflowContextManager({
-      node: fakeNode as UnionExecutionGraphNode,
+      node: fakeNode as AtomicGraphNode,
       stackFrames: fakeStackFrames,
       workflowExecutionGraph,
       workflowExecutionState,

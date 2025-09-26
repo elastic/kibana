@@ -62,4 +62,8 @@ export {
   isExitNormalPath,
   isEnterContinue,
   isExitContinue,
+  isEnterStepTimeoutZone,
+  isExitStepTimeoutZone,
+  isEnterWorkflowTimeoutZone,
+  isExitWorkflowTimeoutZone,
 } from './types';

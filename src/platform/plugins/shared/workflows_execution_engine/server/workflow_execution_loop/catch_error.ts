@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type { UnionExecutionGraphNode } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
@@ -100,7 +100,7 @@ export async function catchError(
           esClient: params.esClient,
           fakeRequest: params.fakeRequest,
           coreStart: params.coreStart,
-          node: node as UnionExecutionGraphNode,
+          node: node as GraphNodeUnion,
           stackFrames: params.workflowRuntime.getCurrentNodeScope(),
         });
         const stepImplementation = params.nodesFactory.create(stepContext);

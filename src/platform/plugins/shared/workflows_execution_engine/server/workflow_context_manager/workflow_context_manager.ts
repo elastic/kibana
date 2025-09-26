@@ -8,7 +8,7 @@
  */
 
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
-import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -20,7 +20,7 @@ export interface ContextManagerInit {
   // New properties for logging
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
-  node: UnionExecutionGraphNode;
+  node: GraphNodeUnion;
   stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
@@ -36,7 +36,7 @@ export class WorkflowContextManager {
   private coreStart?: CoreStart;
 
   private stackFrames: StackFrame[];
-  public readonly node: UnionExecutionGraphNode;
+  public readonly node: GraphNodeUnion;
   public readonly stepExecutionId: string;
   public readonly abortController = new AbortController();
 

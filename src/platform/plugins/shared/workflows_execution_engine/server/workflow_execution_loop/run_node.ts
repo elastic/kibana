@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnionExecutionGraphNode } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
 import { runStackMonitor } from './run_stack_monitor';
@@ -47,7 +47,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     esClient: params.esClient,
     fakeRequest: params.fakeRequest,
     coreStart: params.coreStart,
-    node: currentNode as UnionExecutionGraphNode,
+    node: currentNode as GraphNodeUnion,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
   const nodeImplementation = params.nodesFactory.create(stepContext);

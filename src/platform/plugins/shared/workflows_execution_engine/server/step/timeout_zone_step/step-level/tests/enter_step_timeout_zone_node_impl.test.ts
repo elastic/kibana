@@ -41,7 +41,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       id: 'test-timeout-zone',
       type: 'enter-timeout-zone',
       stepId: 'timeoutStep',
-      stepType: 'timeout',
+      stepType: 'step_level_timeout',
       timeout: '30s',
     };
 

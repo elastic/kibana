@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnionExecutionGraphNode } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { MonitorableNode } from '../step/node_implementation';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
@@ -93,7 +93,7 @@ export async function runStackMonitor(
           esClient: params.esClient,
           fakeRequest: params.fakeRequest,
           coreStart: params.coreStart,
-          node: node as UnionExecutionGraphNode,
+          node: node as GraphNodeUnion,
           stackFrames: nodeStack.stackFrames,
         })
       );
