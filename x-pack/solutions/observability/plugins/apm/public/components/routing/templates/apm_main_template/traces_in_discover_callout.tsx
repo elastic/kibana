@@ -103,6 +103,7 @@ export function TracesInDiscoverCallout() {
     <>
       <EuiSpacer size="m" />
       <EuiCallOut
+        data-test-subj="apmApmMainTemplateTracesInDiscoverCallout"
         size="m"
         announceOnMount
         title={calloutTitle}
