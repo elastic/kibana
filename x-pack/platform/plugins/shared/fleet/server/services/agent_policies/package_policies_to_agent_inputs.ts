@@ -24,6 +24,7 @@ import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
@@ -137,15 +138,11 @@ export const getFullInputStreams = (
               const streamId = stream.id;
               const { data_stream: compiledDataStream, ...compiledStream } =
                 stream.compiled_stream ?? {};
-              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
-              const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
                 data_stream: {
                   ...stream.data_stream,
                   ...compiledDataStream,
-                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
-                  ...(datasetVar ? { dataset: datasetVar } : {}),
                 },
                 ...compiledStream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
@@ -153,6 +150,18 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                // otelcol inputs are not going to have the data_stream type and dataset in
+                // the compiled stream, get them directly from the user-defined variables.
+                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+                fullStream.data_stream = {
+                  ...fullStream.data_stream,
+                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
+                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                };
+              }
+
               streamsOriginalIdsMap?.set(fullStream.id, streamId);
 
               return fullStream;
