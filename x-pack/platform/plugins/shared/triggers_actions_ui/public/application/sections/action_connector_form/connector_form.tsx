@@ -64,7 +64,7 @@ interface Props {
  */
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-export const formDeserializer = (data: InternalConnectorForm): InternalConnectorForm => {
+export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
   const overrides = connectorOverrides(data.actionTypeId);
   if (overrides?.formDeserializer) {
     return overrides.formDeserializer(data);
@@ -87,7 +87,6 @@ export const formDeserializer = (data: InternalConnectorForm): InternalConnector
   return {
     ...data,
     __internal__: {
-      ...(data.__internal__ ?? {}),
       headers: configHeaders,
     },
   };
@@ -106,7 +105,7 @@ const buildHeaderRecords = (
 };
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-export const formSerializer = (formData: InternalConnectorForm): InternalConnectorForm => {
+export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
   const overrides = connectorOverrides(formData.actionTypeId);
   if (overrides?.formSerializer) {
     return overrides.formSerializer(formData);
