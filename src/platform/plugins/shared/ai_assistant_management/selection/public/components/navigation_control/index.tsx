@@ -32,19 +32,19 @@ import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../../common/ui_sett
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
 
-interface AiAssistantHeaderButtonProps {
+interface AIAssistantHeaderButtonProps {
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
   triggerOpenChat: (event: { assistant: AIAssistantType }) => void;
 }
 
-export const AiAssistantHeaderButton: React.FC<AiAssistantHeaderButtonProps> = ({
+export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = ({
   coreStart,
   isSecurityAIAssistantEnabled,
   isObservabilityAIAssistantEnabled,
   triggerOpenChat,
-}: AiAssistantHeaderButtonProps) => {
+}) => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
