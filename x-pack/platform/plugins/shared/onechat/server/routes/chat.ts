@@ -38,8 +38,7 @@ export function registerChatRoutes({
     agent_id: schema.string({
       defaultValue: oneChatDefaultAgentId,
       meta: {
-        description:
-          'The ID of the agent to converse with. Defaults to the default Elastic AI agent.',
+        description: 'The ID of the agent to chat with. Defaults to the default Elastic AI agent.',
       },
     }),
     connector_id: schema.maybe(
@@ -118,9 +117,9 @@ export function registerChatRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Converse with an agent',
+      summary: 'Send chat message',
       description:
-        'Send a message to an agent. Use this endpoint to have conversations with AI agents, continue existing conversations, and enable advanced features like external integrations and visualization capabilities.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
         tags: ['oas-tag:agent builder'],
         availability: {
@@ -183,9 +182,9 @@ export function registerChatRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Converse with an agent and stream events',
+      summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent with real-time streaming events. Use this endpoint to have conversations with AI agents and receive live updates as the agent processes your request.',
+        "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.",
       options: {
         tags: ['oas-tag:agent builder'],
         availability: {

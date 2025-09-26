@@ -54,7 +54,7 @@ actions:
         Use the Agent Builder APIs to create, and manage AI agents and tools.
         Chat with agents to perform tasks and workflows and execute tools.
       externalDocs:
-        description: Agent Builder documentation
+        description: Read the Agent Builder documentation
         url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
       # externalDocs:
         # description: 

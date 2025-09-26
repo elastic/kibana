@@ -29,9 +29,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'MCP server',
+      summary: 'Send MCP request',
       description:
-        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
+        'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.',
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
@@ -148,9 +148,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'MCP server',
+      summary: 'Get MCP server (not supported)',
       description:
-        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
+        'GET requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.',
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         availability: {
@@ -187,9 +187,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'MCP server',
+      summary: 'Delete MCP server (not supported)',
       description:
-        'Handle MCP (Model Context Protocol) requests. Use this endpoint to provide a standardized interface for tool integration and agent communication.',
+        'DELETE requests to the MCP server are not supported. This endpoint returns a 405 Method Not Allowed error. Use POST requests to communicate with the MCP server via JSON-RPC 2.0.',
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,

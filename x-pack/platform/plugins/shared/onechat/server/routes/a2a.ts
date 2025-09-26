@@ -38,7 +38,7 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Agent Card',
+      summary: 'Get A2A agent card',
       description:
         'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.',
       options: {
@@ -79,7 +79,7 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Task Endpoint',
+      summary: 'Send A2A task',
       description:
         'Handle A2A (Agent-to-Agent) task requests. Use this endpoint to process inter-agent communication using JSON-RPC 2.0 protocol.',
       options: {
