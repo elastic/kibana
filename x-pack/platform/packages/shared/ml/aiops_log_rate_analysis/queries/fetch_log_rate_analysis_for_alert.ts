@@ -25,14 +25,13 @@ import { getLogRateAnalysisTypeForCounts } from '../get_log_rate_analysis_type_f
 import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 
 import { fetchIndexInfo } from './fetch_index_info';
-import { fetchSignificantCategories } from './fetch_significant_categories';
 import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
 
 const MAX_CONCURRENT_QUERIES = 5;
 const CHUNK_SIZE = 50;
 
 interface QueueItem {
-  fn: typeof fetchSignificantCategories | typeof fetchSignificantTermPValues;
+  fn: typeof fetchSignificantTermPValues;
   fieldNames: string[];
 }
 
@@ -105,13 +104,25 @@ export async function fetchLogRateAnalysisForAlert({
         },
       })
   );
-  const { textFieldCandidates, keywordFieldCandidates } = indexInfo;
+
+  // For log rate analysis on contextual insights on alerting pages,
+  // we only consider keyword fields as field candidates.
+  // See https://github.com/elastic/kibana/issues/235562 for more details.
+  const { keywordFieldCandidates } = indexInfo;
 
   const logRateAnalysisType = getLogRateAnalysisTypeForCounts({
     baselineCount: indexInfo.baselineTotalDocCount,
     deviationCount: indexInfo.deviationTotalDocCount,
     windowParameters,
   });
+
+  // Return early if there are no keyword field candidates.
+  if (keywordFieldCandidates.length === 0) {
+    return {
+      logRateAnalysisType,
+      significantItems: [],
+    };
+  }
 
   // Just in case the log rate analysis type is 'dip', we need to swap
   // the window parameters for the analysis.
@@ -151,11 +162,9 @@ export async function fetchLogRateAnalysisForAlert({
     );
   }, MAX_CONCURRENT_QUERIES);
 
-  // Push the actual items to the queue. We don't need to chunk the text fields
-  // since they are just `message` and `error.message`.
+  // Push the actual items to the queue.
   significantItemsQueue.push(
     [
-      { fn: fetchSignificantCategories, fieldNames: textFieldCandidates },
       ...chunk(keywordFieldCandidates, CHUNK_SIZE).map((fieldNames) => ({
         fn: fetchSignificantTermPValues,
         fieldNames,
