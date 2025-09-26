@@ -26,12 +26,9 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
-const CommonIncidentAttributes = {
-  name: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-  severityCode: schema.nullable(schema.number()),
+const MAX_ADDITIONAL_FIELDS_LENGTH = 200;
+
+const AdditionalFields = {
   additionalFields: schema.nullable(
     schema.recordOf(
       schema.string({
@@ -42,12 +39,21 @@ const CommonIncidentAttributes = {
         validate: (value) =>
           validateRecordMaxKeys({
             record: value,
-            maxNumberOfFields: 200,
+            maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
             fieldName: 'additionalFields',
           }),
       }
     )
   ),
+};
+
+const CommonIncidentAttributes = {
+  name: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+  severityCode: schema.nullable(schema.number()),
+  ...AdditionalFields,
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
@@ -79,22 +85,7 @@ export const PushToServiceIncidentSchema = {
   description: schema.nullable(schema.string()),
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.number()),
-  additionalFields: schema.nullable(
-    schema.recordOf(
-      schema.string({
-        validate: (value) => validateOtherFieldsKeys(value),
-      }),
-      schema.any(),
-      {
-        validate: (value) =>
-          validateRecordMaxKeys({
-            record: value,
-            maxNumberOfFields: 200,
-            fieldName: 'additionalFields',
-          }),
-      }
-    )
-  ),
+  ...AdditionalFields,
 };
 
 // Reserved for future implementation
