@@ -11,6 +11,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -79,6 +80,41 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             onClick: () => setShowFullScreenWaterfall(true),
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
+            tour: {
+              title: i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.title', {
+                defaultMessage: 'Trace insights in Discover',
+              }),
+              subtitle: i18n.translate(
+                'unifiedDocViewer.observability.traces.trace.tourStep.subtitle',
+                {
+                  defaultMessage: 'New discover feature',
+                }
+              ),
+              content: (
+                <EuiText size="s">
+                  {i18n.translate(
+                    'unifiedDocViewer.observability.traces.trace.tourStep.content.1',
+                    {
+                      defaultMessage: 'You can now click ',
+                    }
+                  )}
+                  <EuiLink
+                    onClick={() => setShowFullScreenWaterfall(true)}
+                    aria-label={fullScreenButtonLabel}
+                  >
+                    {fullScreenButtonLabel}
+                  </EuiLink>
+
+                  {i18n.translate(
+                    'unifiedDocViewer.observability.traces.trace.tourStep.content.2',
+                    {
+                      defaultMessage:
+                        ' to view the full-screen waterfall and explore your trace data in context.',
+                    }
+                  )}
+                </EuiText>
+              ),
+            },
           },
         ]}
       >
