@@ -165,6 +165,7 @@
     "@kbn/ai-assistant-common": "link:x-pack/platform/packages/shared/ai-assistant/common",
     "@kbn/ai-assistant-connector-selector-action": "link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action",
     "@kbn/ai-assistant-cta": "link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta",
+    "@kbn/ai-assistant-default-llm-setting": "link:x-pack/platform/packages/shared/ai-assistant-default-llm-setting",
     "@kbn/ai-assistant-icon": "link:x-pack/platform/packages/shared/ai-assistant/icon",
     "@kbn/ai-assistant-management-plugin": "link:src/platform/plugins/shared/ai_assistant_management/selection",
     "@kbn/ai-security-labs-content": "link:x-pack/solutions/security/packages/ai-security-labs-content",

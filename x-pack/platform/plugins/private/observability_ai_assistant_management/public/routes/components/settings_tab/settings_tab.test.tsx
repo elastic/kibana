@@ -31,6 +31,14 @@ describe('SettingsTab', () => {
     });
     useKibanaMock.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockImplementation((flag) => {
+            if (flag === 'aiAssistant.defaultLlmSettingEnabled') {
+              return true;
+            }
+            return false;
+          }),
+        },
         application: {
           getUrlForApp: getUrlForAppMock,
           capabilities: {
@@ -39,6 +47,13 @@ describe('SettingsTab', () => {
         },
         http: {
           basePath: { prepend: prependMock },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+          },
         },
         productDocBase: undefined,
       },
@@ -49,7 +64,17 @@ describe('SettingsTab', () => {
       isPolling: false,
       isWarmingUpModel: false,
     });
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
+    useGenAIConnectorsMock.mockReturnValue({
+      connectors: [
+        {
+          id: 'test-connector',
+          name: 'Test Connector',
+          isPreconfigured: false,
+          actionTypeId: 'test-action-type',
+        },
+      ],
+      loading: false,
+    });
 
     getUrlForAppMock.mockReset();
     prependMock.mockReset();
