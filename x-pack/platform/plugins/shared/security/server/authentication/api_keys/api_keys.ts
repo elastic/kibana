@@ -257,7 +257,7 @@ export class APIKeys implements APIKeysType {
       return null;
     }
 
-    this.logger.debug(`Trying to get API key by id=${id} as internal user`);
+    this.logger.debug(`Trying to get API key by id=${id} as current user`);
 
     let result: SecurityApiKey | null = null;
     try {
@@ -268,9 +268,9 @@ export class APIKeys implements APIKeysType {
       if (apiKeys && apiKeys.length > 0) {
         result = apiKeys[0];
       }
-      this.logger.debug(`API key by id=${id} was retrieved successfully as internal user`);
+      this.logger.debug(`API key by id=${id} was retrieved successfully as current user`);
     } catch (e) {
-      this.logger.error(`Failed to get API key by id=${id} as internal user: ${e.message}`);
+      this.logger.error(`Failed to get API key by id=${id} as current user: ${e.message}`);
       throw e;
     }
 
