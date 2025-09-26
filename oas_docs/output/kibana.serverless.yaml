@@ -25600,36 +25600,42 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    cloudProvider:
-                      type: string
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                    packagePolicyCount:
-                      type: number
-                    updated_at:
-                      type: string
-                    vars:
-                      additionalProperties: {}
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
                       type: object
-                  required:
-                    - id
-                    - name
-                    - cloudProvider
-                    - vars
-                    - packagePolicyCount
-                    - created_at
-                    - updated_at
-                type: array
+                      properties:
+                        cloudProvider:
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                        packagePolicyCount:
+                          type: number
+                        updated_at:
+                          type: string
+                        vars:
+                          additionalProperties: {}
+                          type: object
+                      required:
+                        - id
+                        - name
+                        - cloudProvider
+                        - vars
+                        - packagePolicyCount
+                        - created_at
+                        - updated_at
+                    type: array
+                required:
+                  - items
           description: Indicates a successful call.
         '400':
           content:
@@ -25733,31 +25739,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
@@ -25867,31 +25879,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
@@ -25990,31 +26008,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
