@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
-  AWS_INPUT_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -48,10 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
       if (process.env.CSPM_AWS_ROLE_ARN && process.env.CSPM_AWS_EXTERNAL_ID) {
-        await cisIntegration.fillInTextField(
-          'awsRoleArnInput',
-          process.env.CSPM_AWS_ROLE_ARN
-        );
+        await cisIntegration.fillInTextField('awsRoleArnInput', process.env.CSPM_AWS_ROLE_ARN);
 
         await cisIntegration.fillInTextField(
           'awsCloudConnectorExternalId',

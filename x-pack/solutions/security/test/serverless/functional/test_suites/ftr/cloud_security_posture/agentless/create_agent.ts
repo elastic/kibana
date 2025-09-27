@@ -49,7 +49,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
-      await cisIntegration.fillInTextField('awsRoleArnInput', 'arn:aws:iam::123456789012:role/test-role');
+      await cisIntegration.fillInTextField(
+        'awsRoleArnInput',
+        'arn:aws:iam::123456789012:role/test-role'
+      );
       await cisIntegration.fillInTextField('awsCloudConnectorExternalId', 'test-external-id');
 
       await pageObjects.header.waitUntilLoadingHasFinished();
