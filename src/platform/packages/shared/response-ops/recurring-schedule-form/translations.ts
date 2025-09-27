@@ -182,10 +182,11 @@ export const RECURRING_SCHEDULE_FORM_INTERVAL_EVERY = i18n.translate(
   }
 );
 
-i18n.translate('responseOpsRecurringScheduleForm.customFrequency.hourly', {
-  defaultMessage: '{interval, plural, one {hour} other {hours}}',
-  values: { interval },
-});
+export const RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_HOURLY = (interval: number) =>
+  i18n.translate('responseOpsRecurringScheduleForm.customFrequency.hourly', {
+    defaultMessage: '{interval, plural, one {hour} other {hours}}',
+    values: { interval },
+  });
 
 export const RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_DAILY = (interval: number) =>
   i18n.translate('responseOpsRecurringScheduleForm.customFrequency.daily', {
