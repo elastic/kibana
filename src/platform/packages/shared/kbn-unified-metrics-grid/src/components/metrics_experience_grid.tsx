@@ -28,7 +28,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
-import { EmptyState } from './empty_state/empty_state';
+import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -41,6 +41,7 @@ export const MetricsExperienceGrid = ({
   requestParams,
   services,
   input$: originalInput$,
+  isChartLoading: isDiscoverLoading,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -59,7 +60,7 @@ export const MetricsExperienceGrid = ({
   });
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isLoading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange: getTimeRange(),
   });
@@ -99,7 +100,7 @@ export const MetricsExperienceGrid = ({
   }, [valueFilters]);
 
   if (fields.length === 0) {
-    return <EmptyState isLoading={isLoading} />;
+    return <EmptyState isLoading={isFieldsLoading} />;
   }
 
   return (
@@ -133,7 +134,7 @@ export const MetricsExperienceGrid = ({
             direction="row"
           >
             <EuiFlexItem grow={false}>
-              {isLoading ? (
+              {isFieldsLoading ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
                 <EuiText size="s">
@@ -166,6 +167,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
+          {isDiscoverLoading && <ChartLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}

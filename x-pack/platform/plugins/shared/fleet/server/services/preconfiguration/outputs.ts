@@ -319,6 +319,10 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
       isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks) ||
+      isDifferent(
+        existingOutput.write_to_logs_streams,
+        preconfiguredOutput.write_to_logs_streams
+      ) ||
       passwordHashIsDifferent
     );
   };
