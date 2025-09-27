@@ -43,19 +43,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      if (process.env.CSPM_AWS_ACCOUNT_ID && process.env.CSPM_AWS_SECRET_KEY) {
+      // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
+      if (process.env.CSPM_AWS_ROLE_ARN && process.env.CSPM_AWS_EXTERNAL_ID) {
         await cisIntegration.fillInTextField(
-          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
-          process.env.CSPM_AWS_ACCOUNT_ID
+          'awsRoleArnInput',
+          process.env.CSPM_AWS_ROLE_ARN
         );
 
         await cisIntegration.fillInTextField(
-          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
-          process.env.CSPM_AWS_SECRET_KEY
+          'awsCloudConnectorExternalId',
+          process.env.CSPM_AWS_EXTERNAL_ID
         );
       }
 
