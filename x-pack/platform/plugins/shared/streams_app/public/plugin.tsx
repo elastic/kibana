@@ -105,7 +105,7 @@ export class StreamsAppPlugin
       euiIconType: 'logoElastic',
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
-      order: 8001,
+      order: 10000,
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(
