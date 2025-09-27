@@ -35,6 +35,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     indexPattern: getStreamPatternFor(integration, namespace),
     name: integrationsSourceIndex(namespace, integration),
     matchers: getMatchersFor(integration),
+    integrationName: integration,
   });
 
   function buildRequiredSources(namespace: string, indexPattern: string) {

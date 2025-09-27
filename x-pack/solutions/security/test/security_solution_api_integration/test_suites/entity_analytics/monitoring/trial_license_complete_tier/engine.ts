@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext) => {
       const indexName = 'privileged-users-index-pattern';
       const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
       const entitySourceIntegration = createIntegrationEntitySource({
-        name: '.entity_analytics.monitoring.sources.okta-default',
+        name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
       });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
@@ -296,7 +296,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(names).toEqual(
           expect.arrayContaining([
             'PrivilegedUsers',
-            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
           ])
         );
         // Try to create the same entity sources again
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
         const names = sources.body.map((s: any) => s.name);
         expect(names).toEqual(
           expect.arrayContaining([
-            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
             // '.entity_analytics.monitoring.sources.ad-default',
             '.entity_analytics.monitoring.users-default',
           ])
