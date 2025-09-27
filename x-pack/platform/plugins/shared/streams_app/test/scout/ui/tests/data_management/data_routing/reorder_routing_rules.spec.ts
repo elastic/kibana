@@ -64,8 +64,11 @@ test.describe(
     test('should handle multiple reorder operations', async ({ pageObjects }) => {
       // Perform drag operations
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
+      await pageObjects.streams.checkDraggingOver();
+
       // Perform another reorder while in reordering state
       await pageObjects.streams.dragRoutingRule('logs.third', -1);
+      await pageObjects.streams.checkDraggingOver();
 
       // Save all changes
       await pageObjects.streams.saveRuleOrder();

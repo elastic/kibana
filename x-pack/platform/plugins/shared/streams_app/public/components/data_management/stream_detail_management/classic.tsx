@@ -15,7 +15,7 @@ import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -72,6 +72,7 @@ export function ClassicStreamDetailManagement({
               })}
               <EuiBadgeGroup gutterSize="s">
                 {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.WiredStream.Definition.is(definition.stream) && <WiredStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>

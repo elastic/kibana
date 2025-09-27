@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
