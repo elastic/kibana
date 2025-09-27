@@ -18,7 +18,8 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
   extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan'> {
   rows: Row<G>[];
   /**
-   * cause the active group root row to stick right under the header
+   * setting a value of true causes the active group root row
+   * to stick right under the header
    */
   enableStickyGroupHeader: boolean;
   estimatedRowHeight?: number;
@@ -27,7 +28,7 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
 interface CascadeVirtualizerReturnValue
   extends Pick<
     ReturnType<typeof useVirtualizer>,
-    'scrollOffset' | 'measureElement' | 'getTotalSize' | 'getVirtualItems'
+    'getTotalSize' | 'getVirtualItems' | 'measureElement' | 'scrollOffset' | 'scrollElement'
   > {
   activeStickyIndex: number | null;
   virtualizedRowComputedTranslateValue: Map<number, number>;
@@ -118,6 +119,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       getScrollElement,
       overscan,
       rangeExtractor,
+      useAnimationFrameWithResizeObserver: true,
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
@@ -149,6 +151,9 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       get virtualizedRowComputedTranslateValue() {
         return virtualizedRowComputedTranslateValueRef.current;
       },
+      get scrollElement() {
+        return virtualizerImpl.scrollElement;
+      },
     }),
     [activeStickyIndex, virtualizerImpl, rows.length]
   );
@@ -176,7 +181,7 @@ export const getGridRowPositioningStyle = (
   };
 };
 
-interface VirtualizedCascadeListProps<G extends GroupNode>
+export interface VirtualizedCascadeListProps<G extends GroupNode>
   extends Pick<
     CascadeVirtualizerReturnValue,
     'virtualizedRowComputedTranslateValue' | 'getVirtualItems' | 'activeStickyIndex'
