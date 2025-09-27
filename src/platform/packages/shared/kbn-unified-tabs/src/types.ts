@@ -9,6 +9,7 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { CoreStart } from '@kbn/core/public';
+import type { TabsEventDataKeys } from './event_data_keys';
 
 export interface TabItem {
   id: string;
@@ -74,17 +75,6 @@ export enum TabsEventName {
   tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
   tabsRestoredOnLoad = 'tabsRestoredOnLoad',
   tabSelectRecentlyClosed = 'tabSelectRecentlyClosed',
-}
-
-export enum TabsEventDataKeys {
-  TABS_EVENT_NAME = 'eventName',
-  TAB_ID = 'tabId',
-  TOTAL_TABS_OPEN = 'totalTabsOpen',
-  FROM_INDEX = 'fromIndex',
-  TO_INDEX = 'toIndex',
-  REMAINING_TABS_COUNT = 'remainingTabsCount',
-  CLOSED_TABS_COUNT = 'closedTabsCount',
-  SHORTCUT_USED = 'shortcutUsed',
 }
 
 export interface TabsEBTEvent {

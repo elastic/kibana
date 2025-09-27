@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabbedContent, type TabbedContentProps } from './components/tabbed_content';
-export { type TabsEBTEvent, TabsEventName } from './types';
+export enum TabsEventDataKeys {
+  TABS_EVENT_NAME = 'eventName',
+  TAB_ID = 'tabId',
+  TOTAL_TABS_OPEN = 'totalTabsOpen',
+  FROM_INDEX = 'fromIndex',
+  TO_INDEX = 'toIndex',
+  REMAINING_TABS_COUNT = 'remainingTabsCount',
+  CLOSED_TABS_COUNT = 'closedTabsCount',
+  SHORTCUT_USED = 'shortcutUsed',
+}

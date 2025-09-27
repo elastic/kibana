@@ -34,11 +34,12 @@ import {
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
-import { TabsEventDataKeys, TabsEventName } from '../../types';
+import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
+import { TabsEventDataKeys } from '../../event_data_keys';
 
 const DROPPABLE_ID = 'unifiedTabsOrder';
 

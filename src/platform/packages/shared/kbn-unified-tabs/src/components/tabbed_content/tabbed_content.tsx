@@ -25,9 +25,10 @@ import {
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData, TabsEBTEvent } from '../../types';
-import { TabsEventName, TabsEventDataKeys } from '../../types';
+import { TabsEventName } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
+import { TabsEventDataKeys } from '../../event_data_keys';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount'> {
   items: TabItem[];
