@@ -49,18 +49,16 @@ export function registerKibanaFunction({
       },
     },
     async ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request, logger, context } = resources;
-      const core = await context.core;
-
-      // @ts-expect-error: coreStart is not defined in the type
-      const basePath = core.coreStart?.http?.basePath?.serverBasePath;
-
-      const { protocol, host } = request.rewrittenUrl || request.url;
+      const { request, logger } = resources;
+      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
 
       const nextUrl = {
         host,
         protocol,
-        pathname: basePath && !pathname.startsWith(basePath) ? `${basePath}${pathname}` : pathname,
+        pathname: pathnameFromRequest.replace(
+          '/internal/observability_ai_assistant/chat/complete',
+          pathname
+        ),
         query: query ? (query as Record<string, string>) : undefined,
       };
 
