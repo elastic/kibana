@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/sse-utils",
+    "@kbn/visualization-utils",
   ]
 }
