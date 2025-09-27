@@ -5,52 +5,75 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JestContext } from '../../test/context_jest';
-import {
-  getPageControlsPrevious as previous,
-  getPageControlsCenter as current,
-  getPageControlsNext as next,
-} from '../../test/selectors';
 import { PageControls } from './page_controls';
 
 jest.mock('../../supported_renderers');
 
 describe('<PageControls />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<PageControls />).isEmptyRender());
+    const { container } = render(<PageControls />);
+    expect(container.firstChild).toBeNull();
   });
 
-  const hello = mount(
-    <JestContext source="hello">
-      <PageControls />
-    </JestContext>
-  );
-  const austin = mount(
-    <JestContext source="austin">
-      <PageControls />
-    </JestContext>
-  );
-
   test('hello: renders as expected', () => {
-    expect(previous(hello).props().disabled).toEqual(true);
-    expect(next(hello).props().disabled).toEqual(true);
-    expect(current(hello).text()).toEqual('Page 1');
+    render(
+      <JestContext source="hello">
+        <PageControls />
+      </JestContext>
+    );
+
+    const previousButton = screen.getByTestId('pageControlsPrevPage');
+    const nextButton = screen.getByTestId('pageControlsNextPage');
+    const currentPageButton = screen.getByTestId('pageControlsCurrentPage');
+
+    expect(previousButton).toBeDisabled();
+    expect(nextButton).toBeDisabled();
+    expect(currentPageButton).toHaveTextContent('Page 1');
   });
 
   test('austin: renders as expected', () => {
-    expect(previous(austin).props().disabled).toEqual(true);
-    expect(next(austin).props().disabled).toEqual(false);
-    expect(current(austin).text()).toEqual('Page 1 of 28');
+    render(
+      <JestContext source="austin">
+        <PageControls />
+      </JestContext>
+    );
+
+    const previousButton = screen.getByTestId('pageControlsPrevPage');
+    const nextButton = screen.getByTestId('pageControlsNextPage');
+    const currentPageButton = screen.getByTestId('pageControlsCurrentPage');
+
+    expect(previousButton).toBeDisabled();
+    expect(nextButton).toBeEnabled();
+    expect(currentPageButton).toHaveTextContent('Page 1 of 28');
   });
 
-  test('austin: moves between pages', () => {
-    next(austin).simulate('click');
-    expect(current(austin).text()).toEqual('Page 2 of 28');
-    next(austin).simulate('click');
-    expect(current(austin).text()).toEqual('Page 3 of 28');
-    previous(austin).simulate('click');
-    expect(current(austin).text()).toEqual('Page 2 of 28');
+  test('austin: moves between pages', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <JestContext source="austin">
+        <PageControls />
+      </JestContext>
+    );
+
+    const previousButton = screen.getByTestId('pageControlsPrevPage');
+    const nextButton = screen.getByTestId('pageControlsNextPage');
+    const currentPageButton = screen.getByTestId('pageControlsCurrentPage');
+
+    // Click next to go to page 2
+    await user.click(nextButton);
+    expect(currentPageButton).toHaveTextContent('Page 2 of 28');
+
+    // Click next to go to page 3
+    await user.click(nextButton);
+    expect(currentPageButton).toHaveTextContent('Page 3 of 28');
+
+    // Click previous to go back to page 2
+    await user.click(previousButton);
+    expect(currentPageButton).toHaveTextContent('Page 2 of 28');
   });
 });

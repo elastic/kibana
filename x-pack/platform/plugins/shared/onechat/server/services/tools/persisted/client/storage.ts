@@ -19,6 +19,7 @@ const storageSettings = {
     properties: {
       id: types.keyword({}),
       type: types.keyword({}),
+      space: types.keyword({}),
       description: types.text({}),
       configuration: types.object({
         dynamic: false,
@@ -34,6 +35,7 @@ const storageSettings = {
 export interface ToolProperties<TConfig extends object = Record<string, unknown>> {
   id: string;
   type: ToolType;
+  space: string;
   description: string;
   configuration: TConfig;
   tags: string[];
