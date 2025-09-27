@@ -8,6 +8,8 @@
 import type { LensAttributes } from '../../../../server/content_management';
 import type { LensSOAttributesV0 } from '../../../../server/content_management/v0';
 
+export const LENS_UNKNOWN_VIS = 'UNKNOWN';
+
 /**
  * Cleanup null and loose SO attribute types
  * - `description` should not allow `null`
@@ -19,6 +21,6 @@ export function attributesCleanup(attributes: LensSOAttributesV0): LensAttribute
     // fix type mismatches, null -> undefined
     description: attributes.description ?? undefined,
     // fix type mismatches, null | undefined -> string
-    visualizationType: attributes.visualizationType ?? 'lnsXY', // should never happen but default to XY
+    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS, // should never happen
   };
 }
