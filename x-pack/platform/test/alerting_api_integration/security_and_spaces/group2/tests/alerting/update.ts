@@ -21,7 +21,6 @@ import {
   ObjectRemover,
   ensureDatetimeIsWithinRange,
   getUnauthorizedErrorMessage,
-  AlertUtils,
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -1497,27 +1496,20 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     describe('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
 
-      const alertUtils = new AlertUtils({
-        user: SuperuserAtSpace1.user,
-        space: SuperuserAtSpace1.space,
-        supertestWithoutAuth,
-      });
-
       it('should throw 400 error when trying to update an internally managed rule type', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send(rulePayload)
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.updateInternallyManagedRule(
-          createdRule1.id,
-          objectRemover
-        );
-
-        expect(response.statusCode).to.eql(400);
+        await supertest
+          .put(`/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({ name: 'test.internal-rule-type-update', schedule: { interval: '5m' } })
+          .expect(400);
       });
     });
   });
