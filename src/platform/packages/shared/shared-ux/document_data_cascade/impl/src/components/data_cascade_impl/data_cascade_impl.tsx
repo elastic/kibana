@@ -18,6 +18,7 @@ import {
   useCascadeVirtualizer,
   getGridHeaderPositioningStyle,
   VirtualizedCascadeRowList,
+  type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
 import {
   useRegisterCascadeAccessibilityHelpers,
@@ -71,10 +72,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const { euiTheme } = useEuiTheme();
 
-  // The scrollable element for your list
   const scrollElementRef = useRef(null);
   const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
+  const virtualizerInstance = useRef<ReturnType<typeof useCascadeVirtualizer>>();
+
+  const getScrollElement = useCallback(() => scrollElementRef.current, []);
+
+  // create stable callback we can use to retrieve the current value of the virtualizer elsewhere
+  const getVirtualizer = useCallback(() => virtualizerInstance.current, []);
 
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
 
@@ -101,11 +107,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             ...rowElement.props.children.props,
             key: props.row.id,
             size,
+            // getVirtualizer will not return undefined here as it is set immediately after the first render
+            getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
           }}
         />
       );
     },
-    [rowElement.props.children.props, size]
+    [getVirtualizer, rowElement.props.children.props, size]
   );
 
   const { headerColumns, rows } = useCascadeTable<G, L>({
@@ -116,6 +124,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     rowCell: cascadeRowCell,
   });
 
+  // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
+  virtualizerInstance.current = useCascadeVirtualizer<G>({
+    rows,
+    overscan,
+    getScrollElement,
+    enableStickyGroupHeader,
+    estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
+  });
+
   const {
     getVirtualItems,
     getTotalSize,
@@ -124,19 +141,32 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
-  } = useCascadeVirtualizer<G>({
-    rows,
-    overscan,
-    getScrollElement: () => scrollElementRef.current,
-    enableStickyGroupHeader,
-    estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
-  });
+  } = virtualizerInstance.current;
 
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
     tableWrapperElement: cascadeWrapperRef.current!,
     scrollToRowIndex: scrollToVirtualizedIndex,
   });
+
+  const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['children']>(
+    ({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
+      <CascadeRowPrimitive<G, L>
+        {...{
+          size,
+          isActiveSticky,
+          enableRowSelection,
+          rowInstance: row,
+          virtualRow: virtualItem,
+          virtualRowStyle,
+          innerRef: measureElement,
+          activeStickyRenderSlotRef,
+          ...rowElement.props,
+        }}
+      />
+    ),
+    [size, enableRowSelection, rowElement.props, measureElement]
+  );
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes();
 
@@ -189,21 +219,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                         rows,
                       }}
                     >
-                      {({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
-                        <CascadeRowPrimitive<G, L>
-                          {...{
-                            size,
-                            isActiveSticky,
-                            enableRowSelection,
-                            rowInstance: row,
-                            virtualRow: virtualItem,
-                            virtualRowStyle,
-                            innerRef: measureElement,
-                            activeStickyRenderSlotRef,
-                            ...rowElement.props,
-                          }}
-                        />
-                      )}
+                      {virtualCascadeRowRenderer}
                     </VirtualizedCascadeRowList>
                   </div>
                 </div>
