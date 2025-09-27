@@ -12,7 +12,7 @@ import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@el
 import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
-import type { CascadeVirtualizerProps } from '../../lib/core/virtualizer';
+import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -32,6 +32,16 @@ interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   nodePathMap: Record<string, string>;
 }
 
+/**
+ * Provides the props required to anchor another virtualized list
+ * within our already virtualized row, and have it controlled by the same scrollable parent, if we wish so.
+ */
+export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNode>
+  extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
+  getScrollOffset: () => number;
+  getScrollMargin: () => number;
+}
+
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends CellContext<G, unknown> {
   /**
@@ -42,10 +52,14 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
-  /**
+  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
+  /*
+   *
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
-  children: (args: { data: L[] | null; cellId: string }) => React.ReactNode;
+  children: (
+    args: { data: L[] | null; cellId: string } & CascadeRowCellNestedVirtualizationAnchorProps<G>
+  ) => React.ReactNode;
 }
 
 interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {

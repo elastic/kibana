@@ -14,5 +14,6 @@ export type {
   DataCascadeProps,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
+  CascadeRowCellNestedVirtualizationAnchorProps,
 } from './src/components';
 export * from './src/lib';
