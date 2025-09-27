@@ -24,6 +24,7 @@ jest.mock('../../../../lib/license_api_access', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  rulesClient.getRuleTypesByQuery.mockResolvedValue({ ruleTypes: [] });
 });
 
 describe('bulkDisableRulesRoute', () => {
@@ -238,6 +239,43 @@ describe('bulkDisableRulesRoute', () => {
           uuid: '123-456',
         },
       ]);
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    it('throws 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValue({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkDisableRulesRoute({ router, licenseState });
+
+      const [config, handler] = router.patch.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_disable');
+
+      rulesClient.bulkDisableRules.mockResolvedValueOnce(bulkDisableResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: bulkDisableRequest,
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot disable rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
     });
   });
 });

@@ -21,6 +21,7 @@ import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleTypes } from '../../../lib/validate_internal_rule_types';
 
 export const bulkDisableRulesRoute = ({
   router,
@@ -43,11 +44,19 @@ export const bulkDisableRulesRoute = ({
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
+          const ruleTypes = alertingContext.listTypes();
 
           const body: BulkDisableRulesRequestBodyV1 = req.body;
           const { filter, ids, untrack } = body;
 
           try {
+            await validateInternalRuleTypes({
+              req: body,
+              ruleTypes,
+              rulesClient,
+              operationText: 'disable',
+            });
+
             const bulkDisableResults = await rulesClient.bulkDisableRules({ filter, ids, untrack });
 
             const resultBody: BulkDisableRulesResponseV1<RuleParamsV1> = {
