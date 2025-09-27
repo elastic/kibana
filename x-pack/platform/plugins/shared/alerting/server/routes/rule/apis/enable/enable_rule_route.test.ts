@@ -11,6 +11,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { mockedRule } from '../../../../task_runner/fixtures';
 
 const rulesClient = rulesClientMock.create();
 
@@ -20,6 +21,7 @@ jest.mock('../../../../lib/license_api_access', () => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
+  rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
 });
 
 describe('enableRuleRoute', () => {
@@ -77,5 +79,44 @@ describe('enableRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
+
+      enableRuleRoute(router, licenseState);
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          params: {
+            id: '1',
+          },
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(res.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            'Cannot enable rule of type "test.internal-rule-type" because it is internally managed.',
+        },
+      });
+    });
   });
 });

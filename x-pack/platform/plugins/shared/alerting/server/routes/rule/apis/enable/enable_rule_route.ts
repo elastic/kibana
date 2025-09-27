@@ -50,10 +50,29 @@ export const enableRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = await (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
+        const ruleTypes = alertingContext.listTypes();
+
         const params: EnableRuleRequestParamsV1 = req.params;
 
         try {
+          const rule = await rulesClient.get({ id: params.id });
+          const ruleType = ruleTypes.get(rule.alertTypeId);
+
+          /**
+           * Throws a bad request (400) if the rule type is internallyManaged
+           * ruleType will always exist here because ruleTypes.get will throw a 400
+           * error if the rule type is not registered.
+           */
+          if (ruleType?.internallyManaged) {
+            return res.badRequest({
+              body: {
+                message: `Cannot enable rule of type "${rule.alertTypeId}" because it is internally managed.`,
+              },
+            });
+          }
+
           await rulesClient.enableRule(params);
           return res.noContent();
         } catch (e) {
