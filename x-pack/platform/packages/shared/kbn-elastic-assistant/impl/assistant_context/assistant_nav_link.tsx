@@ -36,7 +36,10 @@ interface AssistantNavLinkProps {
 /** One gradient to rule them all */
 const CTA_GRAD = `linear-gradient(20deg, #0B64DD 10%, #1C9BEF 60%, #48EFCF 100%)`;
 
-export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, variant = 'primary' }) => {
+export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
+  iconOnly = false,
+  variant = 'primary',
+}) => {
   const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
@@ -55,9 +58,10 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const EuiButtonBasicOrEmpty =
+    chromeStyle === 'project' ? (variant === 'secondary' ? EuiButton : EuiButtonEmpty) : EuiButton;
   const ButtonComponent = iconOnly ? EuiButtonIcon : EuiButtonBasicOrEmpty;
-  
+
   // Choose the right icon based on variant
   const IconComponent = variant === 'primary' ? SparklesWhite : SparklesAnim;
 
@@ -117,16 +121,40 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
 
   /** Secondary (outlined): gradient border + gradient text/icon */
   const secondary = css`
-    background: transparent !important;
-    border: 2px solid var(--cta-grad) !important;
+    background: ${chromeStyle === 'project' ? euiTheme.colors.plain : '#0b1628'} !important;
+    border: none !important;
+    border-radius: 24px;
+    position: relative !important;
+    overflow: visible !important;
     
-    /* Apply gradient to button and all children - this approach worked before */
-    background: var(--cta-grad) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    color: transparent !important;
+    /* Create gradient border using pseudo-element */
+    &::before {
+      content: '' !important;
+      position: absolute !important;
+      top: -1px !important;
+      left: -1px !important;
+      right: -1px !important;
+      bottom: -1px !important;
+      background: linear-gradient(20deg, #0B64DD 10%, #1C9BEF 60%, #48EFCF 100%) !important;
+      border-radius: inherit !important;
+      z-index: -1 !important;
+      transition: opacity 0.3s ease !important;
+    }
     
+    /* Animate gradient on hover */
+    &:hover::before {
+      opacity: 0.7 !important;
+    }
+
+    /* Apply gradient text to the direct child span element */
+    > span {
+      background: var(--cta-grad) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
+    }
+
     /* Apply gradient to all children except icon (which uses CSS mask) */
     *:not(.euiButtonContent__icon) {
       background: var(--cta-grad) !important;
@@ -136,11 +164,8 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
       color: transparent !important;
     }
 
-    &:hover {
-      filter: brightness(1.03);
-    }
     &:focus-visible {
-      box-shadow: 0 0 0 2px ${euiTheme.colors.primary}33;
+      box-shadow: 0 0 0 2px ${euiTheme.colors.primary};
     }
   `;
 
@@ -148,14 +173,21 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
   const tertiary = css`
     background: transparent !important;
     border: none !important;
-    color: ${euiTheme.colors.text} !important; /* Fallback text color */
-    
-    /* Apply gradient text */
-    .euiButtonContent__content {
+
+    /* Apply gradient to button and all children - same as secondary */
+    background: var(--cta-grad) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+
+    /* Apply gradient to all children except icon (which uses CSS mask) */
+    *:not(.euiButtonContent__icon) {
       background: var(--cta-grad) !important;
       -webkit-background-clip: text !important;
       background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
     }
 
     &:hover {
@@ -224,8 +256,16 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ iconOnly = false, 
         css={[
           base,
           iconOnly
-            ? (variant === 'primary' ? iconOnlyPrimary : variant === 'secondary' ? iconOnlySecondary : iconOnlyTertiary)
-            : (variant === 'primary' ? primary : variant === 'secondary' ? secondary : tertiary),
+            ? variant === 'primary'
+              ? iconOnlyPrimary
+              : variant === 'secondary'
+              ? iconOnlySecondary
+              : iconOnlyTertiary
+            : variant === 'primary'
+            ? primary
+            : variant === 'secondary'
+            ? secondary
+            : tertiary,
         ]}
       >
         {!iconOnly && LINK_LABEL}

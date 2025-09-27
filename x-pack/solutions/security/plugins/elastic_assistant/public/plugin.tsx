@@ -99,7 +99,7 @@ export class ElasticAssistantPublicPlugin
                 <AssistantSpaceIdProvider>
                   <AssistantProvider>
                     <Suspense fallback={null}>
-                      <AssistantNavLink iconOnly={false} variant="primary" />
+                      <AssistantNavLink iconOnly={false} variant="secondary" />
                       <AssistantOverlay />
                     </Suspense>
                   </AssistantProvider>
