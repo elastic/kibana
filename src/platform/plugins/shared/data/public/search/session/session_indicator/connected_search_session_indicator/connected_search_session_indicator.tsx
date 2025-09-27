@@ -21,7 +21,6 @@ import { useSearchSessionTour } from './search_session_tour';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { ISessionService } from '../../session_service';
 import { SearchSessionState } from '../../search_session_state';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -40,13 +39,7 @@ export const createConnectedSearchSessionIndicator = ({
   usageCollector,
   basePath,
   tourDisabled,
-  featureFlags,
 }: SearchSessionIndicatorDeps): React.FC => {
-  const hasBackgroundSearchEnabled = featureFlags.getBooleanValue(
-    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    true
-  );
-
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
   const debouncedSessionServiceState$ = sessionService.state$.pipe(
@@ -191,7 +184,6 @@ export const createConnectedSearchSessionIndicator = ({
           startedTime={startTime}
           completedTime={completedTime}
           canceledTime={canceledTime}
-          hasBackgroundSearchEnabled={hasBackgroundSearchEnabled}
         />
       </RedirectAppLinks>
     );

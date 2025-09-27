@@ -52,7 +52,7 @@ export interface SearchSessionIndicatorProps {
   completedTime?: Date;
   canceledTime?: Date;
 
-  hasBackgroundSearchEnabled: boolean;
+  hasBackgroundSearchEnabled?: boolean;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -141,7 +141,7 @@ const searchSessionIndicatorViewStateToProps = ({
   hasBackgroundSearchEnabled,
   state,
 }: {
-  hasBackgroundSearchEnabled: boolean;
+  hasBackgroundSearchEnabled?: boolean;
   state: SearchSessionState;
 }) => {
   const stateProps: {

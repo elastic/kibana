@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
   const dashboardExpect = getService('dashboardExpect');
-  // Skipping because background search needs to be implemented differently
-  describe.skip('Session and searches integration', () => {
+  describe('Session and searches integration', () => {
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {

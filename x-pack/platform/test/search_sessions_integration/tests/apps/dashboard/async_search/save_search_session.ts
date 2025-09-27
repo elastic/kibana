@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.submitQuery();
   };
 
-  describe.skip('save a search sessions', () => {
+  describe('save a search sessions', () => {
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {

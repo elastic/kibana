@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 export interface SearchSessionNameProps {
   name: string;
-  hasBackgroundSearchEnabled: boolean;
+  hasBackgroundSearchEnabled?: boolean;
   editName: (newName: string) => Promise<unknown>;
 }
 
