@@ -85,17 +85,25 @@ export function registerKibanaFunction({
         );
       });
 
-      logger.debug(`Calling Kibana API: ${method} ${format(nextUrl)}`);
+      logger.debug(
+        `Forwarding requests from ${
+          request.headers.origin ?? host
+        } to call Kibana API: ${method} ${format(nextUrl)}`
+      );
 
-      const response = await axios({
-        method,
-        headers,
-        url: format(nextUrl),
-        data: body ? JSON.stringify(body) : undefined,
-        signal,
-      });
-
-      return { content: response.data };
+      try {
+        const response = await axios({
+          method,
+          headers,
+          url: format(nextUrl),
+          data: body ? JSON.stringify(body) : undefined,
+          signal,
+        });
+        return { content: response.data };
+      } catch (e) {
+        logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
+        throw e;
+      }
     }
   );
 }
