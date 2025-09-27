@@ -87,16 +87,12 @@ export const createConnectedSearchSessionIndicator = ({
     // this happens in case there is no app that allows current user to use search session
     if (!sessionService.hasAccess()) {
       managementDisabled = saveDisabled = true;
-      managementDisabledReasonText = saveDisabledReasonText = hasBackgroundSearchEnabled
-        ? i18n.translate(
-            'data.searchSessionIndicator.backgroundSearchDisabledDueToDisabledGloballyMessage',
-            {
-              defaultMessage: "You don't have permissions to manage background searches",
-            }
-          )
-        : i18n.translate('data.searchSessionIndicator.disabledDueToDisabledGloballyMessage', {
-            defaultMessage: "You don't have permissions to manage search sessions",
-          });
+      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
+        'data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
+        {
+          defaultMessage: "You don't have permissions to manage search sessions",
+        }
+      );
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
