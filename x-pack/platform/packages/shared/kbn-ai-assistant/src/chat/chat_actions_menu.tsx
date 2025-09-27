@@ -8,15 +8,13 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import {
-  navigateToConnectorsManagementApp,
-  navigateToSettingsManagementApp,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { navigateToSettingsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { CreateConnectorFlyout } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
@@ -28,9 +26,11 @@ type ConnectorLists = [
 export function ChatActionsMenu({
   connectors,
   disabled,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const { application, http, triggersActionsUi } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
