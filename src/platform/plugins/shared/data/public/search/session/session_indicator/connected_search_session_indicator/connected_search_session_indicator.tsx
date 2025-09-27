@@ -70,16 +70,12 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (disableSaveAfterSearchesExpire) {
       saveDisabled = true;
-      saveDisabledReasonText = hasBackgroundSearchEnabled
-        ? i18n.translate(
-            'data.searchSessionIndicator.backgroundSearchDisabledDueToTimeoutMessage',
-            {
-              defaultMessage: 'Background search results expired.',
-            }
-          )
-        : i18n.translate('data.searchSessionIndicator.disabledDueToTimeoutMessage', {
-            defaultMessage: 'Search session results expired.',
-          });
+      saveDisabledReasonText = i18n.translate(
+        'data.searchSessionIndicator.disabledDueToTimeoutMessage',
+        {
+          defaultMessage: 'Search session results expired.',
+        }
+      );
     }
 
     if (isSaveDisabledByApp.disabled) {
