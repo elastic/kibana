@@ -227,6 +227,33 @@ export const PrivMonUtils = (
     return res.body;
   };
 
+  async function runSync() {
+    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await waitForSyncTaskRun();
+  }
+
+  async function setTimestamp(id: string, ts: string, indexPattern: string) {
+    return updateIntegrationsUserTimeStamp({
+      id,
+      timestamp: ts,
+      indexPattern,
+    });
+  }
+
+  const expectUserCount = async (n: number) => {
+    const users = (await api.listPrivMonUsers({ query: {} })).body;
+    expect(users.length).toBe(n);
+    return users;
+  };
+
+  async function getLastProcessedMarker(indexPattern: string) {
+    const res = await api.listEntitySources({ query: {} });
+    const integration = res.body.find(
+      (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
+    );
+    return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
+  }
+
   const setIntegrationUserPrivilege = async ({
     id,
     isPrivileged,
@@ -236,6 +263,7 @@ export const PrivMonUtils = (
     isPrivileged: boolean;
     indexPattern: string;
   }) => {
+    const rolesParam = isPrivileged ? ['Help Desk Administrator'] : [];
     await es.updateByQuery({
       index: indexPattern,
       refresh: true,
@@ -246,9 +274,9 @@ export const PrivMonUtils = (
         source: `
       if (ctx._source.user == null) ctx._source.user = new HashMap();
       ctx._source.user.is_privileged = params.new_privileged_status;
-      ctx._source.user.roles = new ArrayList();      
+      ctx._source.user.roles = params.roles;      
     `,
-        params: { new_privileged_status: isPrivileged },
+        params: { new_privileged_status: isPrivileged, roles: rolesParam },
       },
     });
   };
@@ -310,7 +338,19 @@ export const PrivMonUtils = (
     return d.toISOString();
   };
 
+  const integrationsSync = {
+    setTimestamp,
+    getLastProcessedMarker,
+    setIntegrationUserPrivilege,
+    updateIntegrationsUsersWithRelativeTimestamps,
+    updateIntegrationsUserTimeStamp,
+    DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP,
+    dateOffsetFromNow,
+    expectUserCount,
+  };
+
   return {
+    runSync,
     assertIsPrivileged,
     bulkUploadUsersCsv,
     expectTimestampsHaveBeenUpdated,
@@ -319,11 +359,8 @@ export const PrivMonUtils = (
     initPrivMonEngineWithoutAuth,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
-    setIntegrationUserPrivilege,
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
-    updateIntegrationsUsersWithRelativeTimestamps,
-    updateIntegrationsUserTimeStamp,
-    dateOffsetFromNow,
+    integrationsSync,
   };
 };

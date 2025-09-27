@@ -441,7 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
           { useCreate: true }
         );
         // Set timestamps to be within last month so they are included in sync (default first run is now - 1M)
-        await privMonUtils.updateIntegrationsUsersWithRelativeTimestamps({
+        await privMonUtils.integrationsSync.updateIntegrationsUsersWithRelativeTimestamps({
           indexPattern: 'logs-entityanalytics_okta.user-default',
         });
         await enablePrivmonSetting(kibanaServer);
@@ -472,7 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(res.body.length).toBe(6); // should be 6 privileged users
         // update okta user to non-privileged, to test sync updates
-        await privMonUtils.setIntegrationUserPrivilege({
+        await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
           id: 'AZlHQD20hY07UD0HNBs-',
           isPrivileged: false,
           indexPattern: 'logs-entityanalytics_okta.user-default',
@@ -488,26 +488,63 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedUser.labels.sources).toHaveLength(0);
       });
 
-      it('update detection should update and create users within lastProcessedMarker range', async () => {
-        // Update 2 privileged users to be out of the time range.
-        const nowMinus1M1D = await privMonUtils.dateOffsetFromNow({ months: 2, days: 1 });
-        const nowMinus2M = await privMonUtils.dateOffsetFromNow({ months: 2 });
-        await privMonUtils.updateIntegrationsUserTimeStamp({
-          id: 'AZmLBcGV9XhZAwOqZV5t',
-          timestamp: nowMinus1M1D,
+      it.only('update detection should update and create users within lastProcessedMarker range', async () => {
+        const oktaIndex = 'logs-entityanalytics_okta.user-default';
+        const IDS = {
+          devon: 'AZmLBcGV9XhZAwOqZV5t', // Devan.Nienow
+          elinor: 'AZmLBcGV9XhZAwOqZV5u', // Elinor.Johnston-Shanahan
+          kaelyn: 'AZmLBcGV9XhZAwOqZV5s', // Kaelyn.Shanahan
+          bennett: 'AZmLBcGV9XhZAwOqZV5y', // Bennett.Becker
+        };
+        // --- Timestamps
+        const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFromNow({
+          months: 2,
+          days: 1,
+        });
+        const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFromNow({ months: 2 });
+        const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 7 });
+        const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 6 });
+        // PHASE 1: Push two users out of range, sync => expect 4 privileged remain
+        await privMonUtils.integrationsSync.setTimestamp(IDS.devon, nowMinus1M1D, oktaIndex);
+        await privMonUtils.integrationsSync.setTimestamp(IDS.elinor, nowMinus2M, oktaIndex);
+        await privMonUtils.runSync();
+        const snapA = await privMonUtils.integrationsSync.expectUserCount(4);
+
+        // PHASE 2: Re-run with no changes => no processing, marker should be default (now-1M)
+        await privMonUtils.runSync();
+        const snapB = await privMonUtils.integrationsSync.expectUserCount(4);
+        expect(new Set(snapB)).toEqual(new Set(snapA));
+
+        const markerAfterPhase2 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          oktaIndex
+        );
+        expect(markerAfterPhase2).toBe(
+          privMonUtils.integrationsSync.DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP
+        );
+
+        // PHASE 3: Bring one user back in-range, sync => last processed marker updates to that timestamp
+        await privMonUtils.integrationsSync.setTimestamp(IDS.kaelyn, nowMinus1w, oktaIndex);
+        await privMonUtils.runSync();
+        const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          oktaIndex
+        );
+        expect(markerAfterPhase3).toBe(nowMinus1w);
+
+        // PHASE 4: Flip a non-privileged user to privileged + in-range, sync => count 5, last processed marker updates
+        await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
+          id: IDS.bennett,
+          isPrivileged: true,
           indexPattern: 'logs-entityanalytics_okta.user-default',
         });
-        await privMonUtils.updateIntegrationsUserTimeStamp({
-          id: 'AZmLBcGV9XhZAwOqZV5u',
-          timestamp: nowMinus2M,
-          indexPattern: 'logs-entityanalytics_okta.user-default',
-        });
-        // Schedule a sync
-        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-        await privMonUtils.waitForSyncTaskRun();
-        const res = await api.listPrivMonUsers({ query: {} });
-        // Expect now we only have 4 privileged users after sync
-        expect(res.body.length).toBe(4);
+        await privMonUtils.integrationsSync.setTimestamp(IDS.bennett, nowMinus6d, oktaIndex);
+
+        await privMonUtils.runSync();
+        await privMonUtils.integrationsSync.expectUserCount(5);
+
+        const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          oktaIndex
+        );
+        expect(markerAfterPhase4).toBe(nowMinus6d);
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {
