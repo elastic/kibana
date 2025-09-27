@@ -435,26 +435,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('integrations sync', async () => {
-      before(async () => {
+      beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
           { useCreate: true }
         );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
-        );
-      });
-
-      beforeEach(async () => {
+        // Set timestamps to be within last month so they are included in sync (default first run is now - 1M)
+        await privMonUtils.updateIntegrationsUsersWithRelativeTimestamps({
+          indexPattern: 'logs-entityanalytics_okta.user-default',
+        });
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
         await toggleIntegrationsSyncFlag(kibanaServer, true);
       });
 
       afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
+        );
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
@@ -487,6 +485,13 @@ export default ({ getService }: FtrProviderContext) => {
         // check user is now non-privileged and does not have integration source
         expect(updatedUser.user.is_privileged).toBe(false);
         expect(updatedUser.labels.sources).toHaveLength(0);
+      });
+
+      it('update detection should update and create users within lastProcessedMarker range', async () => {
+        // schedule a sync
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
+        const res = await api.listPrivMonUsers({ query: {} });
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {

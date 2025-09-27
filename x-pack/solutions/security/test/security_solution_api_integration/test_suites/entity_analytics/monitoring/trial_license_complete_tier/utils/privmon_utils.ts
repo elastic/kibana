@@ -22,6 +22,11 @@ import { routeWithNamespace, waitFor } from '../../../../../config/services/dete
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 type PrivmonUser = ListPrivMonUsersResponse[number];
+// Default within last month so included in first run range of now-1M
+const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
+  Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
+).toISOString();
+
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -248,6 +253,30 @@ export const PrivMonUtils = (
     });
   };
 
+  const updateIntegrationsUsersWithRelativeTimestamps = async ({
+    indexPattern,
+    relativeTimeStamp,
+  }: {
+    indexPattern: string;
+    relativeTimeStamp?: string;
+  }) => {
+    if (!relativeTimeStamp) {
+      // Default to 3.5 weeks ago (within 1M range, e.g. onboarding)
+      relativeTimeStamp = DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP;
+    }
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { match_all: {} },
+      script: {
+        lang: 'painless',
+        source: "ctx._source['@timestamp'] = params.newTimestamp",
+        params: { newTimestamp: relativeTimeStamp },
+      },
+    });
+  };
+
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
@@ -260,5 +289,6 @@ export const PrivMonUtils = (
     setIntegrationUserPrivilege,
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
+    updateIntegrationsUsersWithRelativeTimestamps,
   };
 };

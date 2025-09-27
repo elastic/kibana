@@ -11,6 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client'
 import { createSourcesSyncService } from '../sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 
+export type IntegrationsSyncService = ReturnType<typeof createIntegrationsSyncService>;
 export const createIntegrationsSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
