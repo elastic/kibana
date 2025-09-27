@@ -13,7 +13,11 @@ import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_pro
 
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps };
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
-export type { DataCascadeRowProps, DataCascadeRowCellProps } from './data_cascade_impl';
+export type {
+  DataCascadeRowProps,
+  DataCascadeRowCellProps,
+  CascadeRowCellNestedVirtualizationAnchorProps,
+} from './data_cascade_impl';
 
 export function DataCascade<G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
