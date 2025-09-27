@@ -277,6 +277,39 @@ export const PrivMonUtils = (
     });
   };
 
+  const updateIntegrationsUserTimeStamp = async ({
+    id,
+    timestamp,
+    indexPattern,
+  }: {
+    id: string;
+    timestamp: string;
+    indexPattern: string;
+  }) => {
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+      script: {
+        lang: 'painless',
+        source: "ctx._source['@timestamp'] = params.newTimestamp",
+        params: { newTimestamp: timestamp },
+      },
+    });
+  };
+
+  const dateOffsetFromNow = async ({ days, months }: { days?: number; months?: number }) => {
+    const d = new Date();
+    if (months) {
+      d.setMonth(d.getMonth() - months);
+    }
+    if (days) {
+      d.setDate(d.getDate() - days);
+    }
+    return d.toISOString();
+  };
+
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
@@ -290,5 +323,7 @@ export const PrivMonUtils = (
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
     updateIntegrationsUsersWithRelativeTimestamps,
+    updateIntegrationsUserTimeStamp,
+    dateOffsetFromNow,
   };
 };

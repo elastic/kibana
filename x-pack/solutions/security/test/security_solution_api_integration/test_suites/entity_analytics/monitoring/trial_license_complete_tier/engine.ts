@@ -470,6 +470,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(r.user.name).toBeDefined();
           expect(r.labels.sources).toContain('entity_analytics_integration');
         });
+        expect(res.body.length).toBe(6); // should be 6 privileged users
         // update okta user to non-privileged, to test sync updates
         await privMonUtils.setIntegrationUserPrivilege({
           id: 'AZlHQD20hY07UD0HNBs-',
@@ -488,10 +489,25 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('update detection should update and create users within lastProcessedMarker range', async () => {
-        // schedule a sync
+        // Update 2 privileged users to be out of the time range.
+        const nowMinus1M1D = await privMonUtils.dateOffsetFromNow({ months: 2, days: 1 });
+        const nowMinus2M = await privMonUtils.dateOffsetFromNow({ months: 2 });
+        await privMonUtils.updateIntegrationsUserTimeStamp({
+          id: 'AZmLBcGV9XhZAwOqZV5t',
+          timestamp: nowMinus1M1D,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
+        });
+        await privMonUtils.updateIntegrationsUserTimeStamp({
+          id: 'AZmLBcGV9XhZAwOqZV5u',
+          timestamp: nowMinus2M,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
+        });
+        // Schedule a sync
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
         const res = await api.listPrivMonUsers({ query: {} });
+        // Expect now we only have 4 privileged users after sync
+        expect(res.body.length).toBe(4);
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {
