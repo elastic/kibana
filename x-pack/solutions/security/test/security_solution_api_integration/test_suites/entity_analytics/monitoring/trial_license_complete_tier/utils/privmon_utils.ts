@@ -15,7 +15,11 @@ import {
   MONITORING_ENGINE_SCHEDULE_NOW_URL,
   MONITORING_USERS_CSV_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type {
+  ListEntitySourcesResponse,
+  ListPrivMonUsersResponse,
+  MonitoringEntitySource,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
@@ -248,6 +252,21 @@ export const PrivMonUtils = (
     });
   };
 
+  const getIntegrationMonitoringSource = async (
+    integrationName: string
+  ): Promise<MonitoringEntitySource> => {
+    const res = await api.listEntitySources({
+      query: {},
+    });
+
+    const sources = res.body as ListEntitySourcesResponse;
+    const source = sources.find((s) => s.integrationName === integrationName);
+    if (!source) {
+      throw new Error(`No monitoring source found for integration ${integrationName}`);
+    }
+    return source;
+  };
+
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
@@ -260,5 +279,6 @@ export const PrivMonUtils = (
     setIntegrationUserPrivilege,
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
+    getIntegrationMonitoringSource,
   };
 };
