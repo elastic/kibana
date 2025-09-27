@@ -71,7 +71,7 @@ export const unsavedChangesBadgeStrings = {
 
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-    defaultMessage: 'Create visualization',
+    defaultMessage: 'Visualization',
   });
 
 export const getQuickCreateButtonGroupLegend = () =>
@@ -208,7 +208,7 @@ export const topNavStrings = {
   },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Switch to view mode',
+      defaultMessage: 'Exit edit',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',
@@ -246,6 +246,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  add: {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add content to your dashboard',
+    }),
+  },
   backgroundSearch: {
     label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {
       defaultMessage: 'Background searches',
@@ -263,12 +271,12 @@ export const getControlButtonTitle = () =>
 
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Add control',
+    defaultMessage: 'Control',
   });
 
 export const getAddESQLControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
-    defaultMessage: 'Add ES|QL control',
+    defaultMessage: 'Variable control',
   });
 
 export const getEditControlGroupButtonTitle = () =>
@@ -283,5 +291,5 @@ export const getOnlyOneTimeSliderControlMsg = () =>
 
 export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
-    defaultMessage: 'Add time slider control',
+    defaultMessage: 'Time slider control',
   });
