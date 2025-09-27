@@ -7,7 +7,7 @@
 
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import type { PrivMonIntegrationsUser } from '../../../../types';
+import type { PrivMonBulkUser } from '../../../../types';
 import { createPatternMatcherService } from './privileged_status_match';
 import { createPrivilegeStatusUpdateService } from './privileged_status_update';
 export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringDataClient) => {
@@ -15,8 +15,9 @@ export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringData
   const patternMatcherService = createPatternMatcherService(dataClient);
 
   const updateDetection = async (source: MonitoringEntitySource) => {
-    const users: PrivMonIntegrationsUser[] =
-      await patternMatcherService.findPrivilegedUsersFromMatchers(source);
+    const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
+      source
+    );
     await statusUpdateService.updatePrivilegedStatus(users);
     dataClient.log(
       'info',

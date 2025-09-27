@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
-import type { PrivMonIntegrationsUser } from '../../../../types';
+import type { PrivMonBulkUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
 import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 
@@ -56,7 +56,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const searchService = createSearchService(dataClient);
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
-  ): Promise<PrivMonIntegrationsUser[]> => {
+  ): Promise<PrivMonBulkUser[]> => {
     /**
      * Empty matchers policy: SAFE DEFAULT
      * If no matchers are configured, we *cannot* infer privileged users.
@@ -76,7 +76,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     let afterKey: AfterKey | undefined;
     let fetchMore = true;
     const pageSize = 100; // number of agg buckets per page
-    const users: PrivMonIntegrationsUser[] = [];
+    const users: PrivMonBulkUser[] = [];
 
     try {
       while (fetchMore) {
@@ -111,9 +111,10 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const extractPrivMonUsers = async (
     aggregation: PrivMatchersAggregation,
     source: MonitoringEntitySource
-  ): Promise<PrivMonIntegrationsUser[]> => {
+  ): Promise<PrivMonBulkUser[]> => {
     const buckets: PrivBucket[] | undefined =
       aggregation.privileged_user_status_since_last_run?.buckets;
+
     if (!buckets) {
       return [];
     }
@@ -121,22 +122,25 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     const batchUsernames = buckets.map((bucket) => bucket.key.username);
     const existingUserMap = await searchService.getExistingUsersMap(uniq(batchUsernames));
 
-    const usersProcessed = buckets.map((bucket) => {
+    return buckets.map((bucket) => {
       const topHit: PrivTopHit | undefined = bucket.latest_doc_for_user?.hits?.hits?.[0];
-      const isPriv =
-        topHit?.fields?.['user.is_privileged']?.[0] ??
-        topHit?._source?.user?.is_privileged ??
-        false;
+      const isPrivileged = Boolean(
+        topHit?.fields?.['user.is_privileged']?.[0] ?? topHit?._source?.user?.is_privileged ?? false
+      );
+      const monitoringLabels = generateMonitoringLabels(
+        source.id,
+        source.matchers,
+        topHit._source || {}
+      );
+
       return {
         sourceId: source.id,
         username: bucket.key.username,
         existingUserId: existingUserMap.get(bucket.key.username),
-        isPrivileged: Boolean(isPriv),
-        latestDocForUser: topHit,
-        monitoringLabels: generateMonitoringLabels(source.id, source.matchers, topHit),
+        isPrivileged,
+        monitoringLabels,
       };
     });
-    return usersProcessed;
   };
 
   return { findPrivilegedUsersFromMatchers };
