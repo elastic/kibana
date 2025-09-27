@@ -25,6 +25,7 @@ import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
+  getVirtualizer,
   onCascadeLeafNodeExpanded,
   row,
   size,
@@ -96,6 +97,25 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     }
   }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
 
+  const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
+  const getScrollMargin = useCallback(
+    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index)?.start ?? 0,
+    [rootVirtualizer, row]
+  );
+  const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
+  const getScrollOffset = useCallback(() => rootVirtualizer.scrollOffset ?? 0, [rootVirtualizer]);
+
+  const memoizedChild = useMemo(() => {
+    return React.createElement(children, {
+      data: leafData,
+      cellId: leafCacheKey,
+      key: leafCacheKey,
+      getScrollElement,
+      getScrollOffset,
+      getScrollMargin,
+    });
+  }, [children, leafData, leafCacheKey, getScrollElement, getScrollOffset, getScrollMargin]);
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem css={styles.cellWrapper} tabIndex={0}>
@@ -104,13 +124,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
           size={size === 'l' ? 'm' : size}
           isLoading={isPendingRowLeafDataFetch || !leafData}
         >
-          <div css={styles.cellInner}>
-            {React.createElement(children, {
-              data: leafData,
-              cellId: leafCacheKey,
-              key: leafCacheKey,
-            })}
-          </div>
+          <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>
       </EuiFlexItem>
     </EuiFlexGroup>
