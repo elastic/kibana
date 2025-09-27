@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RulesClient } from '../../rules_client';
+import { rulesClientMock } from '../../mocks';
+import { validateInternalRuleTypes } from './validate_internal_rule_types';
+
+describe('validateInternalRuleTypes', () => {
+  const req = { ids: ['1', '2'], filter: 'someFilter' };
+  const rulesClient = rulesClientMock.create() as unknown as RulesClient;
+  const ruleTypes = new Map();
+  const operationText = 'edit';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    rulesClient.getRuleTypesByQuery = jest.fn().mockResolvedValue({
+      ruleTypes: ['non-internal'],
+    });
+
+    ruleTypes.set('non-internal', {
+      id: 'non-internal',
+      name: 'Non-Internal',
+      internallyManaged: false,
+    });
+
+    ruleTypes.set('internal', { id: 'internal', name: 'Internal', internallyManaged: true });
+  });
+
+  it('should throw an error for invalid rule types', async () => {
+    rulesClient.getRuleTypesByQuery = jest.fn().mockResolvedValue({
+      ruleTypes: ['internal'],
+    });
+
+    await expect(
+      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot edit rule of type \\"internal\\" because it is internally managed."`
+    );
+  });
+
+  it('should not throw an error for valid rule types', async () => {
+    await expect(
+      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+    ).resolves.not.toThrow();
+  });
+
+  it('should throw an error for non found rule types', async () => {
+    ruleTypes.clear();
+
+    await expect(
+      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule type not found"`);
+  });
+});
