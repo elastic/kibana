@@ -289,7 +289,7 @@ describe('run_all.ts', () => {
         process.execPath,
         [
           'scripts/jest',
-          '--config',
+          '--config=',
           '/path/to/config1.js',
           '--runInBand',
           '--coverage=false',

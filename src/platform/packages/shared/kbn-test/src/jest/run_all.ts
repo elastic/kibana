@@ -40,7 +40,7 @@ export async function runJestAll() {
 
   const configsArg: string | undefined = argv.configs;
   const maxParallelRaw: string | undefined = argv.maxParallel || process.env.JEST_MAX_PARALLEL;
-  const maxParallel = Math.min(1, parseInt(maxParallelRaw || '3', 10));
+  const maxParallel = Math.max(1, parseInt(maxParallelRaw || '3', 10));
 
   let configs: string[] = [];
 
@@ -171,7 +171,7 @@ async function runConfigs(
 
         const args = [
           'scripts/jest',
-          '--config',
+          '--config=',
           config,
           '--runInBand',
           '--coverage=false',
