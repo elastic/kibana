@@ -8,7 +8,7 @@ requestBody:
             id: created-agent-id
             name: Search Index Helper
             description: Updated description - Search for anything in "content-*" indices!
-            labels:
+            tags:
             - custom-indices
             - department-search
             - elastic-employees
@@ -36,7 +36,7 @@ responses:
               type: chat
               name: Search Index Helper
               description: Updated description - Search for anything in "content-*" indices!
-              labels:
+              tags:
               - custom-indices
               - department-search
               - elastic-employees

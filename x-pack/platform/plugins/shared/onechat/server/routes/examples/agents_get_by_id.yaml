@@ -12,7 +12,7 @@ responses:
               name: Search Index Helper
               description: Hi! I can help you search the data within the indices starting with
                 "content-" prefix.
-              labels:
+              tags:
               - custom-indices
               - department-search
               avatar_color: "#BFDBFF"
