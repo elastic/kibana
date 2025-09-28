@@ -192,10 +192,9 @@ describe('MetricsService', () => {
 
     it('emits average ELU values on getEluMetrics$ call', async () => {
       mockOpsCollector.collect
-        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 0.1))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9));
-
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.5));
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getEluMetrics$ } = await metricsService.start();
       const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
@@ -206,19 +205,19 @@ describe('MetricsService', () => {
 
       await expect(eluMetricsPromise).resolves.toEqual([
         expect.objectContaining({
-          short: expect.closeTo(0.1),
-          medium: expect.closeTo(0.1),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0067, 3), // accumulating mean: (1.0 * 0.1) / 15 = 0.0067
+          medium: expect.closeTo(0.0033, 3), // accumulating mean: (1.0 * 0.1) / 30 = 0.0033
+          long: expect.closeTo(0.0017, 3), // accumulating mean: (1.0 * 0.1) / 60 = 0.0017
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.11),
-          medium: expect.closeTo(0.1),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0133, 3), // accumulating mean: (1.0 + 1.0) * 0.1 / 15 = 0.0133
+          medium: expect.closeTo(0.0067, 3), // accumulating mean: (1.0 + 1.0) * 0.1 / 30 = 0.0067
+          long: expect.closeTo(0.0033, 3), // accumulating mean: (1.0 + 1.0) * 0.1 / 60 = 0.0033
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.11),
-          medium: expect.closeTo(0.11),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0167, 3), // accumulating mean: (1.0 + 1.0 + 0.5) * 0.1 / 15 = 0.0167
+          medium: expect.closeTo(0.0083, 3), // accumulating mean: (1.0 + 1.0 + 0.5) * 0.1 / 30 = 0.0083
+          long: expect.closeTo(0.0042, 3), // accumulating mean: (1.0 + 1.0 + 0.5) * 0.1 / 60 = 0.0042
         }),
       ]);
     });

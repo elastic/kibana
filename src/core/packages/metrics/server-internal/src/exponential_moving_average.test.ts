@@ -19,44 +19,61 @@ describe('exponentialMovingAverage', () => {
     });
   });
 
-  it('should emit the initial value', () => {
+  it('should emit the initial value as mean', () => {
     testScheduler.run(({ cold, expectObservable }) => {
       const observable = cold('a|', { a: 1 }).pipe(exponentialMovingAverage(15, 5));
 
-      expectObservable(observable).toBe('a|', { a: 1 });
+      expectObservable(observable).toBe('a|', { a: expect.closeTo(0.33, 2) });
     });
   });
 
   it('should emit smoothed values', () => {
     testScheduler.run(({ cold, expectObservable }) => {
-      const observable = cold('abc|', { a: 1, b: 1, c: 2 }).pipe(exponentialMovingAverage(15, 5));
+      const observable = cold('abcdef|', { a: 1, b: 1, c: 2, d: 2, e: 1, f: 1 }).pipe(
+        exponentialMovingAverage(15, 5)
+      );
 
-      expectObservable(observable).toBe('abc|', {
-        a: 1,
-        b: 1,
-        c: expect.closeTo(1.3, 1),
+      expectObservable(observable).toBe('abcdef|', {
+        a: expect.closeTo(0.33, 2), // mean: 1 * 5 / 15 = 0.33
+        b: expect.closeTo(0.67, 2), // mean: (1+1) * 5 / 15 = 0.67
+        c: expect.closeTo(1.33, 2), // mean: (1+1+2) * 5 / 15 = 1.33
+        d: expect.closeTo(2, 2), // first EMA value after mean period
+        e: expect.closeTo(1.72, 2),
+        f: expect.closeTo(1.51, 2),
       });
     });
   });
 
   it('should fade away outdated values', () => {
     testScheduler.run(({ cold, expectObservable }) => {
-      const observable = cold('abcdef|', {
+      const observable = cold('abcdefghijkl|', {
         a: 1,
         b: 1,
         c: 2,
         d: 2,
         e: 1,
         f: 1,
+        g: 2,
+        h: 2,
+        i: 1,
+        j: 1,
+        k: 2,
+        l: 2,
       }).pipe(exponentialMovingAverage(15, 5));
 
-      expectObservable(observable).toBe('abcdef|', {
-        a: 1, // https://en.wikipedia.org/wiki/Exponential_smoothing#Choosing_the_initial_smoothed_value
-        b: 1,
-        c: expect.closeTo(1.3, 1),
-        d: expect.closeTo(1.5, 1),
-        e: expect.closeTo(1.3, 1),
-        f: expect.closeTo(1.2, 1),
+      expectObservable(observable).toBe('abcdefghijkl|', {
+        a: expect.closeTo(0.33, 2), // mean: 1 * 5 / 15 = 0.33
+        b: expect.closeTo(0.67, 2), // mean: (1+1) * 5 / 15 = 0.67
+        c: expect.closeTo(1.33, 2), // mean: (1+1+2) * 5 / 15 = 1.33
+        d: expect.closeTo(2, 2), // first EMA value after mean period
+        e: expect.closeTo(1.72, 2), // EMA
+        f: expect.closeTo(1.51, 2), // EMA
+        g: expect.closeTo(1.65, 2), // EMA
+        h: expect.closeTo(1.75, 2), // EMA
+        i: expect.closeTo(1.54, 2), // EMA
+        j: expect.closeTo(1.39, 2), // EMA
+        k: expect.closeTo(1.56, 2), // EMA
+        l: expect.closeTo(1.68, 2), // EMA
       });
     });
   });
