@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { enablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
@@ -42,7 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('search_indices API', () => {
       it('should return an empty array if no indices match the search query', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: 'test_1235678' } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: 'test_1235678' },
+        });
 
         logWhenNot200(res);
 
@@ -51,7 +53,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return all indices when no searchQuery is given', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: undefined } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: undefined },
+        });
 
         logWhenNot200(res);
 
@@ -60,7 +64,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return index when searchQuery matches', async () => {
-        const res = await api.searchPrivilegesIndices({ query: { searchQuery: indexName } });
+        const res = await entityAnalyticsApi.searchPrivilegesIndices({
+          query: { searchQuery: indexName },
+        });
 
         logWhenNot200(res);
 
