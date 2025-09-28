@@ -447,20 +447,7 @@ export const WorkflowYAMLEditor = ({
       // This prevents Monaco from ever seeing the problematic numeric enum messages
       const originalSetModelMarkers = monaco.editor.setModelMarkers;
       const markerInterceptor = function(model: any, owner: string, markers: any[]) {
-        // Debug logging to understand what markers we're getting
-        if (owner === 'yaml' && markers.length > 0) {
-          console.log('🔍 YAML validation markers received:', {
-            owner,
-            markerCount: markers.length,
-            markers: markers.map(m => ({
-              message: m.message,
-              startLine: m.startLineNumber,
-              startColumn: m.startColumn,
-              severity: m.severity,
-              source: m.source
-            }))
-          });
-        }
+        // Only process YAML validation markers
         
         // Only modify YAML validation markers
         if (owner === 'yaml') {
@@ -488,13 +475,7 @@ export const WorkflowYAMLEditor = ({
             // Also check for the current message pattern we're seeing
             const hasConnectorEnumPattern = marker.message?.includes('Expected ".none" | ".cases-webhook"');
             
-            console.log('🔍 Checking marker for formatting:', {
-              message: marker.message,
-              hasNumericEnumPattern,
-              hasConnectorEnumPattern,
-              hasFieldTypeError,
-              willProcess: hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError
-            });
+            // Process markers that match our patterns
             
             if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
               try {
@@ -508,13 +489,6 @@ export const WorkflowYAMLEditor = ({
                     column: marker.startColumn
                   });
                   yamlPath = getCurrentPath(yamlDocument, markerPosition);
-                  console.log('🎯 Detected YAML path for validation error:', {
-                    line: marker.startLineNumber,
-                    column: marker.startColumn,
-                    position: markerPosition,
-                    path: yamlPath,
-                    originalMessage: marker.message
-                  });
                 }
                 
                 // Create a mock Zod error with the path information
@@ -534,11 +508,7 @@ export const WorkflowYAMLEditor = ({
                   yamlDocument
                 );
                 
-                console.log('🎯 Formatted validation message:', {
-                  originalMessage: marker.message,
-                  formattedMessage,
-                  changed: formattedMessage !== marker.message
-                });
+                // Return the marker with the improved message
                 
                 return {
                   ...marker,
@@ -547,7 +517,6 @@ export const WorkflowYAMLEditor = ({
                 
               } catch (error) {
                 // Fallback to original message if dynamic formatting fails
-                console.warn('Failed to format validation error dynamically:', error);
                 return marker;
               }
             }

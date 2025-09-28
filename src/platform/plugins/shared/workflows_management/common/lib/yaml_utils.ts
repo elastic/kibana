@@ -334,6 +334,9 @@ function checkCustomUnionHandlers(issue: any): string | null {
   return null;
 }
 
+// Cache for schema lookups to avoid repeated computation
+const schemaCache = new Map<string, any>();
+
 /**
  * Generates a detailed union error message by analyzing the schema at the given path
  * or by looking up the connector schema directly
@@ -345,89 +348,78 @@ function generateUnionErrorMessage(
   yamlDocument?: any
 ): string | null {
   try {
-    console.log('🔍 Attempting to generate union error message:', {
-      path,
-      fieldName
-    });
+    // Create cache key for this lookup
+    const cacheKey = `${path.join('.')}-${fieldName}`;
+    if (schemaCache.has(cacheKey)) {
+      return schemaCache.get(cacheKey);
+    }
+    
+    let result: string | null = null;
     
     // First, try to get the connector type from the path to look up the schema directly
     const connectorUnionSchema = getConnectorUnionSchemaFromPath(path, yamlDocument);
     if (connectorUnionSchema) {
-      console.log('🎯 Found connector union schema directly');
       const unionOptions = analyzeUnionSchema(connectorUnionSchema);
-      console.log('📝 Union options from connector schema:', unionOptions);
       
       if (unionOptions.length > 0) {
         const optionsList = unionOptions
           .map(option => `  - ${option.name}\n    ${option.description}`)
           .join('\n');
         
-        const result = `${fieldName} should be oneOf:\n${optionsList}`;
-        console.log('✅ Generated union message from connector schema:', result);
-        return result;
+        result = `${fieldName} should be oneOf:\n${optionsList}`;
       }
     }
     
     // If not a union, try to get a better error message for the field schema
-    const betterFieldMessage = getBetterFieldErrorMessage(path, fieldName, yamlDocument);
-    if (betterFieldMessage) {
-      console.log('✅ Generated better field error message:', betterFieldMessage);
-      return betterFieldMessage;
+    if (!result) {
+      result = getBetterFieldErrorMessage(path, fieldName, yamlDocument);
     }
     
     // Fallback: try the original path-based approach
-    const pathString = path
-      .map(segment => typeof segment === 'number' ? `[${segment}]` : segment)
-      .join('.')
-      .replace(/\.\[/g, '['); // Fix array notation
-    
-    const schemaAtPath = getSchemaAtPath(schema, pathString);
-    console.log('📋 Schema at path (fallback):', {
-      pathString,
-      schemaFound: !!schemaAtPath,
-      schemaType: schemaAtPath?.constructor?.name
-    });
-    
-    if (!schemaAtPath) {
-      return null;
-    }
-    
-    // Check if it's a union schema (might be wrapped in optional, nullable, etc.)
-    let unionSchema = schemaAtPath;
-    
-    // Unwrap optional, nullable, default wrappers to find the underlying union
-    while (unionSchema && !(unionSchema instanceof z.ZodUnion)) {
-      if (unionSchema instanceof z.ZodOptional) {
-        unionSchema = unionSchema._def.innerType;
-      } else if (unionSchema instanceof z.ZodNullable) {
-        unionSchema = unionSchema._def.innerType;
-      } else if (unionSchema instanceof z.ZodDefault) {
-        unionSchema = unionSchema._def.innerType;
-      } else {
-        break;
-      }
-    }
-    
-    if (unionSchema instanceof z.ZodUnion) {
-      console.log('🔀 Found union schema (fallback), analyzing options...');
-      const unionOptions = analyzeUnionSchema(unionSchema);
-      console.log('📝 Union options (fallback):', unionOptions);
+    if (!result) {
+      const pathString = path
+        .map(segment => typeof segment === 'number' ? `[${segment}]` : segment)
+        .join('.')
+        .replace(/\.\[/g, '['); // Fix array notation
       
-      if (unionOptions.length > 0) {
-        const optionsList = unionOptions
-          .map(option => `  - ${option.name}\n    ${option.description}`)
-          .join('\n');
+      const schemaAtPath = getSchemaAtPath(schema, pathString);
+      
+      if (schemaAtPath) {
+        // Check if it's a union schema (might be wrapped in optional, nullable, etc.)
+        let unionSchema = schemaAtPath;
         
-        const result = `${fieldName} should be oneOf:\n${optionsList}`;
-        console.log('✅ Generated union message (fallback):', result);
-        return result;
+        // Unwrap optional, nullable, default wrappers to find the underlying union
+        while (unionSchema && !(unionSchema instanceof z.ZodUnion)) {
+          if (unionSchema instanceof z.ZodOptional) {
+            unionSchema = unionSchema._def.innerType;
+          } else if (unionSchema instanceof z.ZodNullable) {
+            unionSchema = unionSchema._def.innerType;
+          } else if (unionSchema instanceof z.ZodDefault) {
+            unionSchema = unionSchema._def.innerType;
+          } else {
+            break;
+          }
+        }
+        
+        if (unionSchema instanceof z.ZodUnion) {
+          const unionOptions = analyzeUnionSchema(unionSchema);
+          
+          if (unionOptions.length > 0) {
+            const optionsList = unionOptions
+              .map(option => `  - ${option.name}\n    ${option.description}`)
+              .join('\n');
+            
+            result = `${fieldName} should be oneOf:\n${optionsList}`;
+          }
+        }
       }
     }
     
-    return null;
+    // Cache the result (even if null)
+    schemaCache.set(cacheKey, result);
+    return result;
   } catch (error) {
     // If anything goes wrong, return null to fall back to default behavior
-    console.warn('❌ Error in generateUnionErrorMessage:', error);
     return null;
   }
 }
@@ -470,7 +462,6 @@ function getBetterFieldErrorMessage(path: (string | number)[], fieldName: string
     
     return null;
   } catch (error) {
-    console.warn('❌ Error in getBetterFieldErrorMessage:', error);
     return null;
   }
 }
@@ -517,7 +508,6 @@ function generateFieldTypeErrorMessage(fieldName: string, fieldSchema: z.ZodType
     
     return null;
   } catch (error) {
-    console.warn('❌ Error generating field type error message:', error);
     return null;
   }
 }
@@ -552,7 +542,6 @@ function getObjectStructureDescription(objectSchema: z.ZodType): string | null {
     
     return null;
   } catch (error) {
-    console.warn('❌ Error getting object structure:', error);
     return null;
   }
 }
@@ -573,50 +562,33 @@ function getConnectorUnionSchemaFromPath(path: (string | number)[], yamlDocument
       const stepIndex = path[1];
       const fieldName = path[3];
       
-      console.log('🔍 Attempting to find connector schema for step:', { stepIndex, fieldName });
-      
       // Get the step type from the YAML document
       const stepType = getStepTypeFromYaml(yamlDocument, stepIndex);
       if (!stepType) {
-        console.log('❌ Could not determine step type from YAML');
         return null;
       }
-      
-      console.log('🎯 Found step type:', stepType);
       
       // Look up the connector definition for this step type
       const connectorSchema = getConnectorParamsSchema(stepType);
       if (!connectorSchema) {
-        console.log('❌ Could not find connector schema for step type:', stepType);
         return null;
       }
-      
-      console.log('📋 Found connector params schema');
       
       // Extract the field schema from the connector params schema
       const fieldSchema = getFieldSchemaFromConnectorParams(connectorSchema, String(fieldName));
       if (!fieldSchema) {
-        console.log('❌ Could not find field schema for:', fieldName);
         return null;
       }
       
       // Check if the field schema is a union (possibly wrapped)
       const unionSchema = unwrapToUnion(fieldSchema);
       if (unionSchema) {
-        console.log('✅ Found union schema for field:', fieldName);
         return unionSchema;
-      } else {
-        console.log('ℹ️ Field schema found but not a union:', {
-          fieldName,
-          schemaType: fieldSchema.constructor.name,
-          isObject: fieldSchema.constructor.name === 'ZodObject'
-        });
       }
     }
     
     return null;
   } catch (error) {
-    console.warn('❌ Error in getConnectorUnionSchemaFromPath:', error);
     return null;
   }
 }
@@ -661,7 +633,6 @@ function getStepTypeFromYaml(yamlDocument: any, stepIndex: number): string | nul
     
     return typeItem.value.value;
   } catch (error) {
-    console.warn('❌ Error extracting step type from YAML:', error);
     return null;
   }
 }
@@ -683,7 +654,6 @@ function getConnectorParamsSchema(stepType: string): z.ZodType | null {
     
     return connector.paramsSchema;
   } catch (error) {
-    console.warn('❌ Error getting connector params schema:', error);
     return null;
   }
 }
@@ -705,7 +675,6 @@ function getFieldSchemaFromConnectorParams(paramsSchema: z.ZodType, fieldName: s
     
     return null;
   } catch (error) {
-    console.warn('❌ Error extracting field schema:', error);
     return null;
   }
 }
@@ -765,12 +734,6 @@ export function formatValidationError(
       const fieldName = issue.path[issue.path.length - 1] || 'field';
       const dynamicUnionMessage = generateUnionErrorMessage(schema, issue.path, String(fieldName), yamlDocument);
       if (dynamicUnionMessage) {
-        // Log the improvement for debugging
-        console.log('🎯 Dynamic union formatting applied:', {
-          originalMessage: issue.message,
-          path: issue.path,
-          dynamicMessage: dynamicUnionMessage
-        });
         formattedMessage = dynamicUnionMessage;
       }
       // Try generic union error message as fallback
