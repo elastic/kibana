@@ -459,7 +459,7 @@ export default ({ getService }: FtrProviderContext) => {
         await toggleIntegrationsSyncFlag(kibanaServer, false);
       });
 
-      it('update detection should sync integrations', async () => {
+      it('should sync integrations during update detection ', async () => {
         // schedule a sync
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
@@ -488,7 +488,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedUser.labels.sources).toHaveLength(0);
       });
 
-      it.only('update detection should update and create users within lastProcessedMarker range', async () => {
+      it('should update and create users within lastProcessedMarker range during update detection ', async () => {
         const oktaIndex = 'logs-entityanalytics_okta.user-default';
         const IDS = {
           devon: 'AZmLBcGV9XhZAwOqZV5t', // Devan.Nienow
