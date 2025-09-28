@@ -218,6 +218,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Enabled',
         field: 'enabled',
+        width: '90px', // Fixed width for toggle + validity indicator
         render: (value, item) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -260,6 +261,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
       {
         name: 'Actions',
+        width: '110px', // Fixed width for action buttons
         actions: [
           {
             isPrimary: true,
