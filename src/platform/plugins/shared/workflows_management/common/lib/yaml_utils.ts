@@ -10,6 +10,7 @@
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { ZodError } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import { getSchemaAtPath } from './zod/zod_utils';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -334,10 +335,422 @@ function checkCustomUnionHandlers(issue: any): string | null {
 }
 
 /**
+ * Generates a detailed union error message by analyzing the schema at the given path
+ * or by looking up the connector schema directly
+ */
+function generateUnionErrorMessage(
+  schema: z.ZodType, 
+  path: (string | number)[], 
+  fieldName: string,
+  yamlDocument?: any
+): string | null {
+  try {
+    console.log('🔍 Attempting to generate union error message:', {
+      path,
+      fieldName
+    });
+    
+    // First, try to get the connector type from the path to look up the schema directly
+    const connectorUnionSchema = getConnectorUnionSchemaFromPath(path, yamlDocument);
+    if (connectorUnionSchema) {
+      console.log('🎯 Found connector union schema directly');
+      const unionOptions = analyzeUnionSchema(connectorUnionSchema);
+      console.log('📝 Union options from connector schema:', unionOptions);
+      
+      if (unionOptions.length > 0) {
+        const optionsList = unionOptions
+          .map(option => `  - ${option.name}\n    ${option.description}`)
+          .join('\n');
+        
+        const result = `${fieldName} should be oneOf:\n${optionsList}`;
+        console.log('✅ Generated union message from connector schema:', result);
+        return result;
+      }
+    }
+    
+    // If not a union, try to get a better error message for the field schema
+    const betterFieldMessage = getBetterFieldErrorMessage(path, fieldName, yamlDocument);
+    if (betterFieldMessage) {
+      console.log('✅ Generated better field error message:', betterFieldMessage);
+      return betterFieldMessage;
+    }
+    
+    // Fallback: try the original path-based approach
+    const pathString = path
+      .map(segment => typeof segment === 'number' ? `[${segment}]` : segment)
+      .join('.')
+      .replace(/\.\[/g, '['); // Fix array notation
+    
+    const schemaAtPath = getSchemaAtPath(schema, pathString);
+    console.log('📋 Schema at path (fallback):', {
+      pathString,
+      schemaFound: !!schemaAtPath,
+      schemaType: schemaAtPath?.constructor?.name
+    });
+    
+    if (!schemaAtPath) {
+      return null;
+    }
+    
+    // Check if it's a union schema (might be wrapped in optional, nullable, etc.)
+    let unionSchema = schemaAtPath;
+    
+    // Unwrap optional, nullable, default wrappers to find the underlying union
+    while (unionSchema && !(unionSchema instanceof z.ZodUnion)) {
+      if (unionSchema instanceof z.ZodOptional) {
+        unionSchema = unionSchema._def.innerType;
+      } else if (unionSchema instanceof z.ZodNullable) {
+        unionSchema = unionSchema._def.innerType;
+      } else if (unionSchema instanceof z.ZodDefault) {
+        unionSchema = unionSchema._def.innerType;
+      } else {
+        break;
+      }
+    }
+    
+    if (unionSchema instanceof z.ZodUnion) {
+      console.log('🔀 Found union schema (fallback), analyzing options...');
+      const unionOptions = analyzeUnionSchema(unionSchema);
+      console.log('📝 Union options (fallback):', unionOptions);
+      
+      if (unionOptions.length > 0) {
+        const optionsList = unionOptions
+          .map(option => `  - ${option.name}\n    ${option.description}`)
+          .join('\n');
+        
+        const result = `${fieldName} should be oneOf:\n${optionsList}`;
+        console.log('✅ Generated union message (fallback):', result);
+        return result;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    // If anything goes wrong, return null to fall back to default behavior
+    console.warn('❌ Error in generateUnionErrorMessage:', error);
+    return null;
+  }
+}
+
+/**
+ * Generates a better error message for non-union field types (like objects)
+ */
+function getBetterFieldErrorMessage(path: (string | number)[], fieldName: string, yamlDocument?: any): string | null {
+  try {
+    // Check if this is a field in a step's 'with' block
+    if (path.length >= 4 && 
+        path[0] === 'steps' && 
+        typeof path[1] === 'number' && 
+        path[2] === 'with') {
+      
+      const stepIndex = path[1];
+      const fieldNameStr = String(fieldName);
+      
+      // Get the step type from the YAML document
+      const stepType = getStepTypeFromYaml(yamlDocument, stepIndex);
+      if (!stepType) {
+        return null;
+      }
+      
+      // Look up the connector definition for this step type
+      const connectorSchema = getConnectorParamsSchema(stepType);
+      if (!connectorSchema) {
+        return null;
+      }
+      
+      // Extract the field schema from the connector params schema
+      const fieldSchema = getFieldSchemaFromConnectorParams(connectorSchema, fieldNameStr);
+      if (!fieldSchema) {
+        return null;
+      }
+      
+      // Generate a better error message based on the schema type
+      return generateFieldTypeErrorMessage(fieldNameStr, fieldSchema);
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('❌ Error in getBetterFieldErrorMessage:', error);
+    return null;
+  }
+}
+
+/**
+ * Generates a descriptive error message based on the field schema type
+ */
+function generateFieldTypeErrorMessage(fieldName: string, fieldSchema: z.ZodType): string | null {
+  try {
+    const schemaType = fieldSchema.constructor.name;
+    
+    switch (schemaType) {
+      case 'ZodObject':
+        // For objects, try to show the expected structure
+        const objectStructure = getObjectStructureDescription(fieldSchema);
+        if (objectStructure) {
+          return `${fieldName} should be an object with structure:\n${objectStructure}`;
+        }
+        return `${fieldName} should be an object, not a primitive value`;
+        
+      case 'ZodString':
+        return `${fieldName} should be a string`;
+        
+      case 'ZodNumber':
+        return `${fieldName} should be a number`;
+        
+      case 'ZodBoolean':
+        return `${fieldName} should be a boolean (true/false)`;
+        
+      case 'ZodArray':
+        return `${fieldName} should be an array`;
+        
+      case 'ZodOptional':
+        // Unwrap optional and try again
+        const innerSchema = (fieldSchema as any)._def?.innerType;
+        if (innerSchema) {
+          return generateFieldTypeErrorMessage(fieldName, innerSchema);
+        }
+        break;
+        
+      default:
+        return `${fieldName} has incorrect type. Expected: ${schemaType.replace('Zod', '').toLowerCase()}`;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('❌ Error generating field type error message:', error);
+    return null;
+  }
+}
+
+/**
+ * Gets a description of an object's expected structure
+ */
+function getObjectStructureDescription(objectSchema: z.ZodType): string | null {
+  try {
+    if (objectSchema.constructor.name === 'ZodObject' && 
+        (objectSchema as any)._def && 
+        typeof (objectSchema as any)._def.shape === 'function') {
+      
+      const shape = (objectSchema as any)._def.shape();
+      const fields = Object.keys(shape);
+      
+      if (fields.length > 0) {
+        const fieldDescriptions = fields.slice(0, 5).map(field => {
+          const fieldSchema = shape[field];
+          const fieldType = fieldSchema.constructor.name.replace('Zod', '').toLowerCase();
+          const isOptional = fieldSchema.constructor.name === 'ZodOptional';
+          return `  ${field}: ${fieldType}${isOptional ? ' (optional)' : ''}`;
+        });
+        
+        const result = fieldDescriptions.join('\n');
+        if (fields.length > 5) {
+          return result + `\n  ... and ${fields.length - 5} more fields`;
+        }
+        return result;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('❌ Error getting object structure:', error);
+    return null;
+  }
+}
+
+/**
+ * Attempts to get the union schema directly by looking up the connector definition
+ * This works for any connector type and field, not just Cases connectors
+ */
+function getConnectorUnionSchemaFromPath(path: (string | number)[], yamlDocument?: any): z.ZodUnion<any> | null {
+  try {
+    // Check if this is a field in a step's 'with' block
+    // Path should be like: ['steps', stepIndex, 'with', fieldName]
+    if (path.length >= 4 && 
+        path[0] === 'steps' && 
+        typeof path[1] === 'number' && 
+        path[2] === 'with') {
+      
+      const stepIndex = path[1];
+      const fieldName = path[3];
+      
+      console.log('🔍 Attempting to find connector schema for step:', { stepIndex, fieldName });
+      
+      // Get the step type from the YAML document
+      const stepType = getStepTypeFromYaml(yamlDocument, stepIndex);
+      if (!stepType) {
+        console.log('❌ Could not determine step type from YAML');
+        return null;
+      }
+      
+      console.log('🎯 Found step type:', stepType);
+      
+      // Look up the connector definition for this step type
+      const connectorSchema = getConnectorParamsSchema(stepType);
+      if (!connectorSchema) {
+        console.log('❌ Could not find connector schema for step type:', stepType);
+        return null;
+      }
+      
+      console.log('📋 Found connector params schema');
+      
+      // Extract the field schema from the connector params schema
+      const fieldSchema = getFieldSchemaFromConnectorParams(connectorSchema, String(fieldName));
+      if (!fieldSchema) {
+        console.log('❌ Could not find field schema for:', fieldName);
+        return null;
+      }
+      
+      // Check if the field schema is a union (possibly wrapped)
+      const unionSchema = unwrapToUnion(fieldSchema);
+      if (unionSchema) {
+        console.log('✅ Found union schema for field:', fieldName);
+        return unionSchema;
+      } else {
+        console.log('ℹ️ Field schema found but not a union:', {
+          fieldName,
+          schemaType: fieldSchema.constructor.name,
+          isObject: fieldSchema.constructor.name === 'ZodObject'
+        });
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('❌ Error in getConnectorUnionSchemaFromPath:', error);
+    return null;
+  }
+}
+
+/**
+ * Extracts the step type from the YAML document at the given step index
+ */
+function getStepTypeFromYaml(yamlDocument: any, stepIndex: number): string | null {
+  try {
+    if (!yamlDocument || !yamlDocument.contents) {
+      return null;
+    }
+    
+    const contents = yamlDocument.contents;
+    if (!contents.items) {
+      return null;
+    }
+    
+    // Find the 'steps' field
+    const stepsItem = contents.items.find((item: any) => 
+      item.key && item.key.value === 'steps'
+    );
+    
+    if (!stepsItem || !stepsItem.value || !stepsItem.value.items) {
+      return null;
+    }
+    
+    // Get the step at the specified index
+    const step = stepsItem.value.items[stepIndex];
+    if (!step || !step.items) {
+      return null;
+    }
+    
+    // Find the 'type' field in the step
+    const typeItem = step.items.find((item: any) => 
+      item.key && item.key.value === 'type'
+    );
+    
+    if (!typeItem || !typeItem.value) {
+      return null;
+    }
+    
+    return typeItem.value.value;
+  } catch (error) {
+    console.warn('❌ Error extracting step type from YAML:', error);
+    return null;
+  }
+}
+
+/**
+ * Gets the params schema for a given connector/step type
+ */
+function getConnectorParamsSchema(stepType: string): z.ZodType | null {
+  try {
+    // Import all connector definitions
+    const { getAllConnectors } = require('../schema');
+    const allConnectors = getAllConnectors();
+    
+    // Find the connector definition for this step type
+    const connector = allConnectors.find((c: any) => c.type === stepType);
+    if (!connector) {
+      return null;
+    }
+    
+    return connector.paramsSchema;
+  } catch (error) {
+    console.warn('❌ Error getting connector params schema:', error);
+    return null;
+  }
+}
+
+/**
+ * Extracts a field schema from a connector params schema
+ */
+function getFieldSchemaFromConnectorParams(paramsSchema: z.ZodType, fieldName: string): z.ZodType | null {
+  try {
+    // Check if it's a ZodObject with a shape
+    if (paramsSchema && 
+        typeof paramsSchema === 'object' && 
+        (paramsSchema as any)._def && 
+        typeof (paramsSchema as any)._def.shape === 'function') {
+      
+      const shape = (paramsSchema as any)._def.shape();
+      return shape[fieldName] || null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('❌ Error extracting field schema:', error);
+    return null;
+  }
+}
+
+/**
+ * Unwraps a schema to find the underlying union, handling optional/nullable/default wrappers
+ */
+function unwrapToUnion(schema: z.ZodType): z.ZodUnion<any> | null {
+  let current = schema;
+  
+  // Unwrap optional, nullable, default wrappers to find the underlying union
+  while (current && current.constructor.name !== 'ZodUnion') {
+    if ((current as any)._def) {
+      if (current.constructor.name === 'ZodOptional' || 
+          current.constructor.name === 'ZodNullable' || 
+          current.constructor.name === 'ZodDefault') {
+        current = ((current as any)._def as any).innerType;
+      } else {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  
+  // Check if we found a ZodUnion
+  if (current && 
+      current.constructor.name === 'ZodUnion' &&
+      (current as any)._def &&
+      Array.isArray(((current as any)._def as any).options)) {
+    return current as z.ZodUnion<any>;
+  }
+  
+  return null;
+}
+
+/**
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
-export function formatValidationError(error: ZodError | MockZodError): FormatValidationErrorResult {
+export function formatValidationError(
+  error: ZodError | MockZodError, 
+  schema?: z.ZodType,
+  yamlDocument?: any
+): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
     const message = error?.message || String(error);
@@ -347,83 +760,112 @@ export function formatValidationError(error: ZodError | MockZodError): FormatVal
   const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
-    // Try generic union error message first
-    const genericUnionMessage = getGenericUnionErrorMessage(issue);
-    if (genericUnionMessage) {
-      formattedMessage = genericUnionMessage;
-    }
-    // Handle discriminated union errors for type field
-    else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
-      formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
-    } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
-      formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
-    }
-    // Handle literal type errors for type field (avoid listing all 1000+ options)
-    else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
-      const receivedValue = issue.received as string;
-      if (receivedValue?.startsWith?.('elasticsearch.')) {
-        formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
-      } else if (receivedValue?.startsWith?.('kibana.')) {
-        formattedMessage = `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
-      } else {
-        formattedMessage = `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
+    // Try to generate dynamic union error message first if schema is provided
+    if (schema && issue.path && issue.path.length > 0) {
+      const fieldName = issue.path[issue.path.length - 1] || 'field';
+      const dynamicUnionMessage = generateUnionErrorMessage(schema, issue.path, String(fieldName), yamlDocument);
+      if (dynamicUnionMessage) {
+        // Log the improvement for debugging
+        console.log('🎯 Dynamic union formatting applied:', {
+          originalMessage: issue.message,
+          path: issue.path,
+          dynamicMessage: dynamicUnionMessage
+        });
+        formattedMessage = dynamicUnionMessage;
+      }
+      // Try generic union error message as fallback
+      else {
+        const genericUnionMessage = getGenericUnionErrorMessage(issue);
+        if (genericUnionMessage) {
+          formattedMessage = genericUnionMessage;
+        }
+        // Handle discriminated union errors for type field
+        else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+          formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
+        } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+          formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+        }
+        // Handle literal type errors for type field (avoid listing all 1000+ options)
+        else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
+          const receivedValue = issue.received as string;
+          if (receivedValue?.startsWith?.('elasticsearch.')) {
+            formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
+          } else if (receivedValue?.startsWith?.('kibana.')) {
+            formattedMessage = `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
+          } else {
+            formattedMessage = `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
+          }
+        }
+        // Handle union errors with too many options
+        else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
+          formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+        }
+        // Note: Removed hardcoded connector-specific fallbacks since we now have dynamic union detection
+        else if (
+          issue.code === 'invalid_type' &&
+          issue.path.length === 1 &&
+          issue.path[0] === 'triggers'
+        ) {
+          formattedMessage = `No triggers found. Add at least one trigger.`;
+        } else if (
+          issue.code === 'invalid_type' &&
+          issue.path.length === 1 &&
+          issue.path[0] === 'steps'
+        ) {
+          formattedMessage = `No steps found. Add at least one step.`;
+        }
+        // Return original message for other errors
+        else {
+          formattedMessage = issue.message;
+        }
       }
     }
-    // Handle union errors with too many options
-    else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
-      formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
-    }
-    // Handle connector field validation errors with numeric enum values
-    else if (
-      issue.code === 'invalid_type' &&
-      issue.path?.includes('connector') &&
-      issue.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"')
-    ) {
-      formattedMessage = 'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
-    }
-    // Handle the specific "unknown" code error with numeric enum values (this is the tooltip error)
-    else if (
-      issue.code === 'unknown' &&
-      issue.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"')
-    ) {
-      formattedMessage = 'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
-    }
-    // Handle connector union validation errors (when passing number instead of object)
-    else if (
-      issue.code === 'invalid_union' &&
-      issue.path?.includes('connector') &&
-      (issue.received === 'number' || 
-       (issue.unionErrors && issue.unionErrors.some((err: any) => 
-         err.issues?.some((nestedIssue: any) => 
-           nestedIssue.message?.includes('Expected object, received number')
-         )
-       )))
-    ) {
-      formattedMessage = 'Invalid connector value. Expected connector object with type ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
-    }
-    // Handle other connector union validation errors
-    else if (
-      issue.code === 'invalid_union' &&
-      issue.path?.includes('connector') &&
-      (issue.message?.includes('0 | 1 | 2 | 3 | 4 | 5 | 6') || issue.message?.includes('Expected "0"'))
-    ) {
-      formattedMessage = 'Invalid connector configuration. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
-    } else if (
-      issue.code === 'invalid_type' &&
-      issue.path.length === 1 &&
-      issue.path[0] === 'triggers'
-    ) {
-      formattedMessage = `No triggers found. Add at least one trigger.`;
-    } else if (
-      issue.code === 'invalid_type' &&
-      issue.path.length === 1 &&
-      issue.path[0] === 'steps'
-    ) {
-      formattedMessage = `No steps found. Add at least one step.`;
-    }
-    // Return original message for other errors
+    // Fallback when no schema is provided - use existing logic
     else {
-      formattedMessage = issue.message;
+      // Try generic union error message first
+      const genericUnionMessage = getGenericUnionErrorMessage(issue);
+      if (genericUnionMessage) {
+        formattedMessage = genericUnionMessage;
+      }
+      // Handle discriminated union errors for type field
+      else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+        formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
+      } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+        formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+      }
+      // Handle literal type errors for type field (avoid listing all 1000+ options)
+      else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
+        const receivedValue = issue.received as string;
+        if (receivedValue?.startsWith?.('elasticsearch.')) {
+          formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
+        } else if (receivedValue?.startsWith?.('kibana.')) {
+          formattedMessage = `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
+        } else {
+          formattedMessage = `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
+        }
+      }
+      // Handle union errors with too many options
+      else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
+        formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+      }
+      // Note: Removed hardcoded connector-specific fallbacks since we now have dynamic union detection
+      else if (
+        issue.code === 'invalid_type' &&
+        issue.path.length === 1 &&
+        issue.path[0] === 'triggers'
+      ) {
+        formattedMessage = `No triggers found. Add at least one trigger.`;
+      } else if (
+        issue.code === 'invalid_type' &&
+        issue.path.length === 1 &&
+        issue.path[0] === 'steps'
+      ) {
+        formattedMessage = `No steps found. Add at least one step.`;
+      }
+      // Return original message for other errors
+      else {
+        formattedMessage = issue.message;
+      }
     }
 
     // Return a new issue object with the formatted message
@@ -561,7 +1003,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     const result = schema.safeParse(json);
     if (!result.success) {
       // Use custom error formatter for better user experience
-      const { message, formattedError } = formatValidationError(result.error);
+      const { message, formattedError } = formatValidationError(result.error, schema, doc);
       return {
         success: false,
         error: new InvalidYamlSchemaError(message, formattedError),

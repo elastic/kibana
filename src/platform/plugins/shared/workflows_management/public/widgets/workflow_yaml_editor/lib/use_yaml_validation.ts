@@ -431,7 +431,7 @@ export function useYamlValidation({
             ],
           };
 
-          const { message } = formatValidationError(mockError);
+                const { message } = formatValidationError(mockError, workflowYamlSchema);
           formattedMessage = message;
         }
 

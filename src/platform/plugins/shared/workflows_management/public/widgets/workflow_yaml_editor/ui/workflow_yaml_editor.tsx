@@ -39,6 +39,7 @@ import {
   getCurrentPath,
 } from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { getSchemaAtPath } from '../../../../common/lib/zod';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -52,6 +53,7 @@ import {
   createUnifiedActionsProvider,
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
+  createUnifiedHoverProvider,
 } from '../lib/monaco_providers';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
@@ -447,31 +449,54 @@ export const WorkflowYAMLEditor = ({
       const markerInterceptor = function(model: any, owner: string, markers: any[]) {
         // Debug logging to understand what markers we're getting
         if (owner === 'yaml' && markers.length > 0) {
-          console.log('🔍 YAML validation markers:', markers.map(m => ({
-            message: m.message,
-            startLine: m.startLineNumber,
-            startColumn: m.startColumn,
-            severity: m.severity
-          })));
+          console.log('🔍 YAML validation markers received:', {
+            owner,
+            markerCount: markers.length,
+            markers: markers.map(m => ({
+              message: m.message,
+              startLine: m.startLineNumber,
+              startColumn: m.startColumn,
+              severity: m.severity,
+              source: m.source
+            }))
+          });
         }
         
         // Only modify YAML validation markers
         if (owner === 'yaml') {
           const fixedMarkers = markers.map(marker => {
-            // Check if this is a connector validation error that needs formatting
-            // Look for numeric enum patterns that indicate connector type validation
-            const isConnectorError = (
-              marker.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"') ||
-              marker.message?.includes('Incorrect type. Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"') ||
-              marker.message?.includes('Expected \\"0 | 1 | 2 | 3 | 4 | 5 | 6\\"') ||
-              // More comprehensive regex to catch various numeric enum patterns
-              /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message) ||
-              /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message) ||
-              // Also catch patterns without quotes
-              /Expected \d+(\s*\|\s*\d+)*/.test(marker.message)
+            // Check if this is a validation error that could benefit from dynamic formatting
+            const hasNumericEnumPattern = (
+              // Patterns with quotes: Expected "0 | 1 | 2"
+              /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+              /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+              // Patterns with escaped quotes: Expected \"0 | 1\"
+              /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(marker.message || '') ||
+              // Patterns without quotes: Expected 0 | 1
+              /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(marker.message || '') ||
+              // Additional patterns for different Monaco YAML error formats
+              /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(marker.message || '') ||
+              /Value must be one of: \d+(\s*,\s*\d+)*/.test(marker.message || '')
             );
+
+            // Check for field type errors (like "Expected settings", "Expected connector", etc.)
+            const hasFieldTypeError = (
+              /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '') ||
+              /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '')
+            );
+
+            // Also check for the current message pattern we're seeing
+            const hasConnectorEnumPattern = marker.message?.includes('Expected ".none" | ".cases-webhook"');
             
-            if (isConnectorError) {
+            console.log('🔍 Checking marker for formatting:', {
+              message: marker.message,
+              hasNumericEnumPattern,
+              hasConnectorEnumPattern,
+              hasFieldTypeError,
+              willProcess: hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError
+            });
+            
+            if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
               try {
                 // Get the YAML path at this marker position to determine context
                 const yamlDocument = yamlDocumentRef.current;
@@ -483,49 +508,37 @@ export const WorkflowYAMLEditor = ({
                     column: marker.startColumn
                   });
                   yamlPath = getCurrentPath(yamlDocument, markerPosition);
+                  console.log('🎯 Detected YAML path for validation error:', {
+                    line: marker.startLineNumber,
+                    column: marker.startColumn,
+                    position: markerPosition,
+                    path: yamlPath,
+                    originalMessage: marker.message
+                  });
                 }
                 
-                // Check if this is specifically a connector field error
-                const isConnectorField = yamlPath.some(segment => 
-                  typeof segment === 'string' && segment === 'connector'
-                );
-                
-                if (isConnectorField) {
-                  // Generate the detailed connector error message
-                  const fieldName = yamlPath[yamlPath.length - 1] || 'connector';
-                  const detailedMessage = `${fieldName} should be oneOf:
-  - Cases_connector_properties_none
-    type: ".none", other props: fields, id, name
-  - Cases_connector_properties_cases_webhook
-    type: ".cases-webhook", other props: fields, id, name
-  - Cases_connector_properties_jira
-    type: ".jira", other props: fields, id, name
-  - Cases_connector_properties_resilient
-    type: ".resilient", other props: fields, id, name
-  - Cases_connector_properties_servicenow
-    type: ".servicenow", other props: fields, id, name
-  - Cases_connector_properties_servicenow_sir
-    type: ".servicenow-sir", other props: fields, id, name
-  - Cases_connector_properties_swimlane
-    type: ".swimlane", other props: fields, id, name`;
-                  
-                  return {
-                    ...marker,
-                    message: detailedMessage
-                  };
-                }
-                
-                // For other numeric enum errors, try the formatValidationError function
+                // Create a mock Zod error with the path information
                 const mockZodError = {
                   issues: [{
-                    code: 'invalid_type',
+                    code: 'unknown' as const,
                     path: yamlPath,
                     message: marker.message,
-                    received: 'number'
+                    received: 'unknown'
                   }]
                 };
                 
-                const { message: formattedMessage } = formatValidationError(mockZodError as any);
+                // Use the dynamic formatValidationError with schema and YAML document
+                const { message: formattedMessage } = formatValidationError(
+                  mockZodError as any, 
+                  workflowYamlSchemaLoose,
+                  yamlDocument
+                );
+                
+                console.log('🎯 Formatted validation message:', {
+                  originalMessage: marker.message,
+                  formattedMessage,
+                  changed: formattedMessage !== marker.message
+                });
                 
                 return {
                   ...marker,
@@ -533,21 +546,9 @@ export const WorkflowYAMLEditor = ({
                 };
                 
               } catch (error) {
-                // Fallback to simple replacement for connector errors
-                const fixedMessage = marker.message
-                  .replace(/Expected "0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6"/g, 
-                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
-                  .replace(/Incorrect type\. Expected "0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6"/g,
-                    'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
-                  .replace(/Expected \\"0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6\\"/g,
-                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
-                  .replace(/Expected 0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6/g,
-                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"');
-                
-                return {
-                  ...marker,
-                  message: fixedMessage
-                };
+                // Fallback to original message if dynamic formatting fails
+                console.warn('Failed to format validation error dynamically:', error);
+                return marker;
               }
             }
             return marker;

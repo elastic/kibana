@@ -183,6 +183,72 @@ describe('formatValidationError', () => {
     const result = formatValidationError(error!);
     expect(result.message).toBe('Invalid connector type. Use Ctrl+Space to see available options.');
   });
+
+  it('should dynamically format union errors when schema is provided', () => {
+    // Create a schema similar to the Cases connector structure
+    const casesConnectorSchema = z.object({
+      connector: z.union([
+        z.object({
+          type: z.literal('.none'),
+          id: z.string(),
+          name: z.string(),
+          fields: z.string().nullable(),
+        }),
+        z.object({
+          type: z.literal('.jira'),
+          id: z.string(),
+          name: z.string(),
+          fields: z.string().nullable(),
+        }),
+        z.object({
+          type: z.literal('.cases-webhook'),
+          id: z.string(),
+          name: z.string(),
+          fields: z.string().nullable(),
+        }),
+      ])
+    });
+
+    // Create a mock error that would come from Monaco YAML validation
+    const mockError = {
+      issues: [{
+        code: 'unknown' as const,
+        path: ['connector'],
+        message: 'Expected "0 | 1 | 2"',
+        received: 'unknown'
+      }]
+    };
+
+    const result = formatValidationError(mockError as any, casesConnectorSchema);
+    
+    // Should generate dynamic message with union options
+    expect(result.message).toContain('connector should be oneOf:');
+    expect(result.message).toContain('type: ".none"');
+    expect(result.message).toContain('type: ".jira"');
+    expect(result.message).toContain('type: ".cases-webhook"');
+    expect(result.message).toContain('other props: fields, id, name');
+  });
+
+  it('should fall back to original behavior when dynamic formatting fails', () => {
+    const mockError = {
+      issues: [{
+        code: 'unknown' as const,
+        path: ['nonexistent'],
+        message: 'Expected "0 | 1 | 2"',
+        received: 'unknown'
+      }]
+    };
+
+    // Schema without the path that's being referenced
+    const simpleSchema = z.object({
+      other: z.string()
+    });
+
+    const result = formatValidationError(mockError as any, simpleSchema);
+    
+    // Should fall back to original message since path doesn't exist in schema
+    expect(result.message).toBe('Expected "0 | 1 | 2"');
+  });
 });
 
 describe('getStepNodeAtPosition', () => {
