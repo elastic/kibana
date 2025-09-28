@@ -11,7 +11,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -38,6 +37,7 @@ import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { WorkflowsUtilityBar } from './workflows_utility_bar';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -47,7 +47,7 @@ interface WorkflowListProps {
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
-  const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
+  const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
@@ -58,19 +58,21 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
   const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
 
-  const deleteSelectedWorkflows = () => {
-    if (selectedItems.length === 0) {
-      return;
-    }
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedItems.length} workflows?`
-    );
-    if (!confirmed) {
-      return;
-    }
-    deleteWorkflows.mutate({ ids: selectedItems.map((item) => item.id) });
+  const deselectWorkflows = useCallback(() => {
     setSelectedItems([]);
-  };
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    const result = await refetch();
+    // Update selected items with fresh data after refetch
+    if (result.data?.results && selectedItems.length > 0) {
+      const selectedIds = selectedItems.map((item) => item.id);
+      const updatedSelectedItems = result.data.results.filter((workflow) =>
+        selectedIds.includes(workflow.id)
+      );
+      setSelectedItems(updatedSelectedItems);
+    }
+  }, [refetch, selectedItems]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, any>) => {
@@ -402,30 +404,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={5}>
-          <EuiText size="s">
-            Showing
-            <b>
-              {' '}
-              {showStart}-{showEnd}{' '}
-            </b>
-            of {workflows?._pagination.total} workflows
-          </EuiText>
-        </EuiFlexItem>
-        {canDeleteWorkflow && (
-          <EuiFlexItem>
-            <EuiButton
-              color="danger"
-              iconType="trash"
-              onClick={deleteSelectedWorkflows}
-              isDisabled={selectedItems.length === 0}
-            >
-              Delete {selectedItems.length || 'selected'} workflows
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <WorkflowsUtilityBar
+        totalWorkflows={workflows?._pagination.total || 0}
+        selectedWorkflows={selectedItems}
+        deselectWorkflows={deselectWorkflows}
+        onRefresh={onRefresh}
+        showStart={showStart}
+        showEnd={showEnd}
+      />
       <EuiSpacer />
       <EuiBasicTable
         css={css`
@@ -444,7 +430,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         selection={{
           onSelectionChange: setSelectedItems,
           selectable: () => true,
-          initialSelected: selectedItems,
+          selected: selectedItems,
         }}
         pagination={{
           pageSize: search.limit,
