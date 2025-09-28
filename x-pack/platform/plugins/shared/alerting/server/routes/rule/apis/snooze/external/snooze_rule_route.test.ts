@@ -68,6 +68,7 @@ rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule)
 describe('snoozeAlertRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
   });
 
   it('snoozes a rule', async () => {
@@ -356,6 +357,9 @@ describe('snoozeAlertRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 
       snoozeRuleRoute(router, licenseState);
 
@@ -374,7 +378,7 @@ describe('snoozeAlertRoute', () => {
         },
         {
           params: {
-            id: 'test.internal-rule-type',
+            id: '1',
           },
           body: {
             schedule,

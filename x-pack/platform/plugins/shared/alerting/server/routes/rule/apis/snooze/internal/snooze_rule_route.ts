@@ -46,8 +46,10 @@ export const snoozeRuleRoute = (
         const body = transformSnoozeBodyV1(req.body);
 
         try {
+          const rule = await rulesClient.get({ id: params.id });
+
           validateInternalRuleType({
-            ruleTypeId: params.id,
+            ruleTypeId: rule.alertTypeId,
             ruleTypes,
             operationText: 'snooze',
           });

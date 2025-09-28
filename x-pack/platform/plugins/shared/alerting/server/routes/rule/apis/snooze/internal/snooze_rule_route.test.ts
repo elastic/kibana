@@ -18,10 +18,6 @@ jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-beforeEach(() => {
-  jest.resetAllMocks();
-});
-
 const SNOOZE_SCHEDULE = {
   rRule: {
     dtstart: '2021-03-07T00:00:00.000Z',
@@ -62,6 +58,11 @@ const mockedRule = {
 };
 
 describe('snoozeAlertRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+  });
+
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -183,6 +184,9 @@ describe('snoozeAlertRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 
       snoozeRuleRoute(router, licenseState);
 
@@ -201,7 +205,7 @@ describe('snoozeAlertRoute', () => {
         },
         {
           params: {
-            id: 'test.internal-rule-type',
+            id: '1',
           },
           body: {
             snooze_schedule: SNOOZE_SCHEDULE,

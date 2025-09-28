@@ -86,8 +86,10 @@ export const snoozeRuleRoute = (
         const snoozeScheduleId = v4();
 
         try {
+          const rule = await rulesClient.get({ id: params.id });
+
           validateInternalRuleType({
-            ruleTypeId: params.id,
+            ruleTypeId: rule.alertTypeId,
             ruleTypes,
             operationText: 'snooze',
           });

@@ -64,13 +64,13 @@ export const unsnoozeRuleRoute = (
 
         const { ruleId, scheduleId }: UnsnoozeParams = req.params;
         try {
+          const currentRule = await rulesClient.get({ id: ruleId });
+
           validateInternalRuleType({
-            ruleTypeId: ruleId,
+            ruleTypeId: currentRule.alertTypeId,
             ruleTypes,
             operationText: 'unsnooze',
           });
-
-          const currentRule = await rulesClient.get({ id: ruleId });
 
           if (!currentRule.snoozeSchedule?.length) {
             throw Boom.badRequest('Rule has no snooze schedules.');
