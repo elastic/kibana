@@ -931,10 +931,10 @@ paths:
                                 - platform.core.get_document_by_id
                         description: Hi! I can help you search the data within the indices starting with "content-" prefix.
                         id: created-agent-id
-                        labels:
+                        name: Search Index Helper
+                        tags:
                           - custom-indices
                           - department-search
-                        name: Search Index Helper
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -974,10 +974,10 @@ paths:
                           - platform.core.get_document_by_id
                   description: Hi! I can help you search the data within the indices starting with "content-" prefix.
                   id: created-agent-id
-                  labels:
+                  name: Search Index Helper
+                  tags:
                     - custom-indices
                     - department-search
-                  name: Search Index Helper
             schema:
               additionalProperties: false
               type: object
@@ -1053,10 +1053,10 @@ paths:
                             - platform.core.get_document_by_id
                     description: Hi! I can help you search the data within the indices starting with "content-" prefix.
                     id: created-agent-id
-                    labels:
+                    name: Search Index Helper
+                    tags:
                       - custom-indices
                       - department-search
-                    name: Search Index Helper
                     type: chat
           description: Indicates a successful response
       summary: Create an agent
@@ -1131,10 +1131,10 @@ paths:
                             - platform.core.get_document_by_id
                     description: Hi! I can help you search the data within the indices starting with "content-" prefix.
                     id: created-agent-id
-                    labels:
+                    name: Search Index Helper
+                    tags:
                       - custom-indices
                       - department-search
-                    name: Search Index Helper
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1180,11 +1180,11 @@ paths:
                           - platform.core.get_document_by_id
                   description: Updated description - Search for anything in "content-*" indices!
                   id: created-agent-id
-                  labels:
+                  name: Search Index Helper
+                  tags:
                     - custom-indices
                     - department-search
                     - elastic-employees
-                  name: Search Index Helper
             schema:
               additionalProperties: false
               type: object
@@ -1250,11 +1250,11 @@ paths:
                             - platform.core.get_document_by_id
                     description: Updated description - Search for anything in "content-*" indices!
                     id: created-agent-id
-                    labels:
+                    name: Search Index Helper
+                    tags:
                       - custom-indices
                       - department-search
                       - elastic-employees
-                    name: Search Index Helper
                     type: chat
           description: Indicates a successful response
       summary: Update an agent
@@ -1597,7 +1597,7 @@ paths:
                         name: elastic-mcp-server
                         version: 0.0.1
           description: Indicates a successful response
-      summary: Send MCP request
+      summary: MCP server API
       tags:
         - agent builder
       x-state: Technical Preview
