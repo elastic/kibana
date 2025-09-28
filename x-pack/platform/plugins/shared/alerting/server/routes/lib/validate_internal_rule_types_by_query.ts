@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { RegistryRuleType } from '../../rule_type_registry';
 import type { RulesClient } from '../../rules_client';
 
-export const validateInternalRuleTypes = async ({
+export const validateInternalRuleTypesByQuery = async ({
   req,
   ruleTypes,
   rulesClient,

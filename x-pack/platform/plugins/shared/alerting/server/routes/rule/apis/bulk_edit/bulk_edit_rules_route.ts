@@ -27,7 +27,7 @@ import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { validateInternalRuleTypes } from '../../../lib/validate_internal_rule_types';
+import { validateInternalRuleTypesByQuery } from '../../../lib/validate_internal_rule_types_by_query';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -140,7 +140,7 @@ const validateInternalRuleTypesBulkEdit = async ({
     return;
   }
 
-  await validateInternalRuleTypes({
+  await validateInternalRuleTypesByQuery({
     req: { filter, ids },
     ruleTypes,
     rulesClient,

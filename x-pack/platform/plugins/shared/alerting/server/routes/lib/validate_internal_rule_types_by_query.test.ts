@@ -7,9 +7,9 @@
 
 import type { RulesClient } from '../../rules_client';
 import { rulesClientMock } from '../../mocks';
-import { validateInternalRuleTypes } from './validate_internal_rule_types';
+import { validateInternalRuleTypesByQuery } from './validate_internal_rule_types_by_query';
 
-describe('validateInternalRuleTypes', () => {
+describe('validateInternalRuleTypesByQuery', () => {
   const req = { ids: ['1', '2'], filter: 'someFilter' };
   const rulesClient = rulesClientMock.create() as unknown as RulesClient;
   const ruleTypes = new Map();
@@ -36,7 +36,7 @@ describe('validateInternalRuleTypes', () => {
     });
 
     await expect(
-      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+      validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Cannot edit rule of type \\"internal\\" because it is internally managed."`
     );
@@ -44,7 +44,7 @@ describe('validateInternalRuleTypes', () => {
 
   it('should not throw an error for valid rule types', async () => {
     await expect(
-      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+      validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
     ).resolves.not.toThrow();
   });
 
@@ -52,7 +52,7 @@ describe('validateInternalRuleTypes', () => {
     ruleTypes.clear();
 
     await expect(
-      validateInternalRuleTypes({ req, rulesClient, ruleTypes, operationText })
+      validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule type not found"`);
   });
 });

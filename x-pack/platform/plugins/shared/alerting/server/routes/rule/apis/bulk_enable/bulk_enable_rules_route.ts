@@ -19,7 +19,7 @@ import { bulkEnableBodySchemaV1 } from '../../../../../common/routes/rule/apis/b
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformBulkEnableResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { validateInternalRuleTypes } from '../../../lib/validate_internal_rule_types';
+import { validateInternalRuleTypesByQuery } from '../../../lib/validate_internal_rule_types_by_query';
 
 export const bulkEnableRulesRoute = ({
   router,
@@ -46,7 +46,7 @@ export const bulkEnableRulesRoute = ({
 
           const body: BulkEnableRulesRequestBodyV1 = req.body;
           try {
-            await validateInternalRuleTypes({
+            await validateInternalRuleTypesByQuery({
               req: body,
               ruleTypes,
               rulesClient,

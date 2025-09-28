@@ -21,7 +21,7 @@ import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { validateInternalRuleTypes } from '../../../lib/validate_internal_rule_types';
+import { validateInternalRuleTypesByQuery } from '../../../lib/validate_internal_rule_types_by_query';
 
 export const bulkDisableRulesRoute = ({
   router,
@@ -50,7 +50,7 @@ export const bulkDisableRulesRoute = ({
           const { filter, ids, untrack } = body;
 
           try {
-            await validateInternalRuleTypes({
+            await validateInternalRuleTypesByQuery({
               req: body,
               ruleTypes,
               rulesClient,
