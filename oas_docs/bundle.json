@@ -1066,11 +1066,11 @@
                           },
                           "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
                           "id": "created-agent-id",
-                          "labels": [
+                          "name": "Search Index Helper",
+                          "tags": [
                             "custom-indices",
                             "department-search"
                           ],
-                          "name": "Search Index Helper",
                           "type": "chat"
                         }
                       ]
@@ -1127,11 +1127,11 @@
                     },
                     "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
                     "id": "created-agent-id",
-                    "labels": [
+                    "name": "Search Index Helper",
+                    "tags": [
                       "custom-indices",
                       "department-search"
-                    ],
-                    "name": "Search Index Helper"
+                    ]
                   }
                 }
               },
@@ -1238,11 +1238,11 @@
                       },
                       "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
                       "id": "created-agent-id",
-                      "labels": [
+                      "name": "Search Index Helper",
+                      "tags": [
                         "custom-indices",
                         "department-search"
                       ],
-                      "name": "Search Index Helper",
                       "type": "chat"
                     }
                   }
@@ -1346,11 +1346,11 @@
                       },
                       "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
                       "id": "created-agent-id",
-                      "labels": [
+                      "name": "Search Index Helper",
+                      "tags": [
                         "custom-indices",
                         "department-search"
                       ],
-                      "name": "Search Index Helper",
                       "type": "chat"
                     }
                   }
@@ -1414,12 +1414,12 @@
                     },
                     "description": "Updated description - Search for anything in \"content-*\" indices!",
                     "id": "created-agent-id",
-                    "labels": [
+                    "name": "Search Index Helper",
+                    "tags": [
                       "custom-indices",
                       "department-search",
                       "elastic-employees"
-                    ],
-                    "name": "Search Index Helper"
+                    ]
                   }
                 }
               },
@@ -1513,12 +1513,12 @@
                       },
                       "description": "Updated description - Search for anything in \"content-*\" indices!",
                       "id": "created-agent-id",
-                      "labels": [
+                      "name": "Search Index Helper",
+                      "tags": [
                         "custom-indices",
                         "department-search",
                         "elastic-employees"
                       ],
-                      "name": "Search Index Helper",
                       "type": "chat"
                     }
                   }
@@ -2025,7 +2025,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Send MCP request",
+        "summary": "MCP server API",
         "tags": [
           "agent builder"
         ],
