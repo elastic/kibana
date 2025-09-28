@@ -307,7 +307,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
-  automaticDashboardsMigration: true,
+  automaticDashboardsMigration: false,
 
   /**
    * Enables the SIEM Readiness Dashboard feature

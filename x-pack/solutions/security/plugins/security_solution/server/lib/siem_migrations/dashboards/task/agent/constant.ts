@@ -9,4 +9,5 @@ import type { RetryPolicy } from '@langchain/langgraph';
 
 export const RETRY_POLICY: RetryPolicy = {
   maxAttempts: 4,
+  jitter: true,
 };
