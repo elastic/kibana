@@ -21,6 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
+  const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
+  const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
 
   describe('Agentless API Serverless', function () {
     this.tags(['skipMKI', 'cloud_security_posture_agentless']);
@@ -46,12 +48,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
-      // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
-      await cisIntegration.fillInTextField(
-        'awsRoleArnInput',
-        'arn:aws:iam::123456789012:role/test-role'
-      );
-      await cisIntegration.fillInTextField('awsCloudConnectorExternalId', 'test-external-id');
+      await cisIntegration.selectAwsCredentials('direct');
+      await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, 'test');
+      await cisIntegration.fillInTextField(DIRECT_ACCESS_SECRET_KEY_TEST_ID, 'test');
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 

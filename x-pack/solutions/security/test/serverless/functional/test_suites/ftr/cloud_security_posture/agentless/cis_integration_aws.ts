@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button for agentless setup`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.selectSetupTechnology('agentless');
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.selectAwsCredentials('direct');
 
         expect(
           (await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()) !== undefined
@@ -71,14 +71,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button for agentless setup`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.selectAwsCredentials('direct');
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });

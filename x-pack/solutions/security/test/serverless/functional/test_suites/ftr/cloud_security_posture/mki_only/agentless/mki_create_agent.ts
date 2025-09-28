@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // In MKI, Cloud Connectors is the default and expected behavior
-      
+
       await cisIntegration.selectAwsCredentials('cloud_connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
