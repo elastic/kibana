@@ -8,12 +8,27 @@
  */
 
 import nunjucks from 'nunjucks';
+import { Liquid } from 'liquidjs';
+
+
+export type TemplateEngineType = 'nunjucks' | 'liquid';
 
 export class WorkflowTemplatingEngine {
-  constructor() {}
+  private readonly engineType: TemplateEngineType;
+
+  constructor(engineType: TemplateEngineType = 'liquid') {
+    this.engineType = engineType;
+  }
 
   public render(template: string, context: Record<string, any>): string {
-    return this.renderNunjucks(template, context);
+    switch (this.engineType) {
+      case 'nunjucks':
+        return this.renderNunjucks(template, context);
+      case 'liquid':
+        return this.renderLiquid(template, context);
+      default:
+        throw new Error(`Unsupported template engine: ${this.engineType}`);
+    }
   }
 
   private renderNunjucks(template: string, context: Record<string, any>): string {
@@ -40,4 +55,14 @@ export class WorkflowTemplatingEngine {
 
     return env.renderString(template, context);
   }
+
+  private renderLiquid(template: string, context: Record<string, any>): string {
+    const engine = new Liquid({
+      strictFilters: true,
+      strictVariables: false,
+    });
+
+    return engine.parseAndRenderSync(template, context);
+  }
+
 }

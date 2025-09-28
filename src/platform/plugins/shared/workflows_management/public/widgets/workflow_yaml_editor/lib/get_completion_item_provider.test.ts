@@ -474,5 +474,239 @@ steps:
         expect(result.fullKey).toBe('');
       });
     });
+
+    describe('liquid filter scenarios', () => {
+      it('should parse liquid filter at end of line', () => {
+        const result = parseLineForCompletion('message: "{{ user.name | ');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('');
+        expect(result.match).toBeTruthy();
+      });
+
+      it('should parse liquid filter with partial filter name', () => {
+        const result = parseLineForCompletion('value: {{ price | up');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('up');
+        expect(result.match).toBeTruthy();
+      });
+
+      it('should parse liquid filter with complex variable path', () => {
+        const result = parseLineForCompletion('data: {{ steps.fetchUser.output.name | ');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid filter with array access', () => {
+        const result = parseLineForCompletion('item: {{ items[0].title | cap');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('cap');
+      });
+
+      it('should parse liquid filter with whitespace', () => {
+        const result = parseLineForCompletion('text: {{  user.name  |  up');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('up');
+      });
+
+      it('should not match liquid filter if not at end of line', () => {
+        const result = parseLineForCompletion('text: {{ user.name | upcase }} more content');
+        expect(result.matchType).not.toBe('liquid-filter');
+      });
+
+      it('should not match liquid filter without pipe', () => {
+        const result = parseLineForCompletion('text: {{ user.name ');
+        expect(result.matchType).toBe('variable-unfinished');
+      });
+
+      it('should not match liquid filter in regular text', () => {
+        const result = parseLineForCompletion('text: "normal | pipe character"');
+        expect(result.matchType).toBeNull();
+      });
+    });
+
+    describe('liquid syntax scenarios', () => {
+      it('should parse liquid syntax block start', () => {
+        const result = parseLineForCompletion('  {% ');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid syntax with partial keyword', () => {
+        const result = parseLineForCompletion('{% if');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('if');
+      });
+
+      it('should parse liquid syntax with partial assign', () => {
+        const result = parseLineForCompletion('  {% ass');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse liquid syntax with whitespace', () => {
+        const result = parseLineForCompletion('  {%  for');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('for');
+      });
+
+      it('should not match liquid syntax if not at end of line', () => {
+        const result = parseLineForCompletion('{% if condition %} content');
+        expect(result.matchType).toBeNull();
+      });
+
+      it('should not match liquid syntax without %', () => {
+        const result = parseLineForCompletion('{ if ');
+        expect(result.matchType).toBeNull();
+      });
+    });
+
+    describe('liquid priority handling', () => {
+      it('should prioritize liquid filter over unfinished mustache', () => {
+        const result = parseLineForCompletion('{{ consts.api | ');
+        expect(result.matchType).toBe('liquid-filter');
+      });
+
+      it('should prioritize liquid filter over complete mustache when at end', () => {
+        const result = parseLineForCompletion('{{ consts.apiUrl }} {{ user.name | fil');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('fil');
+      });
+
+      it('should prioritize @ trigger over liquid syntax', () => {
+        const result = parseLineForCompletion('{% if @steps');
+        expect(result.matchType).toBe('at');
+        expect(result.fullKey).toBe('steps');
+      });
+    });
+  });
+
+  describe('Integration tests for liquid completions', () => {
+    it('should provide liquid filter completions', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: "{{ user.name | `;
+      
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+      
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+      
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter, triggerCharacter: '|' } as any,
+        {} as any
+      );
+      
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+      
+      const labels = result?.suggestions.map(s => s.label) || [];
+      expect(labels).toContain('upcase');
+      expect(labels).toContain('downcase');
+      expect(labels).toContain('capitalize');
+    });
+
+    it('should provide filtered liquid filter completions', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: "{{ user.name | up`;
+      
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+      
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+      
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+      
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+      
+      const labels = result?.suggestions.map(s => s.label) || [];
+      expect(labels).toContain('upcase');
+      expect(labels).not.toContain('downcase'); // Should be filtered out
+    });
+
+    it('should provide liquid syntax completions', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      content: |
+        {% `;
+      
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+      
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+      
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter, triggerCharacter: '{' } as any,
+        {} as any
+      );
+      
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+      
+      const labels = result?.suggestions.map(s => s.label) || [];
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+      expect(labels).toContain('assign');
+    });
+
+    it('should provide liquid syntax completions with partial match', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      content: |
+        {% if`;
+      
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+      
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+      
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+      
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+      
+      const labels = result?.suggestions.map(s => s.label) || [];
+      expect(labels).toContain('if');
+      // Should include both if and unless since "if" partially matches both
+    });
   });
 });

@@ -31,12 +31,14 @@ import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  LIQUID_FILTER_REGEX,
 } from '../../../../common/lib/regex';
 import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
 import { getIndentLevel } from './get_indent_level';
+import { createLiquidFilterCompletions, createLiquidSyntaxCompletions } from './liquid_completions';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -180,6 +182,8 @@ export interface LineParseResult {
     | 'variable-complete'
     | 'variable-unfinished'
     | 'foreach-variable'
+    | 'liquid-filter'
+    | 'liquid-syntax'
     | null;
   match: RegExpMatchArray | null;
 }
@@ -203,6 +207,18 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'at',
       match: atMatch,
+    };
+  }
+
+  // Check for Liquid filter completion FIRST (e.g., "{{ variable | fil")
+  const liquidFilterMatch = lineUpToCursor.match(LIQUID_FILTER_REGEX);
+  if (liquidFilterMatch) {
+    const filterPrefix = liquidFilterMatch[1] || '';
+    return {
+      fullKey: filterPrefix,
+      pathSegments: null,
+      matchType: 'liquid-filter',
+      match: liquidFilterMatch,
     };
   }
 
@@ -237,6 +253,16 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       fullKey,
       pathSegments: parsePath(fullKey),
       matchType: 'foreach-variable',
+      match: null,
+    };
+  }
+
+  // Check for Liquid syntax completion (e.g., "{% ")
+  if (lineUpToCursor.match(/\{\%\s*\w*$/)) {
+    return {
+      fullKey: lastWordBeforeCursor || '',
+      pathSegments: null,
+      matchType: 'liquid-syntax',
       match: null,
     };
   }
@@ -838,7 +864,7 @@ export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema
 ): monaco.languages.CompletionItemProvider {
   return {
-    triggerCharacters: ['@', '.', ' '],
+    triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
         const { lineNumber } = position;
@@ -958,6 +984,27 @@ export function getCompletionItemProvider(
               incomplete: false,
             };
           }
+        }
+
+        // SPECIAL CASE: Liquid filter completion
+        if (parseResult.matchType === 'liquid-filter') {
+          const filterPrefix = parseResult.fullKey;
+          const liquidFilterSuggestions = createLiquidFilterCompletions(range, filterPrefix);
+          
+          return {
+            suggestions: liquidFilterSuggestions,
+            incomplete: false,
+          };
+        }
+
+        // SPECIAL CASE: Liquid syntax completion ({% %})
+        if (parseResult.matchType === 'liquid-syntax') {
+          const syntaxSuggestions = createLiquidSyntaxCompletions(range);
+          
+          return {
+            suggestions: syntaxSuggestions,
+            incomplete: false,
+          };
         }
 
         // SPECIAL CASE: Direct type completion - context-aware
