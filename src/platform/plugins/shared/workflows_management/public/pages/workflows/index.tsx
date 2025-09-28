@@ -153,6 +153,7 @@ export function WorkflowsPage() {
                   iconType="plusInCircle"
                   color="primary"
                   size="s"
+                  fill
                   onClick={handleCreateWorkflow}
                 >
                   <FormattedMessage

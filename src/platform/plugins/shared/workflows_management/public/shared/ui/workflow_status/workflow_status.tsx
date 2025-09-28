@@ -7,31 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIconTip, type EuiBadgeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 
 type WorkflowStatusProps = EuiBadgeProps & {
   valid: boolean;
-  showLabel?: boolean;
 };
 
-export function WorkflowStatus({ valid, showLabel = true, ...props }: WorkflowStatusProps) {
+export function WorkflowStatus({ valid, ...props }: WorkflowStatusProps) {
+  // When showLabel is false, render just an icon for invalid workflows
   return (
-    <EuiBadge
-      color={valid ? 'hollow' : 'warning'}
-      iconType={valid ? 'check' : 'warning'}
-      {...props}
-    >
-      {showLabel && (
-        <>
-          {valid ? (
-            <FormattedMessage id="workflows.workflowList.valid" defaultMessage="Valid" />
-          ) : (
-            <FormattedMessage id="workflows.workflowList.invalid" defaultMessage="Has issues" />
-          )}
-        </>
-      )}
-    </EuiBadge>
+    <EuiIconTip
+      type="errorFilled"
+      color="danger"
+      size="m"
+      content={i18n.translate('workflows.workflowList.workflowInvalid', {
+        defaultMessage: 'Workflow is invalid',
+      })}
+    />
   );
 }

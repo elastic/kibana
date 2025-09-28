@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBadge, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
-import { css } from '@emotion/react';
 import * as i18n from '../../../common/translations';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { PopoverItems } from './popover_items';
@@ -25,45 +24,44 @@ const TRIGGERS_ICONS: Record<string, string> = {
   scheduled: 'clock',
 };
 
+const BADGE_STYLE = css`
+  margin: 2px 3px 0 0;
+`;
+
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
-  const [first, ...rest] = triggers || [];
+  if (triggers.length === 0) {
+    return (
+      <EuiBadge color="#FFF" iconType="asterisk" css={BADGE_STYLE}>
+        <EuiText size="xs" css={BADGE_STYLE}>
+          No triggers
+        </EuiText>
+      </EuiBadge>
+    );
+  }
+  const [firstTrigger, ...restOfTriggers] = triggers || [];
 
   // Rare edge-case: empty triggers list
-  if (!first) return null;
+  if (!firstTrigger) return null;
 
   return (
     <>
-      <EuiBadge
-        color="hollow"
-        iconType={TRIGGERS_ICONS[first.type]}
-        css={css`
-          margin: 2px 3px 0 0;
-        `}
-      >
-        <FormattedMessage
-          id={`workflows.workflowList.trigger.${first.type}`}
-          defaultMessage={capitalize(first.type)}
-        />
+      <EuiBadge color="#FFF" iconType={TRIGGERS_ICONS[firstTrigger.type]} css={BADGE_STYLE}>
+        <EuiText size="xs">{capitalize(firstTrigger.type)}</EuiText>
       </EuiBadge>
-      {rest.length > 0 && (
+      {restOfTriggers.length > 0 && (
         <PopoverItems
           items={triggers}
           popoverTitle={i18n.TRIGGERS_LIST_TITLE}
-          popoverButtonTitle={`+${rest.length.toString()}`}
+          popoverButtonTitle={`+${restOfTriggers.length.toString()}`}
           dataTestPrefix="triggers"
           renderItem={(trigger, idx) => (
             <EuiBadge
               key={`${trigger}-${idx}`}
-              color="hollow"
+              color="#FFF"
               iconType={TRIGGERS_ICONS[trigger.type]}
-              css={css`
-                margin: 2px 3px 0 0;
-              `}
+              css={BADGE_STYLE}
             >
-              <FormattedMessage
-                id={`workflows.workflowList.trigger.${trigger.type}`}
-                defaultMessage={capitalize(trigger.type)}
-              />
+              <EuiText size="xs">{capitalize(trigger.type)}</EuiText>
             </EuiBadge>
           )}
         />

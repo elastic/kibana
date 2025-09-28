@@ -9,6 +9,7 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
@@ -21,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -30,12 +32,12 @@ import { Link } from 'react-router-dom';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
-import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
-import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -162,21 +164,33 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
-                {item.description}
+                {item.description || 'No description'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
       },
       {
+        field: 'tags',
+        name: 'Tags',
+        render: (value: any, item: WorkflowListItemDto) => {
+          const tags = item.definition?.tags;
+          if (!tags || tags.length === 0) {
+            return null;
+          }
+          return tags.map((tag: string) => (
+            <EuiBadge key={tag} color="hollow">
+              {tag}
+            </EuiBadge>
+          ));
+        },
+      },
+      {
         field: 'triggers',
-        name: 'Triggers',
-        render: (value: any, item: WorkflowListItemDto) =>
-          item.definition?.triggers ? (
-            <WorkflowsTriggersList triggers={item.definition.triggers} />
-          ) : (
-            <EuiText size="s">No triggers</EuiText>
-          ),
+        name: 'Trigger',
+        render: (value: any, item: WorkflowListItemDto) => (
+          <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+        ),
       },
       {
         name: 'Last run',
@@ -202,42 +216,45 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         },
       },
       {
-        name: 'Valid',
-        field: 'valid',
-        render: (value: boolean) => {
-          return <WorkflowStatus valid={value} />;
-        },
-      },
-      {
         name: 'Enabled',
         field: 'enabled',
         render: (value, item) => {
           return (
-            <EuiToolTip
-              content={
-                !item.valid
-                  ? i18n.translate('workflows.workflowList.invalid', {
-                      defaultMessage: 'Fix errors to enable workflow',
-                    })
-                  : undefined
-              }
-            >
-              <EuiSwitch
-                disabled={!canUpdateWorkflow || !item.valid}
-                checked={item.enabled}
-                onChange={() => handleToggleWorkflow(item)}
-                label={
-                  item.enabled
-                    ? i18n.translate('workflows.workflowList.enabled', {
-                        defaultMessage: 'Enabled',
-                      })
-                    : i18n.translate('workflows.workflowList.disabled', {
-                        defaultMessage: 'Disabled',
-                      })
-                }
-                showLabel={false}
-              />
-            </EuiToolTip>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    !item.valid
+                      ? i18n.translate('workflows.workflowList.invalid', {
+                          defaultMessage: 'Fix errors to enable workflow',
+                        })
+                      : undefined
+                  }
+                >
+                  <EuiSwitch
+                    disabled={!canUpdateWorkflow || !item.valid}
+                    checked={item.enabled}
+                    onChange={() => handleToggleWorkflow(item)}
+                    label={
+                      item.enabled
+                        ? i18n.translate('workflows.workflowList.enabled', {
+                            defaultMessage: 'Enabled',
+                          })
+                        : i18n.translate('workflows.workflowList.disabled', {
+                            defaultMessage: 'Disabled',
+                          })
+                    }
+                    showLabel={false}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              {/* TODO: right now it's only invalid but in the future we might need to add other statuses */}
+              {!item.valid && (
+                <EuiFlexItem grow={false}>
+                  <WorkflowStatus valid={item.valid} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       },
@@ -248,7 +265,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             isPrimary: true,
             enabled: (item) => !!canExecuteWorkflow && item.enabled && item.valid,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
@@ -409,6 +426,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiBasicTable
+        css={css`
+          .euiBasicTableAction-showOnHover {
+            opacity: 1 !important;
+          }
+        `}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
