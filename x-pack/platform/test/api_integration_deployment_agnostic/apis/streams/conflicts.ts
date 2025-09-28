@@ -90,12 +90,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                lifecycle: {
-                  dsl: {},
-                },
-                processing: {
-                  steps: [],
-                },
+                lifecycle: { dsl: {} },
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   routing: [],
                   fields: {},
@@ -134,12 +131,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               description: '',
               ingest: {
-                lifecycle: {
-                  dsl: {},
-                },
-                processing: {
-                  steps: [],
-                },
+                lifecycle: { dsl: {} },
+                processing: { steps: [] },
+                settings: {},
                 wired: {
                   routing: [],
                   fields: {},

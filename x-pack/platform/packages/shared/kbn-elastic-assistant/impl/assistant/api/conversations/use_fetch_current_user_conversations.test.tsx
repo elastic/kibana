@@ -56,7 +56,7 @@ describe('useFetchCurrentUserConversations', () => {
       );
     });
   });
-  it(`should enhance the response with isConversationOwner=false when no currentUser`, async () => {
+  it(`should enhance the response with isConversationOwner=true when no currentUser`, async () => {
     const { result } = renderHook(() => useFetchCurrentUserConversations(defaultProps), {
       wrapper: createWrapper(),
     });
@@ -65,7 +65,7 @@ describe('useFetchCurrentUserConversations', () => {
       expect(result.current.data).toEqual({
         [welcomeConvo.id]: {
           ...welcomeConvo,
-          isConversationOwner: false,
+          isConversationOwner: true,
         },
       });
     });

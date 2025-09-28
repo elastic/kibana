@@ -499,7 +499,7 @@ describe('EditRoleMappingPage', () => {
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
 
     // Lock icon is displayed
-    const lockIcon = wrapper.find('EuiToolTip[data-test-subj="readOnlyRoleMappingTooltip"]');
+    const lockIcon = wrapper.find('EuiIconTip[data-test-subj="readOnlyRoleMappingTooltip"]');
     expect(lockIcon).toHaveLength(1);
   });
 

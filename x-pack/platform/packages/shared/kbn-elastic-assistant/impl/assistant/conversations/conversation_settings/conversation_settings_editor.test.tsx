@@ -90,6 +90,7 @@ const baseProps: ConversationSettingsEditorProps = {
   allSystemPrompts: mockSystemPrompts,
   conversationSettings: { [welcomeConvo.id]: welcomeConvo },
   conversationsSettingsBulkActions: {},
+  currentUser: { name: 'elastic' },
   http: { basePath: { get: jest.fn(() => 'http://localhost:5601') } } as unknown as HttpSetup,
   isDisabled: false,
   selectedConversation: welcomeConvo,

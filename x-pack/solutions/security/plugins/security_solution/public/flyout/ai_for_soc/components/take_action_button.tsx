@@ -62,9 +62,7 @@ export const TakeActionButton = memo(() => {
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: dataAsNestedObject,
     onMenuItemClick: closePopover,
-    isActiveTimelines: false,
     ariaLabel: ADD_TO_CASE_ARIA_LABEL,
-    isInDetections: true,
   });
 
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({

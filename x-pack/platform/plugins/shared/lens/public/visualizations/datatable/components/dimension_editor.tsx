@@ -11,6 +11,7 @@ import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
@@ -214,15 +215,23 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
-                if (!column?.palette && newMode !== 'none') {
-                  params.palette = {
-                    ...activePalette,
-                    params: {
-                      ...activePalette.params,
-                      // that's ok, at first open we're going to throw them away and recompute
-                      stops: displayStops,
-                    },
-                  };
+
+                if (newMode !== 'none') {
+                  if (!column?.colorMapping && showColorByTerms) {
+                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
+
+                  // also set palette for now
+                  if (!column?.palette) {
+                    params.palette = {
+                      ...activePalette,
+                      params: {
+                        ...activePalette.params,
+                        // that's ok, at first open we're going to throw them away and recompute
+                        stops: displayStops,
+                      },
+                    };
+                  }
                 }
 
                 // clear up when switching to no coloring

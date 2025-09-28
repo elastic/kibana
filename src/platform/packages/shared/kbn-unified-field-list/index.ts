@@ -58,7 +58,7 @@ export type {
   RenderFieldItemParams,
   SearchMode,
 } from './src/types';
-export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
+export { ExistenceFetchStatus, FieldsGroupNames, type AdditionalFieldGroups } from './src/types';
 export type { UnifiedFieldListRestorableState } from './src/restorable_state';
 
 export {

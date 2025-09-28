@@ -7,6 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { type ErrorsByTraceId } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -35,6 +36,7 @@ import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { normalizeErrors } from './normalize_errors';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -217,6 +219,46 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
     return {
       traceItems: focusedTraceItems,
       summary: { ...traceSummaryCount, errors: unifiedTraceErrors.totalErrors },
+    };
+  },
+});
+
+const unifiedTracesByIdErrorsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}/errors',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([rangeRt, t.partial({ docId: t.string })]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ErrorsByTraceId> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const logsClient = await createLogsClient(resources);
+
+    const { params } = resources;
+    const { traceId } = params.path;
+    const { start, end, docId } = params.query;
+
+    const { apmErrors, unprocessedOtelErrors } = await getUnifiedTraceErrors({
+      apmEventClient,
+      logsClient,
+      docId,
+      traceId,
+      start,
+      end,
+    });
+
+    if (apmErrors.length > 0) {
+      return {
+        traceErrors: normalizeErrors(apmErrors),
+        source: 'apm',
+      };
+    }
+
+    return {
+      traceErrors: normalizeErrors(unprocessedOtelErrors),
+      source: 'unprocessedOtel',
     };
   },
 });
@@ -428,4 +470,5 @@ export const traceRouteRepository = {
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,
   ...unifiedTracesByIdSummaryRoute,
+  ...unifiedTracesByIdErrorsRoute,
 };

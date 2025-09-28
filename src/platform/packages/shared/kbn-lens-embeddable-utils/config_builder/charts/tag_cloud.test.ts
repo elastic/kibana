@@ -64,7 +64,6 @@ test('generates tag cloud chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
   expect(result).toMatchInlineSnapshot(`

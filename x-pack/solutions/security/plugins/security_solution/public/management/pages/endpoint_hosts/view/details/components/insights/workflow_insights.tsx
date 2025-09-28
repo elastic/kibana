@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiSpacer,
-  EuiText,
-  EuiBetaBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import {
-  TECHNICAL_PREVIEW_TOOLTIP,
-  TECHNICAL_PREVIEW,
-} from '../../../../../../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
@@ -167,50 +156,34 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
 
   return (
     <>
-      <EuiAccordion
-        data-test-subj={'endpointDetailsInsightsWrapper'}
-        id={'workflow-insights-wrapper'}
-        buttonContent={
-          <EuiFlexGroup gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiText size={'m'}>
-                <h4>{WORKFLOW_INSIGHTS.title}</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                alignment={'middle'}
-                label={TECHNICAL_PREVIEW}
-                tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                size="s"
-                iconType={'beaker'}
-                data-test-subj={'workflow-insights-tech-preview-badge'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        initialIsOpen
-        extraAction={lastResultCaption}
-        paddingSize={'none'}
+      <EuiFlexGroup
+        data-test-subj="endpointDetailsInsightsWrapper"
+        gutterSize={'s'}
+        justifyContent="spaceBetween"
+        alignItems="center"
       >
-        <EuiSpacer size={'m'} />
-        <WorkflowInsightsScanSection
-          isScanButtonDisabled={isScanButtonDisabled}
-          onScanButtonClick={onScanButtonClick}
-        />
-        <EuiSpacer size={'m'} />
-        <WorkflowInsightsResults
-          results={activeInsights}
-          scanCompleted={
-            !isScanButtonDisabled &&
-            !insightGenerationFailures &&
-            scanCompleted &&
-            userTriggeredScan
-          }
-          endpointId={endpointId}
-        />
-      </EuiAccordion>
-      <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <EuiText size={'m'}>
+            <h4>{WORKFLOW_INSIGHTS.title}</h4>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size={'s'}>{lastResultCaption}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+      <WorkflowInsightsScanSection
+        isScanButtonDisabled={isScanButtonDisabled}
+        onScanButtonClick={onScanButtonClick}
+      />
+      <EuiSpacer size={'m'} />
+      <WorkflowInsightsResults
+        results={activeInsights}
+        scanCompleted={
+          !isScanButtonDisabled && !insightGenerationFailures && scanCompleted && userTriggeredScan
+        }
+        endpointId={endpointId}
+      />
     </>
   );
 });
