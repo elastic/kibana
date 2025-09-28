@@ -564,11 +564,19 @@ export default ({ getService }: FtrProviderContext) => {
 
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
+        const syncMarkersIndices = sources.body.map((s: any) => s.integrations?.syncMarkersIndex);
+        // confirm default sources have been created
         expect(names).toEqual(
           expect.arrayContaining([
             '.entity_analytics.monitoring.sources.okta-default',
             // '.entity_analytics.monitoring.sources.ad-default',
             '.entity_analytics.monitoring.users-default',
+          ])
+        );
+        expect(syncMarkersIndices).toEqual(
+          expect.arrayContaining([
+            'logs-entityanalytics_okta.entity-default',
+            //  '.entity_analytics.monitoring.sources.ad-default',
           ])
         );
       });

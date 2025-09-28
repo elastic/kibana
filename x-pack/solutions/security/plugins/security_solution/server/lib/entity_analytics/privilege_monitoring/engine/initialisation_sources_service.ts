@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import {
+  defaultMonitoringUsersIndex,
+  oktaLastSyncMarkersIndex,
+} from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from './data_client';
@@ -29,12 +32,22 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     name,
   });
 
+  const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
+    // When using AD, will use the users index:
+    /* if (integration === 'ad') {
+      return getStreamPatternFor(integration, namespace);
+    }*/
+    // okta has a dedicated index for last full sync markers
+    return oktaLastSyncMarkersIndex(namespace);
+  };
+
   const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
     type: 'entity_analytics_integration' as const,
     managed: true,
     indexPattern: getStreamPatternFor(integration, namespace),
     name: integrationsSourceIndex(namespace, integration),
     matchers: getMatchersFor(integration),
+    integrations: { syncMarkersIndex: getLastFullSyncMarkersIndex(namespace, integration) },
   });
 
   function buildRequiredSources(namespace: string, indexPattern: string) {
