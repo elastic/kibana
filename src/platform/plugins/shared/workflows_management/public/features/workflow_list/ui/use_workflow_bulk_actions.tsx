@@ -100,24 +100,24 @@ export const useWorkflowBulkActions = ({
     onAction();
     const enabledWorkflows = selectedWorkflows.filter((workflow) => workflow.enabled);
 
-    let completedUpdates = 0;
-    const totalUpdates = enabledWorkflows.length;
-
-    enabledWorkflows.forEach((workflow) => {
-      updateWorkflow.mutate(
-        {
-          id: workflow.id,
-          workflow: { enabled: false },
-        },
-        {
-          onSettled: () => {
-            completedUpdates++;
-            if (completedUpdates === totalUpdates) {
-              onActionSuccess();
-            }
+    const updatePromises = enabledWorkflows.map((workflow) => {
+      return new Promise((resolve) => {
+        updateWorkflow.mutate(
+          {
+            id: workflow.id,
+            workflow: { enabled: false },
           },
-        }
-      );
+          {
+            onSettled: () => {
+              resolve(undefined);
+            },
+          }
+        );
+      });
+    });
+
+    Promise.allSettled(updatePromises).then(() => {
+      onActionSuccess();
     });
   }, [selectedWorkflows, updateWorkflow, onAction, onActionSuccess]);
 
