@@ -7,7 +7,6 @@
 
 import type {
   ConversationRound,
-  ConversationWithoutRounds,
   ReasoningStep,
   ToolCallProgress,
   ToolCallStep,
@@ -30,30 +29,6 @@ import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
 
 const pendingRoundId = '__pending__';
-
-/**
- * Determines the next conversation ID to navigate to after deleting a conversation.
- * @param conversationList - The list of all conversations
- * @param deletedConversationId - The ID of the conversation being deleted
- * @returns The ID of the next conversation to navigate to
- */
-const getNextConversationId = (
-  conversationList: ConversationWithoutRounds[],
-  deletedConversationId: string
-): string => {
-  const currentIndex = conversationList.findIndex((conv) => conv.id === deletedConversationId);
-
-  if (currentIndex !== -1 && currentIndex < conversationList.length - 1) {
-    // If not the last conversation, go to the next one
-    return conversationList[currentIndex + 1].id;
-  } else if (currentIndex !== -1 && currentIndex > 0) {
-    // If it's the last conversation but not the first, go to the previous one
-    return conversationList[currentIndex - 1].id;
-  } else {
-    // If it's the only conversation or first conversation, go to new chat
-    return newConversationId;
-  }
-};
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
@@ -215,19 +190,18 @@ export const useConversationActions = () => {
       navigateToConversation({ nextConversationId: id });
     },
     deleteConversation: async (id: string) => {
-      const conversationList =
-        queryClient.getQueryData<ConversationWithoutRounds[]>(queryKeys.conversations.all) || [];
-
       await conversationsService.delete({ conversationId: id });
-      // Find next conversation to redirect to
-      const nextConversationId = getNextConversationId(conversationList, id);
 
-      // Navigate to the determined conversation
-      const path =
-        nextConversationId === newConversationId
-          ? appPaths.chat.new
-          : appPaths.chat.conversation({ conversationId: nextConversationId });
-      navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
+      // Check if we're deleting the current conversation
+      const isCurrentConversation = conversationId === id;
+
+      if (isCurrentConversation) {
+        // If deleting current conversation, navigate to new conversation
+        const path = appPaths.chat.new;
+        navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
+      }
+      // If deleting other conversations, stay at current conversation (no navigation needed)
+
       queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },

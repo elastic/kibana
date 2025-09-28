@@ -84,11 +84,61 @@ describe('useConversationActions', () => {
   });
 
   describe('deleteConversation', () => {
-    it('should navigate to next conversation when deleting a conversation that is not the last one', async () => {
+    it('should navigate to new conversation when deleting the current conversation', async () => {
       const conversationList: ConversationWithoutRounds[] = [
         {
-          id: 'conv-1',
-          title: 'First',
+          id: 'current-conversation-id',
+          title: 'Current',
+          created_at: '2023-01-01',
+          updated_at: '2023-01-01',
+          user: { id: 'user1', username: 'user1' },
+          agent_id: 'agent1',
+        },
+        {
+          id: 'conv-2',
+          title: 'Second',
+          created_at: '2023-01-02',
+          updated_at: '2023-01-02',
+          user: { id: 'user1', username: 'user1' },
+          agent_id: 'agent1',
+        },
+      ];
+
+      // Set up query cache with conversation list
+      queryClient.setQueryData(['conversations', 'all'], conversationList);
+
+      const { result } = renderHook(() => useConversationActions(), {
+        wrapper: createWrapper(),
+      });
+
+      await act(async () => {
+        await result.current.deleteConversation('current-conversation-id');
+      });
+
+      // Should call delete service
+      expect(mockDeleteConversation).toHaveBeenCalledWith({
+        conversationId: 'current-conversation-id',
+      });
+
+      // Should navigate to new conversation
+      expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(appPaths.chat.new, undefined, {
+        shouldStickToBottom: true,
+      });
+
+      // Should remove the deleted conversation from cache
+      expect(
+        queryClient.getQueryData(['conversations', 'byId', 'current-conversation-id'])
+      ).toBeUndefined();
+
+      // Should invalidate conversation list
+      expect(queryClient.getQueryState(['conversations', 'all'])?.isInvalidated).toBe(true);
+    });
+
+    it('should not navigate when deleting other conversations (not current)', async () => {
+      const conversationList: ConversationWithoutRounds[] = [
+        {
+          id: 'current-conversation-id',
+          title: 'Current',
           created_at: '2023-01-01',
           updated_at: '2023-01-01',
           user: { id: 'user1', username: 'user1' },
@@ -120,86 +170,26 @@ describe('useConversationActions', () => {
       });
 
       await act(async () => {
-        await result.current.deleteConversation('conv-1');
+        await result.current.deleteConversation('conv-2');
       });
 
       // Should call delete service
-      expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+      expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'conv-2' });
 
-      // Should navigate to next conversation (conv-2)
-      expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(
-        appPaths.chat.conversation({ conversationId: 'conv-2' }),
-        undefined,
-        { shouldStickToBottom: true }
-      );
+      // Should NOT navigate (stay at current conversation)
+      expect(mockNavigateToOnechatUrl).not.toHaveBeenCalled();
 
       // Should remove the deleted conversation from cache
-      expect(queryClient.getQueryData(['conversations', 'byId', 'conv-1'])).toBeUndefined();
+      expect(queryClient.getQueryData(['conversations', 'byId', 'conv-2'])).toBeUndefined();
 
       // Should invalidate conversation list
       expect(queryClient.getQueryState(['conversations', 'all'])?.isInvalidated).toBe(true);
     });
 
-    it('should navigate to previous conversation when deleting the last conversation', async () => {
+    it('should navigate to new conversation when deleting current conversation (only conversation)', async () => {
       const conversationList: ConversationWithoutRounds[] = [
         {
-          id: 'conv-1',
-          title: 'First',
-          created_at: '2023-01-01',
-          updated_at: '2023-01-01',
-          user: { id: 'user1', username: 'user1' },
-          agent_id: 'agent1',
-        },
-        {
-          id: 'conv-2',
-          title: 'Second',
-          created_at: '2023-01-02',
-          updated_at: '2023-01-02',
-          user: { id: 'user1', username: 'user1' },
-          agent_id: 'agent1',
-        },
-        {
-          id: 'conv-3',
-          title: 'Third',
-          created_at: '2023-01-03',
-          updated_at: '2023-01-03',
-          user: { id: 'user1', username: 'user1' },
-          agent_id: 'agent1',
-        },
-      ];
-
-      // Set up query cache with conversation list
-      queryClient.setQueryData(['conversations', 'all'], conversationList);
-
-      const { result } = renderHook(() => useConversationActions(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.deleteConversation('conv-3');
-      });
-
-      // Should call delete service
-      expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'conv-3' });
-
-      // Should navigate to previous conversation (conv-2)
-      expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(
-        appPaths.chat.conversation({ conversationId: 'conv-2' }),
-        undefined,
-        { shouldStickToBottom: true }
-      );
-
-      // Should remove the deleted conversation from cache
-      expect(queryClient.getQueryData(['conversations', 'byId', 'conv-3'])).toBeUndefined();
-
-      // Should invalidate conversation list
-      expect(queryClient.getQueryState(['conversations', 'all'])?.isInvalidated).toBe(true);
-    });
-
-    it('should navigate to new chat when deleting the only conversation', async () => {
-      const conversationList: ConversationWithoutRounds[] = [
-        {
-          id: 'conv-1',
+          id: 'current-conversation-id',
           title: 'Only',
           created_at: '2023-01-01',
           updated_at: '2023-01-01',
@@ -216,25 +206,29 @@ describe('useConversationActions', () => {
       });
 
       await act(async () => {
-        await result.current.deleteConversation('conv-1');
+        await result.current.deleteConversation('current-conversation-id');
       });
 
       // Should call delete service
-      expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+      expect(mockDeleteConversation).toHaveBeenCalledWith({
+        conversationId: 'current-conversation-id',
+      });
 
-      // Should navigate to new chat
+      // Should navigate to new conversation
       expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(appPaths.chat.new, undefined, {
         shouldStickToBottom: true,
       });
 
       // Should remove the deleted conversation from cache
-      expect(queryClient.getQueryData(['conversations', 'byId', 'conv-1'])).toBeUndefined();
+      expect(
+        queryClient.getQueryData(['conversations', 'byId', 'current-conversation-id'])
+      ).toBeUndefined();
 
       // Should invalidate conversation list
       expect(queryClient.getQueryState(['conversations', 'all'])?.isInvalidated).toBe(true);
     });
 
-    it('should handle empty conversation list gracefully', async () => {
+    it('should not navigate when deleting non-current conversation with empty list', async () => {
       // Set up query cache with empty conversation list
       queryClient.setQueryData(['conversations', 'all'], []);
 
@@ -249,13 +243,11 @@ describe('useConversationActions', () => {
       // Should call delete service
       expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'non-existent-conv' });
 
-      // Should navigate to new chat when conversation not found in list
-      expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(appPaths.chat.new, undefined, {
-        shouldStickToBottom: true,
-      });
+      // Should NOT navigate (not current conversation)
+      expect(mockNavigateToOnechatUrl).not.toHaveBeenCalled();
     });
 
-    it('should handle missing conversation list in cache', async () => {
+    it('should not navigate when deleting non-current conversation with missing cache', async () => {
       // Don't set any conversation list in cache
       const { result } = renderHook(() => useConversationActions(), {
         wrapper: createWrapper(),
@@ -268,10 +260,8 @@ describe('useConversationActions', () => {
       // Should call delete service
       expect(mockDeleteConversation).toHaveBeenCalledWith({ conversationId: 'some-conv' });
 
-      // Should navigate to new chat when no conversation list available
-      expect(mockNavigateToOnechatUrl).toHaveBeenCalledWith(appPaths.chat.new, undefined, {
-        shouldStickToBottom: true,
-      });
+      // Should NOT navigate (not current conversation)
+      expect(mockNavigateToOnechatUrl).not.toHaveBeenCalled();
     });
   });
 });
