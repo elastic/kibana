@@ -73,24 +73,26 @@ export const useWorkflowBulkActions = ({
     onAction();
     const disabledWorkflows = selectedWorkflows.filter((workflow) => !workflow.enabled);
 
-    let completedUpdates = 0;
-    const totalUpdates = disabledWorkflows.length;
-
-    disabledWorkflows.forEach((workflow) => {
-      updateWorkflow.mutate(
-        {
-          id: workflow.id,
-          workflow: { enabled: true },
-        },
-        {
-          onSettled: () => {
-            completedUpdates++;
-            if (completedUpdates === totalUpdates) {
-              onActionSuccess();
-            }
-          },
-        }
-      );
+    // Use Promise.allSettled to avoid race conditions
+    Promise.allSettled(
+      disabledWorkflows.map(
+        (workflow) =>
+          new Promise((resolve) => {
+            updateWorkflow.mutate(
+              {
+                id: workflow.id,
+                workflow: { enabled: true },
+              },
+              {
+                onSettled: () => {
+                  resolve(undefined);
+                },
+              }
+            );
+          })
+      )
+    ).then(() => {
+      onActionSuccess();
     });
   }, [selectedWorkflows, updateWorkflow, onAction, onActionSuccess]);
 
