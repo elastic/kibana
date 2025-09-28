@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-  
+
   describe('Agentless API Serverless', function () {
     this.tags(['skipMKI', 'cloud_security_posture_agentless']);
     let mockApiServer: http.Server;
