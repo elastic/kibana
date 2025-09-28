@@ -154,7 +154,7 @@ export const shareModalStrings = {
     defaultMessage: 'Failed to update permissions.',
   }),
   draftModeCalloutTitle: i18n.translate('dashboard.share.shareModal.draftModeCallout.title', {
-    defaultMessage: '"Dashboard has unsaved changes',
+    defaultMessage: 'Dashboard has unsaved changes',
   }),
   draftModeSaveButtonLabel: i18n.translate(
     'dashboard.share.shareModal.draftModeCallout.saveButton',
