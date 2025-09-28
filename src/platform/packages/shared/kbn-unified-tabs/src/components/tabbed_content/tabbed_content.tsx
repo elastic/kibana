@@ -241,7 +241,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
         onEBTEvent({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabDuplicated,
-          [TabsEventDataKeys.TAB_ID]: newItem.id,
+          [TabsEventDataKeys.TAB_ID]: item.id,
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
@@ -260,7 +260,6 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedOthers,
           [TabsEventDataKeys.TAB_ID]: item.id,
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
           [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
         });
 
