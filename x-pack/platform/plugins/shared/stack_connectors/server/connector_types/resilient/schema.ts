@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
 
 export const ExternalIncidentServiceConfiguration = {
@@ -124,9 +124,13 @@ export const ExternalServiceFieldsSchema = schema.object(
     read_only: schema.boolean(),
     required: schema.nullable(schema.string()),
     text: schema.string(),
+    internal: schema.boolean(),
+    prefix: schema.nullable(schema.string()),
   },
   { unknowns: 'allow' }
 );
+
+export type ResilientFieldMeta = TypeOf<typeof ExternalServiceFieldsSchema>;
 
 export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
 

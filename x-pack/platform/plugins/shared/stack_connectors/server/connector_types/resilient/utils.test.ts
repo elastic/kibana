@@ -6,6 +6,7 @@
  */
 
 import { formatUpdateRequest, getValueTextContent } from './utils';
+import { resilientFields } from './mocks';
 
 describe('utils', () => {
   describe('getValueTextContent', () => {
@@ -54,22 +55,28 @@ describe('utils', () => {
       const oldIncident = {
         name: 'title',
         description: { format: 'html', content: 'desc' },
-        severity_code: '5',
+        severity_code: 5,
         incident_type_ids: [12, 16],
       };
       const newIncident = {
         name: 'title_updated',
         description: 'desc_updated',
-        severityCode: '6',
+        severityCode: 6,
         incidentTypes: [12, 16, 1001],
         additionalFields: { customField1: 'customValue1' },
       };
-      expect(formatUpdateRequest({ oldIncident, newIncident })).toEqual({
+      expect(
+        formatUpdateRequest({
+          oldIncident,
+          newIncident,
+          fields: resilientFields,
+        })
+      ).toEqual({
         changes: [
           {
             field: { name: 'customField1' },
-            old_value: null,
-            new_value: 'customValue1',
+            old_value: {},
+            new_value: { text: 'customValue1' },
           },
           {
             field: { name: 'name' },
@@ -113,23 +120,29 @@ describe('utils', () => {
       const oldIncident = {
         name: 'title',
         description: { format: 'html', content: 'desc' },
-        severity_code: '5',
+        severity_code: 5,
         incident_type_ids: [12, 16],
         properties: { customField1: 'oldCustomValue' },
       };
       const newIncident = {
         name: 'title_updated',
         description: 'desc_updated',
-        severityCode: '6',
+        severityCode: 6,
         incidentTypes: [12, 16, 1001],
         additionalFields: { customField1: 'customValue1' },
       };
-      expect(formatUpdateRequest({ oldIncident, newIncident })).toEqual({
+      expect(
+        formatUpdateRequest({
+          oldIncident,
+          newIncident,
+          fields: resilientFields,
+        })
+      ).toEqual({
         changes: [
           {
             field: { name: 'customField1' },
-            old_value: 'oldCustomValue',
-            new_value: 'customValue1',
+            old_value: { text: 'oldCustomValue' },
+            new_value: { text: 'customValue1' },
           },
           {
             field: { name: 'name' },

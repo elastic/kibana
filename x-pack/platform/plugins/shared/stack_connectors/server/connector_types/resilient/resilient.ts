@@ -34,8 +34,9 @@ import {
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
   GetIncidentResponseSchema,
+  type ResilientFieldMeta,
 } from './schema';
-import { formatUpdateRequest } from './utils';
+import { formatUpdateRequest, transformFieldMetadataToRecord } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -157,7 +158,23 @@ export class ResilientConnector extends CaseConnector<
       }
 
       if (incident.additionalFields) {
-        data = { ...data, properties: { ...incident.additionalFields } };
+        const fieldsMetaData = transformFieldMetadataToRecord(
+          await this.getFields({}, connectorUsageCollector)
+        );
+        const additionalFields = incident.additionalFields;
+
+        Object.entries(additionalFields).forEach(([key, value]) => {
+          // Custom fields need to be prefixed with 'properties.'
+          const fieldMeta = fieldsMetaData[key];
+          if (fieldMeta.prefix === 'properties') {
+            if (!data.properties) {
+              data.properties = {};
+            }
+            data.properties[key] = value;
+          } else {
+            data[key] = value;
+          }
+        });
       }
 
       const res = await this.request(
@@ -198,10 +215,15 @@ export class ResilientConnector extends CaseConnector<
   ): Promise<ExternalServiceIncidentResponse> {
     try {
       const latestIncident = await this.getIncident({ id: incidentId }, connectorUsageCollector);
+      const fields = await this.getFields({}, connectorUsageCollector);
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
-      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident });
+      const data = formatUpdateRequest({
+        oldIncident: latestIncident,
+        newIncident,
+        fields,
+      });
 
       const res = await this.request(
         {
@@ -209,13 +231,16 @@ export class ResilientConnector extends CaseConnector<
           url: `${this.urls.incident}/${incidentId}`,
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
+          responseSchema: schema.object(
+            { success: schema.boolean(), message: schema.nullable(schema.string()) },
+            { unknowns: 'allow' }
+          ),
         },
         connectorUsageCollector
       );
 
       if (!res.data.success) {
-        throw new Error('Error while updating incident');
+        throw new Error(`Error while updating incident: ${res.data.message}`);
       }
 
       const updatedIncident = await this.getIncident({ id: incidentId }, connectorUsageCollector);
@@ -342,7 +367,10 @@ export class ResilientConnector extends CaseConnector<
     }
   }
 
-  public async getFields(params: unknown, connectorUsageCollector: ConnectorUsageCollector) {
+  public async getFields(
+    params: unknown,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ResilientFieldMeta[]> {
     try {
       const res = await this.request(
         {
@@ -361,6 +389,8 @@ export class ResilientConnector extends CaseConnector<
           read_only: field.read_only,
           required: field.required,
           text: field.text,
+          internal: field.internal,
+          prefix: field.prefix,
         };
       });
 

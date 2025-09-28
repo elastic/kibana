@@ -5,105 +5,162 @@
  * 2.0.
  */
 
-import { isArray, isObject } from 'lodash';
-import type { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
+import { isArray, isNumber, isString, isBoolean, isObject } from 'lodash';
+import type {
+  ResilientUpdateFieldValue,
+  ResilientTextAreaField,
+  ResilientFieldPrimitives,
+  UpdateIncidentRequest,
+} from './types';
+import type { ResilientFieldMeta } from './schema';
 
-export const getValueTextContent = (
-  field: string,
-  value: string | number | number[] | undefined
-): GetValueTextContentResponse => {
-  if (value == null || value === undefined) {
-    return { text: '' };
+// todo:
+// 1. add tests for non-text fields
+//    1.1 - add support for `values` check in select/multiselect
+
+export const getValueFromOldField = (
+  fieldMeta: ResilientFieldMeta,
+  value: unknown
+): ResilientFieldPrimitives => {
+  switch (fieldMeta.input_type) {
+    case 'textarea':
+      return value === null || value === undefined
+        ? null
+        : (value as ResilientTextAreaField['textarea']);
+    case 'multiselect':
+    case 'select':
+    case 'datetimepicker':
+    case 'datepicker':
+    case 'boolean':
+    case 'number':
+    case 'text':
+      return value as ResilientFieldPrimitives;
+    default:
+      return null;
   }
-
-  if (field === 'description') {
-    return {
-      textarea: {
-        format: 'html',
-        content: value.toString(),
-      },
-    };
-  }
-
-  if (field === 'incidentTypes') {
-    if (isArray(value)) {
-      return { ids: value.map((item) => Number(item)) };
-    }
-    return {
-      ids: [Number(value)],
-    };
-  }
-
-  if (field === 'severityCode') {
-    return {
-      id: Number(value),
-    };
-  }
-
-  return {
-    text: value.toString(),
-  };
 };
 
-function additionalFieldsAreSpecified(
-  additionalFields: unknown
-): additionalFields is Record<string, unknown> {
-  return isObject(additionalFields) && Object.keys(additionalFields).length > 0;
+export function getValueFieldShape(
+  fieldMeta: ResilientFieldMeta,
+  value: ResilientFieldPrimitives,
+  oldValue?: ResilientFieldPrimitives
+): ResilientUpdateFieldValue {
+  switch (fieldMeta.input_type) {
+    case 'textarea':
+      if (value === null || value === undefined) {
+        return { textarea: null };
+      } else if (typeof value === 'object' && 'format' in value && 'content' in value) {
+        return {
+          textarea: {
+            ...value,
+          },
+        };
+      } else {
+        return {
+          textarea: {
+            format: isObject(oldValue) && 'format' in oldValue ? oldValue?.format : 'text',
+            content: value,
+          },
+        };
+      }
+
+    case 'multiselect':
+      if (isArray(value)) {
+        return { ids: value.map((item) => item) };
+      } else if (isNumber(value)) {
+        return { ids: [value] };
+      } else {
+        return {};
+      }
+    case 'select':
+      return isNumber(value) || isString(value) ? { id: value } : {};
+    case 'datetimepicker':
+    case 'datepicker':
+      return isNumber(value) ? { date: value } : {};
+    case 'boolean':
+      return isBoolean(value) ? { boolean: value } : {};
+    case 'number':
+      return isNumber(value) ? { object: value } : {};
+    case 'text':
+      return isString(value) ? { text: value } : {};
+    default:
+      return {};
+  }
 }
 
 export const formatUpdateRequest = ({
   oldIncident,
   newIncident,
+  fields,
 }: {
   oldIncident: Record<string, unknown>;
   newIncident: Record<string, unknown>;
+  fields: ResilientFieldMeta[];
 }): UpdateIncidentRequest => {
-  const { additionalFields, ...updates } = newIncident;
-
-  // `additionalFields` need to be treated differently as they are dynamic and not part of the standard fields
-  // In the update request, we do not need to add them under `properties`. They're added at the top level.
-  // We only need to make sure we merge them correctly with the old incident properties.
-  let mergedAdditionalFields: UpdateIncidentRequest['changes'] = [];
-  if (additionalFieldsAreSpecified(additionalFields)) {
-    mergedAdditionalFields = Object.keys(additionalFields)
-      .map((key) => {
-        if (additionalFields[key]) {
-          return {
-            field: { name: key },
-            old_value:
-              oldIncident.properties && isObject(oldIncident.properties)
-                ? (oldIncident.properties as Record<string, unknown>)[key]
-                : null,
-            new_value: additionalFields[key] ?? null,
-          };
-        }
-      })
-      .filter(Boolean) as UpdateIncidentRequest['changes'];
-  }
+  const { additionalFields, ...root } = newIncident;
+  // We can merge the root and the additional fields since they are treated the same
+  // in update requests to Resilient
+  const updates: Record<string, unknown> = { ...(additionalFields || {}), ...root };
+  const fieldsRecord = transformFieldMetadataToRecord(fields);
   return {
-    changes: mergedAdditionalFields.concat(
-      Object.keys(updates).map((key) => {
-        let name = key;
+    changes: Object.keys(updates).map((key) => {
+      let name = key;
 
-        if (key === 'incidentTypes') {
-          name = 'incident_type_ids';
-        }
+      if (key === 'incidentTypes') {
+        name = 'incident_type_ids';
+      }
 
-        if (key === 'severityCode') {
-          name = 'severity_code';
-        }
+      if (key === 'severityCode') {
+        name = 'severity_code';
+      }
 
-        return {
-          field: { name },
-          old_value: getValueTextContent(
-            key,
-            name === 'description'
-              ? (oldIncident as { description: { content: string } }).description.content
-              : (oldIncident[name] as string | number | number[])
-          ),
-          new_value: getValueTextContent(key, updates[key] as string | undefined),
-        };
-      })
-    ),
+      const fieldMeta = fieldsRecord[name];
+      if (!fieldMeta) {
+        // if we don't have metadata about the field, we can't process it
+        throw new Error(`No metadata found for field ${name}`);
+      }
+
+      let oldValue = oldIncident[name] ? oldIncident[name] : oldIncident[key];
+      // Non-internal fields are stored under `properties` in the old incident
+      if (!fieldMeta.internal) {
+        oldValue = oldIncident.properties
+          ? (oldIncident.properties as Record<string, unknown>)[key]
+          : null;
+      }
+
+      const newValue = (updates[name] ? updates[name] : updates[key]) as ResilientFieldPrimitives;
+
+      const oldValueShape = getValueFieldShape(
+        fieldMeta,
+        getValueFromOldField(fieldMeta, oldValue)
+      );
+      const newValueShape = getValueFieldShape(
+        fieldMeta,
+        newValue,
+        oldValue as ResilientFieldPrimitives
+      );
+      return {
+        field: { name },
+        old_value: oldValueShape,
+        new_value: newValueShape,
+      };
+    }),
   };
 };
+
+export function transformFieldMetadataToRecord(
+  fields: ResilientFieldMeta[]
+): Record<string, ResilientFieldMeta> {
+  return fields.reduce<Record<string, ResilientFieldMeta>>((acc, field) => {
+    acc[field.name] = {
+      name: field.name,
+      input_type: field.input_type,
+      read_only: field.read_only,
+      required: field.required,
+      text: field.text,
+      internal: field.internal,
+      prefix: field.prefix,
+    };
+    return acc;
+  }, {});
+}
