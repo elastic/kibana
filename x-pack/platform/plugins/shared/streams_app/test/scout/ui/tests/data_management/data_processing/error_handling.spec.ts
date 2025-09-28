@@ -9,8 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/236525
-test.describe.skip(
+test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -48,7 +47,6 @@ test.describe.skip(
       });
 
       await pageObjects.streams.saveStepsListChanges();
-      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
@@ -75,7 +73,6 @@ test.describe.skip(
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveStepsListChanges();
-      await pageObjects.streams.confirmChangesInReviewModal();
       await pageObjects.streams.closeToasts();
 
       // Edit the processor
