@@ -36,6 +36,7 @@ export const PrivMonUtils = (
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const retry = getService('retry');
