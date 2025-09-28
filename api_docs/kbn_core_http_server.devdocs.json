@@ -6981,6 +6981,10 @@
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
