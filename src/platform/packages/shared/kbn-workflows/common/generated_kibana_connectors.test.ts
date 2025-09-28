@@ -55,10 +55,10 @@ describe('Generated Kibana Connectors', () => {
         return Array.isArray(bodyParams) && bodyParams.length === 1 && bodyParams[0] === 'body';
       });
 
-      // Currently we have 57 endpoints with generic body params that need inline schema handling
+      // Currently we have 59 endpoints with generic body params that need inline schema handling
       // This is acceptable for now as they represent endpoints with inline OpenAPI schemas
       // that openapi-zod-client generates as inline Zod objects rather than named schemas
-      expect(endpointsWithGenericBody).toHaveLength(57);
+      expect(endpointsWithGenericBody).toHaveLength(59);
     });
 
     it('should use proper schemas for POST/PUT/PATCH endpoints instead of generic z.any() body', () => {

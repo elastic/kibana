@@ -8,7 +8,8 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { ZodError, z } from '@kbn/zod';
+import type { ZodError } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -31,6 +32,308 @@ interface FormatValidationErrorResult {
 }
 
 /**
+ * Cache for analyzed union schemas to avoid re-analysis
+ */
+const UNION_ANALYSIS_CACHE = new Map<string, any>();
+
+/**
+ * Cache for schema name mappings extracted from generated schemas
+ */
+let SCHEMA_NAME_CACHE: Map<string, string> | null = null;
+
+/**
+ * Extracts schema names from the generated schemas file to provide better error messages
+ */
+async function extractSchemaNames(): Promise<Map<string, string>> {
+  if (SCHEMA_NAME_CACHE) {
+    return SCHEMA_NAME_CACHE;
+  }
+  
+  const schemaNames = new Map<string, string>();
+  
+  try {
+    // Try to dynamically import the generated schemas
+    const schemas = await import('@kbn/workflows/common/generated_kibana_schemas');
+    
+    // Extract schema names and their patterns
+    for (const [exportName, schema] of Object.entries(schemas)) {
+      if (exportName.startsWith('Cases_connector_properties_')) {
+        const connectorType = exportName.replace('Cases_connector_properties_', '');
+        schemaNames.set(connectorType, exportName);
+      }
+    }
+  } catch (error) {
+    // If we can't import the schemas, we'll work with what we have
+    console.warn('Could not load schema names for enhanced error messages:', error);
+  }
+  
+  SCHEMA_NAME_CACHE = schemaNames;
+  return schemaNames;
+}
+
+/**
+ * Dynamically analyzes a Zod union schema to extract user-friendly option descriptions
+ */
+function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): Array<{ name: string; description: string }> {
+  const options: Array<{ name: string; description: string }> = [];
+  
+  for (const option of unionSchema._def.options) {
+    let name = 'unknown';
+    let description = 'unknown option';
+    
+    if (option instanceof z.ZodObject) {
+      const shape = option._def.shape();
+      
+      // Look for discriminator fields (like 'type')
+      const discriminator = findDiscriminatorInShape(shape);
+      if (discriminator) {
+        name = `${discriminator.key}_${discriminator.value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        
+        // Get other required properties
+        const otherProps = Object.keys(shape)
+          .filter(key => key !== discriminator.key && !isOptionalSchema(shape[key]))
+          .sort();
+        
+        const propsText = otherProps.length > 0 ? `, other props: ${otherProps.join(', ')}` : '';
+        description = `${discriminator.key}: "${discriminator.value}"${propsText}`;
+      } else {
+        // No discriminator, list all required properties
+        const requiredProps = Object.keys(shape)
+          .filter(key => !isOptionalSchema(shape[key]))
+          .sort();
+        
+        if (requiredProps.length > 0) {
+          name = `object_with_${requiredProps.join('_')}`;
+          description = `props: ${requiredProps.join(', ')}`;
+        }
+      }
+    } else if (option instanceof z.ZodLiteral) {
+      name = `literal_${String(option._def.value).replace(/[^a-zA-Z0-9]/g, '_')}`;
+      description = `literal value: ${JSON.stringify(option._def.value)}`;
+    } else if (option instanceof z.ZodString) {
+      name = 'string';
+      description = 'string value';
+    } else if (option instanceof z.ZodNumber) {
+      name = 'number';
+      description = 'number value';
+    } else if (option instanceof z.ZodBoolean) {
+      name = 'boolean';
+      description = 'boolean value';
+    } else {
+      // Try to get type information from the schema
+      const typeName = getSchemaTypeName(option);
+      name = typeName || 'unknown';
+      description = `${typeName || 'unknown'} type`;
+    }
+    
+    options.push({ name, description });
+  }
+  
+  return options;
+}
+
+/**
+ * Finds discriminator field and value in a Zod object shape
+ */
+function findDiscriminatorInShape(shape: Record<string, z.ZodType>): { key: string; value: any } | null {
+  for (const [key, schema] of Object.entries(shape)) {
+    if (schema instanceof z.ZodLiteral) {
+      return { key, value: schema._def.value };
+    }
+  }
+  return null;
+}
+
+/**
+ * Checks if a Zod schema is optional
+ */
+function isOptionalSchema(schema: z.ZodType): boolean {
+  return schema instanceof z.ZodOptional || 
+         schema instanceof z.ZodNullable ||
+         (schema instanceof z.ZodDefault);
+}
+
+/**
+ * Gets a human-readable type name from a Zod schema
+ */
+function getSchemaTypeName(schema: z.ZodType): string | null {
+  if (schema instanceof z.ZodString) return 'string';
+  if (schema instanceof z.ZodNumber) return 'number';
+  if (schema instanceof z.ZodBoolean) return 'boolean';
+  if (schema instanceof z.ZodArray) return 'array';
+  if (schema instanceof z.ZodObject) return 'object';
+  if (schema instanceof z.ZodUnion) return 'union';
+  if (schema instanceof z.ZodLiteral) return 'literal';
+  if (schema instanceof z.ZodEnum) return 'enum';
+  
+  // Try to extract from constructor name
+  const constructorName = schema.constructor.name;
+  if (constructorName.startsWith('Zod')) {
+    return constructorName.slice(3).toLowerCase();
+  }
+  
+  return null;
+}
+
+/**
+ * Dynamically generates a user-friendly error message for union validation failures
+ * This analyzes the actual union schema from the error context
+ */
+function getDynamicUnionErrorMessage(issue: any): string | null {
+  if (issue.code !== 'invalid_union' || !issue.unionErrors || !Array.isArray(issue.unionErrors)) {
+    return null;
+  }
+  
+  // Try to reconstruct the union schema from the error information
+  const fieldName = issue.path && issue.path.length > 0 ? issue.path[issue.path.length - 1] : 'field';
+  
+  // Analyze the union errors to extract option information
+  const options: Array<{ name: string; description: string }> = [];
+  
+  for (const unionError of issue.unionErrors) {
+    if (unionError.issues && Array.isArray(unionError.issues)) {
+      // Analyze each union option's validation errors to understand the expected structure
+      const optionInfo = analyzeUnionErrorForOption(unionError.issues);
+      if (optionInfo) {
+        options.push(optionInfo);
+      }
+    }
+  }
+  
+  if (options.length === 0) {
+    return null;
+  }
+  
+  // Generate user-friendly message
+  const optionDescriptions = options
+    .map((option, index) => `  - ${option.description}`)
+    .join('\n');
+  
+  return `${fieldName} should be oneOf:\n${optionDescriptions}`;
+}
+
+/**
+ * Analyzes union error issues to understand what option was expected
+ */
+function analyzeUnionErrorForOption(issues: any[]): { name: string; description: string } | null {
+  const requiredFields: string[] = [];
+  let discriminatorInfo: { key: string; value: any } | null = null;
+  
+  for (const issue of issues) {
+    if (issue.code === 'invalid_literal' && issue.path && issue.path.length > 0) {
+      const fieldName = issue.path[issue.path.length - 1];
+      const expectedValue = issue.expected;
+      discriminatorInfo = { key: fieldName, value: expectedValue };
+    } else if (issue.code === 'invalid_type' && issue.path && issue.path.length > 0) {
+      const fieldName = issue.path[issue.path.length - 1];
+      if (!requiredFields.includes(fieldName)) {
+        requiredFields.push(fieldName);
+      }
+    }
+  }
+  
+  if (discriminatorInfo) {
+    const otherProps = requiredFields.filter(field => field !== discriminatorInfo!.key).sort();
+    const propsText = otherProps.length > 0 ? `, other props: ${otherProps.join(', ')}` : '';
+    
+    // Try to get a better schema name if this looks like a connector type
+    let schemaName = `${discriminatorInfo.key}_${String(discriminatorInfo.value).replace(/[^a-zA-Z0-9]/g, '_')}`;
+    if (discriminatorInfo.key === 'type' && String(discriminatorInfo.value).startsWith('.')) {
+      const connectorType = String(discriminatorInfo.value).substring(1); // Remove the leading dot
+      schemaName = `Cases_connector_properties_${connectorType.replace(/-/g, '_')}`;
+    }
+    
+    return {
+      name: schemaName,
+      description: `${schemaName}\n    ${discriminatorInfo.key}: "${discriminatorInfo.value}"${propsText}`
+    };
+  } else if (requiredFields.length > 0) {
+    return {
+      name: `object_with_${requiredFields.join('_')}`,
+      description: `props: ${requiredFields.sort().join(', ')}`
+    };
+  }
+  
+  return null;
+}
+
+/**
+ * Main function to get a user-friendly union error message
+ * This tries multiple approaches to generate the best possible message
+ */
+function getGenericUnionErrorMessage(issue: any): string | null {
+  if (issue.code !== 'invalid_union') {
+    return null;
+  }
+  
+  // Try custom handlers first
+  const customMessage = checkCustomUnionHandlers(issue);
+  if (customMessage) {
+    return customMessage;
+  }
+  
+  // Try dynamic analysis
+  const dynamicMessage = getDynamicUnionErrorMessage(issue);
+  if (dynamicMessage) {
+    return dynamicMessage;
+  }
+  
+  // Fallback: if we can't analyze dynamically, provide a generic helpful message
+  const fieldName = issue.path && issue.path.length > 0 ? issue.path[issue.path.length - 1] : 'field';
+  return `${fieldName} has an invalid value. Please check the expected format for this field.`;
+}
+
+/**
+ * Enhanced union error message generator that can be extended for specific patterns
+ * This function can be called to register custom union error handlers
+ */
+export function createUnionErrorHandler(
+  pathPattern: string | RegExp,
+  handler: (issue: any) => string | null
+): void {
+  // Store custom handlers for future use
+  // This allows plugins or other parts of the system to register custom union error handling
+  if (!globalThis.__unionErrorHandlers) {
+    globalThis.__unionErrorHandlers = new Map();
+  }
+  globalThis.__unionErrorHandlers.set(pathPattern, handler);
+}
+
+/**
+ * Checks custom union error handlers for a match
+ */
+function checkCustomUnionHandlers(issue: any): string | null {
+  if (!globalThis.__unionErrorHandlers || !issue.path) {
+    return null;
+  }
+  
+  const pathString = issue.path.join('.');
+  
+  for (const [pattern, handler] of globalThis.__unionErrorHandlers.entries()) {
+    let matches = false;
+    
+    if (typeof pattern === 'string') {
+      matches = pathString === pattern || pathString.endsWith(pattern);
+    } else if (pattern instanceof RegExp) {
+      matches = pattern.test(pathString);
+    }
+    
+    if (matches) {
+      try {
+        const result = handler(issue);
+        if (result) {
+          return result;
+        }
+      } catch (error) {
+        console.warn('Custom union error handler failed:', error);
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
@@ -44,8 +347,13 @@ export function formatValidationError(error: ZodError | MockZodError): FormatVal
   const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
+    // Try generic union error message first
+    const genericUnionMessage = getGenericUnionErrorMessage(issue);
+    if (genericUnionMessage) {
+      formattedMessage = genericUnionMessage;
+    }
     // Handle discriminated union errors for type field
-    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+    else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
       formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
     } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
@@ -64,6 +372,42 @@ export function formatValidationError(error: ZodError | MockZodError): FormatVal
     // Handle union errors with too many options
     else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    }
+    // Handle connector field validation errors with numeric enum values
+    else if (
+      issue.code === 'invalid_type' &&
+      issue.path?.includes('connector') &&
+      issue.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"')
+    ) {
+      formattedMessage = 'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
+    }
+    // Handle the specific "unknown" code error with numeric enum values (this is the tooltip error)
+    else if (
+      issue.code === 'unknown' &&
+      issue.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"')
+    ) {
+      formattedMessage = 'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
+    }
+    // Handle connector union validation errors (when passing number instead of object)
+    else if (
+      issue.code === 'invalid_union' &&
+      issue.path?.includes('connector') &&
+      (issue.received === 'number' || 
+       (issue.unionErrors && issue.unionErrors.some((err: any) => 
+         err.issues?.some((nestedIssue: any) => 
+           nestedIssue.message?.includes('Expected object, received number')
+         )
+       )))
+    ) {
+      formattedMessage = 'Invalid connector value. Expected connector object with type ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
+    }
+    // Handle other connector union validation errors
+    else if (
+      issue.code === 'invalid_union' &&
+      issue.path?.includes('connector') &&
+      (issue.message?.includes('0 | 1 | 2 | 3 | 4 | 5 | 6') || issue.message?.includes('Expected "0"'))
+    ) {
+      formattedMessage = 'Invalid connector configuration. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane".';
     } else if (
       issue.code === 'invalid_type' &&
       issue.path.length === 1 &&
@@ -246,7 +590,7 @@ export function getPathFromAncestors(
       path.push((ancestor.key as Scalar).value as string);
     } else if (isSeq(ancestor)) {
       // If ancestor is a Sequence, we need to find the index of the child item
-      let childNode = null;
+      let childNode: any = null;
 
       // Look for the next ancestor that would be contained within this sequence
       for (let i = index + 1; i < ancestors.length; i++) {

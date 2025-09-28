@@ -33,6 +33,11 @@ import {
   getTriggerNodes,
   getTriggerNodesWithType,
 } from '../../../../common/lib/yaml_utils';
+import {
+  parseWorkflowYamlToJSON,
+  formatValidationError,
+  getCurrentPath,
+} from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -435,7 +440,141 @@ export const WorkflowYAMLEditor = ({
         },
       };
 
-      // Register hover provider with Monaco
+
+      // Intercept and modify markers at the source to fix connector validation messages
+      // This prevents Monaco from ever seeing the problematic numeric enum messages
+      const originalSetModelMarkers = monaco.editor.setModelMarkers;
+      const markerInterceptor = function(model: any, owner: string, markers: any[]) {
+        // Debug logging to understand what markers we're getting
+        if (owner === 'yaml' && markers.length > 0) {
+          console.log('🔍 YAML validation markers:', markers.map(m => ({
+            message: m.message,
+            startLine: m.startLineNumber,
+            startColumn: m.startColumn,
+            severity: m.severity
+          })));
+        }
+        
+        // Only modify YAML validation markers
+        if (owner === 'yaml') {
+          const fixedMarkers = markers.map(marker => {
+            // Check if this is a connector validation error that needs formatting
+            // Look for numeric enum patterns that indicate connector type validation
+            const isConnectorError = (
+              marker.message?.includes('Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"') ||
+              marker.message?.includes('Incorrect type. Expected "0 | 1 | 2 | 3 | 4 | 5 | 6"') ||
+              marker.message?.includes('Expected \\"0 | 1 | 2 | 3 | 4 | 5 | 6\\"') ||
+              // More comprehensive regex to catch various numeric enum patterns
+              /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message) ||
+              /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message) ||
+              // Also catch patterns without quotes
+              /Expected \d+(\s*\|\s*\d+)*/.test(marker.message)
+            );
+            
+            if (isConnectorError) {
+              try {
+                // Get the YAML path at this marker position to determine context
+                const yamlDocument = yamlDocumentRef.current;
+                let yamlPath: (string | number)[] = [];
+                
+                if (yamlDocument) {
+                  const markerPosition = model.getOffsetAt({
+                    lineNumber: marker.startLineNumber,
+                    column: marker.startColumn
+                  });
+                  yamlPath = getCurrentPath(yamlDocument, markerPosition);
+                }
+                
+                // Check if this is specifically a connector field error
+                const isConnectorField = yamlPath.some(segment => 
+                  typeof segment === 'string' && segment === 'connector'
+                );
+                
+                if (isConnectorField) {
+                  // Generate the detailed connector error message
+                  const fieldName = yamlPath[yamlPath.length - 1] || 'connector';
+                  const detailedMessage = `${fieldName} should be oneOf:
+  - Cases_connector_properties_none
+    type: ".none", other props: fields, id, name
+  - Cases_connector_properties_cases_webhook
+    type: ".cases-webhook", other props: fields, id, name
+  - Cases_connector_properties_jira
+    type: ".jira", other props: fields, id, name
+  - Cases_connector_properties_resilient
+    type: ".resilient", other props: fields, id, name
+  - Cases_connector_properties_servicenow
+    type: ".servicenow", other props: fields, id, name
+  - Cases_connector_properties_servicenow_sir
+    type: ".servicenow-sir", other props: fields, id, name
+  - Cases_connector_properties_swimlane
+    type: ".swimlane", other props: fields, id, name`;
+                  
+                  return {
+                    ...marker,
+                    message: detailedMessage
+                  };
+                }
+                
+                // For other numeric enum errors, try the formatValidationError function
+                const mockZodError = {
+                  issues: [{
+                    code: 'invalid_type',
+                    path: yamlPath,
+                    message: marker.message,
+                    received: 'number'
+                  }]
+                };
+                
+                const { message: formattedMessage } = formatValidationError(mockZodError as any);
+                
+                return {
+                  ...marker,
+                  message: formattedMessage
+                };
+                
+              } catch (error) {
+                // Fallback to simple replacement for connector errors
+                const fixedMessage = marker.message
+                  .replace(/Expected "0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6"/g, 
+                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
+                  .replace(/Incorrect type\. Expected "0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6"/g,
+                    'Incorrect type. Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
+                  .replace(/Expected \\"0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6\\"/g,
+                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"')
+                  .replace(/Expected 0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6/g,
+                    'Expected ".none" | ".cases-webhook" | ".jira" | ".resilient" | ".servicenow" | ".servicenow-sir" | ".swimlane"');
+                
+                return {
+                  ...marker,
+                  message: fixedMessage
+                };
+              }
+            }
+            return marker;
+          });
+          
+          // Call the original function with fixed markers
+          return originalSetModelMarkers.call(monaco.editor, model, owner, fixedMarkers);
+        }
+        
+        // For non-YAML markers, call original function unchanged
+        return originalSetModelMarkers.call(monaco.editor, model, owner, markers);
+      };
+
+      // Override Monaco's setModelMarkers function
+      monaco.editor.setModelMarkers = markerInterceptor;
+      
+      // Store cleanup function to restore original behavior
+      disposablesRef.current.push({
+        dispose: () => {
+          monaco.editor.setModelMarkers = originalSetModelMarkers;
+        }
+      });
+
+      // Monaco YAML hover is now disabled via configuration (hover: false)
+      // The unified hover provider will handle all hover content including validation errors
+
+      // Register the unified hover provider for API documentation and other content
       const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
       disposablesRef.current.push(hoverDisposable);
 
@@ -1791,6 +1930,8 @@ const componentStyles = {
         backgroundRepeat: 'no-repeat',
         display: 'block',
       },
+
+      // Keep the red underlines for validation errors - they're important visual indicators
 
       // Console
       '.codicon-symbol-variable:before': {
