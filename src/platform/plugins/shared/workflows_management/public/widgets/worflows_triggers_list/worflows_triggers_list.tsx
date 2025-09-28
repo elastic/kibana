@@ -32,16 +32,11 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
   if (triggers.length === 0) {
     return (
       <EuiBadge color="#FFF" iconType="asterisk" css={BADGE_STYLE}>
-        <EuiText size="xs" css={BADGE_STYLE}>
-          No triggers
-        </EuiText>
+        <EuiText size="xs">No triggers</EuiText>
       </EuiBadge>
     );
   }
-  const [firstTrigger, ...restOfTriggers] = triggers || [];
-
-  // Rare edge-case: empty triggers list
-  if (!firstTrigger) return null;
+  const [firstTrigger, ...restOfTriggers] = triggers;
 
   return (
     <>

@@ -16,7 +16,7 @@ type WorkflowStatusProps = EuiBadgeProps & {
 };
 
 export function WorkflowStatus({ valid, ...props }: WorkflowStatusProps) {
-  // When showLabel is false, render just an icon for invalid workflows
+  if (valid) return null;
   return (
     <EuiIconTip
       type="errorFilled"
