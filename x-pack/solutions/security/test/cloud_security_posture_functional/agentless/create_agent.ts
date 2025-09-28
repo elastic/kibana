@@ -83,12 +83,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.selectSetupTechnology('agentless');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
-      await cisIntegration.fillInTextField(
-        'awsRoleArnInput',
-        'arn:aws:iam::123456789012:role/test-role'
-      );
-      await cisIntegration.fillInTextField('awsCloudConnectorExternalId', 'test-external-id');
+      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
+      await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -127,12 +126,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.selectSetupTechnology('agentless');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
-      await cisIntegration.fillInTextField(
-        'awsRoleArnInput',
-        'arn:aws:iam::123456789012:role/test-role'
-      );
-      await cisIntegration.fillInTextField('awsCloudConnectorExternalId', 'test-external-id');
+      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
+      await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
 
