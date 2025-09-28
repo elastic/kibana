@@ -248,6 +248,15 @@ describe('WHERE Autocomplete', () => {
       ]);
     });
 
+    test('suggestions after IS', async () => {
+      await whereExpectSuggestions('from index | WHERE keywordField IS ', [
+        'IS NULL',
+        'IS NOT NULL',
+      ]);
+
+      await whereExpectSuggestions('from index | WHERE keywordField IS NU', ['IS NULL']);
+    });
+
     test('suggestions after NOT', async () => {
       await whereExpectSuggestions('from index | WHERE keywordField not ', [
         'LIKE $0',
@@ -260,38 +269,12 @@ describe('WHERE Autocomplete', () => {
         'IN $0',
       ]);
       await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
-        ...getFunctionSignaturesByReturnType(
-          Location.WHERE,
-          'boolean',
-          { operators: true },
-          ['boolean'],
-          [':']
-        ),
+        'AND $0',
+        'OR $0',
         '| ',
       ]);
-      await whereExpectSuggestions('from index | WHERE keywordField IS NOT', [
-        '!= $0',
-        '== $0',
-        'AND $0',
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'NOT',
-        'NOT IN $0',
-        'OR $0',
-      ]);
-
-      await whereExpectSuggestions('from index | WHERE keywordField IS NOT ', [
-        '!= $0',
-        '== $0',
-        'AND $0',
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'NOT',
-        'NOT IN $0',
-        'OR $0',
-      ]);
+      await whereExpectSuggestions('from index | WHERE keywordField IS NOT ', ['IS NOT NULL']);
+      await whereExpectSuggestions('from index | WHERE keywordField IS NOT      ', ['IS NOT NULL']);
     });
 
     test('suggestions after IN', async () => {

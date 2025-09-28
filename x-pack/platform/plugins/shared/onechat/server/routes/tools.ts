@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -39,14 +40,21 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'List tools',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
     .addVersion(
-      { version: '2023-10-31', validate: false },
+      {
+        version: '2023-10-31',
+        validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_list.yaml'),
+        },
+      },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -70,9 +78,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Get a tool by id',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -82,9 +91,14 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to retrieve.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -109,9 +123,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Create a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -121,15 +136,40 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              id: schema.string(),
-              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
-              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
-              description: schema.string({ defaultValue: '' }),
-              tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              id: schema.string({
+                meta: { description: 'Unique identifier for the tool.' },
+              }),
+              type: schema.oneOf(
+                // @ts-expect-error TS2769: No overload matches this call
+                editableToolTypes.map((type) => schema.literal(type)),
+                {
+                  meta: { description: 'The type of tool to create (e.g., esql, index_search).' },
+                }
+              ),
+              description: schema.string({
+                defaultValue: '',
+                meta: { description: 'Description of what the tool does.' },
+              }),
+              tags: schema.arrayOf(
+                schema.string({
+                  meta: { description: 'Tag for categorizing the tool.' },
+                }),
+                {
+                  defaultValue: [],
+                  meta: { description: 'Optional tags for categorizing and organizing tools.' },
+                }
+              ),
               // actual config validation is done in the tool service
-              configuration: schema.recordOf(schema.string(), schema.any()),
+              configuration: schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description: 'Tool-specific configuration parameters. See examples for details.',
+                },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_create.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -154,9 +194,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Update a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -166,15 +207,40 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              toolId: schema.string(),
+              toolId: schema.string({
+                meta: { description: 'The unique identifier of the tool to update.' },
+              }),
             }),
             body: schema.object({
-              description: schema.maybe(schema.string()),
-              tags: schema.maybe(schema.arrayOf(schema.string())),
+              description: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated description of what the tool does.' },
+                })
+              ),
+              tags: schema.maybe(
+                schema.arrayOf(
+                  schema.string({
+                    meta: { description: 'Updated tag for categorizing the tool.' },
+                  }),
+                  {
+                    meta: { description: 'Updated tags for categorizing and organizing tools.' },
+                  }
+                )
+              ),
               // actual config validation is done in the tool service
-              configuration: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+              configuration: schema.maybe(
+                schema.recordOf(schema.string(), schema.any(), {
+                  meta: {
+                    description:
+                      'Updated tool-specific configuration parameters. See examples for details.',
+                  },
+                })
+              ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -200,9 +266,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Delete a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -212,9 +279,14 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to delete.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -237,9 +309,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'Execute a Tool',
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -249,11 +322,27 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              tool_id: schema.string({}),
-              tool_params: schema.recordOf(schema.string(), schema.any()),
-              connector_id: schema.maybe(schema.string()),
+              tool_id: schema.string({
+                meta: { description: 'The ID of the tool to execute.' },
+              }),
+              tool_params: schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description: 'Parameters to pass to the tool execution. See examples for details',
+                },
+              }),
+              connector_id: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Optional connector ID for tools that require external integrations.',
+                  },
+                })
+              ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_execute.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

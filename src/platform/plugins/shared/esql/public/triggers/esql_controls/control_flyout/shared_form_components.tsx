@@ -332,10 +332,10 @@ export function Header({
             <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
-                    defaultMessage: 'Edit ES|QL control',
+                    defaultMessage: 'Edit variable control',
                   })
                 : i18n.translate('esql.flyout.title', {
-                    defaultMessage: 'Create ES|QL control',
+                    defaultMessage: 'Create variable control',
                   })}
             </h2>
           </EuiTitle>
