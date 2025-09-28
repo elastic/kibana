@@ -169,4 +169,42 @@ describe('unsnoozeAlertRoute', () => {
       `[Error: Rule has no snooze schedule with id random_schedule_1.]`
     );
   });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      unsnoozeRuleRoute(router, licenseState);
+
+      const [config, handler] = router.delete.mock.calls[0];
+
+      expect(config.path).toMatchInlineSnapshot(
+        `"/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"`
+      );
+
+      rulesClient.get.mockResolvedValueOnce(mockedAlert);
+      rulesClient.unsnooze.mockResolvedValueOnce();
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient, // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          params: {
+            ruleId: 'test.internal-rule-type',
+            scheduleId: 'snooze_schedule_1',
+          },
+        },
+        ['noContent']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot unsnooze rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
+  });
 });
