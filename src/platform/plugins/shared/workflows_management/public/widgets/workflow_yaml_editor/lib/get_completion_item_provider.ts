@@ -11,7 +11,7 @@ import type { Scalar } from 'yaml';
 import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-// Types are inferred from the schemas, no need to import them explicitly
+import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -819,7 +819,7 @@ function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as any);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -890,7 +890,7 @@ function getTriggerTypeSuggestions(
   );
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type as any);
+    const snippetText = generateTriggerSnippet(triggerType.type as TriggerType);
 
     // Extended range for multi-line insertion
     const extendedRange = {

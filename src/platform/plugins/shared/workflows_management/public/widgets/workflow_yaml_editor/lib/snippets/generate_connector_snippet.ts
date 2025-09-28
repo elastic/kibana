@@ -80,8 +80,8 @@ export function generateConnectorSnippet(
     if (requiredParams.length === 0) {
       const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
       const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
-      // Replace the empty with block with comment and cursor positioned for parameters (6 spaces for step context)
-      result = result.replace('with: {}', `with:\n      ${comment}\n      $0`);
+      // Replace the empty with block with comment and cursor positioned for parameters (2 spaces for step context)
+      result = result.replace('with: {}', `with:\n  ${comment}\n  $0`);
     }
 
     return result;
@@ -96,8 +96,8 @@ export function generateConnectorSnippet(
   if (requiredParams.length === 0) {
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
-    // Replace the empty with block with one that has a comment (4 spaces for proper indentation)
-    const withComment = yamlString.replace('with: {}', `with:\n    ${comment}\n    $0`);
+    // Replace the empty with block with one that has a comment (2 spaces for proper indentation)
+    const withComment = yamlString.replace('with: {}', `with:\n  ${comment}\n  $0`);
     return `${connectorType}\n${withComment}`;
   }
 

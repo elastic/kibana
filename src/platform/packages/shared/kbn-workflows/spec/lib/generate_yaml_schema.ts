@@ -163,25 +163,16 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   // CRITICAL FIX: Remove additionalProperties: false from objects inside allOf arrays
   // In allOf, each schema should be permissive to allow the union of all properties
   if (obj.type === 'object' && obj.additionalProperties === false) {
-    // More aggressive fix: remove additionalProperties from any object that might be in an allOf
-    // This includes checking for allOf in the path or if the object has specific patterns
+    // More specific fix: only remove additionalProperties from objects that are actually inside allOf arrays
+    // This prevents removing additionalProperties from main connector schemas
     const pathParts = path.split('.');
     const isInAllOf = pathParts.some((part, index) => {
       return part === 'allOf' && pathParts[index + 1] && /^\d+$/.test(pathParts[index + 1]);
     });
 
-    // Also check if this looks like a connector schema object (has properties like invocationCount, timeframeEnd, etc.)
-    const hasConnectorProps =
-      obj.properties &&
-      (obj.properties.invocationCount ||
-        obj.properties.timeframeEnd ||
-        obj.properties.enable_logged_requests ||
-        obj.properties.actions ||
-        obj.properties.description ||
-        obj.properties.name ||
-        obj.properties.type);
-
-    if (isInAllOf || (hasConnectorProps && path.includes('with'))) {
+    // Only remove additionalProperties if we're actually inside an allOf structure
+    // Do NOT remove it from main connector schemas (which should remain strict)
+    if (isInAllOf) {
       delete obj.additionalProperties;
     }
   }
