@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  defaultMonitoringUsersIndex,
-  oktaLastSyncMarkersIndex,
-} from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from './data_client';
@@ -18,6 +15,7 @@ import {
   getStreamPatternFor,
   INTEGRATION_TYPES,
   integrationsSourceIndex,
+  oktaLastFullSyncMarkersIndex,
 } from '../data_sources';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
@@ -38,7 +36,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
       return getStreamPatternFor(integration, namespace);
     }*/
     // okta has a dedicated index for last full sync markers
-    return oktaLastSyncMarkersIndex(namespace);
+    return oktaLastFullSyncMarkersIndex(namespace);
   };
 
   const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
