@@ -12,6 +12,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useLocation } from 'react-router-dom';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -20,7 +22,6 @@ import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -59,10 +60,11 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observabilityShared, application } = services;
-  const basePath = http?.basePath.get();
-  const { config } = useApmPluginContext();
-
+  const { docLinks, observabilityShared, application, share } = services;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const addDataUrl = onboardingLocator?.useUrl({ category: 'application' }) ?? '';
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   const { data, status } = useFetcher((callApmApi) => {
@@ -101,13 +103,11 @@ export function ApmMainTemplate({
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
 
   const noDataConfig = getNoDataConfig({
-    basePath,
     docsLink: docLinks!.links.observability.guide,
     hasApmData,
-    hasApmIntegrations,
     shouldBypassNoDataScreen,
     loading: isLoading,
-    isServerless: config?.serverlessOnboarding,
+    addDataUrl,
   });
 
   useDefaultAiAssistantStarterPromptsForAPM({
