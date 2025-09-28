@@ -17,7 +17,7 @@ import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
-import { RETRY_POLICY } from '../../constant';
+import { RETRY_POLICY } from '../../constants';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);

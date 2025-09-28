@@ -12,7 +12,7 @@ import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard'
 import { getCreateDescriptionsNode } from './nodes/create_descriptions';
 import { getTranslatePanelNode } from './nodes/translate_panel/translate_panel';
 import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
-import { RETRY_POLICY } from './constant';
+import { RETRY_POLICY } from './constants';
 
 export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
   const parseOriginalDashboardNode = getParseOriginalDashboardNode();
