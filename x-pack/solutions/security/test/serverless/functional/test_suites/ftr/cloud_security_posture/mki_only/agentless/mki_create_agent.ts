@@ -42,18 +42,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      // With cloud connectors enabled, we need to fill in Role ARN and External ID instead of direct access keys
-      if (process.env.CSPM_AWS_ROLE_ARN && process.env.CSPM_AWS_EXTERNAL_ID) {
-        await cisIntegration.fillInTextField('awsRoleArnInput', process.env.CSPM_AWS_ROLE_ARN);
+      // In MKI, Cloud Connectors is the default and expected behavior
+      
+      await cisIntegration.selectAwsCredentials('cloud_connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.fillInTextField(
-          'awsCloudConnectorExternalId',
-          process.env.CSPM_AWS_EXTERNAL_ID
-        );
-      }
+      // Fill in Cloud Connector credentials (role ARN and external ID)
+      await cisIntegration.fillInTextField(
+        'awsRoleArnInput',
+        'arn:aws:iam::123456789012:role/test-role'
+      );
+      await cisIntegration.fillInTextField('passwordInput-external-id', 'test-external-id');
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
