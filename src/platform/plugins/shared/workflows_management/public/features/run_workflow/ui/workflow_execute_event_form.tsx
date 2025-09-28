@@ -134,6 +134,32 @@ function TimeRangePicker({
   );
 }
 
+const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = {};
+
+  for (const key of Object.keys(flatObject)) {
+    const keys = key.split('.');
+    let current = result;
+    for (let i = 0; i < keys.length; i++) {
+      const currentKey = keys[i];
+      if (i === keys.length - 1) {
+        current[currentKey] = flatObject[key];
+      } else {
+        if (
+          current[currentKey] === undefined ||
+          typeof current[currentKey] !== 'object' ||
+          Array.isArray(current[currentKey])
+        ) {
+          current[currentKey] = {};
+        }
+        current = current[currentKey];
+      }
+    }
+  }
+
+  return result;
+};
+
 export const WorkflowExecuteEventForm = ({
   value,
   setValue,
@@ -199,21 +225,6 @@ export const WorkflowExecuteEventForm = ({
             query: esQuery,
             size: 50, // Limit to 50 recent alerts
             sort: [{ '@timestamp': { order: 'desc' } }],
-            _source: [
-              '@timestamp',
-              'kibana.alert.rule.name',
-              'kibana.alert.rule.uuid',
-              'kibana.alert.severity',
-              'kibana.alert.status',
-              'kibana.alert.reason',
-              'agent.name',
-              'host.name',
-              'user.name',
-              'process.name',
-              'file.name',
-              'source.ip',
-              'destination.ip',
-            ],
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -252,29 +263,17 @@ export const WorkflowExecuteEventForm = ({
 
   const updateEventData = (selectedAlerts: Alert[]) => {
     if (selectedAlerts.length > 0) {
-      const alertEvents = selectedAlerts.map((alert: Alert) => ({
-        id: alert._id,
-        index: alert._index,
-        timestamp: alert._source['@timestamp'],
-        rule: {
-          name: alert._source['kibana.alert.rule.name'],
-          uuid: alert._source['kibana.alert.rule.uuid'],
-        },
-        severity: alert._source['kibana.alert.severity'],
-        status: alert._source['kibana.alert.status'],
-        reason: alert._source['kibana.alert.reason'],
-        ...(alert._source['agent.name'] && { agent: { name: alert._source['agent.name'] } }),
-        ...(alert._source['host.name'] && { host: { name: alert._source['host.name'] } }),
-        ...(alert._source['user.name'] && { user: { name: alert._source['user.name'] } }),
-        ...(alert._source['process.name'] && {
-          process: { name: alert._source['process.name'] },
-        }),
-        ...(alert._source['file.name'] && { file: { name: alert._source['file.name'] } }),
-        ...(alert._source['source.ip'] && { source: { ip: alert._source['source.ip'] } }),
-        ...(alert._source['destination.ip'] && {
-          destination: { ip: alert._source['destination.ip'] },
-        }),
-      }));
+      const alertEvents = selectedAlerts.map((alert: Alert) => {
+        const unflattenedAlert = unflattenObject(alert._source);
+
+        return {
+          id: alert._id,
+          index: alert._index,
+          timestamp: alert._source['@timestamp'],
+          rule: unflattenedAlert.kibana.alert.rule,
+          ...unflattenedAlert.kibana.alert,
+        };
+      });
 
       const workflowEvent = {
         event: {
