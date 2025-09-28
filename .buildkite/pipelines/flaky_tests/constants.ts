@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlsToolbarButton } from './controls_toolbar_button';
+export enum TestSuiteType {
+  FTR = 'ftr-suite',
+  SCOUT = 'scout-suite',
+  CYPRESS = 'cypress-suite',
+  SYNTHETICS = 'synthetics-suite',
+}
+
+export const TEST_SUITE_TYPES = Object.values(TestSuiteType);
