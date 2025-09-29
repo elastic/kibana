@@ -524,6 +524,62 @@ steps:
       });
     });
 
+    describe('liquid block filter scenarios', () => {
+      it('should parse liquid block filter at end of line', () => {
+        const result = parseLineForCompletion('  assign variable = value | ');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid block filter with prefix', () => {
+        const result = parseLineForCompletion('  assign variable = data | up');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('up');
+      });
+
+      it('should parse liquid block filter in complex expression', () => {
+        const result = parseLineForCompletion('  assign result = foreach.item | down');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('down');
+      });
+
+      it('should parse liquid block filter with spaces', () => {
+        const result = parseLineForCompletion('assign   variable   =   value   |   cap');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('cap');
+      });
+
+      it('should parse liquid block filter in echo statement', () => {
+        const result = parseLineForCompletion('  echo message | ');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should not match liquid block filter within mustache', () => {
+        const result = parseLineForCompletion('  assign var = {{ value | filter');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('filter');
+      });
+
+      it('should parse liquid block filter without leading spaces', () => {
+        const result = parseLineForCompletion('assign message = value | ');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid block filter with tab indentation', () => {
+        const result = parseLineForCompletion('\tassign variable = value | fil');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('fil');
+      });
+
+      it('should parse liquid block filter with tabs around pipe', () => {
+        const result = parseLineForCompletion('\techo\tmessage\t|\tup');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('up');
+      });
+    });
+
     describe('liquid syntax scenarios', () => {
       it('should parse liquid syntax block start', () => {
         const result = parseLineForCompletion('  {% ');
@@ -560,6 +616,73 @@ steps:
       });
     });
 
+    describe('liquid block keyword scenarios', () => {
+      it('should parse liquid block keyword at start of line', () => {
+        const result = parseLineForCompletion('assign');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('assign');
+      });
+
+      it('should parse liquid block keyword with indentation', () => {
+        const result = parseLineForCompletion('  case');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('case');
+      });
+
+      it('should parse partial liquid block keyword', () => {
+        const result = parseLineForCompletion('  ass');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse completely empty line as liquid block keyword', () => {
+        const result = parseLineForCompletion('');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse line with only whitespace as liquid block keyword', () => {
+        const result = parseLineForCompletion('    ');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse line with tabs as liquid block keyword', () => {
+        const result = parseLineForCompletion('\t\t');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid block keyword with tab indentation', () => {
+        const result = parseLineForCompletion('\tassign');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('assign');
+      });
+
+      it('should parse partial liquid block keyword with tabs', () => {
+        const result = parseLineForCompletion('\t\tass');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse liquid block keyword with mixed tab and space indentation', () => {
+        const result = parseLineForCompletion('\t  case');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('case');
+      });
+
+      it('should parse liquid block keyword with trailing space', () => {
+        const result = parseLineForCompletion('echo ');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('echo');
+      });
+
+      it('should not match liquid block keyword with complex content', () => {
+        const result = parseLineForCompletion('assign variable = "value"');
+        expect(result.matchType).toBeNull();
+      });
+    });
+
     describe('liquid priority handling', () => {
       it('should prioritize liquid filter over unfinished mustache', () => {
         const result = parseLineForCompletion('{{ consts.api | ');
@@ -589,25 +712,28 @@ steps:
     type: set_variable
     with:
       message: "{{ user.name | `;
-      
+
       const cursorOffset = yamlContent.length;
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
-      
+
       const schema = generateYamlSchemaFromConnectors(mockConnectors);
       const provider = getCompletionItemProvider(schema);
-      
+
       const result = await provider.provideCompletionItems(
         model as any,
         position as any,
-        { triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter, triggerCharacter: '|' } as any,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: '|',
+        } as any,
         {} as any
       );
-      
+
       expect(result?.suggestions).toBeDefined();
       expect(result?.suggestions.length).toBeGreaterThan(0);
-      
-      const labels = result?.suggestions.map(s => s.label) || [];
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('upcase');
       expect(labels).toContain('downcase');
       expect(labels).toContain('capitalize');
@@ -621,25 +747,25 @@ steps:
     type: set_variable
     with:
       message: "{{ user.name | up`;
-      
+
       const cursorOffset = yamlContent.length;
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
-      
+
       const schema = generateYamlSchemaFromConnectors(mockConnectors);
       const provider = getCompletionItemProvider(schema);
-      
+
       const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
         {} as any
       );
-      
+
       expect(result?.suggestions).toBeDefined();
       expect(result?.suggestions.length).toBeGreaterThan(0);
-      
-      const labels = result?.suggestions.map(s => s.label) || [];
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('upcase');
       expect(labels).not.toContain('downcase'); // Should be filtered out
     });
@@ -653,25 +779,28 @@ steps:
     with:
       content: |
         {% `;
-      
+
       const cursorOffset = yamlContent.length;
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
-      
+
       const schema = generateYamlSchemaFromConnectors(mockConnectors);
       const provider = getCompletionItemProvider(schema);
-      
+
       const result = await provider.provideCompletionItems(
         model as any,
         position as any,
-        { triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter, triggerCharacter: '{' } as any,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: '{',
+        } as any,
         {} as any
       );
-      
+
       expect(result?.suggestions).toBeDefined();
       expect(result?.suggestions.length).toBeGreaterThan(0);
-      
-      const labels = result?.suggestions.map(s => s.label) || [];
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('if');
       expect(labels).toContain('for');
       expect(labels).toContain('assign');
@@ -686,27 +815,268 @@ steps:
     with:
       content: |
         {% if`;
-      
+
       const cursorOffset = yamlContent.length;
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
-      
+
       const schema = generateYamlSchemaFromConnectors(mockConnectors);
       const provider = getCompletionItemProvider(schema);
-      
+
       const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
         {} as any
       );
-      
+
       expect(result?.suggestions).toBeDefined();
       expect(result?.suggestions.length).toBeGreaterThan(0);
-      
-      const labels = result?.suggestions.map(s => s.label) || [];
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('if');
       // Should include both if and unless since "if" partially matches both
+    });
+
+    it('should provide liquid block keyword completions before typing any characters', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          `;
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('case');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('if');
+      expect(labels).toContain('when');
+      expect(labels).toContain('else');
+      expect(labels).toContain('for');
+      expect(labels).toContain('capture');
+      expect(labels).toContain('comment');
+      
+      // Should NOT contain closing keywords
+      expect(labels).not.toContain('endcase');
+      expect(labels).not.toContain('endif');
+      expect(labels).not.toContain('endfor');
+      expect(labels).not.toContain('endcapture');
+    });
+
+    it('should provide liquid block keyword completions with indentation before typing', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          assign var = "test"
+          `;
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+      
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('case');
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+      
+      // Should NOT contain closing keywords
+      expect(labels).not.toContain('endcase');
+      expect(labels).not.toContain('endif');
+      expect(labels).not.toContain('endfor');
+    });
+
+    it('should provide liquid block keyword completions with tab indentation', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+\t\t\t`;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('case');
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+      
+      // Should NOT contain closing keywords
+      expect(labels).not.toContain('endcase');
+      expect(labels).not.toContain('endif');
+      expect(labels).not.toContain('endfor');
+      expect(labels).toContain('if');
+    });
+
+    it('should provide liquid block keyword completions with mixed tab/space indentation', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+\t  `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('case');
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+      
+      // Should NOT contain closing keywords
+      expect(labels).not.toContain('endcase');
+      expect(labels).not.toContain('endif');
+      expect(labels).not.toContain('endfor');
+    });
+
+    it('should properly detect nested liquid blocks', async () => {
+      // Test case with nested liquid blocks
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          assign x = 1
+          {%- liquid
+            assign y = 2
+            `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+    });
+
+    it('should not provide liquid block completions outside liquid blocks', async () => {
+      const yamlContent = `
+version: "1"
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          assign x = 1
+        -%}
+        `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      // Should not contain liquid block keywords since we're outside the block
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).not.toContain('assign');
+      expect(labels).not.toContain('echo');
     });
   });
 });

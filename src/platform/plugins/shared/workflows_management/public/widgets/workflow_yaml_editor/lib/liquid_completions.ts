@@ -67,7 +67,7 @@ export const LIQUID_FILTERS = [
   },
   {
     name: 'default',
-    description: 'Allows you to specify a fallback in case a value doesn\'t exist',
+    description: "Allows you to specify a fallback in case a value doesn't exist",
     insertText: 'default: "${1:fallback}"',
     example: '{{ product.title | default: "No title" }}',
   },
@@ -127,7 +127,8 @@ export const LIQUID_FILTERS = [
   },
   {
     name: 'map',
-    description: 'Creates an array of values by extracting the values of a named property from another object',
+    description:
+      'Creates an array of values by extracting the values of a named property from another object',
     insertText: 'map: "${1:property}"',
     example: '{{ products | map: "title" }}',
   },
@@ -175,13 +176,15 @@ export const LIQUID_FILTERS = [
   },
   {
     name: 'replace',
-    description: 'Replaces every occurrence of the first argument in a string with the second argument',
+    description:
+      'Replaces every occurrence of the first argument in a string with the second argument',
     insertText: 'replace: "${1:search}", "${2:replace}"',
     example: '{{ "Take my money" | replace: "my", "your" }}',
   },
   {
     name: 'replace_first',
-    description: 'Replaces only the first occurrence of the first argument in a string with the second argument',
+    description:
+      'Replaces only the first occurrence of the first argument in a string with the second argument',
     insertText: 'replace_first: "${1:search}", "${2:replace}"',
     example: '{{ "Take my money" | replace_first: "my", "your" }}',
   },
@@ -319,6 +322,118 @@ export function createLiquidFilterCompletions(
   }));
 }
 
+// Liquid block keywords that can be used inside {%- liquid ... -%} blocks
+export const LIQUID_BLOCK_KEYWORDS = [
+  {
+    name: 'assign',
+    description: 'Creates a new variable',
+    insertText: 'assign ${1:variable} = ${2:value}',
+    example: 'assign message = "Hello World"',
+  },
+  {
+    name: 'echo',
+    description: 'Outputs the value of a variable',
+    insertText: 'echo ${1:variable}',
+    example: 'echo message',
+  },
+  {
+    name: 'case',
+    description: 'Creates a switch statement',
+    insertText: 'case ${1:variable}\n  when ${2:value}\n    ${3:content}\n  else\n    ${4:default_content}\nendcase',
+    example: 'case alert_type\n  when "critical"\n    assign message = "Critical alert"\n  else\n    assign message = "Normal alert"\nendcase',
+  },
+  {
+    name: 'when',
+    description: 'Defines a condition in a case statement',
+    insertText: 'when ${1:value}\n  ${2:content}',
+    example: 'when "critical"\n  assign message = "Critical"',
+  },
+  {
+    name: 'else',
+    description: 'Defines the default case',
+    insertText: 'else\n  ${1:content}',
+    example: 'else\n  assign message = "Default"',
+  },
+  {
+    name: 'if',
+    description: 'Creates a conditional statement',
+    insertText: 'if ${1:condition}\n  ${2:content}\nendif',
+    example: 'if user.active\n  echo "User is active"\nendif',
+  },
+  {
+    name: 'unless',
+    description: 'Creates a negative conditional statement',
+    insertText: 'unless ${1:condition}\n  ${2:content}\nendunless',
+    example: 'unless user.banned\n  echo "User is allowed"\nendunless',
+  },
+  {
+    name: 'elsif',
+    description: 'Additional condition in an if statement',
+    insertText: 'elsif ${1:condition}',
+    example: 'elsif user.premium',
+  },
+  {
+    name: 'for',
+    description: 'Creates a for loop',
+    insertText: 'for ${1:item} in ${2:collection}\n  ${3:content}\nendfor',
+    example: 'for product in products\n  echo product.name\nendfor',
+  },
+  {
+    name: 'break',
+    description: 'Exits a for loop early',
+    insertText: 'break',
+    example: 'break',
+  },
+  {
+    name: 'continue',
+    description: 'Skips the current iteration of a for loop',
+    insertText: 'continue',
+    example: 'continue',
+  },
+  {
+    name: 'capture',
+    description: 'Captures string output and assigns it to a variable',
+    insertText: 'capture ${1:variable}\n  ${2:content}\nendcapture',
+    example: 'capture greeting\n  echo "Hello " + user.name\nendcapture',
+  },
+  {
+    name: 'comment',
+    description: 'Creates a comment block',
+    insertText: 'comment\n  ${1:comment_text}\nendcomment',
+    example: 'comment\n  This is a comment\nendcomment',
+  },
+];
+
+/**
+ * Creates completion items for Liquid block keywords (used inside {%- liquid ... -%} blocks)
+ */
+export function createLiquidBlockKeywordCompletions(
+  range: monaco.IRange,
+  keywordPrefix?: string
+): monaco.languages.CompletionItem[] {
+  const filteredKeywords = keywordPrefix
+    ? LIQUID_BLOCK_KEYWORDS.filter((keyword) =>
+        keyword.name.toLowerCase().startsWith(keywordPrefix.toLowerCase())
+      )
+    : LIQUID_BLOCK_KEYWORDS;
+
+  return filteredKeywords.map((keyword) => ({
+    label: keyword.name,
+    kind: monaco.languages.CompletionItemKind.Keyword,
+    detail: keyword.description,
+    documentation: {
+      value: `**${keyword.name}**\n\n${keyword.description}\n\n**Example:**\n\`\`\`liquid\n${keyword.example}\n\`\`\``,
+      isTrusted: true,
+    },
+    insertText: keyword.insertText,
+    insertTextRules: keyword.insertText.includes('$')
+      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      : monaco.languages.CompletionItemInsertTextRule.None,
+    range,
+    sortText: keyword.name,
+  }));
+}
+
 /**
  * Creates completion items for common Liquid syntax
  */
@@ -327,11 +442,20 @@ export function createLiquidSyntaxCompletions(
 ): monaco.languages.CompletionItem[] {
   return [
     {
+      label: 'liquid',
+      kind: monaco.languages.CompletionItemKind.Keyword,
+      detail: 'Liquid block',
+      documentation: 'Creates a liquid block for multiple liquid statements without tag wrappers',
+      insertText: '- liquid\n  ${1:assign variable = value}\n  ${2:echo variable}\n-%}',
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range,
+    },
+    {
       label: 'if',
       kind: monaco.languages.CompletionItemKind.Keyword,
       detail: 'Liquid if statement',
       documentation: 'Creates a conditional statement',
-      insertText: '{% if ${1:condition} %}\n  ${2:content}\n{% endif %}',
+      insertText: 'if ${1:condition} %}\n  ${2:content}\n{% endif %}',
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range,
     },
@@ -340,7 +464,7 @@ export function createLiquidSyntaxCompletions(
       kind: monaco.languages.CompletionItemKind.Keyword,
       detail: 'Liquid unless statement',
       documentation: 'Creates a conditional statement (opposite of if)',
-      insertText: '{% unless ${1:condition} %}\n  ${2:content}\n{% endunless %}',
+      insertText: 'unless ${1:condition} %}\n  ${2:content}\n{% endunless %}',
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range,
     },
@@ -349,7 +473,7 @@ export function createLiquidSyntaxCompletions(
       kind: monaco.languages.CompletionItemKind.Keyword,
       detail: 'Liquid for loop',
       documentation: 'Creates a for loop',
-      insertText: '{% for ${1:item} in ${2:collection} %}\n  ${3:content}\n{% endfor %}',
+      insertText: 'for ${1:item} in ${2:collection} %}\n  ${3:content}\n{% endfor %}',
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range,
     },
@@ -358,9 +482,9 @@ export function createLiquidSyntaxCompletions(
       kind: monaco.languages.CompletionItemKind.Keyword,
       detail: 'Liquid case statement',
       documentation: 'Creates a switch-like statement',
-      insertText: '{% case ${1:variable} %}\n{% when ${2:value} %}\n  ${3:content}\n{% endcase %}',
+      insertText: 'case ${1:variable} %}\n{% when ${2:value} %}\n  ${3:content}\n{% endcase %}',
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range,
-    }
+    },
   ];
 }

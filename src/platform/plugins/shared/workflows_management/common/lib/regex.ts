@@ -20,3 +20,13 @@ export const PROPERTY_PATH_REGEX =
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})
 export const LIQUID_FILTER_REGEX = /\{\{\s*[^}]*\|\s*(\w*)\s*$/;
+
+// Matches: variable | filter_prefix within liquid blocks (outside of mustache syntax)
+export const LIQUID_BLOCK_FILTER_REGEX = /(?:^|[^{])\s*[^{}\s]+\s*\|\s*(\w*)\s*$/;
+
+// Matches liquid keywords within a liquid block (assign, case, when, echo, etc.)
+export const LIQUID_BLOCK_KEYWORD_REGEX = /^\s*(\w*)\s*$/;
+
+// Liquid block detection patterns (global versions for matching within text)
+export const LIQUID_BLOCK_START_REGEX = /\{\%-?\s*liquid\s/g;
+export const LIQUID_BLOCK_END_REGEX = /-?\%\}/g;
