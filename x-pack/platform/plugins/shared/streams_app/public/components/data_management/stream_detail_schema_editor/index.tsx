@@ -102,7 +102,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
             iconType="info"
             title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
               defaultMessage:
-                'Root streams are selectively immutable and their schema cannot be modified. To enrich data, partition a new child stream and add processors to it.',
+                'Root streams are selectively immutable and their schema cannot be modified. To modify the schema or to add processing steps, partition a new child stream first.',
             })}
             announceOnMount={false}
             size="s"
