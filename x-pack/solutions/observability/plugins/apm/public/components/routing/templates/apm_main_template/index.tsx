@@ -22,7 +22,6 @@ import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
-import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -44,7 +43,6 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
-  showTracesInDiscoverCallout = false,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -54,7 +52,6 @@ export function ApmMainTemplate({
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
-  showTracesInDiscoverCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -138,7 +135,6 @@ export function ApmMainTemplate({
                   <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
                 </EuiFlexGroup>
               )}
-              {showTracesInDiscoverCallout && <TracesInDiscoverCallout />}
             </>
           ),
         }}

@@ -105,7 +105,6 @@ export function TracesInDiscoverCallout() {
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiCallOut
         data-test-subj="apmApmMainTemplateTracesInDiscoverCallout"
         size="m"

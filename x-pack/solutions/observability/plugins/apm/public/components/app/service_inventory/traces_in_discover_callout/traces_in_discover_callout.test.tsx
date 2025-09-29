@@ -11,7 +11,7 @@ import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
-import { TracesInDiscoverCallout } from './traces_in_discover_callout';
+import { TracesInDiscoverCallout } from '.';
 
 const mockGetRedirectUrl = jest.fn(() => 'mock-discover-url');
 const mockGetApmIndices = jest.fn(() =>
