@@ -52,9 +52,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('searches SLOs using kqlQuery', async () => {
-      const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      const testTag = `test-${Date.now()}`;
+      const createResponse1 = await sloApi.create(
+        Object.assign({}, DEFAULT_SLO, { tags: ['test', testTag] }),
+        adminRoleAuthc
+      );
       const createResponse2 = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),
+        Object.assign({}, DEFAULT_SLO, {
+          name: 'something irrelevant foo',
+          tags: ['test', testTag],
+        }),
         adminRoleAuthc
       );
 
@@ -65,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await retry.tryForTime(180 * 1000, async () => {
         let response = await supertestWithoutAuth
           .get(`/api/observability/slos`)
-          .query({ page: 1, perPage: 333 })
+          .query({ page: 1, perPage: 333, kqlQuery: `slo.tags:"${testTag}"` })
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
           .send();
