@@ -12,14 +12,14 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { SynchronizationTaskRunner } from './synchronization_task_runner';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
-import { CAI_CASES_INDEX_NAME } from '../../cases_index/constants';
+import { getCasesDestinationIndexName, CAI_CASES_SYNC_TYPE } from '../../cases_index/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const sourceIndex = '.source-index';
-  const destIndex = CAI_CASES_INDEX_NAME;
+  const destIndex = getCasesDestinationIndexName('default', 'securitySolution');
 
   const painlessScriptId = 'painlessScriptId';
   const painlessScript = {
@@ -37,6 +37,9 @@ describe('SynchronizationTaskRunner', () => {
     params: {
       sourceIndex,
       destIndex,
+      owner: 'securitySolution',
+      spaceId: 'default',
+      syncType: CAI_CASES_SYNC_TYPE,
     },
     state: {
       lastSyncSuccess,
@@ -115,16 +118,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was successful so we will reindex with
          * a new time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -196,16 +211,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was successful so we will reindex with
          * a new time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -272,16 +299,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was unsuccessful so we will reindex with
          * the old lastSyncSuccess. And updated the attempt time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncSuccess)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncSuccess)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -368,8 +407,8 @@ describe('SynchronizationTaskRunner', () => {
 
     expect(logger.error).not.toBeCalled();
     expect(logger.debug).toBeCalledWith(
-      '[.internal.cases] Destination index does not exist, skipping synchronization task.',
-      { tags: ['cai-synchronization', '.internal.cases'] }
+      '[.internal.cases.default-securitysolution] Destination index does not exist, skipping synchronization task.',
+      { tags: ['cai-synchronization', '.internal.cases.default-securitysolution'] }
     );
   });
 
@@ -393,8 +432,14 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases] Synchronization reindex failed. Error: My retryable error',
-        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
+        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My retryable error',
+        {
+          tags: [
+            'cai-synchronization',
+            'cai-synchronization-error',
+            '.internal.cases.default-securitysolution',
+          ],
+        }
       );
     });
 
@@ -417,8 +462,14 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
-        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
+        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My unrecoverable error',
+        {
+          tags: [
+            'cai-synchronization',
+            'cai-synchronization-error',
+            '.internal.cases.default-securitysolution',
+          ],
+        }
       );
     });
   });
