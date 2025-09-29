@@ -1332,7 +1332,7 @@ function generateKibanaConnectors() {
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';${schemaImportsSection}
+import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];
