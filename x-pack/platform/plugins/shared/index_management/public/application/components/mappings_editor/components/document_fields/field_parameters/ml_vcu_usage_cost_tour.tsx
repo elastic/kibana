@@ -73,7 +73,7 @@ export const MlVcuUsageCostTour = ({
                   </EuiLink>
                 ),
               }}
-              defaultMessage="The VCUs used to perform inference, NLP tasks, and other ML activities will incur {additionalCostsLink}. You can continue to use other models as normal. {learnMoreLink}"
+              defaultMessage="Performing inference, NLP tasks, and other ML activities on the Elastic Inference Service (EIS) requires machine learning VCUs that incur {additionalCostsLink}. You can perform these activities on other infrastructures as well. {learnMoreLink}"
             />
           </p>
         </EuiText>
