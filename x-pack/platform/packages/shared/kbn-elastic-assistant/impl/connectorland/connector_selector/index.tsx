@@ -13,13 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
-  EuiPopover,
   EuiSelectableOption,
-  EuiSuperSelect,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { ConnectorSelectable, ConnectorSelectableComponentProps, ConnectorSelectableProps } from '@kbn/ai-assistant-connector-selector-action';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
@@ -33,7 +28,6 @@ import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 import { AddConnectorModal } from '../add_connector_modal';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
@@ -44,7 +38,7 @@ interface Props {
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
   selectedConnectorId?: string;
-  displayFancy?: (displayText: string) => React.ReactNode;
+  displayFancy?: (aIConnector: AIConnector) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
 }
@@ -124,7 +118,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
 
     const selectedOrDefaultConnectorId = selectedConnectorId ?? defaultAIConnectorId
-    const selectedOrDefaultConnector = aiConnectors?.find((connector) => connector.id === selectedOrDefaultConnectorId)
+    const selectedOrDefaultConnector = aiConnectors?.find((connector) => connector.id === selectedOrDefaultConnectorId) ?? aiConnectors?.at(0)
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     // Group connectors into pre-configured and custom
@@ -155,7 +149,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           ? stats.statsPerConnector.find((s) => s.connectorId === option.key) ?? null
           : null;
 
-      return < React.Fragment key={option.key} >
+      return <React.Fragment key={option.key} >
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
           <EuiFlexItem grow={false} data-test-subj={`connector-${option.label}`}>
             {option.label}
@@ -186,7 +180,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     return (
       <>
-        {!connectorExists && (customConnectors.length + preConfiguredConnectors.length) === 0 ? (
+        {((!connectorExists && (customConnectors.length + preConfiguredConnectors.length) === 0) || !selectedOrDefaultConnector) ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
@@ -199,15 +193,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         ) : (
           <EuiInputPopover
             input={
-              <EuiButton iconType="arrowDown" iconSide="right" size="s" color="text" fullWidth onClick={() => setModalForceOpen(true)} disabled={localIsDisabled} contentProps={{
+              <EuiButton iconType="arrowDown" iconSide="right" size="s" color="text" fullWidth={fullWidth} onClick={() => setModalForceOpen(true)} disabled={localIsDisabled} style={{ borderWidth: fullWidth ? 1 : 0 }} contentProps={{
                 style: {
                   display: 'flex',
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }
-              }}>
-                {selectedOrDefaultConnector?.name}
+              }}
+              data-test-subj='connector-selector'
+              >
+                {displayFancy?.(selectedOrDefaultConnector) ?? selectedOrDefaultConnector.name}
               </EuiButton>
             }
             isOpen={modalForceOpen}
