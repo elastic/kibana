@@ -49,16 +49,24 @@ export const AdditionalFormFields = React.memo<{
     );
   }, [fieldsData?.data]);
 
+  // todo: make this a memo of the superFormField value
   const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
-    []
+    () => {
+      const a = superFormField.value ? JSON.parse(superFormField.value) : {};
+      return Object.keys(a).map((key) => ({
+        label: fieldsMetadataRecord[key]?.text ?? key,
+        value: key,
+      }));
+    }
   );
 
   const { form } = useForm<Record<string, unknown>>({
-    defaultValue: { fields: {} },
-    options: { stripEmptyFields: false, valueChangeDebounceTime: 500 },
+    // todo: make this use a memo of the superFormField value instead of parsing each time
+    defaultValue: superFormField.value ? JSON.parse(superFormField.value) : {},
+    options: { stripUnsetFields: false, stripEmptyFields: false, valueChangeDebounceTime: 500 },
   });
 
-  const [{ fields }] = useFormData<Record<string, unknown>>({
+  const [fields] = useFormData<Record<string, unknown>>({
     form,
   });
 
@@ -69,8 +77,9 @@ export const AdditionalFormFields = React.memo<{
       const transformedFields = Object.entries(fields ?? {}).reduce((acc, [key, value]) => {
         // Dates need to be sent to the resilient API as numbers
         if (
-          fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
-          fieldsMetadataRecord[key].input_type === 'datepicker'
+          typeof value === 'string' &&
+          (fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
+            fieldsMetadataRecord[key].input_type === 'datepicker')
         ) {
           acc[key] = new Date(value).getTime();
         } else {
@@ -78,6 +87,7 @@ export const AdditionalFormFields = React.memo<{
         }
         return acc;
       }, {} as Record<string, unknown>);
+
       superFormField.setValue(JSON.stringify(transformedFields));
     }, 500);
     return () => clearTimeout(timeout);
