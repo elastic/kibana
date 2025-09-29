@@ -55,6 +55,7 @@ interface Props {
   dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
   isOptionalField?: boolean;
+  readOnly?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -85,6 +86,7 @@ export const JsonEditorWithMessageVariables = forwardRef<JsonEditorWithMessageVa
       dataTestSubj,
       euiCodeEditorProps = {},
       isOptionalField = false,
+      readOnly = false,
     },
     ref
   ) => {
@@ -211,6 +213,7 @@ export const JsonEditorWithMessageVariables = forwardRef<JsonEditorWithMessageVa
               wordWrap: 'on',
               wrappingIndent: 'indent',
               automaticLayout: true,
+              readOnly,
             }}
             value={xJson}
             width="100%"

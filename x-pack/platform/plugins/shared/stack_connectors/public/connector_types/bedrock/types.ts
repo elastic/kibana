@@ -6,12 +6,14 @@
  */
 
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorProps } from '@kbn/alerts-ui-shared';
 import type { SUB_ACTION } from '../../../common/bedrock/constants';
 import type { RunActionParams } from '../../../common/bedrock/types';
 
 export interface BedrockActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
   subActionParams: RunActionParams;
+  actionConnector: ActionConnectorProps<Config, Secrets>;
 }
 
 export interface Config {

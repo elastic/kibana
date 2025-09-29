@@ -22,7 +22,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ActionConnectorProps } from '@kbn/alerts-ui-shared';
 import type { JsonEditorWithMessageVariablesRef } from '@kbn/triggers-actions-ui-plugin/public/application/components/json_editor_with_message_variables';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
@@ -34,13 +33,9 @@ import {
   MIN_EXTENDED_THINKING_BUDGET_TOKENS,
   MAX_EXTENDED_THINKING_BUDGET_TOKENS,
 } from '../../../common/bedrock/constants';
-import type { BedrockActionParams, Config, Secrets } from './types';
+import type { BedrockActionParams, Config } from './types';
 
-const BedrockParamsFields: React.FunctionComponent<
-  ActionParamsProps<BedrockActionParams> & {
-    actionConnector: ActionConnectorProps<Config, Secrets>;
-  }
-> = ({
+const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
   actionParams,
   editAction,
   index,
@@ -50,13 +45,15 @@ const BedrockParamsFields: React.FunctionComponent<
   actionConnector,
 }) => {
   const { subAction, subActionParams } = actionParams;
+  const connectorConfig =
+    actionConnector && 'config' in actionConnector ? actionConnector.config : undefined;
 
-  const { body, model = actionConnector?.config?.defaultModel } = subActionParams ?? {};
-  const [extendedThinking, setExtendedThinking] = useState(
-    actionConnector?.config?.extendedThinking || false
+  const { body, model = connectorConfig?.defaultModel as string } = subActionParams ?? {};
+  const [extendedThinking, setExtendedThinking] = useState<boolean>(
+    (connectorConfig?.extendedThinking as Config['extendedThinking']) || false
   );
   const [budgetTokens, setBudgetTokens] = useState(
-    actionConnector?.config?.budgetTokens || MIN_EXTENDED_THINKING_BUDGET_TOKENS
+    (connectorConfig?.budgetTokens as Config['budgetTokens']) || MIN_EXTENDED_THINKING_BUDGET_TOKENS
   );
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
@@ -74,11 +71,11 @@ const BedrockParamsFields: React.FunctionComponent<
         {
           body: JSON.stringify({
             ...JSON.parse(DEFAULT_BODY),
-            ...(actionConnector?.config?.extendedThinking
+            ...(connectorConfig?.extendedThinking
               ? {
                   thinking: {
                     type: 'enabled',
-                    budget_tokens: actionConnector?.config?.budgetTokens || 1024,
+                    budget_tokens: connectorConfig?.budgetTokens || 1024,
                   },
                 }
               : {}),
@@ -87,13 +84,7 @@ const BedrockParamsFields: React.FunctionComponent<
         index
       );
     }
-  }, [
-    actionConnector?.config?.extendedThinking,
-    actionConnector?.config?.budgetTokens,
-    editAction,
-    index,
-    subActionParams,
-  ]);
+  }, [connectorConfig, editAction, index, subActionParams]);
 
   useEffect(() => {
     return () => {
@@ -122,7 +113,7 @@ const BedrockParamsFields: React.FunctionComponent<
   }, [model]);
 
   const handleBodyChange = useCallback(
-    (newValue: string) => {
+    (newValue: Record<string, any>) => {
       editSubActionParams({
         body: JSON.stringify(newValue),
       });

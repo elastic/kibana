@@ -21,12 +21,28 @@ const messageVariables = [
 
 describe('Bedrock Params Fields renders', () => {
   test('all params fields are rendered', () => {
+    const actionConnector = {
+      secrets: {
+        accessKey: 'accessKey',
+        secret: 'secret',
+      },
+      id: 'test',
+      actionTypeId: '.bedrock',
+      isPreconfigured: false,
+      isSystemAction: false as const,
+      isDeprecated: false,
+      name: 'My Bedrock Connector',
+      config: {
+        apiUrl: DEFAULT_BEDROCK_URL,
+      },
+    };
     const { getByTestId } = render(
       <BedrockParamsFields
         actionParams={{
           subAction: SUB_ACTION.RUN,
           subActionParams: { body: '{"message": "test"}' },
         }}
+        actionConnector={actionConnector}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
@@ -89,6 +105,7 @@ describe('Bedrock Params Fields renders', () => {
     };
     const editAction = jest.fn();
     const errors = {};
+
     render(
       <BedrockParamsFields
         actionParams={actionParams}
@@ -188,6 +205,136 @@ describe('Bedrock Params Fields renders', () => {
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       { body: '{"key": "value"}', model: 'not-the-default' },
+      0
+    );
+  });
+
+  it('handles extended thinking and budget tokens when actionConnector has extendedThinking true', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const actionConnector = {
+      secrets: {
+        accessKey: 'accessKey',
+        secret: 'secret',
+      },
+      id: 'test',
+      actionTypeId: '.bedrock',
+      isPreconfigured: false,
+      isSystemAction: false as const,
+      isDeprecated: false,
+      name: 'My Bedrock Connector',
+      config: {
+        apiUrl: DEFAULT_BEDROCK_URL,
+        extendedThinking: true,
+        budgetTokens: 2048,
+      },
+    };
+    const { getByTestId } = render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{}',
+          },
+        }}
+        actionConnector={actionConnector}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    const extendedThinkingSwitch = getByTestId('bedrock-extended-thinking');
+    expect(extendedThinkingSwitch).toBeInTheDocument();
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      expect.objectContaining({
+        body: expect.stringContaining('"thinking":{"type":"enabled","budget_tokens":2048}'),
+      }),
+      0
+    );
+  });
+
+  it('handles extended thinking and budget tokens when actionConnector has extendedThinking false', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const actionConnector = {
+      secrets: {
+        accessKey: 'accessKey',
+        secret: 'secret',
+      },
+      id: 'test',
+      actionTypeId: '.bedrock',
+      isPreconfigured: false,
+      isSystemAction: false as const,
+      isDeprecated: false,
+      name: 'My Bedrock Connector',
+      config: {
+        apiUrl: DEFAULT_BEDROCK_URL,
+        extendedThinking: false,
+        budgetTokens: 1024,
+      },
+    };
+    render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{}',
+          },
+        }}
+        actionConnector={actionConnector}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      expect.objectContaining({
+        body: '{}',
+      }),
+      0
+    );
+  });
+
+  it('handles when actionConnector is not provided', () => {
+    const editAction = jest.fn();
+    const errors = {};
+    const { getByTestId } = render(
+      <BedrockParamsFields
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{"key": "value"}',
+          },
+        }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />,
+      {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      }
+    );
+    // Should still render UI elements
+    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(getByTestId('bedrock-model')).toBeInTheDocument();
+    expect(getByTestId('bedrock-extended-thinking')).toBeInTheDocument();
+    // Extended thinking should be off by default when no actionConnector
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      expect.objectContaining({
+        body: '{"key": "value"}',
+      }),
       0
     );
   });
