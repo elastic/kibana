@@ -3569,6 +3569,14 @@
       "matchDepNames": [
         "chromedriver"
       ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
       "enabled": true
     },
     {
@@ -4148,25 +4156,6 @@
         "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Cloud Defend",
-      "matchDepNames": [
-        "monaco-yaml"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: Cloud Native Integrations",
-        "release_note:skip",
-        "backport:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
