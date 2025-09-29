@@ -503,6 +503,7 @@ function getStepTypeFromYaml(yamlDocument: any, stepIndex: number): string | nul
 function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   try {
     // Import all connector definitions
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getAllConnectors } = require('../schema');
     const allConnectors = getAllConnectors();
     
