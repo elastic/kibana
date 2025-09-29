@@ -23,9 +23,7 @@ interface InspectFlyoutProps {
   searchSession: UISession;
 }
 
-const InspectFlyout: React.FC<InspectFlyoutProps> = ({
-  searchSession,
-}) => {
+const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
   const renderInfo = () => {
     return (
       <Fragment>
