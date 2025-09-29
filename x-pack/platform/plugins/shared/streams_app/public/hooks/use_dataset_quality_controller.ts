@@ -12,7 +12,6 @@ import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
-import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
