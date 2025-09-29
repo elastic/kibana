@@ -8,6 +8,7 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   type FieldHook,
+  getFieldValidityAndErrorMessage,
   Form,
   useForm,
   useFormData,
@@ -58,6 +59,8 @@ export const AdditionalFormFields = React.memo<{
     form,
   });
 
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(superFormField);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       superFormField.setValue(JSON.stringify(fields ?? {}));
@@ -67,7 +70,12 @@ export const AdditionalFormFields = React.memo<{
 
   return (
     <Form form={form}>
-      <EuiFormRow label={i18n.ADDITIONAL_FIELDS_LABEL} helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}>
+      <EuiFormRow
+        label={i18n.ADDITIONAL_FIELDS_LABEL}
+        helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
+        isInvalid={isInvalid}
+        error={errorMessage}
+      >
         <EuiComboBox
           data-test-subj="incidentTypeComboBox"
           fullWidth
@@ -77,6 +85,7 @@ export const AdditionalFormFields = React.memo<{
           onChange={setAdditionalFields}
           options={fieldComboOptions}
           placeholder={i18n.ADDITIONAL_FIELDS_PLACEHOLDER}
+          isInvalid={isInvalid}
           selectedOptions={additionalFields}
         />
       </EuiFormRow>
