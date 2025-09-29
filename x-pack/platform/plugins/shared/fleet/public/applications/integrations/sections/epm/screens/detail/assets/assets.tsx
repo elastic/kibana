@@ -37,7 +37,7 @@ import {
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
-import { DeferredAssetsSection } from './deferred_assets_accordion';
+import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
@@ -105,6 +105,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
