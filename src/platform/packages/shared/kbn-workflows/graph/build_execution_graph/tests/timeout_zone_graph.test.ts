@@ -59,7 +59,7 @@ describe('convertToWorkflowGraph', () => {
         id: 'enterTimeoutZone_testAtomicStep1',
         type: 'enter-timeout-zone',
         stepId: 'testAtomicStep1',
-        stepType: 'slack',
+        stepType: 'step_level_timeout',
         timeout: '30s',
       });
     });
@@ -71,7 +71,7 @@ describe('convertToWorkflowGraph', () => {
         id: 'exitTimeoutZone_testAtomicStep1',
         type: 'exit-timeout-zone',
         stepId: 'testAtomicStep1',
-        stepType: 'slack',
+        stepType: 'step_level_timeout',
       });
     });
   });
