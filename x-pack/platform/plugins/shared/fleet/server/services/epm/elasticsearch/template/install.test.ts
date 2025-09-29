@@ -659,7 +659,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'logs-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'logs',
+                  name: 'logs@lifecycle',
                 },
                 mapping: {
                   total_fields: {
@@ -810,7 +810,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'metrics-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'metrics',
+                  name: 'metrics@lifecycle',
                 },
                 mapping: {
                   total_fields: {
