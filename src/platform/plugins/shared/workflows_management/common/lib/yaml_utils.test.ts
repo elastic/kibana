@@ -206,21 +206,23 @@ describe('formatValidationError', () => {
           name: z.string(),
           fields: z.string().nullable(),
         }),
-      ])
+      ]),
     });
 
     // Create a mock error that would come from Monaco YAML validation
     const mockError = {
-      issues: [{
-        code: 'unknown' as const,
-        path: ['connector'],
-        message: 'Expected "0 | 1 | 2"',
-        received: 'unknown'
-      }]
+      issues: [
+        {
+          code: 'unknown' as const,
+          path: ['connector'],
+          message: 'Expected "0 | 1 | 2"',
+          received: 'unknown',
+        },
+      ],
     };
 
     const result = formatValidationError(mockError as any, casesConnectorSchema);
-    
+
     // Should generate dynamic message with union options
     expect(result.message).toContain('connector should be oneOf:');
     expect(result.message).toContain('type: ".none"');
@@ -232,21 +234,23 @@ describe('formatValidationError', () => {
 
   it('should fall back to original behavior when dynamic formatting fails', () => {
     const mockError = {
-      issues: [{
-        code: 'unknown' as const,
-        path: ['nonexistent'],
-        message: 'Expected "0 | 1 | 2"',
-        received: 'unknown'
-      }]
+      issues: [
+        {
+          code: 'unknown' as const,
+          path: ['nonexistent'],
+          message: 'Expected "0 | 1 | 2"',
+          received: 'unknown',
+        },
+      ],
     };
 
     // Schema without the path that's being referenced
     const simpleSchema = z.object({
-      other: z.string()
+      other: z.string(),
     });
 
     const result = formatValidationError(mockError as any, simpleSchema);
-    
+
     // Should fall back to original message since path doesn't exist in schema
     expect(result.message).toBe('Expected "0 | 1 | 2"');
   });
@@ -316,16 +320,18 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_union' as const,
-          path: ['steps', 0, 'with', 'connector'],
-          message: 'Invalid input',
-          received: 0,
-        }]
+        issues: [
+          {
+            code: 'invalid_union' as const,
+            path: ['steps', 0, 'with', 'connector'],
+            message: 'Invalid input',
+            received: 0,
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // In test environment, our system falls back to generic message
       // In real environment with actual connectors, it would show detailed union info
       expect(result.message).toContain('connector has an invalid value');
@@ -350,19 +356,23 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_type' as const,
-          path: ['steps', 0, 'with', 'settings'],
-          message: 'Expected object, received number',
-          received: 0,
-        }]
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['steps', 0, 'with', 'settings'],
+            message: 'Expected object, received number',
+            received: 0,
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // In test environment, falls back to basic message
       // In real environment, would show enhanced object structure
-      expect(result.message).toMatch(/Expected object, received number|settings should be an object/);
+      expect(result.message).toMatch(
+        /Expected object, received number|settings should be an object/
+      );
     });
   });
 
@@ -377,16 +387,18 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_union' as const,
-          path: ['steps', 0, 'with', 'someField'],
-          message: 'Invalid input',
-          received: 0,
-        }]
+        issues: [
+          {
+            code: 'invalid_union' as const,
+            path: ['steps', 0, 'with', 'someField'],
+            message: 'Invalid input',
+            received: 0,
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // Should provide a helpful fallback message
       expect(result.message).toContain('someField has an invalid value');
     });
@@ -401,16 +413,18 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_type' as const,
-          path: ['steps', 0, 'with', 'config'],
-          message: 'Expected object, received number',
-          received: 0,
-        }]
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['steps', 0, 'with', 'config'],
+            message: 'Expected object, received number',
+            received: 0,
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // Should enhance the basic type error
       expect(result.message).toMatch(/config should be an object|Expected object, received number/);
     });
@@ -425,16 +439,18 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_type' as const,
-          path: ['steps', 0, 'with', 'items'],
-          message: 'Expected array, received number',
-          received: 0,
-        }]
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['steps', 0, 'with', 'items'],
+            message: 'Expected array, received number',
+            received: 0,
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // Should enhance the basic type error
       expect(result.message).toMatch(/items should be an array|Expected array, received number/);
     });
@@ -449,17 +465,19 @@ steps:
 `);
 
       const mockZodError = {
-        issues: [{
-          code: 'invalid_enum_value' as const,
-          path: ['steps', 0, 'with', 'level'],
-          message: 'Invalid enum value',
-          received: 0,
-          options: ['low', 'medium', 'high'],
-        }]
+        issues: [
+          {
+            code: 'invalid_enum_value' as const,
+            path: ['steps', 0, 'with', 'level'],
+            message: 'Invalid enum value',
+            received: 0,
+            options: ['low', 'medium', 'high'],
+          },
+        ],
       };
 
       const result = formatValidationError(mockZodError as any, undefined, yamlDocument);
-      
+
       // Should show available options or fall back to basic message
       expect(result.message).toMatch(/level should be one of:|Invalid enum value/);
     });
@@ -475,48 +493,60 @@ steps:
 `);
 
       // Test different error scenarios that might occur
-      
+
       // Scenario 1: Missing required fields (id_field, id_value)
       const missingFieldsError = {
-        issues: [{
-          code: 'invalid_type' as const,
-          path: ['steps', 0, 'with'],
-          message: 'Required fields missing',
-          received: 'object',
-        }]
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['steps', 0, 'with'],
+            message: 'Required fields missing',
+            received: 'object',
+          },
+        ],
       };
 
-      const result1 = formatValidationError(missingFieldsError as any, undefined, incompleteYamlDocument);
+      const result1 = formatValidationError(
+        missingFieldsError as any,
+        undefined,
+        incompleteYamlDocument
+      );
       expect(result1.message).toMatch(/Required fields missing|with should be an object/);
 
       // Scenario 2: Type error (number instead of string for criticality_level)
       const typeError = {
-        issues: [{
-          code: 'invalid_type' as const,
-          path: ['steps', 0, 'with', 'criticality_level'],
-          message: 'Expected string, received number',
-          expected: 'string',
-          received: 'number',
-        }]
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['steps', 0, 'with', 'criticality_level'],
+            message: 'Expected string, received number',
+            expected: 'string',
+            received: 'number',
+          },
+        ],
       };
 
       const result2 = formatValidationError(typeError as any, undefined, incompleteYamlDocument);
-      expect(result2.message).toMatch(/Expected string, received number|criticality_level should be a string/);
+      expect(result2.message).toMatch(
+        /Expected string, received number|criticality_level should be a string/
+      );
 
       // Scenario 3: Enum validation error
       const enumError = {
-        issues: [{
-          code: 'invalid_enum_value' as const,
-          path: ['steps', 0, 'with', 'criticality_level'],
-          message: 'Invalid enum value',
-          received: 'invalid_value',
-          options: ['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'],
-        }]
+        issues: [
+          {
+            code: 'invalid_enum_value' as const,
+            path: ['steps', 0, 'with', 'criticality_level'],
+            message: 'Invalid enum value',
+            received: 'invalid_value',
+            options: ['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'],
+          },
+        ],
       };
 
       const result3 = formatValidationError(enumError as any, undefined, incompleteYamlDocument);
       expect(result3.message).toMatch(/criticality_level should be one of:|Invalid enum value/);
-      
+
       // If it shows enum options, verify they're the correct ones
       if (result3.message.includes('should be one of')) {
         expect(result3.message).toContain('low_impact');
@@ -540,19 +570,21 @@ steps:
 
       // This should not produce validation errors for the structure
       // but we can test individual field validation
-      
+
       const invalidEnumError = {
-        issues: [{
-          code: 'invalid_enum_value' as const,
-          path: ['steps', 0, 'with', 'criticality_level'],
-          message: 'Invalid enum value',
-          received: 'invalid_level',
-          options: ['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'],
-        }]
+        issues: [
+          {
+            code: 'invalid_enum_value' as const,
+            path: ['steps', 0, 'with', 'criticality_level'],
+            message: 'Invalid enum value',
+            received: 'invalid_level',
+            options: ['low_impact', 'medium_impact', 'high_impact', 'extreme_impact'],
+          },
+        ],
       };
 
       const result = formatValidationError(invalidEnumError as any, undefined, correctYamlDocument);
-      
+
       // Should provide helpful enum validation
       expect(result.message).toMatch(/criticality_level should be one of:|Invalid enum value/);
     });

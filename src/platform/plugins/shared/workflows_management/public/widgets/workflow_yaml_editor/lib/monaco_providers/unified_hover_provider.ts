@@ -162,15 +162,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // FIRST: Check if there are validation errors at this position OR nearby
       // If there are, let the validation-only hover provider handle it
       const markers = monaco.editor.getModelMarkers({ resource: model.uri });
-      const validationMarkersNearby = markers.filter(marker => 
-        marker.startLineNumber === position.lineNumber && // Same line
-        marker.owner === 'yaml' && // Only check YAML validation errors
-        // Check if the position is within or very close to the marker range
-        (
-          (marker.startColumn <= position.column && marker.endColumn >= position.column) ||
-          (Math.abs(marker.startColumn - position.column) <= 3) || // Within 3 columns
-          (Math.abs(marker.endColumn - position.column) <= 3)
-        )
+      const validationMarkersNearby = markers.filter(
+        (marker) =>
+          marker.startLineNumber === position.lineNumber && // Same line
+          marker.owner === 'yaml' && // Only check YAML validation errors
+          // Check if the position is within or very close to the marker range
+          ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+            Math.abs(marker.startColumn - position.column) <= 3 || // Within 3 columns
+            Math.abs(marker.endColumn - position.column) <= 3)
       );
 
       if (validationMarkersNearby.length > 0) {
@@ -227,7 +226,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
       if (!hoverContent) {
-        //console.log('UnifiedHoverProvider: Handler returned no hover content');
+        // console.log('UnifiedHoverProvider: Handler returned no hover content');
         return null;
       }
 

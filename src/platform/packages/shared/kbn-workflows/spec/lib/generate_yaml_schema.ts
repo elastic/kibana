@@ -172,8 +172,9 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
 
     // ENHANCED FIX: Also check if we're in a connector's "with" property that uses allOf
     // This catches cases like: anyOf/X/properties/with/allOf/Y where connector params use .and()
-    const isInConnectorWithAllOf = path.includes('properties.with.allOf') || 
-                                   (path.includes('anyOf') && path.includes('properties.with') && path.includes('allOf'));
+    const isInConnectorWithAllOf =
+      path.includes('properties.with.allOf') ||
+      (path.includes('anyOf') && path.includes('properties.with') && path.includes('allOf'));
 
     // Only remove additionalProperties if we're actually inside an allOf structure
     // Do NOT remove it from main connector schemas (which should remain strict)
