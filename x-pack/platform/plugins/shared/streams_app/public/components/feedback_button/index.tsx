@@ -33,6 +33,7 @@ export function FeedbackButton() {
 
   return (
     <EuiButtonEmpty
+      size="s"
       iconType="popout"
       href={feedbackUrl}
       target="_blank"

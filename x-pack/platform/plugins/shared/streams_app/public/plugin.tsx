@@ -137,6 +137,7 @@ export class StreamsAppPlugin
             .start({ http: coreStart.http })
             .getClient(),
           telemetryClient: this.telemetry.getClient(),
+          version: this.version,
         };
 
         // Trigger fetch to ensure the time filter has an up-to-date time range when the app mounts.
@@ -175,20 +176,6 @@ export class StreamsAppPlugin
         }),
       });
     });
-<<<<<<< HEAD
-    return {
-      createStreamsApplicationComponent: () => {
-        return ({ appMountParameters, PageTemplate }: StreamsApplicationProps) => {
-          const services: StreamsAppServices = {
-            dataStreamsClient: new DataStreamsStatsService()
-              .start({ http: coreStart.http })
-              .getClient(),
-            PageTemplate,
-            version: this.version,
-            telemetryClient: this.telemetry.getClient(),
-          };
-=======
->>>>>>> upstream/main
 
     return {};
   }

@@ -112,7 +112,7 @@ export function StreamListView() {
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
@@ -136,10 +136,9 @@ export function StreamListView() {
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <FeedbackButton />
             {groupStreams?.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={openGroupStreamModificationFlyout}>
+                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
                     defaultMessage: 'Create Group stream',
                   })}
@@ -150,6 +149,7 @@ export function StreamListView() {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="gear"
+                  size="s"
                   onClick={() => setIsSettingsFlyoutOpen(true)}
                   aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
                     defaultMessage: 'Settings',
@@ -161,6 +161,7 @@ export function StreamListView() {
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
+            <FeedbackButton />
           </EuiFlexGroup>
         }
         description={
