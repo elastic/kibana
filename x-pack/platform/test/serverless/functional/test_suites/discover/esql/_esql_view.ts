@@ -597,7 +597,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

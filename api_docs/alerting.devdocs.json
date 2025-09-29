@@ -10629,6 +10629,18 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.FIND_MAINTENANCE_WINDOWS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "FIND_MAINTENANCE_WINDOWS_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.GET_MAINTENANCE_WINDOW_API_PATH",
         "type": "string",
         "tags": [],

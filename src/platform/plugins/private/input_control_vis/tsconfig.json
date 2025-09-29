@@ -22,7 +22,6 @@
     "@kbn/es-query",
     "@kbn/expect",
     "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",

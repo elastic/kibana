@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -16,9 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const queryBar = getService('queryBar');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
   const { common, unifiedFieldList, discover } = getPageObjects([
     'common',
@@ -48,42 +44,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Classic view', function () {
-      it('stores a finished search', async () => {
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Refresh query');
-
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
-
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
-      });
-
-      it('starts and stores a new search', async () => {
-        await queryBar.setQuery('Carrier: "Kibana Airlines"');
-
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Needs updating');
-
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
-
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
+      describe('when clicking the open background search flyout button', () => {
+        it('opens the background search flyout', async () => {
+          await testSubjects.click('openBackgroundSearchFlyoutButton');
+          await testSubjects.exists('searchSessionsMgmtUiTable');
+        });
       });
     });
   });

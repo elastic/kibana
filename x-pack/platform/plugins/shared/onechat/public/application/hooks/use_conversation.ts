@@ -8,13 +8,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useSendMessage } from '../context/send_message_context';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';
+import { useSendMessage } from '../context/send_message/send_message_context';
+import { useOnechatAgents } from './agents/use_agents';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -24,6 +26,7 @@ export const useConversation = () => {
   const {
     data: conversation,
     isLoading,
+    isFetching,
     isFetched,
   } = useQuery({
     queryKey,
@@ -38,25 +41,50 @@ export const useConversation = () => {
     },
   });
 
-  return { conversation, isLoading, isFetched };
+  return { conversation, isLoading, isFetching, isFetched };
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetched } = useConversation();
-  return { isLoading, isFetched };
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
+};
+
+const useGetNewConversationAgentId = () => {
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const { agents } = useOnechatAgents();
+  const isAgentIdValid = (agentId?: string): agentId is string => {
+    if (!agentId) {
+      return false;
+    }
+    return agents.some((agent) => agent.id === agentId);
+  };
+
+  // Ensure we always return a string
+  return (): string => {
+    if (isAgentIdValid(agentIdStorage)) {
+      return agentIdStorage;
+    }
+    return oneChatDefaultAgentId;
+  };
 };
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
-  // We only use the local storage value when creating a new converation and an agent id isn't already set
-  if (isNewConversation && !agentId && agentIdStorage) {
-    return agentIdStorage;
+  const getNewConversationAgentId = useGetNewConversationAgentId();
+
+  if (agentId) {
+    return agentId;
   }
-  return agentId;
+
+  // For new conversations, agent id must be defined
+  if (isNewConversation) {
+    return getNewConversationAgentId();
+  }
+
+  return undefined;
 };
 
 export const useConversationTitle = () => {

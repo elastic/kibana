@@ -46,9 +46,13 @@ const mockUseGetMissingResources = jest.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
-mockUseGetMissingResources.mockImplementation(() => {
+
+mockUseGetMissingResources.mockImplementation((_, setterFn) => {
   return {
-    getMissingResources: mockGetMissingResources,
+    getMissingResources: jest.fn().mockImplementation(() => {
+      const missingResources = mockGetMissingResources();
+      setterFn(missingResources);
+    }),
     isLoading: false,
     error: null,
   };
@@ -69,6 +73,10 @@ const renderTestComponent = (
 };
 
 describe('DashboardMigrationResultPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetMissingResources.mockReturnValue([]);
+  });
   it('renders panel with title, badge, and button', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument());
@@ -115,7 +123,33 @@ describe('DashboardMigrationResultPanel', () => {
   });
 
   it('renders upload missing panel', () => {
+    mockGetMissingResources.mockReturnValue([{}]);
     renderTestComponent();
-    expect(screen.getByText(/upload/i)).toBeInTheDocument();
+    expect(screen.getByText(/Click Upload to continue translating/i)).toBeInTheDocument();
+  });
+
+  describe('Total execution time', () => {
+    it('should display Total execution time when total_execution_time_ms is present', () => {
+      renderTestComponent({
+        migrationStats: {
+          ...baseProps.migrationStats,
+          last_execution: { total_execution_time_ms: 65000 },
+        },
+      });
+      expect(screen.getByTestId('migrationExecutionTime')).toBeVisible();
+      expect(screen.getByTestId('migrationExecutionTime')).toHaveTextContent(
+        'Total execution time: a minute'
+      );
+    });
+
+    it('should not display Total execution time when total_execution_time_ms is not present', () => {
+      renderTestComponent({
+        migrationStats: {
+          ...baseProps.migrationStats,
+          last_execution: {},
+        },
+      });
+      expect(screen.queryByTestId('migrationExecutionTime')).not.toBeInTheDocument();
+    });
   });
 });

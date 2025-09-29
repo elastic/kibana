@@ -330,8 +330,9 @@ export function buildPartialMatcher(str: string) {
   return pattern;
 }
 
-const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
-const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
+// Handles: "IS ", "IS N", "IS NU", "IS NUL" with flexible whitespace
+const isNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('nul') + ')?$', 'i');
+const isNotNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('not nul') + ')?$', 'i');
 
 // --- Expression types helpers ---
 

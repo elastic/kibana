@@ -196,7 +196,7 @@ export function unmapField(
   const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== fieldName) return field;
 
-    const schemaField: SchemaField = { ...field, status: 'unmapped' };
+    const schemaField: SchemaField = { ...field, type: undefined, status: 'unmapped' };
     updatedCache.set(schemaField.name, schemaField);
     return schemaField;
   });

@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
 export function IngestionRate({
   definition,
@@ -24,8 +24,8 @@ export function IngestionRate({
   stats?: DataStreamStats;
   isLoadingStats: boolean;
 }) {
-  const { timeState } = useTimefilter();
   const { isServerless } = useKibana();
+  const { timeState } = useTimefilter();
 
   return (
     <>

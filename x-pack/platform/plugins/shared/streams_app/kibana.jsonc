@@ -30,7 +30,12 @@
       "dashboard",
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "esUiShared"
+    ],
     "extraPublicDirs": ["common"]
   }
 }

@@ -125,8 +125,9 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({ stepRef, stepU
           defaultMessage: 'Step context menu',
         }
       )}
+      data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
       disabled={!!stepUnderEdit}
-      size="s"
+      size="xs"
       iconType="boxesVertical"
       onClick={togglePopover}
     />

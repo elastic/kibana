@@ -242,6 +242,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -323,6 +324,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 30,
@@ -910,6 +912,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 0,
@@ -1131,6 +1134,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": true,
                     "syncAlerts": true,
                   },
                   "severity": 10,
@@ -1765,6 +1769,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "medium",
@@ -2265,6 +2270,7 @@ describe('CasesService', () => {
      * - connector
      * - external_service
      * - category
+     * - settings
      *
      * The following fields can be undefined:
      * - total_alerts
@@ -2281,6 +2287,7 @@ describe('CasesService', () => {
       'customFields',
       'observables',
       'incremental_id',
+      'settings',
       'total_alerts',
       'total_comments',
       'in_progress_at',
@@ -2390,6 +2397,7 @@ describe('CasesService', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2494,6 +2502,7 @@ describe('CasesService', () => {
                 "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
+                  "extractObservables": false,
                   "syncAlerts": true,
                 },
                 "severity": "low",
@@ -2589,6 +2598,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2684,6 +2694,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2792,6 +2803,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2850,6 +2862,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2954,6 +2967,7 @@ describe('CasesService', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -3074,6 +3088,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",

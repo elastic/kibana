@@ -8,7 +8,14 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiIcon,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  transparentize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -975,6 +982,9 @@ export const WorkflowYAMLEditor = ({
       rules: [],
       colors: {
         'editor.background': euiTheme.colors.backgroundBaseSubdued,
+        'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
+        'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
+        'editorHoverWidget.border': euiTheme.colors.borderBasePlain,
       },
     });
 
@@ -1001,7 +1011,7 @@ export const WorkflowYAMLEditor = ({
           width: 100%;
           min-width: 500px;
           max-width: 800px;
-          padding: 12px 16px;
+          padding: 4px 8px;
         }
         
         .monaco-editor .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"]) .hover-contents,
@@ -1416,11 +1426,11 @@ const componentStyles = {
       minHeight: 0,
       // css classes for the monaco editor
       '.template-variable-valid': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
         borderRadius: '2px',
       },
       '.template-variable-error': {
-        backgroundColor: euiTheme.colors.vis.euiColorVisWarning1,
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
         color: euiTheme.colors.severity.danger,
         borderRadius: '2px',
       },

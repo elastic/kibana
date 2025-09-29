@@ -47,6 +47,14 @@ actions:
         description: Connector documentation
         url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
       x-displayName: 'Connectors'
+  - target: '$.tags[?(@.name=="elastic agent builder")]'
+    description: Change tag description and displayName
+    update:
+      # description: 
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Elastic Agent Builder'
   # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -37,10 +38,30 @@ export function registerChatRoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
-    agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    connector_id: schema.maybe(schema.string()),
-    conversation_id: schema.maybe(schema.string()),
-    input: schema.string(),
+    agent_id: schema.string({
+      defaultValue: oneChatDefaultAgentId,
+      meta: {
+        description:
+          'The ID of the agent to converse with. Defaults to the default Elastic AI agent.',
+      },
+    }),
+    connector_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional connector ID for the agent to use for external integrations.',
+        },
+      })
+    ),
+    conversation_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional existing conversation ID to continue a previous conversation.',
+        },
+      })
+    ),
+    input: schema.string({
+      meta: { description: 'The user input message to send to the agent.' },
+    }),
     capabilities: schema.maybe(
       schema.object({
         visualizations: schema.maybe(schema.boolean()),
@@ -88,8 +109,10 @@ export function registerChatRoutes({
       summary: 'Converse with an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -98,6 +121,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -147,8 +173,10 @@ export function registerChatRoutes({
       summary: 'Converse with an agent and stream events',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -157,6 +185,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

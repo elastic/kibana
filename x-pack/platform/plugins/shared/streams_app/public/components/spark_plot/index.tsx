@@ -96,6 +96,7 @@ export function SparkPlot({
       },
       gridLine: {
         vertical: {
+          visible: !compressed,
           dash: [5],
         },
         horizontal: {

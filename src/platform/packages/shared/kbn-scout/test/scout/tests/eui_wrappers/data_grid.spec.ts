@@ -20,7 +20,7 @@ test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'
 
     await test.step('should return column names', async () => {
       const dataGrid = new EuiDataGridWrapper(page, selector);
-      expect(await dataGrid.getColumnsNames()).toEqual([
+      expect(await dataGrid.getColumnsNames()).toStrictEqual([
         'Name',
         'Email address',
         'Location',
@@ -34,13 +34,13 @@ test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'
 
     await test.step('should return rows count', async () => {
       const dataGrid = new EuiDataGridWrapper(page, selector);
-      expect(await dataGrid.getRowsCount()).toEqual(10);
+      expect(await dataGrid.getRowsCount()).toBe(10);
     });
 
     await test.step('should open context menu and hide column', async () => {
       const dataGrid = new EuiDataGridWrapper(page, selector);
       await dataGrid.doActionOnColumn('Location', 'Hide column');
-      expect(await dataGrid.getColumnsNames()).toEqual([
+      expect(await dataGrid.getColumnsNames()).toStrictEqual([
         'Name',
         'Email address',
         'Account',
@@ -54,7 +54,7 @@ test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'
     await test.step('should open/close full screen mode', async () => {
       const dataGrid = new EuiDataGridWrapper(page, selector);
       await dataGrid.openFullScreenMode();
-      expect(await dataGrid.getColumnsNames()).toEqual([
+      expect(await dataGrid.getColumnsNames()).toStrictEqual([
         'Name',
         'Email address',
         'Account',

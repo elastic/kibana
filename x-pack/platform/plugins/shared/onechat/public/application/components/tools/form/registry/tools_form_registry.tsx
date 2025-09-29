@@ -14,10 +14,12 @@ import { esqlToolFormRegistryEntry } from './tool_types/esql';
 import type { SupportedToolTypeRegistryEntry } from './common';
 import { indexSearchToolRegistryEntry } from './tool_types/index_search';
 import { builtinToolRegistryEntry } from './tool_types/builtin';
+import { workflowToolRegistryEntry } from './tool_types/workflow';
 
 export const TOOLS_FORM_REGISTRY: Record<ToolType, SupportedToolTypeRegistryEntry> = {
   [ToolType.esql]: esqlToolFormRegistryEntry,
   [ToolType.index_search]: indexSearchToolRegistryEntry,
+  [ToolType.workflow]: workflowToolRegistryEntry,
   // This is only for displaying read-only built-in tools
   [ToolType.builtin]: builtinToolRegistryEntry,
 };

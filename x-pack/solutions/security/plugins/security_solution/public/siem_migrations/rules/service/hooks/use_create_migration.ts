@@ -8,9 +8,9 @@
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
+import type { RuleMigrationStats } from '../../types';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
@@ -30,7 +30,7 @@ export type CreateMigration = (
   migrationName: string,
   rules: CreateRuleMigrationRulesRequestBody
 ) => void;
-export type OnSuccess = (migrationStats: RuleMigrationTaskStats) => void;
+export type OnSuccess = (migrationStats: RuleMigrationStats) => void;
 
 export const useCreateMigration = (onSuccess: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;

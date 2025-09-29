@@ -11393,6 +11393,8 @@
           "SavedObjectsModelVersion",
           " | undefined; 20?: ",
           "SavedObjectsModelVersion",
+          " | undefined; 21?: ",
+          "SavedObjectsModelVersion",
           " | undefined; }"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",

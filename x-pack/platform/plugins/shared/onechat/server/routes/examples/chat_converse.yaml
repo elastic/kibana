@@ -1,0 +1,36 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        converseRequestExample:
+          description: "Example request to send a message to the agent as a part of the conversation"
+          value:
+            input: "What is Elasticsearch?"
+            agent_id: "elastic-ai-agent"
+            connector_id: "my-connector-id"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          converseResponseExample:
+            description: "Example response containing the chain of events representing a conversation with the agent"
+            value:
+              conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
+              steps:
+              - type: "reasoning"
+                reasoning: "Searching for official documentation or content that explains what Elasticsearch is"
+              - type: "tool_call"
+                tool_call_id: "tooluse_shOdUwKIRwC9YhqGzeg0cQ"
+                tool_id: "platform.core.search"
+                progression:
+                - message: "Selecting the best target for this query"
+                params:
+                  query: "what is elasticsearch definition overview introduction"
+                results:
+                - type: "error"
+                  data:
+                    message: "Could not figure out which index to use"
+              response:
+                message: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."

@@ -85,3 +85,18 @@ export const ExitFallbackPathNodeSchema = GraphNodeSchema.extend({
   enterNodeId: z.string(),
 });
 export type ExitFallbackPathNode = z.infer<typeof ExitFallbackPathNodeSchema>;
+
+export const OnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('on-failure'),
+});
+export type OnFailureNode = z.infer<typeof OnFailureNodeSchema>;
+
+export const StepLevelOnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('step-level-on-failure'),
+});
+export type StepLevelOnFailureNode = z.infer<typeof StepLevelOnFailureNodeSchema>;
+
+export const WorkflowLevelOnFailureNodeSchema = GraphNodeSchema.extend({
+  type: z.literal('workflow-level-on-failure'),
+});
+export type WorkflowLevelOnFailureNode = z.infer<typeof WorkflowLevelOnFailureNodeSchema>;

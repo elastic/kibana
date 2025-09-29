@@ -7,6 +7,11 @@
 
 export type { OnechatEvent } from './base/events';
 export {
+  internalNamespaces as toolNamespaces,
+  protectedNamespaces as toolReservedNamespaces,
+  isInProtectedNamespace,
+} from './base/namespaces';
+export {
   ToolType,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
@@ -40,9 +45,6 @@ export {
   type TabularDataResult,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
-  internalNamespaces as toolNamespaces,
-  protectedNamespaces as toolReservedNamespaces,
-  isInProtectedNamespace,
 } from './tools';
 export {
   OnechatErrorCode,

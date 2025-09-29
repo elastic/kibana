@@ -47,7 +47,7 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
         padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
-          margin-bottom: ${euiTheme.size.m};
+          margin-bottom: ${euiTheme.size.s};
         }
       `}
     >

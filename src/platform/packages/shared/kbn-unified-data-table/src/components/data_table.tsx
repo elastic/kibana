@@ -1439,7 +1439,7 @@ const componentStyles = {
         backgroundColor: euiTheme.colors.backgroundBaseWarning,
       },
       '.unifiedDataTable__cell--expanded': {
-        backgroundColor: euiTheme.colors.highlight,
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
       '.euiDataGrid__content': {
         background: 'transparent',
@@ -1477,9 +1477,6 @@ const componentStyles = {
           height: '100%',
           borderBottom: 0,
         },
-      '.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover': {
-        backgroundColor: euiTheme.colors.lightestShade, // we keep using a deprecated shade until a proper token is available
-      },
       '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
         backgroundColor: 'transparent', // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
       },

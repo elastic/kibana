@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
 export async function autocomplete(
   query: string,
@@ -36,7 +36,7 @@ export async function autocomplete(
 
     if ('STATS'.startsWith(afterInline) && afterInline.length <= 'INLINE'.length) {
       return [
-        {
+        withAutoSuggest({
           label: 'STATS',
           text: 'STATS ',
           kind: 'Keyword',
@@ -44,8 +44,7 @@ export async function autocomplete(
             defaultMessage: 'STATS keyword',
           }),
           sortText: 'A',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        },
+        }),
       ];
     }
   }
@@ -55,7 +54,7 @@ export async function autocomplete(
 
   if ('INLINE'.startsWith(trimmedInput) && trimmedInput.length <= 'INLINE'.length) {
     return [
-      {
+      withAutoSuggest({
         label: 'INLINE STATS',
         text: 'INLINE STATS ',
         kind: 'Keyword',
@@ -63,8 +62,7 @@ export async function autocomplete(
           defaultMessage: 'INLINE STATS command',
         }),
         sortText: 'A',
-        command: TRIGGER_SUGGESTION_COMMAND,
-      },
+      }),
     ];
   }
 
