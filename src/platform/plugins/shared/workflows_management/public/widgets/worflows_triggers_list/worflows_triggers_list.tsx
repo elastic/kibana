@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
@@ -29,6 +29,8 @@ const BADGE_STYLE = css`
 `;
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
+  const { euiTheme } = useEuiTheme();
+
   if (triggers.length === 0) {
     return (
       <EuiBadge color="#FFF" iconType="asterisk" css={BADGE_STYLE}>
@@ -40,7 +42,11 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
 
   return (
     <>
-      <EuiBadge color="#FFF" iconType={TRIGGERS_ICONS[firstTrigger.type]} css={BADGE_STYLE}>
+      <EuiBadge
+        color={euiTheme.colors.backgroundBasePlain}
+        iconType={TRIGGERS_ICONS[firstTrigger.type]}
+        css={BADGE_STYLE}
+      >
         <EuiText size="xs">{capitalize(firstTrigger.type)}</EuiText>
       </EuiBadge>
       {restOfTriggers.length > 0 && (
@@ -52,7 +58,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
           renderItem={(trigger, idx) => (
             <EuiBadge
               key={`${trigger}-${idx}`}
-              color="#FFF"
+              color={euiTheme.colors.backgroundBasePlain}
               iconType={TRIGGERS_ICONS[trigger.type]}
               css={BADGE_STYLE}
             >

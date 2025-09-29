@@ -69,57 +69,43 @@ export const useWorkflowBulkActions = ({
     setShowDeleteModal(false);
   }, []);
 
-  const handleEnableWorkflows = useCallback(() => {
-    onAction();
-    const disabledWorkflows = selectedWorkflows.filter((workflow) => !workflow.enabled);
+  const bulkUpdateWorkflows = useCallback(
+    (workflowsToUpdate: WorkflowListItemDto[], updateData: { enabled: boolean }) => {
+      onAction();
 
-    // Use Promise.allSettled to avoid race conditions
-    Promise.allSettled(
-      disabledWorkflows.map(
+      const updatePromises = workflowsToUpdate.map(
         (workflow) =>
-          new Promise((resolve) => {
+          new Promise<void>((resolve) => {
             updateWorkflow.mutate(
               {
                 id: workflow.id,
-                workflow: { enabled: true },
+                workflow: updateData,
               },
               {
                 onSettled: () => {
-                  resolve(undefined);
+                  resolve();
                 },
               }
             );
           })
-      )
-    ).then(() => {
-      onActionSuccess();
-    });
-  }, [selectedWorkflows, updateWorkflow, onAction, onActionSuccess]);
+      );
+
+      Promise.allSettled(updatePromises).then(() => {
+        onActionSuccess();
+      });
+    },
+    [updateWorkflow, onAction, onActionSuccess]
+  );
+
+  const handleEnableWorkflows = useCallback(() => {
+    const disabledWorkflows = selectedWorkflows.filter((workflow) => !workflow.enabled);
+    bulkUpdateWorkflows(disabledWorkflows, { enabled: true });
+  }, [selectedWorkflows, bulkUpdateWorkflows]);
 
   const handleDisableWorkflows = useCallback(() => {
-    onAction();
     const enabledWorkflows = selectedWorkflows.filter((workflow) => workflow.enabled);
-
-    const updatePromises = enabledWorkflows.map((workflow) => {
-      return new Promise((resolve) => {
-        updateWorkflow.mutate(
-          {
-            id: workflow.id,
-            workflow: { enabled: false },
-          },
-          {
-            onSettled: () => {
-              resolve(undefined);
-            },
-          }
-        );
-      });
-    });
-
-    Promise.allSettled(updatePromises).then(() => {
-      onActionSuccess();
-    });
-  }, [selectedWorkflows, updateWorkflow, onAction, onActionSuccess]);
+    bulkUpdateWorkflows(enabledWorkflows, { enabled: false });
+  }, [selectedWorkflows, bulkUpdateWorkflows]);
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
