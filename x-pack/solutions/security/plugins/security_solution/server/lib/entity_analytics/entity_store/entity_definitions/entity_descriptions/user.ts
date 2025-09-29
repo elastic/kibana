@@ -7,7 +7,7 @@
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 import { collectValues as collect } from './field_utils';
-import { copyUserIsPrivilegedStep } from '../../elasticsearch_assets/ingest_processor_steps';
+
 export const USER_DEFINITION_VERSION = '1.0.0';
 export const USER_IDENTITY_FIELD = 'user.name';
 
@@ -36,7 +36,6 @@ export const userEntityEngineDescription: EntityDescription = {
         override: false,
       },
     },
-    copyUserIsPrivilegedStep,
   ],
   fields: [
     collect({ source: 'user.domain' }),
