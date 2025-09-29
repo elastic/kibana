@@ -21,7 +21,7 @@ export async function collectAndRun({
   context: GlobalRunContext;
   configGlob?: string | string[];
 }): Promise<ConfigResult[]> {
-  const { log, globalConfig, runtimeOverrides, workspace } = context;
+  const { log, globalConfig, runtimeOverrides } = context;
 
   const startAll = performance.now();
 
@@ -29,7 +29,7 @@ export async function collectAndRun({
 
   const patterns = castArray(configGlob ?? []);
 
-  const configPaths = await collectConfigPaths({ patterns, cwd: workspace.getDir() });
+  const configPaths = await collectConfigPaths({ patterns, cwd: process.cwd() });
 
   log.debug(`Discovered ${configPaths.length} config path(s)`);
 
