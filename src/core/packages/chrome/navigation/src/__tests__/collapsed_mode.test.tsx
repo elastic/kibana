@@ -24,16 +24,24 @@ const mlAnomalyExplorerItemId = securityMock.navItems.primaryItems[11].sections?
 
 describe('Collapsed mode', () => {
   const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+  const originalScrollIntoView = Element.prototype.scrollIntoView;
+  const scrollIntoViewMock = jest.fn();
 
   beforeAll(() => {
     Element.prototype.getBoundingClientRect = createBoundingClientRectMock(
       (COLLAPSED_MENU_ITEM_HEIGHT + COLLAPSED_MENU_GAP) * (MAX_MENU_ITEMS - 1) +
         (COLLAPSED_MENU_ITEM_HEIGHT + COLLAPSED_MENU_GAP)
     );
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+  });
+
+  beforeEach(() => {
+    scrollIntoViewMock.mockClear();
   });
 
   afterAll(() => {
     Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    Element.prototype.scrollIntoView = originalScrollIntoView;
   });
 
   it('should render the side navigation', () => {

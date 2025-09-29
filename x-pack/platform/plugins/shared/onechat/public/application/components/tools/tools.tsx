@@ -12,6 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../common/doc_links';
 import { useToolsActions } from '../../context/tools_provider';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -41,9 +42,8 @@ export const OnechatTools = () => {
               ),
               learnMoreLink: (
                 <EuiLink
-                  href="#"
+                  href={docLinks.tools}
                   target="_blank"
-                  external
                   aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
                     defaultMessage: 'Learn more about tools in the documentation',
                   })}

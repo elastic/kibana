@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { LensAttributes, LensConfig, LensConfigOptions } from './types';
@@ -45,12 +45,9 @@ export class LensConfigBuilder {
   private apiConvertersByChart = {
     metric: { fromAPItoLensState, fromLensStateToAPI },
   };
-  private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon | undefined;
 
-  // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
-  constructor(dataViewsAPI?: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
-    this.formulaAPI = formulaAPI;
+  constructor(dataViewsAPI?: DataViewsCommon) {
     this.dataViewsAPI = dataViewsAPI;
   }
 
@@ -71,7 +68,6 @@ export class LensConfigBuilder {
     const chartType = isLensLegacyFormat(config) ? config.chartType : config.type;
     const chartBuilderFn = this.charts[chartType];
     const chartConfig = await chartBuilderFn(config as any, {
-      formulaAPI: this.formulaAPI,
       dataViewsAPI: this.dataViewsAPI,
     });
 

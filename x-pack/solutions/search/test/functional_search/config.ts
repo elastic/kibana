@@ -43,5 +43,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('.')],
     screenshots: { directory: resolve(__dirname, 'screenshots') },
+    apps: {
+      ...functionalConfig.get('apps'),
+      searchInferenceEndpoints: {
+        pathname: '/app/elasticsearch/relevance/inference_endpoints',
+      },
+    },
   };
 }

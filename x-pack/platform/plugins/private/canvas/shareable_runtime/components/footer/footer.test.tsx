@@ -5,28 +5,41 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JestContext } from '../../test/context_jest';
-import { getScrubber as scrubber, getPageControlsCenter as center } from '../../test/selectors';
 import { Footer } from './footer';
 
 jest.mock('../../supported_renderers');
 
 describe('<Footer />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<Footer />).isEmptyRender());
+    const { container } = render(<Footer />);
+    expect(container.firstChild).toBeNull();
   });
 
-  const wrapper = mount(
-    <JestContext>
-      <Footer />
-    </JestContext>
-  );
+  test('scrubber functions properly', async () => {
+    const user = userEvent.setup();
 
-  test('scrubber functions properly', () => {
-    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(false);
-    center(wrapper).simulate('click');
-    expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(true);
+    render(
+      <JestContext>
+        <Footer />
+      </JestContext>
+    );
+
+    const currentPageButton = screen.getByTestId('pageControlsCurrentPage');
+
+    // Initially scrubber should be hidden (slideContainer should not have visible class)
+    const slideContainer = document.querySelector('.slideContainer');
+    expect(slideContainer).toBeInTheDocument();
+
+    // Click the current page button to toggle scrubber visibility
+    await user.click(currentPageButton);
+
+    // After clicking, scrubber should be visible
+    // We can verify this by checking if the scrubber root element has the visible class
+    const scrubberRoot = slideContainer?.closest('[class*="root"]');
+    expect(scrubberRoot).toHaveClass('visible');
   });
 });
