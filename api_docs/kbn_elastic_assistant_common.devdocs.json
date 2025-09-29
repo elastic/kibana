@@ -2581,7 +2581,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly defendInsightsPolicyResponseFailure: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsightsPolicyResponseFailure: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -6184,7 +6184,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantModelEvaluation: boolean; defendInsights: boolean; }"
+          "{ assistantModelEvaluation: boolean; defendInsightsPolicyResponseFailure: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -9629,7 +9629,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly defendInsightsPolicyResponseFailure: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsightsPolicyResponseFailure: false; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -10769,7 +10769,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; defendInsightsPolicyResponseFailure: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsightsPolicyResponseFailure: boolean; }, { assistantModelEvaluation: boolean; defendInsightsPolicyResponseFailure: boolean; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,

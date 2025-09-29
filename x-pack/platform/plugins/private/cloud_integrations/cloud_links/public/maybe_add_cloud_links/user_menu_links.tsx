@@ -12,7 +12,7 @@ import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/pub
 import type { CoreStart } from '@kbn/core/public';
 import { AppearanceSelector } from './appearance_selector';
 
-export const createUserMenuLinks = ({
+export const createUserMenuLinks = async ({
   core,
   cloud,
   security,
@@ -22,8 +22,8 @@ export const createUserMenuLinks = ({
   cloud: CloudStart;
   security: SecurityPluginStart;
   isServerless: boolean;
-}): UserMenuLink[] => {
-  const { profileUrl, billingUrl, organizationUrl } = cloud;
+}): Promise<UserMenuLink[]> => {
+  const { profileUrl, organizationUrl } = cloud;
 
   const userMenuLinks = [] as UserMenuLink[];
 
@@ -39,6 +39,7 @@ export const createUserMenuLinks = ({
     });
   }
 
+  const { billingUrl } = await cloud.getPrivilegedUrls();
   if (billingUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {

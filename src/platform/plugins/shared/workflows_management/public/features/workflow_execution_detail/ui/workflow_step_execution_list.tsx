@@ -15,10 +15,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiButton,
   EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
@@ -219,9 +216,6 @@ export const WorkflowStepExecutionList = ({
             )}
           />
         </div>
-        <EuiButton onClick={onClose} css={styles.doneButton}>
-          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-        </EuiButton>
       </>
     );
   } else {
@@ -248,46 +242,18 @@ export const WorkflowStepExecutionList = ({
       justifyContent="flexStart"
       css={styles.container}
     >
-      <EuiFlexItem grow={false}>
-        <header css={styles.header}>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <EuiButtonEmpty iconType="arrowLeft" onClick={onClose} size="xs">
-                  <FormattedMessage
-                    id="workflows.workflowStepExecutionList.backToExecution"
-                    defaultMessage="Back to executions"
-                  />
-                </EuiButtonEmpty>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
-          </EuiFlexGroup>
-        </header>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
       <EuiFlexItem css={styles.content}>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
-      overflow: 'hidden',
-    }),
-  content: css({
+  container: css({
     overflow: 'hidden',
   }),
-  header: css({
-    minHeight: `32px`,
-    display: 'flex',
-    alignItems: 'center',
-  }),
-  doneButton: css({
-    marginTop: 'auto',
-    justifySelf: 'flex-end',
-    flexShrink: 0,
+  content: css({
+    overflow: 'hidden',
   }),
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
     overflow-y: auto;

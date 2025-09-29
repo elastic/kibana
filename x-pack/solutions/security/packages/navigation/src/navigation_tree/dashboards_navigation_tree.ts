@@ -9,10 +9,16 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createDashboardsNavigationTree = (): NodeDefinition => ({
+export const createDashboardsNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityPageName.dashboards,
+  iconV2: 'dashboardApp',
   link: securityLink(SecurityPageName.dashboards),
   renderAs: 'item',
+  sideNavVersion,
   children: [
     {
       id: SecurityPageName.overview,

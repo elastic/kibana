@@ -13,7 +13,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { PreviewTable } from '../../preview_table';
+import { PreviewTable } from '../../shared/preview_table';
 import { LoadingPanel } from '../../../loading_panel';
 import type { MappedSchemaField, SchemaField } from '../types';
 import { isSchemaFieldTyped } from '../types';

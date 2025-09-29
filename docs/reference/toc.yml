@@ -66,6 +66,7 @@ toc:
   - file: commands.md
     children:
       - file: commands/kibana-encryption-keys.md
+      - file: commands/kibana-setup.md
       - file: commands/kibana-verification-code.md
   - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md

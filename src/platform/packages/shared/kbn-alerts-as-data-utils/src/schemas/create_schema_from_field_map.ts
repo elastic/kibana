@@ -347,6 +347,13 @@ const getSchemaFileContents = (lineWriters: Record<string, LineWriter>, schemaPr
 const writeGeneratedFile = (fileName: string, contents: string) => {
   const genFileName = path.join(PLUGIN_DIR, fileName);
   try {
+    // Check if file exists and content is the same
+    if (fs.existsSync(genFileName)) {
+      const existingContent = fs.readFileSync(genFileName, 'utf8');
+      if (existingContent === contents) {
+        return;
+      }
+    }
     fs.writeFileSync(genFileName, contents);
   } catch (err) {
     logError(`error writing file: ${genFileName}: ${err.message}`);

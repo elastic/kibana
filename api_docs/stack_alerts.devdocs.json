@@ -190,7 +190,7 @@
             "section": "def-common.EsqlTable",
             "text": "EsqlTable"
           },
-          ", query: string, isGroupAgg: boolean) => EsqlQueryHits"
+          ", query: string, isGroupAgg: boolean, isPreview?: boolean) => Promise<EsqlQueryHits>"
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
         "deprecated": false,
@@ -238,6 +238,21 @@
             "type": "boolean",
             "tags": [],
             "label": "isGroupAgg",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getEsqlQueryHits.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPreview",
             "description": [],
             "signature": [
               "boolean"
