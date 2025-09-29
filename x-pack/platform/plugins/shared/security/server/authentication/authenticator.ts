@@ -143,6 +143,19 @@ function assertLoginAttempt(attempt: ProviderLoginAttempt) {
       'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
     );
   }
+
+  // Additional validation to ensure provider object exists and has valid properties
+  if (!attempt.provider) {
+    throw new Error('Login attempt must include a provider object.');
+  }
+
+  if ('name' in attempt.provider && (!attempt.provider.name || typeof attempt.provider.name !== 'string')) {
+    throw new Error('Login attempt provider name must be a non-empty string.');
+  }
+
+  if ('type' in attempt.provider && (!attempt.provider.type || typeof attempt.provider.type !== 'string')) {
+    throw new Error('Login attempt provider type must be a non-empty string.');
+  }
 }
 
 function isLoginAttemptWithProviderName(
@@ -298,9 +311,9 @@ export class Authenticator {
     // attempts we may not know what provider exactly can handle that attempt and we have to try
     // every enabled provider of the specified type).
     const providers: Array<[string, BaseAuthenticationProvider]> =
-      isLoginAttemptWithProviderName(attempt) && this.providers.has(attempt.provider.name)
+      isLoginAttemptWithProviderName(attempt) && attempt.provider && this.providers.has(attempt.provider.name)
         ? [[attempt.provider.name, this.providers.get(attempt.provider.name)!]]
-        : isLoginAttemptWithProviderType(attempt)
+        : isLoginAttemptWithProviderType(attempt) && attempt.provider
         ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
             ([, { type }]) => type === attempt.provider.type
           )
@@ -309,9 +322,11 @@ export class Authenticator {
     if (providers.length === 0) {
       this.logger.warn(
         `Login attempt for provider with ${
-          isLoginAttemptWithProviderName(attempt)
+          isLoginAttemptWithProviderName(attempt) && attempt.provider
             ? `name ${attempt.provider.name}`
-            : `type "${(attempt.provider as Record<string, string>).type}"`
+            : isLoginAttemptWithProviderType(attempt) && attempt.provider
+            ? `type "${attempt.provider.type}"`
+            : 'unknown provider'
         } is detected, but it isn't enabled.`
       );
       return AuthenticationResult.notHandled();
