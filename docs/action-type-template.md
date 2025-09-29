@@ -1,8 +1,8 @@
 ---
 navigation_title: <CONNECTOR_NAME>
 applies_to:
-  stack: ga all
-  serverless: ga all
+  stack: ga
+  serverless: ga
 description: Instructions and best practices for creating <CONNECTOR_NAME> in Elastic.
 ---
 
