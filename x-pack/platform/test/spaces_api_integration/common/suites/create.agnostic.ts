@@ -132,17 +132,11 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
+          await loadSavedObjects();
         });
 
         after(async () => {
           await supertest.destroy();
-        });
-
-        beforeEach(async () => {
-          await loadSavedObjects();
-        });
-
-        afterEach(async () => {
           await unloadSavedObjects();
         });
 
