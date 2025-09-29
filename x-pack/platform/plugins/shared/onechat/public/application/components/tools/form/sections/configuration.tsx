@@ -12,6 +12,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
+import { useToolTypes } from '../../../../hooks/tools/use_tool_type_info';
 import type { ToolFormData } from '../types/tool_form_types';
 import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
 import { ToolFormMode } from '../tool_form';
@@ -40,9 +41,19 @@ export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProp
     return toolConfig!.getConfigurationComponent();
   }, [toolConfig]);
 
+  const { toolTypes: serverToolTypes, isLoading: toolTypesLoading } = useToolTypes();
+
   const editableToolTypes = useMemo(() => {
-    return getEditableToolTypes();
-  }, []);
+    let editableTypes = getEditableToolTypes();
+    if (!toolTypesLoading && serverToolTypes) {
+      const serverEnabledEditableTypes = serverToolTypes
+        .filter((st) => st.create)
+        .map((st) => st.type);
+
+      editableTypes = editableTypes.filter((t) => serverEnabledEditableTypes.includes(t.value));
+    }
+    return editableTypes;
+  }, [serverToolTypes, toolTypesLoading]);
 
   return (
     <ToolFormSection
