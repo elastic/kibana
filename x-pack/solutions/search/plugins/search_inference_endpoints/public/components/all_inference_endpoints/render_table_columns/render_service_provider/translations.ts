@@ -17,7 +17,7 @@ export const MIT_LICENSE = i18n.translate(
 export const ELASTIC_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.elastic.description',
   {
-    defaultMessage: 'Runs on GPUs (billed per token)',
+    defaultMessage: 'Runs on GPUs (token-based billing)',
   }
 );
 

@@ -122,6 +122,9 @@ const inferenceEndpoints = [
   },
 ] as InferenceAPIConfigResponse[];
 
+const elasticDescription = 'Runs on GPUs (token-based billing)';
+const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
+
 jest.mock('../../hooks/use_delete_endpoint', () => ({
   useDeleteEndpoint: () => ({
     mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
@@ -152,36 +155,36 @@ describe('When the tabular page is loaded', () => {
 
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('Runs on GPUs (billed per token)');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
     expect(rows[1]).not.toHaveTextContent('elser_model_2');
 
     expect(rows[2]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('Runs on ML Nodes (resource-based billing)');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
     expect(rows[2]).not.toHaveTextContent('.elser_model_2');
 
     expect(rows[3]).toHaveTextContent('Elasticsearch');
-    expect(rows[3]).toHaveTextContent('Runs on ML Nodes (resource-based billing)');
+    expect(rows[3]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[4]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('Runs on GPUs (billed per token)');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[5]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('Runs on GPUs (billed per token)');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[6]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('Runs on GPUs (billed per token)');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[7]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('Runs on GPUs (billed per token)');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[8]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('Runs on ML Nodes (resource-based billing)');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[9]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('Runs on ML Nodes (resource-based billing)');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[10]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('Runs on ML Nodes (resource-based billing)');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[11]).toHaveTextContent('OpenAI');
     expect(rows[11]).toHaveTextContent('.own_model');
