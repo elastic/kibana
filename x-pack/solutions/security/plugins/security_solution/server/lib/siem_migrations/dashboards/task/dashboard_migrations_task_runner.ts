@@ -85,6 +85,9 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       dashboardMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
+      inference: inferenceService,
+      request: this.request,
+      connectorId,
     });
 
     this.telemetry = telemetryClient;
