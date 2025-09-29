@@ -426,7 +426,7 @@ export class IndexUpdateService {
                 },
                 aggregatable: field.aggregatable,
                 searchable: field.searchable,
-                esTypes: field.esTypes,
+                esType: field.esTypes?.at(0),
               },
             } as DatatableColumn;
           })
