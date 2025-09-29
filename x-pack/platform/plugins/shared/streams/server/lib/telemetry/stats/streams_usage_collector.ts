@@ -7,25 +7,16 @@
 
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { Streams } from '@kbn/streams-schema';
-import { hasChangedRetention, isDevMode } from './utils';
+import {
+  hasChangedRetention,
+  isDevMode,
+  percentiles,
+  isClassicStream,
+  isWiredStream,
+  isGroupStream,
+} from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
-const percentiles = (arr: number[], p: number[]) => {
-  const sorted = arr.slice().sort((a, b) => a - b);
-  return p.map((percent) => {
-    if (sorted.length === 0) {
-      return 0;
-    }
-    const pos = (sorted.length - 1) * (percent / 100);
-    const base = Math.floor(pos);
-    const rest = pos - base;
-    if (sorted[base + 1] !== undefined) {
-      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-    }
-    return sorted[base];
-  });
-};
 
 /**
  * Fetches Streams usage statistics for telemetry collection
@@ -69,12 +60,12 @@ export async function fetchStreamsUsageStats({
     // Note: We no longer need defaultRetention since we use schema-based type guards
     const hits = allStreams.hits?.hits ?? [];
     for (const hit of hits) {
-      const definition = (hit._source ?? {}) as Streams.all.Definition;
+      const definition = hit._source ?? {};
 
-      // Use proper type guards from Streams schema
-      const isClassic = Streams.ClassicStream.Definition.is(definition);
-      const isWired = Streams.WiredStream.Definition.is(definition);
-      const isGroup = Streams.GroupStream.Definition.is(definition);
+      // Use lightweight type detection for better telemetry performance
+      const isClassic = isClassicStream(definition);
+      const isWired = isWiredStream(definition);
+      const isGroup = isGroupStream(definition);
 
       if (isClassic) {
         // Presence of a classic stream in `.kibana_streams` implies it has been stored/changed
@@ -193,12 +184,12 @@ export async function fetchStreamsUsageStats({
         let classicCount = 0;
 
         for (const hit of streamDefinitionsResponse.hits?.hits || []) {
-          const definition = (hit._source ?? {}) as Streams.all.Definition;
+          const definition = hit._source ?? {};
 
-          // Use proper type guards from Streams schema (same as main telemetry logic)
-          const isClassic = Streams.ClassicStream.Definition.is(definition);
-          const isWired = Streams.WiredStream.Definition.is(definition);
-          const isGroup = Streams.GroupStream.Definition.is(definition);
+          // Use lightweight type detection for better telemetry performance
+          const isClassic = isClassicStream(definition);
+          const isWired = isWiredStream(definition);
+          const isGroup = isGroupStream(definition);
 
           if (isWired && !isGroup) {
             wiredCount++;
