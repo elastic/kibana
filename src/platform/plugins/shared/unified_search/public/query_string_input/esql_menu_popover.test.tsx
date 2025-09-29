@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { screen, render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/stubs';
@@ -46,13 +46,17 @@ describe('ESQLMenuPopover', () => {
     httpModule.http.get.mockClear();
   });
 
-  it('should render a button', () => {
-    renderESQLPopover();
+  it('should render a button', async () => {
+    await act(async () => {
+      renderESQLPopover();
+    });
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
   });
 
   it('should open a menu when the popover is open', async () => {
-    renderESQLPopover();
+    await act(async () => {
+      renderESQLPopover();
+    });
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
     expect(screen.getByTestId('esql-quick-reference')).toBeInTheDocument();
@@ -62,7 +66,9 @@ describe('ESQLMenuPopover', () => {
   });
 
   it('should have recommended queries if a dataview is passed', async () => {
-    renderESQLPopover(stubIndexPattern);
+    await act(async () => {
+      renderESQLPopover(stubIndexPattern);
+    });
     await userEvent.click(screen.getByRole('button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
@@ -76,7 +82,9 @@ describe('ESQLMenuPopover', () => {
     // Configure the mock to resolve with mockQueries
     httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
 
-    renderESQLPopover(stubIndexPattern);
+    await act(async () => {
+      renderESQLPopover(stubIndexPattern);
+    });
     const esqlQuery = `FROM ${stubIndexPattern.name}`;
 
     // Assert that http.get was called with the correct URL
@@ -104,7 +112,9 @@ describe('ESQLMenuPopover', () => {
     // Configure the mock to reject with an error
     httpModule.http.get.mockRejectedValueOnce(new Error('Network error'));
 
-    renderESQLPopover(stubIndexPattern);
+    await act(async () => {
+      renderESQLPopover(stubIndexPattern);
+    });
     // Assert that http.get was called (even if it failed)
     await waitFor(() => {
       expect(httpModule.http.get).toHaveBeenCalledTimes(1);
@@ -139,7 +149,9 @@ describe('ESQLMenuPopover', () => {
       },
     });
 
-    renderESQLPopover(stubLogstashDataView);
+    await act(async () => {
+      renderESQLPopover(stubLogstashDataView);
+    });
 
     // open the popover and check for recommended queries
     await userEvent.click(screen.getByRole('button'));

@@ -230,9 +230,8 @@ describe('SearchBar', () => {
       })
     );
 
-      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
-      expect(screen.queryByTestId('showQueryBarMenu')).not.toBeInTheDocument();
-
+    expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+    expect(screen.queryByTestId('showQueryBarMenu')).not.toBeInTheDocument();
   });
 
   it('Should render query bar and filter bar', async () => {
