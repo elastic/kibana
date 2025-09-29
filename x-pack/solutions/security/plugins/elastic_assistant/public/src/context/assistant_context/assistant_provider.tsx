@@ -35,10 +35,12 @@ export function AssistantProvider({
   children,
   isServerless,
   openChatTrigger$,
+  completeOpenChat,
 }: {
   children: React.ReactElement;
   isServerless?: boolean;
   openChatTrigger$: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat: () => void;
 }) {
   const {
     application: { navigateToApp, currentAppId$, getUrlForApp },
@@ -117,6 +119,7 @@ export function AssistantProvider({
     getUrlForApp,
     openChatTrigger$,
     settings,
+    completeOpenChat,
   });
 
   useEffect(() => {

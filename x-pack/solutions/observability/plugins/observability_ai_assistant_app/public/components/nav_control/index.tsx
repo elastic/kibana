@@ -122,13 +122,14 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((event) => {
       if (event.assistant === 'observability') {
         service.conversations.openNewConversation({ messages: [] });
+        aiAssistantManagementSelection.completeOpenChat();
       }
     });
 
     return () => {
       openChatSubscription.unsubscribe();
     };
-  }, [aiAssistantManagementSelection.openChat$, service.conversations]);
+  }, [aiAssistantManagementSelection, service.conversations]);
 
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$

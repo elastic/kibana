@@ -27,8 +27,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability, openChatTrigger$ } =
-    useAssistantContext();
+  const {
+    chrome,
+    showAssistantOverlay,
+    assistantAvailability,
+    openChatTrigger$,
+    completeOpenChat,
+  } = useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -47,10 +52,11 @@ export const AssistantNavLink: FC = () => {
     const sub = openChatTrigger$.subscribe((event) => {
       if (event.assistant === 'security') {
         showOverlay();
+        completeOpenChat?.();
       }
     });
     return () => sub.unsubscribe();
-  }, [openChatTrigger$, showOverlay]);
+  }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
   if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
     return null;

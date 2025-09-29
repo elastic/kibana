@@ -93,6 +93,7 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
+    const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
@@ -107,7 +108,8 @@ export class ElasticAssistantPublicPlugin
                 <AssistantSpaceIdProvider>
                   <AssistantProvider
                     isServerless={this.isServerless}
-                    openChatTrigger$={services.aiAssistantManagementSelection.openChat$}
+                    openChatTrigger$={openChat$}
+                    completeOpenChat={completeOpenChat}
                   >
                     <Suspense fallback={null}>
                       <AssistantNavLink />

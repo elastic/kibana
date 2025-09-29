@@ -19,7 +19,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
@@ -32,6 +32,7 @@ export interface AIAssistantManagementSelectionPluginPublicSetup {}
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
   openChat$: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat(): void;
 }
 
 export interface SetupDependencies {
@@ -132,7 +133,12 @@ export class AIAssistantManagementPlugin
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
       });
-    const openChatSubject = new ReplaySubject<{ assistant: AIAssistantType }>(1);
+    const openChatSubject = new BehaviorSubject<{ assistant: AIAssistantType }>({
+      assistant: AIAssistantType.Default,
+    });
+    const completeOpenChat = () => {
+      openChatSubject.next({ assistant: AIAssistantType.Default });
+    };
 
     const isAiAssistantManagementSelectionEnabled =
       coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
@@ -190,6 +196,7 @@ export class AIAssistantManagementPlugin
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
       openChat$: openChatSubject.asObservable(),
+      completeOpenChat,
     };
   }
 

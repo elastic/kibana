@@ -98,6 +98,7 @@ export interface AssistantProviderProps {
   userProfileService: UserProfileService;
   chrome: ChromeStart;
   openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat?: () => void;
 }
 
 export interface UserAvatar {
@@ -158,6 +159,7 @@ export interface UseAssistantContext {
   userProfileService: UserProfileService;
   chrome: ChromeStart;
   openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat?: () => void;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -196,6 +198,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     userProfileService,
     chrome,
     openChatTrigger$,
+    completeOpenChat,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -365,6 +368,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       userProfileService,
       chrome,
       openChatTrigger$,
+      completeOpenChat,
     }),
     [
       actionTypeRegistry,
@@ -407,6 +411,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       userProfileService,
       chrome,
       openChatTrigger$,
+      completeOpenChat,
     ]
   );
 
