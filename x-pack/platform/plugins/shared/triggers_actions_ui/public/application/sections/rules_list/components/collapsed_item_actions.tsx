@@ -340,6 +340,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           ),
         },
       ];
+
   return (
     item.isEditable && (
       <>
