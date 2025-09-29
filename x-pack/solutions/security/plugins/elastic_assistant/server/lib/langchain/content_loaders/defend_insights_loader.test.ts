@@ -61,6 +61,6 @@ describe.skip('defend_insights_loader', () => {
   it('getDefendInsightsDocsCount returns correct count', async () => {
     const result = await getDefendInsightsDocsCount({ logger: loggerMock.create() });
 
-    expect(result).toBe(8);
+    expect(result).toBe(14);
   });
 });
