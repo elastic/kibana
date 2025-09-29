@@ -255,7 +255,7 @@ export const PrivMonUtils = (
   const getIntegrationMonitoringSource = async (
     integrationName: string
   ): Promise<MonitoringEntitySource> => {
-    const res = await api.listEntitySources({
+    const res = await entityAnalyticsApi.listEntitySources({
       query: {},
     });
 
