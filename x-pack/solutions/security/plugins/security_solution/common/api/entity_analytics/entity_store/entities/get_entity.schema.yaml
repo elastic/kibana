@@ -1,0 +1,39 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Get Single Entity
+paths:
+  /api/entity_store/entities/{entityType}/{entityId}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetEntity
+      summary: Get a single entity from Entity Store
+      description: >
+        Retrieve a single entity by its ID and type from the Entity Store.
+        
+        Returns the complete entity record including all fields and metadata.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the entity
+      responses:
+        '200':
+          description: Entity retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/Entity'
+        '404':
+          description: Entity not found
+        '503':
+          description: Entity Store engine not running or not initialized
