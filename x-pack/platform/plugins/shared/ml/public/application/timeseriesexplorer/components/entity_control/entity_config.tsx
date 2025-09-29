@@ -14,11 +14,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiPopover,
   EuiRadioGroup,
   EuiSwitch,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -198,7 +197,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
 
           <EuiFlexItem grow={false} style={{ width: '16px' }}>
             {isModelPlotEnabled && !config?.anomalousOnly ? (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={
                   <FormattedMessage
@@ -206,13 +205,13 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                     defaultMessage="The list contains values from the model plot results."
                   />
                 }
-              >
-                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
-              </EuiToolTip>
+                type="info"
+                color="subdued"
+              />
             ) : null}
 
             {!isModelPlotEnabled && !config?.applyTimeRange ? (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={
                   <FormattedMessage
@@ -220,9 +219,9 @@ export const EntityConfig: FC<EntityConfigProps> = ({
                     defaultMessage="The list contains values from all anomalies created during the lifetime of the job."
                   />
                 }
-              >
-                <EuiIcon tabIndex={0} type="info" color={'subdued'} />
-              </EuiToolTip>
+                type="info"
+                color="subdued"
+              />
             ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>

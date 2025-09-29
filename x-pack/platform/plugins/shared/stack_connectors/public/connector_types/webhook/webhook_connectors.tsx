@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -17,10 +17,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import * as i18n from './translations';
-import { AuthConfig } from '../../common/auth/auth_config';
 
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
+
+const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -28,7 +29,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
-
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -74,7 +74,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <AuthConfig readOnly={readOnly} isPfxEnabled={isPfxEnabled} />
+      <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <LazyLoadedAuthConfig
+          readOnly={readOnly}
+          isPfxEnabled={isPfxEnabled}
+          isOAuth2Enabled={true}
+        />
+      </React.Suspense>
     </>
   );
 };

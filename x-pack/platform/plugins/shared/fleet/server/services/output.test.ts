@@ -166,6 +166,7 @@ function getMockedSoClient(
         return mockOutputSO('existing-es-output', {
           type: 'elasticsearch',
           is_default: false,
+          write_to_logs_streams: false,
         });
       }
 
@@ -1286,6 +1287,15 @@ describe('Output Service', () => {
       );
     });
 
+    it('should allow to update write_to_logs_streams field in preconfigured output outside from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
+        write_to_logs_streams: true,
+        ssl: { certificate: '', certificate_authorities: [] },
+      });
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Allow to update a preconfigured output from preconfiguration', async () => {
       const soClient = getMockedSoClient();
       await outputService.update(
@@ -1497,6 +1507,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'logstash',
         hosts: ['test:4343'],
+        write_to_logs_streams: false,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
@@ -1504,6 +1515,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        write_to_logs_streams: null,
       });
     });
 
@@ -1878,6 +1890,7 @@ describe('Output Service', () => {
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
+        write_to_logs_streams: null,
       });
     });
 

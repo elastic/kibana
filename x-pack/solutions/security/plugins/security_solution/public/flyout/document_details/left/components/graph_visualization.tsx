@@ -27,8 +27,13 @@ import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+  GENERIC_ENTITY_PREVIEW_BANNER,
+} from '../../preview/constants';
 import { useToasts } from '../../../../common/lib/kibana';
+import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -79,8 +84,21 @@ export const GraphVisualization: React.FC = memo(() => {
             id: documentData.id,
             indexName: documentData.index,
             scopeId,
-            banner: documentData.type === 'alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            banner:
+              getNodeDocumentMode(node) === 'single-alert'
+                ? ALERT_PREVIEW_BANNER
+                : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
+          },
+        });
+      } else if (getNodeDocumentMode(node) === 'single-entity' && documentData) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: documentData.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
           },
         });
       } else {

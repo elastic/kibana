@@ -553,7 +553,9 @@ const ESQLEditorInternal = function ESQLEditor({
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
-        if (activeSolutionId) {
+        // Only fetch recommendations if there's an active solutionId and a non-empty query
+        // Otherwise the route will return an error
+        if (activeSolutionId && queryString.trim() !== '') {
           return (
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,
@@ -951,10 +953,6 @@ const ESQLEditorInternal = function ESQLEditor({
                       editorModel.current = model;
                       await addLookupIndicesDecorator();
                     }
-
-                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
-                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
-                    });
 
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText

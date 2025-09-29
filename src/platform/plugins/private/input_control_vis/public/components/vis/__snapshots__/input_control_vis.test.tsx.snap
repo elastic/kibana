@@ -1,344 +1,718 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
-<div
-  css="unknown styles"
->
-  <div
-    css="unknown styles"
-  >
-    <EuiFlexGroup
-      wrap={true}
+<div>
+  <div>
+    <div
+      class="eui-scrollBar css-n64vsg-InputControlVis"
     >
-      <EuiFlexItem
-        css="unknown styles"
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
+      <div
+        class="css-7edsv3-icvContainerStyles"
       >
-        <injectIntl(ListControlUi)
-          controlIndex={0}
-          fetchOptions={[Function]}
-          formatOptionLabel={[Function]}
-          id="mock-list-control"
-          label="list control"
-          multiselect={true}
-          options={
-            Array [
-              "choice1",
-              "choice2",
-            ]
-          }
-          selectedOptions={Array []}
-          stageFilter={[Function]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      wrap={true}
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="inputControlSubmitBtn"
-          disabled={false}
-          fill={true}
-          onClick={[Function]}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Apply changes"
-            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlCancelBtn"
-          disabled={false}
-          onClick={[Function]}
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
+            data-test-subj="inputControlItem"
+          >
+            <span
+              class="euiThemeProvider emotion-euiColorMode-light"
+            >
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                data-test-subj="inputControl0"
+                id="mock-list-control-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                    for="mock-list-control"
+                    id="mock-list-control-label"
+                  >
+                    list control
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiComboBox emotion-euiComboBox"
+                    data-test-subj="listControlSelect0"
+                  >
+                    <div
+                      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+                    >
+                      <div
+                        class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                          style="--euiFormControlRightIconsCount: 1;"
+                        >
+                          <div
+                            class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect-plainText"
+                            data-test-subj="comboBoxInput"
+                            tabindex="-1"
+                          >
+                            <input
+                              aria-autocomplete="list"
+                              aria-controls=""
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-invalid="false"
+                              autocomplete="off"
+                              class="euiComboBox__input emotion-euiComboBoxInput"
+                              data-test-subj="comboBoxSearchInput"
+                              focusable="false"
+                              id="mock-list-control"
+                              placeholder="Select..."
+                              role="combobox"
+                              style="inline-size: 100%;"
+                              value=""
+                            />
+                          </div>
+                          <div
+                            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+                          >
+                            <button
+                              aria-label="Open list of options"
+                              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                              data-test-subj="comboBoxToggleListButton"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="arrowDown"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Cancel changes"
-            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlClearBtn"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Clear form"
-            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="inputControlSubmitBtn"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Apply changes
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+              data-test-subj="inputControlCancelBtn"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Cancel changes
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlClearBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Clear form
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Clear btns enabled when there are values 1`] = `
-<div
-  css="unknown styles"
->
-  <div
-    css="unknown styles"
-  >
-    <EuiFlexGroup
-      wrap={true}
+<div>
+  <div>
+    <div
+      class="eui-scrollBar css-n64vsg-InputControlVis"
     >
-      <EuiFlexItem
-        css="unknown styles"
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
+      <div
+        class="css-7edsv3-icvContainerStyles"
       >
-        <injectIntl(ListControlUi)
-          controlIndex={0}
-          fetchOptions={[Function]}
-          formatOptionLabel={[Function]}
-          id="mock-list-control"
-          label="list control"
-          multiselect={true}
-          options={
-            Array [
-              "choice1",
-              "choice2",
-            ]
-          }
-          selectedOptions={Array []}
-          stageFilter={[Function]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      wrap={true}
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="inputControlSubmitBtn"
-          disabled={true}
-          fill={true}
-          onClick={[Function]}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Apply changes"
-            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlCancelBtn"
-          disabled={true}
-          onClick={[Function]}
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
+            data-test-subj="inputControlItem"
+          >
+            <span
+              class="euiThemeProvider emotion-euiColorMode-light"
+            >
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                data-test-subj="inputControl0"
+                id="mock-list-control-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                    for="mock-list-control"
+                    id="mock-list-control-label"
+                  >
+                    list control
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiComboBox emotion-euiComboBox"
+                    data-test-subj="listControlSelect0"
+                  >
+                    <div
+                      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+                    >
+                      <div
+                        class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                          style="--euiFormControlRightIconsCount: 1;"
+                        >
+                          <div
+                            class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect-plainText"
+                            data-test-subj="comboBoxInput"
+                            tabindex="-1"
+                          >
+                            <input
+                              aria-autocomplete="list"
+                              aria-controls=""
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-invalid="false"
+                              autocomplete="off"
+                              class="euiComboBox__input emotion-euiComboBoxInput"
+                              data-test-subj="comboBoxSearchInput"
+                              focusable="false"
+                              id="mock-list-control"
+                              placeholder="Select..."
+                              role="combobox"
+                              style="inline-size: 100%;"
+                              value=""
+                            />
+                          </div>
+                          <div
+                            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+                          >
+                            <button
+                              aria-label="Open list of options"
+                              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                              data-test-subj="comboBoxToggleListButton"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="arrowDown"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Cancel changes"
-            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlClearBtn"
-          disabled={false}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Clear form"
-            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              data-test-subj="inputControlSubmitBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Apply changes
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlCancelBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Cancel changes
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+              data-test-subj="inputControlClearBtn"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Clear form
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Renders list control 1`] = `
-<div
-  css="unknown styles"
->
-  <div
-    css="unknown styles"
-  >
-    <EuiFlexGroup
-      wrap={true}
+<div>
+  <div>
+    <div
+      class="eui-scrollBar css-n64vsg-InputControlVis"
     >
-      <EuiFlexItem
-        css="unknown styles"
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
+      <div
+        class="css-7edsv3-icvContainerStyles"
       >
-        <injectIntl(ListControlUi)
-          controlIndex={0}
-          fetchOptions={[Function]}
-          formatOptionLabel={[Function]}
-          id="mock-list-control"
-          label="list control"
-          multiselect={true}
-          options={
-            Array [
-              "choice1",
-              "choice2",
-            ]
-          }
-          selectedOptions={Array []}
-          stageFilter={[Function]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      wrap={true}
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="inputControlSubmitBtn"
-          disabled={true}
-          fill={true}
-          onClick={[Function]}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Apply changes"
-            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlCancelBtn"
-          disabled={true}
-          onClick={[Function]}
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
+            data-test-subj="inputControlItem"
+          >
+            <span
+              class="euiThemeProvider emotion-euiColorMode-light"
+            >
+              <div
+                class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+                data-test-subj="inputControl0"
+                id="mock-list-control-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                    for="mock-list-control"
+                    id="mock-list-control-label"
+                  >
+                    list control
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiComboBox emotion-euiComboBox"
+                    data-test-subj="listControlSelect0"
+                  >
+                    <div
+                      class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+                    >
+                      <div
+                        class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                          style="--euiFormControlRightIconsCount: 1;"
+                        >
+                          <div
+                            class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect-plainText"
+                            data-test-subj="comboBoxInput"
+                            tabindex="-1"
+                          >
+                            <input
+                              aria-autocomplete="list"
+                              aria-controls=""
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-invalid="false"
+                              autocomplete="off"
+                              class="euiComboBox__input emotion-euiComboBoxInput"
+                              data-test-subj="comboBoxSearchInput"
+                              focusable="false"
+                              id="mock-list-control"
+                              placeholder="Select..."
+                              role="combobox"
+                              style="inline-size: 100%;"
+                              value=""
+                            />
+                          </div>
+                          <div
+                            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+                          >
+                            <button
+                              aria-label="Open list of options"
+                              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                              data-test-subj="comboBoxToggleListButton"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="arrowDown"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Cancel changes"
-            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlClearBtn"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Clear form"
-            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              data-test-subj="inputControlSubmitBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Apply changes
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlCancelBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Cancel changes
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlClearBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Clear form
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
 
 exports[`Renders range control 1`] = `
-<div
-  css="unknown styles"
->
-  <div
-    css="unknown styles"
-  >
-    <EuiFlexGroup
-      wrap={true}
+<div>
+  <div>
+    <div
+      class="eui-scrollBar css-n64vsg-InputControlVis"
     >
-      <EuiFlexItem
-        css="unknown styles"
-        data-test-subj="inputControlItem"
-        key="mock-range-control"
+      <div
+        class="css-7edsv3-icvContainerStyles"
       >
-        <RangeControl
-          control={
-            Object {
-              "format": [Function],
-              "id": "mock-range-control",
-              "isEnabled": [Function],
-              "label": "range control",
-              "max": 100,
-              "min": 0,
-              "options": Object {
-                "decimalPlaces": 0,
-                "step": 1,
-              },
-              "type": "range",
-              "value": Object {
-                "max": 0,
-                "min": 0,
-              },
-            }
-          }
-          controlIndex={0}
-          stageFilter={[Function]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup
-      wrap={true}
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="inputControlSubmitBtn"
-          disabled={true}
-          fill={true}
-          onClick={[Function]}
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Apply changes"
-            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlCancelBtn"
-          disabled={true}
-          onClick={[Function]}
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
+            data-test-subj="inputControlItem"
+          >
+            <div
+              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+              data-test-subj="inputControl0"
+              id="mock-range-control-row"
+            >
+              <div
+                class="euiFormRow__labelWrapper"
+              >
+                <label
+                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                  for="mock-range-control"
+                  id="mock-range-control-label"
+                >
+                  range control
+                </label>
+              </div>
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <div
+                  class="euiFormRow emotion-euiFormRow"
+                  id="generated-id-row"
+                >
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <div
+                      class="euiRangeWrapper euiDualRange emotion-euiRangeWrapper-euiDualRange"
+                    >
+                      <div
+                        class="euiFormControlLayout emotion-euiFormControlLayout"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-label="Range minimum"
+                            class="euiFieldNumber euiRangeInput euiRangeInput--min emotion-euiFieldNumber-euiRangeInput"
+                            max="100"
+                            min="0"
+                            name="undefined-minValue"
+                            step="1"
+                            style="inline-size: calc(12px + 0ch + 2em + 0px);"
+                            type="number"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                      <div
+                        class="euiRange__slimHorizontalSpacer emotion-euiRange__slimHorizontalSpacer"
+                      />
+                      <div
+                        aria-hidden="true"
+                        class="euiRangeTrack emotion-euiRangeTrack-hasTicks"
+                      >
+                        <div
+                          class="euiRangeTicks emotion-euiRangeTicks-regular-isCustom"
+                        >
+                          <button
+                            class="euiRangeTick emotion-euiRangeTick-isCustom-hasPseudoTickMark-regular"
+                            style="inset-inline-start: calc(NaN% + 8px);"
+                            tabindex="-1"
+                            title="0"
+                            type="button"
+                            value="0"
+                          >
+                            0
+                          </button>
+                          <button
+                            class="euiRangeTick emotion-euiRangeTick-isCustom-hasPseudoTickMark-regular"
+                            style="inset-inline-start: calc(-Infinity% + 8px);"
+                            tabindex="-1"
+                            title="100"
+                            type="button"
+                            value="100"
+                          >
+                            100
+                          </button>
+                        </div>
+                        <input
+                          aria-hidden="true"
+                          class="euiRangeSlider euiDualRange__slider emotion-euiRangeSlider-hasTicks-hasRange-euiDualRange__slider"
+                          id="generated-id"
+                          max="100"
+                          min="0"
+                          step="1"
+                          tabindex="-1"
+                          type="range"
+                          value=""
+                        />
+                        <div
+                          aria-disabled="false"
+                          aria-valuemax="0"
+                          aria-valuemin="0"
+                          aria-valuenow="0"
+                          class="euiRangeThumb emotion-euiRangeThumb-hasTicks"
+                          role="slider"
+                          style="inset-inline-start: 0;"
+                          tabindex="-1"
+                        />
+                        <div
+                          aria-disabled="false"
+                          aria-valuemax="100"
+                          aria-valuemin="0"
+                          aria-valuenow="0"
+                          class="euiRangeThumb emotion-euiRangeThumb-hasTicks"
+                          role="slider"
+                          style="inset-inline-start: 0;"
+                          tabindex="-1"
+                        />
+                      </div>
+                      <div
+                        class="euiRange__slimHorizontalSpacer emotion-euiRange__slimHorizontalSpacer"
+                      />
+                      <div
+                        class="euiFormControlLayout emotion-euiFormControlLayout"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-label="Range maximum"
+                            class="euiFieldNumber euiRangeInput euiRangeInput--max emotion-euiFieldNumber-euiRangeInput"
+                            max="100"
+                            min="0"
+                            name="undefined-maxValue"
+                            step="1"
+                            style="inline-size: calc(12px + 0ch + 2em + 0px);"
+                            type="number"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Cancel changes"
-            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          data-test-subj="inputControlClearBtn"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Clear form"
-            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              data-test-subj="inputControlSubmitBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Apply changes
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlCancelBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Cancel changes
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
+              data-test-subj="inputControlClearBtn"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Clear form
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

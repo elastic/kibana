@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimeRange } from '@kbn/data-plugin/common';
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
 import { DIMENSIONS_COLUMN } from './constants';
@@ -18,7 +17,6 @@ interface CreateESQLQueryParams {
   instrument?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
-  timeRange?: TimeRange;
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -26,7 +24,6 @@ const separator = '\u203A'.normalize('NFC');
 export function createESQLQuery({
   index = 'metrics-*',
   instrument,
-  timeRange,
   dimensions = [],
   metricField,
   filters,
@@ -60,23 +57,19 @@ export function createESQLQuery({
       : (query) => query,
     instrument === 'counter'
       ? stats(
-          `SUM(RATE(??metricField)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${
+          `SUM(RATE(??metricField)) BY BUCKET(@timestamp, 100, \?_tstart, \?_tend)${
             dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
           }`,
           {
             metricField,
-            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
-            _tend: timeRange?.to ?? 'NOW()',
           }
         )
       : stats(
-          `AVG(??metricField) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend) ${
+          `AVG(??metricField) BY BUCKET(@timestamp, 100, \?_tstart, \?_tend) ${
             dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
           }`,
           {
             metricField,
-            _tstart: timeRange?.from ?? 'NOW() - 15 minute',
-            _tend: timeRange?.to ?? 'NOW()',
           }
         ),
     ...(dimensions.length > 0

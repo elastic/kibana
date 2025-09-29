@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiHealth,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPage,
   EuiPageBody,
@@ -63,9 +63,7 @@ const getNodeTooltip = (node) => {
   if (nodeTypeLabel) {
     return (
       <>
-        <EuiToolTip position="bottom" content={nodeTypeLabelContent}>
-          <EuiIcon type={nodeTypeClassIcon} />
-        </EuiToolTip>{' '}
+        <EuiIconTip position="bottom" content={nodeTypeLabelContent} type={nodeTypeClassIcon} />{' '}
         &nbsp;
       </>
     );

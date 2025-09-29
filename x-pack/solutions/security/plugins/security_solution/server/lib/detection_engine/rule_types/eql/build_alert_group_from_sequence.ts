@@ -82,7 +82,10 @@ export const buildAlertGroupFromSequence = ({
     ruleExecutionLogger,
     publicBaseUrl,
   } = sharedParams;
-  const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
+  const sequenceWithoutMissingEvents = sequence.events.filter((event) => event.missing !== true);
+  const ancestors: Ancestor[] = sequenceWithoutMissingEvents.flatMap((event) =>
+    buildAncestors(event)
+  );
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return { shellAlert: undefined, buildingBlocks: [] };
   }
@@ -93,7 +96,7 @@ export const buildAlertGroupFromSequence = ({
   // since that's when the group ID is determined.
   let baseAlerts: DetectionAlertLatest[] = [];
   try {
-    baseAlerts = sequence.events.map((event) =>
+    baseAlerts = sequenceWithoutMissingEvents.map((event) =>
       transformHitToAlert({
         sharedParams,
         doc: event,

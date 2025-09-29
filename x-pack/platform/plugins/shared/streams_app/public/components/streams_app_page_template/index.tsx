@@ -26,17 +26,22 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
-StreamsAppPageTemplate.Body = (props: EuiPageSectionProps) => (
+StreamsAppPageTemplate.Body = ({
+  noPadding,
+  ...props
+}: EuiPageSectionProps & { noPadding?: boolean }) => (
   <EuiPageTemplate.Section
     grow
     css={css`
       overflow-y: auto;
+      ${noPadding ? 'padding: 0px;' : ''}
     `}
     contentProps={{
       css: css`
         display: flex;
         flex-direction: column;
         height: 100%;
+        ${noPadding ? 'padding: 0px;' : ''}
       `,
     }}
     {...props}
