@@ -157,7 +157,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '40%',
+        width: '45%',
         render: (name: string, item) => (
           <div
             css={css`
@@ -227,7 +227,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Trigger',
-        width: '15%',
+        width: '16%',
         render: (value: any, item: WorkflowListItemDto) => (
           <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
         ),
@@ -258,7 +258,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Enabled',
         field: 'enabled',
-        width: '8%',
+        width: '70px',
         render: (value, item) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -301,7 +301,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
       {
         name: '',
-        width: '10%',
+        width: '120px',
         actions: [
           {
             isPrimary: true,
