@@ -1489,7 +1489,7 @@
               },
               "> | undefined; fieldAttrs?: ",
               "FieldAttrsAsObject",
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,

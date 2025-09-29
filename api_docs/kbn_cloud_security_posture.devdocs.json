@@ -1534,17 +1534,6 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.CloudSetupConfig.cloudConnectorEnabledVersion",
-            "type": "string",
-            "tags": [],
-            "label": "cloudConnectorEnabledVersion",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.CloudSetupConfig.showCloudTemplates",
             "type": "boolean",
             "tags": [],

@@ -21,10 +21,12 @@ import {
   merge,
   withLatestFrom,
   startWith,
-  type Observable,
+  Observable,
+  distinctUntilChanged,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import { useEuiTheme } from '@elastic/eui';
 import { useChartLayers } from './use_chart_layers';
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -37,6 +39,7 @@ export type LensProps = Pick<
   | 'executionContext'
   | 'onLoad'
 >;
+
 export const useLensProps = ({
   title,
   query,
@@ -48,6 +51,7 @@ export const useLensProps = ({
   searchSessionId,
   discoverFetch$,
   abortController,
+  chartRef,
 }: {
   title: string;
   query: string;
@@ -56,8 +60,10 @@ export const useLensProps = ({
   unit?: MetricUnit;
   getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
+  chartRef?: React.RefObject<HTMLDivElement>;
   abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
+  const { euiTheme } = useEuiTheme();
   const chartLayers = useChartLayers({
     query,
     seriesType,
@@ -71,7 +77,7 @@ export const useLensProps = ({
   const attributes$ = useRef(new BehaviorSubject<LensAttributes | undefined>(undefined));
   const lensParams = useMemo<LensConfig | undefined>(
     () =>
-      chartLayers
+      chartLayers.length > 0
         ? {
             chartType: 'xy',
             dataset: {
@@ -127,26 +133,47 @@ export const useLensProps = ({
 
   useEffect(() => {
     const attributesCurrent = attributes$.current;
+    const chartRefCurrent = chartRef?.current;
+
+    // progressively load Lens when the chart becomes visible
+    const intersecting$ = new Observable<boolean>((subscriber) => {
+      const observer = new IntersectionObserver(
+        ([entry]) => subscriber.next(entry.isIntersecting),
+        { threshold: 0.1, rootMargin: euiTheme.size.base }
+      );
+
+      if (chartRefCurrent) {
+        observer.observe(chartRefCurrent);
+      } else {
+        subscriber.next(true);
+        subscriber.complete();
+      }
+
+      return () => observer.disconnect();
+    }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged());
+
     const subscription = merge(
       discoverFetch$,
       // Emit the current attributes value immediately to handle cases where
       // attributes are already set but discoverFetch$ emitted before this hook mounted.
       // This ensures we don't miss an update that occurred between unmount and mount.
-      attributesCurrent.pipe(startWith(attributesCurrent.value))
+      attributesCurrent.pipe(startWith(attributesCurrent.value)),
+      intersecting$
     )
       .pipe(
         // prevent rapid successive updates
         debounceTime(100),
-        withLatestFrom(attributesCurrent),
-        filter(([, attr]) => !!attr)
+        withLatestFrom(attributesCurrent, intersecting$),
+        filter(([, attr, isIntersecting]) => {
+          return !!attr && isIntersecting;
+        })
       )
       .subscribe(() => updateLensPropsContext());
 
     return () => {
-      attributesCurrent.complete();
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, updateLensPropsContext]);
+  }, [discoverFetch$, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
   return lensPropsContext;
 };

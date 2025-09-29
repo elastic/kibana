@@ -17,6 +17,11 @@ export interface EndpointModelInfoProps {
   endpointInfo: InferenceInferenceEndpointInfo;
 }
 
+const descriptions: Record<string, string> = {
+  [ServiceProviderKeys.elastic]: i18n.TOKEN_BASED_BILLING_DESCRIPTION,
+  [ServiceProviderKeys.elasticsearch]: i18n.RESOURCE_BASED_BILLING_DESCRIPTION,
+};
+
 export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
   const serviceSettings = endpointInfo.service_settings;
   const modelId =
@@ -27,6 +32,9 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
       : undefined;
 
   const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
+  const description = endpointInfo?.inference_id.startsWith('.')
+    ? descriptions[endpointInfo?.service ?? '']
+    : undefined;
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
@@ -35,7 +43,7 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
           <EuiFlexGroup gutterSize="xs" direction="row">
             <EuiFlexItem grow={0}>
               <EuiText size="s" color="subdued">
-                {modelId}
+                {description ?? modelId}
               </EuiText>
             </EuiFlexItem>
             {isEligibleForMITBadge ? (
