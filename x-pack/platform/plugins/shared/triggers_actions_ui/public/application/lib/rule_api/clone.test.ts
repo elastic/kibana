@@ -90,7 +90,6 @@ describe('cloneRule', () => {
           "status": "pending",
         },
         "id": "12/3",
-        "isInternallyManaged": false,
         "isSnoozedUntil": undefined,
         "muteAll": undefined,
         "mutedInstanceIds": undefined,

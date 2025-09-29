@@ -88,7 +88,6 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   next_run: nextRun,
   alert_delay: alertDelay,
   flapping,
-  isInternallyManaged,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -113,7 +112,6 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
-  isInternallyManaged: Boolean(isInternallyManaged),
   ...rest,
 });
 
