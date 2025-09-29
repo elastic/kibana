@@ -8188,6 +8188,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streamlang-tests@link:x-pack/platform/packages/shared/kbn-streamlang-tests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streamlang@link:x-pack/platform/packages/shared/kbn-streamlang":
   version "0.0.0"
   uid ""
