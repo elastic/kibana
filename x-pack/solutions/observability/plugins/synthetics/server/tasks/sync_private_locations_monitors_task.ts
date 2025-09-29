@@ -45,6 +45,7 @@ interface TaskState extends Record<string, unknown> {
   lastTotalParams: number;
   lastTotalMWs: number;
   hasAlreadyDoneCleanup: boolean;
+  maxCleanUpRetries: number;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -95,6 +96,7 @@ export class SyncPrivateLocationMonitorsTask {
       lastTotalParams: taskInstance.state.lastTotalParams || 0,
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
+      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
     };
 
     try {
@@ -415,9 +417,15 @@ export class SyncPrivateLocationMonitorsTask {
         'Skipping cleanup of duplicated package policies as it has already been done once'
       );
       return { performSync };
-    } else {
-      this.debugLog('Starting cleanup of duplicated package policies');
+    } else if (taskState.maxCleanUpRetries <= 0) {
+      this.debugLog(
+        'Skipping cleanup of duplicated package policies as max retries have been reached'
+      );
+      taskState.hasAlreadyDoneCleanup = true;
+      taskState.maxCleanUpRetries = 3;
+      return { performSync };
     }
+    this.debugLog('Starting cleanup of duplicated package policies');
     const { fleet } = this.serverSetup.pluginsStart;
     const { logger } = this.serverSetup;
 
@@ -488,8 +496,17 @@ export class SyncPrivateLocationMonitorsTask {
         });
       }
       taskState.hasAlreadyDoneCleanup = true;
+      taskState.maxCleanUpRetries = 3;
       return { performSync };
     } catch (e) {
+      taskState.maxCleanUpRetries -= 1;
+      if (taskState.maxCleanUpRetries <= 0) {
+        this.debugLog(
+          'Skipping cleanup of duplicated package policies as max retries have been reached'
+        );
+        taskState.hasAlreadyDoneCleanup = true;
+        taskState.maxCleanUpRetries = 3;
+      }
       logger.error(
         '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
         { error: e }
