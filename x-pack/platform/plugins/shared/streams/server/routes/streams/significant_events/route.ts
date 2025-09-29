@@ -70,11 +70,6 @@ const previewSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
-
     const {
       body: { query },
       path: { name },
