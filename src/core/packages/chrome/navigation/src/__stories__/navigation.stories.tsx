@@ -31,7 +31,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
   }
 
   div.side-nav,
-  div.side_panel {
+  div.side-nav-panel {
     height: 100vh;
   }
 `;
