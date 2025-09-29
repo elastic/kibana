@@ -7,7 +7,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-qz4jpu-SideNav"
+      class="side-nav css-1j51av1-SideNav"
     >
       <div
         class="css-1aomi1g-wrapperStyles"

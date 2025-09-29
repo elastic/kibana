@@ -7,7 +7,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-gz3nn4-SideNav"
+      class="side-nav css-yv8mab-SideNav"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
