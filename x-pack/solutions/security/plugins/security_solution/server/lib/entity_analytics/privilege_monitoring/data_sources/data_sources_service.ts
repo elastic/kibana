@@ -18,7 +18,7 @@ export const createDataSourcesService = (
 ) => {
   const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const indexSyncService = createIndexSyncService(dataClient);
+  const indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
   const integrationsSyncService = createIntegrationsSyncService(dataClient);
   const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
