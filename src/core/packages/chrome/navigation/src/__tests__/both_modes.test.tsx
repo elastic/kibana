@@ -42,6 +42,8 @@ describe('Both modes', () => {
   let restoreWindowSize: () => void;
 
   const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+  const originalScrollIntoView = Element.prototype.scrollIntoView;
+  const scrollIntoViewMock = jest.fn();
 
   beforeAll(() => {
     Element.prototype.getBoundingClientRect = createBoundingClientRectMock(
@@ -49,11 +51,17 @@ describe('Both modes', () => {
         (EXPANDED_MENU_ITEM_HEIGHT + EXPANDED_MENU_GAP) +
         SPACE_MARGIN
     );
+    Element.prototype.scrollIntoView = scrollIntoViewMock;
+  });
+
+  beforeEach(() => {
+    scrollIntoViewMock.mockClear();
   });
 
   afterAll(() => {
     if (restoreWindowSize) restoreWindowSize();
     Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    Element.prototype.scrollIntoView = originalScrollIntoView;
   });
 
   it('should render the side navigation', () => {

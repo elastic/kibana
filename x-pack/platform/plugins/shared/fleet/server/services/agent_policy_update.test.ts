@@ -6,8 +6,10 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+
 import { createAppContextStartContractMock } from '../mocks';
+
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { appContextService } from './app_context';
 import { getAgentById, getAgentPolicyForAgent, getAgentsByKuery } from './agents';
 
@@ -18,6 +20,9 @@ jest.mock('./agents/crud', () => ({
   getAgentPolicyForAgent: jest.fn(),
 }));
 jest.mock('./api_keys');
+jest.mock('./secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
 
 describe('agentPolicyUpdateEventHandler', () => {
   describe('deleted', () => {

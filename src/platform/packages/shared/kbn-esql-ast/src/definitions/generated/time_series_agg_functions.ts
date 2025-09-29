@@ -35,9 +35,8 @@ const absentOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'absent_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.absent_over_time', {
-    defaultMessage: 'The absence of a field in the output result over time range.',
+    defaultMessage: 'Calculates the absence of a field in the output result over time range.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -233,9 +232,8 @@ const avgOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'avg_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.avg_over_time', {
-    defaultMessage: 'The average over time of a numeric field.',
+    defaultMessage: 'Calculates the average over time of a numeric field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -281,9 +279,8 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'count_distinct_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.count_distinct_over_time', {
-    defaultMessage: 'The count of distinct values over time for a field.',
+    defaultMessage: 'Calculates the count of distinct values over time for a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -849,9 +846,8 @@ const countOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'count_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.count_over_time', {
-    defaultMessage: 'The count over time value of a field.',
+    defaultMessage: 'Calculates the count over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1048,9 +1044,8 @@ const firstOverTimeDefinition: FunctionDefinition = {
   name: 'first_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.first_over_time', {
     defaultMessage:
-      'The earliest value of a field, where recency determined by the `@timestamp` field.',
+      'Calculates the earliest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1097,9 +1092,8 @@ const lastOverTimeDefinition: FunctionDefinition = {
   name: 'last_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.last_over_time', {
     defaultMessage:
-      'The latest value of a field, where recency determined by the `@timestamp` field.',
+      'Calculates the latest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1145,9 +1139,8 @@ const maxOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'max_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.max_over_time', {
-    defaultMessage: 'The maximum over time value of a field.',
+    defaultMessage: 'Calculates the maximum over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1273,9 +1266,8 @@ const minOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'min_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.min_over_time', {
-    defaultMessage: 'The minimum over time value of a field.',
+    defaultMessage: 'Calculates the minimum over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1401,9 +1393,8 @@ const presentOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'present_over_time',
   description: i18n.translate('kbn-esql-ast.esql.definitions.present_over_time', {
-    defaultMessage: 'The presence of a field in the output result over time range.',
+    defaultMessage: 'Calculates the presence of a field in the output result over time range.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1599,9 +1590,8 @@ const rateDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'rate',
   description: i18n.translate('kbn-esql-ast.esql.definitions.rate', {
-    defaultMessage: 'The rate of a counter field.',
+    defaultMessage: 'Calculates the rate of a counter field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1641,6 +1631,53 @@ const rateDefinition: FunctionDefinition = {
     'TS k8s\n| STATS max(rate(network.total_bytes_in)) BY time_bucket = bucket(@timestamp,5minute)',
   ],
 };
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sumOverTimeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+  name: 'sum_over_time',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sum_over_time', {
+    defaultMessage: 'Calculates the sum over time value of a field.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [Location.STATS_TIMESERIES],
+  examples: [
+    'TS k8s\n| STATS sum_cost=sum(sum_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+  ],
+};
 export const timeSeriesAggFunctionDefinitions = [
   absentOverTimeDefinition,
   avgOverTimeDefinition,
@@ -1652,4 +1689,5 @@ export const timeSeriesAggFunctionDefinitions = [
   minOverTimeDefinition,
   presentOverTimeDefinition,
   rateDefinition,
+  sumOverTimeDefinition,
 ];

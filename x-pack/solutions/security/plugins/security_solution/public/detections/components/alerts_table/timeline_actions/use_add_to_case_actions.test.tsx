@@ -94,14 +94,14 @@ describe('useAddToCaseActions', () => {
     );
   });
 
-  it('should not render case options when event is not alert ', () => {
+  it('should render case options when event is not alert ', () => {
     const { result } = renderHook(
       () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
       {
         wrapper: TestProviders,
       }
     );
-    expect(result.current.addToCaseActionItems.length).toEqual(0);
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
   });
 
   it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {

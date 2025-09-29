@@ -7,17 +7,18 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import type { Owner } from '../../common/constants/types';
 import {
-  CAI_ATTACHMENTS_INDEX_NAME,
+  CAI_ATTACHMENTS_SYNC_TYPE,
   getAttachmentsSynchronizationSourceQuery,
 } from './attachments_index/constants';
-import { CAI_CASES_INDEX_NAME, getCasesSynchronizationSourceQuery } from './cases_index/constants';
+import { CAI_CASES_SYNC_TYPE, getCasesSynchronizationSourceQuery } from './cases_index/constants';
 import {
-  CAI_COMMENTS_INDEX_NAME,
+  CAI_COMMENTS_SYNC_TYPE,
   getCommentsSynchronizationSourceQuery,
 } from './comments_index/constants';
 import {
-  CAI_ACTIVITY_INDEX_NAME,
+  CAI_ACTIVITY_SYNC_TYPE,
   getActivitySynchronizationSourceQuery,
 } from './activity_index/constants';
 
@@ -38,12 +39,18 @@ export const CAI_INDEX_MODE = 'lookup';
  */
 export const CAI_DEFAULT_TIMEOUT = '300s';
 
+export type CAISyncType =
+  | typeof CAI_CASES_SYNC_TYPE
+  | typeof CAI_COMMENTS_SYNC_TYPE
+  | typeof CAI_ATTACHMENTS_SYNC_TYPE
+  | typeof CAI_ACTIVITY_SYNC_TYPE;
+
 export const SYNCHRONIZATION_QUERIES_DICTIONARY: Record<
   string,
-  (lastSyncAt: Date) => QueryDslQueryContainer
+  (lastSyncAt: Date, spaceId: string, owner: Owner) => QueryDslQueryContainer
 > = {
-  [CAI_CASES_INDEX_NAME]: getCasesSynchronizationSourceQuery,
-  [CAI_COMMENTS_INDEX_NAME]: getCommentsSynchronizationSourceQuery,
-  [CAI_ATTACHMENTS_INDEX_NAME]: getAttachmentsSynchronizationSourceQuery,
-  [CAI_ACTIVITY_INDEX_NAME]: getActivitySynchronizationSourceQuery,
+  [CAI_CASES_SYNC_TYPE]: getCasesSynchronizationSourceQuery,
+  [CAI_COMMENTS_SYNC_TYPE]: getCommentsSynchronizationSourceQuery,
+  [CAI_ATTACHMENTS_SYNC_TYPE]: getAttachmentsSynchronizationSourceQuery,
+  [CAI_ACTIVITY_SYNC_TYPE]: getActivitySynchronizationSourceQuery,
 };

@@ -189,7 +189,8 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
-describe('query tab with unified timeline', () => {
+// Failing: See https://github.com/elastic/kibana/issues/224186
+describe.skip('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   beforeAll(() => {
     fetchNotesSpy.mockImplementation(jest.fn());

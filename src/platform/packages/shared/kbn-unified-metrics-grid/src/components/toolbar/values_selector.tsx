@@ -20,11 +20,10 @@ import {
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
-
-const MAX_VALUES_SELECTIONS = 10;
+import { MAX_VALUES_SELECTIONS } from '../../common/constants';
 
 interface ValuesFilterProps {
   selectedDimensions: string[];

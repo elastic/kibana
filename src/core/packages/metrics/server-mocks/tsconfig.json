@@ -14,7 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-metrics-server",
     "@kbn/core-metrics-server-internal",
-    "@kbn/core-metrics-collectors-server-mocks"
+    "@kbn/core-metrics-collectors-server-mocks",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

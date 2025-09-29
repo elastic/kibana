@@ -7,6 +7,7 @@
 
 import { of } from 'rxjs';
 
+import { createSolutionViewTourManagerMock } from './nav_control/solution_view_tour/mock';
 import type { SpacesPluginStart } from './plugin';
 import type { SpacesApi } from './types';
 import type { SpacesApiUi, SpacesApiUiComponent } from './ui_api';
@@ -17,6 +18,7 @@ const createApiMock = (hasOnlyDefaultSpace: boolean): jest.Mocked<SpacesApi> => 
   ui: createApiUiMock(),
   hasOnlyDefaultSpace,
   isSolutionViewEnabled: true,
+  solutionViewTourManager: createSolutionViewTourManagerMock(),
 });
 
 type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {
