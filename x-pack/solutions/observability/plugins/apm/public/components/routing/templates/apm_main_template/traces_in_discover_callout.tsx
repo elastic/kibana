@@ -15,7 +15,10 @@ import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { SolutionId } from '@kbn/core-chrome-browser/src/project_navigation';
 import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL_VALUE,
+  ENVIRONMENT_NOT_DEFINED_VALUE,
+} from '../../../../../common/environment_filter_values';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
@@ -44,6 +47,25 @@ function useTracesIndex(apmSourcesAccess: ApmSourceAccessPluginStart) {
   return tracesIndex;
 }
 
+function getEsqlQuery(environment: string, tracesIndex: string): string {
+  const base = from(tracesIndex);
+
+  if (environment === ENVIRONMENT_ALL_VALUE) {
+    return base.toString();
+  }
+
+  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    return base.pipe(where(`${SERVICE_ENVIRONMENT} IS NULL`)).toString();
+  }
+  return base
+    .pipe(
+      where(`${SERVICE_ENVIRONMENT} == ?serviceEnvironment`, {
+        serviceEnvironment: environment,
+      })
+    )
+    .toString();
+}
+
 export function TracesInDiscoverCallout() {
   const { share } = useApmPluginContext();
   const { space } = useKibanaSpace();
@@ -68,17 +90,7 @@ export function TracesInDiscoverCallout() {
         to: rangeTo,
       },
       query: {
-        esql: from(tracesIndex)
-          .pipe(
-            ...(environment !== ENVIRONMENT_ALL_VALUE
-              ? [
-                  where(`${SERVICE_ENVIRONMENT} == ?serviceEnvironment`, {
-                    serviceEnvironment: environment,
-                  }),
-                ]
-              : [])
-          )
-          .toString(),
+        esql: getEsqlQuery(environment, tracesIndex),
       },
     });
   }, [share.url.locators, tracesIndex, environment, rangeFrom, rangeTo]);

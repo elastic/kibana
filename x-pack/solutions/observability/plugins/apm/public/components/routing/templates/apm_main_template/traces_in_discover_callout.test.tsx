@@ -7,16 +7,26 @@
 
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import {
+  ENVIRONMENT_ALL_VALUE,
+  ENVIRONMENT_NOT_DEFINED_VALUE,
+} from '../../../../../common/environment_filter_values';
 import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 const mockGetRedirectUrl = jest.fn(() => 'mock-discover-url');
 const mockGetApmIndices = jest.fn(() =>
   Promise.resolve({ span: 'apm-span', transaction: 'apm-transaction' })
 );
+const mockTraceIndex = 'apm-span, apm-transaction';
+
 let mockGetActiveSpace = {
   solution: 'oblt',
 };
-
+let mockQuery = {
+  environment: 'production',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+};
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
     share: {
@@ -45,11 +55,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('../../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
-    query: {
-      environment: 'production',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    },
+    query: mockQuery,
   }),
 }));
 
@@ -111,6 +117,64 @@ describe('TracesInDiscoverCallout', () => {
       expect(
         screen.queryByTestId('apmApmMainTemplateViewTracesInDiscoverButton')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls getRedirectUrl with correct ES|QL for defined environment', async () => {
+    await act(async () => {
+      render(<TracesInDiscoverCallout />);
+    });
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      query: {
+        esql: `FROM ${mockTraceIndex}\n  | WHERE service.environment == "${mockQuery.environment}"`,
+      },
+      timeRange: {
+        from: mockQuery.rangeFrom,
+        to: mockQuery.rangeTo,
+      },
+    });
+  });
+
+  it('calls getRedirectUrl with correct ES|QL for ENVIRONMENT_ALL_VALUE', async () => {
+    mockQuery = {
+      ...mockQuery,
+      environment: ENVIRONMENT_ALL_VALUE,
+    };
+
+    await act(async () => {
+      render(<TracesInDiscoverCallout />);
+    });
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      query: {
+        esql: `FROM ${mockTraceIndex}`,
+      },
+      timeRange: {
+        from: mockQuery.rangeFrom,
+        to: mockQuery.rangeTo,
+      },
+    });
+  });
+
+  it('calls getRedirectUrl with correct ES|QL for ENVIRONMENT_NOT_DEFINED_VALUE', async () => {
+    mockQuery = {
+      ...mockQuery,
+      environment: ENVIRONMENT_NOT_DEFINED_VALUE,
+    };
+
+    await act(async () => {
+      render(<TracesInDiscoverCallout />);
+    });
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      query: {
+        esql: `FROM ${mockTraceIndex}\n  | WHERE service.environment IS NULL`,
+      },
+      timeRange: {
+        from: mockQuery.rangeFrom,
+        to: mockQuery.rangeTo,
+      },
     });
   });
 });
