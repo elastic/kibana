@@ -48,6 +48,8 @@
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/serverless",
     "@kbn/field-types",
     "@kbn/core-lifecycle-browser",
     "@kbn/data-views-plugin",

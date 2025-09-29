@@ -42,7 +42,8 @@ import { DATAGRID_HEADER } from '../../../screens/timeline';
  *
  * */
 
-describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/236606
+describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();

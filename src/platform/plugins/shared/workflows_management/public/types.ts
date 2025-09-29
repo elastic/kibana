@@ -10,6 +10,8 @@
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -28,6 +30,7 @@ export interface WorkflowsPluginStart {}
 
 export interface WorkflowsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+  serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -36,6 +39,10 @@ export interface WorkflowsPluginStartDependencies {
 export interface WorkflowsPluginStartAdditionalServices {
   storage: Storage;
 }
+
+export type WorkflowsServices = CoreStart &
+  WorkflowsPluginStartDependencies &
+  WorkflowsPluginStartAdditionalServices;
 
 export interface WorkflowsSearchParams {
   limit: number;

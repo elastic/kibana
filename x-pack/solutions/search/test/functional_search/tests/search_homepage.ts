@@ -13,16 +13,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'header',
-    'common',
     'searchStart',
-    'searchOverview',
     'apiKeys',
     'searchHomePage',
     'searchNavigation',
   ]);
   const es = getService('es');
+  const searchSpace = getService('searchSpace');
   const browser = getService('browser');
-  const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -37,17 +35,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
-
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({
-          name: 'search-ftr',
-          solution: 'es',
-        }));
-        await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-homepage-ftr'));
+        await searchSpace.navigateTo(spaceCreated.id);
       });
 
       after(async () => {
@@ -59,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('search home page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(['test-*', 'search-*']);
-          await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
             `/s/${spaceCreated.id}`
           );
         });
