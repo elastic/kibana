@@ -45,6 +45,7 @@ describe('createConnectorRoute', () => {
       isDeprecated: false,
       isMissingSecrets: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     const createApiResult = {
@@ -174,6 +175,7 @@ describe('createConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -215,6 +217,7 @@ describe('createConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

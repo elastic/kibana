@@ -104,6 +104,7 @@ const actionExecutorInitializationParams = {
       isPreconfigured: true,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     },
     {
       actionTypeId: '.cases',
@@ -114,6 +115,7 @@ const actionExecutorInitializationParams = {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: true,
+      isConnectorTypeDeprecated: false,
     },
   ],
 };

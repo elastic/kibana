@@ -41,6 +41,7 @@ describe('getConnectorRoute', () => {
       isDeprecated: false,
       isMissingSecrets: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -60,6 +61,7 @@ describe('getConnectorRoute', () => {
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
+          "isConnectorTypeDeprecated": false,
           "is_deprecated": false,
           "is_missing_secrets": false,
           "is_preconfigured": false,
@@ -82,6 +84,7 @@ describe('getConnectorRoute', () => {
         is_deprecated: false,
         is_missing_secrets: false,
         is_system_action: false,
+        isConnectorTypeDeprecated: false,
       },
     });
   });
@@ -103,6 +106,7 @@ describe('getConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -139,6 +143,7 @@ describe('getConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
