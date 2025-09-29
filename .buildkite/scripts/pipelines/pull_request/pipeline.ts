@@ -16,11 +16,9 @@
         ] */
 
 import fs from 'fs';
-import yaml from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import {
   areChangesSkippable,
-  doAllChangesMatch,
   doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
@@ -65,34 +63,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
 
-    const solutions = ['chat', 'observability', 'search', 'security'];
-    let limitSolutions: string | undefined;
-    for (const solution of solutions) {
-      if (await doAllChangesMatch(new RegExp(`^x-pack/solutions/${solution}`))) {
-        limitSolutions = solution;
-        break;
-      }
-    }
-
-    const pickTestGroups = yaml.load(
-      getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml')
-    ) as Array<{ env?: Record<string, string> }>;
-    if (limitSolutions) {
-      pickTestGroups.forEach((step) => {
-        step.env = {
-          ...step.env,
-          LIMIT_SOLUTIONS: limitSolutions,
-        };
-      });
-    }
-    pipeline.push(
-      yaml
-        .dump(pickTestGroups)
-        .split('\n')
-        .map((line) => (line ? `  ${line}` : line))
-        .join('\n')
-    );
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -470,25 +443,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
       );
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-scout/,
-        /^src\/platform\/packages\/private\/kbn-scout-info/,
-        /^src\/platform\/packages\/private\/kbn-scout-reporting/,
-        /^x-pack\/platform\/plugins\/shared\/maps/,
-        /^x-pack\/platform\/plugins\/shared\/streams_app/,
-        /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
-        /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
-        /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
-        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
     if (

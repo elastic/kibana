@@ -80,8 +80,8 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
     }
 
     if (item.type === 'ftrConfig') {
@@ -93,6 +93,20 @@ function getTestSuitesFromJson(json: string) {
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    if (item.type === 'scoutConfig') {
+      const scoutConfig = item.scoutConfig;
+      if (typeof scoutConfig !== 'string') {
+        fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      testSuites.push({
+        type: 'scoutConfig',
+        scoutConfig,
         count,
       });
       continue;
@@ -191,7 +205,7 @@ for (const testSuite of testSuites) {
       concurrency_method: 'eager',
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       depends_on: 'build',
-      timeout_in_minutes: 30,
+      timeout_in_minutes: 60,
       cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
