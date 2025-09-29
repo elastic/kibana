@@ -47,6 +47,7 @@ export interface GetTimeFieldRangeResponse {
 
 export interface IsIndexSearchableResponse {
   isSearchable: boolean;
+  count: number;
 }
 
 export const FileUploadComponent = GeoUploadWizardAsyncWrapper;

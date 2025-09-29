@@ -30,6 +30,6 @@ export interface TranslateRuleGraphParams {
 }
 
 export interface TranslateRuleValidationErrors {
-  iterations: number;
+  retries_left: number;
   esql_errors?: string;
 }

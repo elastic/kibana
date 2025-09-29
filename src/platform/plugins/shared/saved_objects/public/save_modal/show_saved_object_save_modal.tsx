@@ -26,13 +26,19 @@ function isSuccess(result: SaveResult): result is { id?: string } {
   return 'id' in result;
 }
 
-interface MinimalSaveModalProps {
+/**
+ * Minimum props expected for model components passed to `showSaveModal`
+ */
+export interface ShowSaveModalMinimalSaveModalProps {
   onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }
 
+/**
+ * @deprecated legacy modal display mechanism
+ */
 export function showSaveModal(
-  saveModal: React.ReactElement<MinimalSaveModalProps>,
+  saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>,
   Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
   // initialize variable that will hold reference for unmount
@@ -51,7 +57,7 @@ export function showSaveModal(
 
       const onSave = saveModal.props.onSave;
 
-      const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
+      const onSaveConfirmed: ShowSaveModalMinimalSaveModalProps['onSave'] = async (...args) => {
         try {
           const response = await onSave(...args);
           // close modal if we either hit an error or the saved object got an id

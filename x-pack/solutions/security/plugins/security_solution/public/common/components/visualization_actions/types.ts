@@ -43,6 +43,10 @@ export interface UseLensAttributesProps {
   stackByField?: string;
   title?: string;
   esql?: string;
+  /**
+   * Indices to use when fetching the lens componen
+   */
+  signalIndexName?: string | null;
 }
 
 export enum VisualizationContextMenuActions {
@@ -122,6 +126,10 @@ export interface LensEmbeddableComponentProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  /**
+   * Indices to use when fetching the lens component
+   */
+  signalIndexName?: string | null;
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
@@ -190,9 +198,14 @@ export interface ExtraOptions {
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
   donutTextWrapperClassName?: string;
+  donutTitleLabel?: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
+  /**
+   * Indices to use when fetching the lens component
+   */
+  signalIndexName?: string | null;
 }
 
 export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {

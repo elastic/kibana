@@ -460,9 +460,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // RUN SCRIPT
     if (payload.command === 'runscript') {
-      const parameters = (
-        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
-      ).parameters;
+      const runScriptRequestPayload = payload as Mutable<
+        ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
+      >;
+      const parameters = runScriptRequestPayload.parameters;
       const scriptId = (parameters?.scriptId ?? '').trim();
 
       if (!scriptId) {
@@ -478,6 +479,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (scriptDetails.data?.data.length === 0 || scriptDetails.data?.data[0].id !== scriptId) {
         throw new ResponseActionsClientError(`Script ID [${scriptId}] not found`, 404);
+      }
+
+      // Prepend the script name to the `comment` field for reference
+      const scriptNameComment = `(Script name: ${scriptDetails.data?.data[0].scriptName})`;
+
+      if (!(runScriptRequestPayload.comment ?? '').startsWith(scriptNameComment)) {
+        runScriptRequestPayload.comment = `(Script name: ${
+          scriptDetails.data?.data[0].scriptName
+        })${runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''}`;
       }
     }
 
@@ -1089,10 +1099,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      SentinelOneRunScriptActionRequestParams,
-      ResponseActionRunScriptOutputContent,
-      Partial<SentinelRunScriptRequestMeta>
+    const reqIndexOptions: Mutable<
+      ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+        SentinelOneRunScriptActionRequestParams,
+        ResponseActionRunScriptOutputContent,
+        Partial<SentinelRunScriptRequestMeta>
+      >
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -1104,6 +1116,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
+        const scriptId = reqIndexOptions.parameters?.scriptId ?? '';
+
         try {
           const s1Response = await this.sendAction<
             SentinelOneExecuteScriptResponse,
@@ -1113,7 +1127,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               ids: actionRequest.endpoint_ids[0],
             },
             script: {
-              scriptId: reqIndexOptions.parameters?.scriptId ?? '',
+              scriptId,
               taskDescription: this.buildExternalComment(reqIndexOptions),
               requiresApproval: false,
               outputDestination: 'SentinelCloud',

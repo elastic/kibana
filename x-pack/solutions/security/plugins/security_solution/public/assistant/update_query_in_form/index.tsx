@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 import { UPDATE_QUERY_IN_FORM_TOOLTIP } from './translations';
@@ -34,9 +34,7 @@ export const UpdateQueryInFormButton: FC<PropsWithChildren<UpdateQueryInFormButt
       flush="both"
       size="xs"
     >
-      <EuiToolTip position="right" content={UPDATE_QUERY_IN_FORM_TOOLTIP}>
-        <EuiIcon type="documentEdit" />
-      </EuiToolTip>
+      <EuiIconTip content={UPDATE_QUERY_IN_FORM_TOOLTIP} position="right" type="documentEdit" />
     </EuiButtonEmpty>
   );
 };

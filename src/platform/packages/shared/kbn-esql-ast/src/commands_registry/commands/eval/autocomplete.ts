@@ -78,10 +78,7 @@ export async function autocomplete(
 
   if (
     // don't suggest finishing characters if incomplete expression
-    isExpressionComplete(
-      getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-      innerText
-    ) &&
+    isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&

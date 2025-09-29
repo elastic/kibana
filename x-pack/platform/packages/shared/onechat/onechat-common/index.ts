@@ -7,6 +7,11 @@
 
 export type { OnechatEvent } from './base/events';
 export {
+  internalNamespaces as toolNamespaces,
+  protectedNamespaces as toolReservedNamespaces,
+  isInProtectedNamespace,
+} from './base/namespaces';
+export {
   ToolType,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
@@ -39,9 +44,7 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
-  internalNamespaces as toolNamespaces,
-  protectedNamespaces as toolReservedNamespaces,
-  isInProtectedNamespace,
+  type IndexSearchToolDefinitionWithSchema,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -74,9 +77,11 @@ export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,
-  type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,
@@ -99,6 +104,8 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,

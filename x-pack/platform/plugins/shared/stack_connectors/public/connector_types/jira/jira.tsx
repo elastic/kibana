@@ -32,7 +32,7 @@ export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, 
     iconClass: lazy(() => import('./logo')),
     selectMessage: JIRA_DESC,
     actionTypeTitle: JIRA_TITLE,
-    actionConnectorFields: lazy(() => import('./jira_connectors')),
+    actionConnectorFields: lazy(() => import('./jira_connector_params')),
     validateParams: async (
       actionParams: JiraActionParams
     ): Promise<GenericValidationResult<unknown>> => {

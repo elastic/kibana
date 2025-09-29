@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
+import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -20,6 +21,7 @@ import type {
   UpdateToolResponse,
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
+import { publicApiPath } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
@@ -30,7 +32,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // list tools API
   router.versioned
     .get({
-      path: '/api/chat/tools',
+      path: `${publicApiPath}/tools`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -38,21 +40,28 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'List tools',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
     .addVersion(
-      { version: '2023-10-31', validate: false },
+      {
+        version: '2023-10-31',
+        validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_list.yaml'),
+        },
+      },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tools = await registry.list({});
         return response.ok<ListToolsResponse>({
           body: {
-            results: tools.map(toDescriptorWithSchema),
+            results: tools.map(toDescriptor),
           },
         });
       })
@@ -61,7 +70,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // get tool by ID
   router.versioned
     .get({
-      path: '/api/chat/tools/{id}',
+      path: `${publicApiPath}/tools/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -69,9 +78,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Get a tool by id',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -81,9 +91,14 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to retrieve.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -92,7 +107,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
         return response.ok<GetToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -100,7 +115,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // create tool
   router.versioned
     .post({
-      path: '/api/chat/tools',
+      path: `${publicApiPath}/tools`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -108,9 +123,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Create a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -120,15 +136,40 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              id: schema.string(),
-              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
-              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
-              description: schema.string({ defaultValue: '' }),
-              tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              id: schema.string({
+                meta: { description: 'Unique identifier for the tool.' },
+              }),
+              type: schema.oneOf(
+                // @ts-expect-error TS2769: No overload matches this call
+                editableToolTypes.map((type) => schema.literal(type)),
+                {
+                  meta: { description: 'The type of tool to create (e.g., esql, index_search).' },
+                }
+              ),
+              description: schema.string({
+                defaultValue: '',
+                meta: { description: 'Description of what the tool does.' },
+              }),
+              tags: schema.arrayOf(
+                schema.string({
+                  meta: { description: 'Tag for categorizing the tool.' },
+                }),
+                {
+                  defaultValue: [],
+                  meta: { description: 'Optional tags for categorizing and organizing tools.' },
+                }
+              ),
               // actual config validation is done in the tool service
-              configuration: schema.recordOf(schema.string(), schema.any()),
+              configuration: schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description: 'Tool-specific configuration parameters. See examples for details.',
+                },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_create.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -137,7 +178,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.create(createRequest);
         return response.ok<CreateToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -145,7 +186,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // update tool
   router.versioned
     .put({
-      path: '/api/chat/tools/{toolId}',
+      path: `${publicApiPath}/tools/{toolId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -153,9 +194,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Update a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -165,15 +207,40 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              toolId: schema.string(),
+              toolId: schema.string({
+                meta: { description: 'The unique identifier of the tool to update.' },
+              }),
             }),
             body: schema.object({
-              description: schema.maybe(schema.string()),
-              tags: schema.maybe(schema.arrayOf(schema.string())),
+              description: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated description of what the tool does.' },
+                })
+              ),
+              tags: schema.maybe(
+                schema.arrayOf(
+                  schema.string({
+                    meta: { description: 'Updated tag for categorizing the tool.' },
+                  }),
+                  {
+                    meta: { description: 'Updated tags for categorizing and organizing tools.' },
+                  }
+                )
+              ),
               // actual config validation is done in the tool service
-              configuration: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+              configuration: schema.maybe(
+                schema.recordOf(schema.string(), schema.any(), {
+                  meta: {
+                    description:
+                      'Updated tool-specific configuration parameters. See examples for details.',
+                  },
+                })
+              ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -183,7 +250,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.update(toolId, update);
         return response.ok<UpdateToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -191,7 +258,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // delete tool
   router.versioned
     .delete({
-      path: '/api/chat/tools/{id}',
+      path: `${publicApiPath}/tools/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -199,9 +266,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Delete a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -211,9 +279,14 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to delete.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -229,16 +302,17 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
   // execute a tool
   router.versioned
     .post({
-      path: '/api/chat/tools/_execute',
+      path: `${publicApiPath}/tools/_execute`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'Execute a Tool',
       options: {
-        tags: ['tools'],
+        tags: ['tools', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -248,19 +322,40 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              tool_id: schema.string({}),
-              tool_params: schema.recordOf(schema.string(), schema.any()),
+              tool_id: schema.string({
+                meta: { description: 'The ID of the tool to execute.' },
+              }),
+              tool_params: schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description: 'Parameters to pass to the tool execution. See examples for details',
+                },
+              }),
+              connector_id: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Optional connector ID for tools that require external integrations.',
+                  },
+                })
+              ),
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_execute.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tool_id: id, tool_params: toolParams } = request.body;
+        const {
+          tool_id: id,
+          tool_params: toolParams,
+          connector_id: defaultConnectorId,
+        } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
-
-        const validation = tool.schema.safeParse(toolParams);
+        const toolSchema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+        const validation = toolSchema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({
             body: {
@@ -269,7 +364,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await registry.execute({ toolId: id, toolParams });
+        const toolResult = await registry.execute({ toolId: id, toolParams, defaultConnectorId });
 
         return response.ok({
           body: {

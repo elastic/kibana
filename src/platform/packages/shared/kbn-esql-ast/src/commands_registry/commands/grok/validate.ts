@@ -21,9 +21,9 @@ export const validate = (
   const messages: ESQLMessage[] = [];
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
-  const columnRef = context?.fields.get(astCol.name);
+  const columnRef = context?.columns.get(astCol.name);
 
-  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as FieldType)) {
     messages.push(
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',

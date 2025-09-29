@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const datasetTypeSchema = schema.oneOf([
   // DataView dataset type
@@ -17,10 +17,10 @@ export const datasetTypeSchema = schema.oneOf([
      * The name of the Kibana data view to use as the data source.
      * Example: 'my-data-view'
      */
-    name: schema.string({
+    id: schema.string({
       meta: {
         description:
-          'The name of the Kibana data view to use as the data source. Example: "my-data-view".',
+          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
       },
     }),
   }),
@@ -134,3 +134,6 @@ export const datasetEsqlTableTypeSchema = schema.oneOf([
 export const datasetEsqlTableSchema = {
   dataset: datasetEsqlTableTypeSchema,
 };
+
+const anyDatasetSchema = schema.oneOf([datasetTypeSchema, datasetEsqlTableTypeSchema]);
+export type DatasetType = TypeOf<typeof anyDatasetSchema>;

@@ -26,6 +26,7 @@ export function ruleFilter(rule: RenovatePackageRule) {
     'bazel', // Per operations team. This is slated for removal, and does not make sense to track.
     'typescript', // These updates are always handled manually
     'webpack', // While we are in the middle of a webpack upgrade. TODO: Remove this once we are done.
+    'puppeteer', // These updates are always handled manually
   ];
   // Rules that use custom managers are not supported by this tool, and are ignored.
   const rulesWithCustomManagers = ['chainguard', 'chainguard-fips'];
@@ -49,7 +50,6 @@ export function packageFilter(pkg: string) {
     !pkg.startsWith('@kbn/') &&
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
-    pkg !== '@elastic/eui-amsterdam' &&
     pkg !== '@elastic/eui-theme-borealis' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'

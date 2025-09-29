@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"workchat\" | \"workchat:integrations\" | \"workchat:agents\" | \"onechat\" | \"onechat:agents\" | \"onechat:tools\" | \"onechat:conversations\""
+          "\"workchat\" | \"workchat:integrations\" | \"workchat:agents\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
         "deprecated": false,

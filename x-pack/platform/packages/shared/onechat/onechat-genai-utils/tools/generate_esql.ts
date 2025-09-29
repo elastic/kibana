@@ -12,8 +12,10 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
 import { extractEsqlQueries } from './utils/esql';
-import { formatFieldAsXml } from './utils/formatting';
-import { resolveResource } from './steps/resolve_resource';
+import {
+  resolveResourceWithSamplingStats,
+  formatResourceWithSampledValues,
+} from './utils/resources';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -47,8 +49,9 @@ export const generateEsql = async ({
     selectedTarget = selectedResource.name;
   }
 
-  const { fields, type: targetType } = await resolveResource({
+  const resolvedResource = await resolveResourceWithSamplingStats({
     resourceName: selectedTarget,
+    samplingSize: 100,
     esClient,
   });
 
@@ -57,8 +60,7 @@ export const generateEsql = async ({
     connectorId: undefined,
     client: model.inferenceClient,
     logger: { debug: () => undefined },
-    input: ` You are an expert ES|QL generator.
-Your task is to write a single, valid ES|QL query based on the provided information.
+    input: `Your task is to write a single, valid ES|QL query based on the provided information.
 
 <user_query>
 ${nlQuery}
@@ -68,11 +70,19 @@ ${nlQuery}
 ${context ?? 'No additional context provided.'}
 </context>
 
-<target_resource name="${selectedTarget}" type="${targetType}" >
-  <fields>
-${fields.map((field) => `    ${formatFieldAsXml(field)}`).join('\n')}
-  </fields>
-</target_resource>
+${formatResourceWithSampledValues({ resource: resolvedResource, indentLevel: 0 })}
+
+<directives>
+## ES|QL Safety Rules
+
+1. **LIMIT is Mandatory:** All multi-row queries **must** end with a \`LIMIT\`. The only exception is for single-row aggregations (e.g., \`STATS\` without a \`GROUP BY\`).
+
+2. **Applying Limits:**
+    * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
+    * **Default:** If no number is given, default to \`LIMIT 100\` for both raw events and \`GROUP BY\` results. Notify the user when you apply this default (e.g., "I've added a \`LIMIT 100\` for safety.").
+
+3. **Handling "All Data" Requests:** If a user asks for "all" results, apply a safety \`LIMIT 250\` and state that this limit was added to protect the system.
+</directives>
 
 Based on all the information above, generate the ES|QL query.
 `,

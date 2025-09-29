@@ -17,6 +17,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+// Mock the validation to avoid dependency on actual readiness tasks config
+jest.mock('./validate_task', () => ({
+  validateTask: jest.fn(),
+}));
+
 describe('useLogReadinessTask', () => {
   const mockPost = jest.fn();
   const queryClient = new QueryClient();
@@ -40,9 +45,9 @@ describe('useLogReadinessTask', () => {
     const { result } = renderHook(() => useLogReadinessTask(), { wrapper });
 
     const task: SiemReadinessTask = {
-      task_id: 'test-task-1',
-      status: 'complete',
-      meta: { description: 'Test task', duration: 1000 },
+      task_id: 'enable-endpoint-visibility',
+      status: 'completed',
+      meta: { agent_status: 'healthy', endpoint_count: 5 },
     };
 
     await act(async () => {
@@ -59,9 +64,9 @@ describe('useLogReadinessTask', () => {
     const { result } = renderHook(() => useLogReadinessTask({ onError: jest.fn() }), { wrapper });
 
     const task: SiemReadinessTask = {
-      task_id: 'test-task-2',
+      task_id: 'ingest-cloud-audit-logs',
       status: 'incomplete',
-      meta: { error: 'Something went wrong' },
+      meta: { cloud_provider: ['aws'], log_count: 0 },
     };
 
     await act(async () => {
@@ -83,8 +88,8 @@ describe('useLogReadinessTask', () => {
     const { result } = renderHook(() => useLogReadinessTask({ onSuccess }), { wrapper });
 
     const task: SiemReadinessTask = {
-      task_id: 'test-task-3',
-      status: 'complete',
+      task_id: 'ingest-asset-inventory',
+      status: 'completed',
       meta: {},
     };
 

@@ -35,8 +35,8 @@ export const postReadinessTaskRoute = (
           request: {
             body: schema.object({
               task_id: schema.string(),
-              status: schema.oneOf([schema.literal('complete'), schema.literal('incomplete')]),
-              meta: schema.object({}, { unknowns: 'allow' }),
+              status: schema.oneOf([schema.literal('completed'), schema.literal('incomplete')]),
+              meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             }),
           },
         },

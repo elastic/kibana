@@ -178,9 +178,11 @@ describe('validation logic', () => {
           JSON.stringify(
             {
               indexes,
-              fields: fields.concat([{ name: policies[0].matchField, type: 'keyword' }]),
+              fields: fields.concat([
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
+              ]),
               enrichFields: enrichFields.concat([
-                { name: policies[0].matchField, type: 'keyword' },
+                { name: policies[0].matchField, type: 'keyword', userDefined: false },
               ]),
               policies,
               unsupported_field,
@@ -253,7 +255,7 @@ describe('validation logic', () => {
     });
 
     // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
+    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/parser/esql_error_listener.ts
     describe('EMPTY query does NOT produce syntax error', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);
@@ -264,7 +266,7 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'ts', 'show'}`,
           ])
       );
     });
@@ -274,7 +276,7 @@ describe('validation logic', () => {
         const { expectErrors } = await setup();
 
         await expectErrors('f', [
-          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}",
+          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'ts', 'show'}",
         ]);
         await expectErrors('from ', [
           "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
@@ -597,17 +599,6 @@ describe('validation logic', () => {
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
-      });
-
-      it('should call fields callbacks also for show command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(`show info | keep name`, undefined, callbackMocks);
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: 'show info',
-        });
       });
 
       it(`should fetch additional fields if an enrich command is found`, async () => {

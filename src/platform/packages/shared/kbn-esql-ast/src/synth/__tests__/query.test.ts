@@ -54,3 +54,34 @@ test('can insert a float node', () => {
   expect(query1 + '').toBe('FROM index | WHERE coordinates.lat >= 0.1');
   expect(query2 + '').toBe('FROM index | WHERE coordinates.lat >= 0.1');
 });
+
+test('can construct a FORK sub-query', () => {
+  const query1 = query`/* asdf */ WHERE emp_no == 10001 | LIMIT 10`;
+  const query2 = query`
+    FROM employees
+    | FORK
+      ( ${query1} )
+      ( WHERE emp_no == 10002 )
+    | KEEP emp_no, _fork
+    | SORT emp_no`;
+
+  expect(query1 + '').toBe('/* asdf */ WHERE emp_no == 10001 | LIMIT 10');
+  expect(query2 + '').toBe(
+    'FROM employees | FORK (/* asdf */ WHERE emp_no == 10001 | LIMIT 10) (WHERE emp_no == 10002) | KEEP emp_no, _fork | SORT emp_no'
+  );
+});
+
+test('can create a query without a source command', () => {
+  const query1 = query`/* asdf */ WHERE emp_no == 10001`;
+  const query2 = query`
+    FORK
+      ( ${query1} )
+      ( WHERE emp_no == 10002 )
+    | KEEP emp_no, _fork
+    | SORT emp_no`;
+
+  expect(query1 + '').toBe('/* asdf */ WHERE emp_no == 10001');
+  expect(query2 + '').toBe(
+    'FORK (/* asdf */ WHERE emp_no == 10001) (WHERE emp_no == 10002) | KEEP emp_no, _fork | SORT emp_no'
+  );
+});

@@ -28,6 +28,8 @@
 
 export const esqlFunctionNames = [
   'ABS',
+  'ABSENT',
+  'ABSENT_OVER_TIME',
   'ACOS',
   'ASIN',
   'ATAN',
@@ -58,6 +60,7 @@ export const esqlFunctionNames = [
   'DATE_PARSE',
   'DATE_TRUNC',
   'DAY_NAME',
+  'DECAY',
   'E',
   'ENDS_WITH',
   'EXP',
@@ -113,6 +116,8 @@ export const esqlFunctionNames = [
   'PERCENTILE',
   'PI',
   'POW',
+  'PRESENT',
+  'PRESENT_OVER_TIME',
   'QSTR',
   'RATE',
   'REPEAT',
@@ -168,6 +173,7 @@ export const esqlFunctionNames = [
   'TO_DATEPERIOD',
   'TO_DATETIME',
   'TO_DEGREES',
+  'TO_DENSE_VECTOR',
   'TO_DOUBLE',
   'TO_GEOHASH',
   'TO_GEOHEX',

@@ -60,7 +60,7 @@ function createDynamicFillColorDescriptor(
 function createLayerLabel(
   layer: OBSERVABILITY_LAYER_TYPE,
   metric: OBSERVABILITY_METRIC_TYPE
-): string | null {
+): string | undefined {
   let layerName;
   if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
     layerName = i18n.translate('xpack.maps.observability.apmRumPerformanceLayerName', {

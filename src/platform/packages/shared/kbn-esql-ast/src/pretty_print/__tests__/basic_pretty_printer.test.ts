@@ -107,6 +107,20 @@ describe('single line query', () => {
       });
     });
 
+    describe('INLINE STATS', () => {
+      test('with aggregates assignment', () => {
+        const { text } = reprint('FROM a | INLINE STATS var = avg(field)');
+
+        expect(text).toBe('FROM a | INLINE STATS var = AVG(field)');
+      });
+
+      test('with BY clause', () => {
+        const { text } = reprint('FROM a | INLINE STATS count(), sum(value) by category');
+
+        expect(text).toBe('FROM a | INLINE STATS COUNT(), SUM(value) BY category');
+      });
+    });
+
     describe('GROK', () => {
       test('two basic arguments', () => {
         const { text } = reprint('FROM search-movies | GROK Awards "text"');
@@ -438,6 +452,18 @@ describe('single line query', () => {
           const { text } = reprint('ROW f(*)');
 
           expect(text).toBe('ROW F(*)');
+        });
+
+        test('parameter function name is printed as specified', () => {
+          const { text } = reprint('ROW ??functionName(*)');
+
+          expect(text).toBe('ROW ??functionName(*)');
+        });
+
+        test('parameter function name is printed as specified (single ?)', () => {
+          const { text } = reprint('ROW ?functionName(42)');
+
+          expect(text).toBe('ROW ?functionName(42)');
         });
       });
 

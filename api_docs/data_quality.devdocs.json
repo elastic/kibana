@@ -52,21 +52,6 @@
     "misc": [
       {
         "parentPluginId": "dataQuality",
-        "id": "def-common.DATA_QUALITY_URL_STATE_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_QUALITY_URL_STATE_KEY",
-        "description": [],
-        "signature": [
-          "\"pageState\""
-        ],
-        "path": "x-pack/platform/plugins/shared/data_quality/common/url_schema/common.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataQuality",
         "id": "def-common.PLUGIN_FEATURE_ID",
         "type": "string",
         "tags": [],

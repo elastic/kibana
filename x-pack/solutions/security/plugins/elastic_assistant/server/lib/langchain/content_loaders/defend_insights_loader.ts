@@ -8,7 +8,7 @@
 import type { Document } from 'langchain/document';
 import type { Logger } from '@kbn/core/server';
 import type { Metadata } from '@kbn/elastic-assistant-common';
-import globby from 'globby';
+import { glob } from 'fs/promises';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
@@ -104,9 +104,13 @@ export const getDefendInsightsDocsCount = async ({
   logger: Logger;
 }): Promise<number> => {
   try {
-    const files = await globby('**/*.{md,txt}', {
-      cwd: resolve(__dirname, '../../../knowledge_base/defend_insights'),
-    });
+    // @ts-expect-error missing type for Array.fromAsync
+    const files = await Array.fromAsync(
+      glob('**/*.{md,txt}', {
+        cwd: resolve(__dirname, '../../../knowledge_base/defend_insights'),
+      })
+    );
+
     return files.length;
   } catch (e) {
     logger.error(`Failed to get Defend Insights source docs count\n${e}`);

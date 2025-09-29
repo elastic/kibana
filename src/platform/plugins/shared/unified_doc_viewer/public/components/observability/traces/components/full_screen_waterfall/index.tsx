@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { where } from '@kbn/esql-composer';
 import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
+import { Global, css } from '@emotion/react';
 import { SpanFlyout } from './span_flyout';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { ExitFullScreenButton } from './exit_full_screen_button';
@@ -33,7 +34,7 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  serviceName: string;
+  serviceName?: string;
   onExitFullScreen: () => void;
 }
 
@@ -77,6 +78,7 @@ export const FullScreenWaterfall = ({
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
           },
+          mode: 'full',
         },
       }),
     }),
@@ -85,6 +87,15 @@ export const FullScreenWaterfall = ({
 
   return (
     <>
+      {/** This global style is a temporary fix until we migrate to the
+       * new flyout system (with child) instead of full screen */}
+      <Global
+        styles={css`
+          .euiDataGridRowCell__popover {
+            z-index: ${euiTheme.levels.modal} !important;
+          }
+        `}
+      />
       <EuiOverlayMask
         maskRef={overlayMaskRef}
         css={{
@@ -134,7 +145,6 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-
       {isFlyoutVisible && spanId && (
         <EuiFocusTrap>
           <SpanFlyout

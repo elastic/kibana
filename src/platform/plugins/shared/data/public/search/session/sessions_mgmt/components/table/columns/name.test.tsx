@@ -43,19 +43,36 @@ const setup = ({
 };
 
 describe('name column', () => {
-  describe('when the session name is clicked', () => {
-    it('should call onBackgroundSearchOpened', async () => {
+  describe('when the session is in progress', () => {
+    it('should render the name as plain text', () => {
       // Given
-      const mockSession = getUiSessionMock();
+      const mockSession = getUiSessionMock({ status: SearchSessionStatus.IN_PROGRESS });
 
       // When
-      const { user, onBackgroundSearchOpened } = setup({ uiSession: mockSession });
-      await user.click(screen.getByText(mockSession.name));
+      setup({ uiSession: mockSession });
 
       // Then
-      expect(onBackgroundSearchOpened).toHaveBeenCalledWith({
-        event: expect.any(Object),
-        session: mockSession,
+      expect(screen.getByTestId('sessionManagementNameText')).toBeVisible();
+      expect(screen.getByText(mockSession.name)).toBeVisible();
+    });
+  });
+
+  describe('when the session is NOT in progress', () => {
+    describe('when the session name is clicked', () => {
+      it('should call onBackgroundSearchOpened', async () => {
+        // Given
+        const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
+
+        // When
+        const { user, onBackgroundSearchOpened } = setup({ uiSession: mockSession });
+        await user.click(screen.getByText(mockSession.name));
+
+        // Then
+        expect(screen.getByTestId('sessionManagementNameLink')).toBeVisible();
+        expect(onBackgroundSearchOpened).toHaveBeenCalledWith({
+          event: expect.any(Object),
+          session: mockSession,
+        });
       });
     });
   });

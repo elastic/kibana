@@ -17,6 +17,7 @@ export const queryExistingUsers =
     esClient
       .search<MonitoredUserDoc>({
         index,
+        size: batch.length,
         query: {
           bool: {
             must: [

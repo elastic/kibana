@@ -5,6 +5,48 @@
     "functions": [
       {
         "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.ContentFrameworkSection",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentFrameworkSection",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "ContentFrameworkSectionProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework/lazy_content_framework_section.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.ContentFrameworkSection.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
         "id": "def-public.JsonCodeEditor",
         "type": "Function",
         "tags": [],
@@ -163,7 +205,9 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; } & React.RefAttributes<",
+          ") => JSX.Element) | undefined; indexes: ",
+          "TraceIndexes",
+          "; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -239,6 +283,42 @@
           {
             "parentPluginId": "unifiedDocViewer",
             "id": "def-public.UnifiedDocViewerObservabilityAttributesOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityGenericOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityGenericOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & { indexes: ",
+          "TraceIndexes",
+          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityGenericOverview.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -426,7 +506,9 @@
             "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
             "text": "ObservabilityStreamsFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; }"
+          ") => JSX.Element) | undefined; indexes: ",
+          "TraceIndexes",
+          "; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "deprecated": false,

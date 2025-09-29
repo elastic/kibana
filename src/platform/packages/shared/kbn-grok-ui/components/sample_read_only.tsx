@@ -47,6 +47,10 @@ export const Sample = ({
     return () => subscription.unsubscribe();
   }, [draftGrokExpressions, sample]);
 
+  if (sample === '') {
+    return <>&nbsp;</>;
+  }
+
   return (
     <>
       <div

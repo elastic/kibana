@@ -12,8 +12,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import type { TabState, TabStateGlobalState } from '../redux';
 
 /**
  * Updates the saved search with a given data view & Appstate
@@ -29,15 +29,17 @@ import { DataSourceType, isDataSourceType } from '../../../../../common/data_sou
 export function updateSavedSearch({
   savedSearch,
   dataView,
-  state,
-  globalStateContainer,
+  initialInternalState,
+  appState,
+  globalState,
   services,
   useFilterAndQueryServices = false,
 }: {
   savedSearch: SavedSearch;
-  dataView?: DataView;
-  state?: DiscoverAppState;
-  globalStateContainer: DiscoverGlobalStateContainer;
+  dataView: DataView | undefined;
+  initialInternalState: TabState['initialInternalState'] | undefined;
+  appState: DiscoverAppState | undefined;
+  globalState: TabStateGlobalState | undefined;
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
 }) {
@@ -48,63 +50,71 @@ export function updateSavedSearch({
     }
   }
 
+  if (initialInternalState?.visContext) {
+    savedSearch.visContext = initialInternalState.visContext;
+  }
+
+  if (initialInternalState?.controlGroupJson) {
+    savedSearch.controlGroupJson = initialInternalState.controlGroupJson;
+  }
+
   if (useFilterAndQueryServices) {
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
       .setField('filter', services.data.query.filterManager.getFilters());
-  } else if (state) {
-    const appFilters = state.filters ? cloneDeep(state.filters) : [];
-    const globalFilters = globalStateContainer.get()?.filters ?? [];
+  } else if (appState) {
+    const appFilters = appState.filters ? cloneDeep(appState.filters) : [];
+    const globalFilters = globalState?.filters ? cloneDeep(globalState.filters) : [];
 
     savedSearch.searchSource
-      .setField('query', state.query ?? undefined)
+      .setField('query', appState.query ?? undefined)
       .setField('filter', [...globalFilters, ...appFilters]);
   }
 
-  if (state) {
-    savedSearch.columns = state.columns || [];
-    savedSearch.sort = (state.sort as SortOrder[]) || [];
-    if (state.grid) {
-      savedSearch.grid = state.grid;
+  if (appState) {
+    savedSearch.columns = appState.columns || [];
+    savedSearch.sort = (appState.sort as SortOrder[]) || [];
+    if (appState.grid) {
+      savedSearch.grid = appState.grid;
     }
-    savedSearch.hideChart = state.hideChart;
-    savedSearch.rowHeight = state.rowHeight;
-    savedSearch.headerRowHeight = state.headerRowHeight;
-    savedSearch.rowsPerPage = state.rowsPerPage;
-    savedSearch.sampleSize = state.sampleSize;
-    savedSearch.density = state.density;
+    savedSearch.hideChart = appState.hideChart;
+    savedSearch.rowHeight = appState.rowHeight;
+    savedSearch.headerRowHeight = appState.headerRowHeight;
+    savedSearch.rowsPerPage = appState.rowsPerPage;
+    savedSearch.sampleSize = appState.sampleSize;
+    savedSearch.density = appState.density;
 
-    if (state.viewMode) {
-      savedSearch.viewMode = state.viewMode;
+    if (appState.viewMode) {
+      savedSearch.viewMode = appState.viewMode;
     }
 
-    if (typeof state.breakdownField !== 'undefined') {
-      savedSearch.breakdownField = state.breakdownField;
+    if (typeof appState.breakdownField !== 'undefined') {
+      savedSearch.breakdownField = appState.breakdownField;
     } else if (savedSearch.breakdownField) {
       savedSearch.breakdownField = '';
     }
 
-    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
+    savedSearch.hideAggregatedPreview = appState.hideAggregatedPreview;
 
     // add a flag here to identify ES|QL queries
     // these should be filtered out from the visualize editor
-    const isEsqlMode = isDataSourceType(state.dataSource, DataSourceType.Esql);
+    const isEsqlMode = isDataSourceType(appState.dataSource, DataSourceType.Esql);
     if (savedSearch.isTextBasedQuery || isEsqlMode) {
       savedSearch.isTextBasedQuery = isEsqlMode;
     }
   }
 
-  const { from, to } = services.timefilter.getTime();
-  const refreshInterval = services.timefilter.getRefreshInterval();
+  const timeRange = globalState?.timeRange;
+  const refreshInterval = globalState?.refreshInterval;
   savedSearch.timeRange =
-    savedSearch.timeRestore || savedSearch.timeRange
+    timeRange && (savedSearch.timeRestore || savedSearch.timeRange)
       ? {
-          from,
-          to,
+          from: timeRange.from,
+          to: timeRange.to,
         }
       : undefined;
   savedSearch.refreshInterval =
-    savedSearch.timeRestore || savedSearch.refreshInterval
+    refreshInterval && (savedSearch.timeRestore || savedSearch.refreshInterval)
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
 

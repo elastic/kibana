@@ -71,8 +71,8 @@ export const AssetTitleMap: Record<
       defaultMessage: 'Benchmark rules',
     }
   ),
-  alert: i18n.translate('xpack.fleet.epm.assetTitles.alert', {
-    defaultMessage: 'Alert rules',
+  alerting_rule_template: i18n.translate('xpack.fleet.epm.assetTitles.alertingRuleTemplates', {
+    defaultMessage: 'Alerting rule templates',
   }),
   'ml-module': i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'Anomaly detection configurations',

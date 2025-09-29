@@ -51,6 +51,7 @@ export function wrapAsMonacoMessages(
       ? offsetToRowColumn(queryString, e.location.max || 0)
       : fallbackPosition;
     return {
+      code: e.code,
       message: e.text,
       startColumn: startPosition.column,
       startLineNumber: startPosition.lineNumber,

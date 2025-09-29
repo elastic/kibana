@@ -292,8 +292,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         ) {
           return response.ok({
             body: getTimeRangeMetadataResponseRT.encode({
-              schemas: ['semconv'],
-              preferredSchema: 'semconv',
+              schemas: ['ecs'],
+              preferredSchema: 'ecs',
             }),
           });
         }
@@ -309,6 +309,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                   should: [
                     ...termsQuery(EVENT_MODULE, inventoryModel.requiredIntegration.beats),
                     ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
+                    ...termsQuery(DATASTREAM_DATASET, 'apm*'),
                   ],
                   minimum_should_match: 1,
                   filter: [

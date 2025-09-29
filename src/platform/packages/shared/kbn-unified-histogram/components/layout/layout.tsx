@@ -17,7 +17,11 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { css } from '@emotion/react';
-import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
+import type {
+  UnifiedHistogramChartContext,
+  UnifiedHistogramHitsContext,
+  UnifiedHistogramTopPanelHeightContext,
+} from '../../types';
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
@@ -39,11 +43,17 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
    * Current top panel height -- leave undefined to use the default
    */
-  topPanelHeight?: number;
+  topPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+
+  /**
+   * The default top panel height if `topPanelHeight` is not provided
+   */
+  defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+
   /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
-  onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
+  onTopPanelHeightChange?: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
 }>;
 
 export const UnifiedHistogramLayout = ({
@@ -52,6 +62,7 @@ export const UnifiedHistogramLayout = ({
   isChartAvailable,
   hits,
   topPanelHeight,
+  defaultTopPanelHeight: originalDefaultTopPanelHeight,
   onTopPanelHeightChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
@@ -62,7 +73,8 @@ export const UnifiedHistogramLayout = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
-  const defaultTopPanelHeight = euiTheme.base * 12;
+  const minTopPanelHeight = euiTheme.base * 12;
+  const defaultTopPanelHeight = originalDefaultTopPanelHeight ?? minTopPanelHeight;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartCss =
@@ -98,7 +110,7 @@ export const UnifiedHistogramLayout = ({
         mode={panelsMode}
         direction={ResizableLayoutDirection.Vertical}
         fixedPanelSize={currentTopPanelHeight}
-        minFixedPanelSize={defaultTopPanelHeight}
+        minFixedPanelSize={minTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}
         fixedPanel={unifiedHistogramChart}
         flexPanel={<OutPortal node={mainPanelNode} />}

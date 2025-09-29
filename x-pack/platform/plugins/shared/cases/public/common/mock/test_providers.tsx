@@ -49,7 +49,7 @@ interface TestProviderProps {
   filesClient?: BaseFilesClient;
 }
 
-window.scrollTo = jest.fn();
+jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
 const getMockedFilesClient = (): BaseFilesClient => {
   const mockedFilesClient = createMockFilesClient();
@@ -93,11 +93,12 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   queryClient,
   filesClient,
 }) => {
-  const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
-  const finalServices = useMemo(
-    () => ({ ...createStartServicesMock({ license }), ...coreStart, ...services }),
-    [coreStart, license, services]
-  );
+  const finalCoreStart = useMemo(() => {
+    return coreStart ?? coreMock.createStart();
+  }, [coreStart]);
+  const finalServices = useMemo(() => {
+    return { ...createStartServicesMock({ license }), ...coreStart, ...services };
+  }, [coreStart, license, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
@@ -168,7 +169,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
 
 TestProvidersComponent.displayName = 'TestProviders';
 
-export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProviders = TestProvidersComponent;
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
   wrapperProps?: Omit<TestProviderProps, 'children'>;

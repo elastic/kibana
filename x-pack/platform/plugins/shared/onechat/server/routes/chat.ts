@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -19,6 +20,7 @@ import {
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
@@ -36,10 +38,35 @@ export function registerChatRoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
-    agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    connector_id: schema.maybe(schema.string()),
-    conversation_id: schema.maybe(schema.string()),
-    input: schema.string(),
+    agent_id: schema.string({
+      defaultValue: oneChatDefaultAgentId,
+      meta: {
+        description:
+          'The ID of the agent to converse with. Defaults to the default Elastic AI agent.',
+      },
+    }),
+    connector_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional connector ID for the agent to use for external integrations.',
+        },
+      })
+    ),
+    conversation_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional existing conversation ID to continue a previous conversation.',
+        },
+      })
+    ),
+    input: schema.string({
+      meta: { description: 'The user input message to send to the agent.' },
+    }),
+    capabilities: schema.maybe(
+      schema.object({
+        visualizations: schema.maybe(schema.boolean()),
+      })
+    ),
   });
 
   const callConverse = ({
@@ -58,12 +85,14 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      capabilities,
     } = payload;
 
     return chatService.converse({
       agentId,
       connectorId,
       conversationId,
+      capabilities,
       abortSignal,
       nextInput: { message: input },
       request,
@@ -72,7 +101,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse',
+      path: `${publicApiPath}/converse`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -80,8 +109,10 @@ export function registerChatRoutes({
       summary: 'Converse with an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -90,6 +121,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -131,17 +165,18 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse/async',
+      path: `${publicApiPath}/converse/async`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-
       access: 'public',
       summary: 'Converse with an agent and stream events',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -150,6 +185,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

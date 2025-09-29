@@ -15,6 +15,7 @@ import type {
   LensApiReferableMetricOperations,
 } from '../../schema/metric_ops';
 import type {
+  AnyBucketLensStateColumn,
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
   ReferableMetricLensStateColumn,
@@ -67,8 +68,8 @@ export function getLensAPIMetricSharedProps(options: {
 export function getLensStateBucketSharedProps(options: { label?: string; field: string }) {
   return {
     sourceField: options.field,
-    customLabel: options.label != null,
     label: options.label ?? LENS_DEFAULT_LABEL,
+    customLabel: Boolean(options.label),
     isBucketed: true,
   };
 }
@@ -130,4 +131,10 @@ export function isColumnOfReferableType(
   return referrableTypes.some((type) =>
     isLensStateColumnOfType<ReferableMetricLensStateColumn>(type, column)
   );
+}
+
+export function isLensStateBucketColumnType(
+  column: AnyLensStateColumn
+): column is AnyBucketLensStateColumn {
+  return column.isBucketed;
 }

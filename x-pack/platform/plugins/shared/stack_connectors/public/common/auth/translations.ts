@@ -157,3 +157,108 @@ export const EDIT_CA_CALLOUT = i18n.translate(
       'This connector has an existing certificate authority file. Upload a new one to replace it.',
   }
 );
+
+export const ACCESS_TOKEN_URL = i18n.translate(
+  'xpack.stackConnectors.components.auth.accessTokenUrlTextFieldLabel',
+  {
+    defaultMessage: 'Access token URL',
+    description: 'The URL to get the access token from',
+  }
+);
+export const ACCESS_TOKEN_URL_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredAccessTokenUrlText',
+  {
+    defaultMessage: 'Access token URL is required.',
+  }
+);
+export const CLIENT_ID = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+    description: 'The client ID to use for OAuth2 authentication',
+  }
+);
+export const CLIENT_ID_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientIdText',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+export const CLIENT_SECRET = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client secret',
+    description: 'The client secret to use for for OAuth2 authentication',
+  }
+);
+export const CLIENT_SECRET_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientSecretText',
+  {
+    defaultMessage: 'Client secret is required.',
+  }
+);
+export const SCOPE = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Scope',
+    description: 'The scope to use for for OAuth2 authentication',
+  }
+);
+
+export const SCOPE_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.auth.scopeHelpText',
+  {
+    defaultMessage: "Space-separated list of scopes (e.g., 'email profile').",
+  }
+);
+
+export const AUTHENTICATION_OAUTH2 = i18n.translate(
+  'xpack.stackConnectors.components.auth.authenticationMethodOAuth2Label',
+  {
+    defaultMessage: 'OAuth 2.0 Client Credentials',
+  }
+);
+
+export const INVALID_JSON = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsFormatErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON',
+  }
+);
+
+export const INVALID_INPUT_EMPTY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsEmptyErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be empty',
+  }
+);
+
+export const INVALID_INPUT_ARRAY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsArrayErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be an array',
+  }
+);
+
+export const ADDITIONAL_FIELDS = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsTitle',
+  {
+    defaultMessage: 'Additional fields',
+    description: 'Title for the additional fields section',
+  }
+);
+
+export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.webhhok.additionalFieldsHelpTooltipText',
+  {
+    defaultMessage:
+      'Additional fields in JSON format. Your token provider may require more that just the default fields.',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
