@@ -14,6 +14,7 @@ import type {
 } from '../../deployment_agnostic/ftr_provider_context';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
+import { SPACE_2 } from '../lib/spaces';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
@@ -34,10 +35,11 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
+  const kbnClient = getService('kibanaServer');
+  const spacesService = getService('spaces');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
@@ -220,6 +222,24 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     });
   };
 
+  const loadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.load(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
+
+  const unloadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.unload(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
+
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
@@ -233,23 +253,22 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           await supertest.destroy();
         });
 
-        beforeEach(async () => {
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
-        afterEach(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        beforeEach(async () => await loadSavedObjects());
+
+        afterEach(async () => await unloadSavedObjects());
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-            return supertest
+            const response = await supertest
               .delete(`${urlPrefix}/api/spaces/space/space_2`)
-              .expect(tests.exists.statusCode)
-              .then(tests.exists.response);
+              .expect(tests.exists.statusCode);
+
+            // If the delete worked, re-create the space so that subsequent tests are not affected.
+            if (response.status === 200) {
+              await spacesService.create(SPACE_2);
+            }
+
+            return tests.exists.response(response);
           });
 
           describe(`when the space is reserved`, () => {
