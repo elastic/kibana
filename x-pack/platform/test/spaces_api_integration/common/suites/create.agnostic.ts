@@ -33,30 +33,11 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const kbnClient = getService('kibanaServer');
   const spacesSupertest = getService('spacesSupertest');
   const config = getService('config');
   const isServerless = config.get('serverless');
   const spacesService = getService('spaces');
   const noop = () => undefined;
-
-  const loadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.load(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
-
-  const unloadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.unload(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
 
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
