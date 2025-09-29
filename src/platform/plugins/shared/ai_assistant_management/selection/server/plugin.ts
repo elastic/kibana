@@ -16,8 +16,11 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { schema } from '@kbn/config-schema';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -25,6 +28,7 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
@@ -93,6 +97,24 @@ export class AIAssistantManagementSelectionPlugin
       },
     });
 
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
     core.capabilities.registerProvider(() => {
       return {
         management: {
@@ -113,7 +135,6 @@ export class AIAssistantManagementSelectionPlugin
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
         kibana: [
           'aiAssistantManagementSelection',

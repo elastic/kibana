@@ -59,9 +59,12 @@ export const useAttackDiscovery = ({
   const {
     http,
     notifications: { toasts },
+    settings,
   } = useKibana().services;
+
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    settings,
   });
 
   // generation can take a long time, so we calculate an approximate future time:

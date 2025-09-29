@@ -21,6 +21,8 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
+import { get } from 'lodash';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -41,6 +43,16 @@ const mockContext = {
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
+  },
+  settings: {
+    client: {
+      get: (key: string) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return '123';
+        }
+        return get(mockValues, key);
+      },
+    },
   },
 };
 const onClose = jest.fn();

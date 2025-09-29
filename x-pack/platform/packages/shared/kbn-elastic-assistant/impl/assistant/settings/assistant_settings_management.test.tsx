@@ -25,7 +25,11 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { mockSystemPrompts } from '../../mock/system_prompt';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -50,6 +54,20 @@ const mockContext = {
     isAssistantEnabled: true,
     isAssistantManagementEnabled: true,
   },
+  settings: {
+    client: {
+      get: jest.fn((key) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
+        }
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
+          return false;
+        }
+        return undefined;
+      }),
+    },
+  },
+  navigateToApp: jest.fn(),
 };
 
 const mockDataViews = {

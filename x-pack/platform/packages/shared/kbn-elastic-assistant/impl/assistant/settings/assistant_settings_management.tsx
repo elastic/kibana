@@ -56,11 +56,16 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       http,
       assistantAvailability: { isAssistantManagementEnabled },
       navigateToApp,
+      settings,
     } = useAssistantContext();
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
@@ -151,7 +156,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
           data-test-subj={`tab-${selectedSettingsTab}`}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
+          {selectedSettingsTab === CONNECTORS_TAB && (
+            <ConnectorsSettingsManagement connectors={connectors} settings={settings} />
+          )}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}

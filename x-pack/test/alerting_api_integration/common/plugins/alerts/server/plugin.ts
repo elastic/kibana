@@ -30,7 +30,6 @@ import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
@@ -110,7 +109,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
       alerting: testAlertingFeatures,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],

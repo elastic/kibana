@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { resolveDataView } from '../../../utils/data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
@@ -24,6 +25,7 @@ export type ChartProps = Pick<LensChartProps, 'overrides'> & {
   dateRange: TimeRange;
   assetId: string;
   lensAttributes: LensConfig;
+  dataView?: DataView;
 };
 
 export const Chart = ({
@@ -33,6 +35,7 @@ export const Chart = ({
   dateRange,
   assetId,
   lensAttributes,
+  dataView,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
@@ -41,8 +44,12 @@ export const Chart = ({
   } = useKibanaContextForPlugin();
 
   const { value: filters = [] } = useAsync(async () => {
+    if (!dataView?.id) {
+      return [];
+    }
+
     const resolvedDataView = await resolveDataView({
-      dataViewId: (lensAttributes.dataset as LensDataviewDataset)?.index,
+      dataViewId: dataView.id,
       dataViewsService: dataViews,
     });
 
@@ -53,7 +60,7 @@ export const Chart = ({
         dataView: resolvedDataView.dataViewReference,
       }),
     ];
-  }, [assetId, dataViews, lensAttributes.dataset, queryField]);
+  }, [dataView?.id, dataViews, queryField, assetId]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
