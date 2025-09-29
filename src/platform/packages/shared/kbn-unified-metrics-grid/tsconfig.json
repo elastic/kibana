@@ -15,7 +15,6 @@
     "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/esql-ast",
-    "@kbn/shared-ux-button-toolbar",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
