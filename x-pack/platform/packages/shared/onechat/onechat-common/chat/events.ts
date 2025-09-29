@@ -19,6 +19,7 @@ export enum ChatEventType {
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
+  conversationIdSet = 'conversation_id_set',
 }
 
 export type ChatEventBase<
@@ -169,6 +170,23 @@ export const isConversationUpdatedEvent = (
   return event.type === ChatEventType.conversationUpdated;
 };
 
+// conversation id set
+
+export interface ConversationIdSetEventData {
+  conversation_id: string;
+}
+
+export type ConversationIdSetEvent = ChatEventBase<
+  ChatEventType.conversationIdSet,
+  ConversationIdSetEventData
+>;
+
+export const isConversationIdSetEvent = (
+  event: OnechatEvent<string, any>
+): event is ConversationIdSetEvent => {
+  return event.type === ChatEventType.conversationIdSet;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -184,4 +202,8 @@ export type ChatAgentEvent =
 /**
  * All types of events that can be emitted from the chat API.
  */
-export type ChatEvent = ChatAgentEvent | ConversationCreatedEvent | ConversationUpdatedEvent;
+export type ChatEvent =
+  | ChatAgentEvent
+  | ConversationCreatedEvent
+  | ConversationUpdatedEvent
+  | ConversationIdSetEvent;

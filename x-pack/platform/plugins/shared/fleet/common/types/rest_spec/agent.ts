@@ -198,9 +198,9 @@ export interface MigrateSingleAgentRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
-      replace_token?: boolean;
+      replace_token?: string;
     };
   };
 }
@@ -209,7 +209,7 @@ export interface MigrateSingleAgentResponse {
 }
 export interface BulkMigrateAgentsRequest {
   body: {
-    agents: string[];
+    agents: string[] | string;
     enrollment_token: string;
     uri: string;
     settings?: {
@@ -223,7 +223,7 @@ export interface BulkMigrateAgentsRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
     };
   };

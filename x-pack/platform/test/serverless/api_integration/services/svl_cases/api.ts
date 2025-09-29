@@ -106,6 +106,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         duration: null,
         severity: request.severity ?? CaseSeverity.LOW,
         totalAlerts: 0,
+        totalEvents: 0,
         totalComment: 0,
         closed_by: null,
         created_by: defaultUser,
@@ -202,6 +203,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         },
         settings: {
           syncAlerts: true,
+          extractObservables: false,
         },
         owner,
         assignees: [],

@@ -656,7 +656,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             connector_id: bedrockActionId,
             message: 'an error occurred while running the action',
             retry: true,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
           });

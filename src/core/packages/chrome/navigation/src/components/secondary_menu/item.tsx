@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
 import { css } from '@emotion/react';
+import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
@@ -43,7 +44,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-
+  const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
@@ -80,7 +81,7 @@ export const SecondaryMenuItemComponent = ({
   );
 
   return (
-    <li>
+    <li ref={activeItemRef}>
       {isHighlighted ? (
         <EuiButton
           aria-current={isCurrent ? 'page' : undefined}
