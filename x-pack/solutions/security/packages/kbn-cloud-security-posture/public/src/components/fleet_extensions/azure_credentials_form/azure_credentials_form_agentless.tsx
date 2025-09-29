@@ -23,7 +23,11 @@ import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_PROVIDER,
 } from '../constants';
-import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
+import {
+  getCloudCredentialVarsConfig,
+  updatePolicyWithInputs,
+  preloadPolicyWithCloudCredentials,
+} from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
   getAgentlessCredentialsType,
@@ -75,7 +79,21 @@ export const AzureCredentialsFormAgentless = ({
     azurePolicyType,
     isAzureCloudConnectorEnabled,
     azureCloudConnectorRemoteRoleTemplate,
+    templateName,
   } = useCloudSetup();
+
+  // Preload policy with default Azure credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'azure',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: azurePolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology,
+    isCloudConnectorEnabled: isAzureCloudConnectorEnabled,
+  });
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 

@@ -40,7 +40,7 @@ import {
   getTemplateUrlFromPackageInfo,
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
-  getAwsCredentialsType,
+  preloadPolicyWithCloudCredentials,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -174,15 +174,21 @@ export const AwsCredentialsFormAgentless = ({
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
-  const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(
-    awsCredentialsType,
+  // Preload policy with default AWS credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'aws',
+    input,
     newPolicy,
     updatePolicy,
-    input,
-    awsPolicyType
-  );
+    policyType: awsPolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology,
+    isCloudConnectorEnabled: isAwsCloudConnectorEnabled,
+  });
+
+  const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,

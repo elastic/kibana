@@ -17,6 +17,11 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import {
+  AWS_SINGLE_ACCOUNT,
+  AZURE_SINGLE_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
+import {
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
   CLOUD_CONNECTOR_TYPE,
@@ -152,7 +157,7 @@ export const getCloudFormationDefaultValue = (
   packageInfo: PackageInfo,
   templateName: string
 ): string => {
-  if (!packageInfo.policy_templates) return '';
+  if (!packageInfo || !packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
   if (!policyTemplate) return '';
@@ -393,7 +398,7 @@ export const getCloudShellDefaultValue = (
   packageInfo: PackageInfo,
   templateName: string
 ): string => {
-  if (!packageInfo.policy_templates) return '';
+  if (!packageInfo || !packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
 
@@ -416,7 +421,7 @@ export const getArmTemplateUrlFromPackage = (
   packageInfo: PackageInfo,
   templateName: string
 ): string => {
-  if (!packageInfo.policy_templates) return '';
+  if (!packageInfo || !packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
   if (!policyTemplate) return '';
@@ -511,7 +516,7 @@ export const getTemplateUrlFromPackageInfo = (
   integrationType: string,
   templateUrlFieldName: string
 ): string | undefined => {
-  if (!packageInfo?.policy_templates) return undefined;
+  if (!packageInfo || !packageInfo.policy_templates) return undefined;
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === integrationType);
   if (!policyTemplate) return undefined;
@@ -551,3 +556,162 @@ export const getCloudCredentialVarsConfig = ({
     [credentialType]: { value: optionId },
   };
 };
+
+/**
+ * Helper function to add provider-specific defaults to the enhanced vars
+ */
+const addProviderDefaults = (
+  provider: 'aws' | 'azure' | 'gcp',
+  enhancedVars: Record<string, PackagePolicyConfigRecordEntry>,
+  isAgentless: boolean
+): void => {
+  switch (provider) {
+    case 'aws':
+      if (!enhancedVars['aws.account_type']) {
+        enhancedVars['aws.account_type'] = {
+          value: AWS_SINGLE_ACCOUNT,
+          type: 'text',
+        };
+      }
+      if (!isAgentless && enhancedVars['aws.supports_cloud_connectors']) {
+        enhancedVars['aws.supports_cloud_connectors'] = {
+          value: false,
+          type: 'bool',
+        };
+      }
+      break;
+
+    case 'azure':
+      if (!enhancedVars['azure.account_type']) {
+        enhancedVars['azure.account_type'] = {
+          value: AZURE_SINGLE_ACCOUNT,
+          type: 'text',
+        };
+      }
+      if (!isAgentless && enhancedVars['azure.supports_cloud_connectors']) {
+        enhancedVars['azure.supports_cloud_connectors'] = {
+          value: false,
+          type: 'bool',
+        };
+      }
+      break;
+
+    case 'gcp':
+      if (!enhancedVars['gcp.account_type']) {
+        enhancedVars['gcp.account_type'] = {
+          value: GCP_SINGLE_ACCOUNT,
+          type: 'text',
+        };
+      }
+      if (enhancedVars['gcp.supports_cloud_connectors']) {
+        enhancedVars['gcp.supports_cloud_connectors'] = {
+          value: false,
+          type: 'bool',
+        };
+      }
+      break;
+  }
+};
+
+/**
+ * Helper function to determine if cloud connectors are being used
+ */
+const isUsingCloudConnectors = (
+  provider: 'aws' | 'azure' | 'gcp',
+  enhancedVars: Record<string, PackagePolicyConfigRecordEntry>,
+  isAgentless: boolean
+): boolean => {
+  if (!isAgentless) {
+    return false;
+  }
+
+  const credentialTypeKey = `${provider}.credentials.type`;
+  const credentialTypeValue = enhancedVars[credentialTypeKey]?.value;
+
+  return (
+    credentialTypeValue === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS ||
+    credentialTypeValue === AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
+  );
+};
+
+/**
+ * Consolidated function to preload policy with all default values for cloud providers
+ * This reduces the number of Fleet policy updates on initial form load by setting
+ * all necessary defaults in a single update operation
+ */
+export const preloadPolicyWithDefaults = ({
+  provider,
+  input,
+  newPolicy,
+  updatePolicy,
+  policyType,
+  packageInfo,
+  templateName,
+  setupTechnology,
+  isCloudConnectorEnabled = false,
+}: {
+  provider: 'aws' | 'azure' | 'gcp';
+  input: NewPackagePolicyInput;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (update: { updatedPolicy: NewPackagePolicy }) => void;
+  policyType: string;
+  packageInfo: PackageInfo;
+  templateName: string;
+  setupTechnology: SetupTechnology;
+  isCloudConnectorEnabled?: boolean;
+}): void => {
+  // Early return if required parameters are missing
+  if (!packageInfo || !templateName) {
+    return;
+  }
+
+  // Check if this policy has already been initialized to avoid unnecessary updates
+  const existingCredentialsType =
+    provider === 'aws'
+      ? getAwsCredentialsType(input)
+      : provider === 'azure'
+      ? getAzureCredentialsType(input)
+      : provider === 'gcp'
+      ? getGcpCredentialsType(input)
+      : null;
+
+  if (existingCredentialsType) {
+    return; // Already initialized, no need to update
+  }
+
+  // Determine setup technology and cloud connector settings
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
+  const effectiveCloudConnectorEnabled = isAgentless ? isCloudConnectorEnabled : false;
+
+  // Get default configuration values
+  const defaultVars = getInputHiddenVars(
+    provider,
+    packageInfo,
+    templateName,
+    setupTechnology,
+    effectiveCloudConnectorEnabled
+  );
+
+  if (!defaultVars) {
+    return; // No default vars to set for this provider
+  }
+
+  // Add provider-specific defaults
+  const enhancedVars = { ...defaultVars };
+  addProviderDefaults(provider, enhancedVars, isAgentless);
+
+  // Determine cloud connector usage and update policy
+  const isCloudConnector = isUsingCloudConnectors(provider, enhancedVars, isAgentless);
+  const updatedPolicy = updatePolicyWithInputs(newPolicy, policyType, enhancedVars);
+  updatedPolicy.supports_cloud_connector = isCloudConnector;
+
+  updatePolicy({
+    updatedPolicy,
+  });
+};
+
+/**
+ * @deprecated Use preloadPolicyWithDefaults instead
+ * Maintained for backward compatibility
+ */
+export const preloadPolicyWithCloudCredentials = preloadPolicyWithDefaults;

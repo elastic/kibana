@@ -1,5 +1,15 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * Copyright Elasticsearch B.V. and/or licensed to E  preloadPolicyWithCloudCredentials({
+    provider: 'gcp',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: gcpPolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology,
+    isCloudConnectorEnabled: false, // GCP doesn't support cloud connectors yet
+  });arch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -19,6 +29,7 @@ import {
   updatePolicyWithInputs,
   gcpField,
   getGcpInputVarsFields,
+  preloadPolicyWithCloudCredentials,
 } from '../utils';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -50,6 +61,16 @@ export const GcpCredentialsFormAgentless = ({
 }: GcpFormAgentlessProps) => {
   const { showCloudTemplates, templateName, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
+
+  // Preload policy with default GCP credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'gcp',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: gcpPolicyType,
+    isCloudConnectorEnabled: false, // GCP doesn't currently use cloud connectors
+  });
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
