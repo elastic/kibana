@@ -43,7 +43,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
       className="side-nav"
       css={css`
         // There is no token for this value
-        --max-side-nav-width: 100px;
+        --expanded-side-nav-width: 100px;
 
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
@@ -52,8 +52,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
         height: 100%;
         padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? euiTheme.size.xxxl : 'fit-content'};
-        max-width: var(--max-side-nav-width);
+        width: ${isCollapsed ? euiTheme.size.xxxl : 'var(--expanded-side-nav-width)'};
       `}
     >
       {children}
