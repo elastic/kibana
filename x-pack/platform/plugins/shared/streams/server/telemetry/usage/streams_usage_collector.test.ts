@@ -35,7 +35,7 @@ describe('Streams Usage Collector', () => {
   it('registers a streams collector', () => {
     const mockCoreSetup = {} as any;
     const mockPlugins = {} as any;
-    registerStreamsUsageCollector(usageCollectionMock, mockCoreSetup, mockPlugins);
+    registerStreamsUsageCollector(usageCollectionMock);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'streams',
@@ -63,7 +63,7 @@ describe('Streams Usage Collector', () => {
 
       const mockCoreSetup = {} as any;
       const mockPlugins = {} as any;
-      registerStreamsUsageCollector(usageCollectionMock, mockCoreSetup, mockPlugins);
+      registerStreamsUsageCollector(usageCollectionMock);
       const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
       const result = await fetch.call({}, { soClient: soClientMock, esClient });
 
@@ -100,7 +100,7 @@ describe('Streams Usage Collector', () => {
 
       const mockCoreSetup = {} as any;
       const mockPlugins = {} as any;
-      registerStreamsUsageCollector(usageCollectionMock, mockCoreSetup, mockPlugins);
+      registerStreamsUsageCollector(usageCollectionMock);
       const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
       const result = await fetch.call({}, { soClient: soClientMock, esClient });
 
@@ -182,7 +182,7 @@ describe('Streams Usage Collector', () => {
 
       const mockCoreSetup = {} as any;
       const mockPlugins = {} as any;
-      registerStreamsUsageCollector(usageCollectionMock, mockCoreSetup, mockPlugins);
+      registerStreamsUsageCollector(usageCollectionMock);
       const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
       const result = await fetch.call({}, { soClient: soClientMock, esClient });
 
@@ -204,6 +204,98 @@ describe('Streams Usage Collector', () => {
           rule_execution_ms_avg_24h: 2,
           rule_execution_ms_p95_24h: 2.9,
           executions_count_24h: 2,
+        },
+      });
+    });
+
+    it('handles circuit_breaking_exception gracefully', async () => {
+      const soClientMock = savedObjectsClientMock.create();
+      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+
+      // Mock circuit breaker error
+      esClientMock.search.mockRejectedValue({
+        meta: {
+          body: {
+            error: {
+              type: 'circuit_breaking_exception',
+            },
+          },
+        },
+        message: 'Circuit breaker error',
+      });
+
+      // Set production environment to prevent re-throwing
+      process.env.NODE_ENV = 'production';
+
+      registerStreamsUsageCollector(usageCollectionMock);
+      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
+      const result = await fetch.call({}, { soClient: soClientMock, esClientMock });
+
+      // Should return default values when ES calls fail
+      expect(result).toEqual({
+        classic_streams: {
+          changed_count: 0,
+          with_processing_count: 0,
+          with_fields_count: 0,
+          with_changed_retention_count: 0,
+        },
+        wired_streams: {
+          count: 0,
+        },
+        significant_events: {
+          rules_count: 0,
+          stored_count: 0,
+          unique_wired_streams_count: 0,
+          unique_classic_streams_count: 0,
+          rule_execution_ms_avg_24h: null,
+          rule_execution_ms_p95_24h: null,
+          executions_count_24h: 0,
+        },
+      });
+    });
+
+    it('handles too_long_http_line_exception gracefully', async () => {
+      const soClientMock = savedObjectsClientMock.create();
+      const esClientMock2 = elasticsearchServiceMock.createElasticsearchClient();
+
+      // Mock too long HTTP line error
+      esClientMock2.search.mockRejectedValue({
+        meta: {
+          body: {
+            error: {
+              type: 'too_long_http_line_exception',
+            },
+          },
+        },
+        message: 'HTTP line too long',
+      });
+
+      // Set production environment to prevent re-throwing
+      process.env.NODE_ENV = 'production';
+
+      registerStreamsUsageCollector(usageCollectionMock);
+      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
+      const result = await fetch.call({}, { soClient: soClientMock, esClientMock2 });
+
+      // Should return default values when ES calls fail
+      expect(result).toEqual({
+        classic_streams: {
+          changed_count: 0,
+          with_processing_count: 0,
+          with_fields_count: 0,
+          with_changed_retention_count: 0,
+        },
+        wired_streams: {
+          count: 0,
+        },
+        significant_events: {
+          rules_count: 0,
+          stored_count: 0,
+          unique_wired_streams_count: 0,
+          unique_classic_streams_count: 0,
+          rule_execution_ms_avg_24h: null,
+          rule_execution_ms_p95_24h: null,
+          executions_count_24h: 0,
         },
       });
     });

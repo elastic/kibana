@@ -136,7 +136,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.debug('[Streams Telemetry] Failed to list streams or compute stream metrics', err);
+        console.error('[Streams Telemetry] Failed to list streams or compute stream metrics', err);
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -163,7 +163,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         result.significant_events.rules_count = (rulesCountResponse.hits?.total as any)?.value ?? 0;
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.debug('[Streams Telemetry] Failed to count significant event rules', err);
+        console.error('[Streams Telemetry] Failed to count significant event rules', err);
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -252,7 +252,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
             result.significant_events.unique_classic_streams_count = classicCount;
           } catch (streamTypeErr) {
             // eslint-disable-next-line no-console
-            console.debug(
+            console.error(
               '[Streams Telemetry] Failed to determine stream types for events',
               streamTypeErr
             );
@@ -261,7 +261,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.debug('[Streams Telemetry] Failed to count significant events', err);
+        console.error('[Streams Telemetry] Failed to count significant events', err);
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -313,7 +313,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.debug('[Streams Telemetry] Failed to fetch event log execution metrics', {
+        console.error('[Streams Telemetry] Failed to fetch event log execution metrics', {
           error: err,
           message: (err as any)?.message,
           statusCode: (err as any)?.meta?.statusCode,
