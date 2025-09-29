@@ -12,6 +12,7 @@ import YAML from 'yaml';
 export interface StepInfo {
   stepId: string;
   stepType: string;
+  stepYamlNode: any;
   lineStart: number;
   lineEnd: number;
 }
@@ -75,6 +76,7 @@ function inspectStep(node: any, model: monaco.editor.ITextModel): Record<string,
     result[stepId] = {
       stepId,
       stepType,
+      stepYamlNode: node,
       lineStart,
       lineEnd,
     };

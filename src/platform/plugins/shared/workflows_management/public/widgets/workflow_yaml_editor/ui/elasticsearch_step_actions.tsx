@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +23,7 @@ import type { monaco } from '@kbn/monaco';
 import { RunStepButton } from './run_step_button';
 import { useEditorState } from '../lib/state/state';
 import type { StepInfo } from '../lib/state/index_yaml_document';
+import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
 export interface ElasticsearchStepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -67,7 +67,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
     }
 
     editor.onDidScrollChange(() => updateContainerPosition(focusedStepRef.current, editor));
-  }, [editor, setPositionStyles]);
+  }, [focusedStepInfo, editor, setPositionStyles]);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -87,21 +87,20 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
     />
   );
 
-  const items = [
-    ...([]?.map((action: any, index: number) => (
-      <EuiContextMenuItem
-        data-test-subj={`actionButton-${action.id}`}
-        key={action.id || index}
-        onClick={() => {
-          action.handler();
-          closePopover();
-        }}
-        icon={action.icon}
-      >
-        {action.label}
-      </EuiContextMenuItem>
-    )) || []),
-  ];
+  const items = useMemo(() => {
+    if (!focusedStepInfo) {
+      return [];
+    }
+
+    return [
+      ...[
+        ...(focusedStepInfo.stepType.startsWith('elasticsearch.')
+          ? [<CopyElasticSearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
+          : []),
+        <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
+      ],
+    ];
+  }, [focusedStepInfo]);
 
   if (!focusedStepInfo) {
     return null;
