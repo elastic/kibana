@@ -30,7 +30,6 @@ import type { FeaturesRegistry } from '../../../common';
 
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
-  showShorterMessage: boolean;
 }
 
 export interface ObservabilityStreamsFeature {

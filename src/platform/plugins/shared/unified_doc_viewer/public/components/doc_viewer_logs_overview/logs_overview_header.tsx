@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -15,9 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
   useGeneratedHtmlId,
-  useResizeObserver,
 } from '@elastic/eui';
 import type { LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
@@ -64,20 +62,16 @@ export function LogsOverviewHeader({
   const hasMessageField = field && value;
   const hasBadges = hasTimestamp || hasLogLevel || hasMessageField;
   const hasFlyoutHeader = hasMessageField || hasBadges;
-  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
-  const { euiTheme } = useEuiTheme();
-  const dimensions = useResizeObserver(ref);
-  const isLargeFlyout = dimensions?.width ? dimensions.width > euiTheme.base * 32 : false;
 
   const accordionId = useGeneratedHtmlId({
     prefix: contentLabel,
   });
 
   const badges = hasBadges && (
-    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc: hit, showShorterMessage: !isLargeFlyout })}
+        renderFlyoutStreamProcessingLink({ doc: hit })}
       {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
           value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
@@ -101,7 +95,6 @@ export function LogsOverviewHeader({
         gutterSize="none"
         justifyContent="spaceBetween"
         responsive={false}
-        ref={setRef}
       >
         <EuiText color="subdued" size="xs">
           {field}

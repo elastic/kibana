@@ -12,9 +12,9 @@ import {
   EuiLink,
   EuiIcon,
   EuiFlexGroup,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -29,7 +29,6 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
   streamsRepositoryClient: StreamsRepositoryClient;
   coreApplication: CoreStart['application'];
   locator: StreamsAppLocator;
-  showShorterMessage: boolean;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
@@ -37,7 +36,6 @@ export function DiscoverFlyoutStreamProcessingLink({
   doc,
   locator,
   coreApplication,
-  showShorterMessage,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
   const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
@@ -74,26 +72,36 @@ export function DiscoverFlyoutStreamProcessingLink({
     defaultMessage: 'Parse content in Streams',
   });
 
-  const shorterMessage = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-    defaultMessage: 'Parse',
-  });
-
   return (
-    <EuiToolTip content={message}>
-      <RedirectAppLinks coreStart={{ application: coreApplication }}>
-        <EuiLink href={href}>
+    <RedirectAppLinks
+      coreStart={{ application: coreApplication }}
+      css={css`
+        min-width: 0;
+      `}
+    >
+      <EuiLink href={href}>
+        <EuiToolTip content={message} display="block">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiIcon
               type="sparkles"
               size="s"
               css={css`
-                margin-left: ${euiTheme.size.m};
+                margin-left: ${euiTheme.size.s};
               `}
             />
-            <EuiText size="xs">{showShorterMessage ? shorterMessage : message}</EuiText>
+            <EuiText
+              size="xs"
+              css={css`
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              `}
+            >
+              {message}
+            </EuiText>
           </EuiFlexGroup>
-        </EuiLink>
-      </RedirectAppLinks>
-    </EuiToolTip>
+        </EuiToolTip>
+      </EuiLink>
+    </RedirectAppLinks>
   );
 }
