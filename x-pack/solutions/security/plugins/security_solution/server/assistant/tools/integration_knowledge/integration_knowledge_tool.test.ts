@@ -16,12 +16,16 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
 const mockSearch = jest.fn();
+const mockIndicesExists = jest.fn();
 const mockAssistantContext = {
   core: {
     elasticsearch: {
       client: {
         asInternalUser: {
           search: mockSearch,
+          indices: {
+            exists: mockIndicesExists,
+          },
         },
       },
     },
@@ -38,6 +42,8 @@ describe('IntegrationKnowledgeTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default to index existing
+    mockIndicesExists.mockResolvedValue(true);
   });
 
   describe('isSupported', () => {
@@ -58,10 +64,25 @@ describe('IntegrationKnowledgeTool', () => {
       expect(result).toBeNull();
     });
 
-    it('returns a DynamicStructuredTool when supported', async () => {
+    it('returns a DynamicStructuredTool when supported and index exists', async () => {
       const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
       expect(tool).toBeDefined();
       expect(tool?.name).toBe('IntegrationKnowledgeTool');
+      expect(mockIndicesExists).toHaveBeenCalledWith({
+        index: '.integration_knowledge',
+      });
+    });
+
+    it('returns null when index does not exist', async () => {
+      mockIndicesExists.mockResolvedValue(false);
+      const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
+      expect(tool).toBeNull();
+    });
+
+    it('returns null when index existence check throws error', async () => {
+      mockIndicesExists.mockRejectedValue(new Error('Index check failed'));
+      const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
+      expect(tool).toBeNull();
     });
   });
 
