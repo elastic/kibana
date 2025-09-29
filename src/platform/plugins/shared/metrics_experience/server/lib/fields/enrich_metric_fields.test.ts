@@ -15,6 +15,7 @@ import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
@@ -42,7 +43,7 @@ describe('enrichMetricFields', () => {
     name,
     index,
     type: 'long',
-    dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword', description: '' }],
+    dimensions: [{ name: TEST_HOST_FIELD, type: ES_FIELD_TYPES.KEYWORD, description: '' }],
     ...overrides,
   });
 
@@ -81,7 +82,8 @@ describe('enrichMetricFields', () => {
     dataStreamFieldCapsMap = new Map();
 
     extractDimensionsMock.mockImplementation(
-      (_caps, names) => names?.map((name) => ({ name, type: 'keyword', description: '' })) ?? []
+      (_caps, names) =>
+        names?.map((name) => ({ name, type: ES_FIELD_TYPES.KEYWORD, description: '' })) ?? []
     );
   });
 

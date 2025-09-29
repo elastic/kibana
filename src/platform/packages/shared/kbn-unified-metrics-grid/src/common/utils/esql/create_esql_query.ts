@@ -30,10 +30,8 @@ const separator = '\u203A'.normalize('NFC');
  * @param fieldType - The Elasticsearch field type (e.g., 'ip', 'long', 'keyword').
  * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
  */
-function needsStringCasting(fieldType: string): boolean {
-  return (
-    DIMENSION_TYPES.includes(fieldType as ES_FIELD_TYPES) && fieldType !== ES_FIELD_TYPES.KEYWORD
-  );
+function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
+  return DIMENSION_TYPES.includes(fieldType) && fieldType !== ES_FIELD_TYPES.KEYWORD;
 }
 
 /**

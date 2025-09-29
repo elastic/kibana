@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type ES_FIELD_TYPES } from '@kbn/field-types';
+
 export interface Dimension {
   name: string;
-  type: string;
+  type: ES_FIELD_TYPES;
   description?: string;
 }
