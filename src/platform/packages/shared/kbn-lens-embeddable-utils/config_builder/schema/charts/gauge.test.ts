@@ -117,7 +117,7 @@ describe('Gauge Schema', () => {
       direction: 'horizontal',
     });
     // thicks default is only applied when explicitly set, not when omitted
-    expect(validated.metric.thicks).toBeUndefined();
+    expect(validated.metric.ticks).toBeUndefined();
   });
 
   it('validates ESQL configuration', () => {
