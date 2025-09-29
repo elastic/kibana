@@ -17,7 +17,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 import { entityManagerRouteRepository } from './routes';
@@ -87,7 +86,6 @@ export class EntityManagerServerPlugin
       name: 'Entity Manager',
       description: 'All features related to the Elastic Entity model',
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [ENTITY_MANAGER_FEATURE_ID],
       privileges: {
         all: {

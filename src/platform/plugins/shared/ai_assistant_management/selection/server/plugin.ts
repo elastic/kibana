@@ -17,7 +17,6 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -135,7 +134,6 @@ export class AIAssistantManagementSelectionPlugin
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
         kibana: [
           'aiAssistantManagementSelection',
