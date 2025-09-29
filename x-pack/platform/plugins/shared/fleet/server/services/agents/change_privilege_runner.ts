@@ -53,6 +53,7 @@ export async function bulkChangePrivilegeAgentsBatch(
   options: {
     actionId?: string;
     total?: number;
+    spaceId?: string;
     user_info?: {
       username?: string;
       groupname?: string;
@@ -68,6 +69,8 @@ export async function bulkChangePrivilegeAgentsBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? agents.length;
   const agentIds = agentsToAction.map((agent) => agent.id);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
 
   // Fail fast if agents contain integrations that require root access.
   await pMap(
@@ -105,6 +108,7 @@ export async function bulkChangePrivilegeAgentsBatch(
     },
     ...(options?.user_info?.password && {
       secrets: { user_info: { password: options.user_info.password } },
+      namespaces,
     }),
   });
 

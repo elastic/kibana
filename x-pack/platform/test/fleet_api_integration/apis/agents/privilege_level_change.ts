@@ -309,7 +309,7 @@ export default function (providerContext: FtrProviderContext) {
         await verifyActionResult(2);
       });
 
-      it('should return 403 if one of the agents requires root access', async () => {
+      it('TESTME should return 200 with errors if one of the agents has integrations that require root access', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')
@@ -321,7 +321,15 @@ export default function (providerContext: FtrProviderContext) {
               password: 'password',
             },
           })
-          .expect(403);
+          .expect(200);
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.latestErrors[0].error).to.eql(
+          'Agent agent2 contains integrations that require root access: system'
+        );
       });
 
       it('should work for multiple agents by kuery in batches async', async () => {
