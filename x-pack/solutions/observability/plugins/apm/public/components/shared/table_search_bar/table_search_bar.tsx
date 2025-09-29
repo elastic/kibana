@@ -6,7 +6,7 @@
  */
 import { debounce } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
@@ -23,10 +23,10 @@ export function TableSearchBar({
   onChangeSearchQuery,
   techPreview = false,
 }: Props) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSearchQuery = useCallback(debounce(onChangeSearchQuery, 500), [
-    onChangeSearchQuery,
-  ]);
+  const debouncedSearchQuery = useMemo(
+    () => debounce(onChangeSearchQuery, 500),
+    [onChangeSearchQuery]
+  );
 
   return (
     <EuiFlexGroup gutterSize="s">
