@@ -14,6 +14,14 @@ export const getParseOriginalDashboardNode = (): GraphNode => {
       throw new Error('Unsupported dashboard vendor');
     }
 
+    // Check if the XML content is supported
+    const supportCheck = SplunkXmlDashboardParser.isSupportedSplunkXml(
+      state.original_dashboard.data
+    );
+    if (!supportCheck.isSupported) {
+      throw new Error(`Unsupported Splunk XML: ${supportCheck.reason}`);
+    }
+
     const parser = new SplunkXmlDashboardParser(state.original_dashboard.data);
     const panels = await parser.extractPanels();
 
