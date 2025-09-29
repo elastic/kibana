@@ -477,15 +477,43 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('update detection should sync integrations', async () => {
         // schedule a sync
+        const monitoringSource = await privMonUtils.getIntegrationMonitoringSource(
+          'entityanalytics_okta'
+        );
+        expect(monitoringSource).toBeDefined();
+        expect(monitoringSource?.name).toBe(
+          '.entity_analytics.monitoring.sources.entityanalytics_okta-default'
+        );
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
-        const res = await api.listPrivMonUsers({ query: {} });
-        // each user should be privileged and have correct source
-        res.body.forEach((r: any) => {
-          expect(r.user.is_privileged).toBe(true);
-          expect(r.user.name).toBeDefined();
-          expect(r.labels.sources).toContain('entity_analytics_integration');
-        });
+
+        const { body: usersBefore } = await api.listPrivMonUsers({ query: {} });
+        const mableBefore = privMonUtils.findUser(usersBefore, 'Mable.Mann');
+        expect(mableBefore).toBeDefined();
+        expect(mableBefore?.user?.is_privileged).toBe(true);
+        expect(mableBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(mableBefore?.labels?.sources).toContain('entity_analytics_integration');
+        expect(mableBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Group Administrator',
+          },
+        ]);
+
+        const kathryneBefore = privMonUtils.findUser(usersBefore, 'Kathryne.Ziemann');
+        expect(kathryneBefore).toBeDefined();
+        expect(kathryneBefore?.user?.is_privileged).toBe(true);
+        expect(kathryneBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneBefore?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
+
         // update okta user to non-privileged, to test sync updates
         await privMonUtils.setIntegrationUserPrivilege({
           id: 'AZlHQD20hY07UD0HNBs-',
@@ -495,12 +523,28 @@ export default ({ getService }: FtrProviderContext) => {
         // schedule another sync
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
-        const res2 = await api.listPrivMonUsers({ query: {} });
+        const { body: usersAfter } = await api.listPrivMonUsers({ query: {} });
+
         // find the updated user
-        const updatedUser = res2.body.find((u: any) => u.user.name === 'Mable.Mann');
-        // check user is now non-privileged and does not have integration source
-        expect(updatedUser.user.is_privileged).toBe(false);
-        expect(updatedUser.labels.sources).toHaveLength(0);
+        const mableAfter = privMonUtils.findUser(usersAfter, 'Mable.Mann');
+        expect(mableAfter).toBeDefined();
+        privMonUtils.assertIsPrivileged(mableAfter, false);
+        expect(mableAfter?.entity_analytics_monitoring?.labels).toEqual([]);
+        privMonUtils.expectTimestampsHaveBeenUpdated(mableBefore, mableAfter);
+
+        // kathryne should remain privileged
+        const kathryneAfter = privMonUtils.findUser(usersAfter, 'Kathryne.Ziemann');
+        expect(kathryneAfter).toBeDefined();
+        expect(kathryneAfter?.user?.is_privileged).toBe(true);
+        expect(kathryneAfter?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneAfter?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneAfter?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {
