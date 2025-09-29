@@ -50143,7 +50143,6 @@ paths:
                                                               type:
                                                                 enum:
                                                                   - keyword
-                                                                  - text
                                                                   - match_only_text
                                                                   - long
                                                                   - double
@@ -53688,7 +53687,6 @@ paths:
                                                               type:
                                                                 enum:
                                                                   - keyword
-                                                                  - text
                                                                   - match_only_text
                                                                   - long
                                                                   - double
@@ -57415,7 +57413,6 @@ paths:
                                               type:
                                                 enum:
                                                   - keyword
-                                                  - text
                                                   - match_only_text
                                                   - long
                                                   - double
@@ -59062,7 +59059,6 @@ paths:
                                               type:
                                                 enum:
                                                   - keyword
-                                                  - text
                                                   - match_only_text
                                                   - long
                                                   - double
