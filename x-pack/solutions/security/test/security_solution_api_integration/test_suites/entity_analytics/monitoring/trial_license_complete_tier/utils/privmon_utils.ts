@@ -21,7 +21,9 @@ import moment from 'moment';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-type PrivmonUser = ListPrivMonUsersResponse[number];
+type PrivmonUser = ListPrivMonUsersResponse[number] & {
+  '@timestamp'?: string;
+};
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
