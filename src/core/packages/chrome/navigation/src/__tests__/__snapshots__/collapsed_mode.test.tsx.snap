@@ -14,6 +14,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       >
         <div
           class="css-18bgeak-wrapperStyles"
+          data-test-subj="side-nav-logo-wrapper"
         >
           <a
             aria-label="Solution homepage"
