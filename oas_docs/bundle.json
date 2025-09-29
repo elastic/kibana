@@ -18958,6 +18958,7 @@
                             "type": "string"
                           },
                           "last_checkin": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "last_checkin_message": {
@@ -21070,6 +21071,7 @@
                           "type": "string"
                         },
                         "last_checkin": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "last_checkin_message": {
@@ -21563,6 +21565,7 @@
                           "type": "string"
                         },
                         "last_checkin": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "last_checkin_message": {
@@ -24665,6 +24668,9 @@
                                 "nullable": true,
                                 "type": "string"
                               },
+                              "rolled_back": {
+                                "type": "boolean"
+                              },
                               "type": {
                                 "type": "string"
                               },
@@ -26826,6 +26832,9 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "rolled_back": {
+                              "type": "boolean"
+                            },
                             "type": {
                               "type": "string"
                             },
@@ -27779,6 +27788,9 @@
                             "previous_version": {
                               "nullable": true,
                               "type": "string"
+                            },
+                            "rolled_back": {
+                              "type": "boolean"
                             },
                             "type": {
                               "type": "string"
