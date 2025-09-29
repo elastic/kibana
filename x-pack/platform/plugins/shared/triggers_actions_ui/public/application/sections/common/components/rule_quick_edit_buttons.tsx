@@ -70,9 +70,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts !== false);
   }, [isAllSelected, selectedItems]);
 
-  const showUpdateKeyOnly =
-    !isAllSelected && selectedItems.every((rule) => rule.isInternallyManaged);
-
   async function deleteSelectedItems() {
     onPerformingAction();
     try {
@@ -261,24 +258,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     [onModalClose, onDisable]
   );
 
-  function renderUpdateApiKeyItem() {
-    return (
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          onClick={updateAPIKeysClick}
-          isLoading={isBulkEditing && bulkEditAction === 'updateApiKey'}
-          isDisabled={isPerformingAction}
-          data-test-subj="updateAPIKeys"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
-            defaultMessage="Update API keys"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    );
-  }
-
   return (
     <>
       <EuiFlexGroup
@@ -287,8 +266,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         gutterSize="none"
         data-test-subj="ruleQuickEditButton"
       >
-        {showUpdateKeyOnly && renderUpdateApiKeyItem()}
-        {!isAllSelected && !showUpdateKeyOnly && (
+        {!isAllSelected && (
           <>
             <EuiFlexItem>
               <EuiButtonEmpty
@@ -344,53 +322,61 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             </EuiFlexItem>
           </>
         )}
-        {!showUpdateKeyOnly && (
-          <>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={onEnable}
-                isLoading={isEnablingRules}
-                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-                data-test-subj="bulkEnable"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
-                  defaultMessage="Enable"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={onDisableClick}
-                isLoading={isDisablingRules}
-                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-                data-test-subj="bulkDisable"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
-                  defaultMessage="Disable"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {renderUpdateApiKeyItem()}
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={deleteSelectedItems}
-                isLoading={isBulkEditing && bulkEditAction === 'delete'}
-                iconType="trash"
-                color="danger"
-                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-                data-test-subj="bulkDelete"
-                className="actBulkActionPopover__deleteAll"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
-                  defaultMessage="Delete"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
-        )}
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onEnable}
+            isLoading={isEnablingRules}
+            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+            data-test-subj="bulkEnable"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
+              defaultMessage="Enable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onDisableClick}
+            isLoading={isDisablingRules}
+            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+            data-test-subj="bulkDisable"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
+              defaultMessage="Disable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={updateAPIKeysClick}
+            isLoading={isBulkEditing && bulkEditAction === 'updateApiKey'}
+            isDisabled={isPerformingAction}
+            data-test-subj="updateAPIKeys"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
+              defaultMessage="Update API keys"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={deleteSelectedItems}
+            isLoading={isBulkEditing && bulkEditAction === 'delete'}
+            iconType="trash"
+            color="danger"
+            isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+            data-test-subj="bulkDelete"
+            className="actBulkActionPopover__deleteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
+              defaultMessage="Delete"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       {isUntrackAlertsModalOpen && (
         <UntrackAlertsModal onConfirm={onModalConfirm} onCancel={onModalClose} />
