@@ -2716,8 +2716,6 @@
       "matchDepNames": [
         "expose-loader",
         "html-loader",
-        "jsondiffpatch",
-        "null-loader",
         "object-path-immutable",
         "postcss-prefix-selector",
         "safe-squel",

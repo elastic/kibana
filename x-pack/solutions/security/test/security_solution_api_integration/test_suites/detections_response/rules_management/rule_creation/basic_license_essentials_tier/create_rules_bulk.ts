@@ -28,7 +28,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkCreateRules({ body: [getSimpleRule()] })
           .expect(200);
 
@@ -91,13 +91,13 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         };
 
-        const { body: createdRulesBulkResponse } = await securitySolutionApi
+        const { body: createdRulesBulkResponse } = await detectionsApi
           .bulkCreateRules({ body: [ruleCreateProperties] })
           .expect(200);
 
         expect(createdRulesBulkResponse[0]).toMatchObject(expectedRule);
 
-        const { body: createdRule } = await securitySolutionApi
+        const { body: createdRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a single rule without a rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkCreateRules({ body: [getSimpleRuleWithoutRuleId()] })
           .expect(200);
 
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkCreateRules({ body: [getSimpleRule(), getSimpleRule()] })
           .expect(200);
 
@@ -137,9 +137,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id that already exists', async () => {
-        await securitySolutionApi.bulkCreateRules({ body: [getSimpleRule()] }).expect(200);
+        await detectionsApi.bulkCreateRules({ body: [getSimpleRule()] }).expect(200);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkCreateRules({ body: [getSimpleRule()] })
           .expect(200);
 
