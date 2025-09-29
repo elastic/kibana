@@ -13,12 +13,16 @@ import type {
   NavigationTreeDefinition,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
+import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+
+import playgroundIcon from './assets/images/playground.svg';
+import agentsIcon from './assets/images/robot.svg';
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -124,6 +128,11 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  iconV2: agentsIcon,
+                  link: 'agent_builder',
+                  title: AGENTS_TITLE,
+                },
+                {
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate(
@@ -137,17 +146,6 @@ export const getNavigationTreeDefinition = ({
                   badgeTypeV2: 'techPreview' as const,
                   link: 'workflows',
                   withBadge: true,
-                },
-                {
-                  link: 'agent_builder',
-                  sideNavVersion: 'v1',
-                  title: AGENTS_TITLE,
-                },
-                {
-                  iconV2: 'comment',
-                  link: 'agent_builder',
-                  sideNavVersion: 'v2',
-                  title: AGENTS_TITLE,
                 },
                 {
                   children: [
@@ -164,7 +162,7 @@ export const getNavigationTreeDefinition = ({
                     },
                     {
                       breadcrumbStatus: 'hidden',
-                      iconV2: 'broom' /* TODO: review icon */,
+                      iconV2: playgroundIcon,
                       link: 'searchPlayground',
                     },
                     {
@@ -289,21 +287,6 @@ export const getNavigationTreeDefinition = ({
                     defaultMessage: 'Machine Learning',
                   }),
                 },
-                {
-                  iconV2: 'globe' /* TODO: review icon */,
-                  link: 'maps',
-                  sideNavVersion: 'v2',
-                },
-                {
-                  iconV2: 'graphApp',
-                  link: 'graph',
-                  sideNavVersion: 'v2',
-                },
-                {
-                  iconV2: 'visualizeApp',
-                  link: 'visualize',
-                  sideNavVersion: 'v2',
-                },
               ],
               defaultIsCollapsed: false,
               icon,
@@ -380,7 +363,7 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   iconV2: 'database',
-                  id: 'ingest_and_data',
+                  id: INGEST_AND_MANAGE_DATA_NAV_ID, // This id can't be changed as we use it to anchor the tour step
                   sideNavVersion: 'v2',
                   renderAs: 'panelOpener',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
@@ -521,6 +504,7 @@ export const getNavigationTreeDefinition = ({
                           children: [
                             { link: 'management:dataViews' },
                             { link: 'management:filesManagement' },
+                            { link: 'visualize' },
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
@@ -547,7 +531,7 @@ export const getNavigationTreeDefinition = ({
                           ),
                         },
                       ],
-                      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
+                      id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
                       renderAs: 'panelOpener',
                       spaceBefore: null,
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

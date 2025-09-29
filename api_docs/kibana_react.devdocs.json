@@ -2205,8 +2205,6 @@
           "HttpSetup",
           " | undefined; injection?: ",
           "CoreDiServiceStart",
-          " | undefined; savedObjects?: ",
-          "SavedObjectsStart",
           " | undefined; i18n?: ",
           "I18nStart",
           " | undefined; notifications?: ",
