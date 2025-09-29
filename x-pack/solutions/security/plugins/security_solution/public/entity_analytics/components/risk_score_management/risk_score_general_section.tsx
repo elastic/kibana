@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiCheckbox,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+} from '@elastic/eui';
 
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
-// import * as i18n from '../../translations';
+import * as i18n from '../../translations';
 
 import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
-
-const StyledList = styled.ul`
-  list-style-type: disc;
-  padding-left: ${euiThemeVars.euiSizeM};
-`;
 
 interface RiskScoreGeneralSectionProps {
   riskEngineSettings: RiskScoreConfiguration;
@@ -28,9 +29,24 @@ export const RiskScoreGeneralSection = (props: RiskScoreGeneralSectionProps) => 
   return (
     <>
       <EuiTitle>
-        <h2>"General"</h2>
+        <h2>{i18n.RISK_SCORE_GENERAL_SECTION}</h2>
       </EuiTitle>
       <EuiSpacer />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={'riskScoreRetainCheckbox'}
+            label={i18n.RISK_SCORE_RETAINMENT_CHECKBOX}
+            checked={!props.riskEngineSettings.enableResetToZero}
+            onChange={props.toggleScoreRetainment}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={i18n.RISK_SCORE_RETAINMENT_TOOLTIP} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
     </>
   );
 };
