@@ -213,4 +213,76 @@ export class UnifiedTabsPageObject extends FtrService {
   public async isTabsBarVisible() {
     return await this.testSubjects.exists('unifiedTabs_tabsBar');
   }
+
+  public async isTabPreviewVisible() {
+    const tabPreview = await this.find.byCssSelector('[data-test-subj^="unifiedTabs_tabPreview_"]');
+
+    return tabPreview ? await tabPreview.isDisplayed() : false;
+  }
+
+  public async closeTabPreviewWithEsc() {
+    if (await this.isTabPreviewVisible()) {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.retry.waitFor('tab preview to close', async () => {
+        return !(await this.isTabPreviewVisible());
+      });
+    }
+  }
+
+  public async openTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to open', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
+    });
+  }
+
+  public async closeTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to close', async () => {
+      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
+    });
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip if it is open
+  }
+
+  public async getRecentlyClosedTabLabels() {
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    const labels = [];
+    for (const item of recentlyClosedItems) {
+      labels.push(await item.getVisibleText());
+    }
+    await this.closeTabsBarMenu();
+    return labels;
+  }
+
+  public async restoreRecentlyClosedTab(index: number) {
+    const currentNumberOfTabs = await this.getNumberOfTabs();
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    if (index < 0 || index >= recentlyClosedItems.length) {
+      throw new Error(`Recently closed tab index ${index} is out of bounds`);
+    }
+    await recentlyClosedItems[index].click();
+    await this.retry.waitFor('the tab to be restored', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === currentNumberOfTabs + 1;
+    });
+  }
+
+  public async clearRecentlyClosedTabs() {
+    await this.openTabsBarMenu();
+    const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
+    const clearButtonExists = await this.testSubjects.exists(buttonTestId);
+    if (clearButtonExists) {
+      await this.testSubjects.click(buttonTestId);
+      await this.retry.waitFor('recently closed tabs to be cleared', async () => {
+        return !(await this.testSubjects.exists(buttonTestId));
+      });
+    }
+    await this.closeTabsBarMenu();
+  }
 }
