@@ -165,7 +165,7 @@ export class SecurityPageObject extends FtrService {
         if (alert && alert.accept) {
           await alert.accept();
         }
-        return await this.find.existsByDisplayedByCssSelector('.login-form');
+        return await this.isLoginFormVisible();
       }
     );
   }
@@ -301,7 +301,7 @@ export class SecurityPageObject extends FtrService {
     { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
   ) {
     this.log.debug('SecurityPage.forceLogout');
-    if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
+    if (await this.isLoginFormVisible()) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
