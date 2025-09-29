@@ -50,7 +50,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
-    valueLabels: 'hide',
+    valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
@@ -122,8 +122,10 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               forAccessor: `${ACCESSOR}${i}_${index}`,
               axisMode: 'left',
               color: yAxis.seriesColor,
+              ...(yAxis.fill ? { fill: yAxis.fill } : {}),
+              ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
             })),
-          } as XYReferenceLineLayerConfig;
+          } satisfies XYReferenceLineLayerConfig;
         case 'series':
           return {
             layerId: `layer_${i}`,
