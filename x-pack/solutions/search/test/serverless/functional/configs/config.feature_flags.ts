@@ -35,9 +35,6 @@ export default createTestConfig({
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: [],
   apps: {
-    serverlessElasticsearch: {
-      pathname: '/app/elasticsearch/getting_started',
-    },
     serverlessConnectors: {
       pathname: '/app/connectors',
     },
