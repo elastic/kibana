@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
 import * as i18n from '../../../common/translations';
@@ -24,42 +24,56 @@ const TRIGGERS_ICONS: Record<string, string> = {
 };
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
-  const { euiTheme } = useEuiTheme();
-
   if (triggers.length === 0) {
     return (
-      <EuiBadge color={euiTheme.colors.backgroundBasePlain} iconType="asterisk">
-        <EuiText size="xs">No triggers</EuiText>
-      </EuiBadge>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="asterisk" size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            No triggers
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
+
   const [firstTrigger, ...restOfTriggers] = triggers;
 
   return (
-    <>
-      <EuiBadge
-        color={euiTheme.colors.backgroundBasePlain}
-        iconType={TRIGGERS_ICONS[firstTrigger.type]}
-      >
-        <EuiText size="xs">{capitalize(firstTrigger.type)}</EuiText>
-      </EuiBadge>
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={TRIGGERS_ICONS[firstTrigger.type]} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{capitalize(firstTrigger.type)}</EuiText>
+      </EuiFlexItem>
       {restOfTriggers.length > 0 && (
-        <PopoverItems
-          items={triggers}
-          popoverTitle={i18n.TRIGGERS_LIST_TITLE}
-          popoverButtonTitle={`+${restOfTriggers.length.toString()}`}
-          dataTestPrefix="triggers"
-          renderItem={(trigger, idx) => (
-            <EuiBadge
-              key={`${trigger}-${idx}`}
-              color={euiTheme.colors.backgroundBasePlain}
-              iconType={TRIGGERS_ICONS[trigger.type]}
-            >
-              <EuiText size="xs">{capitalize(trigger.type)}</EuiText>
-            </EuiBadge>
-          )}
-        />
+        <EuiFlexItem grow={false}>
+          <PopoverItems
+            items={triggers}
+            popoverTitle={i18n.TRIGGERS_LIST_TITLE}
+            popoverButtonTitle={`+${restOfTriggers.length.toString()}`}
+            dataTestPrefix="triggers"
+            renderItem={(trigger, idx) => (
+              <EuiFlexGroup
+                key={`${trigger.type}-${idx}`}
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={TRIGGERS_ICONS[trigger.type]} size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">{capitalize(trigger.type)}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          />
+        </EuiFlexItem>
       )}
-    </>
+    </EuiFlexGroup>
   );
 };

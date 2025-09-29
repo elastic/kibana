@@ -157,29 +157,61 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
+        width: '40%',
         render: (name: string, item) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiLink>
-                <Link to={`/${item.id}`}>{name}</Link>
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {item.description || (
-                  <FormattedMessage
-                    id="workflows.workflowList.noDescription"
-                    defaultMessage="No description"
-                  />
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <div
+            css={css`
+              max-width: 100%;
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiLink>
+                  <Link
+                    to={`/${item.id}`}
+                    css={css`
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      display: block;
+                      max-width: 100%;
+                    `}
+                  >
+                    {name}
+                  </Link>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  title={item.description}
+                  css={css`
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                    display: block;
+                    width: 100%;
+                  `}
+                >
+                  {item.description || (
+                    <FormattedMessage
+                      id="workflows.workflowList.noDescription"
+                      defaultMessage="No description"
+                    />
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         ),
       },
       {
         field: 'tags',
         name: 'Tags',
+        width: '15%',
         render: (value: any, item: WorkflowListItemDto) => {
           const tags = item.definition?.tags;
           if (!tags || tags.length === 0) {
@@ -195,6 +227,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Trigger',
+        width: '15%',
         render: (value: any, item: WorkflowListItemDto) => (
           <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
         ),
@@ -202,6 +235,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Last run',
         field: 'runHistory',
+        width: '12%',
         render: (value, item) => {
           if (item.history.length === 0) return;
           const lastRun = item.history[0];
@@ -215,6 +249,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Last run status',
         field: 'runHistory',
+        width: '12%',
         render: (value, item) => {
           if (item.history.length === 0) {
             return;
@@ -225,7 +260,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Enabled',
         field: 'enabled',
-        width: '90px', // Fixed width for toggle + validity indicator
+        width: '10%',
         render: (value, item) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -268,7 +303,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
       {
         name: 'Actions',
-        width: '110px', // Fixed width for action buttons
+        width: '8%',
         actions: [
           {
             isPrimary: true,
@@ -427,8 +462,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
-        responsiveBreakpoint={false}
-        tableLayout={'auto'}
+        responsiveBreakpoint="xs"
+        tableLayout={'fixed'}
         onChange={({ page: { index: pageIndex, size } }: CriteriaWithPagination<any>) =>
           setSearch({ ...search, page: pageIndex + 1, limit: size })
         }
