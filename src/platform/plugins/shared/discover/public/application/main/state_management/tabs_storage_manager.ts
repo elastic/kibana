@@ -8,19 +8,20 @@
  */
 
 import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { TAB_STATE_URL_KEY, NEW_TAB_ID } from '../../../../common/constants';
-import type { TabState, RecentlyClosedTabState } from './redux/types';
+import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
+import { TAB_ACTION, type TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -54,17 +55,6 @@ export interface TabsInternalStatePayload {
   allTabs: TabState[];
   selectedTabId: string;
   recentlyClosedTabs: RecentlyClosedTabState[];
-}
-
-export interface TabsUrlState {
-  /**
-   * Syncing the selected tab id with the URL
-   */
-  tabId?: string;
-  /**
-   * (Optional) Label for the tab, used when creating a new tab via locator URL.
-   */
-  tabLabel?: string;
 }
 
 export interface TabsStorageManager {
@@ -362,6 +352,7 @@ export const createTabsStorageManager = ({
         ? undefined
         : tabsStateFromURL?.tabId
       : undefined;
+    const selectedTabAction = enabled ? tabsStateFromURL?.action : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -394,10 +385,30 @@ export const createTabsStorageManager = ({
     );
 
     // restore previously opened tabs
-    if (enabled && selectedTabId) {
-      if (selectedTabId === NEW_TAB_ID) {
-        // append a new tab if requested via URL
+    if (enabled) {
+      // try to preselect one of the previously opened tabs
+      if (
+        selectedTabId &&
+        selectedTabId !== NEW_TAB_ID &&
+        openTabs.find((tab) => tab.id === selectedTabId)
+      ) {
+        return {
+          allTabs: openTabs,
+          selectedTabId,
+          recentlyClosedTabs: getNRecentlyClosedTabs({
+            previousOpenTabs,
+            previousRecentlyClosedTabs: closedTabs,
+            nextOpenTabs: openTabs,
+          }),
+        };
+      }
 
+      if (
+        // append a new tab if requested via URL
+        selectedTabId === NEW_TAB_ID ||
+        // or append a new tab to the persisted session if could not find it by the selected tab id above
+        (selectedTabAction === TAB_ACTION.shared && persistedDiscoverSession)
+      ) {
         const newTab = {
           ...defaultTabState,
           ...createTabItem(openTabs),
@@ -419,21 +430,8 @@ export const createTabsStorageManager = ({
         };
       }
 
-      // try to preselect one of the previously opened tabs
-      if (openTabs.find((tab) => tab.id === selectedTabId)) {
-        return {
-          allTabs: openTabs,
-          selectedTabId,
-          recentlyClosedTabs: getNRecentlyClosedTabs({
-            previousOpenTabs,
-            previousRecentlyClosedTabs: closedTabs,
-            nextOpenTabs: openTabs,
-          }),
-        };
-      }
-
-      // try to reopen some of the previously closed tabs
-      if (!persistedDiscoverSession) {
+      // otherwise try to reopen some of the previously closed tabs
+      if (selectedTabId && !persistedDiscoverSession && !selectedTabAction) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
@@ -459,6 +457,11 @@ export const createTabsStorageManager = ({
       ...defaultTabState,
       ...createTabItem([]),
     };
+
+    if (enabled && selectedTabAction === TAB_ACTION.shared && tabsStateFromURL?.tabLabel) {
+      newDefaultTab.label = tabsStateFromURL.tabLabel;
+    }
+
     let allTabs = [newDefaultTab];
     let selectedTab = newDefaultTab;
 

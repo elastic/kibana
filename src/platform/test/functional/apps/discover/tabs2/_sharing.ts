@@ -43,21 +43,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
         expect(await queryBar.getQueryString()).to.be('bytes > 1000');
-        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getTabLabels()).to.eql(['second tab']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql(['first tab', 'second tab']);
       });
+
+      // modify the opened tab state
+      await unifiedTabs.editTabLabel(0, 'second tab (modified)');
+      await queryBar.setQuery('bytes > 500');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('13,129');
 
       // after a browser refresh in the original browser tab, the Discover tabs are restored
       await browser.switchTab(0);
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
-
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
         expect(await queryBar.getQueryString()).to.be('bytes > 1000');
         expect(await unifiedTabs.getTabLabels()).to.eql(['first tab', 'second tab']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
-          'Untitled',
+          'second tab (modified)',
           'first tab',
           'second tab',
         ]);
@@ -72,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
         expect(await queryBar.getQueryString()).to.be('bytes > 1000');
-        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getTabLabels()).to.eql(['second tab']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([]);
       });
     });

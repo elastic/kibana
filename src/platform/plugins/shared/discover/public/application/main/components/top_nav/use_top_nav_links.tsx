@@ -79,7 +79,7 @@ export const useTopNavLinks = ({
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
-  const currentTabId = useCurrentTabSelector((tabState) => tabState.id);
+  const currentTab = useCurrentTabSelector((tabState) => tabState);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
@@ -182,7 +182,7 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
-          currentTabId,
+          currentTab,
           persistedDiscoverSession,
         });
         items.push(...shareAppMenuItem);
@@ -199,7 +199,7 @@ export const useTopNavLinks = ({
       currentDataView,
       hasShareIntegration,
       appId,
-      currentTabId,
+      currentTab,
       persistedDiscoverSession,
     ]);
 

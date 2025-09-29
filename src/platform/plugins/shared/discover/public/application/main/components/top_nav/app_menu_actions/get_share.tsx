@@ -21,20 +21,22 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
+import { TAB_ACTION } from '../../../../../../common/types';
+import type { TabState } from '../../../state_management/redux/types';
 
 export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
   hasIntegrations,
-  currentTabId,
+  currentTab,
   persistedDiscoverSession,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
-  currentTabId: string | undefined;
+  currentTab: TabState | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
@@ -78,9 +80,11 @@ export const getShareAppMenuItem = ({
 
     const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
 
-    if (tabsEnabled && persistedDiscoverSession?.id && currentTabId) {
+    if (tabsEnabled && currentTab) {
       params.tab = {
-        id: currentTabId,
+        ...(persistedDiscoverSession?.id ? { id: currentTab.id } : {}), // skip tab id unless it's a persisted session
+        label: currentTab.label,
+        action: TAB_ACTION.shared,
       };
     }
 

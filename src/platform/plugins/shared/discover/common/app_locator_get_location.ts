@@ -13,12 +13,8 @@ import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-uti
 import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import {
-  APP_STATE_URL_KEY,
-  GLOBAL_STATE_URL_KEY,
-  NEW_TAB_ID,
-  TAB_STATE_URL_KEY,
-} from './constants';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
+import type { TabsUrlState } from './types';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -97,13 +93,16 @@ export const appLocatorGetLocationCommon = async (
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
-  if (tab?.id) {
-    path = setStateToKbnUrl(
-      TAB_STATE_URL_KEY,
-      { tabId: tab.id, tabLabel: tab.id === NEW_TAB_ID && 'label' in tab ? tab.label : undefined },
-      { useHash },
-      path
-    );
+  if (tab && Object.keys(tab).length) {
+    const tabsState: TabsUrlState = {
+      tabId: tab.id,
+      ...('label' in tab ? { tabLabel: tab.label } : {}),
+      ...('action' in tab ? { action: tab.action } : {}),
+    };
+
+    if (tabsState && Object.keys(tabsState).length) {
+      path = setStateToKbnUrl(TAB_STATE_URL_KEY, tabsState, { useHash }, path);
+    }
   }
 
   return {
