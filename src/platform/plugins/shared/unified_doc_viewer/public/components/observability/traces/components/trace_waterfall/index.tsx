@@ -11,8 +11,8 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
-import { ContentFrameworkSectionActionTourId } from '../../../../content_framework/section/enums/action_tour_id';
+import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -37,9 +37,16 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
   defaultMessage: 'Trace',
 });
 
+const fullscreenWaterfallTourStorageKey = 'fullscreenWaterfallTourDismissed';
+
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data } = getUnifiedDocViewerServices();
+  const { euiTheme } = useEuiTheme();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
+  const [dismissedActionTour, setDismissedActionTour] = useLocalStorage<boolean>(
+    fullscreenWaterfallTourStorageKey,
+    false
+  );
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
   const getParentApi = useCallback(
@@ -55,6 +62,60 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
       }),
     }),
     [docId, rangeFrom, rangeTo, traceId]
+  );
+
+  const actionId = 'traceWaterfallFullScreenAction';
+  const renderTourStep = (
+    <EuiTourStep
+      anchor={`#${actionId}`}
+      content={
+        <EuiText size="s">
+          {i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.content.1', {
+            defaultMessage: 'You can now click ',
+          })}
+          <EuiLink
+            onClick={() => setShowFullScreenWaterfall(true)}
+            aria-label={fullScreenButtonLabel}
+          >
+            {fullScreenButtonLabel}
+          </EuiLink>
+          {i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.content.2', {
+            defaultMessage:
+              ' to view the full-screen waterfall and explore your trace data in context.',
+          })}
+        </EuiText>
+      }
+      isStepOpen={!dismissedActionTour}
+      maxWidth={350}
+      onFinish={() => {}}
+      step={1}
+      stepsTotal={1}
+      title={i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.title', {
+        defaultMessage: 'Trace insights in Discover',
+      })}
+      subtitle={i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.subtitle', {
+        defaultMessage: 'New discover feature',
+      })}
+      footerAction={
+        <EuiButtonEmpty
+          aria-label={i18n.translate(
+            'unifiedDocViewer.contentFramework.section.tourStep.okButton',
+            {
+              defaultMessage: 'Close {action} tour',
+              values: { action: fullScreenButtonLabel },
+            }
+          )}
+          onClick={() => {
+            setDismissedActionTour(true);
+          }}
+        >
+          {i18n.translate('unifiedDocViewer.contentFramework.section.tourStep.okButtonLabel', {
+            defaultMessage: 'OK',
+          })}
+        </EuiButtonEmpty>
+      }
+      zIndex={Number(euiTheme.levels.flyout)}
+    />
   );
 
   return (
@@ -81,42 +142,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             onClick: () => setShowFullScreenWaterfall(true),
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
-            tour: {
-              id: ContentFrameworkSectionActionTourId.TRACE_WATERFALL,
-              title: i18n.translate('unifiedDocViewer.observability.traces.trace.tourStep.title', {
-                defaultMessage: 'Trace insights in Discover',
-              }),
-              subtitle: i18n.translate(
-                'unifiedDocViewer.observability.traces.trace.tourStep.subtitle',
-                {
-                  defaultMessage: 'New discover feature',
-                }
-              ),
-              content: (
-                <EuiText size="s">
-                  {i18n.translate(
-                    'unifiedDocViewer.observability.traces.trace.tourStep.content.1',
-                    {
-                      defaultMessage: 'You can now click ',
-                    }
-                  )}
-                  <EuiLink
-                    onClick={() => setShowFullScreenWaterfall(true)}
-                    aria-label={fullScreenButtonLabel}
-                  >
-                    {fullScreenButtonLabel}
-                  </EuiLink>
-
-                  {i18n.translate(
-                    'unifiedDocViewer.observability.traces.trace.tourStep.content.2',
-                    {
-                      defaultMessage:
-                        ' to view the full-screen waterfall and explore your trace data in context.',
-                    }
-                  )}
-                </EuiText>
-              ),
-            },
+            id: actionId,
           },
         ]}
       >
@@ -125,6 +151,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           getParentApi={getParentApi}
           hidePanelChrome
         />
+        {renderTourStep}
       </ContentFrameworkSection>
     </>
   );
