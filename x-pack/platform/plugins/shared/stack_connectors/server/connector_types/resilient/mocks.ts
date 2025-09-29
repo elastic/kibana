@@ -125,6 +125,15 @@ export const resilientFields: ResilientFieldMeta[] = [
     internal: false,
     prefix: 'properties',
   },
+  {
+    name: 'resolution_summary',
+    input_type: 'textarea',
+    read_only: false,
+    required: null,
+    text: '',
+    internal: true,
+    prefix: null,
+  },
 ];
 
 export const incidentTypes = {

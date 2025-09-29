@@ -15,10 +15,9 @@ import type {
 import type { ResilientFieldMeta } from './schema';
 
 // todo:
-// 1. add tests for non-text fields
 //    1.1 - add support for `values` check in select/multiselect
 
-export const getValueFromOldField = (
+const getValueFromOldField = (
   fieldMeta: ResilientFieldMeta,
   value: unknown
 ): ResilientFieldPrimitives => {
@@ -40,7 +39,7 @@ export const getValueFromOldField = (
   }
 };
 
-export function getValueFieldShape(
+function getValueFieldShape(
   fieldMeta: ResilientFieldMeta,
   value: ResilientFieldPrimitives,
   oldValue?: ResilientFieldPrimitives
