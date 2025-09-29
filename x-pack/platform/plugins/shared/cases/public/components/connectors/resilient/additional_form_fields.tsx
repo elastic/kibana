@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo } from 'react';
+import { isObject } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   type FieldHook,
@@ -77,11 +78,22 @@ export const AdditionalFormFields = React.memo<{
       const transformedFields = Object.entries(fields ?? {}).reduce((acc, [key, value]) => {
         // Dates need to be sent to the resilient API as numbers
         if (
-          typeof value === 'string' &&
+          isObject(value) &&
+          'toDate' in value &&
+          typeof value.toDate === 'function' &&
           (fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
             fieldsMetadataRecord[key].input_type === 'datepicker')
         ) {
-          acc[key] = new Date(value).getTime();
+          // DatePickerFields return Moment objects but resilient expects numbers
+          acc[key] = value.toDate().getTime();
+        } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'select') {
+          // SelectFields return strings but resilient expects numbers
+          acc[key] = Number(value);
+        } else if (Array.isArray(value) && fieldsMetadataRecord[key].input_type === 'multiselect') {
+          // MultiSelectFields return string[] but resilient expects number[]
+          acc[key] = value.map((v) => Number(v));
+        } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'number') {
+          acc[key] = Number(value);
         } else {
           acc[key] = value;
         }
