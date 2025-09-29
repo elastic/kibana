@@ -46,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             hostTerm: {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            indexPattern: 'metrics-*,metrics-system*,metricbeat-*',
             to: 1680027660000,
             command:
               '/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter',
