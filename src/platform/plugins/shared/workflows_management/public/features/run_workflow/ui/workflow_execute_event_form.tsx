@@ -19,13 +19,11 @@ import {
   EuiBasicTable,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState, useCallback } from 'react';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { WorkflowsPluginStartDependencies } from '../../../types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
   _id: string;
@@ -166,7 +164,7 @@ export const WorkflowExecuteEventForm = ({
   errors,
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
-  const { services } = useKibana<CoreStart & WorkflowsPluginStartDependencies>();
+  const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({

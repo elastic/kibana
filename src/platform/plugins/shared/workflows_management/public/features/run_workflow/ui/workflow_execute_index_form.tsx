@@ -22,15 +22,13 @@ import {
   EuiFormRow,
   EuiPanel,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { take } from 'rxjs';
-import type { WorkflowsPluginStartDependencies } from '../../../types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Document {
   _id: string;
@@ -76,7 +74,7 @@ export const WorkflowExecuteIndexForm = ({
   errors,
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
-  const { services } = useKibana<CoreStart & WorkflowsPluginStartDependencies>();
+  const { services } = useKibana();
   const { unifiedSearch } = services;
   const { SearchBar } = unifiedSearch.ui;
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
