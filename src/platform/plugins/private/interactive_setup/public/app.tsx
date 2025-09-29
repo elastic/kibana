@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './app.scss';
-
-import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -38,6 +37,11 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
     [http]
   );
 
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+  const theme = useEuiTheme();
+  const { euiTheme } = theme;
+  const euiShadowM = useEuiShadow('m');
+
   if (state.loading) {
     return null;
   }
@@ -54,10 +58,23 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   }
 
   return (
-    <div className="interactiveSetup">
-      <header className="interactiveSetup__header eui-textCenter">
+    <div css={kbnFullScreenBgCss}>
+      <header
+        css={css`
+          position: relative;
+          z-index: 10;
+          padding: ${euiTheme.size.xl};
+          text-align: center;
+        `}
+      >
         <EuiSpacer size="xxl" />
-        <span className="interactiveSetup__logo">
+        <span
+          css={css`
+            margin-bottom: ${euiTheme.size.xl};
+            display: inline-block;
+            ${euiShadowM};
+          `}
+        >
           <EuiIcon type="logoElastic" size="xxl" />
         </span>
         <EuiTitle size="m">
@@ -70,7 +87,17 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
         </EuiTitle>
         <EuiSpacer size="xl" />
       </header>
-      <div className="interactiveSetup__content">
+      <div
+        css={css`
+          position: relative;
+          z-index: 10;
+          margin: auto;
+          margin-bottom: ${euiTheme.size.xl};
+          max-width: calc(${euiTheme.breakpoint.s}px - ${euiTheme.size.xl});
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
+        `}
+      >
         <EuiPanel paddingSize="l">
           <div hidden={page !== 'token'}>
             <EnrollmentTokenForm

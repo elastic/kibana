@@ -293,14 +293,34 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 `;
 
 exports[`LoginPage page renders as expected 1`] = `
-<div
-  className="loginWelcome login-form"
->
-  <header
-    className="loginWelcome__header"
+<div>
+  <div
+    class="css-vvcdom-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
+    <header
+      class="css-1uhsdzt-LoginPage"
+    >
+      <div
+        class="css-das9jl-LoginPage"
+      >
+        <span
+          class="loginWelcome__logo"
+        >
+          <span
+            data-euiicon-type="logoElastic"
+          />
+        </span>
+        <h1
+          class="euiTitle loginWelcome__title emotion-euiTitle-m"
+          data-test-subj="loginWelcomeTitle"
+        >
+          Welcome to Elastic
+        </h1>
+      </div>
+    </header>
     <div
-      className="loginWelcome__content eui-textCenter"
+      class="css-das9jl-LoginPage"
     >
       <EuiSpacer
         size="xxl"
@@ -381,14 +401,42 @@ exports[`LoginPage page renders as expected 1`] = `
 `;
 
 exports[`LoginPage page renders with custom branding 1`] = `
-<div
-  className="loginWelcome login-form"
->
-  <header
-    className="loginWelcome__header"
+<div>
+  <div
+    class="css-vvcdom-kbnFullScreenBgCss"
+    data-test-subj="loginForm"
   >
+    <header
+      class="css-1uhsdzt-LoginPage"
+    >
+      <div
+        class="css-das9jl-LoginPage"
+      >
+        <span
+          class="loginWelcome__logo"
+          style="padding: 0px;"
+        >
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper"
+          >
+            <img
+              alt="logo"
+              class="euiImage emotion-euiImage-customSize"
+              src="logo"
+              style="max-width: 40px; max-height: 40px;"
+            />
+          </figure>
+        </span>
+        <h1
+          class="euiTitle loginWelcome__title emotion-euiTitle-m"
+          data-test-subj="loginWelcomeTitle"
+        >
+          Welcome to Elastic
+        </h1>
+      </div>
+    </header>
     <div
-      className="loginWelcome__content eui-textCenter"
+      class="css-das9jl-LoginPage"
     >
       <EuiSpacer
         size="xxl"
