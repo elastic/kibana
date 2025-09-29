@@ -10,13 +10,11 @@
 import { schema } from '@kbn/config-schema';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from '../v2';
 
-// sections only include y + i for grid data
 export const sectionGridDataSchema = schema.object({
   y: schema.number(),
   i: schema.string(),
 });
 
-// panels include all grid data keys, including those that sections use
 export const gridDataSchema = schema.object({
   x: schema.number(),
   y: schema.number(),
