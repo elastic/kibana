@@ -141,7 +141,9 @@ export function ChangeDataView({
         {...rest}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>{trigger.label}</EuiFlexItem>
+          <EuiFlexItem data-test-subj={`${dataTestSubj}-label`} grow={false}>
+            {trigger.label}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DataViewLabels isAdhoc={isAdHocSelected} isManaged={isManagedSelected} name={label} />
           </EuiFlexItem>

@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await header.waitUntilLoadingHasFinished();
 
     const actualIndexPattern = await (
-      await testSubjects.find('discover-dataView-switch-link')
+      await testSubjects.find('discover-dataView-switch-link-label')
     ).getVisibleText();
     expect(actualIndexPattern).to.be('*stash*');
 
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       const actualIndexPattern = await (
-        await testSubjects.find('discover-dataView-switch-link')
+        await testSubjects.find('discover-dataView-switch-link-label')
       ).getVisibleText();
       expect(actualIndexPattern).to.be('*stash*');
 
