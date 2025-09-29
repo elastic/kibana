@@ -42,6 +42,7 @@ export const MetricsExperienceGrid = ({
   services,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
+  isComponentVisible,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -110,6 +111,7 @@ export const MetricsExperienceGrid = ({
       chartToolbarCss={chartToolbarCss}
       requestParams={requestParams}
       fields={fields}
+      isComponentVisible={isComponentVisible}
     >
       <EuiFlexGroup
         direction="column"
