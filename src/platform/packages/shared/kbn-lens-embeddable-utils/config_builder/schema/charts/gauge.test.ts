@@ -57,7 +57,7 @@ describe('Gauge Schema', () => {
             { type: 'to' as const, to: 100, color: '#green' },
           ],
         },
-        thicks: 'bands' as const,
+        ticks: 'bands' as const,
         min: {
           operation: 'static_value' as const,
           value: 0,
@@ -87,7 +87,7 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'average' as const,
         field: 'cpu_usage',
-        thicks: 'auto' as const,
+        ticks: 'auto' as const,
       },
       shape: {
         type: 'circle' as const,
@@ -116,7 +116,7 @@ describe('Gauge Schema', () => {
       type: 'bullet',
       direction: 'horizontal',
     });
-    // thicks default is only applied when explicitly set, not when omitted
+    // ticks default is only applied when explicitly set, not when omitted
     expect(validated.metric.ticks).toBeUndefined();
   });
 
@@ -153,13 +153,13 @@ describe('Gauge Schema', () => {
     expect(() => gaugeStateSchema.validate(input)).toThrow();
   });
 
-  it('throws on invalid thicks value', () => {
+  it('throws on invalid ticks value', () => {
     const input = {
       ...baseGaugeConfig,
       metric: {
         operation: 'count' as const,
         field: 'test_field',
-        thicks: 'invalid' as const,
+        ticks: 'invalid' as const,
       },
     };
 
