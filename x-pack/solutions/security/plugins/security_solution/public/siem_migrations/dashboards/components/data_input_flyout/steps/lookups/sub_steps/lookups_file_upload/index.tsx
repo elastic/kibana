@@ -10,7 +10,7 @@ import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
 import { LookupsFileUpload } from '../../../../../../../common/components/migration_steps';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
+import { useUpsertResources } from '../../../../../../../common/service/hooks/use_upsert_resources';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from './translations';
 
@@ -25,7 +25,7 @@ export const useLookupsFileUploadStep = ({
   migrationStats,
   addUploadedLookups,
 }: DashboardsFileUploadStepProps): EuiStepProps => {
-  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups, 'dashboard');
 
   const upsertMigrationResources = useCallback(
     (lookupsFromFile: SiemMigrationResourceData[]) => {

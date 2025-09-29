@@ -24,7 +24,7 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
-import { DashboardUploadSteps } from '../constants';
+import { DataInputStep as DashboardUploadSteps } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
 
@@ -42,7 +42,7 @@ interface LookupsDataInputProps
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
   ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DashboardUploadSteps.LookupsUpload, dataInputStep),
+      () => getEuiStepStatus(DashboardUploadSteps.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -54,7 +54,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
                   titleSize="xs"
-                  number={DashboardUploadSteps.LookupsUpload}
+                  number={DashboardUploadSteps.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

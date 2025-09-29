@@ -7,9 +7,9 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
-import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
-import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnMissingResourcesFetched } from '../../../../types';
+import { useGetMissingResources } from '../../../../../hooks/use_get_missing_resources';
+import type { RuleMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { OnMissingResourcesFetched } from '../../../types';
 import * as i18n from './translations';
 
 export interface CheckResourcesStepProps {
