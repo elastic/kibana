@@ -79,5 +79,6 @@ export type StreamEnrichmentEvent =
       step?: StreamlangWhereBlock;
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
+  | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };
