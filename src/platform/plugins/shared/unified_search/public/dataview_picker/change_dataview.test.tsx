@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -17,7 +17,6 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 // Mock DOM measurement functions to prevent EUI truncation width errors
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
@@ -60,12 +59,23 @@ describe('DataView component', () => {
   };
 
   function wrapDataViewComponentInContext(
-    testProps: DataViewPickerProps,
-    storageValue: boolean,
+    testProps?: Partial<DataViewPickerProps>,
+    storageValue: boolean = false,
     uiSettingValue: boolean = false
   ) {
     const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
     (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
+    // Mock openEditor to immediately call onSave callback when called
+    (dataViewEditorMock.openEditor as jest.Mock).mockImplementation(({ onSave }) => {
+      if (onSave) {
+        // Simulate saving by calling onSave with a mock data view
+        setTimeout(() => {
+          onSave({ id: 'new-dataview', title: 'New Data View' });
+        }, 0);
+      }
+      return jest.fn(); // Return a mock close function
+    });
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
@@ -84,20 +94,7 @@ describe('DataView component', () => {
       },
     };
 
-    return (
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <ChangeDataView {...testProps} />
-        </KibanaContextProvider>
-      </I18nProvider>
-    );
-  }
-
-  let props: DataViewPickerProps;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    props = {
+    const defaultProps = {
       currentDataViewId: 'dataview-1',
       trigger: {
         label: 'Dataview 1',
@@ -107,6 +104,18 @@ describe('DataView component', () => {
       },
       onChangeDataView: jest.fn(),
     };
+
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <ChangeDataView {...defaultProps} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it.each([
@@ -122,7 +131,7 @@ describe('DataView component', () => {
     },
   ])('$description', async ({ hasAddField, expectPresent }) => {
     const addFieldSpy = jest.fn();
-    const testProps = hasAddField ? { ...props, onAddField: addFieldSpy } : props;
+    const testProps = hasAddField ? { onAddField: addFieldSpy } : {};
 
     render(wrapDataViewComponentInContext(testProps, !hasAddField));
 
@@ -154,9 +163,7 @@ describe('DataView component', () => {
     },
   ])('$description', async ({ hasOnDataViewCreated, expectPresent }) => {
     const addDataViewSpy = jest.fn();
-    const testProps = hasOnDataViewCreated
-      ? { ...props, onDataViewCreated: addDataViewSpy }
-      : props;
+    const testProps = hasOnDataViewCreated ? { onDataViewCreated: addDataViewSpy } : {};
 
     render(wrapDataViewComponentInContext(testProps, !hasOnDataViewCreated));
 
@@ -168,7 +175,9 @@ describe('DataView component', () => {
       expect(createButton).toBeInTheDocument();
       expect(createButton).toHaveTextContent('Create a data view');
       await userEvent.click(createButton!);
-      expect(addDataViewSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(addDataViewSpy).toHaveBeenCalled();
+      });
     } else {
       expect(createButton).not.toBeInTheDocument();
     }
@@ -176,20 +185,16 @@ describe('DataView component', () => {
 
   it('should properly handle ad hoc data views', async () => {
     render(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-          ],
-          adHocDataViews: [dataViewMock],
-        },
-        false
-      )
+      wrapDataViewComponentInContext({
+        onDataViewCreated: jest.fn(),
+        savedDataViews: [
+          {
+            id: 'dataview-1',
+            title: 'dataview-1',
+          },
+        ],
+        adHocDataViews: [dataViewMock],
+      })
     );
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
@@ -206,20 +211,15 @@ describe('DataView component', () => {
 
   it('should properly handle ES|QL ad hoc data views', async () => {
     render(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-          ],
-          adHocDataViews: [dataViewMockEsql],
-        },
-        false
-      )
+      wrapDataViewComponentInContext({
+        savedDataViews: [
+          {
+            id: 'dataview-1',
+            title: 'dataview-1',
+          },
+        ],
+        adHocDataViews: [dataViewMockEsql],
+      })
     );
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
@@ -232,26 +232,21 @@ describe('DataView component', () => {
 
   it('should properly handle managed data views', async () => {
     render(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-            {
-              id: 'the-data-view-id',
-              title: 'the-data-view-title',
-              name: 'the-data-view',
-              type: 'default',
-              managed: true,
-            },
-          ],
-        },
-        false
-      )
+      wrapDataViewComponentInContext({
+        savedDataViews: [
+          {
+            id: 'dataview-1',
+            title: 'dataview-1',
+          },
+          {
+            id: 'the-data-view-id',
+            title: 'the-data-view-title',
+            name: 'the-data-view',
+            type: 'default',
+            managed: true,
+          },
+        ],
+      })
     );
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
@@ -268,28 +263,22 @@ describe('DataView component', () => {
 
   it('should properly handle both ad hoc and managed data views together', async () => {
     render(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          onDataViewCreated: jest.fn(),
-          savedDataViews: [
-            {
-              id: 'dataview-1',
-              title: 'dataview-1',
-            },
-          ],
-          adHocDataViews: [dataViewMock],
-          managedDataViews: [
-            {
-              ...dataViewMock,
-              id: 'managed-dataview-id',
-              title: 'managed-dataview-title',
-              name: 'managed-dataview',
-            } as unknown as DataView,
-          ],
-        },
-        false
-      )
+      wrapDataViewComponentInContext({
+        savedDataViews: [
+          {
+            id: 'dataview-1',
+            title: 'dataview-1',
+          },
+          {
+            id: 'managed-dataview-id',
+            title: 'managed-dataview-title',
+            name: 'managed-dataview',
+            type: 'default',
+            managed: true,
+          },
+        ],
+        adHocDataViews: [dataViewMock],
+      })
     );
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
@@ -312,10 +301,10 @@ describe('DataView component', () => {
     const addDataViewSpy = jest.fn();
 
     render(
-      wrapDataViewComponentInContext(
-        { ...props, onClosePopover: onClosePopoverSpy, onDataViewCreated: addDataViewSpy },
-        false
-      )
+      wrapDataViewComponentInContext({
+        onClosePopover: onClosePopoverSpy,
+        onDataViewCreated: addDataViewSpy,
+      })
     );
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));

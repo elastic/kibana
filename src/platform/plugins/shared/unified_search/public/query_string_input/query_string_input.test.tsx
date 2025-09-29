@@ -155,6 +155,7 @@ describe('QueryStringInput', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByDisplayValue(kqlQuery.query)).toBeInTheDocument();
       const textarea = document.querySelector('textarea');
       expect(textarea).not.toHaveAttribute('autofocus');
     });
@@ -215,6 +216,7 @@ describe('QueryStringInput', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByDisplayValue(luceneQuery.query)).toBeInTheDocument();
       expect(screen.queryByTestId('switchQueryLanguageButton')).not.toBeInTheDocument();
     });
   });
@@ -230,6 +232,7 @@ describe('QueryStringInput', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByDisplayValue(luceneQuery.query)).toBeInTheDocument();
       const icon = document.querySelector('[data-euiicon-type="search"]');
       expect(icon).toBeInTheDocument();
     });

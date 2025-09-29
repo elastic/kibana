@@ -58,22 +58,26 @@ describe('DataView list component', () => {
     };
   });
 
-  it('sorts alphabetically the items', () => {
+  it('sorts alphabetically the items', async () => {
     const listWithEmptyName: DataViewListItemEnhanced[] = [
       { id: 'dataview-1', title: 'beta', name: '' },
       { id: 'dataview-2', title: 'alpha' },
       { id: 'dataview-3', title: 'gamma', name: 'gamma' },
     ];
 
-    const component = shallow(
+    renderWithContainer(
       <DataViewsList {...props} dataViewsList={listWithEmptyName} currentDataViewId="dv-1" />
     );
 
-    expect(getDataViewPickerOptions(component)!.map((o: any) => o.label)).toEqual([
-      'alpha',
-      'beta',
-      'gamma',
-    ]);
+    await waitFor(() => {
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(3);
+
+      // Check that options are sorted alphabetically
+      expect(options[0]).toHaveTextContent('alpha');
+      expect(options[1]).toHaveTextContent('beta');
+      expect(options[2]).toHaveTextContent('gamma');
+    });
   });
 
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {

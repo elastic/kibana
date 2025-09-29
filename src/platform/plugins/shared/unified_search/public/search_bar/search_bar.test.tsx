@@ -18,10 +18,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mount } from 'enzyme';
-import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
-import { FilterItems } from '../filter_bar';
-import { DataViewPicker } from '..';
+import { EuiThemeProvider } from '@elastic/eui';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
@@ -131,12 +128,6 @@ function wrapSearchBarInContext(
 }
 
 describe('SearchBar', () => {
-  const SEARCH_BAR_ROOT = '.uniSearchBar';
-  const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
-  const QUERY_BAR = '.kbnQueryBar';
-  const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
-  const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -149,9 +140,9 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
-      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
-      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedFilterBar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
     });
   });
 
@@ -168,10 +159,10 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
       // Check for filter-related elements that are actually rendered
-      expect(document.querySelector('[data-test-subj="addFilter"]')).toBeTruthy();
-      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+      expect(screen.getByTestId('addFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
     });
   });
 
@@ -187,9 +178,9 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
-      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
-      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedFilterBar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
     });
   });
 
@@ -204,9 +195,9 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
-      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
-      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedFilterBar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
     });
   });
 
@@ -222,9 +213,9 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
-      expect(document.querySelector(FILTER_BAR)).toBeFalsy();
-      expect(document.querySelector(QUERY_INPUT)).toBeFalsy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedFilterBar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedQueryInput')).not.toBeInTheDocument();
     });
   });
 
@@ -239,9 +230,9 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => {
-      expect(document.querySelector(QUERY_MENU_BUTTON)).toBeFalsy();
-    });
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('showQueryBarMenu')).not.toBeInTheDocument();
+
   });
 
   it('Should render query bar and filter bar', async () => {
@@ -258,11 +249,11 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(SEARCH_BAR_ROOT)).toBeTruthy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
       // Check for filter-related elements that are actually rendered
-      expect(document.querySelector('[data-test-subj="addFilter"]')).toBeTruthy();
-      expect(document.querySelector(QUERY_BAR)).toBeTruthy();
-      expect(document.querySelector(QUERY_INPUT)).toBeTruthy();
+      expect(screen.getByTestId('addFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedQueryInput')).toBeInTheDocument();
     });
   });
 
@@ -277,9 +268,10 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector(QUERY_INPUT)).toBeFalsy();
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
       // Check for ES|QL menu button instead of editor since that's what's rendered
-      expect(document.querySelector('[data-test-subj="esql-menu-button"]')).toBeTruthy();
+      expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedQueryInput')).not.toBeInTheDocument();
     });
   });
 
@@ -302,9 +294,9 @@ describe('SearchBar', () => {
     );
 
     await waitFor(() => {
-      const queryInput = document.querySelector(QUERY_INPUT);
-      expect(queryInput?.querySelector('textarea')).toBeDisabled();
-      expect(queryInput?.querySelector('[title="Clear input"]')).toBeFalsy();
+      const queryInput = screen.getByTestId('unifiedQueryInput');
+      expect(queryInput.querySelector('textarea')).toBeDisabled();
+      expect(queryInput.querySelector('[title="Clear input"]')).toBeFalsy();
 
       expect(screen.getByTestId('showQueryBarMenu')).toBeDisabled();
       expect(screen.getByTestId('addFilter')).toBeDisabled();
@@ -473,7 +465,7 @@ describe('SearchBar', () => {
   });
 
   it('renders BackgroundSearchRestoredCallout when feature flag enabled and session restored', () => {
-    const component = mount(
+    render(
       wrapSearchBarInContext(
         { indexPatterns: [stubIndexPattern] },
         {
@@ -485,13 +477,11 @@ describe('SearchBar', () => {
       )
     );
 
-    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
-      true
-    );
+    expect(screen.getByTestId('backgroundSearchRestoredCallout')).toBeInTheDocument();
   });
 
   it('does not render BackgroundSearchRestoredCallout when feature flag disabled', () => {
-    const component = mount(
+    render(
       wrapSearchBarInContext(
         { indexPatterns: [stubIndexPattern] },
         {
@@ -503,8 +493,8 @@ describe('SearchBar', () => {
       )
     );
 
-    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
-      false
-    );
+    expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+    // Then verify the callout is not rendered
+    expect(screen.queryByTestId('backgroundSearchRestoredCallout')).not.toBeInTheDocument();
   });
 });

@@ -145,7 +145,7 @@ describe('QueryBarTopRowTopRow', () => {
     },
   ])('when background search is $description', ({ value, submitId, cancelId }) => {
     describe('when it is NOT loading', () => {
-      it('should render the submit button', () => {
+      it('should render the submit button', async () => {
         const { getByTestId } = render(
           wrapQueryBarTopRowInContext({
             query: kqlQuery,
@@ -157,12 +157,15 @@ describe('QueryBarTopRowTopRow', () => {
           })
         );
 
-        expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
+        });
       });
     });
 
     describe('when it is loading', () => {
-      it('should render the cancel button', () => {
+      it('should render the cancel button', async () => {
         const { getByTestId } = render(
           wrapQueryBarTopRowInContext({
             query: kqlQuery,
@@ -177,7 +180,10 @@ describe('QueryBarTopRowTopRow', () => {
           })
         );
 
-        expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
+        });
       });
     });
   });
@@ -218,7 +224,7 @@ describe('QueryBarTopRowTopRow', () => {
         });
       });
 
-      it('the secondary button should be disabled', () => {
+      it('the secondary button should be disabled', async () => {
         // When
         const { getByTestId } = render(
           wrapQueryBarTopRowInContext(
@@ -235,7 +241,10 @@ describe('QueryBarTopRowTopRow', () => {
         );
 
         // Then
-        expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
+        });
       });
     });
 
@@ -412,6 +421,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
       expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
     });
@@ -606,6 +616,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.getByTestId('queryCancelButton')).toBeInTheDocument();
     });
   });
@@ -626,6 +637,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
     });
   });
