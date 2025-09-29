@@ -251,7 +251,6 @@ export function SchemaChangesReviewModal({
         const sourceLabels = {
           ecs: 'ECS Standard',
           otel: 'OpenTelemetry',
-          integration: 'Integration Schema',
         };
 
         return (
