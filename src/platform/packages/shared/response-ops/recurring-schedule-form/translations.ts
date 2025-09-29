@@ -327,6 +327,12 @@ export const RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
     values: { date },
   });
 
+export const RECURRING_SCHEDULE_FORM_HOURLY_SUMMARY = (time: string) =>
+  i18n.translate('responseOpsRecurringScheduleForm.hourlySummary', {
+    defaultMessage: 'starting from {time}',
+    values: { time },
+  });
+
 export const RECURRING_SCHEDULE_FORM_TIME_SUMMARY = (time: string) =>
   i18n.translate('responseOpsRecurringScheduleForm.timeSummary', {
     defaultMessage: 'at {time}',
