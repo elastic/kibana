@@ -14,7 +14,7 @@ import type {
 import type { MetricsDataSavedObject } from '../saved_objects/metrics_data_source';
 import { metricsDataSourceSavedObjectName } from '../saved_objects/metrics_data_source';
 
-export const DEFAULT_METRIC_INDICES = 'metrics-*,metricbeat-*';
+export const DEFAULT_METRIC_INDICES = 'metrics-*,metrics-system*,metricbeat-*';
 
 export class MetricsDataClient {
   private readonly defaultSavedObjectId = 'default';
