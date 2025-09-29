@@ -23,7 +23,7 @@ import {
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -166,7 +166,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
-                {item.description || 'No description'}
+                {item.description || (
+                  <FormattedMessage
+                    id="workflows.workflowList.noDescription"
+                    defaultMessage="No description"
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
