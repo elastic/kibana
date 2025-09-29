@@ -7,6 +7,7 @@
 
 import datemath from '@kbn/datemath';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Aggregate } from '@kbn/session-view-plugin/common';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { MonitoringEntitySourceDescriptorClient } from '../../../../saved_objects';
@@ -47,23 +48,39 @@ export const createSyncMarkersService = (
   const updateLastFullSyncMarker = async (marker: string): Promise<void> => {
     // update latest full sync to saved object
   };
+
   const getLastFullSyncMarker = async (
     source: MonitoringEntitySource
   ): Promise<string | undefined> => {
-    // get latest full sync from saved object
-    const lastFullSyncMarker = await monitoringIndexSourceClient.getLastFullSyncMarker(source);
-    if (lastFullSyncMarker) {
-      return lastFullSyncMarker;
-    }
-    // otherwise, find the last fullSyncMarker from the index
-    /**
-     * So to get the last fullSyncMarker from the index, we need to:
-     * 1. Find the syncMarkerIndex from the source
-     * 2. Query the index for the latest fullSyncMarker
-     * 3. Return the latest fullSyncMarker
-     *
-     * Should this be part of sync markers service OR the deletion detection service?
-     */
+    // Try from the SO first
+    const fromSO = await monitoringIndexSourceClient.getLastFullSyncMarker(source);
+    if (fromSO) return fromSO;
+
+    // Fallback: search index
+    const fromIndex = await findLastFullSyncMarkerInIndex(source);
+    if (!fromIndex) return undefined;
+
+    // Update the SO for next time
+    await updateLastFullSyncMarker(fromIndex);
+    return fromIndex;
+  };
+
+  const findLastFullSyncMarkerInIndex = async (
+    source: MonitoringEntitySource
+  ): Promise<string | undefined> => {
+    // find the last full sync marker in the index
+    const esClient = deps.clusterClient.asCurrentUser;
+    const resp = await esClient.search<never, Aggregate>({
+      index: source.integrations?.syncMarkerIndex,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      size: 1,
+      query: {
+        term: { 'event.action': 'completed' },
+      },
+      _source: ['@timestamp'],
+    });
+    const hit = resp?.hits?.hits?.[0]?._source?.['@timestamp'] ?? undefined;
+    return hit;
   };
 
   return {

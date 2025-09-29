@@ -10,6 +10,7 @@ import type { MonitoringEntitySource } from '../../../../../../../common/api/ent
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import { createSourcesSyncService } from '../sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
+import { createDeletionDetectionService } from './deletion_detection/deletion_detection';
 
 export type IntegrationsSyncService = ReturnType<typeof createIntegrationsSyncService>;
 export const createIntegrationsSyncService = (
@@ -17,6 +18,7 @@ export const createIntegrationsSyncService = (
   soClient: SavedObjectsClientContract
 ) => {
   const updateDetectionService = createUpdateDetectionService(dataClient, soClient);
+  const deletionDetectionService = createDeletionDetectionService(dataClient, soClient);
   const sourcesSyncService = createSourcesSyncService(dataClient);
 
   const integrationsSync = async () => {
@@ -26,7 +28,7 @@ export const createIntegrationsSyncService = (
       process: async (source: MonitoringEntitySource) => {
         // process each integration source
         await updateDetectionService.updateDetection(source);
-        // await deletionDetectionService.deletionDetection(source);
+        await deletionDetectionService.deletionDetection(source);
       },
     });
   };
