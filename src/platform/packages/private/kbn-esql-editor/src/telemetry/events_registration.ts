@@ -26,7 +26,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       trigger_action: {
         type: 'keyword',
         _meta: {
-          description: 'The lookup index action shown. Possible values are: create|view|edit',
+          description: 'The lookup index action shown. Possible values are: create|edit|read',
         },
       },
       trigger_source: {
@@ -36,10 +36,10 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
             'The way how the index editor action has been triggered. Possible values are: esql_hover|esql_autocomplete',
         },
       },
-      privilege_kind: {
+      higher_privilege: {
         type: 'keyword',
         _meta: {
-          description: 'User privileges. Possible values are: write|read_view_metadata|create_only',
+          description: 'User privileges. Possible values are: create|edit|read',
         },
       },
     },

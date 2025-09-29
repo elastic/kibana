@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-// import { ESQL_LOOKUP_JOIN_ACTION_SHOWN } from './events_registration';
+import { ESQL_LOOKUP_JOIN_ACTION_SHOWN } from './events_registration';
+import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
+import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
 
 export class ESQLEditorTelemetryService {
   private _analytics: AnalyticsServiceStart;
@@ -25,11 +27,39 @@ export class ESQLEditorTelemetryService {
     }
   }
 
-  public trackLookupJoinHoverActionShown(badgeClass: string) {
-    // this._reportEvent(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
-    //   trigger_source: 'esql_hover',
-    //   trigger_action: badgeClass, // HD
-    //   privilege_kind: 'read_view_metadata', // HD
-    // });
+  public trackLookupJoinHoverActionShown(hoverMessage: string) {
+    if (!hoverMessage.includes(`command:${LOOKUP_INDEX_EDITOR_COMMAND}`)) {
+      return;
+    }
+
+    let commandData: IndexEditorCommandArgs | undefined;
+
+    try {
+      // Extract the command URI from the markdown link format
+      const commandMatch = hoverMessage.match(
+        new RegExp(`command:${LOOKUP_INDEX_EDITOR_COMMAND}\\?([^)]+)`)
+      );
+      if (commandMatch && commandMatch[1]) {
+        const decodedData = decodeURIComponent(commandMatch[1]);
+        commandData = JSON.parse(decodedData) as IndexEditorCommandArgs;
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Failed to parse hover message command data', error);
+    }
+
+    if (commandData) {
+      const triggerAction = !commandData.doesIndexExist
+        ? 'create'
+        : commandData.canEditIndex
+        ? 'edit'
+        : 'read';
+
+      this._reportEvent(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
+        trigger_source: 'esql_hover',
+        trigger_action: triggerAction,
+        higher_privilege: commandData.higherPrivilege,
+      });
+    }
   }
 }

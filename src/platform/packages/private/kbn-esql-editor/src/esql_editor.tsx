@@ -589,12 +589,6 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
-      telemetry: {
-        hover: {
-          trackLookupJoinHoverActionShown:
-            telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
-        },
-      },
     };
     return callbacks;
   }, [
@@ -602,7 +596,6 @@ const ESQLEditorInternal = function ESQLEditor({
     getJoinIndices,
     kibana.services?.esql,
     canCreateLookupIndex,
-    telemetryService,
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
@@ -770,7 +763,19 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks]
   );
 
-  const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
+  const hoverProvider = useMemo(
+    () =>
+      ESQLLang.getHoverProvider?.({
+        ...esqlCallbacks,
+        telemetry: {
+          hover: {
+            onDecorationHoverShown:
+              telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
+          },
+        },
+      }),
+    [esqlCallbacks, telemetryService]
+  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
@@ -813,7 +818,7 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       hover: {
         above: false,
-        delay: 500,
+        // delay: 500,
       },
       accessibilitySupport: 'auto',
       autoIndent: 'keep',

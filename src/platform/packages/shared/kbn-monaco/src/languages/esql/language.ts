@@ -33,7 +33,19 @@ export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
 export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
-export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
+interface ESQLTelemetry {
+  hover?: {
+    // Callback fired when the user hovers over a decoration with a hover message.
+    onDecorationHoverShown?: (hoverMessage: string) => void;
+  };
+}
+
+export type ESQLDependencies = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetry;
+  }>;
+
+export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const language = monarch.create({
@@ -70,7 +82,9 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
   },
-  getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
+  getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
+    let lastHoveredWord: string;
+
     return {
       async provideHover(
         model: monaco.editor.ITextModel,
@@ -79,35 +93,26 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
       ) {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
+        const hoveredWord = model.getWordAtPosition(position);
 
-        const overedWord = model.getWordAtPosition(position);
-        if (overedWord) {
-          const wordRange = new monaco.Range(
-            position.lineNumber,
-            overedWord.startColumn,
-            position.lineNumber,
-            overedWord.endColumn
+        // Monaco triggers the hover event on each char of the word,
+        // we only want to track the Hover if the word changed.
+        if (
+          hoveredWord &&
+          hoveredWord.word !== lastHoveredWord &&
+          deps?.telemetry?.hover?.onDecorationHoverShown
+        ) {
+          lastHoveredWord = hoveredWord.word;
+
+          trackDecorationHovered(
+            hoveredWord,
+            position,
+            model,
+            deps?.telemetry?.hover?.onDecorationHoverShown
           );
-
-          // Get decorations at the overed word
-          const decorations = model.getDecorationsInRange(wordRange);
-
-          // Find decorations with an hover message
-          const lookupJoinDecoration = decorations.map((decoration) => {
-            return isArray(decoration.options.hoverMessage)
-              ? decoration.options.hoverMessage?.map((msg) => msg.value).join('\n')
-              : decoration.options.hoverMessage?.value ?? '';
-          });
-
-          if (lookupJoinDecoration) {
-            // console.log('lookupJoinDecoration shown!', lookupJoinDecoration);
-            if (callbacks?.telemetry?.hover?.onDecorationHoverShown) {
-              callbacks.telemetry.hover.onDecorationHoverShown(lookupJoinDecoration);
-            }
-          }
         }
 
-        return getHoverItem(fullText, offset, callbacks);
+        return getHoverItem(fullText, offset, deps);
       },
     };
   },
@@ -162,3 +167,33 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
     };
   },
 };
+
+function trackDecorationHovered(
+  word: monaco.editor.IWordAtPosition,
+  position: monaco.Position,
+  model: monaco.editor.ITextModel,
+  onDecorationHoverShown: (hoverMessage: string) => void
+) {
+  const wordRange = new monaco.Range(
+    position.lineNumber,
+    word.startColumn,
+    position.lineNumber,
+    word.endColumn
+  );
+
+  // Get decorations at the hovered word
+  const decorations = model.getDecorationsInRange(wordRange);
+
+  // Find decorations with an hover message
+  const hoverMessage = decorations
+    .map((decoration) => {
+      return isArray(decoration.options.hoverMessage)
+        ? decoration.options.hoverMessage?.map((msg) => msg.value).join(', ')
+        : decoration.options.hoverMessage?.value ?? '';
+    })
+    .join(', ');
+
+  if (hoverMessage) {
+    onDecorationHoverShown(hoverMessage);
+  }
+}

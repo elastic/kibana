@@ -34,6 +34,14 @@ import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
  */
 export const COMMAND_ID = 'esql.lookup_index.create';
 
+export interface IndexEditorCommandArgs {
+  indexName: string;
+  doesIndexExist?: boolean;
+  canEditIndex?: boolean;
+  triggerSource?: string;
+  higherPrivilege?: string;
+}
+
 async function isCurrentAppSupported(
   currentAppId$: ApplicationStart['currentAppId$'] | undefined
 ): Promise<boolean> {
@@ -74,12 +82,21 @@ export function getMonacoCommandString(
     return;
   }
 
+  const higherPrivilege = canCreateIndex
+    ? 'create'
+    : canEditIndex
+    ? 'edit'
+    : canReadIndex
+    ? 'read'
+    : '';
+
   return `[${actionLabel}](command:${COMMAND_ID}?${encodeURIComponent(
     JSON.stringify({
       indexName,
       doesIndexExist: isExistingIndex,
       canEditIndex,
       triggerSource: 'esql_hover',
+      higherPrivilege,
     })
   )})`;
 }
@@ -200,6 +217,7 @@ export const useLookupIndexCommand = (
             hoverMessage: {
               value: commandString,
               isTrusted: true,
+              supportHtml: true,
             },
 
             inlineClassName:
@@ -282,15 +300,7 @@ export const useLookupIndexCommand = (
   useEffect(function registerCommandOnMount() {
     const disposable = monaco.editor.registerCommand(
       COMMAND_ID,
-      async (
-        _,
-        args: {
-          indexName: string;
-          doesIndexExist?: boolean;
-          canEditIndex?: boolean;
-          triggerSource?: string;
-        }
-      ) => {
+      async (_, args: IndexEditorCommandArgs) => {
         const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
         await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
       }
