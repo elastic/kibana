@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
+  EuiButton,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -238,23 +239,35 @@ export const WorkflowStepExecutionList = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="none"
       justifyContent="flexStart"
       css={styles.container}
     >
-      <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
       <EuiFlexItem css={styles.content}>{content}</EuiFlexItem>
+      <EuiFlexItem grow={false} css={styles.footer}>
+        <EuiButton onClick={onClose} iconType="check" size="s" fullWidth>
+          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+        </EuiButton>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 const componentStyles = {
-  container: css({
-    overflow: 'hidden',
-  }),
-  content: css({
-    overflow: 'hidden',
-  }),
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: '100%',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
+  content: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+    }),
+  footer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+      borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
     overflow-y: auto;
 
@@ -276,10 +289,6 @@ const componentStyles = {
         ${logicalCSS('width', euiTheme.size.s)}
         ${logicalCSS('border-bottom', euiTheme.border.thin)}
       }
-    }
-    & .euiTreeView {
-      // TODO: reduce padding to fit more nested levels in 300px sidebar?
-      padding-inline-start: ${euiTheme.size.m} !important;
     }
 
     & .euiTreeView__node {
