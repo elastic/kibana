@@ -180,6 +180,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill={true}
                 size="s"
                 color="primary"
                 onClick={() => {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiConfirmModal } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
@@ -23,26 +22,6 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-function WithLoadingSpinner({ onClick, ...props }: React.ComponentProps<typeof EuiButtonIcon>) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <EuiButtonIcon
-      {...props}
-      isLoading={isLoading}
-      isDisabled={isLoading}
-      onClick={(
-        event: React.MouseEvent<HTMLAnchorElement> & React.MouseEvent<HTMLButtonElement>
-      ) => {
-        setIsLoading(true);
-        Promise.resolve(onClick?.(event)).finally(() => {
-          setIsLoading(false);
-        });
-      }}
-    />
-  );
-}
-
 export function SignificantEventsTable({
   definition,
   response,
@@ -53,7 +32,7 @@ export function SignificantEventsTable({
 }: {
   definition: Streams.all.Definition;
   response: Pick<AbortableAsyncState<SignificantEventItem[]>, 'value' | 'loading' | 'error'>;
-  onDeleteClick?: (query: SignificantEventItem) => void;
+  onDeleteClick?: (query: SignificantEventItem) => Promise<void>;
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
   query?: string;
@@ -66,6 +45,8 @@ export function SignificantEventsTable({
   const { timeState } = useTimefilter();
 
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
 
   const items = useMemo(() => {
     const values = response.value ?? [];
@@ -81,32 +62,9 @@ export function SignificantEventsTable({
     }
     return response.value ?? [];
   }, [response.value, queryString]);
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<SignificantEventItem>();
   const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
-    {
-      align: 'right',
-      width: '40px',
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <span>{OPEN_DETAILS_LABEL}</span>
-        </EuiScreenReaderOnly>
-      ),
-      render: (item: SignificantEventItem) => {
-        return (
-          <EuiButtonIcon
-            onClick={() => {
-              setIsDetailFlyoutOpen(isDetailFlyoutOpen ? undefined : item);
-            }}
-            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
-            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
-            iconSize="s"
-          />
-        );
-      },
-    },
     {
       field: 'title',
       name: i18n.translate('xpack.streams.significantEventsTable.titleColumnTitle', {
@@ -202,28 +160,25 @@ export function SignificantEventsTable({
           name: i18n.translate('xpack.streams.significantEventsTable.openInDiscoverActionTitle', {
             defaultMessage: 'Open in Discover',
           }),
+          type: 'icon',
+          icon: 'discoverApp',
           description: i18n.translate(
             'xpack.streams.significantEventsTable.openInDiscoverActionDescription',
             {
               defaultMessage: 'Open query in Discover',
             }
           ),
-          render: (item) => {
-            return (
-              <WithLoadingSpinner
-                iconType="discoverApp"
-                onClick={() => {
-                  const url = discover?.locator?.getRedirectUrl(
-                    buildDiscoverParams(item.query, definition, timeState)
-                  );
-                  window.open(url, '_blank');
-                }}
-              />
+          onClick: (item) => {
+            const url = discover?.locator?.getRedirectUrl(
+              buildDiscoverParams(item.query, definition, timeState)
             );
+            window.open(url, '_blank');
           },
           isPrimary: true,
         },
         {
+          icon: 'pencil',
+          type: 'icon',
           name: i18n.translate('xpack.streams.significantEventsTable.editQueryActionTitle', {
             defaultMessage: 'Edit',
           }),
@@ -234,15 +189,8 @@ export function SignificantEventsTable({
             }
           ),
           isPrimary: true,
-          render: (item) => {
-            return (
-              <WithLoadingSpinner
-                iconType="pencil"
-                onClick={() => {
-                  return onEditClick?.(item);
-                }}
-              />
-            );
+          onClick: (item) => {
+            onEditClick?.(item);
           },
         },
         {
@@ -255,15 +203,9 @@ export function SignificantEventsTable({
               defaultMessage: 'Remove query from stream',
             }
           ),
-          render: (item) => {
-            return (
-              <WithLoadingSpinner
-                iconType="trash"
-                onClick={() => {
-                  return onDeleteClick?.(item);
-                }}
-              />
-            );
+          onClick: (item) => {
+            setIsDeleteModalVisible(true);
+            setSelectedDeleteItem(item);
           },
         },
       ],
@@ -294,24 +236,37 @@ export function SignificantEventsTable({
           }}
         />
       )}
+      {isDeleteModalVisible && selectedDeleteItem && (
+        <EuiConfirmModal
+          aria-labelledby={'deleteSignificantModal'}
+          title={i18n.translate(
+            'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventLabel',
+            { defaultMessage: 'Delete significant event' }
+          )}
+          titleProps={{ id: 'deleteSignificantModal' }}
+          onCancel={() => setIsDeleteModalVisible(false)}
+          onConfirm={() => {
+            onDeleteClick?.(selectedDeleteItem).finally(() => {
+              setIsDeleteModalVisible(false);
+              setSelectedDeleteItem(undefined);
+            });
+          }}
+          cancelButtonText="Keep editing"
+          confirmButtonText="Discard changes"
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventMessage',
+              {
+                defaultMessage:
+                  'Are you sure you want to delete the selected significant event? This action cannot be undone.',
+              }
+            )}
+          </p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 }
-
-const OPEN_DETAILS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
-  defaultMessage: 'Open details',
-});
-
-const COLLAPSE_DETAILS_LABEL = i18n.translate(
-  'xpack.streams.streamSystemsTable.columns.collapseDetails',
-  {
-    defaultMessage: 'Collapse details',
-  }
-);
-
-const EXPAND_DETAILS_LABEL = i18n.translate(
-  'xpack.streams.streamSystemsTable.columns.expandDetails',
-  {
-    defaultMessage: 'Expand details',
-  }
-);
