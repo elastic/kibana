@@ -415,7 +415,7 @@ export class IndexTable extends Component {
 
       return (
         <Fragment key={`bannerExtension${i}`}>
-          <EuiCallOut color={type} size="m" title={title}>
+          <EuiCallOut announceOnMount={false} color={type} size="m" title={title}>
             {message && <p>{message}</p>}
             {action || filter ? (
               <EuiFlexGroup gutterSize="s" alignItems="center">
