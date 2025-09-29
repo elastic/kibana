@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
+import { useFieldsMetadataContext } from '../../context/fields_metadata';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
@@ -40,6 +41,7 @@ interface MetricInsightsFlyoutProps {
 export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
+
   isOpen,
   onClose,
 }: MetricInsightsFlyoutProps) => {
@@ -51,6 +53,7 @@ export const MetricInsightsFlyout = ({
     defaultWidth
   );
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
+  const { fieldsMetadata = {} } = useFieldsMetadataContext();
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
@@ -112,11 +115,21 @@ export const MetricInsightsFlyout = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <MetricFlyoutBody metric={metric} esqlQuery={esqlQuery} />
+          <MetricFlyoutBody
+            metric={metric}
+            esqlQuery={esqlQuery}
+            description={fieldsMetadata[metric.name]?.description}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={onClose}>
-            {i18n.translate('metricsExperience.metricInsightsFlyout.closeButtonEmptyLabel', {
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={onClose}
+            aria-label={i18n.translate('metricsExperience.metricInsightsFlyout.close.ariaLabel', {
+              defaultMessage: 'Close metric insights flyout',
+            })}
+          >
+            {i18n.translate('metricsExperience.metricInsightsFlyout.close.label', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
