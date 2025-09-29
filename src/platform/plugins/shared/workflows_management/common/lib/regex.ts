@@ -30,3 +30,11 @@ export const LIQUID_BLOCK_KEYWORD_REGEX = /^\s*(\w*)\s*$/;
 // Liquid block detection patterns (global versions for matching within text)
 export const LIQUID_BLOCK_START_REGEX = /\{\%-?\s*liquid\s/g;
 export const LIQUID_BLOCK_END_REGEX = /-?\%\}/g;
+
+// Liquid template detection patterns for validation
+// Matches all Liquid expressions: {{ ... }} and {% ... %}
+export const LIQUID_EXPRESSION_REGEX_GLOBAL = /(\{\{[^}]*\}\}|\{\%[^%]*\%\})/g;
+
+// More specific patterns for different Liquid constructs
+export const LIQUID_OUTPUT_REGEX_GLOBAL = /\{\{\s*([^}]*?)\s*\}\}/g;
+export const LIQUID_TAG_REGEX_GLOBAL = /\{\%\s*([^%]*?)\s*\%\}/g;

@@ -12,6 +12,7 @@ import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
 import { WorkflowGraph, isEnterForeach } from '@kbn/workflows/graph';
+import { Liquid } from 'liquidjs';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   parseWorkflowYamlToJSON,
@@ -20,7 +21,10 @@ import {
   getPathFromAncestors,
   getStepNode,
 } from '../../../../common/lib/yaml_utils';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
+import {
+  VARIABLE_REGEX_GLOBAL,
+  LIQUID_EXPRESSION_REGEX_GLOBAL,
+} from '../../../../common/lib/regex';
 import {
   getSchemaAtPath,
   getZodTypeName,
@@ -132,6 +136,184 @@ const collectAllStepNames = (yamlDocument: any): StepNameInfo[] => {
   });
 
   return stepNames;
+};
+
+/**
+ * Validates Liquid template syntax using the liquidjs parser
+ * This matches exactly how templates are processed server-side
+ */
+const validateLiquidSyntax = (
+  template: string
+): {
+  isValid: boolean;
+  error?: string;
+  start?: number;
+  end?: number;
+} => {
+  try {
+    // Create a Liquid instance with the same configuration as the templating engine
+    const liquid = new Liquid({
+      strictFilters: true,
+      strictVariables: false, // Allow undefined variables during validation
+    });
+
+    // Parse the template to check for syntax errors
+    liquid.parse(template);
+
+    return { isValid: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
+    // Extract position information from the error
+    const position = extractLiquidErrorPosition(template, errorMessage);
+    // customer-facing error message without the line number and column number
+    const customerFacingErrorMessage = errorMessage.replace(/line:\d+, col:\d+/g, '');
+
+    return {
+      isValid: false,
+      error: customerFacingErrorMessage,
+      start: position.start,
+      end: position.end,
+    };
+  }
+};
+
+/**
+ * Extracts position information from liquidjs error messages
+ * By default, liquidjs returns the start of the line of the error message
+ * This function tries to pinpoint the specific problematic token rather than just the start of the expression
+ */
+const extractLiquidErrorPosition = (
+  text: string,
+  errorMessage: string
+): { start: number; end: number } => {
+  // Try to find the specific problematic token from the error message
+  const specificTokenPosition = findSpecificErrorToken(text, errorMessage);
+  if (specificTokenPosition) {
+    return specificTokenPosition;
+  }
+
+  // Parse liquidjs error format: "error description, line:X, col:Y"
+  const lineColMatch = errorMessage.match(/line:(\d+),\s*col:(\d+)/);
+
+  if (lineColMatch) {
+    const line = parseInt(lineColMatch[1], 10);
+    const col = parseInt(lineColMatch[2], 10);
+
+    // Convert line/column to text offset
+    const lines = text.split('\n');
+    let offset = 0;
+
+    // Add up lengths of previous lines
+    for (let i = 0; i < line - 1 && i < lines.length; i++) {
+      offset += lines[i].length + 1; // +1 for newline character
+    }
+
+    // Add column offset (liquidjs uses 1-based columns)
+    offset += Math.max(0, col - 1);
+
+    // Try to find the extent of the problematic liquid expression
+    const remainingText = text.substring(offset);
+    let end = offset + 1;
+
+    // Look for liquid expression boundaries
+    if (remainingText.startsWith('{{')) {
+      const closeMatch = remainingText.indexOf('}}');
+      end = offset + (closeMatch > -1 ? closeMatch + 2 : Math.min(50, remainingText.length));
+    } else if (remainingText.startsWith('{%')) {
+      const closeMatch = remainingText.indexOf('%}');
+      end = offset + (closeMatch > -1 ? closeMatch + 2 : Math.min(50, remainingText.length));
+    } else {
+      // Find the end of the current word/expression
+      const wordMatch = remainingText.match(/^\S+/);
+      end = offset + (wordMatch ? wordMatch[0].length : 10);
+    }
+
+    return {
+      start: Math.max(0, offset),
+      end: Math.min(text.length, end),
+    };
+  }
+
+  // Fallback: try to find any liquid-like pattern in the text
+  const liquidPattern = /\{\{|\{\%/g;
+  let match;
+  while ((match = liquidPattern.exec(text)) !== null) {
+    const start = match.index;
+    const remaining = text.substring(start);
+    const end = remaining.search(/\}\}|\%\}/) + start;
+    return {
+      start,
+      end: end > start ? end + 2 : Math.min(start + 20, text.length),
+    };
+  }
+
+  // Final fallback: highlight the first character
+  return { start: 0, end: Math.min(1, text.length) };
+};
+
+/**
+ * Tries to find the specific token causing the error based on error message patterns
+ */
+const findSpecificErrorToken = (
+  text: string,
+  errorMessage: string
+): { start: number; end: number } | null => {
+  // Pattern for undefined filter errors: "undefined filter: filterName"
+  const filterMatch = errorMessage.match(/undefined filter:\s*([a-zA-Z_]\w*)/);
+  if (filterMatch) {
+    const filterName = filterMatch[1];
+    // Look for the filter name after a pipe character
+    const filterRegex = new RegExp(`\\|\\s*${filterName}\\b`, 'g');
+    const match = filterRegex.exec(text);
+    if (match) {
+      const pipeIndex = match.index;
+      const filterStart = text.indexOf(filterName, pipeIndex);
+      return {
+        start: filterStart,
+        end: filterStart + filterName.length,
+      };
+    }
+  }
+
+  // Pattern for undefined tag errors: "tag 'tagName' not found"
+  const tagMatch = errorMessage.match(/tag ['"](.*?)['"] not found/);
+  if (tagMatch) {
+    const tagName = tagMatch[1];
+    const tagIndex = text.indexOf(tagName);
+    if (tagIndex !== -1) {
+      return {
+        start: tagIndex,
+        end: tagIndex + tagName.length,
+      };
+    }
+  }
+
+  // Pattern for unclosed tags: "output '{{ content' not closed" or "tag '{% content' not closed"
+  const unclosedMatch = errorMessage.match(/(output|tag) ['"](\{\{.*?|<\%.*?)['"] not closed/);
+  if (unclosedMatch) {
+    const content = unclosedMatch[2];
+    const contentIndex = text.indexOf(content);
+    if (contentIndex !== -1) {
+      return {
+        start: contentIndex,
+        end: Math.min(contentIndex + content.length + 10, text.length), // Extend a bit to show the unclosed part
+      };
+    }
+  }
+
+  // Pattern for invalid value expressions: "invalid value expression"
+  if (errorMessage.includes('invalid value expression')) {
+    // Look for empty expressions like {{ }}
+    const emptyExpressionMatch = text.match(/\{\{\s*\}\}/);
+    if (emptyExpressionMatch && emptyExpressionMatch.index !== undefined) {
+      return {
+        start: emptyExpressionMatch.index,
+        end: emptyExpressionMatch.index + emptyExpressionMatch[0].length,
+      };
+    }
+  }
+
+  return null;
 };
 
 export interface UseYamlValidationResult {
@@ -349,6 +531,66 @@ export function useYamlValidation({
           }
         }
 
+        // Validate Liquid template syntax
+        // First, validate the entire text to catch syntax errors
+        const globalValidation = validateLiquidSyntax(text);
+        if (!globalValidation.isValid) {
+          // Use the position information returned by validateLiquidSyntax
+          const startPos = model.getPositionAt(globalValidation.start || 0);
+          const endPos = model.getPositionAt(globalValidation.end || 1);
+
+          const errorMessage = `Invalid Liquid syntax: ${globalValidation.error}`;
+
+          // Add marker for Liquid validation error
+          markers.push({
+            severity: SEVERITY_MAP.error,
+            message: errorMessage,
+            startLineNumber: startPos.lineNumber,
+            startColumn: startPos.column,
+            endLineNumber: endPos.lineNumber,
+            endColumn: endPos.column,
+            source: 'liquid-validation',
+          });
+
+          // Add decoration for Liquid error
+          decorations.push({
+            range: new monaco.Range(
+              startPos.lineNumber,
+              startPos.column,
+              endPos.lineNumber,
+              endPos.column
+            ),
+            options: {
+              inlineClassName: 'liquid-template-error',
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              hoverMessage: createMarkdownContent(errorMessage),
+            },
+          });
+        } else {
+          // If global validation passes, add decorations for valid liquid expressions
+          const liquidMatches = [...text.matchAll(LIQUID_EXPRESSION_REGEX_GLOBAL)];
+          for (const match of liquidMatches) {
+            const start = match.index ?? 0;
+            const end = start + match[0].length;
+            const startPos = model.getPositionAt(start);
+            const endPos = model.getPositionAt(end);
+
+            decorations.push({
+              range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+              ),
+              options: {
+                inlineClassName: 'liquid-template-valid',
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: createMarkdownContent('Valid Liquid syntax'),
+              },
+            });
+          }
+        }
+
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
@@ -364,6 +606,11 @@ export function useYamlValidation({
           model,
           'step-name-validation',
           markers.filter((m) => m.source === 'step-name-validation')
+        );
+        monaco.editor.setModelMarkers(
+          model,
+          'liquid-validation',
+          markers.filter((m) => m.source === 'liquid-validation')
         );
         setError(null);
       } catch (e) {
