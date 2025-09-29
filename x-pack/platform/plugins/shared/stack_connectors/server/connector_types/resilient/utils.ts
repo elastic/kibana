@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { isArray, isNumber, isString, isBoolean, isObject } from 'lodash';
+import { isNumber, isString, isBoolean, isObject } from 'lodash';
 import type {
   ResilientUpdateFieldValue,
   ResilientTextAreaField,
   ResilientFieldPrimitives,
   UpdateIncidentRequest,
+  CreateIncidentData,
+  Incident,
 } from './types';
 import type { ResilientFieldMeta } from './schema';
-
-// todo:
-//    1.1 - add support for `values` check in select/multiselect
 
 const getValueFromOldField = (
   fieldMeta: ResilientFieldMeta,
@@ -38,6 +37,25 @@ const getValueFromOldField = (
       return null;
   }
 };
+
+export function validateValues(
+  fieldMeta: ResilientFieldMeta,
+  givenValues: ResilientFieldPrimitives[]
+) {
+  const valuesMeta = fieldMeta.values;
+  if (valuesMeta && Array.isArray(valuesMeta)) {
+    if (!givenValues.every((id) => valuesMeta.some((option) => option.value === id))) {
+      throw new Error(
+        `Invalid values provided to ${fieldMeta.name}: ${JSON.stringify(
+          givenValues,
+          null,
+          2
+        )}. Accepted values: ${valuesMeta.map((v) => `${v.value} (for "${v.label}")`)}`
+      );
+    }
+  }
+  return true;
+}
 
 function getValueFieldShape(
   fieldMeta: ResilientFieldMeta,
@@ -64,15 +82,20 @@ function getValueFieldShape(
       }
 
     case 'multiselect':
-      if (isArray(value)) {
-        return { ids: value.map((item) => item) };
-      } else if (isNumber(value)) {
-        return { ids: [value] };
-      } else {
+      if (value === null || value === undefined) {
         return {};
       }
+      const ids = Array.isArray(value) ? value.map((item) => item) : [value];
+      if (validateValues(fieldMeta, ids)) {
+        return { ids };
+      }
     case 'select':
-      return isNumber(value) || isString(value) ? { id: value } : {};
+      if (value === null || value === undefined) {
+        return {};
+      }
+      if (validateValues(fieldMeta, [value])) {
+        return { id: value };
+      }
     case 'datetimepicker':
     case 'datepicker':
       return isNumber(value) ? { date: value } : {};
@@ -159,7 +182,37 @@ export function transformFieldMetadataToRecord(
       text: field.text,
       internal: field.internal,
       prefix: field.prefix,
+      values: field.values,
     };
     return acc;
   }, {});
+}
+
+export function prepareAdditionalFieldsForCreation(
+  fields: ResilientFieldMeta[],
+  additionalFields: NonNullable<Incident['additionalFields']>
+): Partial<CreateIncidentData> {
+  const data: Partial<CreateIncidentData> = {};
+  const fieldsMetaData = transformFieldMetadataToRecord(fields);
+
+  Object.entries(additionalFields).forEach(([key, value]) => {
+    const fieldMeta = fieldsMetaData[key];
+
+    // validate `select` and `multiselect` values
+    if (fieldMeta?.input_type === 'select' || fieldMeta?.input_type === 'multiselect') {
+      validateValues(fieldMeta, Array.isArray(value) ? value : [value]);
+    }
+
+    // Custom fields need to be prefixed with 'properties.'
+    if (fieldMeta.prefix === 'properties') {
+      if (!data.properties) {
+        data.properties = {};
+      }
+      data.properties[key] = value;
+    } else {
+      data[key] = value;
+    }
+  });
+
+  return data;
 }

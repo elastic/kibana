@@ -5,10 +5,68 @@
  * 2.0.
  */
 
-import { formatUpdateRequest } from './utils';
+import { formatUpdateRequest, prepareAdditionalFieldsForCreation } from './utils';
 import { resilientFields } from './mocks';
 
 describe('utils', () => {
+  describe('prepareAdditionalFieldsForCreation', () => {
+    it('transforms additional fields correctly', () => {
+      const additionalFields = {
+        // custom fields
+        customField1: 'customValue1',
+        test_text: 'some text',
+        test_text_area: 'some textarea',
+        test_boolean: true,
+        test_number: 123,
+        test_select: 100,
+        test_multi_select: [100, 110],
+        test_date_picker: 943983345345,
+        test_date_time_picker: 943983345345,
+        // non custom field
+        resolution_summary: 'some resolution summary',
+      };
+      expect(prepareAdditionalFieldsForCreation(resilientFields, additionalFields)).toEqual({
+        properties: {
+          customField1: 'customValue1',
+          test_boolean: true,
+          test_date_picker: 943983345345,
+          test_date_time_picker: 943983345345,
+          test_multi_select: [100, 110],
+          test_number: 123,
+          test_select: 100,
+          test_text: 'some text',
+          test_text_area: 'some textarea',
+        },
+        resolution_summary: 'some resolution summary',
+      });
+    });
+
+    it('throws an error for invalid values in `select` fields', () => {
+      const additionalFields = {
+        test_select: 1337, // invalid value
+      };
+      expect(() => prepareAdditionalFieldsForCreation(resilientFields, additionalFields))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "Invalid values provided to test_select: [
+          1337
+        ]. Accepted values: 100 (for \\"Option 1\\"),110 (for \\"Option 2\\"),120 (for \\"Option 3\\"),130 (for \\"Option 4\\")"
+      `);
+    });
+
+    it('throws an error for invalid values in `multiselect` fields', () => {
+      const additionalFields = {
+        test_multi_select: [100, 1337], // invalid value
+      };
+      expect(() => prepareAdditionalFieldsForCreation(resilientFields, additionalFields))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "Invalid values provided to test_multi_select: [
+          100,
+          1337
+        ]. Accepted values: 100 (for \\"Option 1\\"),110 (for \\"Option 2\\"),120 (for \\"Option 3\\"),130 (for \\"Option 4\\")"
+      `);
+    });
+  });
+
   describe('formatUpdateRequest', () => {
     test('transforms correctly', () => {
       const oldIncident = {
@@ -29,8 +87,8 @@ describe('utils', () => {
           test_text_area: 'some textarea',
           test_boolean: true,
           test_number: 123,
-          test_select: 'option1',
-          test_multi_select: ['option1', 'option2'],
+          test_select: 100,
+          test_multi_select: [100, 110],
           test_date_picker: 943983345345,
           test_date_time_picker: 943983345345,
           // non custom field
@@ -91,7 +149,7 @@ describe('utils', () => {
               name: 'test_select',
             },
             new_value: {
-              id: 'option1',
+              id: 100,
             },
             old_value: {},
           },
@@ -100,7 +158,7 @@ describe('utils', () => {
               name: 'test_multi_select',
             },
             new_value: {
-              ids: ['option1', 'option2'],
+              ids: [100, 110],
             },
             old_value: {},
           },
@@ -193,8 +251,8 @@ describe('utils', () => {
           test_text_area: 'some textarea',
           test_boolean: true,
           test_number: 123,
-          test_select: 'option1',
-          test_multi_select: ['option1', 'option2'],
+          test_select: 100,
+          test_multi_select: [100, 110],
           test_date_picker: 943983345345,
           test_date_time_picker: 943983345345,
         },
@@ -210,8 +268,8 @@ describe('utils', () => {
           test_text_area: 'some new textarea',
           test_boolean: false,
           test_number: 1234,
-          test_select: 'option2',
-          test_multi_select: ['option3', 'option4'],
+          test_select: 110,
+          test_multi_select: [120, 130],
           test_date_picker: 1234567890123,
           test_date_time_picker: 1234567890123,
           resolution_summary: 'some new resolution summary',
@@ -280,10 +338,10 @@ describe('utils', () => {
               name: 'test_select',
             },
             new_value: {
-              id: 'option2',
+              id: 110,
             },
             old_value: {
-              id: 'option1',
+              id: 100,
             },
           },
           {
@@ -291,10 +349,10 @@ describe('utils', () => {
               name: 'test_multi_select',
             },
             new_value: {
-              ids: ['option3', 'option4'],
+              ids: [120, 130],
             },
             old_value: {
-              ids: ['option1', 'option2'],
+              ids: [100, 110],
             },
           },
           {
@@ -377,6 +435,48 @@ describe('utils', () => {
           },
         ]),
       });
+    });
+
+    test('throws for invalid supplied values to `select` field', () => {
+      const oldIncident = {
+        severity_code: 5,
+      };
+      const newIncident = {
+        severityCode: 1337, // invalid value
+      };
+      expect(() =>
+        formatUpdateRequest({
+          oldIncident,
+          newIncident,
+          fields: resilientFields,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid values provided to severity_code: [
+          1337
+        ]. Accepted values: 5 (for \\"Low\\"),6 (for \\"Medium\\")"
+      `);
+    });
+
+    test('throws for invalid supplied values to `multiselect` field', () => {
+      const oldIncident = {
+        incident_type_ids: [12, 16],
+      };
+      const newIncident = {
+        incident_type_ids: [12, 16, 1337], // invalid value
+      };
+      expect(() =>
+        formatUpdateRequest({
+          oldIncident,
+          newIncident,
+          fields: resilientFields,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid values provided to incident_type_ids: [
+          12,
+          16,
+          1337
+        ]. Accepted values: 12 (for \\"Communication error (fax; email)\\"),16 (for \\"Custom type\\"),1001 (for \\"Custom type 2\\")"
+      `);
     });
   });
 });

@@ -36,7 +36,7 @@ import {
   GetIncidentResponseSchema,
   type ResilientFieldMeta,
 } from './schema';
-import { formatUpdateRequest, transformFieldMetadataToRecord } from './utils';
+import { formatUpdateRequest, prepareAdditionalFieldsForCreation } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -158,23 +158,12 @@ export class ResilientConnector extends CaseConnector<
       }
 
       if (incident.additionalFields) {
-        const fieldsMetaData = transformFieldMetadataToRecord(
-          await this.getFields({}, connectorUsageCollector)
+        const fieldsMetaData = await this.getFields({}, connectorUsageCollector);
+        const { properties, ...rest } = prepareAdditionalFieldsForCreation(
+          fieldsMetaData,
+          incident.additionalFields
         );
-        const additionalFields = incident.additionalFields;
-
-        Object.entries(additionalFields).forEach(([key, value]) => {
-          // Custom fields need to be prefixed with 'properties.'
-          const fieldMeta = fieldsMetaData[key];
-          if (fieldMeta.prefix === 'properties') {
-            if (!data.properties) {
-              data.properties = {};
-            }
-            data.properties[key] = value;
-          } else {
-            data[key] = value;
-          }
-        });
+        data = { ...data, ...(rest ? rest : {}), ...(properties ? { properties } : {}) };
       }
 
       const res = await this.request(
@@ -391,6 +380,7 @@ export class ResilientConnector extends CaseConnector<
           text: field.text,
           internal: field.internal,
           prefix: field.prefix,
+          values: field.values,
         };
       });
 

@@ -117,6 +117,17 @@ export const GetSeverityResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+const ValuesItemSchema = schema.object(
+  {
+    value: schema.oneOf([schema.number(), schema.string()]),
+    label: schema.string(),
+    enabled: schema.boolean(),
+    hidden: schema.boolean(),
+    default: schema.boolean(),
+  },
+  { unknowns: 'allow' }
+);
+
 export const ExternalServiceFieldsSchema = schema.object(
   {
     input_type: schema.string(),
@@ -126,6 +137,7 @@ export const ExternalServiceFieldsSchema = schema.object(
     text: schema.string(),
     internal: schema.boolean(),
     prefix: schema.nullable(schema.string()),
+    values: schema.nullable(schema.arrayOf(ValuesItemSchema)),
   },
   { unknowns: 'allow' }
 );
