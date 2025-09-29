@@ -106,7 +106,7 @@ export function TracesInDiscoverCallout() {
   return (
     <>
       <EuiCallOut
-        data-test-subj="apmApmMainTemplateTracesInDiscoverCallout"
+        data-test-subj="apmServiceInventoryTracesInDiscoverCallout"
         size="m"
         announceOnMount
         title={calloutTitle}
@@ -116,7 +116,7 @@ export function TracesInDiscoverCallout() {
         <EuiText size="s">{calloutContent}</EuiText>
         <EuiSpacer size="m" />
         <EuiButton
-          data-test-subj="apmApmMainTemplateViewTracesInDiscoverButton"
+          data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton"
           fill
           href={discoverHref}
           aria-label={buttonLabel}

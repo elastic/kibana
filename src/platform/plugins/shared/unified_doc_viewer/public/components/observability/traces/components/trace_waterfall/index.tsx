@@ -100,6 +100,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="traceWaterfallFullScreenActionTourLink"
                   onClick={() => setShowFullScreenWaterfall(true)}
                   aria-label={fullScreenButtonLabel}
                 >

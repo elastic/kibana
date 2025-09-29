@@ -85,7 +85,9 @@ describe('TracesInDiscoverCallout', () => {
         'Now you can view and analyse the full-screen waterfall and explore your trace data in context.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByTestId('apmApmMainTemplateViewTracesInDiscoverButton')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('apmServiceInventoryTracesInDiscoverCalloutButton')
+    ).toBeInTheDocument();
   });
 
   it('dismisses the callout when clicking close', async () => {
@@ -105,7 +107,7 @@ describe('TracesInDiscoverCallout', () => {
     });
 
     expect(
-      screen.queryByTestId('apmApmMainTemplateTracesInDiscoverCallout')
+      screen.queryByTestId('apmServiceInventoryTracesInDiscoverCallout')
     ).not.toBeInTheDocument();
   });
 
@@ -115,7 +117,7 @@ describe('TracesInDiscoverCallout', () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByTestId('apmApmMainTemplateViewTracesInDiscoverButton')
+        screen.queryByTestId('apmServiceInventoryTracesInDiscoverCalloutButton')
       ).not.toBeInTheDocument();
     });
   });
