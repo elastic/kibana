@@ -89,6 +89,7 @@ describe('CollapsedItemActions', () => {
       actionsCount: 1,
       index: 0,
       ruleType: 'Test Rule Type',
+      isInternallyManaged: false,
       isEditable: true,
       enabledInLicense: true,
       revision: 0,

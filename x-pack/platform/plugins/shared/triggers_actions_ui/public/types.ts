@@ -247,7 +247,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  isInternallyManaged?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
