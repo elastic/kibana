@@ -11,9 +11,14 @@ export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
     return defaultVal;
   }
   if (typeof v === 'string') {
-    return formatXJsonString(v);
+    try {
+      const obj = JSON.parse(XJson.collapseLiteralStrings(v));
+      return XJson.expandLiteralStrings(JSON.stringify(obj, null, 2));
+    } catch {
+      return formatXJsonString(v);
+    }
   }
-  return JSON.stringify(v, null, 2);
+  return XJson.expandLiteralStrings(JSON.stringify(v, null, 2));
 };
 
 export const deserializeJson = (input: string) => {
