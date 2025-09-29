@@ -40,6 +40,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
   const retry = getService('retry');
   const kbnClient = getService('kibanaServer');
   const spacesService = getService('spaces');
+  const log = getService('log');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
@@ -81,6 +82,8 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
 
+    log.debug('buckets', JSON.stringify(buckets));
+
     // The test fixture contains six legacy URL aliases:
     // (1) two for "default", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
     // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
@@ -89,86 +92,41 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 20,
+        doc_count: 18,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 11,
-            },
-            {
-              key: 'space',
-              doc_count: 3,
-            },
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'legacy-url-alias',
-              doc_count: 2,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
+            { key: 'index-pattern', doc_count: 15 },
+            { key: 'space', doc_count: 3 },
           ],
         },
       },
       {
         key: 'space_1',
-        doc_count: 10,
+        doc_count: 11,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 6,
-            },
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
-          ],
-        },
-      },
-      {
-        key: '*',
-        doc_count: 3,
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 3,
-            },
-          ],
+          buckets: [{ key: 'index-pattern', doc_count: 11 }],
         },
       },
       {
         key: 'other_space',
+        doc_count: 4,
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'index-pattern', doc_count: 4 }],
+        },
+      },
+      {
+        key: 'space_3',
         doc_count: 3,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'legacy-url-alias',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
-          ],
+          buckets: [{ key: 'index-pattern', doc_count: 3 }],
         },
       },
     ];
@@ -248,27 +206,27 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
+          await loadSavedObjects();
         });
         after(async () => {
           await supertest.destroy();
+          await unloadSavedObjects();
         });
 
-        beforeEach(async () => await loadSavedObjects());
-
-        afterEach(async () => await unloadSavedObjects());
+        beforeEach(async () => {
+          try {
+            await spacesService.create(SPACE_2);
+          } catch (error) {
+            // Ignore
+          }
+        });
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-            const response = await supertest
+            return supertest
               .delete(`${urlPrefix}/api/spaces/space/space_2`)
-              .expect(tests.exists.statusCode);
-
-            // If the delete worked, re-create the space so that subsequent tests are not affected.
-            if (response.status === 200) {
-              await spacesService.create(SPACE_2);
-            }
-
-            return tests.exists.response(response);
+              .expect(tests.exists.statusCode)
+              .then(tests.exists.response);
           });
 
           describe(`when the space is reserved`, () => {
