@@ -3525,6 +3525,23 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID",
+        "description": [
+          "\nFeature flag ID for enabling / disabling the workflow execution stats bar UI"
+        ],
+        "signature": [
+          "\"workflows:executionStatsBar:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.WorkflowContext",
         "type": "Type",
         "tags": [],

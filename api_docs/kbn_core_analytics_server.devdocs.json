@@ -1048,6 +1048,10 @@
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/firehose/use_firehose_flow.ts"
               },
               {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/otel_apm/use_otel_apm_flow.ts"
+              },
+              {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
               },
