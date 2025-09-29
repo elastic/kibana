@@ -17,6 +17,7 @@ const actionTypes = [
     minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['alerting'],
     isSystemActionType: false,
+    isDeprecated: false,
   },
   {
     id: 'system-action-type-2',
@@ -27,6 +28,7 @@ const actionTypes = [
     minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
+    isDeprecated: true,
   },
 ];
 
@@ -43,6 +45,7 @@ describe('createSystemConnectors', () => {
         isMissingSecrets: false,
         isPreconfigured: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: true,
       },
     ]);
   });

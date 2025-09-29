@@ -371,6 +371,7 @@ describe('actions telemetry', () => {
         secrets: {
           clientSecret: 'sdfsdf',
         },
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'anotherServerLog',
@@ -381,6 +382,7 @@ describe('actions telemetry', () => {
         isSystemAction: false,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -587,6 +589,7 @@ describe('actions telemetry', () => {
         isSystemAction: false,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'anotherServerLog',
@@ -597,6 +600,7 @@ describe('actions telemetry', () => {
         isSystemAction: false,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -643,6 +647,7 @@ describe('actions telemetry', () => {
         isSystemAction: true,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -757,6 +762,7 @@ describe('actions telemetry', () => {
         isSystemAction: false,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ]);
 

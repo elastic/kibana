@@ -44,6 +44,7 @@ describe('fetchConnectors', () => {
         referencedByCount: 0,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ];
 
@@ -87,6 +88,7 @@ describe('fetchConnectors', () => {
         referencedByCount: 0,
         secrets: {},
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ];
 

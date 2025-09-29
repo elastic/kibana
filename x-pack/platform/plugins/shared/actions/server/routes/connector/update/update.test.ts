@@ -41,6 +41,7 @@ describe('updateConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -110,6 +111,7 @@ describe('updateConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -155,6 +157,7 @@ describe('updateConnectorRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();

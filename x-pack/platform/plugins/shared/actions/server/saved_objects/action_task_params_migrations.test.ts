@@ -26,6 +26,7 @@ const inMemoryConnectors = [
     isPreconfigured: true,
     isDeprecated: false,
     isSystemAction: false,
+    isConnectorTypeDeprecated: false,
   },
 ];
 

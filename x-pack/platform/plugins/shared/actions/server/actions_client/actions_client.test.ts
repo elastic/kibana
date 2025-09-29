@@ -394,6 +394,7 @@ describe('create()', () => {
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       config: {},
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -548,6 +549,7 @@ describe('create()', () => {
         b: true,
         c: true,
       },
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -738,6 +740,7 @@ describe('create()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
       ],
 
@@ -816,6 +819,7 @@ describe('create()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -880,6 +884,7 @@ describe('get()', () => {
             config: {
               foo: 'bar',
             },
+            isConnectorTypeDeprecated: false,
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
@@ -912,6 +917,7 @@ describe('get()', () => {
             isPreconfigured: false,
             isDeprecated: false,
             isSystemAction: true,
+            isConnectorTypeDeprecated: false,
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
@@ -972,6 +978,7 @@ describe('get()', () => {
             config: {
               foo: 'bar',
             },
+            isConnectorTypeDeprecated: false,
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
@@ -1010,6 +1017,7 @@ describe('get()', () => {
             isPreconfigured: false,
             isDeprecated: false,
             isSystemAction: true,
+            isConnectorTypeDeprecated: false,
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
@@ -1100,6 +1108,7 @@ describe('get()', () => {
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: false,
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1135,6 +1144,7 @@ describe('get()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1149,6 +1159,7 @@ describe('get()', () => {
       isDeprecated: false,
       isSystemAction: false,
       name: 'test',
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1175,6 +1186,7 @@ describe('get()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1208,6 +1220,7 @@ describe('get()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1223,6 +1236,7 @@ describe('get()', () => {
       isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
+      isConnectorTypeDeprecated: false,
     });
   });
 });
@@ -1279,6 +1293,7 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
+            isConnectorTypeDeprecated: false,
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
@@ -1416,6 +1431,7 @@ describe('getBulk()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -1427,6 +1443,7 @@ describe('getBulk()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1445,6 +1462,7 @@ describe('getBulk()', () => {
         isDeprecated: false,
         name: 'test',
         config: { foo: 'bar' },
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '1',
@@ -1455,6 +1473,7 @@ describe('getBulk()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
   });
@@ -1510,6 +1529,7 @@ describe('getBulk()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -1521,6 +1541,7 @@ describe('getBulk()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1583,6 +1604,7 @@ describe('getBulk()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -1594,6 +1616,7 @@ describe('getBulk()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -1615,6 +1638,7 @@ describe('getBulk()', () => {
         isSystemAction: false,
         name: 'test',
         secrets: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         actionTypeId: '.cases',
@@ -1626,6 +1650,7 @@ describe('getBulk()', () => {
         isSystemAction: true,
         name: 'System action: .cases',
         secrets: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         actionTypeId: 'test',
@@ -1636,6 +1661,7 @@ describe('getBulk()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         name: 'test',
+        isConnectorTypeDeprecated: false,
       },
     ]);
   });
@@ -1667,6 +1693,7 @@ describe('getOAuthAccessToken()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -2080,6 +2107,7 @@ describe('delete()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
       ],
       actionExecutor,
@@ -2115,6 +2143,7 @@ describe('delete()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       actionExecutor,
@@ -2329,6 +2358,7 @@ describe('update()', () => {
       isMissingSecrets: false,
       name: 'my name',
       config: {},
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2411,6 +2441,7 @@ describe('update()', () => {
       isMissingSecrets: true,
       name: 'my name',
       config: {},
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2573,6 +2604,7 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      isConnectorTypeDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2667,6 +2699,7 @@ describe('update()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
       ],
       actionExecutor,
@@ -2709,6 +2742,7 @@ describe('update()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       actionExecutor,
@@ -2789,6 +2823,7 @@ describe('execute()', () => {
             isMissingSecrets: false,
             isPreconfigured: false,
             isSystemAction: true,
+            isConnectorTypeDeprecated: false,
           },
         ],
         logger,
@@ -2851,6 +2886,7 @@ describe('execute()', () => {
             config: {
               foo: 'bar',
             },
+            isConnectorTypeDeprecated: false,
           },
         ],
         logger,
@@ -2912,6 +2948,7 @@ describe('execute()', () => {
             isMissingSecrets: false,
             isPreconfigured: false,
             isSystemAction: true,
+            isConnectorTypeDeprecated: false,
           },
         ],
         logger,
@@ -3209,6 +3246,7 @@ describe('isPreconfigured()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -3220,6 +3258,7 @@ describe('isPreconfigured()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({
@@ -3258,6 +3297,7 @@ describe('isPreconfigured()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -3269,6 +3309,7 @@ describe('isPreconfigured()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({
@@ -3309,6 +3350,7 @@ describe('isSystemAction()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -3320,6 +3362,7 @@ describe('isSystemAction()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({
@@ -3358,6 +3401,7 @@ describe('isSystemAction()', () => {
           config: {
             foo: 'bar',
           },
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system-connector-.cases',
@@ -3369,6 +3413,7 @@ describe('isSystemAction()', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({

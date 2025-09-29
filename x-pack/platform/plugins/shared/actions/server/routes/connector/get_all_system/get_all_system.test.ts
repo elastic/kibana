@@ -44,6 +44,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
         isMissingSecrets: false,
         config: {},
         referencedByCount: 0,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
