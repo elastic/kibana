@@ -34,4 +34,7 @@ export type {
   LensTreeMapConfig,
   LensXYConfig,
   LensSeriesLayer,
+  LensBaseLayer,
+  LensXYConfigBase,
+  LensBreakdownConfig,
 } from './types';

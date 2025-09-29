@@ -290,7 +290,7 @@ export type LensSeriesLayer = Identity<
   LensBaseXYLayer & {
     type: 'series';
     breakdown?: LensBreakdownConfig;
-    xAxis: LensBreakdownConfig;
+    xAxis?: LensBreakdownConfig;
     seriesType: 'line' | 'bar' | 'area';
   }
 >;
