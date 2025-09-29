@@ -19,7 +19,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dataViews = getService('dataViews');
 
-  describe('sharing', function () {
+  describe('tabs sharing', function () {
+    beforeEach(async () => {
+      await unifiedTabs.clearRecentlyClosedTabs();
+    });
+
+    afterEach(async () => {
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+    });
+
     it('can share an unsaved tab', async () => {
       await unifiedTabs.editTabLabel(0, 'first tab');
       await discover.waitUntilTabIsLoaded();
@@ -58,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getHitCount()).to.be('13,129');
 
       // after a browser refresh in the original browser tab, the Discover tabs are restored
+      await browser.closeCurrentWindow();
       await browser.switchTab(0);
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
@@ -129,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getHitCount()).to.be('12');
 
       // after a browser refresh in the original browser tab, the Discover tabs are restored as modified
+      await browser.closeCurrentWindow();
       await browser.switchTab(0);
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
