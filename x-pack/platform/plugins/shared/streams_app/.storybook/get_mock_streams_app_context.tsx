@@ -141,6 +141,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       PageTemplate: () => null,
       telemetryClient: telemetryService.getClient(),
+      version: '1.0.0',
     },
     isServerless: false,
   };
