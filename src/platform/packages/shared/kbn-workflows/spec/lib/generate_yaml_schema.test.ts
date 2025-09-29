@@ -25,7 +25,7 @@ describe('generate_yaml_schema', () => {
         'CRITICAL FIX: Remove additionalProperties: false from objects inside allOf arrays'
       );
       expect(schemaFileContent).toContain('isInAllOf');
-      expect(schemaFileContent).toContain('hasConnectorProps');
+      expect(schemaFileContent).toContain('isInConnectorWithAllOf');
       expect(schemaFileContent).toContain('Complex schema intersection (simplified');
     });
 

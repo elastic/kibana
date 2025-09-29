@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { ZodError } from '@kbn/zod';
 import { z } from '@kbn/zod';
 import { getSchemaAtPath } from './zod/zod_utils';
+import { getCompactTypeDescription, getDetailedTypeDescription } from './zod/zod_type_description';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -117,24 +118,14 @@ function isOptionalSchema(schema: z.ZodType): boolean {
 
 /**
  * Gets a human-readable type name from a Zod schema
+ * Uses the existing zod_type_description utility for consistency
  */
 function getSchemaTypeName(schema: z.ZodType): string | null {
-  if (schema instanceof z.ZodString) return 'string';
-  if (schema instanceof z.ZodNumber) return 'number';
-  if (schema instanceof z.ZodBoolean) return 'boolean';
-  if (schema instanceof z.ZodArray) return 'array';
-  if (schema instanceof z.ZodObject) return 'object';
-  if (schema instanceof z.ZodUnion) return 'union';
-  if (schema instanceof z.ZodLiteral) return 'literal';
-  if (schema instanceof z.ZodEnum) return 'enum';
-  
-  // Try to extract from constructor name
-  const constructorName = schema.constructor.name;
-  if (constructorName.startsWith('Zod')) {
-    return constructorName.slice(3).toLowerCase();
+  try {
+    return getCompactTypeDescription(schema);
+  } catch {
+    return null;
   }
-  
-  return null;
 }
 
 /**
@@ -376,46 +367,23 @@ function getBetterFieldErrorMessage(path: (string | number)[], fieldName: string
 
 /**
  * Generates a descriptive error message based on the field schema type
+ * Uses the existing zod_type_description utility for consistency
  */
 function generateFieldTypeErrorMessage(fieldName: string, fieldSchema: z.ZodType): string | null {
   try {
-    const schemaType = fieldSchema.constructor.name;
-    
-    switch (schemaType) {
-      case 'ZodObject':
-        // For objects, try to show the expected structure
-        const objectStructure = getObjectStructureDescription(fieldSchema);
-        if (objectStructure) {
-          return `${fieldName} should be an object with structure:\n${objectStructure}`;
-        }
-        return `${fieldName} should be an object, not a primitive value`;
-        
-      case 'ZodString':
-        return `${fieldName} should be a string`;
-        
-      case 'ZodNumber':
-        return `${fieldName} should be a number`;
-        
-      case 'ZodBoolean':
-        return `${fieldName} should be a boolean (true/false)`;
-        
-      case 'ZodArray':
-        return `${fieldName} should be an array`;
-        
-      case 'ZodOptional':
-        // Unwrap optional and try again
-        const innerSchema = (fieldSchema as any)._def?.innerType;
-        if (innerSchema) {
-          return generateFieldTypeErrorMessage(fieldName, innerSchema);
-        }
-        break;
-        
-      default:
-        return `${fieldName} has incorrect type. Expected: ${schemaType.replace('Zod', '').toLowerCase()}`;
+    // Handle ZodObject specially to show structure
+    if (fieldSchema.constructor.name === 'ZodObject') {
+      const objectStructure = getObjectStructureDescription(fieldSchema);
+      if (objectStructure) {
+        return `${fieldName} should be an object with structure:\n${objectStructure}`;
+      }
+      return `${fieldName} should be an object, not a primitive value`;
     }
     
-    return null;
-  } catch (error) {
+    // For all other types, use the compact type description
+    const expectedType = getCompactTypeDescription(fieldSchema);
+    return `${fieldName} should be ${expectedType}`;
+  } catch {
     return null;
   }
 }
@@ -425,31 +393,15 @@ function generateFieldTypeErrorMessage(fieldName: string, fieldSchema: z.ZodType
  */
 function getObjectStructureDescription(objectSchema: z.ZodType): string | null {
   try {
-    if (objectSchema.constructor.name === 'ZodObject' && 
-        (objectSchema as any)._def && 
-        typeof (objectSchema as any)._def.shape === 'function') {
-      
-      const shape = (objectSchema as any)._def.shape();
-      const fields = Object.keys(shape);
-      
-      if (fields.length > 0) {
-        const fieldDescriptions = fields.slice(0, 5).map(field => {
-          const fieldSchema = shape[field];
-          const fieldType = fieldSchema.constructor.name.replace('Zod', '').toLowerCase();
-          const isOptional = fieldSchema.constructor.name === 'ZodOptional';
-          return `  ${field}: ${fieldType}${isOptional ? ' (optional)' : ''}`;
-        });
-        
-        const result = fieldDescriptions.join('\n');
-        if (fields.length > 5) {
-          return result + `\n  ... and ${fields.length - 5} more fields`;
-        }
-        return result;
-      }
-    }
-    
-    return null;
-  } catch (error) {
+    return getDetailedTypeDescription(objectSchema, {
+      detailed: true,
+      maxDepth: 2,
+      showOptional: true,
+      includeDescriptions: false,
+      singleLine: false,
+      indentSpacesNumber: 2,
+    });
+  } catch {
     return null;
   }
 }
