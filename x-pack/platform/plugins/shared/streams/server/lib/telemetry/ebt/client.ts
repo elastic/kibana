@@ -23,7 +23,7 @@ const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/_resync 2023-10-31',
 ];
 
-export class StreamsTelemetryClient {
+export class EbtTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup) {}
 
   public startTrackingEndpointLatency(

@@ -6,11 +6,11 @@
  */
 
 // EBT (Event-Based Telemetry) exports
-export { StreamsTelemetryService } from './service';
-export { StreamsTelemetryClient } from './client';
-export * from './constants';
-export * from './events';
-export * from './types';
+export { EbtTelemetryService } from './ebt/service';
+export { EbtTelemetryClient } from './ebt/client';
+export * from './ebt/constants';
+export * from './ebt/events';
+export * from './ebt/types';
 
 // Stats (Usage Collection) exports
 export { StatsTelemetryService } from './stats';

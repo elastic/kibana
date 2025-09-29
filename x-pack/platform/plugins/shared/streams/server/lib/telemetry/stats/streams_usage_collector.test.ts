@@ -12,18 +12,6 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
 
-// Helper to create a valid SavedObjectsFindResult
-const createFindResult = (attrs: any) => ({
-  id: attrs.id || 'id',
-  type: attrs.type || 'stream',
-  version: attrs.version || '1',
-  created_at: attrs.created_at || new Date().toISOString(),
-  updated_at: attrs.updated_at || new Date().toISOString(),
-  attributes: attrs.attributes,
-  score: 1,
-  references: [],
-});
-
 describe('Streams Usage Collector', () => {
   let usageCollectionMock: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
 
@@ -33,8 +21,6 @@ describe('Streams Usage Collector', () => {
   });
 
   it('registers a streams collector', () => {
-    const mockCoreSetup = {} as any;
-    const mockPlugins = {} as any;
     registerStreamsUsageCollector(usageCollectionMock);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -61,11 +47,9 @@ describe('Streams Usage Collector', () => {
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       } as any);
 
-      const mockCoreSetup = {} as any;
-      const mockPlugins = {} as any;
       registerStreamsUsageCollector(usageCollectionMock);
-      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
-      const result = await fetch.call({}, { soClient: soClientMock, esClient });
+      const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
+      const result = await collector.fetch({ soClient: soClientMock, esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -82,8 +66,8 @@ describe('Streams Usage Collector', () => {
           stored_count: 0,
           unique_wired_streams_count: 0,
           unique_classic_streams_count: 0,
-          rule_execution_ms_avg: null,
-          rule_execution_ms_p95: null,
+          rule_execution_ms_avg_24h: null,
+          rule_execution_ms_p95_24h: null,
           executions_count_24h: 0,
         },
       });
@@ -98,11 +82,9 @@ describe('Streams Usage Collector', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      const mockCoreSetup = {} as any;
-      const mockPlugins = {} as any;
       registerStreamsUsageCollector(usageCollectionMock);
-      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
-      const result = await fetch.call({}, { soClient: soClientMock, esClient });
+      const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
+      const result = await collector.fetch({ soClient: soClientMock, esClient });
 
       // Restore original NODE_ENV
       process.env.NODE_ENV = originalEnv;
@@ -122,15 +104,14 @@ describe('Streams Usage Collector', () => {
           stored_count: 0,
           unique_wired_streams_count: 0,
           unique_classic_streams_count: 0,
-          rule_execution_ms_avg: null,
-          rule_execution_ms_p95: null,
+          rule_execution_ms_avg_24h: null,
+          rule_execution_ms_p95_24h: null,
           executions_count_24h: 0,
         },
       });
     });
     it('returns computed metrics when data is available', async () => {
       const soClientMock = savedObjectsClientMock.create();
-      const now = new Date().toISOString();
 
       // Mock streams data - no SavedObjects queries for rules anymore
       soClientMock.find.mockResolvedValue({
@@ -142,20 +123,29 @@ describe('Streams Usage Collector', () => {
 
       // Mock search calls - for streams, rules, significant events, and event log
       esClient.search.mockImplementation(async (params: any) => {
+        const baseResponse = {
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        };
+
         if (params.index === '.kibana_streams') {
           return {
+            ...baseResponse,
             hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          };
+          } as any;
         }
         if (params.index === '.kibana*') {
           // Mock rules count
           return {
-            hits: { total: { value: 5, relation: 'eq' } },
-          };
+            ...baseResponse,
+            hits: { hits: [], total: { value: 5, relation: 'eq' } },
+          } as any;
         }
         if (params.index === '.alerts-streams.alerts-default') {
           return {
-            hits: { total: { value: 123, relation: 'eq' } },
+            ...baseResponse,
+            hits: { hits: [], total: { value: 123, relation: 'eq' } },
             aggregations: {
               by_stream_tags: {
                 buckets: [
@@ -164,10 +154,11 @@ describe('Streams Usage Collector', () => {
                 ],
               },
             },
-          };
+          } as any;
         }
         if (params.index === '.kibana-event-log-*') {
           return {
+            ...baseResponse,
             hits: {
               total: { value: 2, relation: 'eq' },
               hits: [
@@ -175,16 +166,17 @@ describe('Streams Usage Collector', () => {
                 { _source: { event: { duration: 3e6 } } }, // 3ms
               ],
             },
-          };
+          } as any;
         }
-        return { hits: { hits: [], total: { value: 0, relation: 'eq' } } };
+        return {
+          ...baseResponse,
+          hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        } as any;
       });
 
-      const mockCoreSetup = {} as any;
-      const mockPlugins = {} as any;
       registerStreamsUsageCollector(usageCollectionMock);
-      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
-      const result = await fetch.call({}, { soClient: soClientMock, esClient });
+      const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
+      const result = await collector.fetch({ soClient: soClientMock, esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -228,8 +220,8 @@ describe('Streams Usage Collector', () => {
       process.env.NODE_ENV = 'production';
 
       registerStreamsUsageCollector(usageCollectionMock);
-      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
-      const result = await fetch.call({}, { soClient: soClientMock, esClientMock });
+      const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
+      const result = await collector.fetch({ soClient: soClientMock, esClient: esClientMock });
 
       // Should return default values when ES calls fail
       expect(result).toEqual({
@@ -274,8 +266,8 @@ describe('Streams Usage Collector', () => {
       process.env.NODE_ENV = 'production';
 
       registerStreamsUsageCollector(usageCollectionMock);
-      const fetch = usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch;
-      const result = await fetch.call({}, { soClient: soClientMock, esClientMock2 });
+      const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
+      const result = await collector.fetch({ soClient: soClientMock, esClient: esClientMock2 });
 
       // Should return default values when ES calls fail
       expect(result).toEqual({

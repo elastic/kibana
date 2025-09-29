@@ -33,7 +33,7 @@ import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService, StatsTelemetryService } from './lib/telemetry';
+import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -67,14 +67,16 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemetryService = new StreamsTelemetryService();
+  private telemetryService = new EbtTelemetryService();
   private statsTelemetryService: StatsTelemetryService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
-    this.statsTelemetryService = new StatsTelemetryService(this.logger.get('stats-telemetry'));
+    this.statsTelemetryService = new StatsTelemetryService(
+      this.logger.get('streams-stats-telemetry')
+    );
   }
 
   public setup(

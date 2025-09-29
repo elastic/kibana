@@ -7,9 +7,9 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { streamsEndpointLatencyEventType } from './events';
-import { StreamsTelemetryClient } from './client';
+import { EbtTelemetryClient } from './client';
 
-export class StreamsTelemetryService {
+export class EbtTelemetryService {
   private analytics?: AnalyticsServiceSetup;
 
   constructor() {}
@@ -23,6 +23,6 @@ export class StreamsTelemetryService {
     if (!this.analytics) {
       throw new Error('Analytics service is not available.');
     }
-    return new StreamsTelemetryClient(this.analytics);
+    return new EbtTelemetryClient(this.analytics);
   }
 }

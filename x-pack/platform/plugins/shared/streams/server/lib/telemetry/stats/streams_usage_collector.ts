@@ -8,7 +8,7 @@
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { Streams } from '@kbn/streams-schema';
-import { getDefaultRetentionValue } from '../../streams/stream_crud';
+// Note: getDefaultRetentionValue no longer needed since we use schema-based type guards
 const percentiles = (arr: number[], p: number[]) => {
   const sorted = arr.slice().sort((a, b) => a - b);
   return p.map((percent) => {
@@ -25,7 +25,7 @@ const percentiles = (arr: number[], p: number[]) => {
   });
 };
 
-interface StreamsSnapshotTelemetry {
+interface StreamsStatsTelemetry {
   classic_streams: {
     changed_count: number;
     with_processing_count: number;
@@ -47,7 +47,7 @@ interface StreamsSnapshotTelemetry {
 }
 
 export function registerStreamsUsageCollector(usageCollection: UsageCollectionSetup) {
-  const collector = usageCollection.makeUsageCollector<StreamsSnapshotTelemetry>({
+  const collector = usageCollection.makeUsageCollector<StreamsStatsTelemetry>({
     type: 'streams',
     isReady: () => true,
     schema: {
@@ -71,7 +71,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
       },
     },
     fetch: async ({ soClient, esClient }) => {
-      const result: StreamsSnapshotTelemetry = {
+      const result: StreamsStatsTelemetry = {
         classic_streams: {
           changed_count: 0,
           with_processing_count: 0,
@@ -100,8 +100,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
           _source: true,
           query: { match_all: {} },
         });
-        const scopedClusterClient = { asCurrentUser: esClient } as any;
-        const defaultRetention = await getDefaultRetentionValue({ scopedClusterClient });
+        // Note: We no longer need defaultRetention since we use schema-based type guards
         const hits = allStreams.hits?.hits ?? [];
         for (const hit of hits) {
           const definition = (hit._source ?? {}) as Streams.all.Definition;
@@ -121,13 +120,11 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
             const fieldOverrides = definition.ingest?.classic?.field_overrides ?? {};
             if (fieldOverrides && Object.keys(fieldOverrides).length > 0)
               result.classic_streams.with_fields_count++;
-            // Check for changed retention - only DSL lifecycle has data_retention
+            // Check for changed retention - any DSL lifecycle is considered changed from default
             const lifecycle = definition.ingest?.lifecycle;
-            if (lifecycle && 'dsl' in lifecycle && lifecycle.dsl?.data_retention) {
-              const retention = lifecycle.dsl.data_retention;
-              if (retention !== defaultRetention) {
-                result.classic_streams.with_changed_retention_count++;
-              }
+            if (lifecycle && 'dsl' in lifecycle) {
+              // DSL lifecycle (custom retention) vs inherit lifecycle (default retention)
+              result.classic_streams.with_changed_retention_count++;
             }
           }
           if (isWired && !isGroup) {
@@ -136,7 +133,10 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('[Streams Telemetry] Failed to list streams or compute stream metrics', err);
+        console.error(
+          '[Streams Stats Telemetry] Failed to list streams or compute stream metrics',
+          err
+        );
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -163,7 +163,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         result.significant_events.rules_count = (rulesCountResponse.hits?.total as any)?.value ?? 0;
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('[Streams Telemetry] Failed to count significant event rules', err);
+        console.error('[Streams Stats Telemetry] Failed to count significant event rules', err);
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -253,7 +253,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
           } catch (streamTypeErr) {
             // eslint-disable-next-line no-console
             console.error(
-              '[Streams Telemetry] Failed to determine stream types for events',
+              '[Streams Stats Telemetry] Failed to determine stream types for events',
               streamTypeErr
             );
             // Leave unique_wired_streams_count and unique_classic_streams_count at 0
@@ -261,7 +261,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('[Streams Telemetry] Failed to count significant events', err);
+        console.error('[Streams Stats Telemetry] Failed to count significant events', err);
         const status = (err as any)?.meta?.statusCode;
         const known = status === 403 || status === 404;
         if (!known && process.env.NODE_ENV !== 'production') {
@@ -289,7 +289,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
 
         // Debug logging
         // eslint-disable-next-line no-console
-        console.debug('[Streams Telemetry] Event log query result:', {
+        console.debug('[Streams Stats Telemetry] Event log query result:', {
           total: eventLogResponse.hits.total,
           hits: eventLogResponse.hits.hits.length,
           twentyFourHoursAgo,
@@ -313,7 +313,7 @@ export function registerStreamsUsageCollector(usageCollection: UsageCollectionSe
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('[Streams Telemetry] Failed to fetch event log execution metrics', {
+        console.error('[Streams Stats Telemetry] Failed to fetch event log execution metrics', {
           error: err,
           message: (err as any)?.message,
           statusCode: (err as any)?.meta?.statusCode,
