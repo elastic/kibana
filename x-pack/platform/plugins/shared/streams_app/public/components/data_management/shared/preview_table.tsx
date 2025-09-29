@@ -53,17 +53,18 @@ export function PreviewTable({
   columnOrderHint = [],
   selectedRowIndex,
   showRowSourceAvatars = false,
+  showLeadingControlColumns = true,
   originalSamples,
   onRowSelected,
   cellActions,
 }: {
-  documents: DocumentWithIgnoredFields[];
+  documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
   height?: EuiDataGridProps['height'];
   renderCellValue?: (
-    values: SampleDocument,
+    doc: SampleDocument,
     columnId: string,
-    ignored_fields?: IgnoredField[]
+    ignoredFields?: IgnoredField[]
   ) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   toolbarVisibility?: boolean;
@@ -73,6 +74,7 @@ export function PreviewTable({
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
   selectedRowIndex?: number;
   showRowSourceAvatars?: boolean;
+  showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   onRowSelected?: (rowIndex: number) => void;
   cellActions?: EuiDataGridColumnCellAction[];
@@ -81,11 +83,13 @@ export function PreviewTable({
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
-    documents.forEach(({ values }) => {
-      if (!values || typeof values !== 'object') {
+    documents.forEach((doc) => {
+      const document = (doc as DocumentWithIgnoredFields).values ?? (doc as SampleDocument);
+
+      if (!document || typeof document !== 'object') {
         return;
       }
-      Object.keys(values).forEach((key) => {
+      Object.keys(document).forEach((key) => {
         cols.add(key);
       });
     });
@@ -231,7 +235,9 @@ export function PreviewTable({
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
-      leadingControlColumns={visibleColumns.length > 0 ? leadingControlColumns : undefined}
+      leadingControlColumns={
+        showLeadingControlColumns && visibleColumns.length > 0 ? leadingControlColumns : undefined
+      }
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
@@ -258,18 +264,21 @@ export function PreviewTable({
       onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
-        if (!doc.values || typeof doc.values !== 'object') {
+        const document = (doc as DocumentWithIgnoredFields).values ?? (doc as SampleDocument);
+        const ignoredFields = (doc as DocumentWithIgnoredFields).ignored_fields ?? [];
+
+        if (!document || typeof document !== 'object') {
           return emptyCell;
         }
 
         if (renderCellValue) {
-          const renderedValue = renderCellValue(doc.values, columnId, doc.ignored_fields);
+          const renderedValue = renderCellValue(document, columnId, ignoredFields);
           if (renderedValue !== undefined) {
             return renderedValue;
           }
         }
 
-        const value = doc.values[columnId];
+        const value = document[columnId];
         if (value === undefined || value === null) {
           return emptyCell;
         }

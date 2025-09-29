@@ -126,9 +126,9 @@ const SamplePreviewTableContent = ({
       >
         <PreviewTable
           documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
-          renderCellValue={(values, columnId, ignoredFields) => {
+          renderCellValue={(doc, columnId, ignoredFields = []) => {
             const emptyCell = <>&nbsp;</>;
-            const docValue = values[columnId];
+            const docValue = doc[columnId];
 
             let renderedValue = emptyCell as ReactNode;
 
@@ -138,7 +138,7 @@ const SamplePreviewTableContent = ({
               renderedValue = String(docValue) || emptyCell;
             }
 
-            const isFieldIgnored = (ignoredFields || []).find((field) => field?.field === columnId);
+            const isFieldIgnored = ignoredFields.find((field) => field?.field === columnId);
 
             if (isFieldIgnored) {
               renderedValue = (
@@ -161,6 +161,7 @@ const SamplePreviewTableContent = ({
             return renderedValue;
           }}
           displayColumns={columns}
+          showLeadingControlColumns={false}
         />
       </div>
     );
