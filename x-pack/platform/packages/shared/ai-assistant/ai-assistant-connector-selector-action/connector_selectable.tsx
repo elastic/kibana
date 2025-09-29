@@ -19,6 +19,7 @@ export type ConnectorSelectableProps = Pick<
   | 'preConfiguredConnectors'
   | 'defaultConnectorId'
   | 'renderOption'
+  | 'data-test-subj'
 > &
   Pick<ConnectorSelectableFooterProps, 'onAddConnectorClick' | 'onManageConnectorsClick'>;
 
@@ -42,7 +43,7 @@ export const ConnectorSelectable: React.FC<ConnectorSelectableProps> = (props) =
       defaultConnectorId={props.defaultConnectorId}
       footer={footer}
       renderOption={props.renderOption}
-      data-test-subj="connectorSelectable"
+      data-test-subj={props['data-test-subj']}
     />
   );
 };
