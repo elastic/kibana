@@ -191,15 +191,13 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const saveFilterSetButton = screen.getByTestId('saved-query-management-save-button');
-      const loadFilterSetButton = screen.getByTestId('saved-query-management-load-button');
+    const saveFilterSetButton = screen.getByTestId('saved-query-management-save-button');
+    const loadFilterSetButton = screen.getByTestId('saved-query-management-load-button');
 
-      expect(saveFilterSetButton).toBeInTheDocument();
-      expect(saveFilterSetButton).toBeDisabled();
-      expect(loadFilterSetButton).toBeInTheDocument();
-      expect(loadFilterSetButton).toBeDisabled();
-    });
+    expect(saveFilterSetButton).toBeInTheDocument();
+    expect(saveFilterSetButton).toBeDisabled();
+    expect(loadFilterSetButton).toBeInTheDocument();
+    expect(loadFilterSetButton).toBeDisabled();
   });
 
   it('should render the saved queries panels if the showFilterBar is true but disabled', async () => {
@@ -211,13 +209,11 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
-      const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
+    const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
+    const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
 
-      expect(applyToAllFiltersButton).toBeDisabled();
-      expect(removeAllFiltersButton).toBeDisabled();
-    });
+    expect(applyToAllFiltersButton).toBeDisabled();
+    expect(removeAllFiltersButton).toBeDisabled();
   });
 
   it('should enable the clear all button if query is given', async () => {
@@ -233,10 +229,8 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
-      expect(removeAllFiltersButton).not.toBeDisabled();
-    });
+    const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
+    expect(removeAllFiltersButton).not.toBeDisabled();
   });
 
   it('should enable the apply to all button if filter is given', async () => {
@@ -249,10 +243,8 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
-      expect(applyToAllFiltersButton).not.toBeDisabled();
-    });
+    const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
+    expect(applyToAllFiltersButton).not.toBeDisabled();
   });
 
   it('should render the language switcher panel', async () => {
@@ -265,10 +257,8 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const languageSwitcher = screen.getByTestId('switchQueryLanguageButton');
-      expect(languageSwitcher).toBeInTheDocument();
-    });
+    const languageSwitcher = screen.getByTestId('switchQueryLanguageButton');
+    expect(languageSwitcher).toBeInTheDocument();
   });
 
   it('should render the save query quick button', async () => {
@@ -294,10 +284,8 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      const saveChangesButton = screen.getByTestId('saved-query-management-save-changes-button');
-      expect(saveChangesButton).toBeInTheDocument();
-    });
+    const saveChangesButton = screen.getByTestId('saved-query-management-save-changes-button');
+    expect(saveChangesButton).toBeInTheDocument();
   });
 
   it('should render all filter panel options by default', async () => {
@@ -312,10 +300,8 @@ describe('Querybar Menu component', () => {
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
-      expect(screen.getByTestId('filter-sets-removeAllFilters')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-sets-removeAllFilters')).toBeInTheDocument();
 
     await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 

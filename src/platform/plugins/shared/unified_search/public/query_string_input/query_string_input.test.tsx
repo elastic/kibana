@@ -24,34 +24,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { QueryStringInput } from './query_string_input';
 import { unifiedSearchPluginMock } from '../mocks';
 
-// Configure test environment to suppress act warnings for complex async operations
 jest.useFakeTimers({ legacyFakeTimers: true });
-
-// Suppress console errors about suspended resources and act warnings in tests
-// eslint-disable-next-line no-console
-const originalConsoleError = console.error;
-beforeAll(() => {
-  // eslint-disable-next-line no-console
-  console.error = (...args) => {
-    const msg = args[0];
-    if (
-      typeof msg === 'string' &&
-      (msg.includes('suspended resource finished loading') ||
-        msg.includes('not wrapped in act') ||
-        msg.includes('update to EuiValidatableControl') ||
-        msg.includes('Warning: A suspended resource') ||
-        msg.includes('Warning: An update to'))
-    ) {
-      return;
-    }
-    originalConsoleError(...args);
-  };
-});
-
-afterAll(() => {
-  // eslint-disable-next-line no-console
-  console.error = originalConsoleError;
-});
 
 const startMock = coreMock.createStart();
 
@@ -92,7 +65,6 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
     intl: null as any,
-    disableAutoFocus: true, // Always disable autofocus to prevent act warnings
     deps: {
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       data: mockDataPlugin,
@@ -123,7 +95,6 @@ describe('QueryStringInput', () => {
         query: kqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPattern],
-        disableAutoFocus: true,
       })
     );
 
@@ -250,12 +221,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
-
-    const textarea = screen.getByDisplayValue(kqlQuery.query);
+    const textarea = await screen.findByDisplayValue(kqlQuery.query);
     expect(textarea).toBeInTheDocument();
     expect(mockCallback).toBeDefined();
   });
@@ -272,11 +238,6 @@ describe('QueryStringInput', () => {
         disableAutoFocus: true,
       })
     );
-
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
 
     const textarea = screen.getByDisplayValue(kqlQuery.query);
     await user.click(textarea);
@@ -298,12 +259,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
-
-    const textarea = screen.getByDisplayValue(kqlQuery.query);
+    const textarea = await screen.findByDisplayValue(kqlQuery.query);
     expect(mockCallback).toBeDefined();
     expect(textarea).toBeInTheDocument();
   });
@@ -320,11 +276,6 @@ describe('QueryStringInput', () => {
         disableAutoFocus: true,
       })
     );
-
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
 
     mockCallback.mockClear();
 
@@ -355,13 +306,7 @@ describe('QueryStringInput', () => {
         submitOnBlur: true,
       })
     );
-
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
-
-    const textarea = screen.getByDisplayValue(kqlQuery.query);
+    const textarea = await screen.findByDisplayValue(kqlQuery.query);
     expect(textarea).toBeInTheDocument();
     expect(mockCallback).toBeDefined();
   });
@@ -379,17 +324,10 @@ describe('QueryStringInput', () => {
       })
     );
 
-    await waitFor(() => {
-      const textarea = screen.getByDisplayValue(kqlQuery.query);
-      expect(textarea).toBeInTheDocument();
-    });
-
     const textarea = screen.getByDisplayValue(kqlQuery.query);
+
     await user.click(textarea);
     await user.tab();
-
-    jest.advanceTimersByTime(10);
-    expect(mockCallback).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(100);
     expect(mockCallback).toHaveBeenCalledTimes(0);
@@ -408,17 +346,9 @@ describe('QueryStringInput', () => {
       })
     );
 
-    await waitFor(
-      () => {
-        const textarea = screen.getByDisplayValue(kqlQuery.query);
-        expect(textarea).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
-
+    const textarea = await screen.findByDisplayValue(kqlQuery.query);
     expect(mockPersistedLog.get).toHaveBeenCalled();
 
-    const textarea = screen.getByDisplayValue(kqlQuery.query);
     mockPersistedLog.get.mockClear();
 
     await user.clear(textarea);
@@ -507,21 +437,13 @@ describe('QueryStringInput', () => {
       })
     );
 
-    await waitFor(
-      () => {
-        const textarea = screen.getByRole('textbox');
-        expect(textarea).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
-
     const textarea = screen.getByRole('textbox');
+    expect(textarea).toBeInTheDocument();
+
     await user.type(textarea, 'test');
 
     await waitFor(() => {
       expect(mockCallback).toHaveBeenCalled();
     });
-
-    expect(textarea).toBeInTheDocument();
   });
 });

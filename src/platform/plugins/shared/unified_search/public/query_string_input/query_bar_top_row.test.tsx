@@ -102,7 +102,6 @@ function wrapQueryBarTopRowInContext(
     onSubmit: noop,
     onChange: noop,
     intl: null as any,
-    disableAutoFocus: true, // Disable autofocus to prevent act warnings
   };
 
   const services = {
