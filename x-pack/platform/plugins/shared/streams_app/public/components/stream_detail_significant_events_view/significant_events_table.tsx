@@ -73,6 +73,7 @@ export function SignificantEventsTable({
       const lowerCaseQuery = queryString.toLowerCase();
       return values.filter(
         (item) =>
+          item.title.toLowerCase().includes(lowerCaseQuery) ||
           item.query.system?.name.toLowerCase().includes(lowerCaseQuery) ||
           item.query.system?.name?.toLowerCase().includes(lowerCaseQuery) ||
           item.query.kql.query.toLowerCase().includes(lowerCaseQuery)
