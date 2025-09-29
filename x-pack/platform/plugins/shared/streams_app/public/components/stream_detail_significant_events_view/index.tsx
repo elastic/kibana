@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { PreviewDataSparkPlot } from './add_significant_event_flyout/common/preview_data_spark_plot';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
@@ -35,6 +35,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     timeState: { start, end },
   } = useTimefilter();
+  const { unifiedSearch } = useKibana().dependencies.start;
 
   const aiFeatures = useAIFeatures();
 
@@ -157,14 +158,23 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow>
-              <StreamsAppSearchBar
-                showQueryInput
-                showDatePicker
+              <unifiedSearch.ui.SearchBar
+                appName="streamsApp"
+                showDatePicker={false}
+                showFilterBar={false}
+                showQueryMenu={false}
+                showQueryInput={true}
+                submitButtonStyle="iconOnly"
+                displayStyle="inPage"
+                disableQueryLanguageSwitcher
                 onQuerySubmit={(queryN) => {
                   setQuery(String(queryN.query) || '');
                 }}
+                onQueryChange={(queryN) => {
+                  setQuery(String(queryN.query) || '');
+                }}
                 query={{
-                  query: '',
+                  query,
                   language: 'text',
                 }}
               />
