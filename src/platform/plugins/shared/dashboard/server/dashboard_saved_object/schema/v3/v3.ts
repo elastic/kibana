@@ -17,10 +17,12 @@ export const sectionGridDataSchema = schema.object({
 });
 
 // panels include all grid data keys, including those that sections use
-export const gridDataSchema = sectionGridDataSchema.extends({
+export const gridDataSchema = schema.object({
   x: schema.number(),
+  y: schema.number(),
   w: schema.number(),
   h: schema.number(),
+  i: schema.maybe(schema.string()),
   sectionId: schema.maybe(schema.string()),
 });
 

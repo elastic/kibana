@@ -11,7 +11,7 @@ import { createOptionsSchemas } from '@kbn/content-management-utils';
 
 import {
   referenceSchema,
-  dashboardDataAttributesSchema,
+  dashboardDataSchema,
   dashboardMetaSchema,
   dashboardResolveMetaSchema,
 } from './common';
@@ -27,7 +27,7 @@ export const dashboardStorageCreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardDataAttributesSchema,
+    data: dashboardDataSchema,
     meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
   },
   { unknowns: 'forbid' }

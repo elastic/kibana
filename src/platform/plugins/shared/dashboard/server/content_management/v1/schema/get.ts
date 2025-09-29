@@ -11,7 +11,7 @@ import {
   dashboardItemSchema,
   dashboardMetaSchema,
   dashboardResolveMetaSchema,
-  dashboardDataAttributesSchema,
+  dashboardDataSchema,
   dashboardAPIItemSchema,
 } from './common';
 
@@ -43,7 +43,7 @@ export const dashboardAPIGetResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardDataAttributesSchema,
+    data: dashboardDataSchema,
     meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
   },
   { unknowns: 'forbid' }

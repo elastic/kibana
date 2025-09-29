@@ -57,7 +57,7 @@ function transformPanelProperties(
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
 ) {
-  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  const { sectionId, i, ...restOfGrid } = gridData; // drop section ID, if it exists
 
   const matchingReference =
     panelRefName && references
@@ -90,7 +90,7 @@ function transformPanelProperties(
   }
 
   return {
-    grid: rest,
+    grid: restOfGrid,
     config: transformedPanelConfig ? transformedPanelConfig : config,
     uid: panelIndex,
     type: panelType,

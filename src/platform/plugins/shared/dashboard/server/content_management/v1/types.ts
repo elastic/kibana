@@ -18,7 +18,6 @@ import type {
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { filterSchema, querySchema } from '@kbn/es-query-server';
 import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
@@ -31,24 +30,11 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 // The schema uses "unknowns: 'allow'" to permit any other keys, but the TypeOf helper does not
 // recognize this, so we need to manually extend the type here.
 export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'config'> & {
-  config: TypeOf<typeof schema.panelSchema>['config'] & { [key: string]: any };
-  grid: GridData;
+  config: object;
 };
 export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = Omit<
-  TypeOf<typeof schema.dashboardCreateRequestAttributesSchema>,
-  'panels'
-> & {
-  panels: Array<DashboardPanel | DashboardSection>;
-};
-
-export type FindDashboardsByIdResponseAttributes = Omit<
-  TypeOf<typeof schema.dashboardDataAttributesSchema>,
-  'panels'
-> & {
-  panels: Array<DashboardPanel | DashboardSection>;
-};
+export type DashboardAttributes = TypeOf<typeof schema.dashboardDataSchema>;
 
 export type DashboardItem = TypeOf<typeof schema.dashboardItemSchema>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
@@ -56,11 +42,11 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
   references: SavedObjectReference[] | undefined;
 };
 
-export type GridData = WithRequiredProperty<TypeOf<typeof schema.panelGridDataSchema>, 'i'>;
+export type GridData = TypeOf<typeof schema.panelGridDataSchema>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardAPIGetOut = GetResult<
-  TypeOf<typeof schema.dashboardDataAttributesSchema>,
+  TypeOf<typeof schema.dashboardDataSchema>,
   TypeOf<typeof schema.dashboardGetResultMetaSchema>
 >;
 export type DashboardGetOut = TypeOf<typeof schema.dashboardGetResultSchema>;

@@ -20,7 +20,7 @@ describe('transformPanelsIn', () => {
       {
         type: 'foo',
         uid: '1',
-        grid: { x: 0, y: 0, w: 12, h: 12, i: '1' },
+        grid: { x: 0, y: 0, w: 12, h: 12 },
         config: { foo: 'bar' },
       },
       {
@@ -36,13 +36,13 @@ describe('transformPanelsIn', () => {
           type: 'foo',
           embeddableConfig: { foo: 'bar' },
           panelIndex: '1',
-          gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
+          gridData: { x: 0, y: 0, w: 12, h: 12 },
         },
         {
           type: 'bar',
           embeddableConfig: { bizz: 'buzz' },
           panelIndex: 'mock-uuid',
-          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid' },
+          gridData: { x: 0, y: 0, w: 12, h: 12 },
         },
       ])
     );

@@ -150,7 +150,7 @@ export function initializeLayoutManager(
         ...layout$.value,
         panels: {
           ...layout$.value.panels,
-          [uuid]: { grid: { ...grid, i: uuid }, type },
+          [uuid]: { grid, type },
         },
       };
     }
@@ -173,7 +173,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { grid: { ...newPanelPlacement, i: uuid }, type },
+        [uuid]: { grid: newPanelPlacement, type },
       },
     };
   };
@@ -314,7 +314,6 @@ export function initializeLayoutManager(
         [uuidOfDuplicate]: {
           grid: {
             ...newPanelPlacement,
-            i: uuidOfDuplicate,
             sectionId: layoutItemToDuplicate.grid.sectionId,
           },
           type: layoutItemToDuplicate.type,
@@ -432,7 +431,7 @@ export function initializeLayoutManager(
         const sections = { ...currentLayout.sections };
         const newId = v4();
         sections[newId] = {
-          grid: { i: newId, y: maxY },
+          grid: { y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
           }),

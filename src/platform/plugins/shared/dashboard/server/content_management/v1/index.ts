@@ -8,7 +8,6 @@
  */
 
 export type {
-  FindDashboardsByIdResponseAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,
@@ -33,7 +32,6 @@ export type {
 } from './types';
 export { serviceDefinition } from './cm_services';
 export {
-  dashboardAttributesSchema,
   dashboardAPIGetResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,

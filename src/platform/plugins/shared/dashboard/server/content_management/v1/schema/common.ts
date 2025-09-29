@@ -49,11 +49,6 @@ export const panelGridDataSchema = schema.object({
     min: 1,
     meta: { description: 'The height of the panel in grid units' },
   }),
-  i: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique identifier of the panel' },
-    })
-  ),
 });
 
 export const panelSchema = schema.object({
@@ -88,11 +83,6 @@ export const panelSchema = schema.object({
 
 const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
-  i: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique identifier of the section' },
-    })
-  ),
 });
 
 export const sectionSchema = schema.object({
@@ -110,35 +100,12 @@ export const sectionSchema = schema.object({
     meta: { description: 'The panels that belong to the section.' },
     defaultValue: [],
   }),
-});
-
-const dashboardPanels = {
-  // Responses always include the panel index (for panels) and grid.i (for panels + sections)
-  panels: schema.arrayOf(
-    schema.oneOf([
-      panelSchema.extends({
-        uid: schema.string(),
-        grid: panelGridDataSchema.extends({
-          i: schema.string(),
-        }),
-      }),
-      sectionSchema.extends({
-        grid: sectionGridDataSchema.extends({
-          i: schema.string(),
-        }),
-        panels: schema.arrayOf(
-          panelSchema.extends({
-            uid: schema.string(),
-            grid: panelGridDataSchema.extends({
-              i: schema.string(),
-            }),
-          })
-        ),
-      }),
-    ]),
-    { defaultValue: [] }
+  uid: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the section.' },
+    })
   ),
-};
+});
 
 export const dashboardMetaSchema = schema.object({
   updatedAt: schema.maybe(schema.string()),
@@ -255,18 +222,15 @@ export const dashboardState = {
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
-//
-export const dashboardAttributesSchema = schema.object({
+export const dashboardDataSchema = schema.object({
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardDataAttributesSchema = dashboardAttributesSchema.extends(dashboardPanels);
-
 export const dashboardAPIItemSchema = schema.object({
-  data: dashboardDataAttributesSchema,
+  data: dashboardDataSchema,
   meta: dashboardMetaSchema,
   type: schema.string(),
   id: schema.string(),
@@ -276,7 +240,7 @@ export const dashboardAPICreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardDataAttributesSchema,
+    data: dashboardDataSchema,
     meta: dashboardMetaSchema,
   },
   { unknowns: 'forbid' }
@@ -286,34 +250,6 @@ export const dashboardResponseAttributesSchema = schema.object({
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
-  // Responses always include the panel index (for panels) and grid.i (for panels + sections)
-  panels: schema.arrayOf(
-    schema.oneOf([
-      panelSchema.extends({
-        uid: schema.string(),
-        grid: panelGridDataSchema.extends({
-          i: schema.string(),
-        }),
-      }),
-      sectionSchema.extends({
-        grid: sectionGridDataSchema.extends({
-          i: schema.string(),
-        }),
-        panels: schema.arrayOf(
-          panelSchema.extends({
-            uid: schema.string(),
-            grid: panelGridDataSchema.extends({
-              i: schema.string(),
-            }),
-          })
-        ),
-      }),
-    ]),
-    { defaultValue: [] }
-  ),
 });
 
 export const dashboardStorageSchema = schema.object(
@@ -327,7 +263,7 @@ export const dashboardStorageSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardStorageAttributesSchemaResponse,
+    attributes: schema.object(dashboardState),
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
@@ -347,15 +283,6 @@ export const dashboardResolveMetaSchema = {
   ),
 };
 
-export const dashboardCreateRequestAttributesSchema = schema.object({
-  ...dashboardState,
-  references: schema.maybe(schema.arrayOf(referenceSchema)),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-export const dashboardAttributesSchemaRequest =
-  dashboardCreateRequestAttributesSchema.extends(dashboardPanels);
-
 export const dashboardItemSchema = schema.object(
   {
     id: schema.string(),
@@ -367,7 +294,7 @@ export const dashboardItemSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchemaRequest,
+    attributes: schema.object(dashboardState),
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
