@@ -110,12 +110,10 @@ export function ContentFrameworkSection({
           )
         }
       >
-        <>
-          <EuiSpacer size="s" />
-          <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
-            {children}
-          </EuiPanel>
-        </>
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
+          {children}
+        </EuiPanel>
       </EuiAccordion>
       {accordionState === 'closed' ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
     </>

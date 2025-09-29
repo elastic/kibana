@@ -104,26 +104,24 @@ export function TracesInDiscoverCallout() {
   }
 
   return (
-    <>
-      <EuiCallOut
-        data-test-subj="apmServiceInventoryTracesInDiscoverCallout"
-        size="m"
-        announceOnMount
-        title={calloutTitle}
-        iconType="cheer"
-        onDismiss={dismissCallout}
+    <EuiCallOut
+      data-test-subj="apmServiceInventoryTracesInDiscoverCallout"
+      size="m"
+      announceOnMount
+      title={calloutTitle}
+      iconType="cheer"
+      onDismiss={dismissCallout}
+    >
+      <EuiText size="s">{calloutContent}</EuiText>
+      <EuiSpacer size="m" />
+      <EuiButton
+        data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton"
+        fill
+        href={discoverHref}
+        aria-label={buttonLabel}
       >
-        <EuiText size="s">{calloutContent}</EuiText>
-        <EuiSpacer size="m" />
-        <EuiButton
-          data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton"
-          fill
-          href={discoverHref}
-          aria-label={buttonLabel}
-        >
-          {buttonLabel}
-        </EuiButton>
-      </EuiCallOut>
-    </>
+        {buttonLabel}
+      </EuiButton>
+    </EuiCallOut>
   );
 }

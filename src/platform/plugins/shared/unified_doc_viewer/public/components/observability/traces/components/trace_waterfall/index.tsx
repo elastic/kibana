@@ -93,23 +93,21 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     <EuiTourStep
       anchor={`#${actionId}`}
       content={
-        <>
-          <FormattedMessage
-            id="unifiedDocViewer.observability.traces.trace.tourStep.content"
-            defaultMessage="You can now click {link} to view the full-screen waterfall and explore your trace data in context."
-            values={{
-              link: (
-                <EuiLink
-                  data-test-subj="traceWaterfallFullScreenActionTourLink"
-                  onClick={() => setShowFullScreenWaterfall(true)}
-                  aria-label={fullScreenButtonLabel}
-                >
-                  {fullScreenButtonLabel}
-                </EuiLink>
-              ),
-            }}
-          />
-        </>
+        <FormattedMessage
+          id="unifiedDocViewer.observability.traces.trace.tourStep.content"
+          defaultMessage="You can now click {link} to view the full-screen waterfall and explore your trace data in context."
+          values={{
+            link: (
+              <EuiLink
+                data-test-subj="traceWaterfallFullScreenActionTourLink"
+                onClick={() => setShowFullScreenWaterfall(true)}
+                aria-label={fullScreenButtonLabel}
+              >
+                {fullScreenButtonLabel}
+              </EuiLink>
+            ),
+          }}
+        />
       }
       isStepOpen={!dismissedActionTour}
       maxWidth={350}
