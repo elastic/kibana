@@ -18959,7 +18959,6 @@
                             "type": "string"
                           },
                           "last_checkin": {
-                            "nullable": true,
                             "type": "string"
                           },
                           "last_checkin_message": {
@@ -21073,7 +21072,6 @@
                           "type": "string"
                         },
                         "last_checkin": {
-                          "nullable": true,
                           "type": "string"
                         },
                         "last_checkin_message": {
@@ -21568,7 +21566,6 @@
                           "type": "string"
                         },
                         "last_checkin": {
-                          "nullable": true,
                           "type": "string"
                         },
                         "last_checkin_message": {
