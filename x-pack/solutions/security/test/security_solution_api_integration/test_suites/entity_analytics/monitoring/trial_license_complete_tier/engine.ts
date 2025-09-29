@@ -334,19 +334,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
-      before(async () => {
-        toggleIntegrationsSyncFlag(kibanaServer, true);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
-          { useCreate: true }
-        );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
-        );
-      });
 
       beforeEach(async () => {
         await indexSyncUtils.createIndex();
