@@ -43,7 +43,7 @@ export const tourSteps: TourStep[] = [
         </p>
       </EuiText>
     ),
-    target: '[data-test-subj~="projectSideNav"] [data-test-subj="side-nav-logo-wrapper"]',
+    target: '[data-test-subj~="projectSideNav"] [data-test-subj~="nav-item-home"]',
   },
   {
     id: 'sidenav-manage-data',
