@@ -107,7 +107,7 @@ export const AdditionalFormFields = React.memo<{
 
       <div>
         {additionalFields.map((field) => {
-          const fieldMetaData = fieldsData?.data?.find((f) => f.name === field.value);
+          const fieldMetaData = fieldsMetadataRecord[field.value || ''];
           if (!fieldMetaData) {
             return null;
           }
