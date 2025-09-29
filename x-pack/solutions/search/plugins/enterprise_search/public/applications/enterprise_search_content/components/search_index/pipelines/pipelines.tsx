@@ -135,6 +135,7 @@ export const SearchIndexPipelines: React.FC = () => {
       {showMissingPipelineCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="error"
             title={i18n.translate(
