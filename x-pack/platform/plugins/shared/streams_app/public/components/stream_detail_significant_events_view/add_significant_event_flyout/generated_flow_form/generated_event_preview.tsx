@@ -193,7 +193,10 @@ export function GeneratedEventPreview({
             onChange={(value) => {
               setQuery({
                 ...query,
-                system: value,
+                system: {
+                  name: value.name,
+                  filter: value.filter,
+                },
               });
               setTouched((prev) => ({ ...prev, system: true }));
             }}
