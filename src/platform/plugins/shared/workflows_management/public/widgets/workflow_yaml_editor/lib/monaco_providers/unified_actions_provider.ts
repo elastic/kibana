@@ -9,15 +9,13 @@
 
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
-import YAML from 'yaml';
+import type YAML from 'yaml';
 import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
 import { getMonacoConnectorHandler } from './provider_registry';
 import type { ActionContext, ProviderConfig } from './provider_interfaces';
 import { getStepRange } from '../step_detection_utils';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 100;
-
-type YamlPath = Array<string | number>;
 
 /**
  * Unified actions provider that provides floating action buttons for all connector types
@@ -138,9 +136,6 @@ export class UnifiedActionsProvider {
         // Update current connector type and step node
         this.currentConnectorType = context.connectorType;
         this.currentStepNode = newStepNode;
-
-        // Update highlighting for the new step
-        this.updateHighlighting(context);
 
         // Generate action buttons for the new step
         const handler = getMonacoConnectorHandler(context.connectorType);
@@ -423,70 +418,6 @@ export class UnifiedActionsProvider {
       parameterType: 'any', // Could be enhanced with schema information
       isRequired: false, // Could be enhanced with schema information
     };
-  }
-
-  /**
-   * Update editor highlighting for the current step
-   * Shows Dev Console-style edge highlighting when cursor is actively positioned within a step
-   */
-  private updateHighlighting(context: ActionContext): void {
-    try {
-      if (!context.stepContext?.stepNode) {
-        this.highlightedLines.clear();
-        return;
-      }
-
-      // Create Dev Console-style decoration (single block border)
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      // Get step range using shared utility
-      const model = this.editor.getModel();
-      if (!model) return;
-
-      const stepRange = getStepRange(context.stepContext.stepNode, model);
-      if (stepRange) {
-        // Create decorations for first line, middle lines, and last line
-        for (
-          let lineNumber = stepRange.startLineNumber;
-          lineNumber <= stepRange.endLineNumber;
-          lineNumber++
-        ) {
-          const isFirstLine = lineNumber === stepRange.startLineNumber;
-          const isLastLine = lineNumber === stepRange.endLineNumber;
-          const isSingleLine = stepRange.startLineNumber === stepRange.endLineNumber;
-
-          let className = 'workflow-step-selected-middle';
-          if (isSingleLine) {
-            className = 'workflow-step-selected-single';
-          } else if (isFirstLine) {
-            className = 'workflow-step-selected-first';
-          } else if (isLastLine) {
-            className = 'workflow-step-selected-last';
-          }
-
-          decorations.push({
-            range: new monaco.Range(lineNumber, 1, lineNumber, 1),
-            options: {
-              className,
-              isWholeLine: true,
-              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-            },
-          });
-        }
-      }
-
-      // Update decorations
-      this.highlightedLines.set(decorations);
-      /*
-      console.log('🔍 Step highlighting applied:', {
-        stepName: context.stepContext.stepName,
-        stepType: context.stepContext.stepType,
-        lines: stepRange ? `${stepRange.startLineNumber}-${stepRange.endLineNumber}` : 'none',
-      });
-      */
-    } catch (error) {
-      // console.warn('UnifiedActionsProvider: Error updating highlighting', error);
-    }
   }
 
   /**

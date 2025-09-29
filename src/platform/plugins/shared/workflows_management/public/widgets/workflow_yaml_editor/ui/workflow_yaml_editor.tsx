@@ -8,14 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiIcon,
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  transparentize,
-} from '@elastic/eui';
+import { EuiIcon, useEuiTheme, EuiButton, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -59,7 +52,9 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
+import type { EditorState } from '../lib/state/state';
 import { EditorStateProvider } from '../lib/state/state';
+import { useFocusedStepOutline } from '../lib/hooks';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -135,6 +130,7 @@ export const WorkflowYAMLEditor = ({
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
   const {
     services: { http, notifications },
   } = useKibana<CoreStart>();
@@ -179,9 +175,16 @@ export const WorkflowYAMLEditor = ({
 
   // Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({
-    display: 'none',
-  });
+  // const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({
+  //   display: 'none',
+  // });
+  const [editorState, setEditorState] = useState<EditorState | null>(null);
+  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorState); // Non-null assertion - will be set after mount
+
+  const memoizedContainerStyles = useMemo(
+    () => css(styles.container, stepOutlineStyles),
+    [styles.container, stepOutlineStyles]
+  );
 
   // Memoize the schema to avoid re-generating it on every render
   const workflowYamlSchemaLoose = useMemo(() => {
@@ -443,15 +446,6 @@ export const WorkflowYAMLEditor = ({
       // const decorationsProvider = createUnifiedDecorationsProvider(editor, providerConfig);
 
       // Setup event listener for CSS updates from actions provider
-      const handleCssUpdate = (event: CustomEvent) => {
-        setEditorActionsCss(event.detail || {});
-      };
-      window.addEventListener('updateEditorActionsCss', handleCssUpdate as EventListener);
-      disposablesRef.current.push({
-        dispose: () => {
-          window.removeEventListener('updateEditorActionsCss', handleCssUpdate as EventListener);
-        },
-      });
 
       // Store provider references
       unifiedProvidersRef.current = {
@@ -1247,8 +1241,6 @@ export const WorkflowYAMLEditor = ({
     [readOnly]
   );
 
-  const styles = useMemoCss(componentStyles);
-
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
     const editor = editorRef.current;
@@ -1284,8 +1276,8 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <EditorStateProvider editor={editorRef.current}>
-      <div css={styles.container} ref={containerRef}>
+    <EditorStateProvider editor={editorRef.current} onEditorStateChange={setEditorState}>
+      <div css={memoizedContainerStyles} ref={containerRef}>
         <ActionsMenuPopover
           anchorPosition="upCenter"
           offset={32}
@@ -1631,39 +1623,6 @@ const componentStyles = {
         backgroundColor: 'rgba(0, 120, 212, 0.05)',
         borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
       },
-      // Dev Console-style step highlighting (block border approach)
-      '.workflow-step-selected-single': {
-        backgroundColor: 'rgba(0, 120, 212, 0.02)',
-        border: `1px solid #0078d4`, // Explicit blue color
-        borderLeft: `1px solid #0078d4`, // Explicit blue color
-        borderRadius: '3px',
-        boxShadow: `0 1px 3px rgba(0, 120, 212, 0.1)`,
-        position: 'relative', // Enable relative positioning for action buttons
-      },
-      '.workflow-step-selected-first': {
-        backgroundColor: 'rgba(0, 120, 212, 0.02)',
-        borderTop: `1px solid #0078d4`, // Explicit blue color
-        borderLeft: `1px solid #0078d4`, // Explicit blue color
-        borderRight: `1px solid #0078d4`, // Explicit blue color
-        borderTopLeftRadius: '3px',
-        borderTopRightRadius: '3px',
-        position: 'relative', // Enable relative positioning for action buttons
-      },
-      '.workflow-step-selected-middle': {
-        backgroundColor: 'rgba(0, 120, 212, 0.02)',
-        borderLeft: `1px solid #0078d4`, // Left border to connect with first/last
-        borderRight: `1px solid #0078d4`, // Right border to connect with first/last
-      },
-      '.workflow-step-selected-last': {
-        backgroundColor: 'rgba(0, 120, 212, 0.02)',
-        borderBottom: `1px solid #0078d4`, // Explicit blue color
-        borderLeft: `1px solid #0078d4`, // Explicit blue color
-        borderRight: `1px solid #0078d4`, // Explicit blue color
-        borderBottomLeftRadius: '3px',
-        borderBottomRightRadius: '3px',
-        boxShadow: `0 1px 3px rgba(0, 120, 212, 0.1)`,
-      },
-
       // Custom icons for Monaco autocomplete (SUGGESTIONS)
       // Slack
       '.codicon-symbol-event:before': {
