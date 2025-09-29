@@ -44,18 +44,8 @@ export const createSyncMarkersService = (
     }
   };
 
-  const updateLastFullSyncMarker = async (marker: string): Promise<void> => {
-    // update latest full sync to saved object
-  };
-  const getLastFullSyncMarker = async (): Promise<string> => {
-    // get latest full sync from saved object
-    return 'now-10y'; // replace with actual value from saved object
-  };
-
   return {
     updateLastProcessedMarker,
     getLastProcessedMarker,
-    updateLastFullSyncMarker,
-    getLastFullSyncMarker,
   };
 };
