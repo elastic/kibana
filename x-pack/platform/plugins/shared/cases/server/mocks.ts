@@ -767,6 +767,10 @@ export const mockCasesContract = (): CasesServerStart => ({
       additionalFields: {
         enabled: true,
       },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
     },
   },
 });
