@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { from, where } from '@kbn/esql-composer';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { SolutionId } from '@kbn/core-chrome-browser/src/project_navigation';
-import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import {
   ENVIRONMENT_ALL_VALUE,
@@ -38,13 +38,12 @@ const calloutContent = i18n.translate('xpack.apm.apmMainTemplate.euiCallout.cont
 const tracesInDiscoverCalloutStorageKey = 'apm.tracesInDiscoverCalloutDismissed';
 
 function useTracesIndex(apmSourcesAccess: ApmSourceAccessPluginStart) {
-  const [tracesIndex, setTracesIndex] = useState<string | undefined>();
-  useEffect(() => {
-    apmSourcesAccess.getApmIndices().then((indices) => {
-      setTracesIndex(Array.from(new Set([indices.span, indices.transaction])).join(','));
-    });
+  const { data } = useFetcher(() => {
+    if (!apmSourcesAccess) return;
+    return apmSourcesAccess.getApmIndices();
   }, [apmSourcesAccess]);
-  return tracesIndex;
+
+  return data ? Array.from(new Set([data.span, data.transaction])).join(',') : undefined;
 }
 
 function getEsqlQuery(environment: string, tracesIndex: string): string {
@@ -73,6 +72,7 @@ export function TracesInDiscoverCallout() {
     services: { apmSourcesAccess },
   } = useKibana<ApmPluginStartDeps>();
   const tracesIndex = useTracesIndex(apmSourcesAccess);
+
   const {
     query: { environment, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services', '/service-map');

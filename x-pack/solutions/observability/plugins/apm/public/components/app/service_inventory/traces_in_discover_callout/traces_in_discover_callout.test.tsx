@@ -14,9 +14,6 @@ import {
 import { TracesInDiscoverCallout } from '.';
 
 const mockGetRedirectUrl = jest.fn(() => 'mock-discover-url');
-const mockGetApmIndices = jest.fn(() =>
-  Promise.resolve({ span: 'apm-span', transaction: 'apm-transaction' })
-);
 const mockTraceIndex = 'apm-span, apm-transaction';
 
 let mockGetActiveSpace = {
@@ -43,13 +40,10 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useKibanaSpace: () => ({
     space: mockGetActiveSpace,
   }),
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      apmSourcesAccess: { getApmIndices: mockGetApmIndices },
-    },
+  useFetcher: () => ({
+    data: { span: 'apm-span', transaction: 'apm-transaction' },
+    status: 'success',
+    refetch: jest.fn(),
   }),
 }));
 
