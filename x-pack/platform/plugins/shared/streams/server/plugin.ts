@@ -27,14 +27,13 @@ import {
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
-import { registerStreamsUsageCollector } from './telemetry/usage/streams_usage_collector';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService } from './lib/telemetry/service';
+import { StreamsTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -69,11 +68,13 @@ export class StreamsPlugin
   public server?: StreamsServer;
   private isDev: boolean;
   private telemetryService = new StreamsTelemetryService();
+  private statsTelemetryService: StatsTelemetryService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.statsTelemetryService = new StatsTelemetryService(this.logger.get('stats-telemetry'));
   }
 
   public setup(
@@ -86,6 +87,7 @@ export class StreamsPlugin
     } as StreamsServer;
 
     this.telemetryService.setup(core.analytics);
+    this.statsTelemetryService.setup(plugins.usageCollection);
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,
@@ -221,10 +223,6 @@ export class StreamsPlugin
       plugins.globalSearch.registerResultProvider(
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
-    }
-
-    if (plugins.usageCollection) {
-      registerStreamsUsageCollector(plugins.usageCollection);
     }
 
     return {};

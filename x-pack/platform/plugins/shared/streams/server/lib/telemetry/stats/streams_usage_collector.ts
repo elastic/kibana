@@ -8,7 +8,7 @@
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { Streams } from '@kbn/streams-schema';
-import { getDefaultRetentionValue } from '../../lib/streams/stream_crud';
+import { getDefaultRetentionValue } from '../../streams/stream_crud';
 const percentiles = (arr: number[], p: number[]) => {
   const sorted = arr.slice().sort((a, b) => a - b);
   return p.map((percent) => {
