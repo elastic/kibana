@@ -31,7 +31,7 @@ exports[`Both modes should render the side navigation 1`] = `
             />
           </div>
           <div
-            class="euiText emotion-euiText-xs-euiTextAlign-center-horizontalStyles-content"
+            class="euiText emotion-euiText-xs-euiTextAlign-center-verticalStyles-content"
           >
             Solution
           </div>
@@ -68,7 +68,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Dashboards
               </div>
@@ -101,7 +101,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Discover
               </div>
@@ -135,7 +135,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Apps
               </div>
