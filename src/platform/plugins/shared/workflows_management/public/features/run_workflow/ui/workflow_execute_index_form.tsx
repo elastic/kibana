@@ -15,16 +15,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiInMemoryTable,
-  EuiIcon,
   EuiButton,
   EuiCallOut,
-  EuiFieldText,
   EuiToken,
   EuiDescriptionList,
   EuiFormRow,
+  EuiPanel,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
@@ -76,6 +76,8 @@ export const WorkflowExecuteIndexForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana<CoreStart & WorkflowsPluginStartDependencies>();
+  const { unifiedSearch } = services;
+  const { SearchBar } = unifiedSearch.ui;
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
@@ -280,38 +282,42 @@ export const WorkflowExecuteIndexForm = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="s">
         {/* Data View Selector */}
         <EuiFlexItem grow={false}>
           <EuiFormRow label="Data View">
-            <DataViewPicker
-              trigger={{
-                'data-test-subj': 'workflow-data-view-selector',
-                label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
-                fullWidth: true,
-                size: 'm',
-              }}
-              savedDataViews={dataViews}
-              currentDataViewId={selectedDataView?.id}
-              onChangeDataView={handleDataViewChange}
-            />
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+              <DataViewPicker
+                trigger={{
+                  'data-test-subj': 'workflow-data-view-selector',
+                  label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
+                  fullWidth: true,
+                  size: 's',
+                }}
+                savedDataViews={dataViews}
+                currentDataViewId={selectedDataView?.id}
+                onChangeDataView={handleDataViewChange}
+              />
+            </EuiPanel>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow label="Documents" fullWidth>
-            <EuiFieldText
-              placeholder="Filter your data using KQL syntax"
-              value={queryString}
-              onChange={(e) => setQueryString(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  fetchDocuments();
+            <SearchBar
+              appName="workflow_management"
+              onQuerySubmit={({ query }: { dateRange: TimeRange; query?: Query }) => {
+                if (query && typeof query.query === 'string') {
+                  setQueryString(query.query);
                 }
               }}
-              fullWidth
-              prepend={<EuiIcon type="search" />}
+              query={{ query: queryString, language: 'kuery' }}
+              indexPatterns={selectedDataView ? [selectedDataView] : []}
+              showDatePicker={false}
+              showFilterBar={false}
+              showSubmitButton={true}
+              placeholder="Filter your data using KQL syntax"
               data-test-subj="workflow-query-input"
             />
           </EuiFormRow>
@@ -347,10 +353,6 @@ export const WorkflowExecuteIndexForm = ({
                 field: '_source.@timestamp',
                 direction: 'desc',
               },
-            }}
-            pagination={{
-              pageSize: 10,
-              pageSizeOptions: [5, 10, 25, 50],
             }}
             tableLayout="fixed"
             itemId="_id"
