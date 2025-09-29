@@ -185,7 +185,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
             label: i18n.ADDITIONAL_FIELDS_LABEL,
             validations: [
               {
-                validator: generateJSONValidator({ maxAdditionalFields: 200 }),
+                validator: generateJSONValidator({ maxAdditionalFields: 50 }),
               },
             ],
           }}
