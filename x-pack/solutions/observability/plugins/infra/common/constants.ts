@@ -13,7 +13,7 @@ export {
   KUBERNETES_POD_UID as KUBERNETES_POD_UID_FIELD,
 } from '@kbn/metrics-data-access-plugin/common';
 
-export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
+export const METRICS_INDEX_PATTERN = 'metrics-*,metrics-system*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
