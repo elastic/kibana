@@ -17,10 +17,6 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
-import type { Flow, SaveData } from './add_significant_event_flyout/types';
-import { ChangePointSummary } from './change_point_summary';
-import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
@@ -39,9 +35,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     timeState: { start, end },
   } = useTimefilter();
-  const aiFeatures = useAIFeatures();
 
-  const theme = useEuiTheme().euiTheme;
   const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
@@ -88,18 +82,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   ) : null;
 
-  const editFlyout = isEditFlyoutOpen ? (
-    <AddSignificantEventFlyout
-      definition={definition.stream}
-      systems={detectedSystems}
-      isLoading={isSystemDetectionLoading}
-      closeFlyout={() => {
-        refresh();
-        setIsSystemDetectionFlyoutOpen(false);
-      }}
-    />
-  ) : null;
-
   const editFlyout = (
     <EditSignificantEventFlyout
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
@@ -115,39 +97,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   );
 
-  const noSystems = systems.length === 0;
-  const noSignificantEvents =
-    significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
-
-  if (noSystems && noSignificantEvents) {
-    return (
-      <>
-        <NoSystemsEmptyState
-          onSystemDetectionClick={() => {
-            setIsSystemDetectionLoading(true);
-            setIsSystemDetectionFlyoutOpen(true);
-
-            identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
-              .then((data) => {
-                setDetectedSystems(data.systems);
-              })
-              .finally(() => {
-                setIsSystemDetectionLoading(false);
-              });
-          }}
-          onManualEntryClick={() => {
-            setQueryToEdit(undefined);
-            setInitialFlow('manual');
-            setIsEditFlyoutOpen(true);
-          }}
-        />
-        {systemDetectionFlyout}
-        {editFlyout}
-      </>
-    );
-  }
-
-  if (noSignificantEvents) {
   const noSystems = systems.length === 0;
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
@@ -212,7 +161,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 showQueryInput
                 showDatePicker
                 onQuerySubmit={(queryN) => {
-                  setQuery(queryN);
+                  setQuery(String(queryN.query) || '');
                 }}
                 query={{
                   query: '',
@@ -249,6 +198,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
+            query={query}
             definition={definition.stream}
             response={significantEventsFetchState}
             onEditClick={(item) => {

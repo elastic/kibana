@@ -49,12 +49,14 @@ export function SignificantEventsTable({
   onDeleteClick,
   onEditClick,
   xFormatter,
+  query: queryString,
 }: {
   definition: Streams.all.Definition;
   response: Pick<AbortableAsyncState<SignificantEventItem[]>, 'value' | 'loading' | 'error'>;
   onDeleteClick?: (query: SignificantEventItem) => void;
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
+  query?: string;
 }) {
   const {
     dependencies: {
@@ -66,8 +68,18 @@ export function SignificantEventsTable({
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
 
   const items = useMemo(() => {
+    const values = response.value ?? [];
+    if (queryString) {
+      const lowerCaseQuery = queryString.toLowerCase();
+      return values.filter(
+        (item) =>
+          item.query.system?.name.toLowerCase().includes(lowerCaseQuery) ||
+          item.query.system?.name?.toLowerCase().includes(lowerCaseQuery) ||
+          item.query.kql.query.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
     return response.value ?? [];
-  }, [response.value]);
+  }, [response.value, queryString]);
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<SignificantEventItem>();
   const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
 
