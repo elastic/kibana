@@ -13,6 +13,7 @@ const COLORS = {
   YELLOW: '\x1b[33m',
   WHITE: '\x1b[37m',
   GREY: '\x1b[90m',
+  BOLD_GREY: '\x1b[1m\x1b[90m',
   BOLD_WHITE: '\x1b[1m\x1b[37m',
   RED_BG: '\x1b[41m',
   ITALIC: '\x1b[3m',
@@ -98,10 +99,11 @@ class SlowTestReporter extends BaseReporter {
     // Show truncation info if not showing all tests
     if (!this._options.showAllSlowTests && this._slowTests.length > DEFAULTS.MAX_TESTS_SHOWN) {
       const remainingCount = this._slowTests.length - DEFAULTS.MAX_TESTS_SHOWN;
-      const mainMessage = ` ... and ${remainingCount} others`;
-      const hint = `Set SHOW_ALL_SLOW_TESTS=true to see all slow tests`;
-      this.log(this._colorText(mainMessage, COLORS.GREY));
-      this.log(`   💡 ${this._colorText(hint, `${COLORS.GREY}${COLORS.ITALIC}`)}`);
+      const othersLeftMessage = ` ... and ${remainingCount} others (${this._colorText(
+        'SHOW_ALL_SLOW_TESTS=true',
+        COLORS.BOLD_GREY
+      )} ${this._colorText('to see all slow tests)', COLORS.GREY)}`;
+      this.log(this._colorText(othersLeftMessage, COLORS.GREY));
     }
 
     // Add the timing guidance note at the end
