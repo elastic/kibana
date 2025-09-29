@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
+import type { ContentFrameworkSectionActionTourId } from './enums/action_tour_id';
 
 interface BaseAction {
   icon: IconType;
@@ -36,7 +37,7 @@ interface BaseAction {
     title: string;
     subtitle: string;
     content: React.ReactNode;
-    id: string;
+    id: ContentFrameworkSectionActionTourId;
   };
 }
 
@@ -74,14 +75,13 @@ export function ContentFrameworkSection({
   hasPadding = true,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
-  const [dismissedTours, setDismissedTours] = useLocalStorage<string[]>(
-    sectionActionsTourStorageKey,
-    []
-  );
+  const [dismissedTours, setDismissedTours] = useLocalStorage<
+    ContentFrameworkSectionActionTourId[]
+  >(sectionActionsTourStorageKey, []);
   const { euiTheme } = useEuiTheme();
 
-  const dismissTour = (actionId: string) => {
-    setDismissedTours(dismissedTours ? [...dismissedTours, actionId] : [actionId]);
+  const dismissTour = (tourId: ContentFrameworkSectionActionTourId) => {
+    setDismissedTours(dismissedTours ? [...dismissedTours, tourId] : [tourId]);
   };
 
   const renderActionButton = ({ icon, ariaLabel, dataTestSubj, label, onClick, href }: Action) => {
@@ -122,7 +122,7 @@ export function ContentFrameworkSection({
               {tour ? (
                 <EuiTourStep
                   content={tour?.content}
-                  isStepOpen={!dismissedTours?.includes(id)}
+                  isStepOpen={!dismissedTours?.includes(tour.id)}
                   maxWidth={350}
                   onFinish={() => {}}
                   step={1}
@@ -139,7 +139,7 @@ export function ContentFrameworkSection({
                         }
                       )}
                       onClick={() => {
-                        dismissTour(id);
+                        dismissTour(tour.id);
                       }}
                     >
                       {i18n.translate(
