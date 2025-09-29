@@ -26,6 +26,7 @@ const setup = ({
   return getExpirationStatus(
     {
       enabled: true,
+      backgroundSearchEnabled: true,
       notTouchedTimeout: moment.duration(0),
       maxUpdateRetries: 0,
       defaultExpiration: moment.duration(0),

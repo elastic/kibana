@@ -74,15 +74,10 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import type { ISessionsClient, ISessionService } from './session';
 import { SessionsClient, SessionService } from './session';
-import {
-  registerSearchSessionsMgmt,
-  updateSearchSessionMgmtSectionTitle,
-} from './session/sessions_mgmt';
+import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from './session/constants';
-
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -206,7 +201,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     if (config.search.sessions.enabled) {
       const sessionsConfig = config.search.sessions;
 
-      const searchSessionsApp = registerSearchSessionsMgmt(
+      registerSearchSessionsMgmt(
         core as CoreSetup<DataStartDependencies>,
         {
           management,
@@ -216,7 +211,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
       );
-      updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
     }
 
     return {
@@ -295,10 +289,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const config = this.initializerContext.config.get();
-    if (
-      config.search.sessions.enabled &&
-      !coreStart.featureFlags.getBooleanValue(BACKGROUND_SEARCH_FEATURE_FLAG_KEY, false)
-    ) {
+    if (config.search.sessions.enabled && !config.search.sessions.backgroundSearchEnabled) {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(
@@ -351,10 +342,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           });
         });
       },
-      isBackgroundSearchEnabled: coreStart.featureFlags.getBooleanValue(
-        BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-        false
-      ),
+      isBackgroundSearchEnabled: config.search.sessions.backgroundSearchEnabled,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
