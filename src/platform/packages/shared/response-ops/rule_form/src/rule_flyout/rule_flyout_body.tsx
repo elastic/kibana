@@ -82,12 +82,16 @@ export const RuleFlyoutBody = ({
       return true;
     }
 
-    return hasRuleErrors({
+    const result = hasRuleErrors({
       baseErrors,
       paramsErrors,
       actionsErrors,
       actionsParamsErrors,
     });
+
+    console.log('hasRuleErrors', result);
+
+    return result;
   }, [formData, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   const {

@@ -6,17 +6,8 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiRadioGroup,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -27,7 +18,6 @@ import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
   getTimeFieldOptions,
-  getTimeOptions,
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
@@ -42,22 +32,6 @@ import {
   getEsqlQueryHits,
   ALERT_ID_SUGGESTED_MAX,
 } from '../../../../common';
-
-const ALL_DOCUMENTS = 'all';
-const alertingOptions = [
-  {
-    id: ALL_DOCUMENTS,
-    label: i18n.translate('xpack.stackAlerts.esQuery.ui.allDocumentsLabel', {
-      defaultMessage: 'Create an alert if matches are found',
-    }),
-  },
-  {
-    id: 'row',
-    label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
-      defaultMessage: 'Create an alert for each row',
-    }),
-  },
-];
 
 const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>) => {
   if (duplicateAlertIds && duplicateAlertIds.size > 0) {
@@ -80,32 +54,18 @@ export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
+  const { query: esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
   >({
     ...ruleParams,
-    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-    // ESQL queries compare conditions within the ES query
-    // so only 'met' results are returned, therefore the threshold should always be 0
-    threshold: [0],
-    thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-    size: isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
-    esqlQuery: esqlQuery ?? { esql: '' },
-    aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-    groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
-    termSize: DEFAULT_VALUES.TERM_SIZE,
-    searchType: SearchType.esqlQuery,
-    // The sourceFields param is ignored
-    sourceFields: [],
+    query: { esql: '' },
   });
-  const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [query, setQuery] = useState<string>(esqlQuery ?? '');
+  const [, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -132,8 +92,8 @@ export const EsqlQueryExpression: React.FC<
 
   const setDefaultExpressionValues = () => {
     setRuleProperty('params', currentRuleParams);
-    if (esqlQuery?.esql) {
-      refreshTimeFields(esqlQuery);
+    if (esqlQuery) {
+      refreshTimeFields({ esql: esqlQuery });
     }
   };
 
@@ -158,7 +118,7 @@ export const EsqlQueryExpression: React.FC<
     const timeWindow = parseDuration(window);
     const now = Date.now();
     const table = await fetchFieldsFromESQL(
-      esqlQuery,
+      { esql: esqlQuery },
       expressions,
       {
         from: new Date(now - timeWindow).toISOString(),
@@ -172,7 +132,7 @@ export const EsqlQueryExpression: React.FC<
       const esqlTable = transformDatatableToEsqlTable(table);
       const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
-        esqlQuery.esql,
+        esqlQuery,
         isGroupAgg,
         true
       );
@@ -225,25 +185,22 @@ export const EsqlQueryExpression: React.FC<
 
       const { newTimeFieldOptions, timestampField } = await fetchTimeFieldsData(q);
       setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
-      if (!timeField && timestampField) {
-        setParam('timeField', timestampField);
-      }
       if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
         clearParam('timeField');
       }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, setParam, clearParam, dataViews, http]
+    [timeField, clearParam, dataViews, http]
   );
 
   return (
     <Fragment>
       <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <ESQLLangEditor
-          query={query}
+          query={{ esql: query }}
           onTextLangQueryChange={(q: AggregateQuery) => {
-            setQuery(q);
-            setParam('esqlQuery', q);
+            setQuery(q.esql);
+            setParam('query', q.esql);
             refreshTimeFields(q);
           }}
           onTextLangQuerySubmit={async () => {}}

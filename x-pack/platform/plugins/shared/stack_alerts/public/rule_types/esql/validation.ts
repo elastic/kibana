@@ -318,34 +318,37 @@ export const validateExpression = (
 ): ValidationResult => {
   const validationResult = { errors: {} };
 
-  const commonErrors = validateCommonParams(ruleParams, isServerless);
-  validationResult.errors = commonErrors;
+  // const commonErrors = validateCommonParams(ruleParams, isServerless);
+  // validationResult.errors = commonErrors;
 
-  /**
-   * Skip esQuery and index params check if it is search source rule,
-   * since it should contain searchConfiguration instead of esQuery and index.
-   *
-   * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
-   * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
-   */
-  if (isSearchSourceRule(ruleParams)) {
-    validationResult.errors = {
-      ...validationResult.errors,
-      ...validateSearchSourceParams(ruleParams),
-    };
-    return validationResult;
-  }
+  // /**
+  //  * Skip esQuery and index params check if it is search source rule,
+  //  * since it should contain searchConfiguration instead of esQuery and index.
+  //  *
+  //  * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
+  //  * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
+  //  */
+  // if (isSearchSourceRule(ruleParams)) {
+  //   validationResult.errors = {
+  //     ...validationResult.errors,
+  //     ...validateSearchSourceParams(ruleParams),
+  //   };
+  //   return validationResult;
+  // }
 
-  if (isEsqlQueryRule(ruleParams)) {
-    validationResult.errors = {
-      ...validationResult.errors,
-      ...validateEsqlQueryParams(ruleParams),
-    };
-    return validationResult;
-  }
+  // if (isEsqlQueryRule(ruleParams)) {
+  //   validationResult.errors = {
+  //     ...validationResult.errors,
+  //     ...validateEsqlQueryParams(ruleParams),
+  //   };
+  //   return validationResult;
+  // }
 
-  const esQueryErrors = validateEsQueryParams(ruleParams as EsQueryRuleParams<SearchType.esQuery>);
-  validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
+  // const esQueryErrors = validateEsQueryParams(ruleParams as EsQueryRuleParams<SearchType.esQuery>);
+  // validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
+
+  // console.log('validationResult', validationResult);
+
   return validationResult;
 };
 

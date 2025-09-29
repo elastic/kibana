@@ -41,6 +41,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     paramsErrors = {},
     actionsErrors = {},
     actionsParamsErrors = {},
+    selectedRuleType,
   } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
@@ -76,11 +77,11 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
       return onSave();
     }
     const canReadConnectors = !!application.capabilities.actions?.show;
-    if (actions.length === 0 && canReadConnectors) {
+    if (actions.length === 0 && canReadConnectors && selectedRuleType?.id !== 'esql') {
       return setShowCreateConfirmation(true);
     }
     onSave();
-  }, [actions, isEdit, application, onSave]);
+  }, [actions, isEdit, application, onSave, selectedRuleType]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);
@@ -130,7 +131,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showCreateConfirmation && (
+      {showCreateConfirmation && selectedRuleType?.id !== 'esql' && (
         <ConfirmCreateRule onConfirm={onCreateConfirmClick} onCancel={onCreateCancelClick} />
       )}
     </>
