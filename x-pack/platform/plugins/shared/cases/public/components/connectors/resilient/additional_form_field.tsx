@@ -18,12 +18,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ResilientFieldMetadata } from './types';
 
-// todo
-// - Allow dates to be set as strings but then be sent to the resilient API as numbers
-// - allow additionalFields to be an object
-
 export const AdditionalFormField = React.memo<{ field: ResilientFieldMetadata }>(({ field }) => {
-  const path = `fields.additionalFields.${field.name}`;
+  const path = `fields.${field.name}`;
   const dataTestSubj = `resilientAdditionalField-${field.name}`;
   switch (field.input_type) {
     case 'text':
