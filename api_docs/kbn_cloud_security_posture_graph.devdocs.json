@@ -711,10 +711,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.LabelNodeViewModel.eventsCount",
+            "id": "def-public.LabelNodeViewModel.uniqueEventsCount",
             "type": "number",
             "tags": [],
-            "label": "eventsCount",
+            "label": "uniqueEventsCount",
             "description": [],
             "signature": [
               "number | undefined"
@@ -725,10 +725,10 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.LabelNodeViewModel.alertsCount",
+            "id": "def-public.LabelNodeViewModel.uniqueAlertsCount",
             "type": "number",
             "tags": [],
-            "label": "alertsCount",
+            "label": "uniqueAlertsCount",
             "description": [],
             "signature": [
               "number | undefined"
