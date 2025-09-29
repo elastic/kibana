@@ -65,5 +65,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./_navigation'));
+    loadTestFile(require.resolve('./_recently_closed_tabs'));
   });
 }
