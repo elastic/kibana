@@ -35,6 +35,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import { DraftModeCallout } from '../draft_mode_callout/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -142,7 +143,8 @@ function ManagedFlyout({
     }
   }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
 
-  const DraftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
+  const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
+  const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
 
   return (
     <React.Fragment>
@@ -213,8 +215,10 @@ function ManagedFlyout({
           </Fragment>
           <Fragment>{exportIntegration.config.generateAssetComponent}</Fragment>
           <Fragment>
-            {publicAPIEnabled && isDirty && DraftModeCallout && (
-              <EuiFlexItem>{DraftModeCallout}</EuiFlexItem>
+            {publicAPIEnabled && isDirty && draftModeCallout && (
+              <EuiFlexItem>
+                <DraftModeCallout {...draftModeCalloutContent} />
+              </EuiFlexItem>
             )}
           </Fragment>
         </EuiFlexGroup>

@@ -29,6 +29,7 @@ import type { AnonymousAccessState } from '../../../../common';
 
 import type { IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
+import { DraftModeCallout } from '../../draft_mode_callout/draft_mode_callout';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -72,10 +73,11 @@ export const EmbedContent = ({
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   const {
-    draftModeCallOut: DraftModeCallout,
+    draftModeCallOut,
     computeAnonymousCapabilities,
     embedUrlParamExtensions: urlParamExtensions,
   } = objectConfig;
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -308,10 +310,10 @@ export const EmbedContent = ({
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout {...draftModeCalloutContent} isEmbed={true} />
           </>
         )}
         <EuiSpacer />
