@@ -17,12 +17,6 @@ export const searchSessionsConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 
   /**
-   * Enables the new background search UX
-   * Is disabled for testing purposes only
-   */
-  backgroundSearchEnabled: schema.boolean({ defaultValue: true }),
-
-  /**
    * notTouchedTimeout controls how long user can save a session after all searches completed.
    * The client continues to poll searches to keep the alive until this timeout hits
    */

@@ -34,8 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--data.search.sessions.enabled=true', // enable search sessions
-        '--data.search.sessions.backgroundSearchEnabled=false', // TODO remove this once new UI is compatible
         '--data.search.sessions.management.refreshInterval=10s', // enable automatic refresh for sessions management screen
       ],
     },

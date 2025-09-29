@@ -116,7 +116,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.asyncSearch.pollInterval (number?)',
         'data.search.sessions.defaultExpiration (duration?)',
         'data.search.sessions.enabled (boolean?)',
-        'data.search.sessions.backgroundSearchEnabled (boolean?)',
         'data.search.sessions.management.expiresSoonWarning (duration?)',
         'data.search.sessions.management.maxSessions (number?)',
         'data.search.sessions.management.refreshInterval (duration?)',

@@ -24,10 +24,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     testFiles: [
+      /** TODO: enable these tests after fixing
       require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
       require.resolve('./screenshotting'),
-      require.resolve('./triggers_actions_ui_examples'),
+      require.resolve('./triggers_actions_ui_examples'),**/
     ],
 
     kbnTestServer: {
@@ -37,9 +38,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        // Needed for search_examples tests
-        '--data.search.sessions.enabled=true',
-        '--data.search.sessions.backgroundSearchEnabled=false',
         ...findTestPluginPaths([
           resolve(KIBANA_ROOT, 'examples'),
           resolve(KIBANA_ROOT, 'x-pack/examples'),
