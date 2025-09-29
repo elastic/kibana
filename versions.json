@@ -4,33 +4,32 @@
     {
       "version": "9.2.0",
       "branch": "main",
-      "currentMajor": true,
-      "currentMinor": true
+      "branchType": "development"
     },
     {
       "version": "9.1.5",
       "branch": "9.1",
-      "currentMajor": true,
-      "previousMinor": true
+      "branchType": "release"
     },
     {
       "version": "9.0.8",
       "branch": "9.0",
-      "currentMajor": true
+      "branchType": "release"
     },
     {
       "version": "8.19.5",
       "branch": "8.19",
-      "previousMajor": true
+      "branchType": "release"
     },
     {
       "version": "8.18.8",
       "branch": "8.18",
-      "previousMajor": true
+      "branchType": "release"
     },
     {
       "version": "7.17.30",
-      "branch": "7.17"
+      "branch": "7.17",
+      "branchType": "unmaintained"
     }
   ]
 }
