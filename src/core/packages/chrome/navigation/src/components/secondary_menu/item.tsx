@@ -57,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   };
 
   const styles = css`
+    font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
     padding: 6px ${euiTheme.size.s};
     width: 100%;
