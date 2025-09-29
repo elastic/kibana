@@ -19,7 +19,7 @@ import {
 import type { ResilientFieldMetadata } from './types';
 
 export const AdditionalFormField = React.memo<{ field: ResilientFieldMetadata }>(({ field }) => {
-  const path = `fields.${field.name}`;
+  const path = field.name;
   const dataTestSubj = `resilientAdditionalField-${field.name}`;
   switch (field.input_type) {
     case 'text':
