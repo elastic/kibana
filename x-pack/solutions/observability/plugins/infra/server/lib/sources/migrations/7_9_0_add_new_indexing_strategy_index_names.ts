@@ -21,6 +21,7 @@ export const addNewIndexingStrategyIndexNames: SavedObjectMigrationFn<
 
   const newLogAliasSegment = 'logs-*';
   const newMetricAliasSegment = 'metrics-*';
+  const newSystemMetricAliasSegment = 'metrics-system*';
 
   return {
     ...sourceConfigurationDocument,
@@ -34,7 +35,7 @@ export const addNewIndexingStrategyIndexNames: SavedObjectMigrationFn<
       metricAlias:
         oldMetricAliasSegments.includes('metricbeat-*') &&
         !oldMetricAliasSegments.includes(newMetricAliasSegment)
-          ? [...oldMetricAliasSegments, newMetricAliasSegment].join(',')
+          ? [...oldMetricAliasSegments, newMetricAliasSegment, newSystemMetricAliasSegment].join(',')
           : sourceConfigurationDocument.attributes.metricAlias,
     },
   };
