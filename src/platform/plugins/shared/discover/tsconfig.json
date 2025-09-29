@@ -120,6 +120,7 @@
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/background-search"
   ],
   "exclude": ["target/**/*"]
 }

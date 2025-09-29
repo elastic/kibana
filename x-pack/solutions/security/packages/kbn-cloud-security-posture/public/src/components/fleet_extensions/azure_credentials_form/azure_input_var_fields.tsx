@@ -80,6 +80,7 @@ export const AzureInputVarFields = ({
             )}
             {field.type === 'text' && !field.isSecret && (
               <>
+                <EuiSpacer size="m" />
                 <EuiFormRow
                   key={field.id}
                   label={field.label}
