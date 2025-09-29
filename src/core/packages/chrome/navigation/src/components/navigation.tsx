@@ -202,7 +202,7 @@ export const Navigation = ({
                       { defaultMessage: 'More' }
                     )}
                   >
-                    <NestedSecondaryMenu.Section hasGap>
+                    <NestedSecondaryMenu.Section>
                       {overflowMenuItems.map((item) => {
                         const hasSubItems = getHasSubmenu(item);
                         const { sections, ...itemProps } = item;
@@ -232,11 +232,7 @@ export const Navigation = ({
                     <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={`submenu-${item.id}`}>
                       <NestedSecondaryMenu.Header title={item.label} />
                       {item.sections?.map((section) => (
-                        <NestedSecondaryMenu.Section
-                          key={section.id}
-                          label={section.label}
-                          hasGap={!!section.label}
-                        >
+                        <NestedSecondaryMenu.Section key={section.id} label={section.label}>
                           {section.items.map((subItem) => (
                             <NestedSecondaryMenu.Item
                               key={subItem.id}
