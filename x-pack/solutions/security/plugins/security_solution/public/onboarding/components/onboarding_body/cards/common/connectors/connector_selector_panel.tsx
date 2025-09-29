@@ -22,7 +22,10 @@ interface ConnectorSelectorPanelProps {
 
 export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
   ({ connectors, selectedConnectorId, onConnectorSelected }) => {
-    const { triggersActionsUi:{actionTypeRegistry}, settings } = useKibana().services;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+      settings,
+    } = useKibana().services;
     const { euiTheme } = useEuiTheme();
     const selectedConnector = useMemo(
       () => connectors.find((connector) => connector.id === selectedConnectorId),

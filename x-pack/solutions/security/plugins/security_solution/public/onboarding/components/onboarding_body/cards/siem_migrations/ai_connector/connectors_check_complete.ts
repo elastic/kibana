@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
-import {getAvailableAiConnectors} from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
-  
 
 export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
@@ -22,12 +21,12 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-
   const allAiConnectors = await loadAiConnectors(http);
 
   const aiConnectors = getAvailableAiConnectors({
-    allAiConnectors, settings,
-  })
+    allAiConnectors,
+    settings,
+  });
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {

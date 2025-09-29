@@ -13,7 +13,12 @@ import { ConnectorSelectableFooter } from './connector_selectable_footer';
 
 export type ConnectorSelectableProps = Pick<
   ConnectorSelectableComponentProps,
-  'value' | 'onValueChange' | 'customConnectors' | 'preConfiguredConnectors' | 'defaultConnectorId' | 'renderOption'
+  | 'value'
+  | 'onValueChange'
+  | 'customConnectors'
+  | 'preConfiguredConnectors'
+  | 'defaultConnectorId'
+  | 'renderOption'
 > &
   Pick<ConnectorSelectableFooterProps, 'onAddConnectorClick' | 'onManageConnectorsClick'>;
 
@@ -37,7 +42,7 @@ export const ConnectorSelectable: React.FC<ConnectorSelectableProps> = (props) =
       defaultConnectorId={props.defaultConnectorId}
       footer={footer}
       renderOption={props.renderOption}
-      data-test-subj='connectorSelectable'
+      data-test-subj="connectorSelectable"
     />
   );
 };
