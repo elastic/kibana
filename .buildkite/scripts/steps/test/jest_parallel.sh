@@ -22,20 +22,14 @@ JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
 if [[ "$1" == 'jest.config.js' ]]; then
   # unit tests
   TEST_TYPE="unit"
+  JEST_MAX_PARALLEL=3 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
 else
   TEST_TYPE="integration"
+  JEST_MAX_PARALLEL=1 # integration tests should not run in parallel by default.
 fi
 
 export TEST_TYPE
 
-# Adjust default MAX_PARALLEL after TEST_TYPE is known unless user overrode.
-if [[ -z "${JEST_MAX_PARALLEL:-}" ]]; then
-  if [[ "$TEST_TYPE" == "unit" ]]; then
-    JEST_MAX_PARALLEL=3 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
-  else
-    JEST_MAX_PARALLEL=1 # integration tests should not run in parallel by default.
-  fi
-fi
 
 # Added section for tracking and retrying failed configs
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
