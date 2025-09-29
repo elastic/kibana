@@ -23,7 +23,8 @@ import {
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import {
@@ -31,7 +32,6 @@ import {
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
-import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
@@ -174,7 +174,13 @@ function isInTriggersContext(path: any[]): boolean {
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at' | 'bracket-unfinished' | 'variable-complete' | 'variable-unfinished' | null;
+  matchType:
+    | 'at'
+    | 'bracket-unfinished'
+    | 'variable-complete'
+    | 'variable-unfinished'
+    | 'foreach-variable'
+    | null;
   match: RegExpMatchArray | null;
 }
 
@@ -221,6 +227,17 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'variable-complete',
       match: completeMatch,
+    };
+  }
+
+  const lastWordBeforeCursor = lineUpToCursor.split(' ').pop();
+  if (lineUpToCursor.includes('foreach:')) {
+    const fullKey = cleanKey(lastWordBeforeCursor ?? '');
+    return {
+      fullKey,
+      pathSegments: parsePath(fullKey),
+      matchType: 'foreach-variable',
+      match: null,
     };
   }
 
@@ -869,7 +886,7 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph = getWorkflowGraph(workflowData);
+        const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowData);
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -904,7 +921,11 @@ export function getCompletionItemProvider(
 
         // SPECIAL CASE: Variable expression completion
         // Handle completions inside {{ }} or after @ triggers
-        if (parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') {
+        if (
+          parseResult.matchType === 'variable-unfinished' ||
+          parseResult.matchType === 'at' ||
+          parseResult.matchType === 'foreach-variable'
+        ) {
           // We're inside a variable expression, provide context-based completions
           if (context instanceof z.ZodObject) {
             const contextKeys = Object.keys(context.shape);
@@ -916,7 +937,7 @@ export function getCompletionItemProvider(
 
             for (const key of filteredKeys) {
               const keySchema = context.shape[key];
-              const propertyTypeName = getZodTypeName(keySchema);
+              const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
 
               suggestions.push(
                 getSuggestion(
@@ -1121,7 +1142,9 @@ export function getCompletionItemProvider(
                 continue;
               }
 
-              const propertyTypeName = getZodTypeName(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
 
               // Create a YAML key-value snippet suggestion with cursor positioning
               let insertText = `${key}: `;
@@ -1248,7 +1271,9 @@ export function getCompletionItemProvider(
               };
             } else {
               // For key completion, provide a custom "type:" completion that triggers snippet completion
-              const propertyTypeName = getZodTypeName(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
               const typeKeySuggestion = getSuggestion(
                 key,
                 completionContext,
@@ -1268,7 +1293,9 @@ export function getCompletionItemProvider(
               suggestions.push(typeKeySuggestion);
             }
           } else {
-            const propertyTypeName = getZodTypeName(currentSchema);
+            const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+              singleLine: true,
+            });
             suggestions.push(
               getSuggestion(
                 key,

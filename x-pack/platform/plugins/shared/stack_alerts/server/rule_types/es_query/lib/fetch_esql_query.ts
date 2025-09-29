@@ -69,7 +69,7 @@ export async function fetchEsqlQuery({
   }
 
   const isGroupAgg = isPerRowAggregation(params.groupBy);
-  const { results, duplicateAlertIds } = getEsqlQueryHits(
+  const { results, duplicateAlertIds } = await getEsqlQueryHits(
     response,
     params.esqlQuery.esql,
     isGroupAgg
@@ -156,15 +156,14 @@ export function generateLink(
 
 function getPartialResultsWarning(response: EsqlTable) {
   const clusters = response?._clusters?.details ?? {};
-  const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
+  const shardFailures: EsqlEsqlShardFailure[] = [];
+  for (const cluster of Object.keys(clusters)) {
     const failures = clusters[cluster]?.failures ?? [];
 
     if (failures.length > 0) {
-      acc.push(...failures);
+      shardFailures.push(...failures);
     }
-
-    return acc;
-  }, []);
+  }
 
   return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
     defaultMessage:
