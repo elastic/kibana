@@ -102,7 +102,7 @@ const getFieldConfig = ({
   ...(type && FIELD_TYPES[type]
     ? {
         type: FIELD_TYPES[type],
-        defaultValue: Array.isArray(defaultValue) ? defaultValue : defaultValue,
+        defaultValue: defaultValue || [],
       }
     : {}),
 });
