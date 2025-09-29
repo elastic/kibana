@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const MORE_ACTIONS_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.threatIntelligence.more-actions.popover',
-  {
-    defaultMessage: 'More actions',
-  }
-);
+export const IOCRightPanelKey = 'ioc-details-right' as const;
