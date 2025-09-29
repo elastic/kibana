@@ -31,7 +31,7 @@ describe('AssistantProvider', () => {
     const openChatTrigger$ = new Subject<{ assistant: AIAssistantType }>();
 
     render(
-      <AssistantProvider openChatTrigger$={openChatTrigger$}>
+      <AssistantProvider openChatTrigger$={openChatTrigger$} completeOpenChat={() => {}}>
         <div data-test-subj="assistant-provider-test">{'Assistant Provider Test'}</div>
       </AssistantProvider>,
       {
