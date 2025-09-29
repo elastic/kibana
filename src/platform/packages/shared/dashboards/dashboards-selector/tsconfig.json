@@ -16,8 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/content-management-plugin",
-    "@kbn/content-management-utils",
-    "@kbn/core",
+    "@kbn/dashboard-plugin",
   ]
 }

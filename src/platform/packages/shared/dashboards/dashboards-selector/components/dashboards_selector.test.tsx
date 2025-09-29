@@ -10,8 +10,8 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DashboardsSelector } from './dashboards_selector';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 const MOCK_FIRST_DASHBOARD_ID = 'dashboard-1';
 const MOCK_SECOND_DASHBOARD_ID = 'dashboard-2';
@@ -36,15 +36,7 @@ const MOCK_SECOND_DASHBOARD = {
 const mockFetchDashboard = jest.fn();
 const mockFetchDashboards = jest
   .fn()
-  .mockResolvedValue([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
-
-// Mock the dashboard service
-jest.mock('../services/dashboard_service', () => ({
-  dashboardServiceProvider: jest.fn(() => ({
-    fetchDashboards: (options: { limit: number; text: string }) => mockFetchDashboards(options),
-    fetchDashboard: (id: string) => mockFetchDashboard(id),
-  })),
-}));
+  .mockResolvedValue({ hits: [MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD] });
 
 const mockOnChange = jest.fn();
 
@@ -58,12 +50,20 @@ describe('DashboardsSelector', () => {
     jest.clearAllMocks();
   });
 
-  const contentManagement = contentManagementMock.createStartContract();
+  const dashboardStart = {
+    findDashboardsService: async () => {
+      return {
+        findById: (id: string) => mockFetchDashboard(id),
+        search: ({ size, search }: { size: number; search: string }) =>
+          mockFetchDashboards({ size, search }),
+      };
+    },
+  } as DashboardStart;
 
   it('renders the component', () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -78,7 +78,7 @@ describe('DashboardsSelector', () => {
   it('displays selected dashboard titles from dashboardsFormData', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[{ id: MOCK_FIRST_DASHBOARD_ID }, { id: MOCK_SECOND_DASHBOARD_ID }]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -99,7 +99,7 @@ describe('DashboardsSelector', () => {
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -115,7 +115,7 @@ describe('DashboardsSelector', () => {
       expect(searchInput).toHaveValue(MOCK_FIRST_DASHBOARD_TITLE);
 
       expect(mockFetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 100, text: `${MOCK_FIRST_DASHBOARD_TITLE}*` })
+        expect.objectContaining({ size: 100, search: `${MOCK_FIRST_DASHBOARD_TITLE}` })
       );
 
       expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe('DashboardsSelector', () => {
   it('fetches dashboard list when combobox is focused', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -135,14 +135,14 @@ describe('DashboardsSelector', () => {
     fireEvent.focus(searchInput);
 
     await waitFor(() => {
-      expect(mockFetchDashboards).toHaveBeenCalledWith(expect.objectContaining({ limit: 100 }));
+      expect(mockFetchDashboards).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
     });
   });
 
   it('does not fetch dashboard list when combobox is not focused', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -155,7 +155,7 @@ describe('DashboardsSelector', () => {
   it('dispatches selected dashboards on change', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        dashboardStart={dashboardStart}
         dashboardsFormData={[{ id: MOCK_FIRST_DASHBOARD_ID }]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -169,7 +169,7 @@ describe('DashboardsSelector', () => {
     // Wait for the dropdown to open and options to load
     await waitFor(() => {
       expect(mockFetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 100, text: '*' })
+        expect.objectContaining({ size: 100, search: '' })
       );
     });
 

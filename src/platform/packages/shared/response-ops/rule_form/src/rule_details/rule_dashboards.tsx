@@ -10,8 +10,8 @@
 import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import {
@@ -22,10 +22,10 @@ import {
 import { LabelWithTooltip } from './label_with_tooltip';
 
 export interface Props {
-  contentManagement: ContentManagementPublicStart;
+  dashboardStart: DashboardStart;
 }
 
-export const RuleDashboards = ({ contentManagement }: Props) => {
+export const RuleDashboards = ({ dashboardStart }: Props) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = useMemo(
@@ -64,7 +64,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
             labelAppend={OptionalFieldLabel}
           >
             <DashboardsSelector
-              contentManagement={contentManagement}
+              dashboardStart={dashboardStart}
               dashboardsFormData={dashboardsFormData}
               onChange={onChange}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}

@@ -48,6 +48,7 @@ import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -152,6 +153,7 @@ export interface DiscoverStartPlugins {
   aiops?: AiopsPluginStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
