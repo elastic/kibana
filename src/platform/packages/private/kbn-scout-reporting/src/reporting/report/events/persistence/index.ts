@@ -108,23 +108,28 @@ export class ScoutReportDataStream {
     await this.es.index({ index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME, document: event });
   }
 
-  async addEventsFromFile(eventLogPath: string) {
-    // Make the given event log path absolute
-    eventLogPath = path.resolve(eventLogPath);
+  async addEventsFromFile(...eventLogPaths: string[]) {
+    // Normalize the given event log paths to absolute paths
+    const paths: string[] = eventLogPaths.map((p) => path.resolve(p));
 
-    const events = async function* () {
-      const lineReader = readline.createInterface({
-        input: fs.createReadStream(eventLogPath),
-        crlfDelay: Infinity,
-      });
+    const events = async function* (): AsyncGenerator<string> {
+      for (const filePath of paths) {
+        const lineReader = readline.createInterface({
+          input: fs.createReadStream(filePath),
+          crlfDelay: Infinity,
+        });
 
-      for await (const line of lineReader) {
-        yield line;
+        for await (const line of lineReader) {
+          yield line;
+        }
       }
     };
 
     this.log.info(
-      `Uploading events from file ${eventLogPath} to data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}'`
+      [
+        `Uploading events from ${paths.length} file(s) to data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}':`,
+        ...paths.map((filePath) => `- ${filePath}`),
+      ].join('\n')
     );
 
     const stats = await this.es.helpers.bulk({
@@ -132,6 +137,8 @@ export class ScoutReportDataStream {
       onDocument: () => {
         return { create: { _index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME } };
       },
+      refresh: false,
+      refreshOnCompletion: false,
     });
 
     this.log.info(`Uploaded ${stats.total} events in ${stats.time / 1000}s.`);
