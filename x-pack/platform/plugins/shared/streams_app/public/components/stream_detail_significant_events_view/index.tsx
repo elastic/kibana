@@ -168,10 +168,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 displayStyle="inPage"
                 disableQueryLanguageSwitcher
                 onQuerySubmit={(queryN) => {
-                  setQuery(String(queryN.query) || '');
+                  setQuery(String(queryN.query.query) || '');
                 }}
                 onQueryChange={(queryN) => {
-                  setQuery(String(queryN.query) || '');
+                  setQuery(String(queryN.query.query) || '');
                 }}
                 query={{
                   query,
