@@ -18,18 +18,17 @@ import {
   EuiIcon,
   EuiButton,
   EuiCallOut,
-  EuiComboBox,
   EuiFieldText,
   EuiToken,
   EuiDescriptionList,
   EuiFormRow,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { css } from '@emotion/react';
 import type { WorkflowsPluginStartDependencies } from '../../../types';
 
 interface Document {
@@ -231,14 +230,6 @@ export const WorkflowExecuteIndexForm = ({
     }
   };
 
-  // Convert data views to combobox options
-  const dataViewOptions = useMemo(() => {
-    return dataViews.map((dataView) => ({
-      label: dataView.name || dataView.title,
-      value: dataView.id,
-    }));
-  }, [dataViews]);
-
   // Table columns configuration
   const columns = useMemo(
     () => [
@@ -293,30 +284,18 @@ export const WorkflowExecuteIndexForm = ({
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="l">
         {/* Data View Selector */}
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            width: 200px;
-          `}
-        >
+        <EuiFlexItem grow={false}>
           <EuiFormRow label="Data View">
-            <EuiComboBox
-              placeholder="Select data view"
-              aria-label="Data view"
-              options={dataViewOptions}
-              selectedOptions={
-                selectedDataView
-                  ? dataViewOptions.filter((opt) => opt.value === selectedDataView.id)
-                  : []
-              }
-              onChange={(selectedOptions) => {
-                if (selectedOptions.length > 0) {
-                  handleDataViewChange(selectedOptions[0].value as string);
-                }
+            <DataViewPicker
+              trigger={{
+                'data-test-subj': 'workflow-data-view-selector',
+                label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
+                fullWidth: true,
+                size: 'm',
               }}
-              singleSelection={{ asPlainText: true }}
-              isClearable={false}
-              data-test-subj="workflow-data-view-selector"
+              savedDataViews={dataViews}
+              currentDataViewId={selectedDataView?.id}
+              onChangeDataView={handleDataViewChange}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -341,7 +320,7 @@ export const WorkflowExecuteIndexForm = ({
       {/* Error Display */}
       {errors && (
         <EuiFlexItem>
-          <EuiCallOut title="Error" color="danger" iconType="error" size="s">
+          <EuiCallOut announceOnMount title="Error" color="danger" iconType="error" size="s">
             <p>{errors}</p>
           </EuiCallOut>
         </EuiFlexItem>
@@ -395,7 +374,13 @@ export const WorkflowExecuteIndexForm = ({
       {/* Selection Summary */}
       {selectedDocuments.length > 0 && (
         <EuiFlexItem>
-          <EuiCallOut title="Documents Selected" color="success" iconType="check" size="s">
+          <EuiCallOut
+            announceOnMount
+            title="Documents Selected"
+            color="success"
+            iconType="check"
+            size="s"
+          >
             <EuiText size="s">
               {selectedDocuments.length} document(s) selected for workflow execution
             </EuiText>
