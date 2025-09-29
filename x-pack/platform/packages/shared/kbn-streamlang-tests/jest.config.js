@@ -6,12 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/plugins/observability_streams_wrapper/public'],
-  setupFiles: [],
-  collectCoverage: false,
-  collectCoverageFrom: [],
-
-  coverageReporters: ['html'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-streamlang-tests'],
 };

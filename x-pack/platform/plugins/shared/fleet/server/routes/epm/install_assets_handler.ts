@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { FleetError, FleetNotFoundError } from '../../errors';
+import { FleetError, FleetNotFoundError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -22,8 +22,11 @@ import type {
   DeleteKibanaAssetsRequestSchema,
   FleetRequestHandler,
   InstallKibanaAssetsRequestSchema,
+  InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
+import { stepCreateAlertingRules } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -124,6 +127,60 @@ export const deletePackageKibanaAssetsHandler: FleetRequestHandler<
     pkgName,
     spaceId,
     installedPkg: installation,
+  });
+
+  return response.ok({ body: { success: true } });
+};
+
+export const installRuleAssetsHandler: FleetRequestHandler<
+  TypeOf<typeof InstallRuleAssetsRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallRuleAssetsRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const logger = appContextService.getLogger();
+  const spaceId = fleetContext.spaceId;
+  const { pkgName, pkgVersion } = request.params;
+
+  const installedPkgWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName,
+    logger,
+  });
+
+  const installation = await getInstallationObject({
+    pkgName,
+    savedObjectsClient,
+  });
+
+  if (
+    !installation ||
+    !installedPkgWithAssets ||
+    installedPkgWithAssets?.installation.version !== pkgVersion
+  ) {
+    throw new FleetNotFoundError('Requested version is not installed');
+  }
+
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
+  if (!authorizationHeader) {
+    throw new FleetUnauthorizedError('Authorization header is missing or invalid');
+  }
+
+  const { packageInfo } = installedPkgWithAssets;
+
+  await stepCreateAlertingRules({
+    logger,
+    savedObjectsClient,
+    packageInstallContext: {
+      packageInfo,
+      paths: installedPkgWithAssets.paths,
+      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+    },
+    spaceId,
+    authorizationHeader,
   });
 
   return response.ok({ body: { success: true } });
