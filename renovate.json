@@ -827,7 +827,7 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/kibana-cloud-security-posture dependencies",
+      "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
         "@mswjs/http-middleware",
         "@types/byte-size",
@@ -836,7 +836,7 @@
         "xterm"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -3738,7 +3738,7 @@
       ],
       "reviewers": [
         "team:response-ops",
-        "team:kibana-cloud-security-posture",
+        "team:contextual-security-apps",
         "team:security-asset-management",
         "team:fleet",
         "team:awp-platform",
@@ -4569,7 +4569,7 @@
         "@xyflow/react"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -4588,7 +4588,7 @@
         "@dagrejs/dagre"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"

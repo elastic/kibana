@@ -67,7 +67,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-program-team',
   ],
   security: [
-    'elastic/kibana-cloud-security-posture',
+    'elastic/contextual-security-apps',
     'elastic/security-asset-management',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
