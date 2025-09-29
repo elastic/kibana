@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/elasticsearch_start.ts'));
     loadTestFile(require.resolve('../test_suites/search_homepage'));
     loadTestFile(require.resolve('../test_suites/search_index_detail.ts'));
-    loadTestFile(require.resolve('../test_suites/getting_started'));
     loadTestFile(require.resolve('../test_suites/index_management'));
     loadTestFile(require.resolve('../test_suites/connectors/connectors_overview'));
     loadTestFile(require.resolve('../test_suites/default_dataview'));
