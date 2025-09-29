@@ -13,5 +13,5 @@ if [[ "${RUN_FULL_CHECK:-}" == "true" ]]; then
 else
   echo "Running type-check with caches..."
   export NODE_OPTIONS="--max-old-space-size=8192"
-  yarn moon run :typecheck -c 2 --affected --remote -u
+  yarn moon run :typecheck -c 3 --affected --remote -u
 fi
