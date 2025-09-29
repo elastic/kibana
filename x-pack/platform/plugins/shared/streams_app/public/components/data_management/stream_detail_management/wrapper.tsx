@@ -109,7 +109,17 @@ export function Wrapper({
           {
             href: router.link('/'),
             text: (
-              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                size="s"
+                flush="left"
+                aria-label={i18n.translate(
+                  'xpack.streams.entityDetailViewWithoutParams.breadcrumb',
+                  {
+                    defaultMessage: 'Back to Streams',
+                  }
+                )}
+              >
                 {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
                   defaultMessage: 'Streams',
                 })}
@@ -122,11 +132,8 @@ export function Wrapper({
         `}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
-              defaultMessage: 'Manage stream {streamId}',
-              values: { streamId },
-            })}
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            {streamId}
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   {Streams.ingest.all.GetResponse.is(definition) && (

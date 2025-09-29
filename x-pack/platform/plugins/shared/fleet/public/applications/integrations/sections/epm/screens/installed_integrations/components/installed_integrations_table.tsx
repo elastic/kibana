@@ -56,7 +56,11 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
   const {
-    actions: { bulkUninstallIntegrationsWithConfirmModal, bulkUpgradeIntegrationsWithConfirmModal },
+    actions: {
+      bulkUninstallIntegrationsWithConfirmModal,
+      bulkUpgradeIntegrationsWithConfirmModal,
+      bulkRollbackIntegrationsWithConfirmModal,
+    },
   } = useInstalledIntegrationsActions();
 
   const { setPagination } = pagination;
@@ -75,6 +79,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     }
     const count = item.packagePoliciesInfo.count;
     return count > 0;
+  };
+  const hasPreviousVersion = (item: InstalledPackageUIPackageListItem) => {
+    return !!item.installationInfo?.previous_version;
   };
 
   return (
@@ -201,7 +208,6 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               );
             },
           },
-          // TODO Actions are not yet implemented to be done in https://github.com/elastic/kibana/issues/209867
           {
             actions: [
               wrapActionWithDisabledTooltip(
@@ -305,6 +311,38 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   {
                     defaultMessage:
                       "You don't have permissions to remove integrations. Contact your administrator.",
+                  }
+                )
+              ),
+              wrapActionWithDisabledTooltip(
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                    {
+                      defaultMessage: 'Rollback integration',
+                    }
+                  ),
+                  icon: 'returnKey',
+                  type: 'icon',
+
+                  onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
+                  enabled: (item) => hasPreviousVersion(item),
+                  description: (item) =>
+                    i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                      {
+                        defaultMessage: !hasPreviousVersion(item)
+                          ? "You can't rollback this integration because it does not have a previous version saved."
+                          : 'Rollback integration',
+                      }
+                    ),
+                },
+                !authz.integrations.installPackages,
+                i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
+                  {
+                    defaultMessage:
+                      "You don't have permissions to rollback integrations. Contact your administrator.",
                   }
                 )
               ),
