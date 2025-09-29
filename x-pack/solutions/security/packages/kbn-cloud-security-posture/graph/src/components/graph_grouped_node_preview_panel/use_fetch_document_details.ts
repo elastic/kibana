@@ -8,12 +8,14 @@
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import { number } from 'io-ts';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { showDetailsErrorToast } from '../utils';
-import type { EntityOrEventItem } from './components/grouped_item/types';
+import type { EventItem, AlertItem } from './components/grouped_item/types';
 
 // Minimal shape of an ES hit we care about. (Avoid pulling large shared types until needed.)
 export interface DocumentHit<_Source = unknown> {
@@ -30,8 +32,11 @@ export interface UseFetchDocumentDetailsParams {
   dataViewId: DataView['id'];
   /** Document ids to retrieve */
   ids: Array<string | undefined> | undefined;
+  /** Current page index (0-based) */
+  pageIndex: number;
   /** Optional flags */
-  options?: {
+  options: {
+    pageSize: number;
     /** Enable / disable the underlying query (defaults true) */
     enabled?: boolean;
     /** Refetch on window focus (defaults true) */
@@ -42,7 +47,10 @@ export interface UseFetchDocumentDetailsParams {
 }
 
 export interface UseFetchDocumentDetailsResult {
-  data: EntityOrEventItem[];
+  data: {
+    page: (EventItem | AlertItem)[];
+    total: number;
+  };
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
@@ -52,11 +60,17 @@ export interface UseFetchDocumentDetailsResult {
 }
 
 /** Build a search request for the provided ids */
-export const buildDocumentsRequest = (dataViewId: DataView['id'], ids: string[]) => ({
+export const buildDocumentsRequest = (
+  dataViewId: DataView['id'],
+  ids: string[],
+  pageIndex: number,
+  pageSize: number
+) => ({
   index: dataViewId,
-  size: ids.length, // we expect at most this many docs back
+  size: pageSize,
+  from: pageIndex * pageSize,
   ignore_unavailable: true,
-  track_total_hits: false,
+  track_total_hits: true,
   query: {
     bool: {
       filter: [
@@ -70,22 +84,47 @@ export const buildDocumentsRequest = (dataViewId: DataView['id'], ids: string[])
   },
 });
 
-const parseItemsFromHits = (hits: DocumentHit[], itemTypes: string[]): EntityOrEventItem[] => {
-  return hits.map((hit) => {
-    // TODO Fix typing issue and replace `any`
-    const hitSource = hit._source as Record<string, any>;
-    return {
-      itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
-      id: hitSource.event.id,
-      timestamp: hitSource['@timestamp'],
-      action: hitSource.event.action,
-      actor: { id: hitSource.actor.entity.id },
-      target: { id: hitSource.target.entity.id },
-      ip: hitSource.source.ip,
-      countryCode: hitSource.source.geo.country_iso_code,
-    };
-  });
+const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
+  // TODO Fix typing issue and replace `any`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hitSource = hit._source as Record<string, any>;
+  return {
+    itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
+    id: hitSource.event.id,
+    timestamp: hitSource['@timestamp'],
+    action: hitSource.event.action,
+    actor: { id: hitSource.actor.entity.id },
+    target: { id: hitSource.target.entity.id },
+    ip: hitSource.source.ip,
+    countryCode: hitSource.source.geo.country_iso_code,
+  };
 };
+
+// const parseItemsFromHits = (
+//   hits: DocumentHit[],
+//   itemTypes: string[]
+// ): (EventItem | AlertItem)[] => {
+//   return hits.map((hit) => {
+//     // TODO Fix typing issue and replace `any`
+//     const hitSource = hit._source as Record<string, any>;
+//     return {
+//       itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
+//       id: hitSource.event.id,
+//       timestamp: hitSource['@timestamp'],
+//       action: hitSource.event.action,
+//       actor: { id: hitSource.actor.entity.id },
+//       target: { id: hitSource.target.entity.id },
+//       ip: hitSource.source.ip,
+//       countryCode: hitSource.source.geo.country_iso_code,
+//     };
+//   });
+// };
+
+// interface SearchRawResponse {
+//   rawResponse?: {
+//     hits?: { hits?: Array<DocumentHit<_Source>> };
+//   };
+// }
 
 /**
  * Hook to fetch full document details for a list of document ids using a single
@@ -95,10 +134,12 @@ const parseItemsFromHits = (hits: DocumentHit[], itemTypes: string[]): EntityOrE
 export const useFetchDocumentDetails = <_Source = unknown>({
   dataViewId,
   ids,
+  pageIndex,
   options,
 }: UseFetchDocumentDetailsParams): UseFetchDocumentDetailsResult => {
+  const missingDataView = !dataViewId;
   const {
-    data,
+    data: dataService,
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
 
@@ -109,64 +150,59 @@ export const useFetchDocumentDetails = <_Source = unknown>({
   );
 
   const queryKey = useMemo(
-    () => ['useFetchDocumentDetails', dataViewId, normalizedIds.join(',')],
-    [dataViewId, normalizedIds]
+    () => [
+      'useFetchDocumentDetails',
+      dataViewId,
+      normalizedIds.join(','),
+      pageIndex,
+      options.pageSize,
+    ],
+    [dataViewId, normalizedIds, pageIndex, options.pageSize]
   );
 
   const queryClient = useQueryClient();
 
-  interface SearchRawResponse {
-    rawResponse?: {
-      hits?: { hits?: Array<DocumentHit<_Source>> };
-    };
-  }
-
-  const {
-    isLoading,
-    isFetching,
-    isError,
-    error,
-    data: hits,
-  } = useQuery<DocumentHit<_Source>[]>(
+  const { isLoading, isFetching, isError, error, data } = useQuery(
     queryKey,
     async () => {
-      if (!dataViewId) {
-        return Promise.reject(new Error('Index is required to fetch document details'));
+      if (missingDataView || normalizedIds.length === 0) {
+        return { page: [], total: 0 };
       }
-      if (!normalizedIds.length) {
-        return [];
-      }
-      try {
-        const search$ = data.search.search({
-          params: buildDocumentsRequest(dataViewId, normalizedIds),
-        });
-        const response = (await lastValueFrom(search$)) as unknown as SearchRawResponse; // Cast: we only access rawResponse.hits.hits
-        const esHits: DocumentHit<_Source>[] = response?.rawResponse?.hits?.hits ?? [];
-        return esHits;
-      } catch (err) {
-        const e = err as unknown;
-        // Attempt to extract message from possible transport error shape
-        const message =
-          (typeof e === 'object' &&
-            e !== null &&
-            'body' in e &&
-            typeof (e as { body?: { message?: string } }).body?.message === 'string' &&
-            (e as { body?: { message?: string } }).body?.message) ||
-          (e as Error)?.message ||
-          'Unknown error';
-        throw new Error(message);
-      }
+      const search$ = dataService.search.search({
+        params: buildDocumentsRequest(dataViewId, normalizedIds, pageIndex, options.pageSize),
+      });
+      const response = await lastValueFrom(search$);
+      const { hits } = response?.rawResponse;
+      return {
+        page: hits.hits.map((hit) => buildItemFromHit(hit as EsHitRecord)),
+        total: number.is(hits.total)
+          ? hits.total
+          : hits.total && number.is(hits.total.value)
+          ? hits.total.value
+          : 0,
+      };
     },
     {
-      enabled: (options?.enabled ?? true) && !!dataViewId && normalizedIds.length > 0,
-      refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
-      keepPreviousData: options?.keepPreviousData ?? false,
-      onError: (e) => showDetailsErrorToast(toasts, e),
+      enabled: !missingDataView && (options.enabled ?? true) && normalizedIds.length > 0,
+      refetchOnWindowFocus: options.refetchOnWindowFocus ?? true,
+      keepPreviousData: options.keepPreviousData ?? false,
+      onError: (e: unknown) => showDetailsErrorToast(toasts, e),
     }
   );
 
+  if (missingDataView) {
+    return {
+      data: { page: [], total: 0 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      refresh: () => {},
+    };
+  }
+
   return {
-    data: hits ? parseItemsFromHits(hits, []) : [],
+    data: data ?? { page: [], total: 0 },
     isLoading,
     isFetching,
     isError,

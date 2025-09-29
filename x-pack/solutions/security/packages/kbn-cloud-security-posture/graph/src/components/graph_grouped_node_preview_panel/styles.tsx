@@ -16,9 +16,10 @@ export const PanelBody = (props: CommonPropsWithChildren) => {
   return (
     <div
       css={css`
-        overflow-y: auto;
         display: flex;
         flex-direction: column;
+        height: 100%;
+        min-height: 0;
         gap: ${euiTheme.size.s};
         padding: ${euiTheme.size.s} ${euiTheme.size.base};
       `}
@@ -49,6 +50,10 @@ export const List = (props: CommonPropsWithChildren) => {
       css={css`
         display: flex;
         flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        width: 100%;
         gap: ${euiTheme.size.s};
       `}
       {...props}

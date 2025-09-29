@@ -19,7 +19,8 @@ import {
   getSingleDocumentData,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
-import type { NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -73,6 +74,8 @@ export const GraphVisualization: React.FC = memo(() => {
     dataFormattedForFieldBrowser,
   });
 
+  console.log({ eventIds });
+
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
@@ -100,10 +103,7 @@ export const GraphVisualization: React.FC = memo(() => {
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
           },
         });
-      } else if (
-        (docMode === 'grouped-entities' || docMode === 'grouped-events') &&
-        node.documentsData
-      ) {
+      } else if (docMode === 'grouped-entities' && node.documentsData) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -111,21 +111,29 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
+            docMode,
+            entityItems: (node.documentsData as NodeDocumentDataModel[]).map((doc) => ({
+              itemType: DOCUMENT_TYPE_ENTITY,
+              id: doc.id,
+              type: doc.entity?.type,
+              subType: doc.entity?.sub_type,
+              icon: node.icon,
+            })),
+          },
+        });
+      } else if (docMode === 'grouped-events' && node.documentsData) {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            docMode,
             dataViewId: dataViewIndexPattern,
-            documentIds: node.documentsData
-              ? (node.documentsData as NodeDocumentDataModel[]).map((doc) =>
-                  docMode === 'grouped-entities' ? doc.entity?.name : doc.event?.id
-                )
-              : [],
-
-            // documentIds: [
-            //   'b9234a06-f1df-4da8-bd44-2b77c05afc32',
-            //   'fd61302f-0f1a-4f96-8cf3-1545b98b339f',
-            //   '6b02aa78-decd-431b-88c3-d96cd17a8e28',
-            // ],
-
-            //  Map documentsData to expeced input
-            // items: node.documentsData.map(doc => ({ ...doc, label: doc})),
+            documentIds: (node.documentsData as NodeDocumentDataModel[]).map(
+              (doc) => doc.event?.id
+            ),
           },
         });
       } else {

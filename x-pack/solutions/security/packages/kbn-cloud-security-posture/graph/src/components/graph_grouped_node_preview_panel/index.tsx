@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
+import React, { memo, useCallback, useState, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,6 +16,7 @@ import { ListHeader } from './components/list_header';
 import { PanelBody, List } from './styles';
 import { i18nNamespaceKey } from './constants';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
+import { PaginationControls } from './components/pagination/pagination';
 
 const loadingItems = i18n.translate(`${i18nNamespaceKey}.loading_items`, {
   defaultMessage: 'Loading group items...',
@@ -62,28 +63,52 @@ const translateEntityType = (type?: string) => {
 };
 
 export interface GraphGroupedNodePreviewPanelProps {
-  // id: string;
-  // indexName: string;
-  // scopeId: string;
-  // isPreviewMode?: boolean;
-  // jumpToEntityId?: string;
-  // jumpToCursor?: string;
-  // id: string;
-  // scopeId: string;
-  // isPreviewMode?: boolean;
   showLoadingState?: boolean;
+  docMode: 'grouped-entities' | 'grouped-events';
+  // events/alerts IDs to fetch details from ES
   dataViewId: DataView['id'];
   documentIds: string[];
+  // entities data reused from graph
+  entityItems: EntityItem[];
 }
 
 /**
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ showLoadingState, dataViewId, documentIds }) => {
-    const { data: items, isLoading } = useFetchDocumentDetails({ dataViewId, ids: documentIds });
+  ({ showLoadingState, docMode, dataViewId, documentIds, entityItems }) => {
+    // Pagination
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+    const onChangeItemsPerPage = useCallback(
+      (pageSize: number) =>
+        setPagination({
+          pageSize,
+          pageIndex: 0,
+        }),
+      [setPagination]
+    );
+    const onChangePage = useCallback(
+      (pageIndex: number) => setPagination((pageState) => ({ ...pageState, pageIndex })),
+      [setPagination]
+    );
 
-    if (showLoadingState || isLoading) {
+    const { data, isLoading, isFetching } = useFetchDocumentDetails({
+      dataViewId,
+      ids: documentIds,
+      pageIndex: pagination.pageIndex,
+      options: { pageSize: pagination.pageSize, enabled: docMode === 'grouped-events' },
+    });
+
+    const items =
+      docMode === 'grouped-entities'
+        ? entityItems.slice(
+            pagination.pageIndex * pagination.pageSize,
+            (pagination.pageIndex + 1) * pagination.pageSize
+          )
+        : data?.page || [];
+    const totalHits = docMode === 'grouped-entities' ? entityItems.length : data?.total || 0;
+
+    if (showLoadingState || isLoading || isFetching) {
       return (
         <PanelBody>
           <Title icon="index" text={loadingItems} />
@@ -97,10 +122,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
       );
     }
 
-    console.log({ dataViewId, documentIds });
-    console.log({ items });
-
-    if (documentIds.length === 0 || items.length === 0)
+    if (items.length === 0) {
       return (
         <PanelBody>
           <EuiEmptyPrompt
@@ -121,8 +143,9 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
           />
         </PanelBody>
       );
+    }
 
-    const areAllEntities = items.every((item) => item.itemType === 'entity');
+    const areAllEntities = docMode === 'grouped-entities';
     const artifactType = areAllEntities
       ? translateEntityType((items[0] as EntityItem).type)
       : events;
@@ -132,7 +155,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         <Title
           icon={areAllEntities ? (items[0] as EntityItem).icon : 'index'}
           text={artifactType}
-          count={items.length}
+          count={totalHits}
         />
         <ListHeader artifactType={artifactType} />
         <List>
@@ -142,6 +165,13 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
             </li>
           ))}
         </List>
+        <PaginationControls
+          pageIndex={pagination.pageIndex}
+          pageSize={pagination.pageSize}
+          pageCount={Math.ceil(totalHits / pagination.pageSize)}
+          onChangePage={onChangePage}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+        />
       </PanelBody>
     );
   }
