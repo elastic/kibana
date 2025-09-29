@@ -390,5 +390,43 @@ describe('metric chart transformations', () => {
       const finalAPIState = validateAndApiToApiTransforms(esqlMetricConfig);
       expect(mergeWithDefaults(esqlMetricConfig)).toEqual(finalAPIState);
     });
+
+    it('should handle apply color to property', () => {
+      const applyToColorMetricChart: InputTypeMetricChart = {
+        type: 'metric',
+        title: 'Comprehensive Test Metric',
+        description: 'A comprehensive metric chart with all features',
+        dataset: {
+          type: 'dataView',
+          id: 'my-custom-data-view-id',
+        },
+        metric: {
+          operation: 'average',
+          // @ts-expect-error - Need to figure out how get the right input type
+          field: 'response_time',
+          label: 'Avg Response Time',
+          sub_label: 'milliseconds',
+          alignments: {
+            labels: 'center',
+            value: 'right',
+          },
+          fit: true,
+          icon: {
+            name: 'clock',
+            align: 'right',
+          },
+          color: {
+            type: 'static',
+            color: '#00FF00',
+          },
+          background_chart: {
+            type: 'trend',
+          },
+          apply_color_to: 'value',
+        },
+      };
+      const finalAPIState = validateAndApiToApiTransforms(applyToColorMetricChart);
+      expect(mergeWithDefaults(applyToColorMetricChart)).toEqual(finalAPIState);
+    });
   });
 });
