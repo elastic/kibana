@@ -7,26 +7,35 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { promises as Fs } from 'fs';
 import simpleGit from 'simple-git';
-import { LOGHUB_DIR, LOGHUB_REPO } from './constants';
 
-export async function ensureLoghubRepo({ log }: { log: ToolingLog }) {
-  const dirExists = await Fs.stat(LOGHUB_DIR)
+export async function ensureRepo({
+  log,
+  dir,
+  repo,
+}: {
+  log: ToolingLog;
+  dir: string;
+  repo: string;
+}) {
+  const dirExists = await Fs.stat(dir)
     .then((stat) => stat.isDirectory())
     .catch(() => false);
 
   if (!dirExists) {
-    log.info(`Directory "${LOGHUB_DIR}" does not exist. Cloning repository...`);
-    await simpleGit().clone(LOGHUB_REPO, LOGHUB_DIR, ['--depth', '1']);
+    log.info(`Directory "${dir}" does not exist. Cloning repository...`);
+    await simpleGit().clone(repo, dir, ['--depth', '1']);
   }
 
-  const repoGit = simpleGit(LOGHUB_DIR);
+  const repoGit = simpleGit(dir);
 
-  log.debug(`Fetching from logai/loghub`);
+  log.debug(`Fetching from ${repo}`);
 
   await repoGit.fetch();
 
-  const defaultBranch =
-    (await repoGit.revparse(['--abbrev-ref', 'origin/HEAD'])).replace('origin/', '') || 'master';
+  const defaultBranch = (await repoGit.revparse(['--abbrev-ref', 'origin/HEAD'])).replace(
+    'origin/',
+    ''
+  );
 
   const currentBranch = (await repoGit.revparse(['--abbrev-ref', 'HEAD'])) || defaultBranch;
 
