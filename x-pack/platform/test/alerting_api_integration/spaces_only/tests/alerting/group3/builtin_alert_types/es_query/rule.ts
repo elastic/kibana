@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
@@ -257,7 +257,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
 
         const docs = await waitForDocs(2);
-        log.info(`docs = ${JSON.stringify(docs)}`);
+        log.info(
+          `runs correctly: threshold on ungrouped agg metric < > for ${searchType} search type docs = ${JSON.stringify(
+            docs
+          )}`
+        );
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -380,6 +384,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /Number of matching documents for group "group-\d" is greater than -1/;
 
         const docs = await waitForDocs(2);
+        log.info(
+          `runs correctly: threshold on grouped hit count < > for ${searchType} search type docs = ${JSON.stringify(
+            docs
+          )}`
+        );
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -669,6 +678,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const docs = await waitForDocs(2);
+        log.info(
+          `runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type docs = ${JSON.stringify(
+            docs
+          )}`
+        );
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;

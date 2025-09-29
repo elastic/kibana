@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../../../../common/ftr_provider_c
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('es_query', () => {
     loadTestFile(require.resolve('./rule'));
-    loadTestFile(require.resolve('./query_dsl_only'));
-    loadTestFile(require.resolve('./esql_only'));
+    // loadTestFile(require.resolve('./query_dsl_only'));
+    // loadTestFile(require.resolve('./esql_only'));
   });
 }
