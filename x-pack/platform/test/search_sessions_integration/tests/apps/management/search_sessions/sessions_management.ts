@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('management');
         const searchSessionsAnchor = await testSubjects.find('search_sessions');
         const anchorText = await searchSessionsAnchor.getVisibleText();
-        expect(anchorText).to.be('Background search');
+        expect(anchorText).to.be('Background Search');
       });
     });
   });
