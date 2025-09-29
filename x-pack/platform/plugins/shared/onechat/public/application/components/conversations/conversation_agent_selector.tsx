@@ -19,19 +19,19 @@ interface ConversationAgentSelectorProps {
 export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps> = ({
   agentId,
 }) => {
-  const { agents, isLoading } = useOnechatAgents();
+  const { agents, isLoading: isLoadingAgents } = useOnechatAgents();
   const hasActiveConversation = useHasActiveConversation();
   const { setAgentId } = useConversationActions();
-
-  const currentAgent = agents?.find((agent) => agent.id === agentId);
 
   const handleAgentChange = (newAgentId: string) => {
     setAgentId(newAgentId);
   };
 
-  if (isLoading) {
+  if (isLoadingAgents || !agentId) {
     return <EuiLoadingSpinner />;
   }
+
+  const currentAgent = agents.find((agent) => agent.id === agentId);
 
   return hasActiveConversation ? (
     <EuiText color="subdued" size="s">
