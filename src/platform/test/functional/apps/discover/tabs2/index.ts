@@ -65,5 +65,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./_navigation'));
+    loadTestFile(require.resolve('./_sharing'));
   });
 }
