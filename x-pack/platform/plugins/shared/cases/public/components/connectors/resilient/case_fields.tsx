@@ -133,6 +133,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           },
         }}
       />
+      <EuiSpacer size="m" />
       {showAdditionalFields && (
         <UseField
           path="fields.additionalFields"
