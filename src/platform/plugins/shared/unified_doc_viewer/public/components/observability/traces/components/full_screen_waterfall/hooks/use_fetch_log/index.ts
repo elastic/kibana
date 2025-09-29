@@ -8,27 +8,24 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { useState, useEffect } from 'react';
-import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
+import { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
+import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-interface UseSpanParams {
-  spanId: string;
-  traceId: string;
+interface Props {
+  id: string;
 }
 
-interface GetTransactionParams {
-  spanId: string;
+interface GetLogParams {
+  id: string;
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
-  traceId: string;
 }
 
-async function getSpanData({ spanId, indexPattern, data, traceId, signal }: GetTransactionParams) {
+async function fetchLogDocument({ id, indexPattern, data, signal }: GetLogParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -44,11 +41,8 @@ async function getSpanData({ spanId, indexPattern, data, traceId, signal }: GetT
               },
             ],
             query: {
-              bool: {
-                filter: [
-                  { term: { [TRACE_ID_FIELD]: traceId } },
-                  { term: { [SPAN_ID_FIELD]: spanId } },
-                ],
+              term: {
+                _id: id,
               },
             },
           },
@@ -59,14 +53,14 @@ async function getSpanData({ spanId, indexPattern, data, traceId, signal }: GetT
   );
 }
 
-export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
+export function useFetchLog({ id }: Props) {
   const { indexes } = useDataSourcesContext();
-  const indexPattern = indexes.apm.traces;
   const { data, core } = getUnifiedDocViewerServices();
-  const [span, setSpan] = useState<Record<PropertyKey, any> | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [docId, setDocId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [logDoc, setLogDoc] = useState<Record<PropertyKey, any> | null>(null);
+  const [index, setIndex] = useState<string | null>(null);
 
+  const indexPattern = indexes.logs;
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
@@ -75,20 +69,20 @@ export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await getSpanData({ spanId, indexPattern, data, signal, traceId })
+          ? await fetchLogDocument({ id, indexPattern, data, signal })
           : undefined;
-        setSpan(result?.rawResponse.hits.hits[0]?.fields ?? null);
-        setDocId(result?.rawResponse.hits.hits[0]?._id ?? null);
+        setIndex(result?.rawResponse.hits.hits[0]?._index ?? null);
+        setLogDoc(result?.rawResponse.hits.hits[0]?.fields ?? null);
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
-            title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.useSpan.error', {
-              defaultMessage: 'An error occurred while fetching the span',
+            title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.logDocument.error', {
+              defaultMessage: 'An error occurred while fetching the log document',
             }),
             text: error.message,
           });
-          setSpan(null);
+          setLogDoc(null);
         }
       } finally {
         setLoading(false);
@@ -100,7 +94,7 @@ export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, indexPattern, spanId, traceId]);
+  }, [core.notifications.toasts, data, id, indexPattern]);
 
-  return { loading, span, docId };
-};
+  return { loading, logDoc, index };
+}
