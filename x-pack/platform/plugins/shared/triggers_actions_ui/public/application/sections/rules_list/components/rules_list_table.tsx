@@ -346,11 +346,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           unsnoozeRule={async () => {}}
           rule={rule}
           onRuleChanged={onRuleChanged}
-          isEditable={
-            rule.isEditable &&
-            isRuleTypeEditableInContext(rule.ruleTypeId) &&
-            !rule.isInternallyManaged
-          }
+          isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
           autoRecoverAlerts={rule.autoRecoverAlerts}
         />
       );
@@ -378,7 +374,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiCheckbox
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
-            disabled={!rule.isEditable}
+            disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
           />

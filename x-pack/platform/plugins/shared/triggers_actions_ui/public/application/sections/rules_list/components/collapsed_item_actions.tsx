@@ -226,12 +226,30 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ),
   });
 
+  const getDisablePanelItem = (testId: string) => ({
+    disabled: !item.isEditable || !item.enabledInLicense,
+    'data-test-subj': testId,
+    onClick: onDisableClick,
+    name: isDisabled
+      ? i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.enableTitle',
+          { defaultMessage: 'Enable' }
+        )
+      : i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
+          { defaultMessage: 'Disable' }
+        ),
+  });
+
   const panels = item.isInternallyManaged
     ? [
         {
           id: 0,
           hasFocus: true,
-          items: [getUpdateApiKeyPanelItem('updateApiKeyInternallyManaged')],
+          items: [
+            getDisablePanelItem('disableButtonInternallyManaged'),
+            getUpdateApiKeyPanelItem('updateApiKeyInternallyManaged'),
+          ],
         },
       ]
     : [
@@ -243,20 +261,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             {
               isSeparator: true as const,
             },
-            {
-              disabled: !item.isEditable || !item.enabledInLicense,
-              'data-test-subj': 'disableButton',
-              onClick: onDisableClick,
-              name: isDisabled
-                ? i18n.translate(
-                    'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.enableTitle',
-                    { defaultMessage: 'Enable' }
-                  )
-                : i18n.translate(
-                    'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
-                    { defaultMessage: 'Disable' }
-                  ),
-            },
+            getDisablePanelItem('disableButton'),
             {
               disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
               'data-test-subj': 'cloneRule',

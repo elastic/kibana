@@ -36,6 +36,21 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
     }
   `;
 
+  const getDisableEnablePanelItem = (testId: string) => ({
+    'data-test-subj': testId,
+    onClick: async () => {
+      setIsPopoverOpen(false);
+      onEnableDisable(!rule.enabled);
+    },
+    name: !rule.enabled
+      ? i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel', {
+          defaultMessage: 'Enable',
+        })
+      : i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel', {
+          defaultMessage: 'Disable',
+        }),
+  });
+
   const getUpdateApiKeyPanelItem = (testId: string) => {
     return {
       'data-test-subj': testId,
@@ -75,24 +90,12 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
           {
             id: 0,
             items: isInternallyManaged
-              ? [getUpdateApiKeyPanelItem('updateAPIKeyButtonInternallyManaged')]
+              ? [
+                  getDisableEnablePanelItem('disableButtonInternallyManaged'),
+                  getUpdateApiKeyPanelItem('updateAPIKeyButtonInternallyManaged'),
+                ]
               : [
-                  {
-                    'data-test-subj': 'disableButton',
-                    onClick: async () => {
-                      setIsPopoverOpen(false);
-                      onEnableDisable(!rule.enabled);
-                    },
-                    name: !rule.enabled
-                      ? i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
-                          { defaultMessage: 'Enable' }
-                        )
-                      : i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
-                          { defaultMessage: 'Disable' }
-                        ),
-                  },
+                  getDisableEnablePanelItem('disableButton'),
                   getUpdateApiKeyPanelItem('updateAPIKeyButton'),
                   {
                     'data-test-subj': 'runRuleButton',
