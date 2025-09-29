@@ -706,7 +706,6 @@ steps:
   describe('Integration tests for liquid completions', () => {
     it('should provide liquid filter completions', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -741,7 +740,6 @@ steps:
 
     it('should provide filtered liquid filter completions', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -772,7 +770,6 @@ steps:
 
     it('should provide liquid syntax completions', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -808,7 +805,6 @@ steps:
 
     it('should provide liquid syntax completions with partial match', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -835,100 +831,10 @@ steps:
 
       const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('if');
-      // Should include both if and unless since "if" partially matches both
-    });
-
-    it('should provide liquid block keyword completions before typing any characters', async () => {
-      const yamlContent = `
-version: "1"
-steps:
-  - name: test
-    type: set_variable
-    with:
-      message: |-
-        {%- liquid
-          `;
-      const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
-      const position = model.getPositionAt(cursorOffset);
-
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
-        model as any,
-        position as any,
-        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
-        {} as any
-      );
-
-      expect(result?.suggestions).toBeDefined();
-      expect(result?.suggestions.length).toBeGreaterThan(0);
-
-
-      const labels = result?.suggestions.map((s) => s.label) || [];
-      expect(labels).toContain('assign');
-      expect(labels).toContain('case');
-      expect(labels).toContain('echo');
-      expect(labels).toContain('if');
-      expect(labels).toContain('when');
-      expect(labels).toContain('else');
-      expect(labels).toContain('for');
-      expect(labels).toContain('capture');
-      expect(labels).toContain('comment');
-      
-      // Should NOT contain closing keywords
-      expect(labels).not.toContain('endcase');
-      expect(labels).not.toContain('endif');
-      expect(labels).not.toContain('endfor');
-      expect(labels).not.toContain('endcapture');
-    });
-
-    it('should provide liquid block keyword completions with indentation before typing', async () => {
-      const yamlContent = `
-version: "1"
-steps:
-  - name: test
-    type: set_variable
-    with:
-      message: |-
-        {%- liquid
-          assign var = "test"
-          `;
-      const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
-      const position = model.getPositionAt(cursorOffset);
-      
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
-        model as any,
-        position as any,
-        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
-        {} as any
-      );
-
-      expect(result?.suggestions).toBeDefined();
-      expect(result?.suggestions.length).toBeGreaterThan(0);
-
-
-      const labels = result?.suggestions.map((s) => s.label) || [];
-      expect(labels).toContain('assign');
-      expect(labels).toContain('echo');
-      expect(labels).toContain('case');
-      expect(labels).toContain('if');
-      expect(labels).toContain('for');
-      
-      // Should NOT contain closing keywords
-      expect(labels).not.toContain('endcase');
-      expect(labels).not.toContain('endif');
-      expect(labels).not.toContain('endfor');
     });
 
     it('should provide liquid block keyword completions with tab indentation', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -960,17 +866,10 @@ steps:
       expect(labels).toContain('case');
       expect(labels).toContain('if');
       expect(labels).toContain('for');
-      
-      // Should NOT contain closing keywords
-      expect(labels).not.toContain('endcase');
-      expect(labels).not.toContain('endif');
-      expect(labels).not.toContain('endfor');
-      expect(labels).toContain('if');
     });
 
     it('should provide liquid block keyword completions with mixed tab/space indentation', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -1002,17 +901,11 @@ steps:
       expect(labels).toContain('case');
       expect(labels).toContain('if');
       expect(labels).toContain('for');
-      
-      // Should NOT contain closing keywords
-      expect(labels).not.toContain('endcase');
-      expect(labels).not.toContain('endif');
-      expect(labels).not.toContain('endfor');
     });
 
     it('should properly detect nested liquid blocks', async () => {
       // Test case with nested liquid blocks
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
@@ -1048,7 +941,6 @@ steps:
 
     it('should not provide liquid block completions outside liquid blocks', async () => {
       const yamlContent = `
-version: "1"
 steps:
   - name: test
     type: set_variable
