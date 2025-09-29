@@ -3431,7 +3431,6 @@
         "require-in-the-middle",
         "tape",
         "tough-cookie",
-        "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
         "@types/js-yaml",
@@ -3439,8 +3438,7 @@
         "@types/minimist",
         "@types/node-forge",
         "@types/object-hash",
-        "@types/tough-cookie",
-        "@types/uuid"
+        "@types/tough-cookie"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3459,7 +3457,9 @@
     {
       "groupName": "platform security modules - ESM required",
       "matchDepNames": [
-        "@kayahr/text-encoding"
+        "@kayahr/text-encoding",
+        "uuid",
+        "@types/uuid"
       ],
       "reviewers": [
         "team:kibana-security"
