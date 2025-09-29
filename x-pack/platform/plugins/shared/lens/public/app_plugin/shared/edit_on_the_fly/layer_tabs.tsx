@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
@@ -51,6 +51,7 @@ export function LayerTabs(
   }
 ) {
   const { activeVisualization, coreStart, startDependencies } = props;
+  const { euiTheme } = useEuiTheme();
 
   const { visualization, datasourceStates, query } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
@@ -222,15 +223,31 @@ export function LayerTabs(
     visualization.state,
   ]);
 
-  /* Render layer tabs only if the chart type supports multiple layers */
+  /**
+   * Render layer tabs only if the chart type supports multiple layers.
+   *
+   * Layout behavior:
+   * - Tabs take only the space they need (grow={false})
+   * - Button stays next to tabs when space available
+   * - When tabs overflow, they get hidden while button remains visible
+   *
+   * Normal state (few tabs):
+   * ┌─────────────────────────────────────────────┐
+   * │ [Tab1] [Tab2] [Tab3] [+]                    │
+   * └─────────────────────────────────────────────┘
+   *
+   * Overflow state (many tabs):
+   * ┌─────────────────────────────────────────────┐
+   * │ [Tab1] [Tab2] [Tab3] [Tab4] [Tab5] [T... [+]│
+   * └─────────────────────────────────────────────┘
+   * Hidden tabs are still accessible via horizontal scroll.
+   */
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="small" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" css={{ padding: `0 ${euiTheme.size.base}` }}>
         <EuiFlexItem grow={false} style={{ overflow: 'hidden', minWidth: 0 }}>
-          <EuiTabs css={{ paddingLeft: '16px' }} bottomBorder={false}>
-            {renderTabs()}
-          </EuiTabs>
+          <EuiTabs bottomBorder={false}>{renderTabs()}</EuiTabs>
         </EuiFlexItem>
         {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
       </EuiFlexGroup>
