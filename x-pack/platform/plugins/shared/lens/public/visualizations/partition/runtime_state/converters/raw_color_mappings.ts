@@ -6,6 +6,7 @@
  */
 
 import type { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import { trackRuntimeMigration } from '../../../../runtime_state';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
@@ -42,6 +43,8 @@ export const convertToRawColorMappingsFn = (
     });
 
     if (!hasDeprecatedColorMappings) return state as PieVisualizationState;
+
+    trackRuntimeMigration('rawColorMappings', 'partition');
 
     const convertedLayers = state.layers.map((layer) => {
       if (

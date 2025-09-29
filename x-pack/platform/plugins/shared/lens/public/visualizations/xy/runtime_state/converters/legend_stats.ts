@@ -8,6 +8,7 @@
 import { LegendValue } from '@elastic/charts';
 
 import type { XYState } from '../../types';
+import { trackRuntimeMigration } from '../../../../runtime_state';
 
 /**
  * Old color mapping state meant for type safety during runtime migrations of old configurations
@@ -20,6 +21,8 @@ interface DeprecatedLegendValueXYState extends XYState {
 
 export function convertToLegendStats(state: DeprecatedLegendValueXYState | XYState): XYState {
   if ('valuesInLegend' in state) {
+    trackRuntimeMigration('legendStats', 'xy');
+
     const valuesInLegend = state.valuesInLegend;
     delete state.valuesInLegend;
 

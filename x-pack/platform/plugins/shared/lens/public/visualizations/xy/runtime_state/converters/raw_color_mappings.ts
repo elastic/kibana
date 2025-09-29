@@ -11,6 +11,7 @@ import {
   getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
+import { trackRuntimeMigration } from '../../../../runtime_state';
 import type { GeneralDatasourceStates } from '../../../../state_management';
 import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../types';
 
@@ -39,6 +40,8 @@ export const convertToRawColorMappingsFn = (
     });
 
     if (!hasDeprecatedColorMappings) return state as XYState;
+
+    trackRuntimeMigration('rawColorMappings', 'xy');
 
     const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
       if (
