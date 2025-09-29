@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { from, where } from '@kbn/esql-composer';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 import type { SolutionId } from '@kbn/core-chrome-browser/src/project_navigation';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_values';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -44,22 +44,13 @@ function useTracesIndex(apmSourcesAccess: ApmSourceAccessPluginStart) {
   return tracesIndex;
 }
 
-function useSolutionId(spaces: SpacesApi | undefined) {
-  const [solutionId, setSolutionId] = useState<string | undefined>();
-  useEffect(() => {
-    spaces?.getActiveSpace().then((space) => setSolutionId(space?.solution));
-  }, [spaces]);
-  return solutionId;
-}
-
 export function TracesInDiscoverCallout() {
   const { share } = useApmPluginContext();
-  const obltSolutionId: SolutionId = 'oblt';
+  const { space } = useKibanaSpace();
   const {
-    services: { apmSourcesAccess, spaces },
+    services: { apmSourcesAccess },
   } = useKibana<ApmPluginStartDeps>();
   const tracesIndex = useTracesIndex(apmSourcesAccess);
-  const solutionId = useSolutionId(spaces);
   const {
     query: { environment, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services', '/service-map');
@@ -67,6 +58,7 @@ export function TracesInDiscoverCallout() {
     tracesInDiscoverCalloutStorageKey,
     false
   );
+  const obltSolutionId: SolutionId = 'oblt';
 
   const discoverHref = useMemo(() => {
     if (!tracesIndex) return undefined;
@@ -91,7 +83,7 @@ export function TracesInDiscoverCallout() {
     });
   }, [share.url.locators, tracesIndex, environment, rangeFrom, rangeTo]);
 
-  if (dismissedCallout || !discoverHref || solutionId !== obltSolutionId) {
+  if (dismissedCallout || !discoverHref || space?.solution !== obltSolutionId) {
     return null;
   }
 

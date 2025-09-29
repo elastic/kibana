@@ -13,7 +13,9 @@ const mockGetRedirectUrl = jest.fn(() => 'mock-discover-url');
 const mockGetApmIndices = jest.fn(() =>
   Promise.resolve({ span: 'apm-span', transaction: 'apm-transaction' })
 );
-const mockGetActiveSpace = jest.fn(() => Promise.resolve({ solution: 'oblt' }));
+let mockGetActiveSpace = {
+  solution: 'oblt',
+};
 
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
@@ -27,11 +29,16 @@ jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  useKibanaSpace: () => ({
+    space: mockGetActiveSpace,
+  }),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
       apmSourcesAccess: { getApmIndices: mockGetApmIndices },
-      spaces: { getActiveSpace: mockGetActiveSpace },
     },
   }),
 }));
@@ -97,7 +104,7 @@ describe('TracesInDiscoverCallout', () => {
   });
 
   it('does not render if solutionId is not oblt', async () => {
-    mockGetActiveSpace.mockResolvedValueOnce({ solution: 'other' });
+    mockGetActiveSpace = { solution: 'other' };
     render(<TracesInDiscoverCallout />);
 
     await waitFor(() => {
