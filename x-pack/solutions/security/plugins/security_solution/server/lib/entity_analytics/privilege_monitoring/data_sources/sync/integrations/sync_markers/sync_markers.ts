@@ -47,9 +47,23 @@ export const createSyncMarkersService = (
   const updateLastFullSyncMarker = async (marker: string): Promise<void> => {
     // update latest full sync to saved object
   };
-  const getLastFullSyncMarker = async (): Promise<string> => {
+  const getLastFullSyncMarker = async (
+    source: MonitoringEntitySource
+  ): Promise<string | undefined> => {
     // get latest full sync from saved object
-    return 'now-10y'; // replace with actual value from saved object
+    const lastFullSyncMarker = await monitoringIndexSourceClient.getLastFullSyncMarker(source);
+    if (lastFullSyncMarker) {
+      return lastFullSyncMarker;
+    }
+    // otherwise, find the last fullSyncMarker from the index
+    /**
+     * So to get the last fullSyncMarker from the index, we need to:
+     * 1. Find the syncMarkerIndex from the source
+     * 2. Query the index for the latest fullSyncMarker
+     * 3. Return the latest fullSyncMarker
+     *
+     * Should this be part of sync markers service OR the deletion detection service?
+     */
   };
 
   return {
