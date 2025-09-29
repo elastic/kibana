@@ -260,7 +260,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Enabled',
         field: 'enabled',
-        width: '10%',
+        width: '8%',
         render: (value, item) => {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -302,8 +302,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         },
       },
       {
-        name: 'Actions',
-        width: '8%',
+        name: '',
+        width: '10%',
         actions: [
           {
             isPrimary: true,
@@ -338,7 +338,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           {
             enabled: () => !!canUpdateWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
+            isPrimary: true,
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),

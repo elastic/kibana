@@ -23,7 +23,8 @@ export function WorkflowStatus({ valid, ...props }: WorkflowStatusProps) {
       color="red"
       size="m"
       content={i18n.translate('workflows.workflowList.workflowInvalid', {
-        defaultMessage: 'Workflow is invalid',
+        defaultMessage:
+          'This workflow can’t be enabled because it contains validation errors. Please review and fix them before continuing.',
       })}
     />
   );

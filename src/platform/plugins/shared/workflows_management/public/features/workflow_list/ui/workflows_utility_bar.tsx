@@ -63,6 +63,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         alignItems="center"
         justifyContent="spaceBetween"
         css={css`
+          margin-top: ${euiTheme.size.s};
           padding-bottom: ${euiTheme.size.s};
         `}
       >
