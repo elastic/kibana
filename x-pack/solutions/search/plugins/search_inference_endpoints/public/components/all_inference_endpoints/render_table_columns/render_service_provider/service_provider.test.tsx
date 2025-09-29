@@ -213,6 +213,18 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
+    it('renders the component with modelId', () => {
+      renderComponent(ServiceProviderKeys.elasticsearch, {
+        ...mockEndpoint,
+        inference_id: 'model-123',
+      });
+
+      expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-elasticsearch');
+      expect(icon).toBeInTheDocument();
+      expect(screen.getByText('settings-model-123')).toBeInTheDocument();
+    });
+
     it('renders the component with description', () => {
       renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
 

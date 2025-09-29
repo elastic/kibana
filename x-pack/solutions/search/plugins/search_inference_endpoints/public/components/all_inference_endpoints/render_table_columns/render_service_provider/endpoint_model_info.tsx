@@ -18,8 +18,8 @@ export interface EndpointModelInfoProps {
 }
 
 const descriptions: Record<string, string> = {
-  [ServiceProviderKeys.elastic]: i18n.ELASTIC_DESCRIPTION,
-  [ServiceProviderKeys.elasticsearch]: i18n.ELASTICSEARCH_DESCRIPTION,
+  [ServiceProviderKeys.elastic]: i18n.TOKEN_BASED_BILLING_DESCRIPTION,
+  [ServiceProviderKeys.elasticsearch]: i18n.RESOURCE_BASED_BILLING_DESCRIPTION,
 };
 
 export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
