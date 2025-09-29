@@ -110,7 +110,7 @@ describe('FailureStoreModal', () => {
       expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeInTheDocument();
 
       expect(getByTestId('selectFailureStorePeriodValue')).toHaveValue(15);
-      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveValue('d');
+      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveTextContent('Days');
 
       fireEvent.click(getByTestId('enableFailureStoreToggle'));
 
@@ -159,9 +159,9 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).toBeDisabled();
       expect(unitSelector).toBeDisabled();
 
-      // The default retention period in the props is 40m, so the value should be 40 and unit 'm'
+      // The default retention period in the props is 40m, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
       fireEvent.click(customButton);
 
@@ -171,16 +171,15 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).not.toBeDisabled();
       expect(unitSelector).not.toBeDisabled();
 
-      // The custom retention period by default is the default period, so the value should be 40 and unit 'm'
+      // The custom retention period by default is the default period, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
-      fireEvent.change(unitSelector, {
-        target: { value: 's' },
-      });
+      fireEvent.click(unitSelector);
+      fireEvent.click(getByTestId('retentionPeriodUnit-s'));
       fireEvent.change(valueSelector, { target: { value: '15' } });
 
-      expect(unitSelector).toHaveValue('s');
+      expect(unitSelector).toHaveTextContent('Seconds');
       expect(valueSelector).toHaveValue(15);
 
       fireEvent.click(getByTestId('failureStoreModalSaveButton'));
