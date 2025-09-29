@@ -8,10 +8,8 @@
 import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment, { type Moment } from 'moment';
-import {
-  syntheticsMonitorStatusAlertParamsToKqlQuery,
-  syntheticsTlsAlertParamsToKqlQuery,
-} from './synthetics_alert_params_to_kql';
+import { syntheticsMonitorStatusAlertParamsToKqlQuery } from './synthetics_status_rule';
+import { syntheticsTlsAlertParamsToKqlQuery } from './synthetics_tls_rule';
 
 describe('synthetics_alert_params_to_kql', () => {
   const FIXED_DATE_ISO = '2025-09-04T20:52:38.662Z';
