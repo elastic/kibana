@@ -42,8 +42,11 @@ export class StreamsAppPlugin
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
 
+  private readonly version: string;
+
   constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.version = context.env.packageInfo.version;
   }
   setup(coreSetup: CoreSetup): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
@@ -76,6 +79,7 @@ export class StreamsAppPlugin
               .start({ http: coreStart.http })
               .getClient(),
             PageTemplate,
+            version: this.version,
             telemetryClient: this.telemetry.getClient(),
           };
 

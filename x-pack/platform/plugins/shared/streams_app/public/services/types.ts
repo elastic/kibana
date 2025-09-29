@@ -12,4 +12,5 @@ export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;
   PageTemplate: React.FC<React.PropsWithChildren<{}>>;
   telemetryClient: StreamsTelemetryClient;
+  version: string;
 }

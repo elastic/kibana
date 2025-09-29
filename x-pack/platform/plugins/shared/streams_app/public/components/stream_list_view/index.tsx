@@ -36,6 +36,7 @@ import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { FeedbackButton } from '../feedback_button';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -117,22 +118,25 @@ export function StreamListView() {
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
                   defaultMessage: 'Streams',
                 })}
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                    defaultMessage: 'Technical Preview',
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.streams.streamsListView.betaBadgeDescription',
-                    {
-                      defaultMessage:
-                        'This functionality is experimental and not supported. It may change or be removed at any time.',
-                    }
-                  )}
-                  alignment="middle"
-                  size="s"
-                />
+                {isServerless && (
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                      defaultMessage: 'Technical Preview',
+                    })}
+                    tooltipContent={i18n.translate(
+                      'xpack.streams.streamsListView.betaBadgeDescription',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    )}
+                    alignment="middle"
+                    size="s"
+                  />
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
+            <FeedbackButton />
             {groupStreams?.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={openGroupStreamModificationFlyout}>
@@ -144,7 +148,13 @@ export function StreamListView() {
             )}
             {showSettingsFlyoutButton && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                <EuiButtonEmpty
+                  iconType="gear"
+                  onClick={() => setIsSettingsFlyoutOpen(true)}
+                  aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                    defaultMessage: 'Settings',
+                  })}
+                >
                   {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
                     defaultMessage: 'Settings',
                   })}

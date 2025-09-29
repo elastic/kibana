@@ -70,8 +70,11 @@ export class ObservabilityStreamsWrapperPlugin
 {
   logger: Logger;
 
+  private isServerless: boolean = false;
+
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
   setup(
     coreSetup: CoreSetup<
@@ -102,7 +105,8 @@ export class ObservabilityStreamsWrapperPlugin
                       }),
                       app: STREAMS_APP_ID,
                       path: '/',
-                      isTechnicalPreview: true,
+                      // on serverless, this is shown as a technical preview
+                      isTechnicalPreview: this.isServerless,
                       matchPath(currentPath: string) {
                         return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
                       },
