@@ -12,7 +12,11 @@ import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation, SimulationContext } from './types';
-import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type {
+  MappedSchemaField,
+  SchemaField,
+  UnmappedSchemaField,
+} from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
@@ -148,22 +152,22 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
       // │ Field Processing Priority (top to bottom):                             │
       // │                                                                         │
       // │ 1. Inherited Fields (field.from exists)                               │
-      // │    └─► status: 'inherited', parent: field.from                        │
+      // │    └► status: 'inherited', parent: field.from                        │
       // │                                                                         │
       // │ 2. ES Fields (field.esType exists)                                    │
-      // │    └─► status: 'mapped', retain esType, streamSource by stream type   │
+      // │    └► status: 'mapped', retain esType, streamSource by stream type   │
       // │                                                                         │
       // │ 3. Metadata Fields (suggestedType + source exists)                    │
-      // │    ├─► Classic Stream:                                                 │
-      // │    │   ├─► ECS fields → status: 'mapped', streamSource: 'template'    │
-      // │    │   └─► All others → ignored (unmapped)                            │
-      // │    ├─► Wired Stream:                                                  │
-      // │    │   ├─► OTEL fields → status: 'mapped', streamSource: 'stream'    │
-      // │    │   └─► All others → ignored (unmapped)                            │
-      // │    └─► Unknown Stream → ECS fields only                               │
+      // │    ├► Classic Stream:                                                 │
+      // │    │   ├► ECS fields → status: 'mapped', streamSource: 'template'    │
+      // │    │   └► All others → ignored (unmapped)                            │
+      // │    ├► Wired Stream:                                                  │
+      // │    │   ├► OTEL fields → status: 'mapped', streamSource: 'stream'    │
+      // │    │   └► All others → ignored (unmapped)                            │
+      // │    └► Unknown Stream → ECS fields only                               │
       // │                                                                         │
       // │ 4. User-Defined Fields (field.type exists)                           │
-      // │    └─► status: 'mapped', use provided type                            │
+      // │    └► status: 'mapped', use provided type                            │
       // │                                                                         │
       // │ 5. Fallback → status: 'unmapped' (unmanaged/dynamic)                 │
       // └─────────────────────────────────────────────────────────────────────────┘
@@ -187,15 +191,25 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
             field.esType as FieldDefinitionType
           );
 
-          // All ES fields are considered "mapped" from user perspective as they exist in the index already
-          fieldSchema = {
-            ...fieldSchema,
-            status: 'mapped',
-            streamSource: streamType === 'wired' ? 'stream' : 'template',
-            esType: field.esType,
-            // Set type based on whether ES type is supported by streams
-            type: isSupportedType ? (field.esType as FieldDefinitionType) : 'system',
-          };
+          if (isSupportedType) {
+            // ES field with supported type - create as mapped field
+            fieldSchema = {
+              ...fieldSchema,
+              status: 'mapped',
+              streamSource: streamType === 'wired' ? 'stream' : 'template',
+              esType: field.esType,
+              type: field.esType as FieldDefinitionType,
+            } as MappedSchemaField;
+          } else {
+            // ES field with unsupported type - create as unmapped field but still show as existing in UI
+            fieldSchema = {
+              ...fieldSchema,
+              status: 'unmapped',
+              streamSource: streamType === 'wired' ? 'stream' : 'template',
+              esType: field.esType,
+              // No type field set for unsupported ES types
+            } as UnmappedSchemaField;
+          }
         }
         // Field has metadata suggestion but no ES type - only handle ECS and OTEL fields
         else if (hasMetadataSuggestion) {
@@ -210,7 +224,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
                 streamSource: 'template',
                 // Clear esType for metadata fields to ensure proper categorization
                 esType: undefined,
-              };
+              } as MappedSchemaField;
             }
           } else if (streamType === 'wired') {
             // Wired streams: Only handle OTEL fields, ignore everything else
@@ -222,7 +236,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
                 streamSource: 'stream',
                 // Clear esType for metadata fields to ensure proper categorization
                 esType: undefined,
-              };
+              } as MappedSchemaField;
             }
           } else {
             // Unknown stream type - fall back to handling ECS fields only
@@ -234,7 +248,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
                 streamSource: 'template',
                 // Clear esType for metadata fields to ensure proper categorization
                 esType: undefined,
-              };
+              } as MappedSchemaField;
             }
           }
         }
@@ -245,7 +259,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
             status: 'mapped',
             parent: streamName,
             type: field.type as FieldDefinitionType,
-          };
+          } as MappedSchemaField;
         }
       }
 
