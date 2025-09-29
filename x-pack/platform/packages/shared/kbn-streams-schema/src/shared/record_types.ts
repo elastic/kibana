@@ -41,5 +41,5 @@ export interface IgnoredField {
 
 export interface DocumentWithIgnoredFields {
   values?: SampleDocument;
-  ignored_fields?: IgnoredField[];
+  ignored_fields: IgnoredField[];
 }

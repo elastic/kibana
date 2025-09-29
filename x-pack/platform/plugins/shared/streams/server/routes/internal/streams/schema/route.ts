@@ -260,14 +260,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       simulationError: null,
       documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits.map((hit, index) => {
         if (!hit.fields) {
-          return { ignored_fields: simulation.docs[index].doc.ignored_fields };
+          return { ignored_fields: simulation.docs[index].doc.ignored_fields || [] };
         }
         return {
           values: Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
             acc[field] = hit.fields![field][0];
             return acc;
           }, {}),
-          ignored_fields: simulation.docs[index].doc.ignored_fields,
+          ignored_fields: simulation.docs[index].doc.ignored_fields || [],
         };
       }),
     };

@@ -40,6 +40,12 @@ const emptyCell = <>&nbsp;</>;
 
 export const MemoPreviewTable = React.memo(PreviewTable);
 
+function isDocumentWithIgnoredFields(
+  doc: SampleDocument | DocumentWithIgnoredFields
+): doc is DocumentWithIgnoredFields {
+  return 'ignored_fields' in doc && Array.isArray(doc.ignored_fields);
+}
+
 export function PreviewTable({
   documents,
   displayColumns,
@@ -84,7 +90,7 @@ export function PreviewTable({
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
-      const document = (doc as DocumentWithIgnoredFields).values ?? (doc as SampleDocument);
+      const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
 
       if (!document || typeof document !== 'object') {
         return;
@@ -264,8 +270,8 @@ export function PreviewTable({
       onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
-        const document = (doc as DocumentWithIgnoredFields).values ?? (doc as SampleDocument);
-        const ignoredFields = (doc as DocumentWithIgnoredFields).ignored_fields ?? [];
+        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
 
         if (!document || typeof document !== 'object') {
           return emptyCell;

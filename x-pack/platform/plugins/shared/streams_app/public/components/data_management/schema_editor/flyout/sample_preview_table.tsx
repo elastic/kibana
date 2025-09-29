@@ -73,7 +73,9 @@ const SamplePreviewTableContent = ({
         isValid: value?.status === 'failure' || error ? false : true,
         isIgnored:
           value?.documentsWithRuntimeFieldsApplied &&
-          value?.documentsWithRuntimeFieldsApplied?.some((doc) => !!doc?.ignored_fields)
+          value?.documentsWithRuntimeFieldsApplied?.some(
+            (doc) => doc?.ignored_fields && doc.ignored_fields?.length > 0
+          )
             ? true
             : false,
       });
