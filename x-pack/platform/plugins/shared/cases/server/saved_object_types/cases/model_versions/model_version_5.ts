@@ -27,6 +27,20 @@ export const modelVersion5: SavedObjectsModelVersion = {
             },
           },
         },
+        settings: {
+          properties: {
+            extractObservables: {
+              type: 'boolean',
+            },
+          },
+        },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (doc) => {
+        const settings = doc.attributes.settings;
+        return { attributes: { settings: { ...settings, extractObservables: false } } };
       },
     },
   ],
