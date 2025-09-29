@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -63,6 +63,9 @@ export function SearchEmbeddableGridComponent({
   const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
     ? api.parentApi.esqlVariables$
     : undefined;
+
+  const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
+
   const [
     loading,
     savedSearch,
@@ -96,7 +99,7 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? new BehaviorSubject(undefined)
+    esqlVariables$ ?? emptyEsqlVariables$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
