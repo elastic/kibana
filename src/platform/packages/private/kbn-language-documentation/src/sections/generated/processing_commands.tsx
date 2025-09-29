@@ -621,7 +621,7 @@ FROM employees
 for an initial set of documents, directly within your ES|QL queries.
 
 \`\`\` esql
-RERANK [column =] query ON field [, field, ...] [WITH { "inference_id" : "my_inference_endpoint" }]
+RERANK [column =] query ON field [, field, ...] [WITH '{ "inference_id" : "my_inference_endpoint" }']
 \`\`\`
 
 **Usage**
