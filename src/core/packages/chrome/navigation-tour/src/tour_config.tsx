@@ -19,6 +19,7 @@ const newNavBlogPost = 'https://ela.st/new-nav';
 export const tourSteps: TourStep[] = [
   {
     id: 'sidenav-home',
+    required: true, // tour won't start if this step is not visible
     title: i18n.translate('core.chrome.navigationTour.sidenavHomeTitle', {
       defaultMessage: 'Improved navigation menu',
     }),
@@ -46,7 +47,29 @@ export const tourSteps: TourStep[] = [
     target: '[data-test-subj~="projectSideNav"] [data-test-subj~="nav-item-home"]',
   },
   {
+    id: 'sidenav-more',
+    required: false, // tour will continue even if this step is not visible
+    title: i18n.translate('core.chrome.navigationTour.sidenavMoreTitle', {
+      defaultMessage: 'All of your apps are still available',
+    }),
+    content: (
+      <EuiText size={'s'}>
+        <p>
+          <FormattedMessage
+            id="core.chrome.navigationTour.sidenavDataManagementMessage"
+            defaultMessage="You can still access apps that were previously in the navigation menu by selecting <b>More</b>."
+            values={{
+              b: (chunks) => <b>{chunks}</b>,
+            }}
+          />
+        </p>
+      </EuiText>
+    ),
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj~="sideNavMoreMenuItem"]`,
+  },
+  {
     id: 'sidenav-manage-data',
+    required: false, // tour will continue even if this step is not visible
     title: i18n.translate('core.chrome.navigationTour.sidenavManageDataTitle', {
       defaultMessage: 'Data management now has its own menu',
     }),
@@ -61,7 +84,6 @@ export const tourSteps: TourStep[] = [
         </p>
       </EuiText>
     ),
-    // TODO: Update the target when there is a dedicated data management app
     target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${INGEST_AND_MANAGE_DATA_NAV_ID}"]`,
   },
 ];
