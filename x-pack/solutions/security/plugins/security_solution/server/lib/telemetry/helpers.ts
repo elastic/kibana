@@ -48,6 +48,8 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
+import { FUNCTIONAL_FIELD_MAP } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -387,6 +389,18 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   }
 
   return event;
+};
+
+export const processDetectionRuleCustomizations = (event: TelemetryEvent) => {
+  const ruleSource = event['kibana.alert.rule.parameters']?.rule_source;
+  if (!ruleSource || ruleSource.type === 'internal' || ruleSource.is_customized === false) {
+    return undefined; // Don't return anything if rule isn't prebuilt or is not customized
+  }
+  const numberOfFunctionalFields = ruleSource.customized_fields.filter((field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]).length
+  return {
+    customized_fields: ruleSource.customized_fields.map((fieldObj)=> fieldObj.field_name),
+    num_functional_fields: numberOfFunctionalFields,
+  }
 };
 
 export const ranges = (
