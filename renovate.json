@@ -4071,25 +4071,6 @@
       "enabled": true
     },
     {
-      "groupName": "Cloud Defend",
-      "matchDepNames": [
-        "monaco-yaml"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: Cloud Native Integrations",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "JSON Web Token",
       "matchDepNames": [
         "jsonwebtoken",
