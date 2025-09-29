@@ -15,6 +15,7 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
+import { EuiIconBackgroundTask } from '@kbn/background-search';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -271,7 +272,8 @@ export const useDashboardMenuItems = ({
       backgroundSearch: {
         ...topNavStrings.backgroundSearch,
         id: 'backgroundSearch',
-        iconType: 'clock',
+        // TODO: Replace when the backgroundTask icon is available in EUI
+        iconType: EuiIconBackgroundTask,
         iconOnly: true,
         testId: 'backgroundSearchButton',
         run: () =>
