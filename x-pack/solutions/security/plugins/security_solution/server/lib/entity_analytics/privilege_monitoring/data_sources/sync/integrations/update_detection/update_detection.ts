@@ -18,7 +18,7 @@ export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringData
     const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
       source
     );
-    await statusUpdateService.updatePrivilegedStatus(users);
+    await statusUpdateService.updatePrivilegedStatus(users, source);
     dataClient.log(
       'info',
       `Completed update detection for source ${source.id}. Processed ${users.length} users.`

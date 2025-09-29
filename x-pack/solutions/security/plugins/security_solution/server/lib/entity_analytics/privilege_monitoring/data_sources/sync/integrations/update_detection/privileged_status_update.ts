@@ -8,11 +8,15 @@
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { PrivMonBulkUser } from '../../../../types';
 import { applyPrivilegedUpdates } from './queries';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 
 export const createPrivilegeStatusUpdateService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const updatePrivilegedStatus = async (users: PrivMonBulkUser[]) => {
+  const updatePrivilegedStatus = async (
+    users: PrivMonBulkUser[],
+    source: MonitoringEntitySource
+  ) => {
     dataClient.log('debug', `Updating internal index for users: ${JSON.stringify(users, null, 2)}`);
-    await applyPrivilegedUpdates({ users, dataClient });
+    await applyPrivilegedUpdates({ users, dataClient, source });
   };
 
   return {

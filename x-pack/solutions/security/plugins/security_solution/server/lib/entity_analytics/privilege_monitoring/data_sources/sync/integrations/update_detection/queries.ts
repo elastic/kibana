@@ -6,7 +6,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { Matcher } from '../../../../../../../../common/api/entity_analytics';
+import type {
+  Matcher,
+  MonitoringEntitySource,
+} from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';
 import type { PrivMonBulkUser } from '../../../../types';
@@ -79,9 +82,11 @@ export const buildPrivilegedSearchBody = (
 export const applyPrivilegedUpdates = async ({
   dataClient,
   users,
+  source,
 }: {
   dataClient: PrivilegeMonitoringDataClient;
   users: PrivMonBulkUser[];
+  source: MonitoringEntitySource;
 }) => {
   if (users.length === 0) return;
 
@@ -91,7 +96,7 @@ export const applyPrivilegedUpdates = async ({
   try {
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
-      const operations = opsForIntegration(chunk); // get some response logging and errors here
+      const operations = opsForIntegration(chunk, source);
       const resp = await esClient.bulk({
         refresh: 'wait_for',
         body: operations,
