@@ -23,7 +23,7 @@ import {
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useStreamSystems } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/use_steam_systems';
+import { useStreamSystems } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/use_stream_systems';
 import { ConditionPanel } from '../../shared';
 import { SystemEventsData } from './system_events_data';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
@@ -32,34 +32,33 @@ export const StreamSystemDetailsFlyout = ({
   system: initialSystem,
   definition,
   closeFlyout,
+  systemName,
 }: {
-  system: System | string;
+  systemName?: string;
+  system?: System;
   closeFlyout: () => void;
   definition: Streams.all.Definition;
 }) => {
-  const [system, setSystem] = React.useState<System | null>(
-    typeof initialSystem === 'string' ? null : initialSystem
-  );
-  const [value, setValue] = React.useState('');
+  const [system, setSystem] = React.useState<System | undefined>(initialSystem);
+  const [value, setValue] = React.useState(initialSystem?.description ?? '');
   const { upsertQuery } = useStreamSystemsApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
 
   const { value: listOfSystems } = useStreamSystems(definition);
 
   useEffect(() => {
-    if (typeof initialSystem === 'string') {
-      const foundSystem = listOfSystems?.systems.find((s) => s.name === initialSystem) || null;
+    if (systemName && !system) {
+      const foundSystem = listOfSystems?.systems.find((s) => s.name === systemName);
       setSystem(foundSystem);
       setValue(foundSystem?.description ?? '');
     } else {
       setSystem(initialSystem);
     }
-  }, [definition.name, listOfSystems, initialSystem]);
+  }, [definition.name, listOfSystems, initialSystem, systemName, system]);
 
-  useEffect(() => {
-    if (typeof initialSystem === 'string') return;
-    setValue(initialSystem.description || '');
-  }, [initialSystem]);
+  if (!system && !systemName) {
+    return null;
+  }
 
   return (
     <EuiFlyout

@@ -75,6 +75,7 @@ export const SomeThings: StoryFn<{}> = () => {
         loading: false,
         value: [
           {
+            title: 'High error rate',
             query: {
               id: 'match_everything',
               title: 'Match everything',

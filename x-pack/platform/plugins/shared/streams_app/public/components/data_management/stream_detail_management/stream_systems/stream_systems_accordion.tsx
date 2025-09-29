@@ -25,7 +25,7 @@ export const StreamSystemsAccordion = ({
   return (
     <EuiAccordion
       initialIsOpen={true}
-      id="steam-systems-accordion"
+      id="stream-systems-accordion"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

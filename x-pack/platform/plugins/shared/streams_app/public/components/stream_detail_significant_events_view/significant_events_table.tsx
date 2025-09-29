@@ -288,7 +288,7 @@ export function SignificantEventsTable({
       {isSystemDetailFlyoutOpen && (
         <StreamSystemDetailsFlyout
           definition={definition}
-          system={isSystemDetailFlyoutOpen}
+          systemName={isSystemDetailFlyoutOpen}
           closeFlyout={() => {
             setIsSystemDetailFlyoutOpen('');
           }}
