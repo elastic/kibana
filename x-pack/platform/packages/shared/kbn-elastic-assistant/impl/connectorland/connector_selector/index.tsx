@@ -29,16 +29,13 @@ import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { AddConnectorModal } from '../add_connector_modal';
-
-export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
-
 interface Props {
   fullWidth?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
   selectedConnectorId?: string;
-  displayFancy?: (aIConnector: AIConnector) => React.ReactNode;
+  displayFancy?: (label: string, aIConnector?: AIConnector) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
 }
@@ -81,18 +78,13 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const onChange = useCallback(
       (connectorId: string) => {
-        if (connectorId === ADD_NEW_CONNECTOR) {
-          setModalForceOpen(false);
-          setIsConnectorModalVisible(true);
-          return;
-        }
-
         const connector = (aiConnectors ?? []).find((c) => c.id === connectorId);
         if (connector) {
           onConnectorSelectionChange(connector);
+          setModalForceOpen(false);
         }
       },
-      [aiConnectors, onConnectorSelectionChange]
+      [aiConnectors, onConnectorSelectionChange, setModalForceOpen]
     );
 
     const cleanupAndCloseModal = useCallback(() => {
@@ -118,7 +110,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
 
     const selectedOrDefaultConnectorId = selectedConnectorId ?? defaultAIConnectorId
-    const selectedOrDefaultConnector = aiConnectors?.find((connector) => connector.id === selectedOrDefaultConnectorId) ?? aiConnectors?.at(0)
+    const selectedOrDefaultConnector = aiConnectors?.find((connector) => connector.id === selectedOrDefaultConnectorId)
+    const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.INLINE_CONNECTOR_PLACEHOLDER
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     // Group connectors into pre-configured and custom
@@ -180,7 +173,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     return (
       <>
-        {((!connectorExists && (customConnectors.length + preConfiguredConnectors.length) === 0) || !selectedOrDefaultConnector) ? (
+        {((!connectorExists && (customConnectors.length + preConfiguredConnectors.length) === 0)) ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
@@ -202,8 +195,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
                 }
               }}
               data-test-subj='connector-selector'
+              isDisabled={localIsDisabled}
               >
-                {displayFancy?.(selectedOrDefaultConnector) ?? selectedOrDefaultConnector.name}
+                {displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel}
               </EuiButton>
             }
             isOpen={modalForceOpen}

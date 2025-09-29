@@ -9,10 +9,12 @@ import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_c
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
+import {getAvailableAiConnectors} from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
+  
 
 export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
-> = async ({ http, application, siemMigrations }) => {
+> = async ({ http, application, siemMigrations, settings }) => {
   let isComplete = false;
   const authz = getConnectorsAuthz(application.capabilities);
 
@@ -20,7 +22,12 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors(http);
+
+  const allAiConnectors = await loadAiConnectors(http);
+
+  const aiConnectors = getAvailableAiConnectors({
+    allAiConnectors, settings,
+  })
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {

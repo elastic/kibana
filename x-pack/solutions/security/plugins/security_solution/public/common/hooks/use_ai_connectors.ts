@@ -11,19 +11,43 @@ import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
 import * as i18n from './translations';
 import { useKibana } from '../lib/kibana';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 
 const QUERY_KEY = ['ai_connectors'];
 
 export const useAIConnectors = () => {
   const {
-    services: { http },
+    services: { http, settings },
   } = useKibana();
 
   const { addError } = useAppToasts();
 
+  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultAiConnectorOnly = settings.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
+
   const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: () => loadAiConnectors(http),
+    queryFn: async () => {
+      const allAiConnectors = await loadAiConnectors(http)
+
+      const availableConnectors = allAiConnectors.filter((connector) => {
+        if (defaultAiConnectorOnly) {
+          return connector.id === defaultAiConnectorId;
+        }
+        return true;
+      });
+
+      if (availableConnectors.length === 0) {
+        return allAiConnectors;
+      }
+      return availableConnectors;
+    },
     onError: (err) => {
       addError(err, {
         title: i18n.ERROR_FETCH_AI_CONNECTORS,

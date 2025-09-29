@@ -65,8 +65,8 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     const { connectorId } = defaultSettings;
 
     const {
-      triggersActionsUi: { actionTypeRegistry },
       siemMigrations,
+      settings
     } = useKibana().services;
 
     const { aiConnectors, isLoading } = useAIConnectors();
@@ -78,20 +78,6 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     );
 
     const startMigrationModalTitleId = useGeneratedHtmlId();
-
-    const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
-      return aiConnectors.map((connector) => {
-        const connectorDescription = getConnectorDescription({
-          connector,
-          actionTypeRegistry,
-        });
-        return {
-          id: connector.id,
-          name: connector.name,
-          description: connectorDescription,
-        };
-      });
-    }, [actionTypeRegistry, aiConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -175,12 +161,13 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                 aria-required={true}
               >
                 <ConnectorSelector
-                  connectors={connectorOptions}
+                  connectors={aiConnectors}
                   selectedId={selectedConnectorId}
                   onChange={setSelectedConnectorId}
                   isInvalid={!selectedConnectorId}
                   isLoading={isLoading}
                   mode={'combobox'}
+                  settings={settings}
                 />
               </EuiFormRow>
               {additionalSettings && <EuiFormRow>{additionalSettings}</EuiFormRow>}

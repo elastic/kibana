@@ -66,6 +66,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
         append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
+        "data-test-subj": connector.value,
       })),
     [props.preConfiguredConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
@@ -77,6 +78,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
         append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
+        "data-test-subj": connector.value,
       })),
     [props.customConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );

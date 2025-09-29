@@ -10,6 +10,7 @@ import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_c
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from './authz';
 import type { AssistantCardMetadata } from '../../assistant/types';
+import {getAvailableAiConnectors} from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 
 const completeBadgeText = (count: number) =>
   i18n.translate('xpack.securitySolution.onboarding.assistantCard.badge.completeText', {
@@ -19,14 +20,18 @@ const completeBadgeText = (count: number) =>
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
-> = async ({ http, application }) => {
+> = async ({ http, application, settings }) => {
   const authz = getConnectorsAuthz(application.capabilities);
 
   if (!authz.canReadConnectors) {
     return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors(http);
+  const allAiConnectors = await loadAiConnectors(http);
+
+  const aiConnectors = getAvailableAiConnectors({
+    allAiConnectors, settings,
+  })
 
   return {
     isComplete: aiConnectors.length > 0,
