@@ -46,7 +46,7 @@ export default function OverviewHeader({ handleRefresh }: { handleRefresh: () =>
         `}
       >
         <unifiedSearch.ui.SearchBar
-          appName="streamsApp"
+          appName="datasetQualityDetails"
           showDatePicker={true}
           showFilterBar={false}
           showQueryMenu={false}
@@ -64,6 +64,8 @@ export default function OverviewHeader({ handleRefresh }: { handleRefresh: () =>
           onRefreshChange={({ refreshInterval, isPaused }) =>
             onRefreshChange({ refreshInterval, isPaused })
           }
+          refreshInterval={timeRange.refresh.value}
+          isRefreshPaused={timeRange.refresh.pause}
         />
       </EuiFlexGroup>
     </EuiFlexGroup>

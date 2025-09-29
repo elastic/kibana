@@ -94,7 +94,7 @@ export default function Filters() {
       </EuiFilterGroup>
       <EuiFlexItem grow={false}>
         <unifiedSearch.ui.SearchBar
-          appName="streamsApp"
+          appName="datasetQuality"
           showDatePicker={true}
           showFilterBar={false}
           showQueryMenu={false}
@@ -112,6 +112,8 @@ export default function Filters() {
           onRefreshChange={({ refreshInterval, isPaused }) =>
             onRefreshChange({ refreshInterval, isPaused })
           }
+          refreshInterval={timeRange.refresh.value}
+          isRefreshPaused={timeRange.refresh.pause}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

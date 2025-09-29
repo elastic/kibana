@@ -35,7 +35,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
-  const { timeState, setTime } = useTimefilter();
+  const { timeState, setTime, refreshInterval, setRefreshInterval } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -59,7 +59,7 @@ export const useDatasetQualityController = (
           timeRange: {
             from: timeState.timeRange.from,
             to: timeState.timeRange.to,
-            refresh: DEFAULT_DATEPICKER_REFRESH,
+            refresh: refreshInterval,
           },
         };
       }
@@ -89,6 +89,7 @@ export const useDatasetQualityController = (
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
             setTime,
+            setRefreshInterval,
           });
         }
       );
