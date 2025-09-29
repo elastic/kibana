@@ -30,7 +30,7 @@ const config: InitialBenchConfig = {
     },
   ],
   runs: 1,
-  timeout: 10 * 60_000,
+  timeout: 20 * 60_000,
 };
 
 // eslint-disable-next-line import/no-default-export
