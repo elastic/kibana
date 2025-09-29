@@ -13,6 +13,7 @@ import { TechnicalPreviewBadge } from '../technical_preview_badge';
 interface Props {
   placeholder: string;
   searchQuery: string;
+  isLoading?: boolean;
   onChangeSearchQuery: (value: string) => void;
   techPreview?: boolean;
 }
@@ -21,6 +22,7 @@ export function TableSearchBar({
   placeholder,
   searchQuery,
   onChangeSearchQuery,
+  isLoading,
   techPreview = false,
 }: Props) {
   const debouncedSearchQuery = useMemo(
@@ -46,6 +48,7 @@ export function TableSearchBar({
           placeholder={placeholder}
           fullWidth={true}
           defaultValue={searchQuery}
+          isLoading={isLoading}
           onChange={(e) => {
             debouncedSearchQuery(e.target.value);
           }}
