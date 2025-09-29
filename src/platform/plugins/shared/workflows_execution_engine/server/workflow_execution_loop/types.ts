@@ -27,4 +27,5 @@ export interface WorkflowExecutionLoopParams {
   esClient: Client;
   fakeRequest: KibanaRequest<unknown, unknown, unknown, any>;
   coreStart: CoreStart;
+  taskAbortController: AbortController;
 }

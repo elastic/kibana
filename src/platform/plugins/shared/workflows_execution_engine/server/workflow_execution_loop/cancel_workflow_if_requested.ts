@@ -25,13 +25,15 @@ export async function cancelWorkflowIfRequested(
   monitoredContext: WorkflowContextManager,
   monitorAbortController?: AbortController
 ): Promise<void> {
-  const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowExecutionState.getWorkflowExecution().id,
-    workflowExecutionState.getWorkflowExecution().spaceId
-  );
+  if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
+    const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowExecutionState.getWorkflowExecution().id,
+      workflowExecutionState.getWorkflowExecution().spaceId
+    );
 
-  if (!currentExecution?.cancelRequested) {
-    return;
+    if (!currentExecution?.cancelRequested) {
+      return;
+    }
   }
 
   monitorAbortController?.abort();

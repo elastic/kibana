@@ -78,6 +78,7 @@ export interface EsWorkflowExecution {
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
+  cancellationReason?: string;
   cancelledAt?: string;
   cancelledBy?: string;
   duration: number;

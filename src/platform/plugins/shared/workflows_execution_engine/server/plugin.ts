@@ -73,6 +73,7 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -118,10 +119,11 @@ export class WorkflowsExecutionEnginePlugin
                 esClient: clientToUse,
                 fakeRequest: fakeRequestFromContainer,
                 coreStart: coreStartFromContainer,
+                taskAbortController,
               });
             },
             async cancel() {
-              // Cancel function for the task
+              taskAbortController.abort();
             },
           };
         },
@@ -134,6 +136,8 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
+
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -179,9 +183,12 @@ export class WorkflowsExecutionEnginePlugin
                 esClient: clientToUse,
                 fakeRequest: fakeRequestFromContainer,
                 coreStart: coreStartFromContainer,
+                taskAbortController,
               });
             },
-            async cancel() {},
+            async cancel() {
+              taskAbortController.abort();
+            },
           };
         },
       },
@@ -265,6 +272,7 @@ export class WorkflowsExecutionEnginePlugin
           esClient: clientToUse,
           fakeRequest,
           coreStart,
+          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
         });
       } else {
         // Normal manual execution - schedule a task
@@ -379,6 +387,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
+        cancellationReason: 'Cancelled by user',
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });

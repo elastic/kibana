@@ -32,6 +32,15 @@ import { runNode } from './run_node';
  * - Any other non-RUNNING status is reached
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+  params.taskAbortController.signal.addEventListener('abort', () => {
+    params.workflowExecutionState.updateWorkflowExecution({
+      cancelRequested: true,
+      cancelledAt: new Date().toISOString(),
+      cancellationReason: 'Task aborted',
+      status: ExecutionStatus.CANCELLED,
+    });
+  });
+
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     await runNode(params);
     await params.workflowLogger.flushEvents();
