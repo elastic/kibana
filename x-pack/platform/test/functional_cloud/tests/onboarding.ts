@@ -329,6 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
     });
+
     it('Redirect and update deployment', async () => {
       const resourceDataString = '{"deployment":{"id":"deployment-id","name":"deployment-name"}}';
 
@@ -366,7 +367,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const resourceDataStringUpdated =
-        '{"deployment":{"id":"new-deployment-id","name":"new-deployment-name"}';
+        '{"deployment":{"id":"new-deployment-id","name":"new-deployment-name"}}';
 
       await browser.get(
         deployment.getHostPort() +
