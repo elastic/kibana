@@ -46,7 +46,7 @@ export class InstallationService {
       body: JSON.stringify({ inferenceId }),
     });
 
-    if (!response.installed) {
+    if (!response?.installed) {
       throw new Error(
         `Installation did not complete successfully.${
           response.failureReason ? `\n${response.failureReason}` : ''

@@ -146,7 +146,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
     const { forceUpdate, inferenceIds } = options ?? {};
     const idsToUpdate: string[] =
-      inferenceIds ?? (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+      inferenceIds.length > 0
+        ? inferenceIds
+        : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
