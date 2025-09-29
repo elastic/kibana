@@ -262,6 +262,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'AI Assistant',
             }),
             link: 'observabilityAIAssistant',
+            iconV2: 'sparkles',
           },
           {
             id: 'machine_learning-landing',
