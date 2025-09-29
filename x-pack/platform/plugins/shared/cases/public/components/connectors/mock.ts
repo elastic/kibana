@@ -15,6 +15,7 @@ export const connector = {
   isPreconfigured: false,
   isDeprecated: false,
   isSystemAction: false,
+  isConnectorTypeDeprecated: false,
 };
 
 export const swimlaneConnector = {
@@ -33,6 +34,7 @@ export const swimlaneConnector = {
   isPreconfigured: false,
   isDeprecated: false,
   isSystemAction: false,
+  isConnectorTypeDeprecated: false,
 };
 
 export const theHiveConnector = {
@@ -43,6 +45,7 @@ export const theHiveConnector = {
   isPreconfigured: false,
   isDeprecated: false,
   isSystemAction: false,
+  isConnectorTypeDeprecated: false,
 };
 
 export const issues = [

@@ -16,6 +16,7 @@ export const getMockConnectors = (): AIConnector[] => [
     isSystemAction: false,
     id: 'gpt41Azure',
     name: 'GPT-4.1',
+    isConnectorTypeDeprecated: false,
   },
   {
     actionTypeId: '.gemini',
@@ -25,6 +26,7 @@ export const getMockConnectors = (): AIConnector[] => [
     isSystemAction: false,
     id: 'gemini_2_5_pro',
     name: 'Gemini 2.5 Pro',
+    isConnectorTypeDeprecated: false,
   },
   {
     actionTypeId: '.bedrock',
@@ -34,6 +36,7 @@ export const getMockConnectors = (): AIConnector[] => [
     isSystemAction: false,
     id: 'pmeClaudeV37SonnetUsEast1',
     name: 'Claude 3.7 Sonnet',
+    isConnectorTypeDeprecated: false,
   },
   {
     actionTypeId: '.inference',
@@ -43,5 +46,6 @@ export const getMockConnectors = (): AIConnector[] => [
     isSystemAction: false,
     id: 'elastic-llm',
     name: 'Elastic LLM',
+    isConnectorTypeDeprecated: false,
   },
 ];

@@ -406,6 +406,7 @@ describe('BackfillClient', () => {
           isPreconfigured: false,
           isSystemAction: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       const mockData = [
@@ -628,6 +629,7 @@ describe('BackfillClient', () => {
           isPreconfigured: false,
           isSystemAction: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       const mockData = [
@@ -1011,6 +1013,7 @@ describe('BackfillClient', () => {
           isPreconfigured: false,
           isSystemAction: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_456',
@@ -1021,6 +1024,7 @@ describe('BackfillClient', () => {
           isMissingSecrets: false,
           isPreconfigured: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       const mockData = [getMockData()];
@@ -1163,6 +1167,7 @@ describe('BackfillClient', () => {
           isPreconfigured: false,
           isSystemAction: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       const mockData = [
@@ -1384,6 +1389,7 @@ describe('BackfillClient', () => {
           isPreconfigured: false,
           isSystemAction: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       const mockData = [

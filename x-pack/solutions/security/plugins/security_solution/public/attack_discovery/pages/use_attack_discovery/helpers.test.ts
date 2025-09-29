@@ -26,6 +26,7 @@ const connector: ActionConnector = {
   isSystemAction: false,
   name: 'Azure OpenAI GPT-4o',
   secrets: { secretTextField: 'a secret' },
+  isConnectorTypeDeprecated: false,
 };
 
 describe('getGenAiConfig', () => {

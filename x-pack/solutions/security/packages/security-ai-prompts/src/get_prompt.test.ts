@@ -19,6 +19,7 @@ const defaultConnector = {
   isDeprecated: false,
   isSystemAction: false,
   actionTypeId: '.inference',
+  isConnectorTypeDeprecated: false,
 };
 describe('get_prompt', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -503,6 +504,7 @@ describe('get_prompt', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         actionsClient,
         connectorId: 'connector-123',
@@ -536,6 +538,7 @@ describe('get_prompt', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         actionsClient,
         connectorId: 'connector-123',

@@ -45,6 +45,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
         subFeature: 'endpointSecurity' as SubFeature,
+        isDeprecated: false,
       },
     ];
 
@@ -109,6 +110,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -190,6 +192,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -233,6 +236,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 

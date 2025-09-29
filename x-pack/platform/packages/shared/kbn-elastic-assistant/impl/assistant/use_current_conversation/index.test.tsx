@@ -37,6 +37,7 @@ const defaultConnectorMock: AIConnector = {
     apiProvider: 'OpenAI',
     apiUrl: 'https://api.openai.com/v1/chat/completions',
   },
+  isConnectorTypeDeprecated: false,
 };
 const mockData = {
   welcome_id: {

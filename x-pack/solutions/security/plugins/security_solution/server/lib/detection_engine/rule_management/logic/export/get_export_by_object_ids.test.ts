@@ -30,6 +30,7 @@ const connectors = [
     isDeprecated: false,
     isSystemAction: false,
     referencedByCount: 1,
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'preconfigured-connector',
@@ -40,6 +41,7 @@ const connectors = [
     isDeprecated: false,
     isSystemAction: false,
     referencedByCount: 1,
+    isConnectorTypeDeprecated: false,
   },
 ];
 

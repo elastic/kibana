@@ -57,6 +57,7 @@ export const mockConnectors: AIConnector[] = [
     config: {
       apiProvider: 'OpenAI',
     },
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
@@ -70,6 +71,7 @@ export const mockConnectors: AIConnector[] = [
     config: {
       apiProvider: 'OpenAI',
     },
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'c29c28a0-20fe-11ee-9386-a1f4d42ec542',
@@ -83,6 +85,7 @@ export const mockConnectors: AIConnector[] = [
     config: {
       apiProvider: 'OpenAI',
     },
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'c29c28a0-20fe-11ee-9396-a1f4d42ec542',
@@ -92,5 +95,6 @@ export const mockConnectors: AIConnector[] = [
     isPreconfigured: true,
     isDeprecated: false,
     isSystemAction: false,
+    isConnectorTypeDeprecated: false,
   },
 ];

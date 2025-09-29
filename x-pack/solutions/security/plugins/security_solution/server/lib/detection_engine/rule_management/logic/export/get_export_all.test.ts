@@ -38,6 +38,7 @@ const connectors = [
     isDeprecated: false,
     isSystemAction: false,
     referencedByCount: 1,
+    isConnectorTypeDeprecated: false,
   },
   {
     id: '456',
@@ -48,6 +49,7 @@ const connectors = [
     isSystemAction: false,
     isDeprecated: false,
     referencedByCount: 1,
+    isConnectorTypeDeprecated: false,
   },
 ];
 describe('getExportAll', () => {

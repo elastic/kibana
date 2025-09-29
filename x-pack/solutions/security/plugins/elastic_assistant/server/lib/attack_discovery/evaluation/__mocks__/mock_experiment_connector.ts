@@ -23,4 +23,5 @@ export const mockExperimentConnector: Connector = {
   isPreconfigured: true,
   isSystemAction: false,
   isDeprecated: false,
+  isConnectorTypeDeprecated: false,
 } as Connector;

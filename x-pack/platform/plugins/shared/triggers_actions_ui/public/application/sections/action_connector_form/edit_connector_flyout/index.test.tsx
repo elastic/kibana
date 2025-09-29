@@ -42,6 +42,7 @@ const connector: ActionConnector = {
   isPreconfigured: false,
   isMissingSecrets: false,
   isSystemAction: false,
+  isConnectorTypeDeprecated: false,
 };
 
 describe('EditConnectorFlyout', () => {

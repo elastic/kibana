@@ -188,6 +188,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.listTypes.mockReset();
@@ -238,6 +239,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -255,6 +257,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -566,6 +569,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -583,6 +587,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -600,6 +605,7 @@ describe('update()', () => {
         isPreconfigured: true,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
@@ -859,6 +865,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -876,6 +883,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'system_action-id',
@@ -886,6 +894,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -2018,6 +2027,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -2035,6 +2045,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2636,6 +2647,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -2653,6 +2665,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -2712,6 +2725,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
@@ -2906,6 +2920,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -2923,6 +2938,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -3275,6 +3291,7 @@ describe('update()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -3747,6 +3764,7 @@ describe('update()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '2',
@@ -3764,6 +3782,7 @@ describe('update()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -3774,6 +3793,7 @@ describe('update()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });
@@ -4681,6 +4701,7 @@ describe('update()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '2',
@@ -4698,6 +4719,7 @@ describe('update()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({

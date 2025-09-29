@@ -379,6 +379,7 @@ const createConnectorMock = (
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
     overrides
   );

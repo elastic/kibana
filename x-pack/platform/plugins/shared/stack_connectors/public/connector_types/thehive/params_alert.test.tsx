@@ -42,6 +42,7 @@ describe('TheHiveParamsFields renders', () => {
     isPreconfigured: false,
     isDeprecated: false,
     isSystemAction: false as const,
+    isConnectorTypeDeprecated: false,
   };
 
   const editAction = jest.fn();

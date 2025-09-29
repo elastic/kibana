@@ -36,6 +36,7 @@ describe('updateActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
+      isConnectorTypeDeprecated: false,
     };
     const resolvedValue = { ...connector, id };
 

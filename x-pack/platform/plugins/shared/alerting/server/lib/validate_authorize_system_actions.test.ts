@@ -40,6 +40,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
     ]);
   });
@@ -191,6 +192,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'system_action-id-2',
@@ -201,6 +203,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -254,6 +257,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'system_action-id-2',
@@ -264,6 +268,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 

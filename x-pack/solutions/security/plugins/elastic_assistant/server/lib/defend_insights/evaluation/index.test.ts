@@ -80,6 +80,7 @@ describe('evaluateDefendInsights', () => {
           eventsEndpointId: 'eventsEndpointId',
           eventsValue: 'eventsValue',
         },
+        isConnectorTypeDeprecated: false,
       },
     ];
 

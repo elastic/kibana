@@ -52,6 +52,7 @@ const connector: ActionConnector = {
   isPreconfigured: false,
   isDeprecated: false,
   isSystemAction: false as const,
+  isConnectorTypeDeprecated: false,
 };
 const editAction = jest.fn();
 const defaultProps = {

@@ -35,6 +35,7 @@ describe('ConnectorSetup', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: 'testType2',
@@ -45,6 +46,7 @@ describe('ConnectorSetup', () => {
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     },
   ];
 

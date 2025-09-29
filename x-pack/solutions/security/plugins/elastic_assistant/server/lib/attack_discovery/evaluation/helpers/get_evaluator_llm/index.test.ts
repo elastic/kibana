@@ -46,6 +46,7 @@ const experimentConnector: Connector = {
   isPreconfigured: true,
   isSystemAction: false,
   isDeprecated: false,
+  isConnectorTypeDeprecated: false,
 } as Connector;
 
 const logger = loggerMock.create();

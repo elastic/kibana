@@ -20,5 +20,5 @@ export interface ConnectorType {
   supportedFeatureIds: ConnectorTypeSchemaType['supportedFeatureIds'];
   isSystemActionType: ConnectorTypeSchemaType['isSystemActionType'];
   subFeature?: ConnectorTypeSchemaType['subFeature'];
-  isDeprecated?: ConnectorTypeSchemaType['isDeprecated'];
+  isDeprecated: ConnectorTypeSchemaType['isDeprecated'];
 }

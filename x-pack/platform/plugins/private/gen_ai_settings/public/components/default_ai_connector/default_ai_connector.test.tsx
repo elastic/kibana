@@ -33,6 +33,7 @@ const mockConnectors = {
       isSystemAction: false,
       name: 'Pre configured Connector',
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
     {
       actionTypeId: 'custom.1',
@@ -42,6 +43,7 @@ const mockConnectors = {
       isSystemAction: false,
       name: 'Custom Connector 1',
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
   ],
 };

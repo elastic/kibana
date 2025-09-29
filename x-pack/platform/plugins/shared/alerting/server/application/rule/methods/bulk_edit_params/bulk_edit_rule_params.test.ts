@@ -181,6 +181,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.listTypes.mockReset();

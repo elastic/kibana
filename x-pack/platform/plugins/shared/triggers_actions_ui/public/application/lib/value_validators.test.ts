@@ -115,6 +115,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
     const configErrors = {};
@@ -133,6 +134,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
     const secretsErrors = {};
     const configErrors = { apiUrl: ['apiUrl is required'] };
@@ -153,6 +155,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
     const configErrors = {};

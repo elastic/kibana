@@ -120,6 +120,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         config: { ...updatedConnector.config, usesTableApi: false },
         secrets: { ...updatedConnector.secrets },
         id: id ?? '',
+        isConnectorTypeDeprecated: false,
       };
 
       try {

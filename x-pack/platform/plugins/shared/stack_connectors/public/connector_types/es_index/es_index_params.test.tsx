@@ -24,6 +24,7 @@ const actionConnector = {
   isDeprecated: false,
   name: 'test name',
   secrets: {},
+  isConnectorTypeDeprecated: false,
 };
 
 const preconfiguredActionConnector = {
@@ -37,6 +38,7 @@ const preconfiguredActionConnector = {
   isDeprecated: false,
   name: 'Alert history Elasticsearch index',
   secrets: {},
+  isConnectorTypeDeprecated: false,
 };
 
 describe('IndexParamsFields renders', () => {

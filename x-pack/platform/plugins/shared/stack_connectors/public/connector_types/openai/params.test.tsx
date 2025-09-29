@@ -60,6 +60,7 @@ describe('Gen AI Params Fields renders', () => {
           apiProvider,
           apiUrl: DEFAULT_URL,
         },
+        isConnectorTypeDeprecated: false,
       };
       render(
         <ParamsFields

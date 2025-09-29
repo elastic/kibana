@@ -161,6 +161,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.listTypes.mockReset();
@@ -828,6 +829,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -845,6 +847,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1022,6 +1025,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -1039,6 +1043,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -1056,6 +1061,7 @@ describe('create()', () => {
         isPreconfigured: true,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -1306,6 +1312,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -1323,6 +1330,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'system_action-id',
@@ -1333,6 +1341,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: true,
+        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -3237,6 +3246,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -3842,6 +3852,7 @@ describe('create()', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -4226,6 +4237,7 @@ describe('create()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -4236,6 +4248,7 @@ describe('create()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 

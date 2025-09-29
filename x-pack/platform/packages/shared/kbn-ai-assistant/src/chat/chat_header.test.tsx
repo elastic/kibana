@@ -54,6 +54,7 @@ const elasticManagedConnector = {
     },
   },
   referencedByCount: 0,
+  isConnectorTypeDeprecated: false,
 };
 
 describe('ChatHeader', () => {

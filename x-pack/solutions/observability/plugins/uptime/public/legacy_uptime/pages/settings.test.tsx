@@ -25,6 +25,7 @@ describe('settings', () => {
           name: 'Slack',
           supportedFeatureIds: ['uptime'],
           isSystemActionType: false,
+          isDeprecated: false,
         },
       ]);
     });

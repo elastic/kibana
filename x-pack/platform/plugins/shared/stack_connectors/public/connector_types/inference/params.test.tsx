@@ -37,6 +37,7 @@ describe('Inference Params Fields renders', () => {
           isSystemAction: false,
           secrets: {},
           name: 'AI Connector',
+          isConnectorTypeDeprecated: false,
         }}
         errors={{ body: [] }}
         editAction={() => {}}
@@ -76,6 +77,7 @@ describe('Inference Params Fields renders', () => {
           },
           taskType: 'completion',
         },
+        isConnectorTypeDeprecated: false,
       };
       render(
         <ParamsFields
@@ -132,6 +134,7 @@ describe('Inference Params Fields renders', () => {
           isSystemAction: false,
           secrets: {},
           name: 'AI Connector',
+          isConnectorTypeDeprecated: false,
         }}
       />
     );
@@ -165,6 +168,7 @@ describe('Inference Params Fields renders', () => {
           isSystemAction: false,
           secrets: {},
           name: 'AI Connector',
+          isConnectorTypeDeprecated: false,
         }}
       />
     );

@@ -24,6 +24,7 @@ describe('helpers', () => {
         apiProvider: 'OpenAI',
         apiUrl: 'https://api.openai.com/v1/chat/completions',
       },
+      isConnectorTypeDeprecated: false,
     };
     it('should return undefined if connectors array is undefined', () => {
       const connectors = undefined;

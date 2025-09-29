@@ -49,6 +49,7 @@ const mockExperimentConnector = {
   isPreconfigured: true,
   isSystemAction: false,
   isDeprecated: false,
+  isConnectorTypeDeprecated: false,
 } as Connector;
 
 const datasetName = 'test-dataset';

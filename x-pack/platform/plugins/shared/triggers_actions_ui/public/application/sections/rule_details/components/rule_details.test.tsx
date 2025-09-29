@@ -383,6 +383,7 @@ describe('rule_details', () => {
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
             isSystemActionType: false,
+            isDeprecated: false,
           },
         ];
 
@@ -427,6 +428,7 @@ describe('rule_details', () => {
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
             isSystemActionType: false,
+            isDeprecated: false,
           },
           {
             id: '.email',
@@ -437,6 +439,7 @@ describe('rule_details', () => {
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
             isSystemActionType: false,
+            isDeprecated: false,
           },
         ];
 
@@ -507,6 +510,7 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
@@ -636,6 +640,7 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);

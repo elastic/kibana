@@ -195,6 +195,7 @@ describe('bulkEdit()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
+        isConnectorTypeDeprecated: false,
       },
     ]);
     actionsClient.listTypes.mockReset();
@@ -998,6 +999,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -1008,6 +1010,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1168,6 +1171,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -1178,6 +1182,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1330,6 +1335,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -1340,6 +1346,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1441,6 +1448,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -1451,6 +1459,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1491,6 +1500,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1542,6 +1552,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1596,6 +1607,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1648,6 +1660,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1697,6 +1710,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -1829,6 +1843,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: 'system_action-id',
@@ -1839,6 +1854,7 @@ describe('bulkEdit()', () => {
           isPreconfigured: false,
           isDeprecated: false,
           isSystemAction: true,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 

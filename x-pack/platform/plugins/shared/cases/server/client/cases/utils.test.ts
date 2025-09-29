@@ -99,6 +99,7 @@ describe('utils', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: false,
+      isConnectorTypeDeprecated: false,
     };
 
     it('creates an external incident correctly for Jira', async () => {

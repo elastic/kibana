@@ -198,6 +198,7 @@ describe('utils', () => {
               config: { foo: 'bar' },
               isMissingSecrets: false,
               isSystemAction: false,
+              isConnectorTypeDeprecated: false,
             },
           ],
           casesConfigurationsMock,

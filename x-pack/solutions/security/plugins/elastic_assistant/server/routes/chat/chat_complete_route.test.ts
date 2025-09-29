@@ -203,6 +203,7 @@ describe('chatCompleteRoute', () => {
           b: true,
           c: true,
         },
+        isConnectorTypeDeprecated: false,
       },
     ]);
   });

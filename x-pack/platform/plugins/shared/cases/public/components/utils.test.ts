@@ -43,6 +43,7 @@ describe('Utils', () => {
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: false,
+    isConnectorTypeDeprecated: false,
   };
 
   describe('getConnectorIcon', () => {

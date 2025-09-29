@@ -690,6 +690,7 @@ describe('useCasesColumns ', () => {
                   isPreconfigured: false,
                   isSystemAction: false,
                   isDeprecated: false,
+                  isConnectorTypeDeprecated: false,
                 },
               ]}
             />

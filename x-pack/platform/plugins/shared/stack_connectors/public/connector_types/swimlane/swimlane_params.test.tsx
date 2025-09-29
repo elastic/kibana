@@ -38,6 +38,7 @@ describe('SwimlaneParamsFields renders', () => {
     isPreconfigured: false,
     isSystemAction: false as const,
     isDeprecated: false,
+    isConnectorTypeDeprecated: false,
   };
 
   const defaultProps = {

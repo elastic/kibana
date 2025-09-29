@@ -33,6 +33,7 @@ const connector = {
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
+  isConnectorTypeDeprecated: false,
 } as ActionConnector;
 
 describe('useGetChoices', () => {

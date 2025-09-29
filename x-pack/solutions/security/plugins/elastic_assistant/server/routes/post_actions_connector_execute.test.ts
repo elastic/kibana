@@ -189,6 +189,7 @@ describe('postActionsConnectorExecuteRoute', () => {
           b: true,
           c: true,
         },
+        isConnectorTypeDeprecated: false,
       },
     ]);
   });

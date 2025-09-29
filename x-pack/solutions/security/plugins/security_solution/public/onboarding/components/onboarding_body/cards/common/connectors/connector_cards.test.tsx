@@ -48,6 +48,7 @@ const mockConnectors: AIConnector[] = [
     isDeprecated: false,
     config: {},
     secrets: {},
+    isConnectorTypeDeprecated: false,
   },
   {
     id: '2',
@@ -58,6 +59,7 @@ const mockConnectors: AIConnector[] = [
     isDeprecated: false,
     config: {},
     secrets: {},
+    isConnectorTypeDeprecated: false,
   },
 ];
 

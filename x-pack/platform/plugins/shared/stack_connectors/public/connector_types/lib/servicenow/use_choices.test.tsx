@@ -32,6 +32,7 @@ const actionConnector = {
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
+  isConnectorTypeDeprecated: false,
 } as ActionConnector;
 
 const getChoicesResponse = [

@@ -47,6 +47,7 @@ describe('client', () => {
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
       {
         id: '.servicenow',
@@ -57,6 +58,7 @@ describe('client', () => {
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
       {
         id: '.unsupported',
@@ -67,6 +69,7 @@ describe('client', () => {
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
       {
         id: '.swimlane',
@@ -77,6 +80,7 @@ describe('client', () => {
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
 
@@ -90,6 +94,7 @@ describe('client', () => {
         isDeprecated: false,
         isSystemAction: false,
         referencedByCount: 1,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -99,8 +104,8 @@ describe('client', () => {
         isPreconfigured: false,
         isDeprecated: false,
         isSystemAction: false,
-
         referencedByCount: 1,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '3',
@@ -111,6 +116,7 @@ describe('client', () => {
         isDeprecated: false,
         isSystemAction: false,
         referencedByCount: 1,
+        isConnectorTypeDeprecated: false,
       },
     ];
 
@@ -159,6 +165,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -209,6 +216,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 

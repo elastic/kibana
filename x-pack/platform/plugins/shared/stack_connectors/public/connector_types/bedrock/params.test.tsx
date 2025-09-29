@@ -62,6 +62,7 @@ describe('Bedrock Params Fields renders', () => {
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
       },
+      isConnectorTypeDeprecated: false,
     };
     render(
       <BedrockParamsFields

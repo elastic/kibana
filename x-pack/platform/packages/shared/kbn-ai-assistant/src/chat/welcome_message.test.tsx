@@ -22,6 +22,7 @@ const mockConnectors: UseGenAIConnectorsResult = {
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
   ],
   loading: false,

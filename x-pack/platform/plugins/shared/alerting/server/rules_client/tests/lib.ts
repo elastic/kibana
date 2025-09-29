@@ -89,6 +89,7 @@ export function getBeforeSetup(
       config: {
         foo: 'bar',
       },
+      isConnectorTypeDeprecated: false,
     },
     {
       id: '2',
@@ -100,6 +101,7 @@ export function getBeforeSetup(
       config: {
         foo: 'bar',
       },
+      isConnectorTypeDeprecated: false,
     },
     {
       id: 'testPreconfigured',
@@ -108,6 +110,7 @@ export function getBeforeSetup(
       isSystemAction: false,
       isDeprecated: false,
       name: 'test',
+      isConnectorTypeDeprecated: false,
     },
   ]);
   rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
