@@ -24,6 +24,11 @@ export interface DocumentationManagerAPI {
    */
   update(options?: DocUpdateOptions): Promise<void>;
   /**
+   * Update the product documentation for all previously installed inference IDs to the latest version.
+   * No-op if the product documentation is not currently installed.
+   */
+  updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
+  /**
    * Uninstall the product documentation.
    * No-op if the product documentation is not currently installed.
    */
@@ -109,4 +114,24 @@ export interface DocUpdateOptions {
    * If provided, the docs will be updated with the model indicated by Inference ID
    */
   inferenceId: string;
+}
+
+/**
+ * Options for {@link DocumentationManagerAPI.updateAll}
+ */
+export interface DocUpdateAllOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
 }

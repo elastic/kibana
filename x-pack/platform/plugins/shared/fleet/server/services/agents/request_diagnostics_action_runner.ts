@@ -13,6 +13,7 @@ import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
 import type { Agent } from '../../types';
 import { REQUEST_DIAGNOSTICS_TIMEOUT_MS } from '../../constants';
 import { FleetError } from '../../errors';
+import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 import { createAgentAction, createErrorActionResults } from './actions';
@@ -59,8 +60,9 @@ export async function requestDiagnosticsBatch(
   const agentIds = givenAgents.map((agent) => agent.id);
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentIds,
     created_at: now,

@@ -95,6 +95,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

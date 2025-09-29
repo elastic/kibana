@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { sharedWorkpads, tick } from '../test';
 import { share } from './shareable';
 
@@ -17,106 +17,68 @@ describe('Canvas Shareable Workpad API', () => {
   // Mock the AJAX load of the workpad.
   beforeEach(function () {
     global.fetch = jest.fn().mockImplementation(() => {
-      const p = new Promise((resolve, _reject) => {
-        resolve({
-          ok: true,
-          json: () => {
-            return sharedWorkpads.hello;
-          },
-        });
+      return Promise.resolve({
+        ok: true,
+        json: () => sharedWorkpads.hello,
       });
-      return p;
     });
   });
 
   test('Placed successfully with default properties', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const wrapper = mount(<div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json" />, {
-      attachTo: container,
-    });
-
-    expect(wrapper.render()).toMatchSnapshot();
+    const { container } = render(
+      <div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json" />
+    );
+    expect(container).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('Placed successfully with height specified', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const wrapper = mount(
-      <div kbn-canvas-shareable="canvas" kbn-canvas-height="350" kbn-canvas-url="workpad.json" />,
-      {
-        attachTo: container,
-      }
+    const { container } = render(
+      <div kbn-canvas-shareable="canvas" kbn-canvas-height="350" kbn-canvas-url="workpad.json" />
     );
-
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.html()).toMatch(
-      /<div class=\"container\" style="height: 350px; width: 525px;\">/
-    );
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container.querySelector('.container')).toHaveStyle('height: 350px; width: 525px;');
+    expect(container).toMatchSnapshot();
   });
 
   test('Placed successfully with width specified', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const wrapper = mount(
-      <div kbn-canvas-shareable="canvas" kbn-canvas-width="400" kbn-canvas-url="workpad.json" />,
-      {
-        attachTo: container,
-      }
+    const { container } = render(
+      <div kbn-canvas-shareable="canvas" kbn-canvas-width="400" kbn-canvas-url="workpad.json" />
     );
-
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.html()).toMatch(
-      /<div class=\"container\" style="height: 267px; width: 400px;\">/
-    );
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container.querySelector('.container')).toHaveStyle('height: 267px; width: 400px;');
+    expect(container).toMatchSnapshot();
   });
 
   test('Placed successfully with width and height specified', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const wrapper = mount(
+    const { container } = render(
       <div
         kbn-canvas-shareable="canvas"
         kbn-canvas-width="350"
         kbn-canvas-height="350"
         kbn-canvas-url="workpad.json"
-      />,
-      {
-        attachTo: container,
-      }
+      />
     );
-
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.html()).toMatch(
-      /<div class=\"container\" style="height: 350px; width: 350px;\">/
-    );
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container.querySelector('.container')).toHaveStyle('height: 350px; width: 350px;');
+    expect(container).toMatchSnapshot();
   });
 
   test('Placed successfully with page specified', async () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const wrapper = mount(
-      <div kbn-canvas-shareable="canvas" kbn-canvas-page="0" kbn-canvas-url="workpad.json" />,
-      {
-        attachTo: container,
-      }
+    const { container } = render(
+      <div kbn-canvas-shareable="canvas" kbn-canvas-page="0" kbn-canvas-url="workpad.json" />
     );
-
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.render()).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

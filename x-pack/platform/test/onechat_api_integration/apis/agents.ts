@@ -25,7 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
         instructions: 'You are a helpful test agent',
         tools: [
           {
-            type: 'builtin',
             tool_ids: ['*'],
           },
         ],
@@ -118,7 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
             instructions: 'Test agent with invalid tools',
             tools: [
               {
-                type: 'invalid_type',
                 tool_ids: ['non-existent-tool'],
               },
             ],

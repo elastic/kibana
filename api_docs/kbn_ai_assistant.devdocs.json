@@ -12,7 +12,13 @@
         "description": [],
         "signature": [
           "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n}: { connectors: ",
-          "UseGenAIConnectorsResult",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          },
           "; currentUser?: Pick<",
           "AuthenticatedUser",
           ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined; flyoutPositionMode?: ",
@@ -80,7 +86,13 @@
                 "label": "connectors",
                 "description": [],
                 "signature": [
-                  "UseGenAIConnectorsResult"
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.UseGenAIConnectorsResult",
+                    "text": "UseGenAIConnectorsResult"
+                  }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                 "deprecated": false,
@@ -1502,7 +1514,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "UseGenAIConnectorsResult"
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseGenAIConnectorsResult",
+            "text": "UseGenAIConnectorsResult"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,

@@ -33,6 +33,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         observability: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
   };
 
   const mockTheme: CoreTheme = {

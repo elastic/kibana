@@ -18,6 +18,7 @@ import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { Flyout } from './flyout';
 import type { BackgroundSearchOpenedHandler } from '../types';
+import { FLYOUT_WIDTH } from './constants';
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -51,7 +52,10 @@ export function openSearchSessionsFlyout({
           <KibanaReactContextProvider>
             <Flyout
               onClose={() => flyout.close()}
-              onBackgroundSearchOpened={attrs.onBackgroundSearchOpened}
+              onBackgroundSearchOpened={(params) => {
+                attrs.onBackgroundSearchOpened?.(params);
+                flyout.close();
+              }}
               appId={attrs.appId}
               api={api}
               coreStart={coreStart}
@@ -66,7 +70,7 @@ export function openSearchSessionsFlyout({
       ),
       {
         hideCloseButton: true,
-        size: 's',
+        size: FLYOUT_WIDTH,
       }
     );
 

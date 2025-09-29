@@ -21,6 +21,10 @@ import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups
 
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -42,10 +46,14 @@ interface EsqlPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
-  data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  // LOOKUP JOIN deps
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface EsqlPluginStart {
@@ -58,9 +66,11 @@ export interface EsqlPluginStart {
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  public setup(_: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
+
+    registerIndexEditorAnalyticsEvents(core.analytics);
 
     return {};
   }
@@ -75,6 +85,9 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       fieldsMetadata,
       usageCollection,
       licensing,
+      fileUpload,
+      fieldFormats,
+      share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -102,6 +115,16 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
         data.query.timefilter.timefilter
       );
       return createESQLControlAction;
+    });
+
+    /** Async register the index editor UI actions */
+    registerIndexEditorActions({
+      data,
+      coreStart: core,
+      share,
+      uiActions,
+      fieldFormats,
+      fileUpload,
     });
 
     const variablesService = new EsqlVariablesService();

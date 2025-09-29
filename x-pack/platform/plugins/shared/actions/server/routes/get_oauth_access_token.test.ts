@@ -107,7 +107,6 @@ describe('getOAuthAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         config: {
           clientId: 'abc',
-          tenantId: 'def',
         },
         secrets: {
           clientSecret: 'iamasecret',
@@ -205,7 +204,6 @@ describe('getOAuthAccessToken', () => {
             scope: 'https://graph.microsoft.com/.default',
             config: {
               clientId: 'abc',
-              tenantId: 'def',
             },
             secrets: {
               clientSecret: 'iamasecret',

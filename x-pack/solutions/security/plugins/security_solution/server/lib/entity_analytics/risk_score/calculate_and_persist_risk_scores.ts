@@ -13,6 +13,7 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
+import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
@@ -29,7 +30,11 @@ export const calculateAndPersistRiskScores = async (
   const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
   });
-  const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
+
+  const calculate = params.experimentalFeatures.disableESQLRiskScoring
+    ? calculateRiskScores
+    : calculateScoresWithESQL;
+  const { after_keys: afterKeys, scores } = await calculate(rest);
 
   if (!scores.host?.length && !scores.user?.length && !scores.service?.length) {
     return { after_keys: {}, errors: [], scores_written: 0 };

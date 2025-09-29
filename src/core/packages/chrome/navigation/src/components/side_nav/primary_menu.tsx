@@ -13,7 +13,7 @@ import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavPrimaryMenuProps {
   children: ReactNode;

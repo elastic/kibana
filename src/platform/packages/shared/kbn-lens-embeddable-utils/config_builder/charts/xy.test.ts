@@ -75,7 +75,6 @@ test('generates xy chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
 

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  useEuiTheme,
+} from '@elastic/eui';
 
 interface Filter {
   name: string;
@@ -23,8 +30,31 @@ export interface Filters {
   [key: string]: Filter;
 }
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    container: css`
+      box-shadow: none;
+      height: ${euiTheme.size.xxl}; /* Align the height with the search input height */
+
+      &,
+      & > :first-child .euiFilterButton {
+        /* EUI specificity override */
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      &::after {
+        border: ${euiTheme.border.thin};
+      }
+    `,
+  };
+};
+
 export function FilterListButton({ onChange, filters }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const styles = useStyles();
 
   const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
 
@@ -74,7 +104,7 @@ export function FilterListButton({ onChange, filters }: Props) {
   );
 
   return (
-    <EuiFilterGroup className="componentTemplates__filterListButton">
+    <EuiFilterGroup css={styles.container}>
       <EuiPopover
         ownFocus
         button={button}

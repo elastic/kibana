@@ -64,7 +64,6 @@ test('generates table config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
   expect(result).toMatchInlineSnapshot(`

@@ -43,7 +43,7 @@ describe('composer', () => {
 
     expect(pipeline.asRequest()).toEqual({
       query:
-        'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = ??FUNCNAME(??duration) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC',
+        'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = ??funcName(??duration) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC',
       params: [
         {
           funcName: 'AVG',
