@@ -176,7 +176,7 @@ describe('createAlertFactory()', () => {
       alertFactory.create('50001');
     }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 5000 alerts."`);
     expect(logger.warn).toHaveBeenCalledWith(
-      'The configured maximum alert limit exceeds the allowed threshold. Only 5000 alerts are being returned. Please consider adjusting the limit.'
+      'The configured maximum alert limit exceeds the allowed threshold. Only 5000 alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.'
     );
     expect(alertFactory.hasReachedAlertLimit()).toBe(true);
   });

@@ -11,7 +11,7 @@ import type { AlertInstanceContext, AlertInstanceState } from '../types';
 import type { PublicAlert } from './alert';
 import { Alert } from './alert';
 import { processAlerts } from '../lib';
-import { ALLOWED_MAX_ALERTS } from '../config';
+import { ALLOWED_MAX_ALERTS, getMaxAlertLimit } from '../../common';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -85,7 +85,7 @@ export function createAlertFactory<
   // Whether rule type has reported back if alert limit was reached
   let hasReportedLimitReached = false;
 
-  const maxAlerts = Math.min(configuredMaxAlerts, ALLOWED_MAX_ALERTS);
+  const maxAlerts = getMaxAlertLimit(configuredMaxAlerts);
 
   let isDone = false;
   return {
@@ -98,7 +98,7 @@ export function createAlertFactory<
         hasReachedAlertLimit = true;
         if (configuredMaxAlerts > ALLOWED_MAX_ALERTS) {
           logger.warn(
-            `The configured maximum alert limit exceeds the allowed threshold. Only ${ALLOWED_MAX_ALERTS} alerts are being returned. Please consider adjusting the limit.`
+            `The configured maximum alert limit exceeds the allowed threshold. Only ${ALLOWED_MAX_ALERTS} alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.`
           );
         }
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);

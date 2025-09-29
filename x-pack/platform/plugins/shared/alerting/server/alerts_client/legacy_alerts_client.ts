@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { getMaxAlertLimit } from '../../common';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -26,7 +27,7 @@ import type {
   TrackedAlerts,
   DetermineDelayedAlertsOpts,
 } from './types';
-import { DEFAULT_MAX_ALERTS, ALLOWED_MAX_ALERTS } from '../config';
+import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
@@ -96,7 +97,7 @@ export class LegacyAlertsClient<
     activeAlertsFromState,
     recoveredAlertsFromState,
   }: InitializeExecutionOpts) {
-    this.maxAlerts = Math.min(maxAlerts, ALLOWED_MAX_ALERTS);
+    this.maxAlerts = getMaxAlertLimit(maxAlerts);
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
