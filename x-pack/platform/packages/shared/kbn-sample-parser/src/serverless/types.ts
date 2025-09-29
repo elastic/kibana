@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export interface StreamLogDocument extends Record<string, any> {
-  '@timestamp': number;
-}
-
-export interface StreamLogGenerator {
+export interface ServerlessSystem {
   name: string;
-  next: (timestamp: number) => StreamLogDocument[];
+  hits: Record<string, unknown>[];
 }
