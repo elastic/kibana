@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSearchBar,
   EuiSpacer,
   EuiText,
   EuiBasicTable,
-  EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState, useCallback } from 'react';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -83,55 +82,6 @@ const getCurrentUser = async (security: SecurityServiceStart) => {
   return null;
 };
 
-function TimeRangePicker({
-  onChange,
-  start,
-  end,
-}: {
-  onChange?: (start: string, end: string) => void;
-  start: string;
-  end: string;
-}) {
-  // Use Elastic date math strings (works great with ES queries)
-  // const [start, setStart] = useState<string>('now-15m');
-  // const [end, setEnd] = useState<string>('now');
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<{ start: string; end: string }[]>(
-    []
-  );
-
-  const commonlyUsedRanges = [
-    { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
-    { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
-    { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-    { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
-    { start: 'now-7d', end: 'now', label: 'Last 7 days' },
-    { start: 'now/d', end: 'now/d', label: 'Today' },
-  ];
-
-  const onTimeChange = ({ start: s, end: e }: OnTimeChangeProps) => {
-    setRecentlyUsedRanges((prev) => [
-      { start: s, end: e },
-      ...prev.filter((r) => !(r.start === s && r.end === e)).slice(0, 9),
-    ]);
-    onChange?.(s, e);
-  };
-
-  return (
-    <EuiSuperDatePicker
-      start={start}
-      end={end}
-      onTimeChange={onTimeChange}
-      isAutoRefreshOnly={false}
-      commonlyUsedRanges={commonlyUsedRanges}
-      recentlyUsedRanges={recentlyUsedRanges}
-      // auto refresh (optional)
-      onRefresh={() => onChange?.(start, end)}
-      refreshInterval={60000}
-      isPaused={true}
-    />
-  );
-}
-
 const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
   const result: Record<string, any> = {};
 
@@ -165,14 +115,19 @@ export const WorkflowExecuteEventForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana();
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = services;
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({
-    start: 'now-15m',
-    end: 'now',
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    from: 'now-15m',
+    to: 'now',
   });
   const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
 
   const fetchAlerts = useCallback(async () => {
     if (!services.http) {
@@ -196,8 +151,8 @@ export const WorkflowExecuteEventForm = ({
             {
               range: {
                 '@timestamp': {
-                  gte: timeRange.start,
-                  lte: timeRange.end,
+                  gte: timeRange.from,
+                  lte: timeRange.to,
                 },
               },
             },
@@ -206,10 +161,10 @@ export const WorkflowExecuteEventForm = ({
         },
       };
 
-      if (query) {
+      if (query.query) {
         esQuery.bool.must.push({
           simple_query_string: {
-            query,
+            query: query.query,
             fields: ['kibana.alert.rule.name'],
             default_operator: 'and',
           },
@@ -295,8 +250,17 @@ export const WorkflowExecuteEventForm = ({
     }
   }, [value, currentUser, setValue]);
 
-  const handleTimeRangeChange = (start: string, end: string) => {
-    setTimeRange({ start, end });
+  const handleQueryChange = ({
+    query: newQuery,
+    dateRange,
+  }: {
+    query?: Query;
+    dateRange: TimeRange;
+  }) => {
+    if (newQuery) {
+      setQuery(newQuery);
+    }
+    setTimeRange(dateRange);
   };
 
   const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
@@ -321,25 +285,18 @@ export const WorkflowExecuteEventForm = ({
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            <EuiSearchBar
-              box={{
-                placeholder: 'Filter your data using KQL syntax',
-                incremental: true,
-                fullWidth: true,
-              }}
-              onChange={({ query: newQuery }) => setQuery(newQuery?.text || '')}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TimeRangePicker
-              onChange={handleTimeRangeChange}
-              start={timeRange.start}
-              end={timeRange.end}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SearchBar
+          appName="workflow_management"
+          showDatePicker
+          onQuerySubmit={handleQueryChange}
+          query={query}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          showFilterBar={false}
+          showSubmitButton={true}
+          placeholder="Filter your data using KQL syntax"
+          data-test-subj="workflow-query-input"
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         {alertsLoading ? (
