@@ -16,6 +16,7 @@ import type {
   ESQLSource,
   ESQLStringLiteral,
 } from '../types';
+import { SynthLiteralFragment } from './synth_literal_fragment';
 import { SynthNode } from './synth_node';
 
 /**
@@ -127,4 +128,14 @@ export const col = (name: string | string[]): ESQLColumn => {
   const node = Builder.expression.column(name);
 
   return SynthNode.from(node);
+};
+
+/**
+ * Creates a literal fragment representing a keyword.
+ *
+ * @param keyword The keyword to create a literal fragment for.
+ * @returns A SynthLiteralFragment representing the keyword.
+ */
+export const kwd = (keyword: string): SynthLiteralFragment => {
+  return new SynthLiteralFragment(keyword);
 };

@@ -244,6 +244,15 @@ describe('FieldsMetadataClient class', () => {
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
       expect(fieldInstance).toBeUndefined();
     });
+
+    it('should not resolve the field if the source is not allowed', async () => {
+      // '_index' is a metadata field, but we filter for ECS sources only
+      const fieldInstance = await fieldsMetadataClient.getByName('_index', {
+        source: ['ecs'],
+      });
+
+      expect(fieldInstance).toBeUndefined();
+    });
   });
 
   describe('#find', () => {
@@ -288,6 +297,19 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
       expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
       expect(Object.hasOwn(fields, 'not-existing-field')).toBeFalsy();
+    });
+
+    it('should not resolve the fields from sources not allowed', async () => {
+      // Should resolve '@timestamp' from ECS but not '_index'
+      const fieldsDictionaryInstance = await fieldsMetadataClient.find({
+        fieldNames: ['@timestamp', '_index'],
+        source: ['ecs'],
+      });
+
+      const fields = fieldsDictionaryInstance.toPlain();
+
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, '_index')).toBeFalsy();
     });
   });
 

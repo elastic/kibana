@@ -79,5 +79,6 @@
     "@kbn/apm-synthtrace",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
+    "@kbn/ai-assistant-management-plugin",
   ]
 }

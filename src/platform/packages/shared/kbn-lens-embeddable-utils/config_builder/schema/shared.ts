@@ -103,10 +103,6 @@ export const collapseBySchema = schema.oneOf(
      * Min collapsed by min function
      */
     schema.literal('min'),
-    /**
-     * No collapse
-     */
-    schema.literal('none'),
   ],
   { meta: { description: 'Collapse by function description' } }
 );

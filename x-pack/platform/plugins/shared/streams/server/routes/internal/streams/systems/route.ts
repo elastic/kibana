@@ -13,8 +13,6 @@ import type {
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
 import { conditionSchema } from '@kbn/streamlang';
-import type { Observable } from 'rxjs';
-import { from, map } from 'rxjs';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -284,7 +282,7 @@ export const identifySystemsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedSystemsEvent>> => {
+  }): Promise<IdentifiedSystemsEvent> => {
     const {
       systemClient,
       scopedClusterClient,
@@ -314,24 +312,20 @@ export const identifySystemsRoute = createServerRoute({
       streamsClient.getStream(name),
     ]);
 
-    return from(
-      runSystemIdentification({
-        start: start.getTime(),
-        end: end.getTime(),
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
-        logger,
-        stream,
-        systems: hits,
-      })
-    ).pipe(
-      map(({ systems }): IdentifiedSystemsEvent => {
-        return {
-          type: 'identified_systems',
-          systems,
-        };
-      })
-    );
+    const { systems } = await runSystemIdentification({
+      start: start.getTime(),
+      end: end.getTime(),
+      esClient: scopedClusterClient.asCurrentUser,
+      inferenceClient: inferenceClient.bindTo({ connectorId }),
+      logger,
+      stream,
+      systems: hits,
+    });
+
+    return {
+      type: 'identified_systems',
+      systems,
+    };
   },
 });
 

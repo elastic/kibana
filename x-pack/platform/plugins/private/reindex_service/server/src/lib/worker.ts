@@ -16,7 +16,7 @@ import moment from 'moment';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus } from '../../../common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexSavedObject } from './types';
 import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';

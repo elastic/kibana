@@ -56,12 +56,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.closePanel('applications');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
-          expect(isOpen).to.be(false);
-        }
-
         // open Infrastructure panel and navigate to some link inside the panel
         await solutionNavigation.sidenav.openPanel('metrics');
         {
@@ -75,13 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(false);
+          expect(isOpen).to.be(true);
         }
 
-        // navigate to a different section
-        await solutionNavigation.sidenav.openSection(
-          'observability_project_nav_footer.project_settings_project_nav'
-        );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
         await solutionNavigation.sidenav.clickPanelLink('management:tags');
@@ -100,6 +90,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('renders a feedback callout', async () => {
+        await solutionNavigation.sidenav.feedbackCallout.reset();
+        await solutionNavigation.sidenav.openPanel('applications');
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();

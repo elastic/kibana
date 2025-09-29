@@ -8,14 +8,15 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { schema } from '@kbn/config-schema';
 import {
   dashboardGetResultSchema,
   dashboardCreateOptionsSchema,
-  dashboardCreateSchema,
   dashboardUpdateOptionsSchema,
   dashboardUpdateRequestAttributesSchema,
   dashboardSearchOptionsSchema,
   dashboardItemSchema,
+  dashboardState,
 } from './schema';
 
 export const serviceDefinition: ServicesDefinition = {
@@ -32,7 +33,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardCreateOptionsSchema,
       },
       data: {
-        schema: dashboardCreateSchema,
+        schema: schema.object(dashboardState),
       },
     },
     out: {

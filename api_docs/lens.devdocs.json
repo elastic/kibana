@@ -339,7 +339,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -683,7 +691,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -923,7 +939,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -6867,7 +6891,15 @@
                 "section": "def-common.DynamicActionsState",
                 "text": "DynamicActionsState"
               },
-              "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+              "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -7708,7 +7740,15 @@
                     "section": "def-common.DynamicActionsState",
                     "text": "DynamicActionsState"
                   },
-                  "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+                  "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
@@ -8646,7 +8686,15 @@
               },
               " | undefined; executionContext?: ",
               "KibanaExecutionContext",
-              " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+              " | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -8892,7 +8940,15 @@
                   },
                   " | undefined; executionContext?: ",
                   "KibanaExecutionContext",
-                  " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+                  " | undefined; esqlVariables?: ",
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
                   {
                     "pluginId": "uiActionsEnhanced",
                     "scope": "common",
@@ -9027,15 +9083,7 @@
               "\nAPI which returns state helpers keeping this async as to not impact page load bundle"
             ],
             "signature": [
-              "() => Promise<{ formula: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
-              "; chartInfo: ",
+              "() => Promise<{ chartInfo: ",
               "ChartInfoApi",
               "; suggestions: ",
               {
@@ -16537,7 +16585,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17363,7 +17419,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18530,7 +18594,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -18874,7 +18946,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -19114,7 +19194,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -19581,7 +19669,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20424,7 +20520,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20860,7 +20964,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21204,7 +21316,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21444,7 +21564,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21887,7 +22015,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -22722,7 +22858,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -23084,7 +23228,15 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          " | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -25484,7 +25636,15 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

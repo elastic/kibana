@@ -19,14 +19,14 @@ describe('transformPanelsIn', () => {
     const panels = [
       {
         type: 'foo',
-        panelIndex: '1',
-        gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
-        panelConfig: { foo: 'bar' },
+        uid: '1',
+        grid: { x: 0, y: 0, w: 12, h: 12, i: '1' },
+        config: { foo: 'bar' },
       },
       {
         type: 'bar',
-        gridData: { x: 0, y: 0, w: 12, h: 12 },
-        panelConfig: { bizz: 'buzz' },
+        grid: { x: 0, y: 0, w: 12, h: 12 },
+        config: { bizz: 'buzz' },
       },
     ];
     const result = transformPanelsIn(panels as DashboardPanel[]);

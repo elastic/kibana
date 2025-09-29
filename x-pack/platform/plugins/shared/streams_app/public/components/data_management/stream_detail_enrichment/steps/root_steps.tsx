@@ -44,14 +44,14 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
       borderRadius="none"
       css={css`
         overflow: auto;
-        padding: ${euiTheme.size.m};
+        padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
-          margin-bottom: ${euiTheme.size.m};
+          margin-bottom: ${euiTheme.size.s};
         }
       `}
     >
-      {rootSteps.map((stepRef) => (
+      {rootSteps.map((stepRef, index) => (
         <StepsListItem
           key={stepRef.id}
           stepRef={stepRef}
@@ -59,6 +59,8 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
           stepUnderEdit={stepUnderEdit}
           rootLevelMap={rootLevelMap}
           stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+          isFirstStepInLevel={index === 0}
+          isLastStepInLevel={index === rootSteps.length - 1}
         />
       ))}
       <EuiFlexGroup alignItems="center" justifyContent="center" wrap>

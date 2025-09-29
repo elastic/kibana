@@ -30,10 +30,12 @@ describe('TabsBar', () => {
     const onAdd = jest.fn();
     const onSelect = jest.fn();
     const onSelectRecentlyClosed = jest.fn();
+    const onClearRecentlyClosed = jest.fn();
     const onLabelEdited = jest.fn();
     const onClose = jest.fn();
     const onReorder = jest.fn();
     const getPreviewData = jest.fn();
+    const onEBTEvent = jest.fn();
 
     const selectedItem = items[0];
 
@@ -55,9 +57,11 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onClearRecentlyClosed={onClearRecentlyClosed}
         onClose={onClose}
         onReorder={onReorder}
         getPreviewData={getPreviewData}
+        onEBTEvent={onEBTEvent}
       />
     );
 

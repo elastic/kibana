@@ -136,9 +136,15 @@
         "label": "DatasetQualityIndicator",
         "description": [],
         "signature": [
-          "({ isLoading, quality, }: { isLoading: boolean; quality: ",
-          "QualityIndicators",
-          "; }) => React.JSX.Element"
+          "({ isLoading, quality, verbose, }: { isLoading: boolean; quality: ",
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          },
+          "; verbose?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
         "deprecated": false,
@@ -149,7 +155,7 @@
             "id": "def-public.DatasetQualityIndicator.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isLoading,\n  quality,\n}",
+            "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
             "deprecated": false,
@@ -175,6 +181,20 @@
                 "description": [],
                 "signature": [
                   "\"good\" | \"poor\" | \"degraded\""
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.verbose",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "verbose",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
                 "deprecated": false,
@@ -625,7 +645,13 @@
         "description": [],
         "signature": [
           "(percentages: number[]) => ",
-          "QualityIndicators"
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
         "deprecated": false,
@@ -1733,6 +1759,21 @@
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.QualityIndicators",
+        "type": "Type",
+        "tags": [],
+        "label": "QualityIndicators",
+        "description": [],
+        "signature": [
+          "\"good\" | \"poor\" | \"degraded\""
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/types/quality_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

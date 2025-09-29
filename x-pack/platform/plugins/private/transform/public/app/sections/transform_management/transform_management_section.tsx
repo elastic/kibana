@@ -14,7 +14,9 @@ import {
   EuiPageTemplate,
   EuiSkeletonText,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,6 +57,17 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    dialog: css`
+      width: calc(${euiTheme.size.l} * 30);
+      min-height: calc(${euiTheme.size.l} * 25);
+    `,
+  };
+};
+
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -91,6 +104,7 @@ export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
+  const styles = useStyles();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
@@ -330,7 +344,13 @@ export const TransformManagement: FC = () => {
       {isSearchSelectionVisible && (
         <EuiModal
           onClose={onCloseModal}
-          className="transformCreateTransformSearchDialog"
+          css={styles.dialog}
+          aria-label={i18n.translate(
+            'xpack.transform.transformList.createTransformSearchModalTitle',
+            {
+              defaultMessage: 'Create Transform - Select Data Source',
+            }
+          )}
           data-test-subj="transformSelectSourceModal"
         >
           <SearchSelection

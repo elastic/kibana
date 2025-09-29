@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -30,6 +31,17 @@ interface Props {
   allowsIndexDefaultOption?: boolean;
   'data-test-subj'?: string;
 }
+
+const styles = {
+  selectWithCustom: css`
+    position: relative;
+  `,
+  selectWithCustomButton: css`
+    position: absolute;
+    right: 0;
+    top: 0;
+  `,
+};
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
 
@@ -161,11 +173,11 @@ export const AnalyzerParameter = ({
   return (
     <UseField path={path} config={fieldConfigWithLabel}>
       {(field) => (
-        <div className="mappingsEditor__selectWithCustom">
+        <div css={styles.selectWithCustom}>
           <EuiButtonEmpty
             size="xs"
             onClick={toggleCustom(field)}
-            className="mappingsEditor__selectWithCustom__button"
+            css={styles.selectWithCustomButton}
             data-test-subj={`${dataTestSubj}-toggleCustomButton`}
           >
             {isCustom

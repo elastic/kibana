@@ -11,8 +11,8 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
+import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 
 interface Props {

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within, act } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterEditorProps } from './filter_editor';
@@ -154,12 +154,14 @@ const defaultProps = {
 };
 
 const renderFilterEditor = async (propsOverrides?: Partial<FilterEditorProps>) => {
-  render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
-    wrapper: ({ children }) => (
-      <I18nProvider>
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      </I18nProvider>
-    ),
+  await act(async () => {
+    render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        </I18nProvider>
+      ),
+    });
   });
 
   await waitFor(() => {

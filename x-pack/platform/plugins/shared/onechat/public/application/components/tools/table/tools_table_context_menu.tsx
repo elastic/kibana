@@ -13,13 +13,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolContextMenuProps {
-  tool: ToolDefinitionWithSchema;
+  tool: ToolDefinition;
 }
 
 export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {

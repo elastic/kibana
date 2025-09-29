@@ -871,7 +871,7 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<Readonly<{ version?: number | undefined; timeRestore?: boolean | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; sections?: Readonly<{ collapsed?: boolean | undefined; } & { title: string; gridData: Readonly<{} & { i: string; y: number; }>; }>[] | undefined; hits?: number | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; optionsJSON?: string | undefined; } & { title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; panelsJSON: string; }>> & { type: \"dashboard\"; }"
+          "<Readonly<{ version?: number | undefined; timeRestore?: boolean | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; sections?: Readonly<{ collapsed?: boolean | undefined; } & { title: string; gridData: Readonly<{} & { i: string; y: number; }>; }>[] | undefined; hits?: number | undefined; controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; optionsJSON?: string | undefined; } & { title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; panelsJSON: string; }>> & { type: \"dashboard\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
         "deprecated": false,
@@ -946,7 +946,7 @@
             "section": "def-common.ContentPackIncludeAll",
             "text": "ContentPackIncludeAll"
           },
-          " | { objects: { queries: { id: string; }[]; routing: ({ destination: string; } & ",
+          " | { objects: { mappings: boolean; queries: { id: string; }[]; routing: ({ destination: string; } & ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",

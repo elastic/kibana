@@ -23,6 +23,7 @@ export enum CLASH_ERROR_TYPE {
   NONE,
   ERROR,
   WARNING,
+  INFO,
 }
 
 export interface MappingClash {
@@ -267,14 +268,19 @@ export function getMappingClashInfo(
       }
     }
     if (fileClash.clash !== CLASH_ERROR_TYPE.ERROR) {
-      // if the file contains many new fields but none of them are in the existing index
-      // set the clash to warning
       if (
         fileClash.missingFields &&
         existingIndexChecks?.existingFields &&
         existingIndexChecks?.existingFields.length > 0 &&
         fileClash.missingFields.length > (existingIndexChecks.existingFields.length - 1) / 2
       ) {
+        // if more than half the fields are missing, mark as a warning
+        fileClash.clash = CLASH_ERROR_TYPE.WARNING;
+      } else if (
+        (fileClash.missingFields && fileClash.missingFields.length > 0) ||
+        (fileClash.newFields && fileClash.newFields.length > 0)
+      ) {
+        // if some fields are missing or some new fields, mark as a warning
         fileClash.clash = CLASH_ERROR_TYPE.WARNING;
       }
     }
@@ -351,7 +357,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
   });
 }
 
-export function getFieldsFromMappings(mappings: MappingTypeMapping) {
+export function getFieldsFromMappings(mappings: MappingTypeMapping, allowedTypes: string[] = []) {
   const fields: Array<{ name: string; value: { type: string } }> = [];
 
   function traverseProperties(properties: MappingPropertyBase, parentKey: string = '') {
@@ -361,7 +367,9 @@ export function getFieldsFromMappings(mappings: MappingTypeMapping) {
       if (value.properties) {
         traverseProperties(value.properties, fullKey);
       } else if (value.type) {
-        fields.push({ name: fullKey, value });
+        if (allowedTypes.length === 0 || allowedTypes.includes(value.type)) {
+          fields.push({ name: fullKey, value });
+        }
       }
     }
   }

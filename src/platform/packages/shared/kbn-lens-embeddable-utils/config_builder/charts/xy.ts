@@ -50,7 +50,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
-    valueLabels: 'hide',
+    valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
@@ -122,8 +122,10 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               forAccessor: `${ACCESSOR}${i}_${index}`,
               axisMode: 'left',
               color: yAxis.seriesColor,
+              ...(yAxis.fill ? { fill: yAxis.fill } : {}),
+              ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
             })),
-          } as XYReferenceLineLayerConfig;
+          } satisfies XYReferenceLineLayerConfig;
         case 'series':
           return {
             layerId: `layer_${i}`,
@@ -146,18 +148,39 @@ function buildVisualizationState(config: LensXYConfig): XYState {
   };
 }
 
+function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
+  return (
+    yAxis.format &&
+    (yAxis.suffix || yAxis.compactValues || yAxis.decimals || yAxis.fromUnit || yAxis.toUnit)
+  );
+}
+
 function getValueColumns(layer: LensSeriesLayer, i: number) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('`breakdown` must be a field name when not using index source');
   }
+
   return [
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
     getXValueColumn(layer.xAxis, i),
-    ...layer.yAxis.map((yAxis, index) =>
-      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number')
-    ),
+    ...layer.yAxis.map((yAxis, index) => {
+      const params = hasFormatParams(yAxis)
+        ? {
+            id: yAxis.format as string,
+            params: {
+              compact: yAxis.compactValues,
+              decimals: yAxis.decimals ?? 0,
+              suffix: yAxis.suffix,
+              fromUnit: yAxis.fromUnit,
+              toUnit: yAxis.toUnit,
+            },
+          }
+        : undefined;
+
+      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
+    }),
   ];
 }
 

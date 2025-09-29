@@ -8,7 +8,8 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/236644
+test.describe.skip(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {

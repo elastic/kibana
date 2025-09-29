@@ -109,7 +109,7 @@ export const openBarchartPopoverMenu = () => {
 export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   recurse(
     () => {
-      cy.get(propertySelector).eq(rowIndex).realHover();
+      cy.get(propertySelector).filter(':visible').eq(rowIndex).trigger('mouseover');
       return cy.get(actionSelector).first();
     },
     ($el) => $el.is(':visible')

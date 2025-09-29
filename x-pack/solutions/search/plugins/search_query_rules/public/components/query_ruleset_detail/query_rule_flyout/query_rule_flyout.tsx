@@ -203,6 +203,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {isIdRule && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     title="Document action using 'ids' are unsupported"
                     color="warning"
                     size="s"
@@ -235,6 +236,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               </EuiFlexItem>
               {pinType === 'pinned' && documentCount !== 0 && (
                 <EuiCallOut
+                  announceOnMount
                   iconType="transitionTopIn"
                   size="s"
                   title={
@@ -295,6 +297,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {shouldShowCriteriaCallout && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     iconType="info"
                     size="s"
                     onDismiss={() => {
@@ -335,6 +338,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   ) : (
                     <>
                       <EuiCallOut
+                        announceOnMount
                         iconType="info"
                         size="s"
                         color="warning"

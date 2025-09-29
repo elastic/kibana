@@ -8,73 +8,34 @@
  */
 
 import { EuiBadge, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DimensionBadges } from './dimension_badges';
 import { categorizeDimensions } from '../../common/utils/dimensions';
+import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
-
 interface OverviewTabProps {
   metric: MetricField;
+  description?: string;
 }
 
-export const OverviewTab = ({ metric }: OverviewTabProps) => {
+export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const { requiredDimensions, optionalDimensions } = categorizeDimensions(
     metric.dimensions || [],
     metric.name
   );
+
+  const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
+
   return (
     <>
-      <TabTitleAndDescription metric={metric} />
-      {/* OpenTelemetry semantic conventions */}
-      {metric.source === 'otel' && metric.stability && (
-        <>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate(
-                'metricsExperience.overviewTab.strong.opentelemetrySemanticConventionsLabel',
-                { defaultMessage: 'OpenTelemetry Semantic Conventions' }
-              )}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiDescriptionList
-            type="column"
-            compressed
-            listItems={[
-              {
-                title: (
-                  <EuiText size="xs">
-                    {i18n.translate('metricsExperience.overviewTab.stabilityTextLabel', {
-                      defaultMessage: 'Stability',
-                    })}
-                  </EuiText>
-                ),
-                description: (
-                  <EuiBadge
-                    color={
-                      metric.stability === 'stable'
-                        ? 'success'
-                        : metric.stability === 'experimental'
-                        ? 'warning'
-                        : 'default'
-                    }
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {metric.stability}
-                  </EuiBadge>
-                ),
-              },
-            ]}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <TabTitleAndDescription metric={metric} description={description} />
 
       <EuiDescriptionList
         compressed
         rowGutterSize="m"
+        data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
         listItems={[
           {
             title: (
@@ -86,7 +47,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                 </strong>
               </EuiText>
             ),
-            description: <EuiText color="primary">{metric.index}</EuiText>,
+            description: (
+              <EuiText color="primary" size="s">
+                {metric.index}
+              </EuiText>
+            ),
           },
           {
             title: (
@@ -101,11 +66,14 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
             ),
             description: <EuiBadge>{metric.type}</EuiBadge>,
           },
-          ...(metric.unit
+          ...(unitLabel
             ? [
                 {
                   title: (
-                    <EuiText size="s">
+                    <EuiText
+                      size="s"
+                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
+                    >
                       <strong>
                         {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
                           defaultMessage: 'Metric unit',
@@ -114,7 +82,7 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                       <EuiSpacer size="xs" />
                     </EuiText>
                   ),
-                  description: <EuiBadge>{metric.unit}</EuiBadge>,
+                  description: <EuiBadge>{unitLabel}</EuiBadge>,
                 },
               ]
             : []),
@@ -122,7 +90,10 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
             ? [
                 {
                   title: (
-                    <EuiText size="s">
+                    <EuiText
+                      size="s"
+                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
+                    >
                       <strong>
                         {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                           defaultMessage: 'Metric type',
@@ -138,13 +109,15 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
         ]}
       />
 
-      {/* Dimensions categorized by type */}
       {metric.dimensions && metric.dimensions.length > 0 && (
         <>
           <EuiSpacer size="m" />
           {requiredDimensions.length > 0 && (
             <>
-              <EuiText size="s">
+              <EuiText
+                size="s"
+                data-test-subj="metricsExperienceFlyoutOverviewTabRequiredDimensionsLabel"
+              >
                 <strong>
                   {i18n.translate('metricsExperience.overviewTab.strong.requiredDimensionsLabel', {
                     defaultMessage: 'Required dimensions',
@@ -162,7 +135,10 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
           )}
           {optionalDimensions.length > 0 && (
             <>
-              <EuiText size="s">
+              <EuiText
+                size="s"
+                data-test-subj="metricsExperienceFlyoutOverviewTabAdditionalDimensionsLabel"
+              >
                 <strong>
                   {i18n.translate(
                     'metricsExperience.overviewTab.strong.additionalDimensionsLabel',

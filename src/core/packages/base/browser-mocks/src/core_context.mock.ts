@@ -10,11 +10,12 @@
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext & {
   logger: MockedLogger;
 } {
-  return {
+  return lazyObject({
     coreId: Symbol('core context mock'),
     logger: loggerMock.create(),
     env: {
@@ -34,7 +35,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         buildFlavor: 'traditional',
       },
     },
-  };
+  });
 }
 
 export const coreContextMock = {

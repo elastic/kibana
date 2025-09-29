@@ -9,7 +9,6 @@
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { firstValueFrom, of } from 'rxjs';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -32,6 +31,7 @@ interface Context {
   initialState?: ESQLControlState;
   closeFlyout?: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
 }
 
 export async function loadESQLControlFlyout({
@@ -47,10 +47,10 @@ export async function loadESQLControlFlyout({
   initialState,
   closeFlyout = () => {},
   ariaLabelledBy,
+  currentApp,
 }: Context) {
   const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
-  const currentApp = await firstValueFrom(core.application.currentAppId$ ?? of(undefined));
 
   return (
     <KibanaRenderContextProvider {...core}>

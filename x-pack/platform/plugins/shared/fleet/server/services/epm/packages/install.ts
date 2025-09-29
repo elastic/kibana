@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import moment from 'moment';
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -1278,7 +1278,8 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
-  saveAsAdditionnalSpace = false
+  saveAsAdditionnalSpace = false,
+  append = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1294,33 +1295,46 @@ export const saveKibanaAssetsRefs = async (
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation = saveAsAdditionnalSpace
-        ? await savedObjectsClient
-            .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-            .catch((e) => {
-              if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                return undefined;
-              }
-              throw e;
-            })
-        : undefined;
+      const installation =
+        saveAsAdditionnalSpace || append
+          ? await savedObjectsClient
+              .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+              .catch((e) => {
+                if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+                  return undefined;
+                }
+                throw e;
+              })
+          : undefined;
+
+      if (saveAsAdditionnalSpace) {
+        return savedObjectsClient.update<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          pkgName,
+          {
+            additional_spaces_installed_kibana: {
+              ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
+              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+            },
+          },
+          { refresh: false }
+        );
+      }
+
+      let newAssetRefs = assetRefs !== null ? assetRefs : [];
+      if (append && installation) {
+        newAssetRefs = uniqBy(
+          [...newAssetRefs, ...(installation.attributes.installed_kibana ?? [])],
+          (asset) => asset.id + asset.type
+        );
+      }
 
       return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
         pkgName,
-        saveAsAdditionnalSpace
-          ? {
-              additional_spaces_installed_kibana: {
-                ...omit(
-                  installation?.attributes?.additional_spaces_installed_kibana ?? {},
-                  spaceId
-                ),
-                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
-              },
-            }
-          : {
-              installed_kibana: assetRefs !== null ? assetRefs : [],
-            },
+        {
+          installed_kibana: newAssetRefs,
+        },
         { refresh: false }
       );
     },

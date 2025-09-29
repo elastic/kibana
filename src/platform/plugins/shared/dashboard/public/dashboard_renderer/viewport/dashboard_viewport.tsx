@@ -54,8 +54,8 @@ export const DashboardViewport = () => {
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
     const panels = Object.values(layout.panels);
-    const visiblePanels = panels.filter(({ gridData }) => {
-      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    const visiblePanels = panels.filter(({ grid }) => {
+      return !dashboardInternalApi.isSectionCollapsed(grid.sectionId);
     });
     return {
       panelCount: panels.length,

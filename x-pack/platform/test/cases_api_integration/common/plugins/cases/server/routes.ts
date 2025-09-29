@@ -19,6 +19,7 @@ import {
   ANALYTICS_BACKFILL_TASK_TYPE,
   CASES_TELEMETRY_TASK_NAME,
 } from '@kbn/cases-plugin/common/constants';
+import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -294,6 +295,31 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
   router.post(
     {
+      path: '/api/analytics_index/scheduler/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (context, req, res) => {
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        logger.info(`Request to run scheduler task id: ${CAI_SCHEDULER_TASK_ID}`);
+        return res.ok({
+          body: await taskManager.runSoon(CAI_SCHEDULER_TASK_ID),
+        });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: CAI_SCHEDULER_TASK_ID, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: '/api/analytics_index/backfill/run_soon',
       security: {
         authz: {
@@ -325,6 +351,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
           }),
         });
       } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
@@ -351,6 +378,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { taskManager }] = await core.getStartServices();
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }

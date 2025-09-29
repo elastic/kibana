@@ -23,6 +23,7 @@ export const paramValueTypeSchema = schema.oneOf([
 export const paramSchema = schema.object({
   type: paramValueTypeSchema,
   description: schema.string(),
+  optional: schema.maybe(schema.boolean()),
 });
 
 export const configurationSchema = schema.object({

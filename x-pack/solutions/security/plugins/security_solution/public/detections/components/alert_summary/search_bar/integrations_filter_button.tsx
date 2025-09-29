@@ -108,7 +108,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed={true}>
       <EuiPopover
         button={button}
         closePopover={togglePopover}

@@ -1334,7 +1334,7 @@
         "label": "useLoadConnectors",
         "description": [],
         "signature": [
-          "({ http, toasts, inferenceEnabled, }: ",
+          "({ http, toasts, inferenceEnabled, settings, }: ",
           "Props",
           ") => ",
           "UseQueryResult",
@@ -1359,7 +1359,7 @@
             "id": "def-public.useLoadConnectors.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  inferenceEnabled = false,\n}",
+            "label": "{\n  http,\n  toasts,\n  inferenceEnabled = false,\n  settings,\n}",
             "description": [],
             "signature": [
               "Props"

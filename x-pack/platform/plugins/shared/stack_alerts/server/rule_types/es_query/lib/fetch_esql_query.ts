@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
 import {
   isPerRowAggregation,
   parseAggregationResults,
@@ -13,15 +12,15 @@ import {
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams } from '@kbn/esql-utils';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
-import type { OnlyEsqlQueryRuleParams } from '../types';
+import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -36,6 +35,7 @@ export interface FetchEsqlQueryOpts {
   };
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 export async function fetchEsqlQuery({
@@ -46,6 +46,7 @@ export async function fetchEsqlQuery({
   spacePrefix,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
@@ -68,9 +69,8 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const sourceFields = getSourceFields(response);
   const isGroupAgg = isPerRowAggregation(params.groupBy);
-  const { results, duplicateAlertIds } = getEsqlQueryHits(
+  const { results, duplicateAlertIds } = await getEsqlQueryHits(
     response,
     params.esqlQuery.esql,
     isGroupAgg
@@ -131,22 +131,11 @@ export const getEsqlQuery = (
         filter: rangeFilter,
       },
     },
+    ...(hasStartEndParams(params.esqlQuery.esql)
+      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      : {}),
   };
   return query;
-};
-
-export const getSourceFields = (results: EsqlTable) => {
-  const resultFields = results.columns.map((c) => ({
-    label: c.name,
-    searchPath: c.name,
-  }));
-  const alertFields = Object.keys(alertFieldMap);
-  const ecsFields = Object.keys(ecsFieldMap)
-    // exclude the alert fields that we don't want to override
-    .filter((key) => !alertFields.includes(key))
-    .map((key) => ({ label: key, searchPath: key }));
-
-  return intersectionBy(resultFields, ecsFields, 'label');
 };
 
 export function generateLink(
@@ -171,15 +160,14 @@ export function generateLink(
 
 function getPartialResultsWarning(response: EsqlTable) {
   const clusters = response?._clusters?.details ?? {};
-  const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
+  const shardFailures: EsqlEsqlShardFailure[] = [];
+  for (const cluster of Object.keys(clusters)) {
     const failures = clusters[cluster]?.failures ?? [];
 
     if (failures.length > 0) {
-      acc.push(...failures);
+      shardFailures.push(...failures);
     }
-
-    return acc;
-  }, []);
+  }
 
   return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
     defaultMessage:

@@ -172,9 +172,11 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
+  'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;
+  'observability:streamsEnableContentPacks': boolean;
 }

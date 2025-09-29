@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import useMount from 'react-use/lib/useMount';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -127,8 +126,8 @@ export const SingleTabView = ({
       : { loading: true }
   );
 
-  useMount(() => {
-    if (!currentStateContainer || !currentCustomizationService) {
+  useEffect(() => {
+    if (!currentStateContainer && !currentCustomizationService) {
       const historyLocationState = services.getScopedHistory<
         MainHistoryLocationState & { defaultState?: DiscoverAppState }
       >()?.location.state;
@@ -138,7 +137,7 @@ export const SingleTabView = ({
         defaultUrlState: historyLocationState?.defaultState,
       });
     }
-  });
+  }, [currentCustomizationService, currentStateContainer, initializeTab, services]);
 
   if (initializeTabState.loading) {
     return <BrandedLoadingIndicator />;
