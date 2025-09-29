@@ -30,7 +30,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
-import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 
@@ -110,7 +109,6 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
   const { mutateAsync: updateAlertStatus } = useUpdateAlertsStatus();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   /**
    * Called by the modal when the user confirms the action,
@@ -127,7 +125,6 @@ const TakeActionComponent: React.FC<Props> = ({
       setPendingAction(null);
 
       await attackDiscoveryBulk({
-        attackDiscoveryPublicApiEnabled,
         ids: attackDiscoveryIds,
         kibanaAlertWorkflowStatus: workflowStatus,
       });
@@ -148,7 +145,6 @@ const TakeActionComponent: React.FC<Props> = ({
       alertIds,
       attackDiscoveryBulk,
       attackDiscoveryIds,
-      attackDiscoveryPublicApiEnabled,
       refetchFindAttackDiscoveries,
       replacements,
       setSelectedAttackDiscoveries,

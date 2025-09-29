@@ -63,7 +63,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: false,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -79,7 +78,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: false,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -99,7 +97,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: false,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -120,7 +117,6 @@ describe('useAttackDiscoveryBulk', () => {
       await act(async () => {
         try {
           await result.current.mutateAsync({
-            attackDiscoveryPublicApiEnabled: false,
             ids: defaultIds,
             kibanaAlertWorkflowStatus: defaultStatus,
             visibility: defaultVisibility,
@@ -139,7 +135,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: false,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -161,7 +156,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: true,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -177,7 +171,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: true,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -197,7 +190,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: true,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -218,7 +210,6 @@ describe('useAttackDiscoveryBulk', () => {
       await act(async () => {
         try {
           await result.current.mutateAsync({
-            attackDiscoveryPublicApiEnabled: true,
             ids: defaultIds,
             kibanaAlertWorkflowStatus: defaultStatus,
             visibility: defaultVisibility,
@@ -237,7 +228,6 @@ describe('useAttackDiscoveryBulk', () => {
 
       await act(async () => {
         await result.current.mutateAsync({
-          attackDiscoveryPublicApiEnabled: true,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,

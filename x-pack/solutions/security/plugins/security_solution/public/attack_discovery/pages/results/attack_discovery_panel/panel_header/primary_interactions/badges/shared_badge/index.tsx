@@ -24,7 +24,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
 import { useInvalidateFindAttackDiscoveries } from '../../../../../../use_find_attack_discoveries';
-import { useKibanaFeatureFlags } from '../../../../../../use_kibana_feature_flags';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
 
 const LIST_PROPS = {
@@ -147,8 +146,6 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
 
   const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
 
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
-
   const onSelectableChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {
       setItems(newOptions);
@@ -157,7 +154,6 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
 
         await attackDiscoveryBulk({
-          attackDiscoveryPublicApiEnabled,
           ids: [attackDiscovery.id],
           visibility,
         });
@@ -175,12 +171,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         invalidateFindAttackDiscoveries();
       }
     },
-    [
-      attackDiscovery,
-      attackDiscoveryBulk,
-      attackDiscoveryPublicApiEnabled,
-      invalidateFindAttackDiscoveries,
-    ]
+    [attackDiscovery, attackDiscoveryBulk, invalidateFindAttackDiscoveries]
   );
 
   const allItemsDisabled = useMemo(() => items.every((item) => item.disabled), [items]);
