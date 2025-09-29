@@ -102,9 +102,11 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
     }
 
     @keyframes moveGradient {
-      50% {
+      0% {
+        background-position: 0% 40%;
+      }
+      100% {
         background-position: 100% 0%;
-        transform: rotate(-200deg);
       }
     }
 
@@ -163,7 +165,7 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
     background: ${chromeStyle === 'project'
       ? euiTheme.colors.backgroundBasePlain
       : '#0b1628'} !important;
-    --border-width: 2px;
+    --border-width: 1px;
 
     position: relative;
     display: flex;
@@ -175,7 +177,7 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
     width: 28px;
     color: white;
     // background: #222;
-    border-radius: 24px;
+    border-radius: 4px;
 
     &::after {
       position: absolute;
@@ -228,13 +230,13 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
 
       background-size: 200% 200%;
       background-position: 0 40%;
-      border-radius: inherit;
+      border-radius: 5px;
       animation: pause;
     }
 
     &:hover {
       &::after {
-        animation: moveGradient 4s alternate infinite;
+        animation: moveGradient 2s alternate infinite;
       }
     }
 
