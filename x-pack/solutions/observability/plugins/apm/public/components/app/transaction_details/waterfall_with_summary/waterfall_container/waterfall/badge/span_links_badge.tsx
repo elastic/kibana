@@ -44,6 +44,7 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: P
       }
     >
       <EuiBadge
+        tabIndex={0}
         data-test-subj={`spanLinksBadge_${id}`}
         {...(onClick
           ? {
@@ -55,7 +56,7 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: P
                 defaultMessage: 'Open span links details',
               }),
             }
-          : { tabIndex: 0 })}
+          : [])}
       >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage: '{total} {total, plural, one {Span link} other {Span links}}',

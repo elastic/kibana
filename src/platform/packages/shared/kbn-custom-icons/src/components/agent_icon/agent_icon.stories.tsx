@@ -42,7 +42,7 @@ export const List: StoryFn = () => {
                 title={agentName}
                 description={
                   <EuiToolTip position="bottom" content="Icon rendered with `AgentIcon`">
-                    <AgentIcon agentName={agentName} tabIndex={0} />
+                    <AgentIcon agentName={agentName} />
                   </EuiToolTip>
                 }
               />

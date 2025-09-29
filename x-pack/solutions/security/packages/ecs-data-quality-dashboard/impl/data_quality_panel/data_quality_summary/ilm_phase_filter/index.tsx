@@ -54,12 +54,7 @@ const IlmPhaseFilterComponent: React.FC = () => {
 
   return (
     <EuiToolTip display="block" content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-      <EuiFormControlLayout
-        css={formControlLayoutCss}
-        fullWidth={true}
-        prepend={ilmFormLabel}
-        tabIndex={0}
-      >
+      <EuiFormControlLayout css={formControlLayoutCss} fullWidth={true} prepend={ilmFormLabel}>
         <EuiComboBox
           id={labelInputId}
           data-test-subj="selectIlmPhases"

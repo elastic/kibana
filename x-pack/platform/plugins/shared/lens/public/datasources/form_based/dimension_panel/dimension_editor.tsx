@@ -234,7 +234,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else {
         hypotethicalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
       }
-      const isDimensionComplete = Boolean(hypotheticalLayer.columns[columnId]);
+      const isDimensionComplete = Boolean(hypotethicalLayer.columns[columnId]);
 
       setState(
         (prevState) => {

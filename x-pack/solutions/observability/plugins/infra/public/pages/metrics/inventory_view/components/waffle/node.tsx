@@ -69,7 +69,8 @@ export const Node = ({
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
-      <div role="listitem" tabIndex={0}>
+      {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
+      <div role="listitem">
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}

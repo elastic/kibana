@@ -49,7 +49,7 @@ export const List: StoryFn = () => {
                   <>
                     <div>
                       <EuiToolTip position="bottom" content="Icon rendered with `SpanIcon`">
-                        <SpanIcon type={type} subtype={subtype} tabIndex={0} />
+                        <SpanIcon type={type} subtype={subtype} />
                       </EuiToolTip>
                     </div>
 

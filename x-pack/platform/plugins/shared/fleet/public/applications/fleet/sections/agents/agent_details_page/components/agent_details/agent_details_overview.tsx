@@ -114,7 +114,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                       </FlexItemWithMinWidth>
                       <FlexItemWithMinWidth grow={4}>
                         <EuiToolTip position="top" content={tooltip}>
-                          <EuiDescriptionListDescription tabIndex={0} className="eui-textTruncate">
+                          <EuiDescriptionListDescription className="eui-textTruncate">
                             {description}
                           </EuiDescriptionListDescription>
                         </EuiToolTip>
@@ -350,7 +350,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 </FlexItemWithMinWidth>
                 <FlexItemWithMinWidth grow={7}>
                   <EuiToolTip position="top" content={tooltip}>
-                    <EuiDescriptionListDescription tabIndex={0} className="eui-textTruncate">
+                    <EuiDescriptionListDescription className="eui-textTruncate">
                       {description}
                     </EuiDescriptionListDescription>
                   </EuiToolTip>

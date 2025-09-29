@@ -159,7 +159,7 @@ export const CustomScriptSelector = memo<
       const toolTipText = hasToolTipContent ? String(option.toolTipContent) : '';
 
       const content = (
-        <div data-test-subj={testId('script')} tabIndex={0}>
+        <div data-test-subj={testId('script')}>
           <EuiText size="s" css={SHARED_TRUNCATION_STYLE}>
             <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
           </EuiText>

@@ -22,6 +22,7 @@ import type {
   CustomIntegrationIcon,
 } from '@kbn/custom-integrations-plugin/common';
 
+import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -107,7 +108,7 @@ export const mapToCard = ({
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
-      isReauthorizationRequired = hasDeferred_installations(item);
+      isReauthorizationRequired = hasDeferredInstallations(item);
     }
 
     const url = getHref('integration_details_overview', {
@@ -177,7 +178,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
-            <EuiBadge tabIndex={0} color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailed"
                 defaultMessage="Update failed"
@@ -207,7 +208,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
           >
-            <EuiBadge tabIndex={0} color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailed"
                 defaultMessage="Install failed"

@@ -588,13 +588,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
     return (
       <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
-        <EuiCodeBlock
-          language="sql"
-          fontSize="s"
-          paddingSize="none"
-          transparentBackground
-          tabIndex={0}
-        >
+        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
           {content}
         </EuiCodeBlock>
       </EuiToolTip>

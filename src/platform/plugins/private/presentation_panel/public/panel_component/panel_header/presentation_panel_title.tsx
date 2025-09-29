@@ -98,7 +98,6 @@ export const PresentationPanelTitle = ({
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
-          tabIndex: 0,
         }}
       >
         <div
@@ -110,6 +109,7 @@ export const PresentationPanelTitle = ({
             column-gap: ${euiTheme.size.xs};
             align-items: center;
           `}
+          tabIndex={0}
         >
           {!hideTitle ? (
             <h2

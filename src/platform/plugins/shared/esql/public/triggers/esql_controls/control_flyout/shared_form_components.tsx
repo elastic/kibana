@@ -109,7 +109,6 @@ export function ControlType({
         condition={isDisabled}
         anchorProps={{
           css: { width: '100%' },
-          tabIndex: 0,
         }}
       >
         <EuiFormRow
@@ -220,6 +219,7 @@ export function VariableName({
           data-test-subj="esqlVariableName"
           fullWidth
           compressed
+          tabIndex={0}
         />
       </EuiToolTip>
     </EuiFormRow>

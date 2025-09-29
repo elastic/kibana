@@ -223,12 +223,11 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
             <EuiToolTip
               anchorProps={{
                 style: { lineHeight: '1' },
-                tabIndex: 0,
               }}
               position="bottom"
               content={tail.join(', ')}
             >
-              <EuiBadge>+{tail.length}</EuiBadge>
+              <EuiBadge tabIndex={0}>+{tail.length}</EuiBadge>
             </EuiToolTip>
           )}
         </EuiBadgeGroup>
