@@ -33,9 +33,9 @@ export function transformPanelsIn(
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
-      const idx = gridData.i ?? uuidv4();
-      sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
+      const { panels: sectionPanels, grid, ...restOfSection } = widget as DashboardSection;
+      const idx = grid.i ?? uuidv4();
+      sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
@@ -58,15 +58,15 @@ function transformPanelIn(panel: DashboardPanel): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
-  const idx = panelIndex ?? uuidv4();
+  const { uid, grid, config, ...restPanel } = panel as DashboardPanel;
+  const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
-  let transformedPanelConfig = panelConfig;
+  let transformedPanelConfig = config;
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
-      const transformed = transforms.transformIn(panelConfig);
+      const transformed = transforms.transformIn(config);
       transformedPanelConfig = transformed.state;
       references = transformed.references;
     }
@@ -83,7 +83,7 @@ function transformPanelIn(panel: DashboardPanel): {
       embeddableConfig: transformedPanelConfig as SavedDashboardPanel['embeddableConfig'],
       panelIndex: idx,
       gridData: {
-        ...gridData,
+        ...grid,
         i: idx,
       },
     },
