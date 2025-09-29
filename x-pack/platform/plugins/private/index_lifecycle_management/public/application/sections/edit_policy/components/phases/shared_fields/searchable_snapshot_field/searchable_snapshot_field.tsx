@@ -10,7 +10,8 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
@@ -19,7 +20,15 @@ import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
 
-import './_searchable_snapshot_field.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    searchableSnapshotField: css`
+      max-width: ${euiTheme.components.forms.maxWidth};
+    `,
+  };
+};
+
 import { i18nTexts as i18nTextsEdit } from '../../../../i18n_texts';
 
 export interface Props {
@@ -83,6 +92,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
   canBeDisabled = true,
 }) => {
+  const styles = useStyles();
   const {
     services: { cloud, docLinks, getUrlForApp },
   } = useKibana();
@@ -227,7 +237,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         }
 
         return (
-          <div className="ilmSearchableSnapshotField">
+          <div css={styles.searchableSnapshotField}>
             <UseField
               path={searchableSnapshotRepoPath}
               defaultValue={!!searchableSnapshotGlobalRepo ? [searchableSnapshotGlobalRepo] : []}
