@@ -22,6 +22,7 @@ export const transformListTypesResponse = (
       supportedFeatureIds,
       isSystemActionType,
       subFeature,
+      isDeprecated,
     }) => ({
       id,
       name,
@@ -32,6 +33,7 @@ export const transformListTypesResponse = (
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
       sub_feature: subFeature,
+      is_deprecated: isDeprecated,
     })
   );
 };

@@ -101,7 +101,8 @@ async function getAllHelper({
   ).saved_objects.map((rawAction) => {
     const connector = connectorFromSavedObject(
       rawAction,
-      isConnectorDeprecated(rawAction.attributes)
+      isConnectorDeprecated(rawAction.attributes),
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });

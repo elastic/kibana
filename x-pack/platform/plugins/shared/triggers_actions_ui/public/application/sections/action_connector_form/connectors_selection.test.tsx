@@ -60,6 +60,7 @@ describe('connectors_selection', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     },
   };
 
@@ -75,6 +76,7 @@ describe('connectors_selection', () => {
       isSystemAction: false as const,
       name: 'test pagerduty',
       secrets: {},
+      isConnectorTypeDeprecated: false,
     },
   ];
 

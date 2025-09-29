@@ -15,7 +15,7 @@ export function actionTypeCompare(
   const aEnabled = getIsEnabledValue(a, preconfiguredConnectors);
   const bEnabled = getIsEnabledValue(b, preconfiguredConnectors);
 
-  if ((aEnabled === true && bEnabled === false) || (a.isDeprecated && b.isDeprecated)) {
+  if ((aEnabled === true && bEnabled === false) || (!a.isDeprecated && b.isDeprecated)) {
     return -1;
   }
   if ((aEnabled === false && bEnabled === true) || (a.isDeprecated && !b.isDeprecated)) {

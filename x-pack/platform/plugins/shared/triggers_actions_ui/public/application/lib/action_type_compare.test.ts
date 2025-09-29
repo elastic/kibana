@@ -19,6 +19,7 @@ test('should sort enabled action types first', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '2',
@@ -29,6 +30,7 @@ test('should sort enabled action types first', async () => {
       enabledInConfig: true,
       enabledInLicense: false,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '3',
@@ -39,6 +41,7 @@ test('should sort enabled action types first', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '4',
@@ -49,6 +52,7 @@ test('should sort enabled action types first', async () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);
@@ -69,6 +73,7 @@ test('should sort by name when all enabled', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '2',
@@ -79,6 +84,7 @@ test('should sort by name when all enabled', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '3',
@@ -89,6 +95,7 @@ test('should sort by name when all enabled', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
     {
       id: '4',
@@ -99,6 +106,7 @@ test('should sort by name when all enabled', async () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);
@@ -106,4 +114,58 @@ test('should sort by name when all enabled', async () => {
   expect(result[1]).toEqual(actionTypes[2]);
   expect(result[2]).toEqual(actionTypes[0]);
   expect(result[3]).toEqual(actionTypes[3]);
+});
+
+test('should sort by deprecation status when all enabled', async () => {
+  const actionTypes: ActionType[] = [
+    {
+      id: '1',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      name: 'third',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      isSystemActionType: false,
+      isDeprecated: true,
+    },
+    {
+      id: '2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      name: 'first',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      isSystemActionType: false,
+      isDeprecated: false,
+    },
+    {
+      id: '3',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      name: 'second',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      isSystemActionType: false,
+      isDeprecated: false,
+    },
+    {
+      id: '4',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      name: 'x-fourth',
+      enabled: true,
+      enabledInConfig: false,
+      enabledInLicense: true,
+      isSystemActionType: false,
+      isDeprecated: false,
+    },
+  ];
+  const result = [...actionTypes].sort(actionTypeCompare);
+  expect(result[0]).toEqual(actionTypes[1]);
+  expect(result[1]).toEqual(actionTypes[2]);
+  expect(result[2]).toEqual(actionTypes[3]);
+  expect(result[3]).toEqual(actionTypes[0]);
 });

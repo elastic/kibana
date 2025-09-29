@@ -111,6 +111,7 @@ describe('actions_connectors_list', () => {
         isDeprecated: false,
         referencedByCount: 1,
         config: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '2',
@@ -122,6 +123,7 @@ describe('actions_connectors_list', () => {
         isPreconfigured: false,
         isDeprecated: false,
         config: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '3',
@@ -132,6 +134,7 @@ describe('actions_connectors_list', () => {
         referencedByCount: 1,
         isPreconfigured: true,
         isDeprecated: false,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '4',
@@ -143,6 +146,7 @@ describe('actions_connectors_list', () => {
         isPreconfigured: false,
         isDeprecated: false,
         config: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '5',
@@ -154,6 +158,7 @@ describe('actions_connectors_list', () => {
         isPreconfigured: false,
         isDeprecated: false,
         config: {},
+        isConnectorTypeDeprecated: false,
       },
       {
         id: '6',
@@ -165,6 +170,7 @@ describe('actions_connectors_list', () => {
         isPreconfigured: false,
         isDeprecated: false,
         config: {},
+        isConnectorTypeDeprecated: false,
       },
     ];
     let mockedEditItem: jest.Mock;
@@ -644,6 +650,111 @@ describe('actions_connectors_list', () => {
         .getByTestId('actionsTable')
         .querySelectorAll('[data-euiicon-type="warning"]');
       expect(warningIcons.length).toEqual(2);
+    });
+  });
+
+  describe('component with deprecated connector type', () => {
+    beforeEach(async () => {
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: 'test',
+          name: '.servicenow',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: true,
+        },
+        {
+          id: 'test2',
+          name: '.servicenow-sir',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: { show: true, save: true, delete: true },
+      };
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+
+      // Mock the action type registry to return valid action types
+      actionTypeRegistry.get.mockImplementation((id: string) => {
+        return {
+          id,
+          iconClass: 'test',
+          selectMessage: 'test',
+          validateParams: (): Promise<GenericValidationResult<unknown>> =>
+            Promise.resolve({ errors: {} }),
+          actionConnectorFields: null,
+          actionParamsFields: React.lazy(async () => ({ default: () => <></> })),
+          actionTypeTitle: 'Test Action',
+          defaultActionParams: {},
+          defaultRecoveredActionParams: {},
+        };
+      });
+
+      // Mock the has method to return true for all action types
+      actionTypeRegistry.has.mockReturnValue(true);
+    });
+
+    it('shows the deprecated badge', async () => {
+      const actions = [
+        {
+          id: '1',
+          actionTypeId: 'test',
+          name: 'ServiceNow Connector',
+          secrets: {},
+          isSystemAction: false,
+          referencedByCount: 1,
+          config: { usesTableApi: true },
+          isDeprecated: true,
+          isMissingSecrets: false,
+          isConnectorTypeDeprecated: true,
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          name: 'ServiceNow SIR Connector',
+          secrets: {},
+          isSystemAction: false,
+          referencedByCount: 1,
+          config: { usesTableApi: true },
+          isDeprecated: true,
+          isMissingSecrets: false,
+          isConnectorTypeDeprecated: false,
+        },
+      ] as Array<ActionConnector<{ usesTableApi: boolean }>>;
+
+      render(
+        <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
+          <IntlProvider>
+            <ActionsConnectorsList
+              setAddFlyoutVisibility={() => {}}
+              loadActions={async () => {}}
+              editItem={() => {}}
+              isLoadingActions={false}
+              actions={actions}
+              setActions={() => {}}
+            />
+          </IntlProvider>
+        </ThemeProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(loadActionTypes).toHaveBeenCalled();
+      expect(screen.getAllByTestId('connectorsTableCell-actionType')).toHaveLength(2);
+      expect(screen.getByTestId('edit1')).toBeInTheDocument();
+      expect(screen.getByTestId('edit2')).toBeInTheDocument();
+
+      expect(screen.getAllByText('Deprecated')).toHaveLength(1);
     });
   });
 });

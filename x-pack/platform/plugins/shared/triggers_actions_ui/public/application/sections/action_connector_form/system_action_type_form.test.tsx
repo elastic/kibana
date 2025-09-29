@@ -42,6 +42,7 @@ const actionConnector = {
   isSystemAction: true,
   name: 'test name',
   secrets: {},
+  isConnectorTypeDeprecated: false,
 };
 
 const actionItem = {
@@ -62,6 +63,7 @@ const actionTypeIndexDefault: Record<string, ActionType> = {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
+    isDeprecated: false,
   },
 };
 

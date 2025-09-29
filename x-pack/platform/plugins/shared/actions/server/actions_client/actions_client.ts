@@ -280,7 +280,11 @@ export class ActionsClient {
         );
       }
       actionResults.push(
-        connectorFromSavedObject(action, isConnectorDeprecated(action.attributes))
+        connectorFromSavedObject(
+          action,
+          isConnectorDeprecated(action.attributes),
+          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId)
+        )
       );
     }
 

@@ -16,10 +16,13 @@ import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import type { ActionTypeRegistry } from '../action_type_registry';
 
 jest.mock('../application/connector/methods/get_all/get_all');
 
 const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
+
+const connectorTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
@@ -38,6 +41,7 @@ const inMemoryConnectors = [
     config: {
       foo: 'bar',
     },
+    isConnectorTypeDeprecated: false,
   },
   /**
    * System actions will not
@@ -53,12 +57,14 @@ const inMemoryConnectors = [
     isMissingSecrets: false,
     isPreconfigured: false,
     isSystemAction: true,
+    isConnectorTypeDeprecated: false,
   },
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
     clusterClient,
@@ -67,6 +73,7 @@ beforeEach(() => {
     internalSavedObjectsRepository,
     kibanaIndices: ['.kibana'],
     logger,
+    connectorTypeRegistry,
   });
 });
 
@@ -83,6 +90,7 @@ describe('getAll()', () => {
         isDeprecated: false,
         isSystemAction: false,
         referencedByCount: 6,
+        isConnectorTypeDeprecated: false,
       },
       {
         id: 'testPreconfigured',
@@ -92,6 +100,7 @@ describe('getAll()', () => {
         isSystemAction: false,
         isDeprecated: false,
         referencedByCount: 2,
+        isConnectorTypeDeprecated: false,
       },
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
@@ -104,6 +113,7 @@ describe('getAll()', () => {
       logger,
       internalSavedObjectsRepository,
       spaceId: 'default',
+      connectorTypeRegistry,
     });
   });
 
@@ -121,6 +131,7 @@ describe('getAll()', () => {
       logger,
       internalSavedObjectsRepository,
       spaceId: 'customSpace',
+      connectorTypeRegistry,
     });
   });
 });

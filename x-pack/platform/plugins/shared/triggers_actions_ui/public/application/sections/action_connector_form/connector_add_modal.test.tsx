@@ -59,6 +59,7 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -102,6 +103,7 @@ describe('connector_add_modal', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       };
       const wrapper = mountWithIntl(
         <ConnectorAddModal
@@ -142,6 +144,7 @@ describe('connector_add_modal', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       };
       const wrapper = mountWithIntl(
         <ConnectorAddModal

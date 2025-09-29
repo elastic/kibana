@@ -80,6 +80,7 @@ describe('ruleActionsConnectorsBody', () => {
         isSystemAction: false,
         name: 'connector-1',
         secrets: { secret: 'secret' },
+        isConnectorTypeDeprecated: false,
       })
     );
 
@@ -94,6 +95,7 @@ describe('ruleActionsConnectorsBody', () => {
         isSystemAction: false,
         name: 'connector-2',
         secrets: { secret: 'secret' },
+        isConnectorTypeDeprecated: false,
       })
     );
   });
@@ -136,5 +138,30 @@ describe('ruleActionsConnectorsBody', () => {
 
     expect(await screen.findAllByTestId('ruleActionsConnectorsModalCard')).toHaveLength(1);
     expect(await screen.findByText('connector-1')).toBeInTheDocument();
+  });
+  test('should show deprecated badge when the connector is deprecated', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [getActionType('1', { isDeprecated: true }), getActionType('2')],
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    expect(screen.getByText('Deprecated')).toBeInTheDocument();
+    expect(screen.getAllByText('Deprecated')).toHaveLength(1);
   });
 });

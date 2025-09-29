@@ -403,4 +403,92 @@ describe('connector_add_flyout', () => {
       ).toBeTruthy();
     });
   });
+
+  describe('deprecated badge', () => {
+    it(`does not render deprecated badge when isDeprecated=false`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        isExperimental: false,
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeFalsy();
+    });
+
+    it(`renders deprecated badge when isDeprecated=true`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        isExperimental: false,
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: true,
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeTruthy();
+    });
+  });
 });

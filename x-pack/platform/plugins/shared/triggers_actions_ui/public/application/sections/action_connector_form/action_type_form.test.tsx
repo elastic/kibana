@@ -723,6 +723,7 @@ function getActionTypeForm({
     isSystemAction: false as const,
     name: 'test name',
     secrets: {},
+    isConnectorTypeDeprecated: false,
   };
 
   const actionItemDefault = {
@@ -747,6 +748,7 @@ function getActionTypeForm({
       isSystemAction: false as const,
       name: 'test name',
       secrets: {},
+      isConnectorTypeDeprecated: false,
     },
     {
       id: '123',
@@ -757,6 +759,7 @@ function getActionTypeForm({
       isSystemAction: false as const,
       config: {},
       secrets: {},
+      isConnectorTypeDeprecated: false,
     },
   ];
 
@@ -770,6 +773,7 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     },
     '.server-log': {
       id: '.server-log',
@@ -780,6 +784,7 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
+      isDeprecated: false,
     },
   };
 
