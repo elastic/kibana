@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, lastValueFrom, map, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
@@ -16,7 +16,9 @@ import {
   SEARCH_EMBEDDABLE_TYPE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { apiPublishesESQLVariables, type ESQLControlVariable } from '@kbn/esql-types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
@@ -109,6 +111,22 @@ const isExecutionContextWithinLimits = (executionContext: KibanaExecutionContext
   return encoded.length < MAX_VALUE_ALLOWED;
 };
 
+const getRelevantESQLVariables = (
+  savedSearch: SavedSearch,
+  allVariables: ESQLControlVariable[] = []
+) => {
+  const query = savedSearch.searchSource.getField('query');
+  if (isOfAggregateQueryType(query)) {
+    const currentVariables = getESQLQueryVariables(query.esql);
+    if (!currentVariables.length) {
+      return allVariables;
+    }
+    // filter out the variables that are not used in the query
+    return allVariables.filter((variable) => currentVariables.includes(variable.key));
+  }
+  return [];
+};
+
 export function initializeFetch({
   api,
   stateManager,
@@ -127,7 +145,30 @@ export function initializeFetch({
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
+  const rawESQLVariables$ = apiPublishesESQLVariables(api.parentApi)
+    ? api.parentApi.esqlVariables$
+    : undefined;
+
+  // Only emits when relevant variables change
+  const relevantESQLVariables$ = rawESQLVariables$
+    ? combineLatest([api.savedSearch$, rawESQLVariables$]).pipe(
+        map(([savedSearch, allVariables]) => getRelevantESQLVariables(savedSearch, allVariables)),
+        distinctUntilChanged(
+          (prev, curr) =>
+            prev.length === curr.length &&
+            prev.every((p, i) => p.key === curr[i]?.key && p.value === curr[i]?.value)
+        )
+      )
+    : undefined;
+
+  const observables = [
+    fetch$(api),
+    api.savedSearch$,
+    api.dataViews$,
+    ...(relevantESQLVariables$ ? [relevantESQLVariables$] : []),
+  ] as const;
+
+  const fetchSubscription = combineLatest(observables)
     .pipe(
       tap(() => {
         // abort any in-progress requests
@@ -136,7 +177,7 @@ export function initializeFetch({
           abortController = undefined;
         }
       }),
-      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
+      switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
@@ -193,6 +234,7 @@ export function initializeFetch({
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
+              esqlVariables,
             });
             return {
               columnsMeta: result.esqlQueryColumns
