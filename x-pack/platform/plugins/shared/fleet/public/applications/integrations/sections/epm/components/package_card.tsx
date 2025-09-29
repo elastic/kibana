@@ -75,6 +75,7 @@ export function PackageCard({
   isCollectionCard = false,
   titleLineClamp,
   titleBadge,
+  titleSize = 'xs',
   descriptionLineClamp,
   maxCardHeight,
   minCardHeight,
@@ -246,7 +247,7 @@ export function PackageCard({
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
         title={<CardTitle title={title} titleBadge={titleBadge} />}
-        titleSize="xs"
+        titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder
         icon={
@@ -304,7 +305,7 @@ const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle>
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
