@@ -1,3 +1,4 @@
+/* eslint-disable @elastic/eui/no-css-color */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +8,14 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiToolTip, EuiButton, EuiButtonEmpty, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiIcon,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { useAssistantContext } from '../..';
@@ -69,6 +77,37 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
   const base = css`
     --cta-grad: ${CTA_GRAD};
 
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 0% 100%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes angleSpin {
+      to {
+        --a: 380deg;
+      }
+    } /* 20 + 360 */
+
+    @keyframes spinConic {
+      to {
+        --a: 360;
+      }
+    }
+
+    @keyframes moveGradient {
+      50% {
+        background-position: 100% 0%;
+        transform: rotate(-200deg);
+      }
+    }
+
     .euiButtonContent {
       gap: ${euiTheme.size.s};
       align-items: center;
@@ -121,29 +160,82 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
 
   /** Secondary (outlined): gradient border + gradient text/icon */
   const secondary = css`
-    background: ${chromeStyle === 'project' ? euiTheme.colors.plain : '#0b1628'} !important;
-    border: none !important;
+    background: ${chromeStyle === 'project'
+      ? euiTheme.colors.backgroundBasePlain
+      : '#0b1628'} !important;
+    --border-width: 2px;
+
+    position: relative;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    // padding-inline: 8px;
+    height: 28px;
+    width: 28px;
+    color: white;
+    // background: #222;
     border-radius: 24px;
-    position: relative !important;
-    overflow: visible !important;
-    
-    /* Create gradient border using pseudo-element */
-    &::before {
-      content: '' !important;
-      position: absolute !important;
-      top: -1px !important;
-      left: -1px !important;
-      right: -1px !important;
-      bottom: -1px !important;
-      background: linear-gradient(20deg, #0B64DD 10%, #1C9BEF 60%, #48EFCF 100%) !important;
-      border-radius: inherit !important;
-      z-index: -1 !important;
-      transition: opacity 0.3s ease !important;
+
+    &::after {
+      position: absolute;
+      content: '';
+      top: calc(-1 * var(--border-width));
+      left: calc(-1 * var(--border-width));
+      z-index: -1;
+      width: calc(100% + var(--border-width) * 2);
+      height: calc(100% + var(--border-width) * 2);
+      // background: linear-gradient(
+      //   60deg,
+      //   hsl(224, 85%, 66%),
+      //   hsl(269, 85%, 66%),
+      //   hsl(314, 85%, 66%),
+      //   hsl(359, 85%, 66%),
+      //   hsl(44, 85%, 66%),
+      //   hsl(89, 85%, 66%),
+      //   hsl(134, 85%, 66%),
+      //   hsl(179, 85%, 66%)
+      // );
+      // background: linear-gradient(20deg, #0b64dd 10%, #1c9bef 60%, #48efcf 100%);
+      //       background: linear-gradient(
+      //   20deg,
+      //   /* Deep blue cluster */
+      //   #0b64dd 0%,
+      //   #186fe3 12%,
+
+      //   /* Light blue cluster */
+      //   #1c9bef 28%,
+      //   #28a8f0 44%,
+
+      //   /* Aqua bridge */
+      //   #33b4f1 54%,
+      //   #39c4e6 64%,
+
+      //   /* Teal cluster (expanded range) */
+      //   #3fd4dc 72%,
+      //   #48efcf 82%,
+      //   #39e1c9 91%,
+      //   #2ccfcd 100%
+      // );
+      background: linear-gradient(
+        120deg,
+        #6a11cb 0%,
+        #8e3edb 15%,
+        #b145da 45%,
+        #ff0080 70%,
+        #ff0080 100%
+      );
+
+      background-size: 200% 200%;
+      background-position: 0 40%;
+      border-radius: inherit;
+      animation: pause;
     }
-    
-    /* Animate gradient on hover */
-    &:hover::before {
-      opacity: 0.7 !important;
+
+    &:hover {
+      &::after {
+        animation: moveGradient 4s alternate infinite;
+      }
     }
 
     /* Apply gradient text to the direct child span element */
@@ -245,12 +337,12 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
 
   return (
     <EuiToolTip delay="long" content={TOOLTIP_CONTENT}>
-      <ButtonComponent
+      <button
         onClick={showOverlay}
-        size="s"
-        color="text" /* we fully control visuals via CSS */
-        display={iconOnly ? 'empty' : undefined}
-        iconType={IconComponent} /* conditional icon: gradient for project, white for classic */
+        // size="s"
+        // color="text" /* we fully control visuals via CSS */
+        // display={iconOnly ? 'empty' : undefined}
+        // iconType={IconComponent} /* conditional icon: gradient for project, white for classic */
         data-test-subj="assistantNavLink"
         aria-label={iconOnly ? LINK_LABEL : undefined}
         css={[
@@ -268,8 +360,14 @@ export const AssistantNavLink: FC<AssistantNavLinkProps> = ({
             : tertiary,
         ]}
       >
-        {!iconOnly && LINK_LABEL}
-      </ButtonComponent>
+        <EuiIcon
+          type={SparklesAnim}
+          css={{
+            fill: chromeStyle === 'project' ? '#0b1628' : euiTheme.colors.backgroundBasePlain,
+          }}
+        />
+        {/* {!iconOnly && LINK_LABEL} */}
+      </button>
     </EuiToolTip>
   );
 };

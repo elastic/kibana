@@ -38,9 +38,14 @@ export const SparklesAnim: React.FC<
           y2="0"
           gradientTransform="rotate(-20)"
         >
-          <stop offset="0%" stopColor="#0B64DD" />
+          {/* <stop offset="0%" stopColor="#0B64DD" />
           <stop offset="60%" stopColor="#1C9BEF" />
-          <stop offset="100%" stopColor="#48EFCF" />
+          <stop offset="100%" stopColor="#48EFCF" /> */}
+          <stop offset="0%" stopColor="#6a11cb" />
+          <stop offset="15%" stopColor="#8e3edb" />
+          <stop offset="45%" stopColor="#b145da" />
+          {/* <stop offset="70%" stopColor="#ff0080" /> */}
+          <stop offset="100%" stopColor="#ff0080" />
         </linearGradient>
       </defs>
       {/* Apply gradient directly to SVG paths */}
