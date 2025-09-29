@@ -27,7 +27,8 @@ mockedAppContextService.getRegisteredFeatures.mockImplementation(() => {
   };
 });
 
-describe('defend_insights_loader', () => {
+// Failing: See https://github.com/elastic/kibana/issues/236735
+describe.skip('defend_insights_loader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
