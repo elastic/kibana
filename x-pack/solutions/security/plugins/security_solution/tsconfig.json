@@ -243,5 +243,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/core-metrics-server",
     "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/core-ui-settings-browser",
   ]
 }

@@ -46,18 +46,20 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
 
   const [selectedConnectorId, setSelectedConnectorId] = useStoredAssistantConnectorId(spaceId);
 
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
-
-  const { setApiConfig } = useConversation();
-
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
     baseConversations,
+    settings,
   } = useAssistantContext();
   const { getLastConversationId } = useAssistantLastConversation({
     spaceId,
   });
+  const { setApiConfig } = useConversation();
+  const defaultConnector = useMemo(
+    () => getDefaultConnector(connectors, settings),
+    [connectors, settings]
+  );
   const {
     allSystemPrompts,
     conversations,
