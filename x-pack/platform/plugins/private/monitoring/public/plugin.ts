@@ -61,7 +61,7 @@ export class MonitoringPlugin
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
-    const { home } = plugins;
+    const { home, licensing } = plugins;
     const id = 'monitoring';
     const icon = 'monitoringApp';
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
@@ -102,7 +102,7 @@ export class MonitoringPlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
         // Check if user has enterprise license
-        const license = await plugins.licensing.license$.pipe(take(1)).toPromise();
+        const license = await licensing.license$.pipe(take(1)).toPromise();
         const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
 
         const deps: LegacyMonitoringStartPluginDependencies = {
