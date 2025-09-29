@@ -1030,7 +1030,6 @@
     "@kbn/streamlang": "link:x-pack/platform/packages/shared/kbn-streamlang",
     "@kbn/streams-ai": "link:x-pack/platform/packages/shared/kbn-streams-ai",
     "@kbn/streams-app-plugin": "link:x-pack/platform/plugins/shared/streams_app",
-    "@kbn/streams-app-wrapper-plugin": "link:x-pack/solutions/observability/plugins/observability_streams_wrapper",
     "@kbn/streams-plugin": "link:x-pack/platform/plugins/shared/streams",
     "@kbn/streams-schema": "link:x-pack/platform/packages/shared/kbn-streams-schema",
     "@kbn/synthetics-plugin": "link:x-pack/solutions/observability/plugins/synthetics",
