@@ -20,7 +20,7 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-// import { generateJSONValidator } from '../validate_json';
+import { generateJSONValidator } from '../validate_json';
 // import { JsonEditorField } from '../json_editor_field';
 import { AdditionalFormFields } from './additional_form_fields';
 
@@ -136,7 +136,14 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
       {showAdditionalFields && (
         <UseField
           path="fields.additionalFields"
-          config={{ defaultValue: '' }}
+          config={{
+            defaultValue: '',
+            validations: [
+              {
+                validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+              },
+            ],
+          }}
           component={AdditionalFormFields}
           componentProps={{ connector }}
         />
