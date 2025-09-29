@@ -43,7 +43,8 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "automaticImport"
+      "automaticImport",
+      "alerting"
     ],
     "requiredBundles": [
       "kibanaReact",
