@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import type {
   ChartSectionProps,
   UnifiedHistogramInputMessage,
@@ -123,7 +123,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: allFields,
       status: 'success',
-      isLoading: false,
+      isFetching: false,
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
@@ -146,14 +146,24 @@ describe('MetricsExperienceGrid', () => {
     await waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
   });
 
-  it('renders the loading state', async () => {
+  it('renders the loading state when fields API is fetching', async () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'loading',
-      isLoading: true,
+      isFetching: true,
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: IntlProvider,
+    });
+
+    await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
+  });
+
+  it('renders the loading state when Discover is reloading', async () => {
+    const props = { ...defaultProps, isChartLoading: true };
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...props} />, {
       wrapper: IntlProvider,
     });
 
@@ -164,7 +174,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'success',
-      isLoading: false,
+      isFetching: false,
     });
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
