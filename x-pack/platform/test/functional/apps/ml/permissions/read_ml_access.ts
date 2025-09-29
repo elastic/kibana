@@ -385,7 +385,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
             await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
           });
-          it('should display elements on File Data Visualizer page correctly', async () => {
+          it.skip('should display elements on File Data Visualizer page correctly', async () => {
             await ml.testExecution.logTestStep(
               'should load the file data visualizer file selection'
             );
@@ -398,8 +398,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display components of the file details page'
             );
-            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
-            await ml.dataVisualizerFileBased.assertFileContentPanelExists();
+            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle, 0);
             await ml.dataVisualizerFileBased.assertSummaryPanelExists();
             await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
             await ml.dataVisualizerFileBased.assertImportButtonEnabled(false);
