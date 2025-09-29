@@ -103,6 +103,14 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
+  getBulkRollbackPath: () => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_PATTERN;
+  },
+
+  getBulkRollbackInfoPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
@@ -117,6 +125,12 @@ export const epmRouteService = {
 
   getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
+  getInstallRuleAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)
       .replace(/\/$/, ''); // trim trailing slash
   },

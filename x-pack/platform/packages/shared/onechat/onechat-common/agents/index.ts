@@ -11,4 +11,9 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
 } from './definition';
-export { agentIdRegexp, validateAgentId } from './agent_ids';
+export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
+export {
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  getKibanaDefaultAgentCapabilities,
+} from './capabilities';
