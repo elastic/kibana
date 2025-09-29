@@ -46,7 +46,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -175,6 +175,7 @@ export interface FleetStartDeps {
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export interface FleetAppContext {
@@ -212,6 +213,7 @@ export interface FleetAppContext {
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
+  alertingStart?: AlertingServerStart;
 }
 
 export type FleetSetupContract = void;
@@ -711,12 +713,14 @@ export class FleetPlugin
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     this.spacesPluginsStart = plugins.spaces;
+
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+
     const uninstallTokenService = new UninstallTokenService(
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
@@ -759,6 +763,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
