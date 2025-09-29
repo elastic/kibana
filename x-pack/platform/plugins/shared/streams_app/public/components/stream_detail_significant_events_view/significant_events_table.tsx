@@ -241,7 +241,11 @@ export function SignificantEventsTable({
           aria-labelledby={'deleteSignificantModal'}
           title={i18n.translate(
             'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventLabel',
-            { defaultMessage: 'Delete significant event' }
+            {
+              defaultMessage: 'Delete significant event {name}',
+
+              values: { name: selectedDeleteItem.query.title },
+            }
           )}
           titleProps={{ id: 'deleteSignificantModal' }}
           onCancel={() => setIsDeleteModalVisible(false)}
@@ -251,8 +255,14 @@ export function SignificantEventsTable({
               setSelectedDeleteItem(undefined);
             });
           }}
-          cancelButtonText="Keep editing"
-          confirmButtonText="Discard changes"
+          cancelButtonText={i18n.translate(
+            'xpack.streams.significantEventsTable.euiConfirmModal.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventButtonLabel',
+            { defaultMessage: 'Delete significant event' }
+          )}
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
