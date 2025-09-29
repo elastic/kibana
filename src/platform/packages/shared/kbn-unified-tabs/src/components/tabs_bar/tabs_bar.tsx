@@ -62,6 +62,7 @@ export type TabsBarProps = Pick<
   services: TabsServices;
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
+  onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
 };
 
@@ -84,6 +85,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onLabelEdited,
       onSelect,
       onSelectRecentlyClosed,
+      onClearRecentlyClosed,
       onReorder,
       onClose,
       getPreviewData,
@@ -288,6 +290,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             recentlyClosedItems={recentlyClosedItems}
             onSelect={onSelect}
             onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onClearRecentlyClosed={onClearRecentlyClosed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
