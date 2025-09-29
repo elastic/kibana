@@ -9,18 +9,11 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme, useEuiBreakpoint } from '@elastic/eui';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
 
 import { layoutVar } from '@kbn/core-chrome-layout-constants';
 import { useEmbeddableConsoleContentStyles, useEmbeddableConsoleStyleVariables } from './styles';
 
-export const useStyles = ({
-  chromeStyle,
-  isOpen,
-}: {
-  chromeStyle?: ChromeStyle;
-  isOpen: boolean;
-}) => {
+export const useStyles = () => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const variables = useEmbeddableConsoleStyleVariables();
@@ -48,53 +41,49 @@ export const useStyles = ({
       height: ${variables.initialHeight};
       max-height: ${variables.maxHeight};
 
-      ${isOpen &&
-      css`
-        animation-duration: ${euiTheme.animation.normal};
-        animation-timing-function: ${euiTheme.animation.resistance};
-        animation-fill-mode: forwards;
-        animation-name: embeddableConsoleOpenPanel;
-        height: var(--embedded-console-height);
-        bottom: calc(
-          var(--embedded-console-bottom) + ${layoutVar('application.content.bottom', '0px')}
-        );
-
-        @keyframes embeddableConsoleOpenPanel {
-          0% {
-            transform: translateY(-${variables.initialHeight});
-          }
-
-          100% {
-            transform: translateY(var(--embedded-console-bottom));
-          }
-        }
-      `}
-
-      ${chromeStyle === 'classic' &&
-      css`
-        left: calc(
-          var(--kbnSolutionNavOffset, 0) + ${layoutVar('application.content.left', '0px')}
-        );
-      `}
-
-      ${chromeStyle === 'project' &&
-      css`
-        left: calc(
-          var(--euiCollapsibleNavOffset, 0) + ${layoutVar('application.content.left', '0px')}
-        );
-      `}
-
-      ${chromeStyle === undefined &&
-      css`
-        left: ${layoutVar('application.content.left', '0px')};
-      `}
-
-      position: fixed;
-      z-index: calc(${euiTheme.levels.header} - 2);
-
       ${useEuiBreakpoint(['xs', 's'])} {
         display: none;
       }
+    `,
+
+    embeddableConsoleOpen: css`
+      animation-duration: ${euiTheme.animation.normal};
+      animation-timing-function: ${euiTheme.animation.resistance};
+      animation-fill-mode: forwards;
+      animation-name: embeddableConsoleOpenPanel;
+      height: var(--embedded-console-height);
+      bottom: calc(
+        var(--embedded-console-bottom) + ${layoutVar('application.content.bottom', '0px')}
+      );
+
+      @keyframes embeddableConsoleOpenPanel {
+        0% {
+          transform: translateY(-${variables.initialHeight});
+        }
+
+        100% {
+          transform: translateY(var(--embedded-console-bottom));
+        }
+      }
+    `,
+
+    embeddableConsoleChromeProject: css`
+      left: calc(
+        var(--euiCollapsibleNavOffset, 0) + ${layoutVar('application.content.left', '0px')}
+      );
+    `,
+
+    embeddableConsoleChromeClassic: css`
+      left: calc(var(--kbnSolutionNavOffset, 0) + ${layoutVar('application.content.left', '0px')});
+    `,
+
+    embeddableConsoleChromeDefault: css`
+      left: ${layoutVar('application.content.left', '0px')};
+    `,
+
+    embeddableConsoleFixed: css`
+      position: fixed;
+      z-index: calc(${euiTheme.levels.header} - 2);
     `,
 
     embeddableConsoleControls: css`

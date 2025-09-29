@@ -12,8 +12,7 @@ import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 
 export const useActionStyles = () => {
-  const EuiThemeContext = useEuiTheme();
-  const { euiTheme } = EuiThemeContext;
+  const { euiTheme } = useEuiTheme();
   return {
     actions: css`
       position: absolute;

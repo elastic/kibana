@@ -88,7 +88,7 @@ export const EmbeddableConsole = ({
     (value) => ({ ...value })
   );
   const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
-  const styles = useStyles({ chromeStyle, isOpen });
+  const styles = useStyles();
 
   useEffect(() => {
     setDispatch(consoleDispatch);
@@ -150,7 +150,14 @@ export const EmbeddableConsole = ({
         <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
           <section
             aria-label={landmarkHeading}
-            css={styles.embeddableConsole}
+            css={[
+              styles.embeddableConsole,
+              isOpen && styles.embeddableConsoleOpen,
+              chromeStyle === 'classic' && styles.embeddableConsoleChromeClassic,
+              chromeStyle === 'project' && styles.embeddableConsoleChromeProject,
+              chromeStyle === undefined && styles.embeddableConsoleChromeDefault,
+              styles.embeddableConsoleFixed,
+            ]}
             data-test-subj="consoleEmbeddedSection"
           >
             <EuiScreenReaderOnly>
