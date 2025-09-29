@@ -20,7 +20,7 @@ export function WorkflowStatus({ valid, ...props }: WorkflowStatusProps) {
   return (
     <EuiIconTip
       type="errorFilled"
-      color="danger"
+      color="red"
       size="m"
       content={i18n.translate('workflows.workflowList.workflowInvalid', {
         defaultMessage: 'Workflow is invalid',

@@ -8,7 +8,6 @@
  */
 
 import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
 import * as i18n from '../../../common/translations';
@@ -24,16 +23,12 @@ const TRIGGERS_ICONS: Record<string, string> = {
   scheduled: 'clock',
 };
 
-const BADGE_STYLE = css`
-  margin: 2px 3px 0 0;
-`;
-
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (triggers.length === 0) {
     return (
-      <EuiBadge color={euiTheme.colors.backgroundBasePlain} iconType="asterisk" css={BADGE_STYLE}>
+      <EuiBadge color={euiTheme.colors.backgroundBasePlain} iconType="asterisk">
         <EuiText size="xs">No triggers</EuiText>
       </EuiBadge>
     );
@@ -45,7 +40,6 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
       <EuiBadge
         color={euiTheme.colors.backgroundBasePlain}
         iconType={TRIGGERS_ICONS[firstTrigger.type]}
-        css={BADGE_STYLE}
       >
         <EuiText size="xs">{capitalize(firstTrigger.type)}</EuiText>
       </EuiBadge>
@@ -60,7 +54,6 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
               key={`${trigger}-${idx}`}
               color={euiTheme.colors.backgroundBasePlain}
               iconType={TRIGGERS_ICONS[trigger.type]}
-              css={BADGE_STYLE}
             >
               <EuiText size="xs">{capitalize(trigger.type)}</EuiText>
             </EuiBadge>
