@@ -38,6 +38,7 @@ import type {
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
+  BulkRollbackPackagesRequest,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -357,6 +358,23 @@ export const sendGetOneBulkUpgradePackagesForRq = (taskId: string) => {
 export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
   return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
     path: epmRouteService.getOneBulkUninstallPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendBulkRollbackPackagesForRq = (params: BulkRollbackPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetBulkRollbackInfoPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackInfoPath(taskId),
     method: 'get',
     version: API_VERSIONS.public.v1,
   });

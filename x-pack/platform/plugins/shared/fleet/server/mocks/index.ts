@@ -299,6 +299,9 @@ export const createMockCloudConnectorService = (): jest.Mocked<CloudConnectorSer
   return {
     create: jest.fn().mockReturnValue(Promise.resolve()),
     getList: jest.fn().mockReturnValue(Promise.resolve()),
+    getById: jest.fn().mockReturnValue(Promise.resolve()),
+    update: jest.fn().mockReturnValue(Promise.resolve()),
+    delete: jest.fn().mockReturnValue(Promise.resolve({ id: 'mock-id' })),
   };
 };
 
@@ -365,6 +368,9 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     cloudConnectorService: {
       create: jest.fn().mockReturnValue(Promise.resolve()),
       getList: jest.fn().mockReturnValue(Promise.resolve()),
+      getById: jest.fn().mockReturnValue(Promise.resolve()),
+      update: jest.fn().mockReturnValue(Promise.resolve()),
+      delete: jest.fn().mockReturnValue(Promise.resolve({ id: 'mock-id' })),
     },
     registerExternalCallback: jest.fn(),
     createArtifactsClient: jest.fn((_) => fleetArtifactsClient),
