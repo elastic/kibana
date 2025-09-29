@@ -213,7 +213,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           await unloadSavedObjects();
         });
 
-        beforeEach(async () => {
+        afterEach(async () => {
           try {
             await spacesService.create(SPACE_2);
           } catch (error) {

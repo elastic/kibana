@@ -28,11 +28,11 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     // https://github.com/elastic/kibana/issues/234059
     this.tags('skipMKI');
 
-    beforeEach(async () => {
+    before(async () => {
       await createSpaces();
     });
 
-    afterEach(async () => {
+    after(async () => {
       await deleteSpaces();
     });
 

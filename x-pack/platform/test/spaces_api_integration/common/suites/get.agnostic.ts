@@ -34,25 +34,6 @@ const nonExistantSpaceId = 'not-a-space';
 export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const config = context.getService('config');
   const isServerless = config.get('serverless');
-  const kbnClient = context.getService('kibanaServer');
-
-  const loadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.load(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
-
-  const unloadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.unload(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
 
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
@@ -143,12 +124,10 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
 
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
-          await loadSavedObjects();
         });
 
         after(async () => {
           await supertest.destroy();
-          await unloadSavedObjects();
         });
 
         getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {

@@ -39,25 +39,6 @@ interface UpdateTestDefinition {
 
 export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const spacesSupertest = context.getService('spacesSupertest');
-  const kbnClient = context.getService('kibanaServer');
-
-  const loadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.load(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
-
-  const unloadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.unload(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
 
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
@@ -103,11 +84,10 @@ export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
         let supertest: SupertestWithRoleScopeType;
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
-          await loadSavedObjects();
         });
+
         after(async () => {
           await supertest.destroy();
-          await unloadSavedObjects();
         });
 
         describe('space_1', () => {
