@@ -398,7 +398,11 @@ export class AuthenticationService {
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =
-          'name' in attempt.provider ? attempt.provider.name : attempt.provider.type;
+          attempt.provider && 'name' in attempt.provider
+            ? attempt.provider.name
+            : attempt.provider && 'type' in attempt.provider
+            ? attempt.provider.type
+            : 'unknown';
         this.logger.info(`Performing login attempt with "${providerIdentifier}" provider.`);
 
         let loginResult: AuthenticationResult;
