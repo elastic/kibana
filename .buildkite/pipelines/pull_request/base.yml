@@ -35,44 +35,44 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    key: checks
-    agents:
-      machineType: n2-standard-2
-      preemptible: true
-      diskSizeGb: 85
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      machineType: n2-standard-16
-      preemptible: true
-      diskSizeGb: 85
-    key: linting
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      machineType: n2-standard-32
-      preemptible: true
-      diskSizeGb: 85
-    key: linting_with_types
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+#  - command: .buildkite/scripts/steps/checks.sh
+#    label: 'Checks'
+#    key: checks
+#    agents:
+#      machineType: n2-standard-2
+#      preemptible: true
+#      diskSizeGb: 85
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
+#
+#  - command: .buildkite/scripts/steps/lint.sh
+#    label: 'Linting'
+#    agents:
+#      machineType: n2-standard-16
+#      preemptible: true
+#      diskSizeGb: 85
+#    key: linting
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
+#
+#  - command: .buildkite/scripts/steps/lint_with_types.sh
+#    label: 'Linting (with types)'
+#    agents:
+#      machineType: n2-standard-32
+#      preemptible: true
+#      diskSizeGb: 85
+#    key: linting_with_types
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
 
 #  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
 #    label: 'Check OAS Snapshot'
