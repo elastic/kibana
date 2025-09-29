@@ -83,6 +83,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+- **`customized_fields`**: a field within `ruleSource` that exists when rule source is set to `external`. It is an array of objects containing field names that have been changed from their base version counterparts.
+- **`has_base_version`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule had a matching base version during rule source calculation.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 - **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
@@ -245,6 +247,8 @@ Given a prebuilt rule installed
 When user customizes the prebuilt rule by changing the <field_name> field so it differs from the base version
 Then the rule's `is_customized` value should be `true`
 And ruleSource should be "external"
+And the rule's `customized_fields` value should contain <field_name>
+And the rule's `has_base_version` value should be true
 ```
 
 #### **Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged**
@@ -253,10 +257,12 @@ And ruleSource should be "external"
 
 ```Gherkin
 Given a prebuilt rule installed
-And the prebuilt rule doesn't have a matching base version
+And the prebuilt rule has a matching base version
 When user opens the corresponding rule editing page
 And saves the form unchanged
 Then the rule's `is_customized` value should stay unchanged (non-customized rule stays non-customized)
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be true
 ```
 
 **Examples:**
@@ -272,6 +278,8 @@ Given a prebuilt rule installed
 And it is non-customized
 When a user changes the <field_name> field so it differs from the base version
 Then the rule's `is_customized` value should remain `false`
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be true
 ```
 
 **Examples:**
@@ -308,6 +316,8 @@ Given a prebuilt rule installed
 And it is customized
 When a user changes the rule fields to match the base version
 Then the rule's `is_customized` value should be false
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be true
 ```
 
 ### Detecting rule customizations when base version is missing
@@ -324,6 +334,8 @@ And the prebuilt rule doesn't have a matching base version
 When user customizes the prebuilt rule by changing the <field_name> field so it differs from the base version
 Then the rule's `is_customized` value should be `true`
 And ruleSource should be "external"
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be false
 ```
 
 **Examples:**
@@ -340,6 +352,8 @@ And the prebuilt rule doesn't have a matching base version
 When user opens the corresponding rule editing page
 And saves the form unchanged
 Then the rule's `is_customized` value should stay unchanged (non-customized rule stays non-customized)
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be false
 ```
 
 **Examples:**
@@ -356,6 +370,8 @@ And the prebuilt rule doesn't have a matching base version
 And it is non-customized
 When a user changes the <field_name> field so it differs from the base version
 Then the rule's `is_customized` value should remain `false`
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be false
 ```
 
 **Examples:**

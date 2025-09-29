@@ -580,7 +580,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should reset customized_fields to empty array', async () => {
-        const { body: customizedResponseWithBaseVersion } = await securitySolutionApi
+        const { body: customizedResponseWithBaseVersion } = await detectionsApi
           .patchRule({
             body: { rule_id: PREBUILT_RULE_ID, name: 'Customized rule name' },
           })
@@ -595,7 +595,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await deleteAllPrebuiltRuleAssets(es, log);
 
-        const { body: customizedResponseWithoutBaseVersion } = await securitySolutionApi
+        const { body: customizedResponseWithoutBaseVersion } = await detectionsApi
           .patchRule({
             body: { rule_id: PREBUILT_RULE_ID, name: 'New customized rule name' },
           })

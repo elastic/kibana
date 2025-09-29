@@ -6,7 +6,7 @@
  */
 
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { RuleResponse } from '../api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../api/detection_engine/model/rule_schema';
 
 export enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 12,
@@ -76,7 +76,7 @@ export const defaultRiskScoreBySeverity: Record<Severity, number> = {
   critical: RISK_SCORE_CRITICAL,
 };
 
-type AllKeys<U> = U extends any ? keyof U : never;
+type AllKeys<U> = U extends unknown ? keyof U : never;
 
 /**
  * A list of all possible fields in the RuleResponse type mapped to whether or not the field is
@@ -86,9 +86,9 @@ type AllKeys<U> = U extends any ? keyof U : never;
  * functional and only fields that have a 100% guaranteed impact on rule execution will be labeled
  * as such. Fields like `index` that have a direct impact but don't necessarily change the alert
  * rate (noise) of a rule will not be marked as functional.
- * 
+ *
  * This categorization is intended to be used for telemetry purposes.
- * 
+ *
  * More info here:
  * x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response/customized_rule_alert_telemetry.md
  */
@@ -174,4 +174,4 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   updated_by: false,
   created_at: false,
   created_by: false,
-}
+};

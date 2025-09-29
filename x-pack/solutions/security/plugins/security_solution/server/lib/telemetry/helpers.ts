@@ -13,6 +13,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type { estypes } from '@elastic/elasticsearch';
+import { FUNCTIONAL_FIELD_MAP } from '../../../common/detection_engine/constants';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -48,8 +49,7 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
-import { FUNCTIONAL_FIELD_MAP } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -393,14 +393,21 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
 
 export const processDetectionRuleCustomizations = (event: TelemetryEvent) => {
   const ruleSource = event['kibana.alert.rule.parameters']?.rule_source;
-  if (!ruleSource || ruleSource.type === 'internal' || ruleSource.is_customized === false || ruleSource.has_base_version === false) {
+  if (
+    !ruleSource ||
+    ruleSource.type === 'internal' ||
+    ruleSource.is_customized === false ||
+    ruleSource.has_base_version === false
+  ) {
     return undefined; // Don't return anything if rule is not customized or base version doesn't exist
   }
-  const numberOfFunctionalFields = ruleSource.customized_fields.filter((field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]).length
+  const numberOfFunctionalFields = ruleSource.customized_fields.filter(
+    (field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]
+  ).length;
   return {
-    customized_fields: ruleSource.customized_fields.map((fieldObj)=> fieldObj.field_name),
+    customized_fields: ruleSource.customized_fields.map((fieldObj) => fieldObj.field_name),
     num_functional_fields: numberOfFunctionalFields,
-  }
+  };
 };
 
 export const ranges = (
