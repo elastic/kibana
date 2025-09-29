@@ -231,6 +231,10 @@ interface InternalUnifiedDataTableProps {
    */
   showFullScreenButton?: boolean;
   /**
+   * Optional callback that gets fired when entering or exiting full screen mode
+   */
+  onFullScreenChange?: (isFullScreen: boolean) => void;
+  /**
    * Determines whether the keyboard shortcuts button should be displayed
    */
   showKeyboardShortcuts?: boolean;
@@ -558,6 +562,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellPopover = false,
       customBulkActions,
       shouldKeepAdHocDataViewImmutable,
+      onFullScreenChange,
     },
     ref
   ) => {
@@ -1390,6 +1395,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 cellContext={cellContextWithInTableSearchSupport}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
+                onFullScreenChange={onFullScreenChange}
               />
             )}
           </div>

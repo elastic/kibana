@@ -163,13 +163,16 @@ export const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId }) => (
+      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
           queryMeta={queryMeta}
           cellId={cellId}
+          getScrollElement={getScrollElement}
+          getScrollOffset={getScrollOffset}
+          getScrollMargin={getScrollMargin}
         />
       ),
       [dataView, props, queryMeta]
