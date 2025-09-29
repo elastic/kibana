@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
@@ -158,53 +158,55 @@ export function LayerTabs(
       );
     });
 
-    if (!hideAddLayerButton) {
-      const addLayerButton = activeVisualization?.getAddLayerButtonComponent?.({
-        state: visualization.state,
-        supportedLayers: activeVisualization.getSupportedLayers(
-          visualization.state,
-          props.framePublicAPI
-        ),
-        addLayer,
-        ensureIndexPattern: async (specOrId) => {
-          let indexPatternId;
+    return layerTabs;
+  }, [layerConfigs, layerLabels, onSelectedTabChanged, selectedLayerId]);
 
-          if (typeof specOrId === 'string') {
-            indexPatternId = specOrId;
-          } else {
-            const dataView = await props.startDependencies.dataViews.create(specOrId);
-
-            if (!dataView.id) {
-              return;
-            }
-
-            indexPatternId = dataView.id;
-          }
-
-          const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-            id: indexPatternId,
-            cache: props.framePublicAPI.dataViews.indexPatterns,
-          });
-
-          if (newIndexPatterns) {
-            dispatchLens(
-              changeIndexPattern({
-                dataViews: { indexPatterns: newIndexPatterns },
-                datasourceIds: Object.keys(datasourceStates),
-                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-                indexPatternId,
-              })
-            );
-          }
-        },
-        registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
-      });
-
-      if (addLayerButton) layerTabs.push(addLayerButton);
+  const addLayerButton = useMemo(() => {
+    if (hideAddLayerButton) {
+      return null;
     }
 
-    return layerTabs;
+    return activeVisualization?.getAddLayerButtonComponent?.({
+      state: visualization.state,
+      supportedLayers: activeVisualization.getSupportedLayers(
+        visualization.state,
+        props.framePublicAPI
+      ),
+      addLayer,
+      ensureIndexPattern: async (specOrId) => {
+        let indexPatternId;
+
+        if (typeof specOrId === 'string') {
+          indexPatternId = specOrId;
+        } else {
+          const dataView = await props.startDependencies.dataViews.create(specOrId);
+
+          if (!dataView.id) {
+            return;
+          }
+
+          indexPatternId = dataView.id;
+        }
+
+        const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
+          id: indexPatternId,
+          cache: props.framePublicAPI.dataViews.indexPatterns,
+        });
+
+        if (newIndexPatterns) {
+          dispatchLens(
+            changeIndexPattern({
+              dataViews: { indexPatterns: newIndexPatterns },
+              datasourceIds: Object.keys(datasourceStates),
+              visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+              indexPatternId,
+            })
+          );
+        }
+      },
+      registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
+      isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
+    });
   }, [
     activeVisualization,
     addLayer,
@@ -212,14 +214,10 @@ export function LayerTabs(
     dispatchLens,
     hideAddLayerButton,
     indexPatternService,
-    layerConfigs,
-    layerLabels,
-    onSelectedTabChanged,
     props.startDependencies.dataViews,
     props.framePublicAPI,
     props?.setIsInlineFlyoutVisible,
     registerLibraryAnnotationGroupFunction,
-    selectedLayerId,
     visualization.activeId,
     visualization.state,
   ]);
@@ -228,7 +226,14 @@ export function LayerTabs(
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
-      <EuiTabs css={{ paddingLeft: '16px' }}>{renderTabs()}</EuiTabs>
+      <EuiFlexGroup gutterSize="small" alignItems="center">
+        <EuiFlexItem grow={false} style={{ overflow: 'hidden', minWidth: 0 }}>
+          <EuiTabs css={{ paddingLeft: '16px' }} bottomBorder={false}>
+            {renderTabs()}
+          </EuiTabs>
+        </EuiFlexItem>
+        {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
+      </EuiFlexGroup>
     </>
   ) : null;
 }
