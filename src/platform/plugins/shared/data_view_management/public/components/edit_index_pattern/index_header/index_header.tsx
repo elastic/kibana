@@ -7,11 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import type { FC, PropsWithChildren, ReactElement } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPageHeader,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface IndexHeaderProps {
   indexPattern: DataView;
@@ -57,44 +66,77 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   children,
   canSave,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const contextMenuItems = [
+    canSave && (
+      <EuiContextMenuItem
+        onClick={editIndexPatternClick}
+        icon="pencil"
+        aria-label={editAriaLabel}
+        data-test-subj="editIndexPatternButton"
+        color="primary"
+      >
+        <EuiText size="s" color="primary">
+          {editTooltip}
+        </EuiText>
+      </EuiContextMenuItem>
+    ),
+    defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
+      <EuiContextMenuItem
+        onClick={setDefault}
+        icon="starFilled"
+        aria-label={setDefaultAriaLabel}
+        data-test-subj="setDefaultIndexPatternButton"
+      >
+        <EuiText size="s">{setDefaultTooltip}</EuiText>
+      </EuiContextMenuItem>
+    ),
+    canSave && indexPattern.isPersisted() && (
+      <EuiContextMenuItem
+        color="danger"
+        onClick={deleteIndexPatternClick}
+        icon={<EuiIcon color="danger" type="trash" />}
+        aria-label={removeAriaLabel}
+        data-test-subj="deleteIndexPatternButton"
+      >
+        <EuiText size="s" color="danger">
+          {removeTooltip}
+        </EuiText>
+      </EuiContextMenuItem>
+    ),
+  ].filter(Boolean) as ReactElement[];
+
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       bottomBorder
       rightSideItems={[
-        canSave && (
-          <EuiButton
-            onClick={editIndexPatternClick}
-            iconType="pencil"
-            aria-label={editAriaLabel}
-            data-test-subj="editIndexPatternButton"
-            color="primary"
-          >
-            {editTooltip}
-          </EuiButton>
-        ),
-        defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
-          <EuiButton
-            onClick={setDefault}
-            iconType="starFilled"
-            aria-label={setDefaultAriaLabel}
-            data-test-subj="setDefaultIndexPatternButton"
-          >
-            {setDefaultTooltip}
-          </EuiButton>
-        ),
-        canSave && indexPattern.isPersisted() && (
-          <EuiButtonEmpty
-            color="danger"
-            onClick={deleteIndexPatternClick}
-            iconType="trash"
-            aria-label={removeAriaLabel}
-            data-test-subj="deleteIndexPatternButton"
-          >
-            {removeTooltip}
-          </EuiButtonEmpty>
-        ),
-      ].filter(Boolean)}
+        <EuiPopover
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          panelPaddingSize="none"
+          button={
+            <EuiButton
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => setIsOpen(!isOpen)}
+              size="m"
+              data-test-subj="actionsButton"
+              aria-label={i18n.translate('indexPatternManagement.editDataView.actionsButtonAria', {
+                defaultMessage: 'Actions',
+              })}
+            >
+              <FormattedMessage
+                id="indexPatternManagement.editDataView.actionsButtonLabel"
+                defaultMessage="Actions"
+              />
+            </EuiButton>
+          }
+        >
+          <EuiContextMenuPanel items={contextMenuItems} />
+        </EuiPopover>,
+      ]}
     >
       {children}
     </EuiPageHeader>
