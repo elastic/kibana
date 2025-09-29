@@ -26,6 +26,7 @@ import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import { createActionThrottle, type ActionThrottle } from './utils';
 import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
@@ -380,7 +381,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   protected async validateRequest(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>,
+    isThrottled?: boolean
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO: support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -474,6 +476,17 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
+    if (payload.command === 'runscript') {
+      if (isThrottled) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `Action 'runscript' for agent '${payload.endpoint_ids[0]}' is throttled. Please wait a moment before retrying in order to prevent conflicts with Microsoft Defender for Endpoint`,
+            429
+          ),
+        };
+      }
+    }
     return super.validateRequest(payload);
   }
 
@@ -587,6 +600,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
+    // Check throttling immediately with agent ID to prevent rapid duplicate requests
+    const agentId = actionRequest.endpoint_ids[0];
+    const throttle = createActionThrottle('runscript', agentId, this.options.spaceId);
+
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       RunScriptActionRequestBody['parameters'],
       {},
@@ -596,11 +613,11 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       ...this.getMethodOptions(options),
       command: 'runscript',
     };
-
     if (!reqIndexOptions.error) {
-      let error = (await this.validateRequest(reqIndexOptions)).error;
+      let error = (await this.validateRequest(reqIndexOptions, throttle.isThrottled)).error;
 
       if (!error) {
+        throttle.setThrottle();
         try {
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
@@ -617,6 +634,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
           if (msActionResponse?.data?.id) {
             reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+            throttle.clearThrottle();
           } else {
             throw new ResponseActionsClientError(
               `Run Script request was sent to Microsoft Defender, but Machine Action Id was not provided!`

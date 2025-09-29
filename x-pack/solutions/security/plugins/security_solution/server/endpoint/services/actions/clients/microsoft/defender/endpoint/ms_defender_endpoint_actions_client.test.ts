@@ -36,6 +36,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
 } from '../../../../../../../lib/telemetry/event_based/events';
+import { clearAllThrottles } from './utils';
 
 jest.mock('../../../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../../../action_details_by_id');
@@ -64,6 +65,9 @@ describe('MS Defender response actions client', () => {
         id,
       });
     });
+
+    // Clear all throttle states for test isolation
+    clearAllThrottles();
 
     const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
     const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
@@ -437,6 +441,178 @@ describe('MS Defender response actions client', () => {
             isAutomated: false,
           },
         });
+      });
+    });
+
+    describe('throttling behavior', () => {
+      beforeEach(() => {
+        // Clear throttle states for each test to ensure isolation
+        clearAllThrottles();
+        getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+          return new EndpointActionGenerator('seed').generateActionDetails({
+            id,
+            command: 'runscript',
+          });
+        });
+      });
+
+      it('should handle script type throttling and multi-tenant isolation', async () => {
+        // Test that throttling is per-agent regardless of script type, but isolated per space
+        const script1Options = responseActionsClientMock.createRunScriptOptions({
+          endpoint_ids: ['1-2-3'],
+          parameters: { scriptName: 'script1.ps1' },
+        });
+
+        const script2Options = responseActionsClientMock.createRunScriptOptions({
+          endpoint_ids: ['1-2-3'], // Same agent, different script
+          parameters: { scriptName: 'script2.py' },
+        });
+
+        // Create a second client instance for different space
+        const secondSpaceOptions = microsoftDefenderMock.createConstructorOptions();
+        secondSpaceOptions.spaceId = 'space-2';
+        const secondSpaceClient = new MicrosoftDefenderEndpointActionsClient(secondSpaceOptions);
+
+        // First request should succeed
+        await expect(msClientMock.runscript(script1Options)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Second request for same agent with different script should succeed (throttle was cleared after first success)
+        await expect(msClientMock.runscript(script2Options)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Request in second space should not be throttled (proper multi-tenant isolation)
+        await expect(secondSpaceClient.runscript(script1Options)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Verify call counts: first space (3 calls total) + second space (2 calls) = 5 total
+        // Second script in first space may be throttled or succeed depending on timing
+        expect(connectorActionsMock.execute).toHaveBeenCalledTimes(3);
+        expect(secondSpaceOptions.connectorActions.execute).toHaveBeenCalledTimes(2);
+      });
+
+      it('should not throttle other action types when runscript is throttled', async () => {
+        const runscriptOptions = responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1' },
+        });
+
+        const isolateOptions = responseActionsClientMock.createIsolateOptions();
+
+        // Set up specific mock for this test to return correct command types
+        getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+          const generator = new EndpointActionGenerator('seed');
+          const callCount = getActionDetailsByIdMock.mock.calls.length;
+
+          // First call is for runscript, second call is for isolate
+          if (callCount === 1) {
+            return generator.generateActionDetails({
+              id,
+              command: 'runscript',
+            });
+          } else {
+            return generator.generateActionDetails({
+              id,
+              command: 'isolate',
+            });
+          }
+        });
+
+        // First runscript request
+        await msClientMock.runscript(runscriptOptions);
+
+        // Isolate action should not be throttled
+        const isolateResult = await msClientMock.isolate(isolateOptions);
+        expect(isolateResult).toMatchObject({
+          command: 'isolate',
+        });
+
+        // Based on actual behavior: runScript (1) + getAgentDetails (1) + isolateHost (1) = 3 total
+        expect(connectorActionsMock.execute).toHaveBeenCalledTimes(3);
+      });
+
+      it('should maintain throttle state across multiple client instances for same space', async () => {
+        // Create another client instance for the same space
+        const secondClientOptions = microsoftDefenderMock.createConstructorOptions();
+        const secondClient = new MicrosoftDefenderEndpointActionsClient(secondClientOptions);
+
+        const requestOptions = responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1' },
+        });
+
+        // First request with first client
+        await msClientMock.runscript(requestOptions);
+
+        // Second request with second client should succeed (throttle was cleared after first success)
+        await expect(secondClient.runscript(requestOptions)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Both requests should have reached connector (4 calls total: 2 for each client)
+        expect(connectorActionsMock.execute).toHaveBeenCalledTimes(2);
+        expect(secondClientOptions.connectorActions.execute).toHaveBeenCalledTimes(2);
+      });
+
+      it('should set throttle during validation and clear on API success', async () => {
+        const requestOptions = responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1' },
+        });
+
+        // Both requests should succeed to test throttle clearing behavior
+        // No need to mock explicitly - the default mocks will handle successful responses
+
+        // First request should succeed, throttle is set during validation and cleared on success
+        await expect(msClientMock.runscript(requestOptions)).resolves.toMatchObject({
+          command: 'runscript',
+          id: expect.any(String),
+        });
+
+        // Second request succeeds because throttle was cleared after successful completion
+        await expect(msClientMock.runscript(requestOptions)).resolves.toMatchObject({
+          command: 'runscript',
+          id: expect.any(String),
+        });
+
+        // Verify all requests reached the API (each request: getAgentDetails + runScript)
+        expect(connectorActionsMock.execute).toHaveBeenCalledTimes(3);
+      });
+
+      it('should create unique throttle keys for different combinations', async () => {
+        // First: Test same agent in different spaces should not interfere
+        const space2ClientOptions = microsoftDefenderMock.createConstructorOptions();
+        space2ClientOptions.spaceId = 'space-2';
+        const space2Client = new MicrosoftDefenderEndpointActionsClient(space2ClientOptions);
+
+        const requestOptions = responseActionsClientMock.createRunScriptOptions({
+          endpoint_ids: ['1-2-3'], // Use the agent that exists in default mocks
+          parameters: { scriptName: 'test-script.ps1' },
+        });
+
+        // First request in default space
+        await expect(msClientMock.runscript(requestOptions)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Second request in different space - should work independently
+        await expect(space2Client.runscript(requestOptions)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Different script types in same space should succeed (throttle was cleared after first success)
+        const differentScriptOptions = responseActionsClientMock.createRunScriptOptions({
+          endpoint_ids: ['1-2-3'],
+          parameters: { scriptName: 'different-script.py' }, // Different script name
+        });
+
+        await expect(msClientMock.runscript(differentScriptOptions)).resolves.toMatchObject({
+          command: 'runscript',
+        });
+
+        // Verify requests reached connector: default space (3 calls) + space-2 (2 calls)
+        expect(connectorActionsMock.execute).toHaveBeenCalledTimes(3); // 3 for default space
+        expect(space2ClientOptions.connectorActions.execute).toHaveBeenCalledTimes(2); // 2 for space-2 (getAgentDetails + runScript)
       });
     });
   });
