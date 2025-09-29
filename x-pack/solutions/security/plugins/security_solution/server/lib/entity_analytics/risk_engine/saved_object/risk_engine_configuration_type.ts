@@ -35,6 +35,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     alertSampleSizePerShard: {
       type: 'integer',
     },
+    enableResetToZero: {
+      type: 'boolean',
+    },
     range: {
       properties: {
         start: {
@@ -98,7 +101,7 @@ const version3: SavedObjectsModelVersion = {
         return {
           attributes: {
             ...document.attributes,
-            enableResetToZero: false
+            enableResetToZero: false,
           },
         };
       },
