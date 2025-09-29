@@ -190,7 +190,10 @@ export const IndexSelectorModal = ({
               iconType="plusInCircle"
               onClick={showCreateIndexModal}
               data-test-subj="create-index-button"
-              aria-label="Cancel"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonAriaLabel',
+                { defaultMessage: 'Create index' }
+              )}
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
@@ -200,7 +203,13 @@ export const IndexSelectorModal = ({
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose} aria-label="Cancel">
+              <EuiButtonEmpty
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.cancelButtonAriaLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

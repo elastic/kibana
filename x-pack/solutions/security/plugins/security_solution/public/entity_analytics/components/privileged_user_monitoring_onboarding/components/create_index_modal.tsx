@@ -163,7 +163,13 @@ export const CreateIndexModal = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose} aria-label="Cancel">
+              <EuiButtonEmpty
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.cancelButtonAriaLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

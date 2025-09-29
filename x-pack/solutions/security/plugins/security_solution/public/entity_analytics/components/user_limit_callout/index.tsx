@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { noop } from 'lodash/fp';
 import { useUserLimitStatus } from '../../hooks/use_privileged_monitoring_health';
 
 interface UserLimitCallOutProps {
@@ -22,10 +23,9 @@ interface UserLimitCallOutProps {
 export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   variant = 'full',
   showOnlyWhenExceeded = false,
-  onManageDataSources,
+  onManageDataSources = noop,
 }: UserLimitCallOutProps) => {
-  const { userStats, isLoading, isLimitExceeded, isNearLimit, utilizationPercentage } =
-    useUserLimitStatus();
+  const { userStats, isLoading } = useUserLimitStatus();
 
   if (isLoading || !userStats) {
     return null;
@@ -35,12 +35,13 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
 
   // Determine when to show the callout
   const shouldShow =
-    isLimitExceeded || (!showOnlyWhenExceeded && (isNearLimit || variant === 'compact'));
+    userStats.isLimitExceeded ||
+    (!showOnlyWhenExceeded && (userStats.isNearLimit || variant === 'compact'));
   if (!shouldShow) {
     return null;
   }
 
-  if (isLimitExceeded) {
+  if (userStats.isLimitExceeded) {
     return (
       <EuiCallOut
         announceOnMount
@@ -70,7 +71,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
           size="s"
           iconType="gear"
           color="warning"
-          onClick={onManageDataSources || (() => {})}
+          onClick={onManageDataSources}
           data-test-subj="manage-data-sources-button-exceeded"
         >
           <FormattedMessage
@@ -82,7 +83,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
     );
   }
 
-  if (isNearLimit && variant === 'full') {
+  if (userStats.isNearLimit && variant === 'full') {
     return (
       <EuiCallOut
         announceOnMount
@@ -103,7 +104,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
             values={{
               currentCount: <strong>{currentCount.toLocaleString()}</strong>,
               maxAllowed: <strong>{maxAllowed.toLocaleString()}</strong>,
-              utilizationPercentage: <strong>{utilizationPercentage}</strong>,
+              utilizationPercentage: <strong>{userStats.usagePercentage}</strong>,
             }}
           />
         </EuiText>
@@ -113,7 +114,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
           size="s"
           iconType="gear"
           color="warning"
-          onClick={onManageDataSources || (() => {})}
+          onClick={onManageDataSources}
           data-test-subj="manage-data-sources-button-near-limit"
         >
           <FormattedMessage
