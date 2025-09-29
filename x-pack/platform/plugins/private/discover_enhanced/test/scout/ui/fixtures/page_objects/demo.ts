@@ -11,6 +11,6 @@ export class DemoPage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    this.page.gotoApp('not_implemented');
+    await this.page.gotoApp('not_implemented');
   }
 }

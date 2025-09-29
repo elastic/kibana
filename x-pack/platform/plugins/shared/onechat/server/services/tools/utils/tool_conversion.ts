@@ -9,7 +9,7 @@ import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema, ToolDefinition } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '../tool_provider';
 
@@ -26,10 +26,11 @@ export const toExecutableTool = <
   runner: Runner;
   request: KibanaRequest;
 }): ExecutableTool<TConfig, RunInput> => {
-  const { handler, ...toolParts } = tool;
+  const { handler, schema, ...toolParts } = tool;
 
   return {
     ...toolParts,
+    schema: typeof schema === 'function' ? schema : () => Promise.resolve(schema),
     execute: (params) => {
       return runner.runTool({ ...params, toolId: tool.id, request });
     },
@@ -41,8 +42,16 @@ export const toExecutableTool = <
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toDescriptorWithSchema = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
-  const { id, type, description, tags, configuration, schema, readonly } = tool;
+export const toDescriptorWithSchema = async (
+  tool: InternalToolDefinition
+): Promise<ToolDefinitionWithSchema> => {
+  const { id, type, description, tags, configuration, readonly } = tool;
+  const schema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
   const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
   return { id, type, description, tags, configuration, readonly, schema: jsonSchema };
+};
+
+export const toDescriptor = (tool: InternalToolDefinition): ToolDefinition => {
+  const { id, type, description, tags, configuration, readonly } = tool;
+  return { id, type, description, tags, configuration, readonly };
 };

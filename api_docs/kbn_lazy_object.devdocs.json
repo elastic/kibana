@@ -1,0 +1,181 @@
+{
+  "id": "@kbn/lazy-object",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/lazy-object",
+        "id": "def-common.annotateLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "annotateLazy",
+        "description": [
+          "\nAnnotate a factory function to indicate the value should be lazily computed.\nWithout this, we can't differentiate between a plain function, and a lazified\ngetter."
+        ],
+        "signature": [
+          "(factory: () => T) => () => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lazy-object",
+            "id": "def-common.annotateLazy.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lazy-object",
+        "id": "def-common.createLazyObjectFromAnnotations",
+        "type": "Function",
+        "tags": [],
+        "label": "createLazyObjectFromAnnotations",
+        "description": [
+          "\nCreate an object where only annotated properties are lazily evaluated.\nNon-annotated properties are defined eagerly as writable value properties."
+        ],
+        "signature": [
+          "(obj: T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lazy-object",
+            "id": "def-common.createLazyObjectFromAnnotations.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lazy-object",
+        "id": "def-common.createLazyObjectFromFactories",
+        "type": "Function",
+        "tags": [],
+        "label": "createLazyObjectFromFactories",
+        "description": [],
+        "signature": [
+          "(factories: TFactories) => { [K in keyof TFactories]: ReturnType<TFactories[K]>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_factories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lazy-object",
+            "id": "def-common.createLazyObjectFromFactories.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "factories",
+            "description": [],
+            "signature": [
+              "TFactories"
+            ],
+            "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_factories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lazy-object",
+        "id": "def-common.getLazyObjectMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "getLazyObjectMetrics",
+        "description": [],
+        "signature": [
+          "() => { count: number; called: number; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-lazy-object/src/metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lazy-object",
+        "id": "def-common.lazyObject",
+        "type": "Function",
+        "tags": [],
+        "label": "lazyObject",
+        "description": [],
+        "signature": [
+          "(obj: T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-lazy-object/src/lazy_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lazy-object",
+            "id": "def-common.lazyObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-lazy-object/src/lazy_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

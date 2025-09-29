@@ -13,9 +13,11 @@ import {
   stringifyWorkflowDefinition,
   parseWorkflowYamlToJSON,
   formatValidationError,
+  getStepNodeAtPosition,
 } from './yaml_utils';
 import type { ConnectorContract, WorkflowYaml } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { YAMLMap, parseDocument } from 'yaml';
 
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContract[] = [
@@ -180,5 +182,45 @@ describe('formatValidationError', () => {
       .safeParse({ steps: [{ type: 'invalid' }] });
     const result = formatValidationError(error!);
     expect(result.message).toBe('Invalid connector type. Use Ctrl+Space to see available options.');
+  });
+});
+
+describe('getStepNodeAtPosition', () => {
+  it('should get the step node at the position', () => {
+    const yaml = `steps:
+      - name: noop_step
+        type: noop # cursor is here
+        with:
+          message: Hello, world!`;
+    const result = getStepNodeAtPosition(parseDocument(yaml), 45);
+    expect(result).toEqual(expect.any(YAMLMap));
+    expect(result?.get('name')).toBe('noop_step');
+  });
+  it('should get the step node at the position with nested steps', () => {
+    const yaml = `steps:
+      - name: loop 
+        type: foreach
+        foreach: "{{ context.items }}"
+        steps:
+          - name: noop_step
+            type: noop # cursor is here
+            with:
+              message: Hello, world!
+      - name: log
+        type: console
+        with:
+          message: "{{ steps.noop_step.output.message }}"
+              `;
+    const result = getStepNodeAtPosition(parseDocument(yaml), 153);
+    expect(result).toEqual(expect.any(YAMLMap));
+    expect(result?.get('name')).toBe('noop_step');
+
+    const result2 = getStepNodeAtPosition(parseDocument(yaml), 265);
+    expect(result2).toEqual(expect.any(YAMLMap));
+    expect(result2?.get('name')).toBe('log');
+
+    const result3 = getStepNodeAtPosition(parseDocument(yaml), 48);
+    expect(result3).toEqual(expect.any(YAMLMap));
+    expect(result3?.get('name')).toBe('loop');
   });
 });

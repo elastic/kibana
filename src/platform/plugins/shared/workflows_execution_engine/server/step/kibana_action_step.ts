@@ -35,14 +35,29 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const context = this.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return Object.entries(stepWith).reduce((acc: Record<string, any>, [key, value]) => {
-      if (typeof value === 'string') {
-        acc[key] = this.templatingEngine.render(value, context);
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    return this.renderObjectTemplate(stepWith, context);
+  }
+
+  /**
+   * Recursively render the object template.
+   * @param obj - The object to render.
+   * @param context - The context to use for rendering.
+   * @returns The rendered object.
+   */
+  private renderObjectTemplate(obj: any, context: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.renderObjectTemplate(item, context));
+    }
+    if (obj && typeof obj === 'object') {
+      return Object.entries(obj).reduce((acc, [key, value]) => {
+        acc[key] = this.renderObjectTemplate(value, context);
+        return acc;
+      }, {} as any);
+    }
+    if (typeof obj === 'string') {
+      return this.templatingEngine.render(obj, context);
+    }
+    return obj;
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
