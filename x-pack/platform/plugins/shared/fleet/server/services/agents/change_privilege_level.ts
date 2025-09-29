@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { omit } from 'lodash';
 
 import { FleetUnauthorizedError } from '../../errors';
 import { packagePolicyService } from '../package_policy';
@@ -17,13 +18,13 @@ export async function changeAgentPrivilegeLevel(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentId: string,
-  options: {
-    userInfo?: {
+  options?: {
+    user_info?: {
       username?: string;
       groupname?: string;
       password?: string;
     };
-  }
+  } | null
 ) {
   // Fail fast if agent contains an integration that requires root access.
   const agent = await getAgentById(esClient, soClient, agentId);
@@ -42,12 +43,18 @@ export async function changeAgentPrivilegeLevel(
     );
   }
 
-  const data = { ...options, unprivileged: true };
-  const res = await createAgentAction(esClient, {
+  // Extract password from options if provided and pass it as a secret.
+  const res = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'PRIVILEGE_LEVEL_CHANGE',
-    data,
+    data: {
+      unprivileged: true,
+      ...(options?.user_info && { user_info: omit(options?.user_info, ['password']) }),
+    },
+    ...(options?.user_info?.password && {
+      secrets: { user_info: { password: options.user_info.password } },
+    }),
   });
   return { actionId: res.id };
 }

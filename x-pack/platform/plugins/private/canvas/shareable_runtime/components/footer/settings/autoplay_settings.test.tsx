@@ -5,45 +5,72 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JestContext } from '../../../test/context_jest';
-import {
-  getAutoplayTextField as input,
-  getAutoplayCheckbox as checkbox,
-  getAutoplaySubmit as submit,
-} from '../../../test/selectors';
 import { AutoplaySettings } from './autoplay_settings';
 
 jest.mock('../../../supported_renderers');
 
 describe('<AutoplaySettings />', () => {
-  const wrapper = mount(
-    <JestContext>
-      <AutoplaySettings />
-    </JestContext>
-  );
+  const renderAutoplaySettings = () => {
+    return render(
+      <JestContext>
+        <AutoplaySettings />
+      </JestContext>
+    );
+  };
 
   test('renders as expected', () => {
-    expect(checkbox(wrapper).props()['aria-checked']).toEqual(false);
-    expect(input(wrapper).props().value).toBe('5s');
+    renderAutoplaySettings();
+
+    const cycleSwitch = screen.getByRole('switch', { name: 'Cycle Slides' });
+    const intervalInput = screen.getByDisplayValue('5s');
+
+    expect(cycleSwitch).toHaveAttribute('aria-checked', 'false');
+    expect(intervalInput).toHaveValue('5s');
   });
 
-  test('activates and deactivates', () => {
-    checkbox(wrapper).simulate('click');
-    expect(checkbox(wrapper).props()['aria-checked']).toEqual(true);
-    checkbox(wrapper).simulate('click');
-    expect(checkbox(wrapper).props()['aria-checked']).toEqual(false);
+  test('activates and deactivates', async () => {
+    const user = userEvent.setup();
+    renderAutoplaySettings();
+
+    const cycleSwitch = screen.getByRole('switch', { name: 'Cycle Slides' });
+
+    // Initially unchecked
+    expect(cycleSwitch).toHaveAttribute('aria-checked', 'false');
+
+    // Click to activate
+    await user.click(cycleSwitch);
+    expect(cycleSwitch).toHaveAttribute('aria-checked', 'true');
+
+    // Click to deactivate
+    await user.click(cycleSwitch);
+    expect(cycleSwitch).toHaveAttribute('aria-checked', 'false');
   });
 
-  test('changes properly with input', () => {
-    input(wrapper).simulate('change', { target: { value: '2asd' } });
-    expect(submit(wrapper).props().disabled).toEqual(true);
-    input(wrapper).simulate('change', { target: { value: '2s' } });
-    expect(submit(wrapper).props().disabled).toEqual(false);
-    expect(input(wrapper).props().value === '2s');
-    submit(wrapper).simulate('submit');
-    expect(input(wrapper).props().value === '2s');
-    expect(submit(wrapper).props().disabled).toEqual(false);
+  test('changes properly with input', async () => {
+    const user = userEvent.setup();
+    renderAutoplaySettings();
+
+    const intervalInput = screen.getByDisplayValue('5s');
+    const submitButton = screen.getByRole('button', { name: 'Set' });
+
+    // Test invalid input
+    await user.clear(intervalInput);
+    await user.type(intervalInput, '2asd');
+    expect(submitButton).toBeDisabled();
+
+    // Test valid input
+    await user.clear(intervalInput);
+    await user.type(intervalInput, '2s');
+    expect(submitButton).toBeEnabled();
+    expect(intervalInput).toHaveValue('2s');
+
+    // Submit form
+    await user.click(submitButton);
+    expect(intervalInput).toHaveValue('2s');
+    expect(submitButton).toBeEnabled();
   });
 });

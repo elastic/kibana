@@ -73,12 +73,12 @@ import type {
   RegistryDataStream,
   Installation,
   DeletePackagePoliciesResponse,
-  PolicySecretReference,
+  SecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
   PreconfiguredInputs,
   CloudProvider,
-  CloudConnectorResponse,
+  CloudConnector,
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
@@ -99,6 +99,7 @@ import {
   PackageRollbackError,
   CloudConnectorInvalidVarsError,
   CloudConnectorCreateError,
+  CloudConnectorUpdateError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -114,6 +115,7 @@ import type {
 import type { ExternalCallback } from '..';
 
 import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
@@ -365,7 +367,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType,
     });
 
-    let secretReferences: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
 
@@ -1206,8 +1208,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
-    let secretReferences: PolicySecretReference[] | undefined;
-    let secretsToDelete: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
+    let secretsToDelete: SecretReference[] | undefined;
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
@@ -1320,10 +1322,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const policyId of packagePolicyUpdate.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-      if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
-        throw new FleetError(
-          'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
-        );
+      if (agentPolicy) {
+        validateReusableIntegrationsAndSpaceAwareness(packagePolicy, [agentPolicy]);
       }
 
       // Validate that if supports_agentless is true, the package actually supports agentless
@@ -1562,7 +1562,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       new Map<string, PackageInfo>()
     );
 
-    const allSecretsToDelete: PolicySecretReference[] = [];
+    const allSecretsToDelete: SecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
       logger,
@@ -1635,6 +1635,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             internalSoClientWithoutSpaceExtension,
             packagePolicy.policy_ids.map((policyId) => ({ id: policyId, spaceId: '*' }))
           );
+
+          validateReusableIntegrationsAndSpaceAwareness(packagePolicy, agentPolicies);
+
           if (!agentPolicies.some((policy) => policy.is_managed)) {
             logger.debug(
               `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
@@ -1664,7 +1667,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        let secretReferences: PolicySecretReference[] | undefined;
+        let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
         // id and version are not part of the saved object attributes
@@ -2245,6 +2248,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           vars: newPolicy.vars || newPP.vars,
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
+          cloud_connector_id: newPolicy.cloud_connector_id,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2911,49 +2915,59 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
     agentPolicy: AgentPolicy
-  ): Promise<CloudConnectorResponse | undefined> {
+  ): Promise<CloudConnector | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
-    // Check if cloud connector setup supported and not already created
-    const isNewCloudConnectorSetup =
-      !!enrichedPackagePolicy?.supports_cloud_connector &&
-      agentPolicy.agentless?.cloud_connectors?.enabled === true &&
-      !enrichedPackagePolicy?.cloud_connector_id;
-
-    if (!isNewCloudConnectorSetup) {
-      logger.debug(
-        `New cloud connector setup is not supported, supports_cloud_connector: ${
-          enrichedPackagePolicy?.supports_cloud_connector
-        }, agentless.cloud_connectors.enabled: ${
-          agentPolicy.agentless?.cloud_connectors?.enabled ?? 'undefined'
-        }, cloud_connector_id: ${enrichedPackagePolicy?.cloud_connector_id}`
-      );
-      return;
-    }
     const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+    const agentlessCloudConnectorsEnabled = agentPolicy.agentless?.cloud_connectors?.enabled;
 
-    if (!cloudProvider) {
-      logger.debug('No cloud provider specified for cloud connector');
+    if (!agentlessCloudConnectorsEnabled) {
+      logger.debug('No agentless cloud connectors enabled for cloud provider');
       return;
     }
-    try {
-      const cloudConnectorVars = extractPackagePolicyVars(
-        cloudProvider,
-        enrichedPackagePolicy,
-        logger
-      );
-      if (cloudConnectorVars) {
-        const cloudConnector = await cloudConnectorService.create(soClient, {
-          name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
-          vars: cloudConnectorVars,
-          cloudProvider,
-        });
-        logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
-        return cloudConnector;
+
+    const cloudConnectorVars = extractPackagePolicyVars(
+      cloudProvider,
+      enrichedPackagePolicy,
+      logger
+    );
+    if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
+      if (enrichedPackagePolicy?.cloud_connector_id) {
+        const existingCloudConnector = await soClient.get<CloudConnector>(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          enrichedPackagePolicy.cloud_connector_id
+        );
+        logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        try {
+          const cloudConnector = await cloudConnectorService.update(
+            soClient,
+            enrichedPackagePolicy.cloud_connector_id,
+            {
+              vars: cloudConnectorVars,
+              packagePolicyCount: existingCloudConnector.attributes.packagePolicyCount + 1,
+            }
+          );
+          logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
+          return cloudConnector;
+        } catch (e) {
+          logger.error(`Error updating cloud connector: ${e}`);
+          throw new CloudConnectorUpdateError(`${e}`);
+        }
+      } else {
+        logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        try {
+          const cloudConnector = await cloudConnectorService.create(soClient, {
+            name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            vars: cloudConnectorVars,
+            cloudProvider,
+          });
+          logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+          return cloudConnector;
+        } catch (error) {
+          logger.error(`Error creating cloud connector: ${error}`);
+          throw new CloudConnectorCreateError(`${error}`);
+        }
       }
-    } catch (error) {
-      logger.error(`Error creating cloud connector: ${error}`);
-      throw new CloudConnectorCreateError(`${error}`);
     }
   }
 }

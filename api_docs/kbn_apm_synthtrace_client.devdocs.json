@@ -1895,7 +1895,7 @@
             "label": "messagingExitSpan",
             "description": [],
             "signature": [
-              "({ name, type, operation, destination, }: { name: string; type: string; destination: string; operation: \"receive\" | \"publish\"; }) => ",
+              "({ name, type, operation, destination, }: { name: string; type: string; destination: string; operation: \"publish\" | \"receive\"; }) => ",
               "OtelSpan"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
@@ -1954,7 +1954,7 @@
                     "label": "operation",
                     "description": [],
                     "signature": [
-                      "\"receive\" | \"publish\""
+                      "\"publish\" | \"receive\""
                     ],
                     "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
                     "deprecated": false,
