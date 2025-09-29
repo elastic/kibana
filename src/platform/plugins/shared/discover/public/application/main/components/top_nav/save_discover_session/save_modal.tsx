@@ -110,7 +110,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
             <EuiText size="xs" color="subdued">
               <p>
                 {i18n.translate('discover.localMenu.saveModalSubtitle', {
-                  defaultMessage: 'All open tabs will be saved to this Discover session.',
+                  defaultMessage: 'All your open tabs will be saved in this session',
                 })}
               </p>
             </EuiText>
