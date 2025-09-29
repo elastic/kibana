@@ -81,7 +81,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRul
       actionGroup: 'query matched',
       state: {},
       context: {},
-      payload: {},
+      payload: {
+        ...result.sourceFields,
+      },
     });
   }
   alertsClient.setAlertLimitReached(parsedResults.truncated);
