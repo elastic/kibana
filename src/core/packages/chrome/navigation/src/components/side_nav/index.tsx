@@ -51,7 +51,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
         height: 100%;
         padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH};
+        width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
       `}
     >
       {children}
