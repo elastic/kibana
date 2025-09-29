@@ -14,6 +14,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -35,13 +36,13 @@ describe('MetricsGrid', () => {
   const fields: MetricsGridProps['fields'] = [
     {
       name: 'system.cpu.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },
     {
       name: 'system.memory.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },

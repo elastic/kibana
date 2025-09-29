@@ -9,17 +9,18 @@
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const mockMetric: MetricField = {
   name: 'cpu.usage',
   type: 'gauge',
   index: 'metrics-*',
   dimensions: [
-    { name: 'host.name', type: 'keyword' },
-    { name: 'container.id', type: 'keyword' },
-    { name: 'host.ip', type: 'ip' },
-    { name: 'cpu.cores', type: 'long' },
-    { name: 'region', type: 'keyword' },
+    { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'host.ip', type: ES_FIELD_TYPES.IP },
+    { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
+    { name: 'region', type: ES_FIELD_TYPES.KEYWORD },
   ],
 };
 

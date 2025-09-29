@@ -10,11 +10,12 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { usePaginatedFields } from './use_paginated_fields';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const createField = (name: string, dimensions: string[] = [], noData = false): MetricField => ({
   name,
   type: 'number',
-  dimensions: dimensions.map((d) => ({ name: d, type: 'keyword' })),
+  dimensions: dimensions.map((d) => ({ name: d, type: ES_FIELD_TYPES.KEYWORD })),
   index: 'metrics-*',
   noData,
 });
