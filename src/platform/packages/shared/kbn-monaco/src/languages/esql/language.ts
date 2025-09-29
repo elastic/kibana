@@ -16,6 +16,7 @@ import {
   getHoverItem,
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
+import { isArray } from 'lodash';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -78,6 +79,34 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
       ) {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
+
+        const overedWord = model.getWordAtPosition(position);
+        if (overedWord) {
+          const wordRange = new monaco.Range(
+            position.lineNumber,
+            overedWord.startColumn,
+            position.lineNumber,
+            overedWord.endColumn
+          );
+
+          // Get decorations at the overed word
+          const decorations = model.getDecorationsInRange(wordRange);
+
+          // Find decorations with an hover message
+          const lookupJoinDecoration = decorations.map((decoration) => {
+            return isArray(decoration.options.hoverMessage)
+              ? decoration.options.hoverMessage?.map((msg) => msg.value).join('\n')
+              : decoration.options.hoverMessage?.value ?? '';
+          });
+
+          if (lookupJoinDecoration) {
+            // console.log('lookupJoinDecoration shown!', lookupJoinDecoration);
+            if (callbacks?.telemetry?.hover?.onDecorationHoverShown) {
+              callbacks.telemetry.hover.onDecorationHoverShown(lookupJoinDecoration);
+            }
+          }
+        }
+
         return getHoverItem(fullText, offset, callbacks);
       },
     };

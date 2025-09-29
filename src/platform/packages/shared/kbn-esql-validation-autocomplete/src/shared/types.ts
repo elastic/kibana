@@ -64,6 +64,7 @@ export interface ESQLCallbacks {
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  telemetry?: ESQLTelemetry;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
@@ -85,6 +86,18 @@ const commandOptionNameToLocation: Record<string, Location> = {
   completion: Location.COMPLETION,
   rerank: Location.RERANK,
 };
+
+/**
+ * Callbacks for telemetry events that can be implemented by the host application.
+ * All callbacks are optional.
+ */
+export interface ESQLTelemetry {
+  hover?: {
+    onDecorationHoverShown?: (hoverMessages: string[]) => void;
+  };
+  autocomplete?: {};
+  validation?: {};
+}
 
 /**
  * Pause before using this in new places. Where possible, use the Location enum directly.

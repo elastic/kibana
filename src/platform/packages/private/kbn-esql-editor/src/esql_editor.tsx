@@ -56,6 +56,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
@@ -139,6 +140,11 @@ const ESQLEditorInternal = function ESQLEditor({
     kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -583,11 +589,20 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
+      telemetry: {
+        hover: {
+          trackLookupJoinHoverActionShown:
+            telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
+        },
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
+    getJoinIndices,
     kibana.services?.esql,
+    canCreateLookupIndex,
+    telemetryService,
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
@@ -602,8 +617,6 @@ const ESQLEditorInternal = function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
     histogramBarTarget,
     activeSolutionId,
-    canCreateLookupIndex,
-    getJoinIndices,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -800,6 +813,7 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       hover: {
         above: false,
+        delay: 500,
       },
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
