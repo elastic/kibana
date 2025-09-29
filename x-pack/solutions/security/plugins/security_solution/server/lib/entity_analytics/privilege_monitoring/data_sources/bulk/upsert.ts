@@ -14,76 +14,90 @@ import type { MonitoringEntitySource } from '../../../../../../common/api/entity
  * If new status is true, add source to sources array if not already present, and set is_privileged to true
  */
 export const UPDATE_SCRIPT_SOURCE = `
+def src = ctx._source;
+
 if (params.new_privileged_status == false) {
-  if (ctx._source.user.is_privileged == true) {
-    ctx._source['@timestamp'] = params.now;
-    ctx._source.event.ingested = params.now;
+  if (src.user.is_privileged == true) {
+    src['@timestamp'] = params.now;
+    src.event.ingested = params.now;
 
-    if (ctx._source.labels == null) {
-      ctx._source.labels = new HashMap();
+    if (src.labels == null) { src.labels = new HashMap(); }
+    if (src.labels.sources == null) { src.labels.sources = new ArrayList(); }
+    if (src.labels.source_ids == null) { src.labels.source_ids = new ArrayList(); }
+
+    src.labels.source_ids.removeIf(l -> l == params.source_id);
+    src.labels.sources.removeIf(l -> l == params.source_type);
+
+    if (src.entity_analytics_monitoring != null && src.entity_analytics_monitoring.labels != null) {
+      src.entity_analytics_monitoring.labels.removeIf(l -> l.source == params.source_id);
     }
 
-    if (ctx._source.labels.sources == null) {
-      ctx._source.labels.sources = [];
-    }
-
-    if (ctx._source.labels.source_ids == null) {
-      ctx._source.labels.source_ids = [];
-    }
-
-    ctx._source.labels.source_ids.removeIf(l -> l == params.source_id);
-
-    ctx._source.labels.sources.removeIf(l -> l == params.source_type);
-
-    if (ctx._source.entity_analytics_monitoring != null && ctx._source.entity_analytics_monitoring.labels != null) {
-      ctx._source.entity_analytics_monitoring.labels.removeIf(l -> l.source == params.source_id);
-    }
-
-    if (ctx._source.labels.sources.size() == 0) {
-      ctx._source.user.is_privileged = false;
+    if (src.labels.sources.size() == 0) {
+      src.user.is_privileged = false;
     }
   }
-} else if (params.new_privileged_status == true) {
-  boolean userModified = false;
-  if (ctx._source.labels == null) {
-    ctx._source.labels = new HashMap();
+} else {
+  boolean modified = false;
+
+  if (src.labels == null) { src.labels = new HashMap(); }
+  if (src.labels.source_ids == null) { src.labels.source_ids = new ArrayList(); }
+  if (!src.labels.source_ids.contains(params.source_id)) {
+    src.labels.source_ids.add(params.source_id);
+    modified = true;
   }
-  if (ctx._source.labels.source_ids == null) {
-    ctx._source.labels.source_ids = new ArrayList();
+  if (src.labels.sources == null) { src.labels.sources = new ArrayList(); }
+  if (!src.labels.sources.contains(params.source_type)) {
+    src.labels.sources.add(params.source_type);
+    modified = true;
   }
-  if (!ctx._source.labels.source_ids.contains(params.source_id)) {
-    ctx._source.labels.source_ids.add(params.source_id);
-    userModified = true;
-  }
-  if (ctx._source.labels.sources == null) {
-    ctx._source.labels.sources = new ArrayList();
-  }
-  if (!ctx._source.labels.sources.contains(params.source_type)) {
-    ctx._source.labels.sources.add(params.source_type);
-    userModified = true;
-  }
-  if (ctx._source.entity_analytics_monitoring == null) {
-    ctx._source.entity_analytics_monitoring = new HashMap();
-  }
-  if (ctx._source.entity_analytics_monitoring.labels == null) {
-    ctx._source.entity_analytics_monitoring.labels = new ArrayList();
-  }
+
+  if (src.entity_analytics_monitoring == null) { src.entity_analytics_monitoring = new HashMap(); }
+  if (src.entity_analytics_monitoring.labels == null) { src.entity_analytics_monitoring.labels = new ArrayList(); }
+
   if (params.monitoring_labels != null) {
-    ctx._source.entity_analytics_monitoring.labels.removeIf(l -> l.source == params.source_id);
-    for (label in params.monitoring_labels) {
-      ctx._source.entity_analytics_monitoring.labels.add(label);
+    def toRemove = new ArrayList();
+    for (label in src.entity_analytics_monitoring.labels) {
+      boolean keep = false;
+      for (newLabel in params.monitoring_labels) {
+        if (label.source == newLabel.source && label.value == newLabel.value && label.field == newLabel.field) {
+          keep = true;
+          break;
+        }
+      }
+      if (!keep) {
+        toRemove.add(label);
+      }
     }
-    userModified = true;
+    if (toRemove.size() > 0) {
+      modified = true;
+      for (label in toRemove) {
+        src.entity_analytics_monitoring.labels.remove(label);
+      }
+    }
+
+    for (label in params.monitoring_labels) {
+      boolean exists = false;
+      for (existing in src.entity_analytics_monitoring.labels) {
+        if (existing.source == label.source && existing.value == label.value && existing.field == label.field) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        src.entity_analytics_monitoring.labels.add(label);
+        modified = true;
+      }
+    }
   }
 
-  if (ctx._source.user.is_privileged != true) {
-    ctx._source.user.is_privileged = true;
-    userModified = true;
+  if (src.user.is_privileged != true) {
+    src.user.is_privileged = true;
+    modified = true;
   }
-  
-  if (userModified) {
-    ctx._source['@timestamp'] = params.now;
-    ctx._source.event.ingested = params.now;
+
+  if (modified) {
+    src['@timestamp'] = params.now;
+    src.event.ingested = params.now;
   }
 }
 `;

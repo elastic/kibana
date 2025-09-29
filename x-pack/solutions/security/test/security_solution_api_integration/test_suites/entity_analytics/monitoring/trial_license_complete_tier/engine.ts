@@ -545,6 +545,8 @@ export default ({ getService }: FtrProviderContext) => {
             value: 'Read-only Administrator',
           },
         ]);
+        expect(kathryneAfter?.['@timestamp']).toEqual(kathryneBefore?.['@timestamp']);
+        expect(kathryneAfter?.event?.ingested).toEqual(kathryneBefore?.event?.ingested);
       });
 
       it.skip('deletion detection should delete users on full sync', async () => {
