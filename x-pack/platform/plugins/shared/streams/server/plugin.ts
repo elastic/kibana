@@ -27,6 +27,7 @@ import {
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { registerStreamsUsageCollector } from './telemetry/usage/streams_usage_collector';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
@@ -220,6 +221,10 @@ export class StreamsPlugin
       plugins.globalSearch.registerResultProvider(
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
+    }
+
+    if (plugins.usageCollection) {
+      registerStreamsUsageCollector(plugins.usageCollection);
     }
 
     return {};
