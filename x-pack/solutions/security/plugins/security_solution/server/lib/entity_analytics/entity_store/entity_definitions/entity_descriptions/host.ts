@@ -57,5 +57,37 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
     ...getEntityFieldsDescriptions('host'),
+
+    collect({
+      source: `host.entity.relationships.Communicates_with`,
+      destination: 'entity.relationships.Communicates_with',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `host.entity.relationships.Depends_on`,
+      destination: 'entity.relationships.Depends_on',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `host.entity.relationships.Dependent_of`,
+      destination: 'entity.relationships.Dependent_of',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+
+    collect({
+      source: `host.entity.relationships.Owned_by`,
+      destination: 'entity.relationships.Owned_by',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `host.entity.relationships.Accessed_frequently_by`,
+      destination: 'entity.relationships.Accessed_frequently_by',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
   ],
 };
