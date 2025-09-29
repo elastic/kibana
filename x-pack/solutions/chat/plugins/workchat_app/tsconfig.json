@@ -28,7 +28,7 @@
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
     "@kbn/logging",
-    "@kbn/chat-data-registry-plugin",
+    "@kbn/data-sources-registry-plugin",
   ],
   "exclude": [
     "target/**/*",

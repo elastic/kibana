@@ -11,10 +11,9 @@ import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { debounce } from 'lodash';
 import { JSONDataView, type JSONDataViewProps } from '../../../shared/ui/json_data_view';
-import type { WorkflowsPluginStartAdditionalServices } from '../../../types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export const STORAGE_KEY = 'workflows_management.step_execution_flyout.searchTerm';
 
@@ -24,7 +23,7 @@ interface StepExecutionDataViewProps extends JSONDataViewProps {
 
 export const StepExecutionDataView = ({ title, data, ...props }: StepExecutionDataViewProps) => {
   const { euiTheme } = useEuiTheme();
-  const { storage } = useKibana<WorkflowsPluginStartAdditionalServices>().services;
+  const { storage } = useKibana().services;
 
   const searchTermStorage = storage.get(STORAGE_KEY) || '';
   const [searchTerm, setSearchTerm] = useState(searchTermStorage);
