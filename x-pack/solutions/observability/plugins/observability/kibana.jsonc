@@ -45,6 +45,7 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
+      "streams",
     ],
     "optionalPlugins": [
       "aiops",
@@ -58,7 +59,6 @@
       "serverless",
       "observabilityAIAssistant",
       "investigate",
-      "streams"
     ],
     "requiredBundles": [
       "aiops",
