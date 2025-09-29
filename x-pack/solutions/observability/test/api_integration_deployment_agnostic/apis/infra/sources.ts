@@ -140,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('source');
-        expect(body?.source.configuration.metricAlias).to.equal('metrics-*,metricbeat-*');
+        expect(body?.source.configuration.metricAlias).to.equal('metrics-*,metrics-system*,metricbeat-*');
         expect(body?.source).to.have.property('status');
         expect(body?.source.status?.metricIndicesExist).to.equal(true);
       });
@@ -170,7 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(expectedHttpStatusCode);
       };
 
-      before(() => patchRequest({ name: 'default', metricAlias: 'metrics-*,metricbeat-*' }));
+      before(() => patchRequest({ name: 'default', metricAlias: 'metrics-*,metrics-system*,metricbeat-*' }));
 
       it('should return "hasData" true when modules is "system"', async () => {
         const response = await makeRequest({ modules: ['system'] });
