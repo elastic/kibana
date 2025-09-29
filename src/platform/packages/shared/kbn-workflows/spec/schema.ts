@@ -15,10 +15,6 @@ export const RetryPolicySchema = z.object({
   'timeout-seconds': z.number().int().min(1).optional(),
 });
 
-export const TemplatingOptionsSchema = z.object({
-  engine: z.enum(['mustache', 'nunjucks']),
-});
-
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   delay: z
@@ -56,7 +52,6 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
-  templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
@@ -410,6 +405,7 @@ const StepSchema = z.lazy(() =>
     BaseConnectorStepSchema,
   ])
 );
+export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
   ForEachStepSchema.shape.type._def.value,
@@ -452,16 +448,59 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
+// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
+const AlertSchema = z.object({
+  _id: z.string(),
+  _index: z.string(),
+  kibana: z.object({
+    alert: z.any(),
+  }),
+  '@timestamp': z.string(),
+});
+
+const SummarizedAlertsChunkSchema = z.object({
+  count: z.number(),
+  data: z.array(z.union([AlertSchema, z.any()])),
+});
+
+const RuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tags: z.array(z.string()),
+  consumer: z.string(),
+  producer: z.string(),
+  ruleTypeId: z.string(),
+});
+
+export const EventSchema = z.object({
+  alerts: z.object({
+    new: SummarizedAlertsChunkSchema,
+    ongoing: SummarizedAlertsChunkSchema,
+    recovered: SummarizedAlertsChunkSchema,
+    all: SummarizedAlertsChunkSchema,
+  }),
+  rule: RuleSchema,
+  spaceId: z.string(),
+  params: z.any(),
+});
+
 export const WorkflowContextSchema = z.object({
-  event: z.any().optional(),
-  inputs: z.record(z.any()).optional(),
+  event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
-
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual inputs and consts of different types
+  inputs: z.object({}),
+  consts: z.object({}),
+});
+export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
 export const StepDataSchema = z.object({
   output: z.any().optional(),
@@ -469,15 +508,24 @@ export const StepDataSchema = z.object({
 });
 export type StepData = z.infer<typeof StepDataSchema>;
 
+const ForEachContextItemSchema = z.unknown();
+export const ForEachContextSchema = z.object({
+  items: z.array(ForEachContextItemSchema),
+  index: z.number().int(),
+  item: ForEachContextItemSchema,
+  total: z.number().int(),
+});
+export type ForEachContext = z.infer<typeof ForEachContextSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
-  foreach: z
-    .object({
-      items: z.array(z.any()),
-      index: z.number().int(),
-      item: z.any(),
-      total: z.number().int(),
-    })
-    .optional(),
+  foreach: ForEachContextSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
+
+export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual step ids and different output types
+  steps: z.object({}),
+});
+export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
