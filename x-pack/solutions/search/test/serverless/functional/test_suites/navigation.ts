@@ -272,7 +272,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       if (isV2) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Admin and Settings' });
       }
 
