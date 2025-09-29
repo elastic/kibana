@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SimpleMemCache } from '../../../../../../lib/simple_mem_cache.ts';
+import { SimpleMemCache } from '../../../../../../lib/simple_mem_cache';
 
 // Shared cache instance for throttling Microsoft Defender Endpoint actions
 // Using static cache because each actions creates a separate response actions client
