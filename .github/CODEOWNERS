@@ -917,6 +917,52 @@ x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/platform/test
+x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
+x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/kibana-cases
+x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
+x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
+x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
+x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
+x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/kibana-cases
+x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
+x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
+x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
+x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
+x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
+x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
+x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
+x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
+x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
+x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
+x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
+x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
+x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
+x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
+x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat_app @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team

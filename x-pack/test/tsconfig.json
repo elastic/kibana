@@ -195,5 +195,6 @@
     "@kbn/inference-common",
     "@kbn/aiops-change-point-detection",
     "@kbn/scout-info",
+    "@kbn/reporting-test-routes",
   ]
 }
