@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ListControl } from './list_control';
 
@@ -19,15 +19,19 @@ const formatOptionLabel = (value: any) => {
   return `${value} + formatting`;
 };
 
-let stageFilter: sinon.SinonSpy;
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(<I18nProvider>{component}</I18nProvider>);
+};
+
+let stageFilter: jest.Mock;
 
 beforeEach(() => {
-  stageFilter = sinon.spy();
+  stageFilter = jest.fn();
 });
 
 test('renders ListControl', () => {
-  const component = shallowWithIntl(
-    <ListControl.WrappedComponent
+  renderWithIntl(
+    <ListControl
       id="mock-list-control"
       label="list control"
       options={options}
@@ -36,15 +40,20 @@ test('renders ListControl', () => {
       controlIndex={0}
       stageFilter={stageFilter}
       formatOptionLabel={formatOptionLabel}
-      intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot();
+
+  expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
+  expect(screen.getByText('list control')).toBeInTheDocument();
+  expect(screen.getByTestId('listControlSelect0')).toBeInTheDocument();
+
+  // Check that combobox is rendered with correct placeholder
+  expect(screen.getByPlaceholderText('Select...')).toBeInTheDocument();
 });
 
 test('disableMsg', () => {
-  const component = shallowWithIntl(
-    <ListControl.WrappedComponent
+  renderWithIntl(
+    <ListControl
       id="mock-list-control"
       label="list control"
       selectedOptions={[]}
@@ -53,8 +62,14 @@ test('disableMsg', () => {
       stageFilter={stageFilter}
       formatOptionLabel={formatOptionLabel}
       disableMsg={'control is disabled to test rendering when disabled'}
-      intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot();
+
+  expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
+  expect(screen.getByText('list control')).toBeInTheDocument();
+
+  // When disabled, it should render a disabled text field instead of combobox
+  const disabledInput = screen.getByDisplayValue('');
+  expect(disabledInput).toBeDisabled();
+  expect(disabledInput).toHaveAttribute('placeholder', 'Select...');
 });

@@ -43,7 +43,9 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.updateRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name eq updated-service')).toBeVisible();
+    await expect(page.getByText('service.name')).toBeVisible();
+    await expect(page.getByText('equals')).toBeVisible();
+    await expect(page.getByText('updated-service')).toBeVisible();
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
@@ -54,7 +56,9 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.cancelRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name eq test-service')).toBeVisible();
+    await expect(page.getByText('service.name')).toBeVisible();
+    await expect(page.getByText('equals')).toBeVisible();
+    await expect(page.getByText('test-service')).toBeVisible();
   });
 
   test('should switch between editing different rules', async ({ page, pageObjects }) => {

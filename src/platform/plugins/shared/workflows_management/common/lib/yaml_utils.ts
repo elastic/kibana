@@ -375,7 +375,8 @@ export function getStepNode(document: Document, stepName: string): YAMLMap | nul
 
       const path = getPathFromAncestors(ancestors);
 
-      const isInSteps = path.length >= 3 && path[path.length - 3] === 'steps';
+      const isInSteps =
+        path.length >= 3 && (path[path.length - 3] === 'steps' || path[path.length - 3] === 'else');
 
       if (isValueMatch && isInSteps) {
         stepNode = ancestors[ancestors.length - 2] as YAMLMap;
@@ -385,4 +386,179 @@ export function getStepNode(document: Document, stepName: string): YAMLMap | nul
     },
   });
   return stepNode;
+}
+
+export function getStepNodeAtPosition(
+  document: Document,
+  absolutePosition: number
+): YAMLMap | null {
+  let stepNode: YAMLMap | null = null;
+  visit(document, {
+    Map(key, node, ancestors) {
+      if (!node.range) {
+        return;
+      }
+      const path = getPathFromAncestors(ancestors);
+
+      const hasTypeProp = typeof node.get('type') === 'string';
+
+      if (!hasTypeProp) {
+        return;
+      }
+
+      const isInSteps = path.includes('steps') || path.includes('else');
+
+      if (isInSteps && absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
+        // assign first found node
+        stepNode = node;
+        // but continue to find the deepest node
+      }
+    },
+  });
+  return stepNode;
+}
+
+export function getTriggerNodes(
+  yamlDocument: Document
+): Array<{ node: any; triggerType: string; typePair: any }> {
+  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        const triggerType = pair.value.value as string;
+        // Find the parent map node that contains this trigger
+        const triggerMapNode = ancestors[ancestors.length - 1];
+        triggerNodes.push({
+          node: triggerMapNode,
+          triggerType,
+          typePair: pair, // Store the actual type pair for precise positioning
+        });
+      }
+    },
+  });
+
+  return triggerNodes;
+}
+
+export function getStepNodesWithType(yamlDocument: Document): YAMLMap[] {
+  const stepNodes: YAMLMap[] = [];
+
+  if (!yamlDocument?.contents) {
+    return stepNodes;
+  }
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a step (not nested inside 'with' or other blocks)
+      const path = ancestors.slice();
+      let isMainStepType = false;
+
+      // Walk up the ancestors to see if we're in a steps array
+      // and ensure this type field is a direct child of a step, not nested in 'with'
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+
+        // If we encounter a 'with' field before finding 'steps', this is a nested type
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'with') {
+          return; // Skip this type field - it's inside a 'with' block
+        }
+
+        // If we find 'steps', this could be a main step type
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'steps') {
+          isMainStepType = true;
+          break;
+        }
+      }
+
+      if (isMainStepType && isScalar(pair.value)) {
+        // Find the step node (parent containing the type) - should be the immediate parent map
+        const immediateParent = ancestors[ancestors.length - 1];
+        if (isMap(immediateParent) && 'items' in immediateParent && immediateParent.items) {
+          // Ensure this is a step node by checking it has both 'name' and 'type' fields
+          const hasName = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'name'
+          );
+          const hasType = immediateParent.items.some(
+            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+          );
+
+          if (hasName && hasType) {
+            stepNodes.push(immediateParent);
+          }
+        }
+      }
+    },
+  });
+
+  return stepNodes;
+}
+
+export function getTriggerNodesWithType(yamlDocument: Document): YAMLMap[] {
+  const triggerNodes: YAMLMap[] = [];
+
+  if (!yamlDocument?.contents) return triggerNodes;
+
+  visit(yamlDocument, {
+    Pair(key, pair, ancestors) {
+      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
+        return;
+      }
+
+      // Check if this is a type field within a trigger
+      const path = ancestors.slice();
+      let isTriggerType = false;
+
+      // Walk up the ancestors to see if we're in a triggers array
+      for (let i = path.length - 1; i >= 0; i--) {
+        const ancestor = path[i];
+        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
+          isTriggerType = true;
+          break;
+        }
+      }
+
+      if (isTriggerType && isScalar(pair.value)) {
+        // Find the trigger node (parent containing the type)
+        for (let i = path.length - 1; i >= 0; i--) {
+          const ancestor = path[i];
+          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
+            // Check if this map contains a type field
+            const hasType = ancestor.items.some(
+              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+            );
+            if (hasType) {
+              triggerNodes.push(ancestor);
+              break;
+            }
+          }
+        }
+      }
+    },
+  });
+
+  return triggerNodes;
 }

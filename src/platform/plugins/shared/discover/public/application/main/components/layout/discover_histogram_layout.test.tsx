@@ -130,7 +130,6 @@ const mountComponent = async ({
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
   const props: DiscoverMainContentProps = {
     dataView,
