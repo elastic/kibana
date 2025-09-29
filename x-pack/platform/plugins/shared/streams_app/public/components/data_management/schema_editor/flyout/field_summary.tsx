@@ -66,9 +66,6 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
   const router = useStreamsAppRouter();
 
-  const parent = getParentId(stream.name);
-  const hasRootAsParent = parent ? isRoot(parent) : false;
-
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -96,7 +93,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : field.status === 'inherited' && !hasRootAsParent ? (
+          ) : field.status === 'inherited' && !isRoot(field.parent) ? (
             <EuiFlexItem grow={2}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
