@@ -816,3 +816,10 @@ export const fieldFilterNoneMatching = i18n.translate(
     defaultMessage: 'No fields found',
   }
 );
+
+export const enableFailureStoreButtonLabel = i18n.translate(
+  'xpack.datasetQuality.enableFailureStore',
+  {
+    defaultMessage: 'Enable failure store',
+  }
+);
