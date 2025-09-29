@@ -25,7 +25,10 @@ import { CreateStreamConfirmationModal } from './create_stream_confirmation_moda
 import { getPercentageFormatter } from '../../../../util/formatters';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useMatchRate } from './use_match_rate';
-import { useStreamSamplesSelector } from '../state_management/stream_routing_state_machine/use_stream_routing';
+import {
+  useStreamRoutingEvents,
+  useStreamSamplesSelector,
+} from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel } from '../../shared';
 
@@ -53,6 +56,7 @@ export function SuggestedStreamPanel({
       selectedPreview.type === 'suggestion' &&
       selectedPreview.name === partition.name
   );
+  const { reviewSuggestedRule } = useStreamRoutingEvents();
 
   return (
     <>
@@ -120,7 +124,15 @@ export function SuggestedStreamPanel({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton iconType="check" size="s" onClick={() => toggleModal(true)} fill>
+                <EuiButton
+                  iconType="check"
+                  size="s"
+                  onClick={() => {
+                    reviewSuggestedRule();
+                    toggleModal(true);
+                  }}
+                  fill
+                >
                   {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
                     defaultMessage: 'Accept',
                   })}

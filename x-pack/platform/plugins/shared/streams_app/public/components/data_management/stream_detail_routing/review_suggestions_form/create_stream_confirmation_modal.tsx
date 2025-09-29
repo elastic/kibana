@@ -25,20 +25,25 @@ import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
 import { useForkStream } from './use_fork_stream';
 import { ConditionPanel } from '../../shared';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from '../state_management/stream_routing_state_machine';
 
 export function CreateStreamConfirmationModal({
-  definition,
   partition,
   onClose,
-  onSuccess,
 }: {
   definition: Streams.WiredStream.GetResponse;
   partition: ReviewSuggestionsInputs['suggestions'][number];
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [forkStreamState, forkStream] = useForkStream(onSuccess);
   const modalTitleId = useGeneratedHtmlId();
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { forkStream } = useStreamRoutingEvents();
+
+  const isForking = routingSnapshot.matches({ ready: { reviewSuggestedRule: 'forking' } });
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
@@ -72,20 +77,20 @@ export function CreateStreamConfirmationModal({
         <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} isDisabled={forkStreamState.loading}>
+        <EuiButtonEmpty onClick={onClose} isDisabled={isForking}>
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
         <EuiButton
-          isLoading={forkStreamState.loading}
-          onClick={() =>
-            forkStream({
-              parentName: definition.stream.name,
-              name: partition.name,
-              condition: partition.condition,
-            })
-          }
+          isLoading={isForking}
+          onClick={async () => {
+            await forkStream({
+              destination: partition.name,
+              where: partition.condition,
+            });
+            onClose();
+          }}
           fill
         >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirm', {

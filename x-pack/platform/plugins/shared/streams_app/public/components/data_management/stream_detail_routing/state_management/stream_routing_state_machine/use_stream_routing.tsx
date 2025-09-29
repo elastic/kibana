@@ -20,6 +20,7 @@ import type {
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
+import { RoutingDefinition } from '@kbn/streams-schema';
 
 const consoleInspector = createConsoleInspector();
 
@@ -54,14 +55,18 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: () => {
-        service.send({ type: 'routingRule.fork' });
+      forkStream: async (routingRule?: RoutingDefinition) => {
+        service.send({ type: 'routingRule.fork', routingRule });
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
+      },
+      reviewSuggestedRule: () => {
+        service.send({ type: 'routingRule.reviewSuggested' });
       },
     }),
     [service]

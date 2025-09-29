@@ -187,6 +187,9 @@ export const streamRoutingMachine = setup({
               target: 'reorderingRules',
               actions: [{ type: 'reorderRouting', params: ({ event }) => event }],
             },
+            'routingRule.reviewSuggested': {
+              target: 'reviewSuggestedRule',
+            },
           },
         },
         creatingNewRule: {
@@ -402,6 +405,50 @@ export const streamRoutingMachine = setup({
                 },
                 onError: {
                   target: 'reordering',
+                  actions: [{ type: 'notifyStreamFailure' }],
+                },
+              },
+            },
+          },
+        },
+        reviewSuggestedRule: {
+          id: 'reviewSuggestedRule',
+          initial: 'reviewing',
+          states: {
+            reviewing: {
+              on: {
+                'routingRule.fork': {
+                  guard: 'canForkStream',
+                  target: 'forking',
+                },
+              },
+            },
+            forking: {
+              invoke: {
+                id: 'forkStreamActor',
+                src: 'forkStream',
+                input: ({ context, event }) => {
+                  const { routingRule } = event as Extract<
+                    StreamRoutingEvent,
+                    { type: 'routingRule.fork' }
+                  >;
+                  if (!routingRule) {
+                    throw new Error('No routing rule to fork');
+                  }
+
+                  return {
+                    definition: context.definition,
+                    destination: routingRule.destination,
+                    where: routingRule.where,
+                    status: 'enabled',
+                  };
+                },
+                onDone: {
+                  target: '#idle',
+                  actions: [{ type: 'refreshDefinition' }],
+                },
+                onError: {
+                  target: 'reviewing',
                   actions: [{ type: 'notifyStreamFailure' }],
                 },
               },
