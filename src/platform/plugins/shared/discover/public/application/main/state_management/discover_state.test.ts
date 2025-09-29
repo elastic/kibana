@@ -641,7 +641,7 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch given a URL with different time range than the stored one showing as changed', async () => {
-      const url = '/#_g=(time:(from:now-24h%2Fh,to:now))';
+      const url = '/#?_g=(time:(from:now-24h%2Fh,to:now))';
       const savedSearch = {
         ...savedSearchMock,
         searchSource: createSearchSourceMock({ index: dataViewMock, filter: [] }),
@@ -671,7 +671,7 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch given a URL with different refresh interval than the stored one showing as changed', async () => {
-      const url = '/#_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:1234))';
+      const url = '/#?_g=(time:(from:now-15d,to:now),refreshInterval:(pause:!f,value:1234))';
       mockServices.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
         return { pause: false, value: 1234 };
       });

@@ -10,6 +10,5 @@ import type { StreamsTelemetryClient } from '../telemetry/client';
 
 export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
   telemetryClient: StreamsTelemetryClient;
 }

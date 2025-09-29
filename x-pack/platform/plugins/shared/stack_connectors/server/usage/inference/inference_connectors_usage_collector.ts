@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 interface InferenceConnectorsUsage {
   inference_count_by_provider: Record<string, number>;
@@ -21,6 +22,30 @@ interface SearchAggs {
   byProvider?: { buckets?: ByProviderBucket[] };
 }
 
+// Keep in sync with ServiceProviderKeys
+const PROVIDER_SCHEMA: Record<ServiceProviderKeys, { type: 'long' }> = {
+  'alibabacloud-ai-search': { type: 'long' },
+  amazonbedrock: { type: 'long' },
+  amazon_sagemaker: { type: 'long' },
+  anthropic: { type: 'long' },
+  azureaistudio: { type: 'long' },
+  azureopenai: { type: 'long' },
+  cohere: { type: 'long' },
+  deepseek: { type: 'long' },
+  elastic: { type: 'long' },
+  elasticsearch: { type: 'long' },
+  googleaistudio: { type: 'long' },
+  googlevertexai: { type: 'long' },
+  hugging_face: { type: 'long' },
+  jinaai: { type: 'long' },
+  mistral: { type: 'long' },
+  openai: { type: 'long' },
+  voyageai: { type: 'long' },
+  watsonxai: { type: 'long' },
+  ai21: { type: 'long' },
+  llama: { type: 'long' },
+};
+
 export function registerInferenceConnectorsUsageCollector(
   usageCollection: UsageCollectionSetup,
   core: CoreSetup
@@ -30,29 +55,7 @@ export function registerInferenceConnectorsUsageCollector(
     isReady: () => true,
     schema: {
       inference_count_by_provider: {
-        // Known providers from ServiceProviderKeys
-        'alibabacloud-ai-search': { type: 'long' },
-        amazonbedrock: { type: 'long' },
-        amazon_sagemaker: { type: 'long' },
-        anthropic: { type: 'long' },
-        azureaistudio: { type: 'long' },
-        azureopenai: { type: 'long' },
-        cohere: { type: 'long' },
-        deepseek: { type: 'long' },
-        elastic: { type: 'long' },
-        elasticsearch: { type: 'long' },
-        googleaistudio: { type: 'long' },
-        googlevertexai: { type: 'long' },
-        hugging_face: { type: 'long' },
-        jinaai: { type: 'long' },
-        mistral: { type: 'long' },
-        openai: { type: 'long' },
-        voyageai: { type: 'long' },
-        watsonxai: { type: 'long' },
-        ai21: { type: 'long' },
-        llama: { type: 'long' },
-        // Fallback for future additions
-        DYNAMIC_KEY: { type: 'long' },
+        ...PROVIDER_SCHEMA,
       },
     },
     fetch: async () => {

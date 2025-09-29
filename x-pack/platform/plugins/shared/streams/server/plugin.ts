@@ -105,7 +105,7 @@ export class StreamsPlugin
         defaultMessage: 'Streams',
       }),
       order: 600,
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
       privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
         defaultMessage: 'All Spaces is required for Streams access.',

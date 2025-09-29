@@ -18,9 +18,6 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
-import { getTechnicalPreviewWarning } from './utils';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -52,9 +49,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'List agents',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.',
       options: {
-        tags: ['agent', 'oas-tag:elastic agent builder'],
+        tags: ['agent', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -85,10 +83,11 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Get an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Get an agent by ID',
+      description:
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.',
       options: {
-        tags: ['agent', 'oas-tag:elastic agent builder'],
+        tags: ['agent', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -129,9 +128,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Create an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.",
       options: {
-        tags: ['agent', 'oas-tag:elastic agent builder'],
+        tags: ['agent', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -214,9 +214,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Update an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.",
       options: {
-        tags: ['agent', 'oas-tag:elastic agent builder'],
+        tags: ['agent', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -306,9 +307,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Delete an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description: 'Delete an agent by ID. This action cannot be undone.',
       options: {
-        tags: ['agent', 'oas-tag:elastic agent builder'],
+        tags: ['agent', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',

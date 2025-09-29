@@ -674,6 +674,7 @@ export function prepareTemplate({
   const defaultSettings = buildDefaultSettings({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
+    isOtelInputType,
   });
 
   const componentTemplates = buildComponentTemplates({

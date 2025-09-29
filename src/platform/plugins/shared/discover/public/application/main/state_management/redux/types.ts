@@ -94,9 +94,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    byId: Record<string, TabState>;
     allIds: string[];
     unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

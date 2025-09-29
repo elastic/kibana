@@ -1054,7 +1054,7 @@ const firstDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'first',
   description: i18n.translate('kbn-esql-ast.esql.definitions.first', {
-    defaultMessage: 'The earliest value of a field.',
+    defaultMessage: 'Calculates the earliest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -1222,7 +1222,7 @@ const lastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'last',
   description: i18n.translate('kbn-esql-ast.esql.definitions.last', {
-    defaultMessage: 'The latest value of a field.',
+    defaultMessage: 'Calculates the latest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,

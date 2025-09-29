@@ -44,6 +44,14 @@ servers:
 security:
   - apiKeyAuth: []
 tags:
+  - name: agent builder
+    description: |
+      Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+    externalDocs:
+      description: Learn about working with Agent Builder programmatically
+      url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+    x-displayName: Agent Builder
   - name: alerting
     description: |
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
@@ -79,8 +87,6 @@ tags:
     x-displayName: Data views
   - name: Elastic Agent actions
   - name: Elastic Agent binary download sources
-  - name: elastic agent builder
-    x-displayName: Elastic Agent Builder
   - name: Elastic Agent policies
   - name: Elastic Agent status
   - name: Elastic Agents
@@ -778,7 +784,7 @@ paths:
           name: product_name
   /api/agent_builder/a2a/{agentId}:
     post:
-      description: 'Elastic A2A Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Handle A2A (Agent-to-Agent) task requests. Use this endpoint to process inter-agent communication using JSON-RPC 2.0 protocol.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-a2a-agentid
       parameters:
         - description: The unique identifier of the agent to send the A2A task to.
@@ -818,16 +824,16 @@ paths:
                         message: Hello! How can I help you today?
                       type: response
           description: Indicates a successful response
-      summary: A2A Task Endpoint
+      summary: Send A2A task
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/a2a/{agentId}.json:
     get:
-      description: 'Provides agent discovery metadata for A2A protocol<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-a2a-agentid.json
       parameters:
         - description: The unique identifier of the agent to get A2A metadata for.
@@ -881,16 +887,16 @@ paths:
                     url: http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent
                     version: 0.1.0
           description: Indicates a successful response
-      summary: A2A Agent Card
+      summary: Get A2A agent card
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/agents:
     get:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-agents
       parameters: []
       responses:
@@ -933,13 +939,13 @@ paths:
           description: Indicates a successful response
       summary: List agents
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Create a new agent. Use this endpoint to define the agent''s behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: post-agent-builder-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1055,14 +1061,14 @@ paths:
           description: Indicates a successful response
       summary: Create an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/agents/{id}:
     delete:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: delete-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1090,13 +1096,13 @@ paths:
           description: Indicates a successful response
       summary: Delete an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-agents-id
       parameters:
         - description: The unique identifier of the agent to retrieve.
@@ -1131,15 +1137,15 @@ paths:
                     name: Search Index Helper
                     type: chat
           description: Indicates a successful response
-      summary: Get an agent
+      summary: Get an agent by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Update an existing agent configuration. Use this endpoint to modify any aspect of the agent''s behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: put-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1253,14 +1259,14 @@ paths:
           description: Indicates a successful response
       summary: Update an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/conversations:
     get:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-conversations
       parameters:
         - description: Optional agent ID to filter conversations by a specific agent.
@@ -1288,14 +1294,14 @@ paths:
           description: Indicates a successful response
       summary: List conversations
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/conversations/{conversation_id}:
     delete:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: delete-agent-builder-conversations-conversation-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1323,13 +1329,13 @@ paths:
           description: Indicates a successful response
       summary: Delete conversation by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-conversations-conversation-id
       parameters:
         - description: The unique identifier of the conversation to retrieve.
@@ -1366,14 +1372,14 @@ paths:
           description: Indicates a successful response
       summary: Get conversation by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/converse:
     post:
-      description: 'Elastic Chat API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1399,13 +1405,15 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
+                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
                   type: object
                   properties:
                     visualizations:
+                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
@@ -1444,16 +1452,16 @@ paths:
                         tool_id: platform.core.search
                         type: tool_call
           description: Indicates a successful response
-      summary: Converse with an agent
+      summary: Send chat message
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/converse/async:
     post:
-      description: 'Elastic Chat API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent''s thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1479,13 +1487,15 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
+                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
                   type: object
                   properties:
                     visualizations:
+                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
@@ -1539,66 +1549,16 @@ paths:
                               message: Hello! How can I help you today?
                       event: round_complete
           description: Indicates a successful response
-      summary: Converse with an agent and stream events
+      summary: Send chat message (streaming)
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/mcp:
-    delete:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
-      operationId: delete-agent-builder-mcp
-      parameters: []
-      responses:
-        '405':
-          content:
-            application/json:
-              examples:
-                mcpMethodNotAllowedExample:
-                  description: Example response showing that the method to list MCP tools is not allowed
-                  value:
-                    attributes:
-                      code: -32000
-                    error: Method Not Allowed
-                    message: Method not allowed
-                    statusCode: 405
-          description: Indicates a Method Not Allowed response
-      summary: MCP server
-      tags:
-        - elastic agent builder
-      x-state: Technical Preview
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-    get:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
-      operationId: get-agent-builder-mcp
-      parameters: []
-      responses:
-        '405':
-          content:
-            application/json:
-              examples:
-                mcpMethodNotAllowedExample:
-                  description: Example response showing that the method to list MCP tools is not allowed
-                  value:
-                    attributes:
-                      code: -32000
-                    error: Method Not Allowed
-                    message: Method not allowed
-                    statusCode: 405
-          description: Indicates a Method Not Allowed response
-      summary: MCP server
-      tags:
-        - elastic agent builder
-      x-state: Technical Preview
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
     post:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-mcp
       parameters: []
       requestBody:
@@ -1639,14 +1599,14 @@ paths:
           description: Indicates a successful response
       summary: MCP server
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools:
     get:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-tools
       parameters: []
       responses:
@@ -1796,13 +1756,13 @@ paths:
           description: Indicates a successful response
       summary: List tools
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: post-agent-builder-tools
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1943,14 +1903,14 @@ paths:
           description: Indicates a successful response
       summary: Create a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/_execute:
     post:
-      description: '[Required authorization] Route required privileges: read_onechat.'
+      description: 'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2143,14 +2103,14 @@ paths:
           description: Indicates a successful response
       summary: Execute a Tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/{id}:
     delete:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: delete-agent-builder-tools-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2178,13 +2138,13 @@ paths:
           description: Indicates a successful response
       summary: Delete a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-tools-id
       parameters:
         - description: The unique identifier of the tool to retrieve.
@@ -2298,14 +2258,14 @@ paths:
           description: Indicates a successful response
       summary: Get a tool by id
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/{toolId}:
     put:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Update an existing tool. Use this endpoint to modify any aspect of the tool''s configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: put-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2446,7 +2406,7 @@ paths:
           description: Indicates a successful response
       summary: Update a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -25604,36 +25564,42 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    cloudProvider:
-                      type: string
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                    packagePolicyCount:
-                      type: number
-                    updated_at:
-                      type: string
-                    vars:
-                      additionalProperties: {}
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
                       type: object
-                  required:
-                    - id
-                    - name
-                    - cloudProvider
-                    - vars
-                    - packagePolicyCount
-                    - created_at
-                    - updated_at
-                type: array
+                      properties:
+                        cloudProvider:
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                        packagePolicyCount:
+                          type: number
+                        updated_at:
+                          type: string
+                        vars:
+                          additionalProperties: {}
+                          type: object
+                      required:
+                        - id
+                        - name
+                        - cloudProvider
+                        - vars
+                        - packagePolicyCount
+                        - created_at
+                        - updated_at
+                    type: array
+                required:
+                  - items
           description: Indicates a successful call.
         '400':
           content:
@@ -25659,6 +25625,7 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -25736,31 +25703,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
@@ -25786,6 +25759,276 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/cloud_connectors/{cloudConnectorId}:
+    delete:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: delete-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Delete cloud connector (supports force deletion)
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.'
+      operationId: get-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: put-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Update cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -26498,6 +26741,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -26847,6 +27092,8 @@ paths:
                                   additionalProperties: true
                                   type: object
                                   properties:
+                                    deferred:
+                                      type: boolean
                                     id:
                                       type: string
                                     originId:
@@ -26945,6 +27192,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -27198,6 +27447,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -27349,6 +27600,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          deferred:
+                                            type: boolean
                                           id:
                                             type: string
                                           originId:
@@ -27435,6 +27688,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: OK
         '400':
           content:
             application/json:
@@ -27455,6 +27709,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27511,6 +27766,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -27531,6 +27787,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27588,6 +27845,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -27608,6 +27866,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -27668,6 +27927,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -27688,6 +27948,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27745,6 +28006,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -27765,6 +28027,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -27812,6 +28075,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -28058,6 +28323,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -28156,6 +28423,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -28465,6 +28734,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -28517,6 +28788,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: OK
         '400':
           content:
             application/json:
@@ -28537,6 +28809,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -28710,6 +28983,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -28808,6 +29083,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -29182,6 +29459,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -29202,6 +29480,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -29257,6 +29536,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -29277,7 +29557,80 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install Kibana assets for a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets:
+    post:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: post-fleet-epm-packages-pkgname-pkgversion-rule-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                force:
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
@@ -49017,9 +49370,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -50892,9 +51243,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -52565,9 +52914,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -54290,9 +54637,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -56301,9 +56646,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:
@@ -57949,9 +58292,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:

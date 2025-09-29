@@ -22,9 +22,6 @@ import type {
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
-import { getTechnicalPreviewWarning } from './utils';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -38,9 +35,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'List tools',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.',
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -76,9 +74,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Get a tool by id',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.',
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -121,9 +120,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Create a tool',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.',
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -192,9 +192,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Update a tool',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.",
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -264,9 +265,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Delete a tool',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description: 'Delete a tool by ID. This action cannot be undone.',
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -308,8 +309,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Execute a Tool',
+      description:
+        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.',
       options: {
-        tags: ['tools', 'oas-tag:elastic agent builder'],
+        tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',

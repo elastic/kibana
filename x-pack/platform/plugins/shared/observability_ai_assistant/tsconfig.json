@@ -51,7 +51,6 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/core-http-browser",
     "@kbn/sse-utils",
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
@@ -60,7 +59,8 @@
     "@kbn/inference-tracing",
     "@kbn/licensing-types",
     "@kbn/llm-tasks-plugin",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/inference-endpoint-plugin"
   ],
   "exclude": ["target/**/*"]
 }

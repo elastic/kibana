@@ -6421,9 +6421,6 @@
             },
             "llama": {
               "type": "long"
-            },
-            "DYNAMIC_KEY": {
-              "type": "long"
             }
           }
         }
