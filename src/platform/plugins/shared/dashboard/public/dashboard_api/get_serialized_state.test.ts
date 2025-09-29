@@ -87,7 +87,7 @@ describe('getSerializedState', () => {
   it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: [{ panelIndex: 'oldPanelId', type: 'visualization' } as DashboardPanel],
+      panels: [{ uid: 'oldPanelId', type: 'visualization' } as DashboardPanel],
     };
     const result = getSerializedState({
       controlGroupReferences: [],
@@ -105,11 +105,11 @@ describe('getSerializedState', () => {
     expect(result.attributes.panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
+          "grid": Object {
             "i": "54321",
           },
-          "panelIndex": "54321",
           "type": "visualization",
+          "uid": "54321",
         },
       ]
     `);
