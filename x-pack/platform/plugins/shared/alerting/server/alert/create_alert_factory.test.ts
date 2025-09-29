@@ -159,7 +159,7 @@ describe('createAlertFactory()', () => {
     expect(alertFactory.hasReachedAlertLimit()).toBe(true);
   });
 
-  test('logs an error more alerts are created than allowed and the configured alert limit is greater than the max allowed threshold', () => {
+  test('logs a warning when more alerts are created than allowed and the configured alert limit is greater than the max allowed threshold', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
