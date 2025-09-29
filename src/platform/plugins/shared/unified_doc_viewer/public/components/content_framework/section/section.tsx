@@ -58,7 +58,7 @@ export interface ContentFrameworkSectionProps {
   hasPadding?: boolean;
 }
 
-const sectionsTourStorageKey = 'contentFramework.sectionsTourDismissed';
+const sectionActionsTourStorageKey = 'contentFramework.sectionActionsTourDismissed';
 
 export function ContentFrameworkSection({
   id,
@@ -74,7 +74,10 @@ export function ContentFrameworkSection({
   hasPadding = true,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
-  const [dismissedTours, setDismissedTours] = useLocalStorage<string[]>(sectionsTourStorageKey, []);
+  const [dismissedTours, setDismissedTours] = useLocalStorage<string[]>(
+    sectionActionsTourStorageKey,
+    []
+  );
   const { euiTheme } = useEuiTheme();
 
   const dismissTour = (actionId: string) => {
