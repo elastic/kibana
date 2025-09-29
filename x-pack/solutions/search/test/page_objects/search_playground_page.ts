@@ -542,7 +542,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
             await testSubjects.click(`summarization_model_select_${name}_gpt-4o`);
           },
           undefined,
-          200
+          1000
         );
       },
     },
