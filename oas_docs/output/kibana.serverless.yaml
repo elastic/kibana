@@ -13939,6 +13939,7 @@ paths:
         Update or create an entity in Entity Store.
         If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
         > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+        > Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -13968,8 +13969,8 @@ paths:
           description: Entity updated or created
         '403':
           description: Operation on a restricted field
-        '404':
-          description: Entity not found
+        '409':
+          description: Conflict. The entity was updated while another update was happening in ElasticSearch
         '503':
           description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
       summary: Upsert an entity in Entity Store
@@ -22993,6 +22994,7 @@ paths:
                                       enum:
                                         - input
                                         - output
+                                        - ''
                                       type: string
                                   required:
                                     - id
@@ -23475,6 +23477,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id
@@ -23833,6 +23836,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id
@@ -25600,36 +25604,42 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    cloudProvider:
-                      type: string
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                    packagePolicyCount:
-                      type: number
-                    updated_at:
-                      type: string
-                    vars:
-                      additionalProperties: {}
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
                       type: object
-                  required:
-                    - id
-                    - name
-                    - cloudProvider
-                    - vars
-                    - packagePolicyCount
-                    - created_at
-                    - updated_at
-                type: array
+                      properties:
+                        cloudProvider:
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                        packagePolicyCount:
+                          type: number
+                        updated_at:
+                          type: string
+                        vars:
+                          additionalProperties: {}
+                          type: object
+                      required:
+                        - id
+                        - name
+                        - cloudProvider
+                        - vars
+                        - packagePolicyCount
+                        - created_at
+                        - updated_at
+                    type: array
+                required:
+                  - items
           description: Indicates a successful call.
         '400':
           content:
@@ -25655,6 +25665,7 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -25732,31 +25743,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
@@ -25782,6 +25799,276 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/cloud_connectors/{cloudConnectorId}:
+    delete:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: delete-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Delete cloud connector (supports force deletion)
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.'
+      operationId: get-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: put-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Update cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
