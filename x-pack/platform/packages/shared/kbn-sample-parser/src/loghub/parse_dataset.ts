@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import type { LoghubSystem } from '../src/read_loghub_system_files';
-import type { LoghubParser } from '../src/types';
+import type { LoghubParser } from './types';
+import type { LoghubSystem } from './read_loghub_system_files';
 
 export function parseDataset({ system, parser }: { parser: LoghubParser; system: LoghubSystem }) {
   const parsedLogLines = system.logLines.map((line) => {

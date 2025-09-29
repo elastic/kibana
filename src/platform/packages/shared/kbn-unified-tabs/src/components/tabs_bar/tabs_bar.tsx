@@ -75,6 +75,7 @@ export type TabsBarProps = Pick<
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (event: TabsEBTEvent) => void;
+  onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
 };
 
 export interface TabsBarApi {
@@ -96,6 +97,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onLabelEdited,
       onSelect,
       onSelectRecentlyClosed,
+      onClearRecentlyClosed,
       onReorder,
       onClose,
       getPreviewData,
@@ -336,6 +338,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             recentlyClosedItems={recentlyClosedItems}
             onSelect={onSelect}
             onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onClearRecentlyClosed={onClearRecentlyClosed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { escapeRegExp, debounce } from 'lodash';
+import { escapeRegExp, omit, debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
@@ -30,7 +30,8 @@ import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 import { TabsEventDataKeys } from '../../event_data_keys';
 
-export interface TabbedContentProps extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount'> {
+export interface TabbedContentProps
+  extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed'> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: TabItem[];
@@ -60,6 +61,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
 }) => {
@@ -141,8 +143,12 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelectRecentlyClosed = useCallback(
     async (item: TabItem) => {
+      const newItem = createItem();
+      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
+      tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
+
       changeState((prevState) => {
-        const newState = selectRecentlyClosedTab(prevState, item);
+        const nextState = selectRecentlyClosedTab(prevState, restoredItem);
 
         onEBTEvent({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
@@ -150,10 +156,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
-        return newState;
+        return nextState;
       });
     },
-    [changeState, onEBTEvent]
+    [changeState, createItem, onEBTEvent]
   );
 
   const onClose = useCallback(
@@ -321,6 +327,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onLabelEdited={onLabelEdited}
             onSelect={onSelect}
             onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onClearRecentlyClosed={onClearRecentlyClosed}
             onReorder={onReorder}
             onClose={onClose}
             getPreviewData={getPreviewData}

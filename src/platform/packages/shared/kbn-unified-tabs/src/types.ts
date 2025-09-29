@@ -15,6 +15,7 @@ export interface TabItem {
   id: string;
   label: string;
   duplicatedFromId?: string; // ID of the tab from which this tab was duplicated
+  restoredFromId?: string; // ID of the closed tab from which this tab was restored
 }
 
 export interface TabsSizeConfig {

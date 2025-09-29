@@ -9,7 +9,7 @@ import { promises as Fs } from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { LOGHUB_DIR } from './constants';
-import { getFileOrThrow } from './utils';
+import { getFileOrThrow } from '../utils';
 
 export interface LoghubSystem {
   name: string;

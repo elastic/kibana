@@ -56,6 +56,7 @@ describe('TabbedContent', () => {
           });
         }}
         onEBTEvent={onEBTEvent}
+        onClearRecentlyClosed={jest.fn()}
         renderContent={(item) => (
           <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
         )}
