@@ -367,7 +367,7 @@ export const functions = {
             {
               defaultMessage: `
   ### SUM OVER TIME
-  The sum over time value of a field.
+  Calculates the sum over time value of a field.
 
   \`\`\`esql
   TS k8s
