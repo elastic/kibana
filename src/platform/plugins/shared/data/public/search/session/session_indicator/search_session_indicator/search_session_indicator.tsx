@@ -240,7 +240,7 @@ const searchSessionIndicatorViewStateToProps = ({ state }: { state: SearchSessio
       },
       popover: {
         title: i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
-          defaultMessage: 'Background search  in progress',
+          defaultMessage: 'Background search in progress',
         }),
         description: i18n.translate(
           'data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
