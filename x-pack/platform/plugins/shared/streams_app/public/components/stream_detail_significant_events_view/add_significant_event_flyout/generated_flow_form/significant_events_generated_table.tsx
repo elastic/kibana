@@ -16,8 +16,9 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React, { useState, type ReactNode } from 'react';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
@@ -25,35 +26,83 @@ import { GeneratedEventPreview } from './generated_event_preview';
 interface Props {
   definition: Streams.all.Definition;
   generatedQueries: StreamQueryKql[];
+  setIsEditingQueries: (isEditingQueries: boolean) => void;
+  onEditQuery: (query: StreamQueryKql) => void;
   selectedQueries: StreamQueryKql[];
   isSubmitting: boolean;
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
+  systems: Omit<System, 'description'>[];
+  dataViews: DataView[];
 }
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,
+  onEditQuery,
+  setIsEditingQueries,
   selectedQueries,
   onSelectionChange,
   definition,
   isSubmitting,
+  systems,
+  dataViews,
 }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+  const [eventsInEditMode, setEventsInEditMode] = useState<string[]>([]);
+
+  const setIsEditing = useCallback(
+    (isEditing: boolean, query: StreamQueryKql) => {
+      const nextEventsInEditMode = isEditing
+        ? [...eventsInEditMode, query.id]
+        : eventsInEditMode.filter((id) => id !== query.id);
+      setEventsInEditMode(nextEventsInEditMode);
+      setIsEditingQueries(nextEventsInEditMode.length > 0);
+    },
+    [eventsInEditMode, setIsEditingQueries]
+  );
 
   const toggleDetails = (query: StreamQueryKql) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    const validation = validateQuery(query);
 
     if (itemIdToExpandedRowMapValues[query.id]) {
       delete itemIdToExpandedRowMapValues[query.id];
     } else {
       itemIdToExpandedRowMapValues[query.id] = (
-        <GeneratedEventPreview definition={definition} query={query} validation={validation} />
+        <GeneratedEventPreview
+          definition={definition}
+          query={query}
+          isEditing={eventsInEditMode.includes(query.id)}
+          setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
+          onSave={onEditQuery}
+          systems={systems}
+          dataViews={dataViews}
+        />
       );
     }
+
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
+
+  useEffect(() => {
+    const copy = { ...itemIdToExpandedRowMap };
+    for (const queryId of Object.keys(copy)) {
+      const query = generatedQueries.find((q) => q.id === queryId)!;
+      copy[queryId] = (
+        <GeneratedEventPreview
+          definition={definition}
+          query={query}
+          isEditing={eventsInEditMode.includes(query.id)}
+          setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
+          onSave={onEditQuery}
+          systems={systems}
+          dataViews={dataViews}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(copy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventsInEditMode, definition, onEditQuery, systems, dataViews, generatedQueries]);
 
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
