@@ -75,7 +75,7 @@ export function StreamDeleteModal({
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
-            defaultMessage: 'Delete {stream} ?',
+            defaultMessage: 'Are you sure you want to delete {stream} ?',
             values: { stream: name },
           })}
         </EuiModalHeaderTitle>
@@ -88,7 +88,7 @@ export function StreamDeleteModal({
           title={
             <FormattedMessage
               id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
+              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
               values={{
                 stream: (
                   <EuiLink
@@ -110,9 +110,9 @@ export function StreamDeleteModal({
         <EuiFormRow
           fullWidth
           label={i18n.translate(
-            'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
-            {
-              defaultMessage: 'Type the stream name to confirm',
+            'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel', {
+            defaultMessage: 'To confirm, type {stream}',
+            values: { stream: name },
             }
           )}
         >
