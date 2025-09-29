@@ -80,6 +80,9 @@ export interface CasesUiConfigType {
   unsafe?: {
     enableCaseSummary: boolean;
   };
+  incrementalId: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
