@@ -19,7 +19,6 @@ import { bulkEnableBodySchemaV1 } from '../../../../../common/routes/rule/apis/b
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformBulkEnableResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { validateInternalRuleTypesByQuery } from '../../../lib/validate_internal_rule_types_by_query';
 
 export const bulkEnableRulesRoute = ({
   router,
@@ -42,17 +41,9 @@ export const bulkEnableRulesRoute = ({
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
-          const ruleTypes = alertingContext.listTypes();
 
           const body: BulkEnableRulesRequestBodyV1 = req.body;
           try {
-            await validateInternalRuleTypesByQuery({
-              req: body,
-              ruleTypes,
-              rulesClient,
-              operationText: 'enable',
-            });
-
             const result = await rulesClient.bulkEnableRules({
               filter: body.filter,
               ids: body.ids,

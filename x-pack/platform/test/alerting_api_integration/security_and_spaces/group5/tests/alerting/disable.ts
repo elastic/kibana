@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { TaskManagerDoc } from '../../../../common/lib';
@@ -79,13 +78,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -155,20 +147,9 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+            case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'get',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
-            case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -220,17 +201,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'get',
-                  'test.unrestricted-noop',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -284,13 +254,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alerts'),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -350,13 +313,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -430,24 +386,5 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         });
       });
     }
-
-    describe('internally managed rule types', () => {
-      const rulePayload = getAlwaysFiringInternalRule();
-
-      it('should throw 400 error when trying to disabling an internally managed rule type', async () => {
-        const { body: createdRule } = await supertest
-          .post(`/api/alerts_fixture/rule/internally_managed`)
-          .set('kbn-xsrf', 'foo')
-          .send(rulePayload)
-          .expect(200);
-
-        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
-
-        await supertest
-          .post(`/api/alerting/rule/${createdRule.id}/_disable`)
-          .set('kbn-xsrf', 'foo')
-          .expect(400);
-      });
-    });
   });
 }
