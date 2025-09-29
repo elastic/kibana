@@ -15,11 +15,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiInMemoryTable,
-  EuiButton,
   EuiCallOut,
   EuiToken,
   EuiDescriptionList,
-  EuiFormRow,
   EuiPanel,
 } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
@@ -38,15 +36,6 @@ interface Document {
     agent?: string;
     user?: string;
     [key: string]: any;
-  };
-}
-
-interface DocumentsResponse {
-  rawResponse: {
-    hits: {
-      hits: Document[];
-      total: number;
-    };
   };
 }
 
@@ -84,6 +73,10 @@ export const WorkflowExecuteIndexForm = ({
   const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    from: 'now-15m',
+    to: 'now',
+  });
 
   // Get current user
   useEffect(() => {
@@ -140,8 +133,8 @@ export const WorkflowExecuteIndexForm = ({
             {
               range: {
                 '@timestamp': {
-                  gte: 'now-24h',
-                  lte: 'now',
+                  gte: timeRange.from,
+                  lte: timeRange.to,
                 },
               },
             },
@@ -181,7 +174,7 @@ export const WorkflowExecuteIndexForm = ({
     } finally {
       setDocumentsLoading(false);
     }
-  }, [selectedDataView, query, services.data, setErrors]);
+  }, [selectedDataView, query, services.data, setErrors, timeRange.from, timeRange.to]);
 
   // Fetch documents when data view, query, or filters change
   useEffect(() => {
@@ -205,6 +198,19 @@ export const WorkflowExecuteIndexForm = ({
     },
     [services.dataViews, setErrors]
   );
+
+  const handleQueryChange = ({
+    query: newQuery,
+    dateRange,
+  }: {
+    query?: Query;
+    dateRange: TimeRange;
+  }) => {
+    if (newQuery) {
+      setQuery(newQuery);
+    }
+    setTimeRange(dateRange);
+  };
 
   // Handle document selection
   const handleDocumentSelection = (selectedItems: Document[]) => {
@@ -290,42 +296,34 @@ export const WorkflowExecuteIndexForm = ({
       <EuiFlexGroup direction="row" gutterSize="s">
         {/* Data View Selector */}
         <EuiFlexItem grow={false}>
-          <EuiFormRow label="Data View">
-            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
-              <DataViewPicker
-                trigger={{
-                  'data-test-subj': 'workflow-data-view-selector',
-                  label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
-                  fullWidth: true,
-                  size: 's',
-                }}
-                savedDataViews={dataViews}
-                currentDataViewId={selectedDataView?.id}
-                onChangeDataView={handleDataViewChange}
-              />
-            </EuiPanel>
-          </EuiFormRow>
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+            <DataViewPicker
+              trigger={{
+                'data-test-subj': 'workflow-data-view-selector',
+                label: selectedDataView?.name || selectedDataView?.title || 'Select data view',
+                fullWidth: true,
+                size: 's',
+              }}
+              savedDataViews={dataViews}
+              currentDataViewId={selectedDataView?.id}
+              onChangeDataView={handleDataViewChange}
+            />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Documents" fullWidth>
-            <SearchBar
-              appName="workflow_management"
-              onQuerySubmit={({ query: newQuery }: { dateRange: TimeRange; query?: Query }) => {
-                if (newQuery) {
-                  setQuery(newQuery);
-                } else {
-                  setQuery({ query: '', language: 'kuery' });
-                }
-              }}
-              query={query}
-              indexPatterns={selectedDataView ? [selectedDataView] : []}
-              showDatePicker={false}
-              showFilterBar={false}
-              showSubmitButton={true}
-              placeholder="Filter your data using KQL syntax"
-              data-test-subj="workflow-query-input"
-            />
-          </EuiFormRow>
+          <SearchBar
+            appName="workflow_management"
+            onQuerySubmit={handleQueryChange}
+            query={query}
+            indexPatterns={selectedDataView ? [selectedDataView] : []}
+            showDatePicker={true}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            showFilterBar={false}
+            showSubmitButton={true}
+            placeholder="Filter your data using KQL syntax"
+            data-test-subj="workflow-query-input"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* Error Display */}
@@ -364,18 +362,6 @@ export const WorkflowExecuteIndexForm = ({
             data-test-subj="workflow-documents-table"
           />
         )}
-      </EuiFlexItem>
-
-      {/* Refresh Button */}
-      <EuiFlexItem>
-        <EuiButton
-          iconType="refresh"
-          onClick={fetchDocuments}
-          isLoading={documentsLoading}
-          disabled={!selectedDataView}
-        >
-          Refresh Documents
-        </EuiButton>
       </EuiFlexItem>
 
       {/* Selection Summary */}

@@ -22,6 +22,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import { take } from 'rxjs';
+import { buildEsQuery } from '@kbn/es-query';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -35,13 +37,6 @@ interface Alert {
     'kibana.alert.status': string;
     'kibana.alert.reason': string;
     [key: string]: any;
-  };
-}
-
-interface AlertsResponse {
-  hits: {
-    hits: Alert[];
-    total: { value: number; relation: string };
   };
 }
 
@@ -119,19 +114,30 @@ export const WorkflowExecuteEventForm = ({
     unifiedSearch: {
       ui: { SearchBar },
     },
+    spaces,
   } = services;
+  const [spaceId, setSpaceId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
   });
+
   const [alertsLoading, setAlertsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
 
+  // Get space ID
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => {
+        setSpaceId(space.id);
+      });
+    }
+  }, [spaces]);
+
   const fetchAlerts = useCallback(async () => {
-    if (!services.http) {
-      setErrors('HTTP service not available');
+    if (!services.data || !spaceId) {
       return;
     }
 
@@ -139,15 +145,12 @@ export const WorkflowExecuteEventForm = ({
     setErrors(null);
 
     try {
-      // Query for recent alerts (last 24 hours)
-      const esQuery: {
+      const esQuery = buildEsQuery(undefined, query ? [query] : [], []);
+      const searchQuery = {
         bool: {
-          filter: object[];
-          must: object[];
-        };
-      } = {
-        bool: {
+          must: esQuery.bool.must || [],
           filter: [
+            ...(esQuery.bool.filter || []),
             {
               range: {
                 '@timestamp': {
@@ -157,37 +160,32 @@ export const WorkflowExecuteEventForm = ({
               },
             },
           ],
-          must: [],
+          should: esQuery.bool.should || [],
+          must_not: esQuery.bool.must_not || [],
         },
       };
 
-      if (query.query) {
-        esQuery.bool.must.push({
-          simple_query_string: {
-            query: query.query,
-            fields: ['kibana.alert.rule.name'],
-            default_operator: 'and',
-          },
-        });
-      }
-
-      const response = await services.http.post<AlertsResponse>(
-        '/api/detection_engine/signals/search',
-        {
-          body: JSON.stringify({
-            query: esQuery,
-            size: 50, // Limit to 50 recent alerts
+      const request = {
+        params: {
+          index: `.alerts-*-${spaceId}`,
+          body: {
+            query: searchQuery,
+            size: 50,
             sort: [{ '@timestamp': { order: 'desc' } }],
-          }),
-          headers: {
-            'Content-Type': 'application/json',
+            _source: [],
           },
-          version: '2023-10-31',
-        }
-      );
+        },
+      };
 
-      if (response && response.hits && response.hits.hits) {
-        setAlerts(response.hits.hits);
+      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
+
+      if (
+        response &&
+        response.rawResponse &&
+        response.rawResponse.hits &&
+        response.rawResponse.hits.hits
+      ) {
+        setAlerts(response.rawResponse.hits.hits as Alert[]);
       } else {
         setAlerts([]);
       }
@@ -197,11 +195,13 @@ export const WorkflowExecuteEventForm = ({
     } finally {
       setAlertsLoading(false);
     }
-  }, [services.http, setErrors, query, timeRange]);
+  }, [services.data, setErrors, query, timeRange.from, timeRange.to, spaceId]);
 
   useEffect(() => {
-    fetchAlerts();
-  }, [fetchAlerts]);
+    if (spaceId) {
+      fetchAlerts();
+    }
+  }, [fetchAlerts, spaceId]);
 
   // Get current user
   useEffect(() => {
@@ -282,7 +282,7 @@ export const WorkflowExecuteEventForm = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <SearchBar
