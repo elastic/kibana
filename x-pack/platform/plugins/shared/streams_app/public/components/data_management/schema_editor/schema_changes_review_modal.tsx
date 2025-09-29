@@ -150,43 +150,6 @@ export function SchemaChangesReviewModal({
 
   const fieldColumns = [
     {
-      field: 'status',
-      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnStatus', {
-        defaultMessage: 'Status',
-      }),
-      width: '200px',
-      render: (status: string, field: SchemaField) => {
-        if (reviewRequiredFields.includes(field)) {
-          return (
-            <EuiBadge color="warning" iconType="check">
-              {i18n.translate('xpack.streams.fieldColumns.newReviewRequiredBadgeLabel', {
-                defaultMessage: 'Review required',
-              })}
-            </EuiBadge>
-          );
-        }
-        if (autoMappedFields.includes(field)) {
-          return (
-            <EuiBadge color="success">
-              {i18n.translate('xpack.streams.fieldColumns.newAutomaticallyMappedBadgeLabel', {
-                defaultMessage: 'Automatically mapped',
-              })}
-            </EuiBadge>
-          );
-        }
-        if (existingFields.includes(field)) {
-          return (
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.streams.fieldColumns.existingBadgeLabel', {
-                defaultMessage: 'Existing',
-              })}
-            </EuiBadge>
-          );
-        }
-        return <EuiBadge color="default">{status}</EuiBadge>;
-      },
-    },
-    {
       field: 'name',
       name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
         defaultMessage: 'Field',
@@ -238,6 +201,43 @@ export function SchemaChangesReviewModal({
             {typeLabel}
           </EuiFlexGroup>
         );
+      },
+    },
+    {
+      field: 'status',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnStatus', {
+        defaultMessage: 'Status',
+      }),
+      width: '200px',
+      render: (status: string, field: SchemaField) => {
+        if (reviewRequiredFields.includes(field)) {
+          return (
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.streams.fieldColumns.newReviewRequiredBadgeLabel', {
+                defaultMessage: 'Review required',
+              })}
+            </EuiBadge>
+          );
+        }
+        if (autoMappedFields.includes(field)) {
+          return (
+            <EuiBadge color="success">
+              {i18n.translate('xpack.streams.fieldColumns.newAutomaticallyMappedBadgeLabel', {
+                defaultMessage: 'Automatically mapped',
+              })}
+            </EuiBadge>
+          );
+        }
+        if (existingFields.includes(field)) {
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.fieldColumns.existingBadgeLabel', {
+                defaultMessage: 'Existing',
+              })}
+            </EuiBadge>
+          );
+        }
+        return <EuiBadge color="default">{status}</EuiBadge>;
       },
     },
     {
@@ -293,7 +293,8 @@ export function SchemaChangesReviewModal({
           {i18n.translate(
             'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
             {
-              defaultMessage: 'The fields below will be updated.',
+              defaultMessage:
+                'Some fields below will be updated. Any error from validation will also appear here',
             }
           )}
         </EuiText>
@@ -351,7 +352,8 @@ export function SchemaChangesReviewModal({
 export function getChanges(fields: SchemaField[], storedFields: SchemaField[]) {
   const addedFields = fields.filter(
     (field) =>
-      field.status === 'mapped' && !storedFields.some((stored) => stored.name === field.name)
+      (field.status === 'mapped' || field.status === 'unmapped') &&
+      !storedFields.some((stored) => stored.name === field.name)
   );
 
   const changedFields = fields.filter((field) => {
