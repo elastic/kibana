@@ -249,8 +249,12 @@ export function SchemaChangesReviewModal({
         if (!source) return null;
 
         const sourceLabels = {
-          ecs: 'ECS Standard',
-          otel: 'OpenTelemetry',
+          ecs: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.ecs', {
+            defaultMessage: 'ECS Standard',
+          }),
+          otel: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.otel', {
+            defaultMessage: 'OpenTelemetry',
+          }),
         };
 
         return (
