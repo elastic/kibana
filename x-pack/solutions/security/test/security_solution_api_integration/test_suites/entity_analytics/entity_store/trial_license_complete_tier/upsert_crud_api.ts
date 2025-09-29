@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
           query: {},
         });
 
-        expect(statusCode).toEqual(400);
+        expect(statusCode).toEqual(200);
 
         log.info('Verifying upsert updated subject user...');
         await retry.waitForWithTimeout('Document is updated', TIMEOUT, async () => {
