@@ -17,6 +17,10 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
+import type { Flow, SaveData } from './add_significant_event_flyout/types';
+import { ChangePointSummary } from './change_point_summary';
+import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
@@ -37,11 +41,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useTimefilter();
   const aiFeatures = useAIFeatures();
 
+  const theme = useEuiTheme().euiTheme;
+  const aiFeatures = useAIFeatures();
+
   const xFormatter = useMemo(() => {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
 
-  const { systems, refresh } = useStreamSystems(definition.stream);
+  const { systems, refresh, loading: systemsLoading } = useStreamSystems(definition.stream);
   const { identifySystems } = useStreamSystemsApi(definition.stream);
   const [isSystemDetectionFlyoutOpen, setIsSystemDetectionFlyoutOpen] = useState(false);
   const [isSystemDetectionLoading, setIsSystemDetectionLoading] = useState(false);
@@ -65,12 +72,24 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const [query, setQuery] = useState<string>('');
 
-  if (!significantEventsFetchState.value) {
+  if (systemsLoading || significantEventsFetchState.loading) {
     return <LoadingPanel size="xxl" />;
   }
 
   const systemDetectionFlyout = isSystemDetectionFlyoutOpen ? (
     <StreamSystemsFlyout
+      definition={definition.stream}
+      systems={detectedSystems}
+      isLoading={isSystemDetectionLoading}
+      closeFlyout={() => {
+        refresh();
+        setIsSystemDetectionFlyoutOpen(false);
+      }}
+    />
+  ) : null;
+
+  const editFlyout = isEditFlyoutOpen ? (
+    <AddSignificantEventFlyout
       definition={definition.stream}
       systems={detectedSystems}
       isLoading={isSystemDetectionLoading}
@@ -96,6 +115,39 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   );
 
+  const noSystems = systems.length === 0;
+  const noSignificantEvents =
+    significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
+
+  if (noSystems && noSignificantEvents) {
+    return (
+      <>
+        <NoSystemsEmptyState
+          onSystemDetectionClick={() => {
+            setIsSystemDetectionLoading(true);
+            setIsSystemDetectionFlyoutOpen(true);
+
+            identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+              .then((data) => {
+                setDetectedSystems(data.systems);
+              })
+              .finally(() => {
+                setIsSystemDetectionLoading(false);
+              });
+          }}
+          onManualEntryClick={() => {
+            setQueryToEdit(undefined);
+            setInitialFlow('manual');
+            setIsEditFlyoutOpen(true);
+          }}
+        />
+        {systemDetectionFlyout}
+        {editFlyout}
+      </>
+    );
+  }
+
+  if (noSignificantEvents) {
   const noSystems = systems.length === 0;
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;

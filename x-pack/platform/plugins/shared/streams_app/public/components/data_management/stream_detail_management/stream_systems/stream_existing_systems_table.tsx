@@ -17,8 +17,13 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { ConditionPanel } from '../../shared';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
@@ -65,9 +70,7 @@ export function StreamExistingSystemsTable({
       name: FILTER_LABEL,
       render: (filter: System['filter']) => {
         return <ConditionPanel condition={filter} />;
-
-        // return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
-      },
+        },
     },
     {
       name: EVENTS_LAST_24_HOURS_LABEL,
