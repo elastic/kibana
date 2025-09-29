@@ -93,18 +93,9 @@ export const loadDashboardState = async ({
     panels,
     filters,
     query,
-    timeFrom,
-    timeTo,
+    timeRange,
     title,
   } = attributes;
-
-  const timeRange =
-    timeRestore && timeFrom && timeTo
-      ? {
-          from: timeFrom,
-          to: timeTo,
-        }
-      : undefined;
 
   return {
     managed,

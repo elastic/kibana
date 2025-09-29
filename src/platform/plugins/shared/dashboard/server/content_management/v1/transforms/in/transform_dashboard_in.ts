@@ -34,7 +34,17 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    const { controlGroupInput, filters, options, panels, query, tags, ...rest } = dashboardState;
+    const {
+      controlGroupInput,
+      options,
+      filters,
+      panels,
+      query,
+      tags,
+      timeRange,
+      timeRestore,
+      ...rest
+    } = dashboardState;
 
     const tagReferences = transformTagsIn({
       tags,
@@ -65,6 +75,8 @@ export const transformDashboardIn = ({
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
+      timeRestore,
+      ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
       kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
