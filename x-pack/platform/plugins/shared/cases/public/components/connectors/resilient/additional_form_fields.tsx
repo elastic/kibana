@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo } from 'react';
-import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   type FieldHook,
   getFieldValidityAndErrorMessage,
@@ -111,7 +111,12 @@ export const AdditionalFormFields = React.memo<{
           if (!fieldMetaData) {
             return null;
           }
-          return <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />;
+          return (
+            <>
+              <EuiSpacer size="m" />
+              <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />
+            </>
+          );
         })}
       </div>
     </Form>
