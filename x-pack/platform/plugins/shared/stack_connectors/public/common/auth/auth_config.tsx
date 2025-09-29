@@ -38,7 +38,7 @@ interface Props {
   isPfxEnabled?: boolean;
 }
 
-export interface Internal {
+export interface InternalFormData {
   key: string;
   value: string;
   type: string;
@@ -47,6 +47,8 @@ export interface Internal {
 const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
+
+const defaultConfigHeader = [{ key: '', value: '', type: 'config' }];
 
 export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
@@ -72,7 +74,9 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const { data: secretHeaderKeys = [] } = useSecretHeaders(connectorId);
+  const { data: secretHeaderKeys = [], isLoading, isFetching } = useSecretHeaders(connectorId);
+
+  const didLoadSecretHeaders = !isFetching && !isLoading;
 
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
@@ -87,13 +91,11 @@ export const AuthConfig: FunctionComponent<Props> = ({
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
   useEffect(() => {
-    if (!connectorId) return;
+    if (!didLoadSecretHeaders) return;
 
     const formData = getFormData();
 
-    const defaultConfigHeader = [{ key: '', value: '', type: 'config' }];
-
-    const currentHeaders: Array<Internal> = formData.__internal__?.headers ?? [];
+    const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
     const secretHeaders = secretHeaderKeys.map((key) => ({
       key,
@@ -101,23 +103,29 @@ export const AuthConfig: FunctionComponent<Props> = ({
       type: 'secret',
     }));
 
-    const mergedHeaders = hasHeaders
-      ? [...(configHeaders.length > 0 ? configHeaders : defaultConfigHeader), ...secretHeaders]
-      : [];
+    let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
+
+    if (mergedHeaders.length === 0 && hasHeaders) {
+      mergedHeaders = [...defaultConfigHeader];
+    }
 
     if (!isEqual(currentHeaders, mergedHeaders)) {
-      updateFieldValues(
-        {
-          __internal__: {
-            ...formData.__internal__,
-            hasHeaders: mergedHeaders.length > 0,
-            headers: mergedHeaders,
-          },
+      updateFieldValues({
+        __internal__: {
+          ...formData.__internal__,
+          hasHeaders: mergedHeaders.length > 0,
+          headers: mergedHeaders,
         },
-        { runDeserializer: false }
-      );
+      });
     }
-  }, [connectorId, getFormData, secretHeaderKeys, updateFieldValues, hasHeaders]);
+  }, [
+    connectorId,
+    getFormData,
+    secretHeaderKeys,
+    updateFieldValues,
+    hasHeaders,
+    didLoadSecretHeaders,
+  ]);
 
   const options = [
     {

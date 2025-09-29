@@ -226,8 +226,8 @@ describe('AuthConfig renders', () => {
       </AuthFormTestProvider>
     );
 
-    expect(screen.getByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
-    expect(screen.getByTestId('webhookHeadersValueInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookHeadersValueInput')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
