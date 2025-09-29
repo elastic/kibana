@@ -26,7 +26,7 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
-const MAX_ADDITIONAL_FIELDS_LENGTH = 200;
+const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 
 const AdditionalFields = {
   additionalFields: schema.nullable(
