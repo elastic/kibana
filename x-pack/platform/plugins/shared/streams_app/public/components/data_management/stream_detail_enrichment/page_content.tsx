@@ -113,7 +113,6 @@ export function StreamDetailEnrichmentContentImpl() {
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={detectedFields}
-            stream={definition.stream.name}
             streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}

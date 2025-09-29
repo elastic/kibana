@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiCode,
   EuiBadge,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
@@ -38,7 +37,6 @@ import { convertToFieldDefinitionConfig } from './utils';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
-  stream: string;
   streamType?: 'wired' | 'classic' | 'unknown';
   definition: Streams.ingest.all.GetResponse;
   fields: SchemaField[];
@@ -48,7 +46,6 @@ interface SchemaChangesReviewModalProps {
 
 export function SchemaChangesReviewModal({
   fields,
-  stream,
   streamType,
   definition,
   storedFields,
@@ -161,9 +158,9 @@ export function SchemaChangesReviewModal({
       render: (status: string, field: SchemaField) => {
         if (reviewRequiredFields.includes(field)) {
           return (
-            <EuiBadge color="warning">
+            <EuiBadge color="warning" iconType="check">
               {i18n.translate('xpack.streams.fieldColumns.newReviewRequiredBadgeLabel', {
-                defaultMessage: 'New: review required',
+                defaultMessage: 'Review required',
               })}
             </EuiBadge>
           );
@@ -172,7 +169,7 @@ export function SchemaChangesReviewModal({
           return (
             <EuiBadge color="success">
               {i18n.translate('xpack.streams.fieldColumns.newAutomaticallyMappedBadgeLabel', {
-                defaultMessage: 'New: automatically mapped',
+                defaultMessage: 'Automatically mapped',
               })}
             </EuiBadge>
           );
@@ -191,10 +188,10 @@ export function SchemaChangesReviewModal({
     },
     {
       field: 'name',
-      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnFieldname', {
-        defaultMessage: 'fieldname',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
+        defaultMessage: 'Field',
       }),
-      render: (name: string) => <EuiCode>{name}</EuiCode>,
+      render: (name: string) => <>{name}</>,
     },
     {
       field: 'type',
@@ -215,7 +212,17 @@ export function SchemaChangesReviewModal({
         if (!type || field.status === 'unmapped') {
           // Only show <dynamic> for classic streams with unmapped fields
           if (streamType === 'classic') {
-            return <EuiCode>{'<dynamic>'}</EuiCode>;
+            const dynamicText = i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.dynamicText',
+              {
+                defaultMessage: 'Dynamic',
+              }
+            );
+            return (
+              <EuiBadge color="hollow" iconType="info" iconSide="right">
+                {dynamicText}
+              </EuiBadge>
+            );
           }
           // For wired streams, don't show <dynamic> for unmanaged fields
           return null;

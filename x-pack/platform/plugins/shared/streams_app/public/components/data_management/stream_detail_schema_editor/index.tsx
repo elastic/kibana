@@ -68,7 +68,6 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={fields}
-            stream={definition.stream.name}
             streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
