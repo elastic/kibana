@@ -38,6 +38,7 @@ export function FeedbackButton() {
       href={feedbackUrl}
       target="_blank"
       rel="noopener"
+      iconSide="right"
       aria-label={i18n.translate('xpack.streams.feedbackButtonLabel', {
         defaultMessage: 'Give feedback',
       })}
