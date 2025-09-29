@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getParser } from './get_parser';
 import { type LoghubSystem } from './read_loghub_system_files';
-import { getFileOrThrow, getParserFilename } from './utils';
+import { getFileOrThrow } from '../utils';
+import { getParser } from './get_parser';
+import { getParserFilename } from './utils';
 
 export async function validateParser(system: LoghubSystem): Promise<void> {
   const [{ getTimestamp, replaceTimestamp, getFakeMetadata }, parserFileContents] =
