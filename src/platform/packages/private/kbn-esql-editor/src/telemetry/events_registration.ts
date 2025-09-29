@@ -16,10 +16,11 @@ import { once } from 'lodash';
 export const ESQL_LOOKUP_JOIN_ACTION_SHOWN = 'esql.lookup_action_shown';
 
 /**
- * Registers the index editor analytics events.
+ * Registers the esql editor analytics events.
  * This function is wrapped in `once` to ensure that the events are registered only once.
  */
 export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServiceSetup) => {
+  // Triggered when a Lookup Join index editor actions is shown to the user inside the ES|QL editor.
   analytics.registerEventType({
     eventType: ESQL_LOOKUP_JOIN_ACTION_SHOWN,
     schema: {
