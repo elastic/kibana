@@ -55,15 +55,23 @@ const tagcloudStateTagsByOptionsSchema = schema.object({
 });
 
 const tagcloudStateSharedOptionsSchema = {
-  /** Orientation of the tagcloud */
+  /**
+   * Orientation of the tagcloud:
+   * - 'horizontal': Horizontal orientation (default)
+   * - 'vertical': Vertical orientation
+   * - 'right_angled': Right angled orientation
+   **/
   orientation: schema.maybe(
-    schema.oneOf([
-      schema.literal('horizontal'),
-      schema.literal('vertical'),
-      schema.literal('right_angled'),
-    ])
+    schema.oneOf(
+      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('right_angled')],
+      { defaultValue: 'horizontal' }
+    )
   ),
-  /** Font size configuration */
+  /**
+   * Font size configuration:
+   * - 'min': Minimum font size (default: 14)
+   * - 'max': Maximum font size (default: 72)
+   **/
   font_size: schema.maybe(
     schema.object({
       min: schema.number({ defaultValue: 14, min: 1 }),
