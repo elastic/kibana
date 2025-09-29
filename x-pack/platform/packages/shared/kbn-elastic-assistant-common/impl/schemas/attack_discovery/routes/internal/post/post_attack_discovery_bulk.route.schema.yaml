@@ -10,6 +10,7 @@ paths:
       operationId: PostAttackDiscoveryBulkInternal
       description: Bulk updates for attack discovery alerts
       summary: Bulk updates for attack discovery alerts
+      deprecated: true
       tags:
         - attack_discovery
       requestBody:

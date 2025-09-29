@@ -10,6 +10,7 @@ paths:
       operationId: FindAttackDiscoverySchedulesInternal
       description: Finds attack discovery schedules
       summary: Finds attack discovery schedules
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:

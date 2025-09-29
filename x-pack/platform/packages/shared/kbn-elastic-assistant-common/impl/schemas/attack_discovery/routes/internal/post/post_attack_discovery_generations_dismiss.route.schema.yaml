@@ -10,6 +10,7 @@ paths:
       operationId: PostAttackDiscoveryGenerationsDismissInternal
       description: Dismiss an attack discovery generation for the current user
       summary: Dismisses an attack discovery generation for the current user
+      deprecated: true
       tags:
         - attack_discovery
         - attack_discovery_generations

@@ -28,6 +28,7 @@ paths:
       operationId: CreateAttackDiscoverySchedulesInternal
       description: Creates attack discovery schedule
       summary: Creates attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       requestBody:
@@ -57,6 +58,7 @@ paths:
       operationId: GetAttackDiscoverySchedulesInternal
       description: Gets attack discovery schedule
       summary: Gets attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:
@@ -85,6 +87,7 @@ paths:
       operationId: UpdateAttackDiscoverySchedulesInternal
       description: Updates attack discovery schedule
       summary: Updates attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:
@@ -119,6 +122,7 @@ paths:
       operationId: DeleteAttackDiscoverySchedulesInternal
       description: Deletes attack discovery schedule
       summary: Deletes attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:
@@ -154,6 +158,7 @@ paths:
       operationId: EnableAttackDiscoverySchedulesInternal
       description: Enables attack discovery schedule
       summary: Enables attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:
@@ -189,6 +194,7 @@ paths:
       operationId: DisableAttackDiscoverySchedulesInternal
       description: Disables attack discovery schedule
       summary: Disables attack discovery schedule
+      deprecated: true
       tags:
         - attack_discovery_schedule
       parameters:

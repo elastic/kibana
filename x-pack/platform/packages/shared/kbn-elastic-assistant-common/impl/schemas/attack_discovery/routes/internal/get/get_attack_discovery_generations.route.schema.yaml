@@ -10,6 +10,7 @@ paths:
       operationId: GetAttackDiscoveryGenerationsInternal
       description: Get the latest n attack discovery generations (that are not dismissed) for the current user
       summary: Get the latest n attack discovery generations (that are not dismissed) for the current user
+      deprecated: true
       tags:
         - attack_discovery
         - attack_discovery_generations

@@ -13,6 +13,7 @@ paths:
       operationId: AttackDiscoveryPostInternal
       description: Generate attack discoveries from alerts
       summary: Generate attack discoveries from alerts via the Elastic Assistant
+      deprecated: true
       tags:
         - attack_discovery
         - alerts

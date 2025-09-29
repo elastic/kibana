@@ -10,6 +10,7 @@ paths:
       operationId: AttackDiscoveryFindInternal
       description: Get Attack discoveries that match the search criteria
       summary: Get Attack discoveries
+      deprecated: true
       tags:
         - attack_discovery
         - attack_discovery_find
