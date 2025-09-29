@@ -26,6 +26,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         size="s"
       />
       <EuiCallOut
+        announceOnMount={true}
         color="warning"
         data-test-subj="importSavedObjectsConflictsWarning"
         iconType="question"

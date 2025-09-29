@@ -318,6 +318,27 @@ describe('rule_details', () => {
               />
             </EuiLink>
           </EuiText>
+          <EuiLiveAnnouncer>
+            Cannot run rule, 
+            <EuiText
+              size="xs"
+            >
+              test
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
+          </EuiLiveAnnouncer>
         </EuiPanel>
       `);
     });
