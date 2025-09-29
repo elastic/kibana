@@ -18,6 +18,7 @@ import { AdditionalFormField } from './additional_form_field';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetFields } from './use_get_fields';
 import * as i18n from './translations';
+import type { ResilientFieldMetadata } from './types';
 
 export const AdditionalFormFields = React.memo<{
   field: FieldHook<string, string>;
@@ -32,6 +33,13 @@ export const AdditionalFormFields = React.memo<{
     http,
     connector,
   });
+  const fieldsMetadataRecord = useMemo(() => {
+    return (fieldsData?.data ?? []).reduce((acc, field) => {
+      acc[field.name] = field;
+      return acc;
+    }, {} as Record<string, ResilientFieldMetadata>);
+  }, [fieldsData]);
+
   const fieldComboOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
     return (
       fieldsData?.data?.map((field) => ({
@@ -48,11 +56,6 @@ export const AdditionalFormFields = React.memo<{
   const { form } = useForm<Record<string, unknown>>({
     defaultValue: { fields: {} },
     options: { stripEmptyFields: false, valueChangeDebounceTime: 500 },
-
-    // todo
-    // - Allow dates to be set as strings but then be sent to the resilient API as numbers
-    // serializer: getConnectorsFormSerializer,
-    // deserializer: getConnectorsFormDeserializer,
   });
 
   const [{ fields }] = useFormData<Record<string, unknown>>({
@@ -63,10 +66,22 @@ export const AdditionalFormFields = React.memo<{
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      superFormField.setValue(JSON.stringify(fields ?? {}));
+      const transformedFields = Object.entries(fields ?? {}).reduce((acc, [key, value]) => {
+        // Dates need to be sent to the resilient API as numbers
+        if (
+          fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
+          fieldsMetadataRecord[key].input_type === 'datepicker'
+        ) {
+          acc[key] = new Date(value).getTime();
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, unknown>);
+      superFormField.setValue(JSON.stringify(transformedFields));
     }, 500);
     return () => clearTimeout(timeout);
-  }, [superFormField, fields]);
+  }, [superFormField, fields, fieldsMetadataRecord]);
 
   return (
     <Form form={form}>
