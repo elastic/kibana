@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_BEDROCK_MODEL } from './constants';
+import {
+  DEFAULT_BEDROCK_MODEL,
+  MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+  MAX_EXTENDED_THINKING_BUDGET_TOKENS,
+} from './constants';
 
 export const TelemtryMetadataSchema = schema.object({
   pluginId: schema.maybe(schema.string()),
@@ -18,6 +22,14 @@ export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
   contextWindowLength: schema.maybe(schema.number({})),
+  extendedThinking: schema.maybe(schema.boolean({ defaultValue: false })),
+  budgetTokens: schema.maybe(
+    schema.number({
+      defaultValue: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+      min: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+      max: MAX_EXTENDED_THINKING_BUDGET_TOKENS,
+    })
+  ),
 });
 
 export const SecretsSchema = schema.object({
@@ -33,6 +45,14 @@ export const RunActionParamsSchema = schema.object({
   timeout: schema.maybe(schema.number()),
   raw: schema.maybe(schema.boolean()),
   telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  extendedThinking: schema.maybe(schema.boolean({ defaultValue: false })),
+  budgetTokens: schema.maybe(
+    schema.number({
+      defaultValue: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+      min: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+      max: MAX_EXTENDED_THINKING_BUDGET_TOKENS,
+    })
+  ),
 });
 
 export const BedrockMessageSchema = schema.object(
@@ -147,6 +167,7 @@ export const RunApiLatestResponseSchema = schema.object(
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
+    thinking: schema.maybe(schema.string()),
     stop_reason: schema.maybe(schema.string()),
     usage: BedrockUsageSchema,
   },

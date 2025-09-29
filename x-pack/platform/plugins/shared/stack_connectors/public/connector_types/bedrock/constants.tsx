@@ -13,6 +13,7 @@ import {
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
   DEFAULT_TOKEN_LIMIT,
+  MIN_EXTENDED_THINKING_BUDGET_TOKENS,
 } from '../../../common/bedrock/constants';
 import { contextWindowLengthField } from '../../common/genai_connectors';
 import * as i18n from './translations';
@@ -73,6 +74,20 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     defaultValue: DEFAULT_BEDROCK_MODEL,
   },
   contextWindowLengthField,
+  {
+    id: 'extendedThinking',
+    label: i18n.EXTENDED_THINKING_LABEL,
+    type: 'TOGGLE',
+    helpText: i18n.EXTENDED_THINKING_DESCRIPTION,
+    defaultValue: false,
+  },
+  {
+    id: 'budgetTokens',
+    label: i18n.EXTENDED_THINKING_BUDGET_TOKENS_LABEL,
+    type: 'NUMBER',
+    helpText: i18n.EXTENDED_THINKING_BUDGET_TOKENS_DESCRIPTION,
+    defaultValue: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+  },
 ];
 
 export const bedrockSecrets: SecretsFieldSchema[] = [

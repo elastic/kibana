@@ -6,7 +6,10 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
+import {
+  DEFAULT_TOKEN_LIMIT,
+  MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+} from '../../../common/bedrock/constants';
 import type { BedrockMessage, BedrockToolChoice } from '../../../common/bedrock/types';
 
 export const formatBedrockBody = ({
@@ -17,6 +20,8 @@ export const formatBedrockBody = ({
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
   toolChoice,
+  extendedThinking,
+  budgetTokens = MIN_EXTENDED_THINKING_BUDGET_TOKENS,
 }: {
   messages: BedrockMessage[];
   stopSequences?: string[];
@@ -26,14 +31,19 @@ export const formatBedrockBody = ({
   system?: string;
   tools?: Array<{ name: string; description: string }>;
   toolChoice?: BedrockToolChoice;
+  extendedThinking?: boolean;
+  budgetTokens?: number;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
   max_tokens: maxTokens,
   stop_sequences: stopSequences,
-  temperature,
+  temperature: extendedThinking ? 1 : temperature,
   tools,
   tool_choice: toolChoice,
+  ...(extendedThinking
+    ? { thinking: { type: 'enabled', budget_tokens: budgetTokens } }
+    : { temperature }),
 });
 
 interface FormattedBedrockMessage {
@@ -98,6 +108,19 @@ export function parseContent(content: Array<{ text?: string; type: string }>): s
   }
   return parsedContent;
 }
+
+export const parseThinking = (content: Array<{ thinking?: string; type: string }>): string => {
+  let parsedContent = '';
+  if (content.length === 1 && content[0].type === 'thinking' && content[0].thinking) {
+    parsedContent = content[0].thinking;
+  } else if (content.length > 1) {
+    parsedContent = content.reduce(
+      (acc, { thinking }) => (thinking ? `${acc}\n${thinking}` : acc),
+      ''
+    );
+  }
+  return parsedContent;
+};
 
 export const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
 

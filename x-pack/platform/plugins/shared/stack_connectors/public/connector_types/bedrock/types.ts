@@ -17,6 +17,8 @@ export interface BedrockActionParams {
 export interface Config {
   apiUrl: string;
   defaultModel: string;
+  extendedThinking?: boolean;
+  budgetTokens?: number;
 }
 
 export interface Secrets {

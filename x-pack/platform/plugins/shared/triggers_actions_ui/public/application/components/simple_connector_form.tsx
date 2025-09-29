@@ -29,7 +29,7 @@ export interface CommonFieldSchema {
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
   requireTld?: boolean;
-  defaultValue?: string | string[];
+  defaultValue?: string | string[] | number | boolean;
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -62,7 +62,7 @@ const getFieldConfig = ({
   isRequired?: boolean;
   isUrlField?: boolean;
   requireTld?: boolean;
-  defaultValue?: string | string[];
+  defaultValue?: string | string[] | boolean | number;
   type?: keyof typeof FIELD_TYPES;
 }) => ({
   label,
@@ -100,7 +100,10 @@ const getFieldConfig = ({
   ],
   defaultValue,
   ...(type && FIELD_TYPES[type]
-    ? { type: FIELD_TYPES[type], defaultValue: Array.isArray(defaultValue) ? defaultValue : [] }
+    ? {
+        type: FIELD_TYPES[type],
+        defaultValue: Array.isArray(defaultValue) ? defaultValue : defaultValue,
+      }
     : {}),
 });
 
