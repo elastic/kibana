@@ -30,6 +30,14 @@ import type { EnhancementRegistryDefinition } from '../common/enhancements/types
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  /**
+   * Use registerTransforms to register transforms for an embeddable type.
+   * Transforms decouple REST API state from stored state,
+   * allowing embeddables to have one shape for REST APIs and another for storage.
+   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
+   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
