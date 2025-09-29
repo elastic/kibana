@@ -135,7 +135,7 @@ FROM index
     test('value and key', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key`');
     });
 
     test('value and target', () => {
@@ -147,7 +147,7 @@ FROM index
     test('value, key, and target', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key` AS type, pvalue');
     });
 
     test('example from docs', () => {
