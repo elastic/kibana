@@ -53674,6 +53674,7 @@
                                                                 "type": {
                                                                   "enum": [
                                                                     "keyword",
+                                                                    "text",
                                                                     "match_only_text",
                                                                     "long",
                                                                     "double",
@@ -60521,6 +60522,7 @@
                                                                 "type": {
                                                                   "enum": [
                                                                     "keyword",
+                                                                    "text",
                                                                     "match_only_text",
                                                                     "long",
                                                                     "double",
@@ -67639,6 +67641,7 @@
                                                 "type": {
                                                   "enum": [
                                                     "keyword",
+                                                    "text",
                                                     "match_only_text",
                                                     "long",
                                                     "double",
@@ -70829,6 +70832,7 @@
                                                 "type": {
                                                   "enum": [
                                                     "keyword",
+                                                    "text",
                                                     "match_only_text",
                                                     "long",
                                                     "double",
