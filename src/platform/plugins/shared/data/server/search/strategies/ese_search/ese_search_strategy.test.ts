@@ -18,6 +18,7 @@ import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
 import { DataViewType } from '@kbn/data-views-plugin/common';
+import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 
 const mockAsyncStatusResponse = (isComplete = false) => ({
   body: {
@@ -100,6 +101,7 @@ describe('ES search strategy', () => {
     },
     searchSessionsClient: createSearchSessionsClientMock(),
     rollupsEnabled: true,
+    featureFlags: coreFeatureFlagsMock.createStart(),
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
