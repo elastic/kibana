@@ -226,18 +226,6 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       updated_at: { type: 'date' },
       hasCredentials: { type: 'boolean' },
       cloud_provider: { type: 'keyword' },
-      account_type: { type: 'keyword' },
-      integrations_used: {
-        type: 'array',
-        items: { type: 'keyword' },
-      },
-      packages: {
-        type: 'array',
-        items: {
-          name: { type: 'keyword' },
-          version: { type: 'keyword' },
-        },
-      },
       packagePolicyIds: {
         type: 'array',
         items: { type: 'keyword' },

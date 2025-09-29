@@ -384,29 +384,27 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       // The stats should be an array (empty in test environment since no cloud connectors exist)
-      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.cspm_cloud_connector_usage_stats).to.be.an('array');
+      expect(
+        apiResponse.stack_stats.kibana.plugins.cloud_security_posture
+          .cspm_cloud_connector_usage_stats
+      ).to.be.an('array');
     });
 
     it('should validate cspm_cloud_connector_usage_stats structure matches expected schema', async () => {
       // This test validates that if we had cloud connector data, it would match our expected structure
       const expectedStatStructure = mockCspmCloudConnectorUsageStats[0];
-      
+
       // Validate the structure matches our interface
       expect(expectedStatStructure).to.have.property('id');
       expect(expectedStatStructure).to.have.property('created_at');
       expect(expectedStatStructure).to.have.property('updated_at');
       expect(expectedStatStructure).to.have.property('hasCredentials');
       expect(expectedStatStructure).to.have.property('cloud_provider');
-      expect(expectedStatStructure).to.have.property('account_type');
-      expect(expectedStatStructure).to.have.property('integrations_used');
-      expect(expectedStatStructure).to.have.property('packages');
       expect(expectedStatStructure).to.have.property('packagePolicyIds');
 
       // Validate data types
       expect(expectedStatStructure.id).to.be.a('string');
       expect(expectedStatStructure.hasCredentials).to.be.a('boolean');
-      expect(expectedStatStructure.integrations_used).to.be.an('array');
-      expect(expectedStatStructure.packages).to.be.an('array');
       expect(expectedStatStructure.packagePolicyIds).to.be.an('array');
     });
   });

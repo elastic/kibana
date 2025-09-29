@@ -238,8 +238,5 @@ export interface CloudSecurityCSPMCloudConnectorUsageStats {
   updated_at: string;
   hasCredentials: boolean;
   cloud_provider: string;
-  account_type: 'single-account' | 'organization-account' | null;
-  integrations_used: string[];
-  packages: Array<{ name: string; version: string }>;
   packagePolicyIds: string[];
 }

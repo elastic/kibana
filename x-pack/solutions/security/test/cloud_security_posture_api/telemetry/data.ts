@@ -160,9 +160,6 @@ export const mockCspmCloudConnectorUsageStats = [
     updated_at: '2024-01-02T00:00:00.000Z',
     hasCredentials: true,
     cloud_provider: 'aws',
-    account_type: 'single-account',
-    integrations_used: ['CSPM'],
-    packages: [{ name: 'cloud_security_posture', version: '1.0.0' }],
     packagePolicyIds: ['policy-123', 'policy-456'],
   },
   {
@@ -171,9 +168,6 @@ export const mockCspmCloudConnectorUsageStats = [
     updated_at: '2024-01-02T00:00:00.000Z',
     hasCredentials: false,
     cloud_provider: 'azure',
-    account_type: 'organization-account',
-    integrations_used: ['CSPM', 'ASSET_INVENTORY'],
-    packages: [{ name: 'cloud_security_posture', version: '1.0.0' }],
     packagePolicyIds: ['policy-789'],
   },
 ];

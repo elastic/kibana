@@ -7,8 +7,6 @@
 
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { CloudConnectorServiceInterface } from '@kbn/fleet-plugin/server';
 import type { CloudSecurityCSPMCloudConnectorUsageStats } from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
@@ -21,51 +19,16 @@ const hasValidCredentials = (cloudProvider: string, vars: Record<string, any>): 
     case 'aws':
       return !!(vars.role_arn?.value && vars.external_id?.value);
     case 'azure':
-      return !!(vars.client_id?.value && vars.tenant_id?.value && vars.client_secret?.value);
+      return !!(
+        vars.client_id?.value &&
+        vars.tenant_id?.value &&
+        vars.azure_cloud_connector_id?.value
+      );
     case 'gcp':
       return !!(vars.credentials?.value || vars.credentials_file?.value);
     default:
       return false;
   }
-};
-
-/**
- * Extracts account type from package policy for CSPM integrations
- */
-const getAccountType = (packagePolicy: PackagePolicy): 'single-account' | 'organization-account' | null => {
-  if (packagePolicy.vars?.posture?.value !== 'cspm') return null;
-
-  const enabledInput = packagePolicy.inputs.find((input) => input.enabled);
-  if (!enabledInput?.streams?.[0]?.vars) return null;
-
-  const inputStreamVars = enabledInput.streams[0].vars;
-  const cloudProvider = packagePolicy.vars?.deployment?.value;
-  const accountType = inputStreamVars[`${cloudProvider}.account_type`]?.value;
-
-  // Default to single-account if not specified (backwards compatibility)
-  return accountType || 'single-account';
-};
-
-/**
- * Extracts integrations used from package policy inputs
- */
-const getIntegrationsUsed = (packagePolicy: PackagePolicy): string[] => {
-  const integrations: string[] = [];
-  
-  // Check for CSPM
-  if (packagePolicy.vars?.posture?.value === 'cspm') {
-    integrations.push('CSPM');
-  }
-
-  // Check for Asset Inventory based on enabled inputs
-  const enabledInputs = packagePolicy.inputs.filter((input) => input.enabled);
-  enabledInputs.forEach((input) => {
-    if (input.policy_template === 'asset_inventory') {
-      integrations.push('ASSET_INVENTORY');
-    }
-  });
-
-  return integrations;
 };
 
 export const getCspmCloudConnectorUsageStats = async (
@@ -104,28 +67,11 @@ export const getCspmCloudConnectorUsageStats = async (
       );
 
       // Extract integration types and packages
-      const integrations = new Set<string>();
-      const packages = new Map<string, string>();
       const packagePolicyIds: string[] = [];
 
       connectorPackagePolicies.forEach((policy) => {
         packagePolicyIds.push(policy.id);
-        
-        // Add package info
-        if (policy.package?.name && policy.package?.version) {
-          packages.set(policy.package.name, policy.package.version);
-        }
-
-        // Add integration types
-        const policyIntegrations = getIntegrationsUsed(policy);
-        policyIntegrations.forEach((integration) => integrations.add(integration));
       });
-
-      // Get account type from the first CSPM policy
-      const cspmPolicy = connectorPackagePolicies.find((policy) => 
-        policy.vars?.posture?.value === 'cspm'
-      );
-      const accountType = cspmPolicy ? getAccountType(cspmPolicy) : null;
 
       return {
         id: connector.id,
@@ -133,9 +79,6 @@ export const getCspmCloudConnectorUsageStats = async (
         updated_at: connector.updated_at,
         hasCredentials: hasValidCredentials(connector.cloudProvider, connector.vars || {}),
         cloud_provider: connector.cloudProvider,
-        account_type: accountType,
-        integrations_used: Array.from(integrations),
-        packages: Array.from(packages.entries()).map(([name, version]) => ({ name, version })),
         packagePolicyIds,
       };
     });
