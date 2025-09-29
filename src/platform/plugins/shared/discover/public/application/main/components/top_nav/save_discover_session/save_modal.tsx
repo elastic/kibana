@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
@@ -108,9 +108,10 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
           />
           {tabsEnabled && (
             <EuiText size="xs" color="subdued">
+              <EuiSpacer size="xs" />
               <p>
                 {i18n.translate('discover.localMenu.saveModalSubtitle', {
-                  defaultMessage: 'All your open tabs will be saved in this session',
+                  defaultMessage: 'All your open tabs will be saved to this session',
                 })}
               </p>
             </EuiText>
