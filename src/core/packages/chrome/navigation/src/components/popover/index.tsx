@@ -143,7 +143,9 @@ export const SideNavPopover = ({
   `;
 
   const popoverContentStyles = css`
-    max-height: 37.5rem;
+    --popover-max-height: 37.5rem;
+
+    max-height: var(--popover-max-height);
     ${useEuiOverflowScroll('y')}
   `;
 
