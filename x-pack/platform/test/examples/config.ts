@@ -39,6 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--env.name=development',
         // Needed for search_examples tests
         '--data.search.sessions.enabled=true',
+        '--data.search.sessions.backgroundSearchEnabled=false',
         ...findTestPluginPaths([
           resolve(KIBANA_ROOT, 'examples'),
           resolve(KIBANA_ROOT, 'x-pack/examples'),

@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
         '--data.search.sessions.enabled=true', // enable search sessions
+        '--data.search.sessions.backgroundSearchEnabled=false', // TODO remove this once new UI is compatible
       ],
     },
   };
