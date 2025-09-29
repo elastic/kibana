@@ -564,6 +564,12 @@ export const getEndpointConsoleCommands = ({
               },
             }
           : []),
+        comment: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: COMMENT_ARG_ABOUT,
+        },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
