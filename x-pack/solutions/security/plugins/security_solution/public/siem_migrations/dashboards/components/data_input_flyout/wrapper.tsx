@@ -7,10 +7,10 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
-import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { DashboardMigrationDataInputFlyout } from './data_input_flyout';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import type { DashboardMigrationStats } from '../../types';
 
 interface DashboardMigrationDataInputWrapperProps {
   onFlyoutClosed: () => void;
@@ -20,7 +20,7 @@ export const DashboardMigrationDataInputWrapper = React.memo<
 >(({ children, onFlyoutClosed }) => {
   const { isOpen: isFlyoutOpen, open: openFlyout, close: closeFlyout } = useIsOpenState(false);
   const [flyoutMigrationStats, setFlyoutMigrationStats] = useState<
-    DashboardMigrationTaskStats | undefined
+    DashboardMigrationStats | undefined
   >();
 
   const closeFlyoutHandler = useCallback(() => {
@@ -30,7 +30,7 @@ export const DashboardMigrationDataInputWrapper = React.memo<
   }, [closeFlyout, onFlyoutClosed]);
 
   const openFlyoutHandler = useCallback(
-    (migrationStats?: DashboardMigrationTaskStats) => {
+    (migrationStats?: DashboardMigrationStats) => {
       setFlyoutMigrationStats(migrationStats);
       openFlyout();
     },

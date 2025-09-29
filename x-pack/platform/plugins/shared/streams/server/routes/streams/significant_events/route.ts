@@ -204,7 +204,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body.system,
+          system: params.body?.system,
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
