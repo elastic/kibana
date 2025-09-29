@@ -121,6 +121,10 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           updateErrors.push(error);
         });
         try {
+          const fieldsMap = fieldsQuery.data ?? {};
+          const requiresReload = Object.keys(unsavedChanges).some(
+            (key) => fieldsMap[key]?.requiresPageReload === true
+          );
           await Promise.all(
             Object.entries(unsavedChanges).map(([key, value]) => {
               return settings.client.set(key, value.unsavedValue);
@@ -131,12 +135,14 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           if (updateErrors.length > 0) {
             throw combineErrors(updateErrors);
           }
+          return requiresReload;
         } finally {
           if (subscription) {
             subscription.unsubscribe();
           }
         }
       }
+      return false;
     },
   });
 

@@ -200,8 +200,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   async function handleSave() {
     try {
-      await saveAll();
-      window.location.reload();
+      const needsReload = await saveAll();
+      if (needsReload) {
+        window.location.reload();
+      }
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({
