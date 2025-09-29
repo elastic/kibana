@@ -9,7 +9,7 @@ requestBody:
             name: Search Index Helper
             description: Hi! I can help you search the data within the indices starting with
               "content-" prefix.
-            tags:
+            labels:
             - custom-indices
             - department-search
             avatar_color: "#BFDBFF"
@@ -37,7 +37,7 @@ responses:
               name: Search Index Helper
               description: Hi! I can help you search the data within the indices starting with
                 "content-" prefix.
-              tags:
+              labels:
               - custom-indices
               - department-search
               avatar_color: "#BFDBFF"

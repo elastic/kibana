@@ -29,7 +29,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'MCP server API',
+      summary: 'Send MCP request',
       description:
         'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.',
       options: {
