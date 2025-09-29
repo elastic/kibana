@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         type: 'index_pattern',
         indexPatternId: 'some-test-id',
       },
-      metricAlias: 'metrics-*,metricbeat-*',
+      metricAlias: 'metrics-*,metrics-system*,metricbeat-*',
       inventoryDefaultView: 'default',
       metricsExplorerDefaultView: 'default',
       anomalyThreshold: 70,
