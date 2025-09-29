@@ -41,25 +41,29 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
           gutterSize="xl"
           alignItems="center"
         >
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={4}>
             <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" direction="column">
-                <EuiFlexGroup gutterSize={'m'} alignItems={'center'}>
-                  <EuiTitle size="l">
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
-                        defaultMessage="Privileged user monitoring"
-                      />
-                    </h2>
-                  </EuiTitle>
-                  <EuiBetaBadge
-                    size={'m'}
-                    label={i18n.translate(
-                      'xpack.securitySolution.privilegedUserMonitoring.onboarding.betaStatus',
-                      { defaultMessage: 'TECHNICAL PREVIEW' }
-                    )}
-                  />
+                <EuiFlexGroup gutterSize="m" alignItems="baseline">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
+                          defaultMessage="Privileged user monitoring"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      size="m"
+                      label={i18n.translate(
+                        'xpack.securitySolution.privilegedUserMonitoring.onboarding.betaStatus',
+                        { defaultMessage: 'TECHNICAL PREVIEW' }
+                      )}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m">
@@ -101,7 +105,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={3}>
             <EuiImage
               src={privilegedUserMonitoringOnboardingPageIllustration}
               hasShadow={false}
