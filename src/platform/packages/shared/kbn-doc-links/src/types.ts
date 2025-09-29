@@ -143,6 +143,7 @@ export interface DocLinks {
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
+    readonly elasticInferenceService: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -494,6 +495,7 @@ export interface DocLinks {
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
     kibanaDisableLegacyUrlAliasesApi: string;
+    kibanaManageSpaces: string;
   }>;
   readonly watcher: Record<string, string>;
   readonly ccs: Record<string, string>;

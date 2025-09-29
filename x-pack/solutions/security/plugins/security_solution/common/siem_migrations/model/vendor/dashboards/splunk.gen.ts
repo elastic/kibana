@@ -59,6 +59,10 @@ export const SplunkOriginalDashboardExportProperties = z.object({
    * The last updated timestamp of the dashboard
    */
   updated: z.string().optional(),
+  /**
+   * The version of the dashboard
+   */
+  version: z.string().optional(),
 });
 
 /**

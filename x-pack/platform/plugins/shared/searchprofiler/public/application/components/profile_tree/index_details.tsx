@@ -6,23 +6,37 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { msToPretty } from '../../lib';
 import type { Index } from '../../types';
+import { useSharedDetailsStyles } from './styles';
 
 export interface Props {
   index: Index;
 }
 
+const useStyles = () => {
+  return {
+    indexDetails: css`
+      align-self: center;
+    `,
+    shardDetails: useSharedDetailsStyles().shardDetails,
+    shardDetailsDim: useSharedDetailsStyles().shardDetailsDim,
+  };
+};
+
 export const IndexDetails = ({ index }: Props) => {
   const { time, name } = index;
+  const styles = useStyles();
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
       {/* Index Title group */}
       <EuiFlexItem grow={false}>
-        <EuiText className="prfDevTool__profileTree__shardDetails">
+        <EuiText css={styles.shardDetails}>
           <h3>
             <b>
               {i18n.translate('xpack.searchProfiler.profileTree.indexTitle', {
@@ -34,8 +48,8 @@ export const IndexDetails = ({ index }: Props) => {
         </EuiText>
       </EuiFlexItem>
       {/* Time details group */}
-      <EuiFlexItem grow={false} className="prfDevTool__profileTree__indexDetails">
-        <EuiText className="prfDevTool__profileTree__shardDetails--dim">
+      <EuiFlexItem grow={false} css={styles.indexDetails}>
+        <EuiText css={styles.shardDetailsDim}>
           <EuiToolTip
             position="bottom"
             content={i18n.translate('xpack.searchProfiler.profileTree.cumulativeTimeTooltip', {

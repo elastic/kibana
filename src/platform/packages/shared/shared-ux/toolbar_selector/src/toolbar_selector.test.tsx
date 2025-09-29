@@ -9,7 +9,8 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { SelectableEntry } from './toolbar_selector';
 import { ToolbarSelector } from './toolbar_selector';
 
@@ -21,7 +22,7 @@ const options: SelectableEntry[] = [
 
 describe('ToolbarSelector', () => {
   it('renders button label', () => {
-    const { getByText } = render(
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorTest"
         buttonLabel="Choose"
@@ -30,11 +31,12 @@ describe('ToolbarSelector', () => {
         singleSelection={true}
       />
     );
-    expect(getByText('Choose')).toBeInTheDocument();
+    expect(screen.getByText('Choose')).toBeInTheDocument();
   });
 
-  it('opens popover and shows options', () => {
-    const { getByTestId, getByText } = render(
+  it('opens popover and shows options', async () => {
+    const user = userEvent.setup();
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorTest"
         buttonLabel="Select"
@@ -43,15 +45,16 @@ describe('ToolbarSelector', () => {
         singleSelection={true}
       />
     );
-    fireEvent.click(getByTestId('toolbarSelectorTestButton'));
-    expect(getByText('Option 1')).toBeInTheDocument();
-    expect(getByText('Option 2')).toBeInTheDocument();
-    expect(getByText('Option 3')).toBeInTheDocument();
+    await user.click(screen.getByTestId('toolbarSelectorTestButton'));
+    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    expect(screen.getByText('Option 2')).toBeInTheDocument();
+    expect(screen.getByText('Option 3')).toBeInTheDocument();
   });
 
-  it('calls onChange for single selection', () => {
+  it('calls onChange for single selection', async () => {
+    const user = userEvent.setup();
     const onChange = jest.fn();
-    const { getByTestId, getByText } = render(
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorTest"
         buttonLabel="Select"
@@ -61,18 +64,19 @@ describe('ToolbarSelector', () => {
         onChange={onChange}
       />
     );
-    fireEvent.click(getByTestId('toolbarSelectorTestButton'));
-    fireEvent.click(getByText('Option 2'));
+    await user.click(screen.getByTestId('toolbarSelectorTestButton'));
+    fireEvent.click(screen.getByText('Option 2'));
     expect(onChange).toHaveBeenCalledWith({ label: 'Option 2', value: '2', checked: 'on' });
   });
 
-  it('calls onChange for multi selection', () => {
+  it('calls onChange for multi selection', async () => {
+    const user = userEvent.setup();
     const onChange = jest.fn();
     const multiOptions: SelectableEntry[] = [
       { label: 'A', value: 'a' },
       { label: 'B', value: 'b' },
     ];
-    const { getByTestId, getByText } = render(
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorMultiTest"
         buttonLabel="Multi"
@@ -82,9 +86,9 @@ describe('ToolbarSelector', () => {
         onChange={onChange}
       />
     );
-    fireEvent.click(getByTestId('toolbarSelectorMultiTestButton'));
-    fireEvent.click(getByText('A'));
-    fireEvent.click(getByText('B'));
+    await user.click(screen.getByTestId('toolbarSelectorMultiTestButton'));
+    fireEvent.click(screen.getByText('A'));
+    fireEvent.click(screen.getByText('B'));
 
     expect(onChange).toHaveBeenCalledTimes(2);
     expect(onChange).toHaveBeenNthCalledWith(1, [{ label: 'A', value: 'a', checked: 'on' }]);
@@ -92,7 +96,7 @@ describe('ToolbarSelector', () => {
   });
 
   it('renders with disabled state', () => {
-    const { getByTestId } = render(
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorDisabled"
         buttonLabel="Disabled"
@@ -102,11 +106,12 @@ describe('ToolbarSelector', () => {
         disabled={true}
       />
     );
-    expect(getByTestId('toolbarSelectorDisabledButton')).toBeDisabled();
+    expect(screen.getByTestId('toolbarSelectorDisabledButton')).toBeDisabled();
   });
 
-  it('renders with searchable enabled', () => {
-    const { getByTestId } = render(
+  it('renders with searchable enabled', async () => {
+    const user = userEvent.setup();
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorSearch"
         buttonLabel="Search"
@@ -115,12 +120,68 @@ describe('ToolbarSelector', () => {
         singleSelection={true}
       />
     );
-    fireEvent.click(getByTestId('toolbarSelectorSearchButton'));
-    expect(getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
+    await user.click(screen.getByTestId('toolbarSelectorSearchButton'));
+    expect(screen.getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
-  it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', () => {
-    const { getByTestId, getAllByLabelText, getByText } = render(
+  it('renders with searchable enabled and multi selection and preserves previously selected options', async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    // Start with pre-selected options to test preservation
+    const optionsWithPreselected: SelectableEntry[] = [
+      { label: 'A', value: 'a', checked: 'on' },
+      { label: 'B', value: 'b', checked: 'on' },
+      { label: 'C', value: 'c' },
+    ];
+
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorSearchBasic"
+        buttonLabel="Search Test"
+        options={optionsWithPreselected}
+        searchable={true}
+        singleSelection={false}
+        onChange={onChange}
+        optionMatcher={({ option, normalizedSearchValue }) =>
+          option.label.toLowerCase().includes(normalizedSearchValue.toLowerCase())
+        }
+      />
+    );
+
+    await user.click(screen.getByTestId('toolbarSelectorSearchBasicButton'));
+
+    // Verify all options are initially visible
+    expect(screen.getByText('A')).toBeInTheDocument();
+    expect(screen.getByText('B')).toBeInTheDocument();
+    expect(screen.getByText('C')).toBeInTheDocument();
+
+    // Search for "C" which should only show C - use fireEvent for search input (EUI compatibility)
+    const searchInput = screen.getByTestId('toolbarSelectorSearchBasicSelectorSearch');
+    await user.type(searchInput, 'C');
+
+    await waitFor(() => {
+      expect(screen.getByText('C')).toBeInTheDocument();
+      expect(screen.queryByText('A')).not.toBeInTheDocument();
+      expect(screen.queryByText('B')).not.toBeInTheDocument();
+    });
+
+    // Select C using fireEvent for EUI selectable compatibility
+    fireEvent.click(screen.getByText('C'));
+
+    // The onChange should preserve A and B (hidden but selected) + add C
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        { label: 'C', value: 'c', checked: 'on' },
+        { label: 'A', value: 'a', checked: 'on' },
+        { label: 'B', value: 'b', checked: 'on' },
+      ])
+    );
+  });
+
+  it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', async () => {
+    const user = userEvent.setup();
+    render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorOptionalProps"
         buttonLabel="Optional"
@@ -128,12 +189,12 @@ describe('ToolbarSelector', () => {
         searchable={true}
         singleSelection={true}
         popoverTitle="My Popover Title"
-        popoverContentBelowSearch={<span>Custom Section</span>}
+        popoverContentBelowSearch={<span>Maximum selection limit reached</span>}
         hasArrow={false}
       />
     );
-    fireEvent.click(getByTestId('toolbarSelectorOptionalPropsButton'));
-    expect(getByText('Custom Section')).toBeInTheDocument();
-    expect(getAllByLabelText('My Popover Title')).toHaveLength(3);
+    await user.click(screen.getByTestId('toolbarSelectorOptionalPropsButton'));
+    expect(screen.getByText('Maximum selection limit reached')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('My Popover Title')).toHaveLength(3);
   });
 });

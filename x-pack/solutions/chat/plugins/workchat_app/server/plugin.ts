@@ -64,8 +64,8 @@ export class WorkChatAppPlugin
 
     registerFeatures({ features: setupDeps.features });
 
-    // Register custom data types with chat data registry
-    registerWorkChatDataTypes({ chatDataRegistry: setupDeps.chatDataRegistry });
+    // Register custom data types with the data sources registry
+    registerWorkChatDataTypes({ dataSourcesRegistry: setupDeps.dataSourcesRegistry });
 
     return {};
   }

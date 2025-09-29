@@ -123,33 +123,12 @@ export const selectAndConfirmClosingReason = () => {
   cy.get('button').contains('Close alert').click();
 };
 
-export const closeFirstAlert = (verifyModal?: () => void) => {
+export const closeFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
-
-  if (verifyModal) {
-    verifyModal();
-  }
-  confirmAlertCloseModal();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
-};
-
-export const closeFirstAlertModalOff = () => {
-  expandFirstAlertActions();
-  cy.get(CLOSE_ALERT_BTN).should('be.visible');
-  cy.get(CLOSE_ALERT_BTN).click();
-  cy.get(CLOSE_ALERT_BTN).should('not.exist');
-};
-
-export const confirmAlertCloseModal = () => {
-  // TODO remove this if statement when the FF continueSuppressionWindowAdvancedSettingEnabled is GA.
-  if (Cypress.env('CLOUD_SERVERLESS')) {
-    return;
-  }
-  cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
-  cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist');
 };
 
 export const closeAlerts = () => {
@@ -159,7 +138,6 @@ export const closeAlerts = () => {
 
   selectAndConfirmClosingReason();
 
-  confirmAlertCloseModal();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
@@ -200,14 +178,10 @@ export const hideMessageTooltip = () => {
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
-export const closeAlertFromStatusBadge = (verifyModal?: () => void) => {
+export const closeAlertFromStatusBadge = () => {
   cy.get(ALERT_STATUS_BADGE_BUTTON).click();
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
-  if (verifyModal) {
-    verifyModal();
-  }
-  confirmAlertCloseModal();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
@@ -391,15 +365,11 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   }
 };
 
-export const bulkCloseSelectedAlerts = (verifyModal?: () => void) => {
+export const bulkCloseSelectedAlerts = () => {
   cy.get(SELECTED_ALERTS).should('have.text', `Selected 2 alerts`);
   cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
   selectAndConfirmClosingReason();
-  if (verifyModal) {
-    verifyModal();
-  }
-  confirmAlertCloseModal();
 };
 
 export const groupAlertsBy = (field: string) => {
@@ -407,24 +377,16 @@ export const groupAlertsBy = (field: string) => {
   cy.get(`[data-test-subj="panel-${field}"]`).click();
 };
 
-export const closeFirstGroupedAlerts = (verifyModal?: () => void) => {
+export const closeFirstGroupedAlerts = () => {
   cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
-  if (verifyModal) {
-    verifyModal();
-  }
-  confirmAlertCloseModal();
 };
 
-export const closeAlertFromFlyoutActions = (verifyModal?: () => void) => {
+export const closeAlertFromFlyoutActions = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
-  if (verifyModal) {
-    verifyModal();
-  }
-  confirmAlertCloseModal();
 };
 
 export const investigateFirstAlertInTimeline = () => {

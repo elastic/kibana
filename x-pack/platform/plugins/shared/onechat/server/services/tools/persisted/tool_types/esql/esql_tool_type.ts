@@ -18,11 +18,11 @@ export const createEsqlToolType = (): PersistedToolTypeDefinition<EsqlToolConfig
     toToolDefinition,
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
-    validateForCreate: async (config) => {
+    validateForCreate: async ({ config }) => {
       await validateConfig(config);
       return config;
     },
-    validateForUpdate: async (update, current) => {
+    validateForUpdate: async ({ update, current }) => {
       const mergedConfig = {
         ...current,
         ...update,
