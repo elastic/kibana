@@ -3435,6 +3435,14 @@
       "matchDepNames": [
         "chromedriver"
       ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
       "enabled": true
     },
     {
