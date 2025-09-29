@@ -68,7 +68,7 @@ describe('infra source configuration migration function for 7.9.0', () => {
     expect(migratedConfiguration).toStrictEqual(
       createTestSourceConfiguration(
         'custom-log-index-*',
-        'metricbeat-*,custom-metric-index-*,metrics-*'
+        'metricbeat-*,custom-metric-index-*,metrics-*,metrics-system*'
       )
     );
   });
@@ -90,7 +90,7 @@ describe('infra source configuration migration function for 7.9.0', () => {
   test('doesn\'t add "metrics-*" when the metricAlias already contains it', () => {
     const unmigratedConfiguration = createTestSourceConfiguration(
       'custom-log-index-*',
-      'metrics-*,metricbeat-*,custom-metric-index-*'
+      'metrics-*,metrics-system*,metricbeat-*,custom-metric-index-*'
     );
 
     const migratedConfiguration = addNewIndexingStrategyIndexNames(
