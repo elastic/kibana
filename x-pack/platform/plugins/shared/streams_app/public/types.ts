@@ -40,7 +40,6 @@ export interface ConfigSchema {}
 
 export interface StreamsApplicationProps {
   appMountParameters: AppMountParameters;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
 }
 
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
@@ -80,6 +79,4 @@ export interface StreamsAppStartDependencies {
 
 export interface StreamsAppPublicSetup {}
 
-export interface StreamsAppPublicStart {
-  createStreamsApplicationComponent: () => StreamsApplicationComponentType;
-}
+export interface StreamsAppPublicStart {}
