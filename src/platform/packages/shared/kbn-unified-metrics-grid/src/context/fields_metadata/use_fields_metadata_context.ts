@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
+import { useContext } from 'react';
+import { FieldsMetadataContext } from './fields_metadata_provider';
 
-export const isDashboardPanel = (
-  widget: DashboardAttributes['panels'][number]
-): widget is DashboardPanel => {
-  return 'config' in widget;
-};
+export function useFieldsMetadataContext() {
+  const context = useContext(FieldsMetadataContext);
+
+  if (!context) {
+    throw new Error('useFieldsMetadataContext must be used within a FieldsMetadataProvider');
+  }
+
+  return context;
+}

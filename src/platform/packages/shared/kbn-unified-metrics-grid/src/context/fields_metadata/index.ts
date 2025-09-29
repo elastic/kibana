@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
-
-export const isDashboardPanel = (
-  widget: DashboardAttributes['panels'][number]
-): widget is DashboardPanel => {
-  return 'config' in widget;
-};
+export { FieldsMetadataProvider } from './fields_metadata_provider';
+export { useFieldsMetadataContext } from './use_fields_metadata_context';

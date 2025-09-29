@@ -19,6 +19,7 @@ import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
+import { FieldsMetadataProvider } from '../context/fields_metadata';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -58,7 +59,7 @@ export const MetricsGrid = ({
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
-        metric: MetricField;
+        rowIndex: number;
         esqlQuery: string;
       }
     | undefined
@@ -87,21 +88,26 @@ export const MetricsGrid = ({
     gridRef,
   });
 
-  const handleViewDetails = useCallback((metric: MetricField, esqlQuery: string) => {
-    setExpandedMetric({ metric, esqlQuery });
-    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-  }, []);
+  const handleViewDetails = useCallback(
+    (index: number) => (esqlQuery: string) => {
+      setExpandedMetric({ rowIndex: index, esqlQuery });
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    },
+    []
+  );
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
   }, []);
+
+  const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
   if (rows.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <>
+    <FieldsMetadataProvider fields={normalizedFields} services={services}>
       <div
         ref={gridRef}
         role="grid"
@@ -161,8 +167,7 @@ export const MetricsGrid = ({
                     filters={filters}
                     onBrushEnd={onBrushEnd}
                     onFilter={onFilter}
-                    onViewDetails={handleViewDetails}
-                    metricName={metric.name}
+                    onViewDetails={handleViewDetails(index)}
                   />
                 </div>
               </EuiFlexItem>
@@ -170,14 +175,14 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </div>
-      {expandedMetric && (
+      {expandedMetric && expandedMetric.rowIndex < rows.length && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
+          metric={rows[expandedMetric.rowIndex].metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen={!!expandedMetric}
+          isOpen
           onClose={handleCloseFlyout}
         />
       )}
-    </>
+    </FieldsMetadataProvider>
   );
 };
