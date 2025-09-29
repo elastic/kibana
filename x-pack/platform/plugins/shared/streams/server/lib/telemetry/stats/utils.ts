@@ -22,3 +22,5 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 export function hasChangedRetention(lifecycle: IngestStreamLifecycle | undefined): boolean {
   return !!(lifecycle && 'dsl' in lifecycle);
 }
+
+export const isDevMode = () => process.env.NODE_ENV !== 'production';
