@@ -9,12 +9,14 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { navigateToSettingsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
-import { CreateConnectorFlyout } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { isSupportedConnectorType } from '@kbn/inference-common';
+import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
@@ -35,7 +37,7 @@ export function ChatActionsMenu({
   const { application, http, triggersActionsUi } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
-  const [createConnectorFlyoutVisible, setCreateConnectorFlyoutVisible] = useState(false);
+  const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -61,6 +63,18 @@ export function ChatActionsMenu({
     );
   }, [connectors.connectors]);
 
+  const ConnectorFlyout = useMemo(
+    () => triggersActionsUi.getAddConnectorFlyout,
+    [triggersActionsUi]
+  );
+
+  const onConnectorCreated = (createdConnector: ActionConnector) => {
+    setConnectorFlyoutOpen(false);
+
+    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
+      connectors.reloadConnectors();
+    }
+  };
   return (
     <>
       <EuiPopover
@@ -153,12 +167,12 @@ export function ChatActionsMenu({
                   value={connectors.selectedConnector}
                   defaultConnectorId={connectors.defaultConnector}
                   onValueChange={(id: string) => {
-                    toggleActionsMenu();
                     connectors.selectConnector(id);
+                    toggleActionsMenu();
                   }}
                   onAddConnectorClick={() => {
                     toggleActionsMenu();
-                    setCreateConnectorFlyoutVisible(true);
+                    setConnectorFlyoutOpen(true);
                   }}
                   onManageConnectorsClick={() => {
                     toggleActionsMenu();
@@ -170,13 +184,11 @@ export function ChatActionsMenu({
           ]}
         />
       </EuiPopover>
-      {createConnectorFlyoutVisible && (
-        <CreateConnectorFlyout
-          onClose={() => {
-            setCreateConnectorFlyoutVisible(false);
-          }}
-          onConnectorCreated={() => connectors.reloadConnectors()}
-          actionTypeRegistry={triggersActionsUi?.actionTypeRegistry!}
+      {connectorFlyoutOpen && (
+        <ConnectorFlyout
+          featureId={GenerativeAIForObservabilityConnectorFeatureId}
+          onConnectorCreated={onConnectorCreated}
+          onClose={() => setConnectorFlyoutOpen(false)}
         />
       )}
     </>
