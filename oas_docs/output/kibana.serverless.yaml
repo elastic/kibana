@@ -75823,14 +75823,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
           type: string
@@ -75873,6 +75866,19 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - status
+    Security_Entity_Analytics_API_MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:
