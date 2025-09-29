@@ -17,14 +17,45 @@ export interface StepInfo {
   lineEnd: number;
 }
 
-export interface WorkflowMetadata {
+/**
+ * Lookup table containing parsed workflow elements from a YAML document.
+ * This interface serves as an index for quickly accessing workflow components
+ * by their identifiers, along with metadata about their location in the document.
+ *
+ * @interface WorkflowLookup
+ */
+export interface WorkflowLookup {
+  /** Map of step IDs to their corresponding step information and metadata */
   steps: Record<string, StepInfo>;
 }
 
-export function indexYamlDocument(
+/**
+ * Parses a YAML document to build a lookup table of workflow elements.
+ *
+ * This function traverses the YAML document structure and extracts workflow steps,
+ * creating an indexed collection for efficient access. Each step is mapped by its
+ * identifier and includes metadata such as type, YAML node reference, and line
+ * position information for editor integration.
+ *
+ * @param yamlDocument - The parsed YAML document containing workflow definition
+ * @param model - Monaco editor text model for calculating line positions
+ * @returns WorkflowLookup object containing indexed workflow elements
+ *
+ * @example
+ * ```typescript
+ * const yamlDoc = YAML.parseDocument(yamlContent);
+ * const editorModel = monaco.editor.getModel(uri);
+ * const lookup = buildWorkflowLookup(yamlDoc, editorModel);
+ *
+ * // Access a specific step
+ * const stepInfo = lookup.steps['my-step-id'];
+ * console.log(`Step type: ${stepInfo.stepType}, Lines: ${stepInfo.lineStart}-${stepInfo.lineEnd}`);
+ * ```
+ */
+export function buildWorkflowLookup(
   yamlDocument: YAML.Document,
   model: monaco.editor.ITextModel
-): WorkflowMetadata {
+): WorkflowLookup {
   const steps: Record<string, StepInfo> = {};
 
   if (!YAML.isMap(yamlDocument?.contents)) {

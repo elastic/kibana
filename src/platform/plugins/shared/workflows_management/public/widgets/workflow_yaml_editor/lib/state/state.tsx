@@ -11,15 +11,15 @@ import { monaco } from '@kbn/monaco';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import YAML from 'yaml';
-import type { StepInfo, WorkflowMetadata } from './index_yaml_document';
-import { indexYamlDocument } from './index_yaml_document';
+import type { StepInfo, WorkflowLookup } from './index_yaml_document';
+import { buildWorkflowLookup } from './index_yaml_document';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
 
 export interface EditorState {
   yamlString: string | null;
   yamlDocument: YAML.Document | null;
-  workflowMetadata: WorkflowMetadata | null;
+  workflowLookup: WorkflowLookup | null;
   workflowGraph: WorkflowGraph | null;
   focusedStepInfo: StepInfo | null;
   hoveredStepInfo?: StepInfo | null;
@@ -28,7 +28,7 @@ export interface EditorState {
 
 function findStepByLine(
   lineNumber: number,
-  workflowMetadata: WorkflowMetadata | null
+  workflowMetadata: WorkflowLookup | null
 ): StepInfo | null {
   if (!workflowMetadata) return null;
   return (
@@ -60,13 +60,13 @@ export function EditorStateProvider({
   const [editorState, setEditorState] = useState<EditorState>({
     yamlString: null,
     yamlDocument: null,
-    workflowMetadata: null,
+    workflowLookup: null,
     workflowGraph: null,
     editor: null,
     focusedStepInfo: null,
   });
   const cursorPosition = editor?.getPosition();
-  const { workflowMetadata } = editorState;
+  const { workflowLookup: workflowMetadata } = editorState;
 
   useEffect(() => {
     if (!editor) return;
@@ -87,8 +87,9 @@ export function EditorStateProvider({
       setEditorState({
         yamlString: null,
         yamlDocument: null,
-        workflowMetadata: null,
+        workflowLookup: null,
         workflowGraph: null,
+        focusedStepInfo: null,
         editor: null,
       });
       return;
@@ -98,7 +99,7 @@ export function EditorStateProvider({
       try {
         const yamlDocument = YAML.parseDocument(yamlString);
         const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
-        const workflowMetadata = indexYamlDocument(yamlDocument, editor?.getModel()!);
+        const workflowLookup = buildWorkflowLookup(yamlDocument, editor?.getModel()!);
         const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
         const workflowGraph = parsedWorkflow
           ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow)
@@ -107,16 +108,18 @@ export function EditorStateProvider({
         setEditorState({
           yamlString,
           yamlDocument,
-          workflowMetadata,
+          workflowLookup,
           workflowGraph,
           editor,
+          focusedStepInfo: null,
         });
       } catch (e) {
         setEditorState({
           yamlString: null,
           yamlDocument: null,
-          workflowMetadata: null,
+          workflowLookup: null,
           workflowGraph: null,
+          focusedStepInfo: null,
           editor: null,
         });
       }
@@ -150,7 +153,7 @@ export function EditorStateProvider({
       if (position && usefulTargets.has(type)) {
         setEditorState((prev) => ({
           ...prev,
-          hoveredStepInfo: findStepByLine(position.lineNumber, prev.workflowMetadata),
+          hoveredStepInfo: findStepByLine(position.lineNumber, prev.workflowLookup),
         }));
       } else {
         setEditorState((prev) => ({ ...prev, hoveredStepInfo: null }));
