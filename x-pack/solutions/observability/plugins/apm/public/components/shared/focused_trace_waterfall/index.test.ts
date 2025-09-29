@@ -104,7 +104,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
-          errorCount: 0,
+          errors: [],
         },
         children: [],
       },
@@ -116,7 +116,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-b',
           duration: 200,
           serviceName: 'service-b',
-          errorCount: 0,
+          errors: [],
         },
         children: [],
       },
@@ -129,7 +129,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
-        errorCount: 0,
+        errors: [],
       },
 
       {
@@ -139,7 +139,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-b',
         duration: 200,
         serviceName: 'service-b',
-        errorCount: 0,
+        errors: [],
       },
     ]);
   });
@@ -154,7 +154,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
-          errorCount: 0,
+          errors: [],
         },
         children: [
           {
@@ -165,7 +165,7 @@ describe('flattenChildren', () => {
               traceId: 'trace-b',
               duration: 100,
               serviceName: 'service-b',
-              errorCount: 0,
+              errors: [],
             },
             children: [
               {
@@ -176,7 +176,7 @@ describe('flattenChildren', () => {
                   traceId: 'trace-c',
                   duration: 100,
                   serviceName: 'service-c',
-                  errorCount: 0,
+                  errors: [],
                 },
                 children: [],
               },
@@ -192,7 +192,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-d',
           duration: 100,
           serviceName: 'service-d',
-          errorCount: 0,
+          errors: [],
         },
         children: [],
       },
@@ -205,7 +205,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: 'b',
@@ -214,7 +214,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-b',
         duration: 100,
         serviceName: 'service-b',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: 'c',
@@ -223,7 +223,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-c',
         duration: 100,
         serviceName: 'service-c',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: 'd',
@@ -232,7 +232,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-d',
         duration: 100,
         serviceName: 'service-d',
-        errorCount: 0,
+        errors: [],
       },
     ]);
   });
@@ -247,7 +247,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-a',
           duration: 100,
           serviceName: 'service-a',
-          errorCount: 0,
+          errors: [],
         },
       },
       {
@@ -258,7 +258,7 @@ describe('flattenChildren', () => {
           traceId: 'trace-b',
           duration: 100,
           serviceName: 'service-b',
-          errorCount: 0,
+          errors: [],
         },
         children: [],
       },
@@ -271,7 +271,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-a',
         duration: 100,
         serviceName: 'service-a',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: 'b',
@@ -280,7 +280,7 @@ describe('flattenChildren', () => {
         traceId: 'trace-b',
         duration: 100,
         serviceName: 'service-b',
-        errorCount: 0,
+        errors: [],
       },
     ]);
   });
