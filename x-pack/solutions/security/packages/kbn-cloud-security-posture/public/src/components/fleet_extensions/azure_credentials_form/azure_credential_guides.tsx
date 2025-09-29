@@ -56,7 +56,7 @@ export const AzureSelectedCredentialsGuide = ({
     const step5 = (
       <FormattedMessage
         id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.4"
-        defaultMessage="Click {reviewButton}"
+        defaultMessage="Click {reviewButton}."
         values={{
           reviewButton: <strong>{'Review + Create'}</strong>,
         }}

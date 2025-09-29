@@ -41,7 +41,10 @@ export const useCloudConnectorSetup = (
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
-    useState<CloudConnectorCredentials>({ roleArn: undefined, externalId: undefined });
+    useState<CloudConnectorCredentials>({
+      roleArn: input.streams[0]?.vars?.role_arn?.value,
+      externalId: input.streams[0]?.vars?.['aws.credentials.external_id']?.value,
+    });
 
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
