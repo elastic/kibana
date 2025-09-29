@@ -2,6 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
     key: build_project_image
+    env:
+      CI_FORCE_NODE_POINTER_COMPRESSION: "false"
     agents:
       machineType: n2-standard-16
       preemptible: true
@@ -19,7 +21,3 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
-      - linting
-      - linting_with_types
-      - checks
-      - check_types
