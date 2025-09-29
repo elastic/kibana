@@ -61,11 +61,11 @@ const noDataOptions: Record<
     dataTestSubj: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     docsLink: cspIntegrationDocsNavigation.kspm.overviewPath,
     actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.actionTitle',
       { defaultMessage: 'Add a KSPM integration' }
     ),
     actionDescription: i18n.translate(
-      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description',
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.actionDescription',
       {
         defaultMessage:
           'Use our Kubernetes Security Posture Management (KSPM) integration to detect security misconfigurations in your Kubernetes clusters.',
@@ -81,11 +81,11 @@ const noDataOptions: Record<
     // TODO: CIS AWS - replace link or create the docs
     docsLink: cspIntegrationDocsNavigation.cspm.overviewPath,
     actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.actionTitle',
       { defaultMessage: 'Add a CSPM integration' }
     ),
     actionDescription: i18n.translate(
-      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description',
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.actionDescription',
       {
         defaultMessage:
           'Use our Cloud Security Posture Management (CSPM) integration to detect security misconfigurations in your cloud infrastructure.',
