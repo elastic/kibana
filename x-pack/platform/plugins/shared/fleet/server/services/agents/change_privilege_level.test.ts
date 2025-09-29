@@ -11,7 +11,9 @@ import { packagePolicyService } from '../package_policy';
 
 import type { Agent } from '../../types';
 
-import { createAgentAction } from './actions';
+import { FleetUnauthorizedError } from '../../errors';
+
+import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentById } from './crud';
 import {
   bulkChangeAgentsPrivilegeLevel,
@@ -34,6 +36,9 @@ jest.mock('./crud', () => {
 
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+  typeof createErrorActionResults
+>;
 
 const esClientMock = elasticsearchServiceMock.createInternalClient();
 const soClientMock = savedObjectsClientMock.create();
@@ -186,7 +191,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
     });
   });
 
-  it('should return an error if agent policies contain integrations that require root access', async () => {
+  it('should record error result if agent policies contain integrations that require root access', async () => {
     (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
     const options = {
       user_info: {
@@ -206,14 +211,19 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       },
     ] as any);
 
-    await expect(
-      bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
-        ...options,
-        agentIds: [mockedAgent.id, mockedAgent.id],
-      })
-    ).rejects.toThrowError(
-      `Agent policy policy-0001 contains integrations that require root access: Package 2`
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      ...options,
+      agentIds: [mockedAgent.id, mockedAgent.id],
+    });
+    expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+      esClientMock,
+      expect.any(String),
+      {
+        'agent-123': new FleetUnauthorizedError(
+          'Agent agent-123 contains integrations that require root access: Package 2'
+        ),
+      },
+      'agent does not support privilege change action'
     );
-    expect(mockedCreateAgentAction).toHaveBeenCalledTimes(0);
   });
 });
