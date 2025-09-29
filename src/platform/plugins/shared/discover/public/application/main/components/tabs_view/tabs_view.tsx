@@ -39,6 +39,11 @@ export const TabsView = (props: SingleTabViewProps) => {
     [dispatch]
   );
 
+  const onClearRecentlyClosed: UnifiedTabsProps['onClearRecentlyClosed'] = useCallback(
+    () => dispatch(internalStateActions.clearRecentlyClosedTabs()),
+    [dispatch]
+  );
+
   const createItem: UnifiedTabsProps['createItem'] = useCallback(
     () => createTabItem(items),
     [items]
@@ -62,6 +67,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
+      onClearRecentlyClosed={onClearRecentlyClosed}
     />
   );
 };
