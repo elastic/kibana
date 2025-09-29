@@ -8,14 +8,18 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import YAML from 'yaml';
 import { indexYamlDocument, type WorkflowMetadata } from './index_yaml_document';
+import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
+import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
 
 export interface EditorState {
   yamlString: string | null;
   yamlDocument: YAML.Document | null;
   workflowMetadata: WorkflowMetadata | null;
+  workflowGraph: WorkflowGraph | null;
   editor: monaco.editor.IStandaloneCodeEditor | null;
 }
 
@@ -39,6 +43,7 @@ export function EditorStateProvider({
     yamlString: null,
     yamlDocument: null,
     workflowMetadata: null,
+    workflowGraph: null,
     editor: null,
   });
 
@@ -62,6 +67,7 @@ export function EditorStateProvider({
         yamlString: null,
         yamlDocument: null,
         workflowMetadata: null,
+        workflowGraph: null,
         editor: null,
       });
       return;
@@ -69,11 +75,21 @@ export function EditorStateProvider({
 
     const timeoutId = setTimeout(() => {
       try {
-        const doc = YAML.parseDocument(yamlString);
+        const yamlDocument = YAML.parseDocument(yamlString);
+        const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
+        const workflowMetadata = indexYamlDocument(yamlDocument, editor?.getModel()!);
+        const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
+        const workflowGraph = parsedWorkflow
+          ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow)
+          : null;
+
+        console.log('Indexed doc', workflowMetadata);
+
         setEditorState({
           yamlString,
-          yamlDocument: doc,
-          workflowMetadata: indexYamlDocument(doc, editor?.getModel()!),
+          yamlDocument,
+          workflowMetadata,
+          workflowGraph,
           editor,
         });
       } catch (e) {
@@ -81,6 +97,7 @@ export function EditorStateProvider({
           yamlString: null,
           yamlDocument: null,
           workflowMetadata: null,
+          workflowGraph: null,
           editor: null,
         });
       }
