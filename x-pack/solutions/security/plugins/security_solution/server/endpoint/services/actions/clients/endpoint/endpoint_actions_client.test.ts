@@ -395,7 +395,12 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript' | 'getCustomScripts'
+    | 'processPendingActions'
+    | 'getFileDownload'
+    | 'getFileInfo'
+    | 'runscript'
+    | 'getCustomScripts'
+    | 'cancel'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

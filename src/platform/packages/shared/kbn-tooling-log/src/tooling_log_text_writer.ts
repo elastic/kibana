@@ -11,6 +11,7 @@ import { format } from 'util';
 
 import chalk from 'chalk';
 
+import { castArray } from 'lodash';
 import type { LogLevel, ParsedLogLevel } from './log_levels';
 import { parseLogLevel } from './log_levels';
 import type { Writer } from './writer';
@@ -117,7 +118,13 @@ export class ToolingLogTextWriter implements Writer {
     }
 
     let prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
-    prefix = msg.context ? prefix + `[${msg.context}] ` : prefix;
+    prefix = msg.context
+      ? prefix +
+        castArray(msg.context ?? [])
+          .map((ctx) => `[${ctx}]`)
+          .join(' ') +
+        ' '
+      : prefix;
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }
