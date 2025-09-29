@@ -49,7 +49,13 @@ const CountryFlag = ({ countryCode }: { countryCode?: string }) => {
       </EuiText>
 
       {/* NOTE: Wrap emoji flag with spaces for screen readers */}
-      <EuiText size="s">{` ${countryFlag} `}</EuiText>
+      <EuiText
+        size="s"
+        css={css`
+          position: relative;
+          top: 1px;
+        `}
+      >{` ${countryFlag} `}</EuiText>
 
       <EuiText
         size="s"
