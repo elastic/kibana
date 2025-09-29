@@ -152,7 +152,10 @@ export function ChatActionsMenu({
                   preConfiguredConnectors={preConfiguredConnectors}
                   value={connectors.selectedConnector}
                   defaultConnectorId={connectors.defaultConnector}
-                  onValueChange={connectors.selectConnector}
+                  onValueChange={(id: string) => {
+                    toggleActionsMenu();
+                    connectors.selectConnector(id);
+                  }}
                   onAddConnectorClick={() => {
                     toggleActionsMenu();
                     setCreateConnectorFlyoutVisible(true);

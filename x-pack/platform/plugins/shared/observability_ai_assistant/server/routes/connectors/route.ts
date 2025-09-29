@@ -36,20 +36,25 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
         ),
       actionsClient.getAll(),
     ]);
-    return connectors.filter(async (connector) => {
+    const filteredConnectors: typeof connectors = [];
+
+    for (const connector of connectors) {
+      const hasAllowedType = availableTypes.includes(connector.actionTypeId);
+      const isSupported = isSupportedConnector(connector);
+      if (!hasAllowedType || !isSupported) continue;
+
       if (connector.actionTypeId === InferenceConnectorType.Inference) {
-        const isInferenceEndpointExists = await inferenceEndpointExists(
+        const endpointExists = await inferenceEndpointExists(
           esClient,
-          connector?.config?.inferenceId
+          connector.config?.inferenceId
         );
-        return (
-          availableTypes.includes(connector.actionTypeId) &&
-          isSupportedConnector(connector) &&
-          isInferenceEndpointExists
-        );
+        if (!endpointExists) continue;
       }
-      return availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector);
-    });
+
+      filteredConnectors.push(connector);
+    }
+
+    return filteredConnectors;
   },
 });
 
