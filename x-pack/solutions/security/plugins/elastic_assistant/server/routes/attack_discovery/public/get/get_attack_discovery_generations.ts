@@ -60,8 +60,6 @@ export const getAttackDiscoveryGenerationsRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        await throwIfPublicApiDisabled(context);
-
         // Perform license and authenticated user checks:
         const checkResponse = await performChecks({
           context: ctx,
@@ -74,6 +72,8 @@ export const getAttackDiscoveryGenerationsRoute = (
         }
 
         try {
+          await throwIfPublicApiDisabled(context);
+
           const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
           const spaceId = (await context.elasticAssistant).getSpaceId();
           const { query } = request;

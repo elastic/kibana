@@ -61,8 +61,6 @@ export const getAttackDiscoverySchedulesRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        await throwIfPublicApiDisabled(context);
-
         // Perform license and authenticated user
         const checkResponse = await performChecks({
           context: ctx,
@@ -77,6 +75,8 @@ export const getAttackDiscoverySchedulesRoute = (
         const { id } = request.params;
 
         try {
+          await throwIfPublicApiDisabled(context);
+
           const dataClient = await assistantContext.getAttackDiscoverySchedulingDataClient();
           if (!dataClient) {
             return resp.error({

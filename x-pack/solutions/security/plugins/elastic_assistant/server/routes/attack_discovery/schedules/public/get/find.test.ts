@@ -168,26 +168,17 @@ describe('findAttackDiscoverySchedulesRoute', () => {
         findAttackDiscoverySchedulesRoute(featureFlagServer.router);
       });
 
-      it('throws the expected error', async () => {
-        await expect(
-          featureFlagServer.inject(
-            findAttackDiscoverySchedulesRequest(),
-            requestContextMock.convertContext(featureFlagContext)
-          )
-        ).rejects.toThrow('Attack discovery public API is disabled');
-      });
+      it('returns a 403 response when the public API is disabled', async () => {
+        const response = await featureFlagServer.inject(
+          findAttackDiscoverySchedulesRequest(),
+          requestContextMock.convertContext(featureFlagContext)
+        );
 
-      it('throws an error with status code 403', async () => {
-        try {
-          await featureFlagServer.inject(
-            findAttackDiscoverySchedulesRequest(),
-            requestContextMock.convertContext(featureFlagContext)
-          );
-          // If we reach this point, the test should fail
-          expect(true).toBe(false);
-        } catch (error) {
-          expect(error).toHaveProperty('statusCode', 403);
-        }
+        expect(response.status).toEqual(403);
+        expect(response.body).toEqual({
+          message: { error: 'Attack discovery public API is disabled', success: false },
+          status_code: 403,
+        });
       });
     });
 

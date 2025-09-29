@@ -57,8 +57,6 @@ export const findAttackDiscoveriesRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        await throwIfPublicApiDisabled(context);
-
         // Perform license and authenticated user checks:
         const checkResponse = await performChecks({
           context: ctx,
@@ -80,6 +78,8 @@ export const findAttackDiscoveriesRoute = (
         }
 
         try {
+          await throwIfPublicApiDisabled(context);
+
           const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 

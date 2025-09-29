@@ -85,8 +85,6 @@ export const postAttackDiscoveryGenerateRoute = (
         const telemetry = assistantContext.telemetry;
         const savedObjectsClient = assistantContext.savedObjectsClient;
 
-        await throwIfPublicApiDisabled(context);
-
         const checkResponse = await performChecks({
           context: performChecksContext,
           request,
@@ -98,6 +96,8 @@ export const postAttackDiscoveryGenerateRoute = (
         }
 
         try {
+          await throwIfPublicApiDisabled(context);
+
           const eventLogger = (await context.elasticAssistant).eventLogger;
 
           // get the actions plugin start contract from the request context:

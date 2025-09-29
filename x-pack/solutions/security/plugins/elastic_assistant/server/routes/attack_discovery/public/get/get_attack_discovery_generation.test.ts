@@ -463,20 +463,21 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         );
       });
 
-      it('throws the expected error', async () => {
-        await expect(getHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
-          'Attack discovery public API is disabled'
-        );
-      });
+      it('returns a 403 custom response when the public API is disabled', async () => {
+        await getHandler(mockContext, mockRequest, mockResponse);
 
-      it('throws an error with status code 403', async () => {
-        try {
-          await getHandler(mockContext, mockRequest, mockResponse);
-          // If we reach this point, the test should fail
-          expect(true).toBe(false);
-        } catch (error) {
-          expect(error).toHaveProperty('statusCode', 403);
-        }
+        expect(mockResponse.custom).toHaveBeenCalledWith({
+          body: Buffer.from(
+            JSON.stringify({
+              message: 'Attack discovery public API is disabled',
+              status_code: 403,
+            })
+          ),
+          headers: {
+            'content-type': 'application/json',
+          },
+          statusCode: 403,
+        });
       });
     });
 

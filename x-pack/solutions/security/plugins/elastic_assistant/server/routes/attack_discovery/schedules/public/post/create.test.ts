@@ -163,26 +163,30 @@ describe('createAttackDiscoverySchedulesRoute', () => {
         createAttackDiscoverySchedulesRoute(featureFlagServer.router);
       });
 
-      it('throws the expected error', async () => {
-        await expect(
-          featureFlagServer.inject(
-            createAttackDiscoverySchedulesPublicRequest(mockRequestBody),
-            requestContextMock.convertContext(featureFlagContext)
-          )
-        ).rejects.toThrow('Attack discovery public API is disabled');
+      it('returns a 403 response when the public API is disabled', async () => {
+        const response = await featureFlagServer.inject(
+          createAttackDiscoverySchedulesPublicRequest(mockRequestBody),
+          requestContextMock.convertContext(featureFlagContext)
+        );
+
+        expect(response.status).toEqual(403);
+        expect(response.body).toEqual({
+          message: {
+            error: 'Attack discovery public API is disabled',
+            success: false,
+          },
+          status_code: 403,
+        });
       });
 
-      it('throws an error with status code 403', async () => {
-        try {
-          await featureFlagServer.inject(
-            createAttackDiscoverySchedulesPublicRequest(mockRequestBody),
-            requestContextMock.convertContext(featureFlagContext)
-          );
-          // If we reach this point, the test should fail
-          expect(true).toBe(false);
-        } catch (error) {
-          expect(error).toHaveProperty('statusCode', 403);
-        }
+      it('responds with status code 403 in the body when disabled', async () => {
+        const response = await featureFlagServer.inject(
+          createAttackDiscoverySchedulesPublicRequest(mockRequestBody),
+          requestContextMock.convertContext(featureFlagContext)
+        );
+
+        expect(response.status).toEqual(403);
+        expect(response.body).toHaveProperty('status_code', 403);
       });
     });
 
