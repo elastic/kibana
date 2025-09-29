@@ -56,7 +56,7 @@ export const tourSteps: TourStep[] = [
       <EuiText size={'s'}>
         <p>
           <FormattedMessage
-            id="core.chrome.navigationTour.sidenavDataManagementMessage"
+            id="core.chrome.navigationTour.sidenavMoreMessage"
             defaultMessage="You can still access apps that were previously in the navigation menu by selecting <b>More</b>."
             values={{
               b: (chunks) => <b>{chunks}</b>,
