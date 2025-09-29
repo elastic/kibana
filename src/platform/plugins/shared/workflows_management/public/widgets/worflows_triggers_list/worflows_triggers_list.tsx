@@ -33,7 +33,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
 
   if (triggers.length === 0) {
     return (
-      <EuiBadge color="#FFF" iconType="asterisk" css={BADGE_STYLE}>
+      <EuiBadge color={euiTheme.colors.backgroundBasePlain} iconType="asterisk" css={BADGE_STYLE}>
         <EuiText size="xs">No triggers</EuiText>
       </EuiBadge>
     );
