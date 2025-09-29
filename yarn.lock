@@ -4308,10 +4308,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
-  version "0.0.0"
-  uid ""
-
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
@@ -5564,6 +5560,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-sources-registry-plugin@link:x-pack/platform/plugins/shared/data_sources_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
@@ -6592,7 +6592,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lock-manager@link:packages/kbn-lock-manager":
+"@kbn/lock-manager@link:src/platform/packages/shared/kbn-lock-manager":
   version "0.0.0"
   uid ""
 
@@ -7697,6 +7697,10 @@
   uid ""
 
 "@kbn/security-solution-storybook-config@link:x-pack/solutions/security/packages/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-test-api-clients@link:x-pack/solutions/security/packages/test-api-clients":
   version "0.0.0"
   uid ""
 
@@ -19482,10 +19486,10 @@ eslint-plugin-node@^11.1.0:
     resolve "^1.10.1"
     semver "^6.1.0"
 
-eslint-plugin-playwright@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.2.0.tgz#d7eda21e670274fc0c006e11ba5cc2c8417b2a6e"
-  integrity sha512-qSQpAw7RcSzE3zPp8FMGkthaCWovHZ/BsXtpmnGax9vQLIovlh1bsZHEa2+j2lv9DWhnyeLM/qZmp7ffQZfQvg==
+eslint-plugin-playwright@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.2.2.tgz#f722649b0bf04acd8fef39184249710335b10a6f"
+  integrity sha512-j0jKpndIPOXRRP9uMkwb9l/nSmModOU3452nrFdgFJoEv/435J1onk8+aITzjDW8DfypxgmVaDMdmVIa6F7I0w==
   dependencies:
     globals "^13.23.0"
 
@@ -31447,9 +31451,9 @@ tape@^5.9.0:
     string.prototype.trim "^1.2.9"
 
 tar-fs@^2.0.0:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-2.1.3.tgz#fb3b8843a26b6f13a08e606f7922875eb1fbbf92"
-  integrity sha512-090nwYJDmlhwFwEW3QQl+vaNnxsO2yVsd45eTKRBzSzu+hlb1w2K9inVq5b0ngXuLVqQ4ApvsUHHnu/zQNkWAg==
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-2.1.4.tgz#800824dbf4ef06ded9afea4acafe71c67c76b930"
+  integrity sha512-mDAjwmZdh7LTT6pNleZ05Yt65HC3E+NiQzl672vQG38jIrehtJk/J3mNwIg+vShQPcLF/LV7CMnDW6vjj6sfYQ==
   dependencies:
     chownr "^1.1.1"
     mkdirp-classic "^0.5.2"
@@ -31457,9 +31461,9 @@ tar-fs@^2.0.0:
     tar-stream "^2.1.4"
 
 tar-fs@^3.0.4, tar-fs@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.1.0.tgz#4675e2254d81410e609d91581a762608de999d25"
-  integrity sha512-5Mty5y/sOF1YWj1J6GiBodjlDc05CUR8PKXrsnFAiSG0xA+GHeWLovaZPYUDXkH/1iKRf2+M5+OrRgzC7O9b7w==
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.1.1.tgz#4f164e59fb60f103d472360731e8c6bb4a7fe9ef"
+  integrity sha512-LZA0oaPOc2fVo82Txf3gw+AkEd38szODlptMYejQUhndHMLQ9M059uXR+AfS7DNo0NpINvSqDsvyaCrBVkptWg==
   dependencies:
     pump "^3.0.0"
     tar-stream "^3.1.5"

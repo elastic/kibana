@@ -649,6 +649,9 @@
         "properties": {
           "syncAlerts": {
             "type": "boolean"
+          },
+          "extractObservables": {
+            "type": "boolean"
           }
         }
       },
