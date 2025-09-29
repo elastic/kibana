@@ -361,9 +361,14 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
+  if (trendLineLayer) {
+    trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
+  }
+
   addLayerColumn(defaultLayer, ACCESSOR, columns);
   if (trendLineLayer) {
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, columns);
+    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, columns);
   }
 
   if (layer.breakdown_by) {
