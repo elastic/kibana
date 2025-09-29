@@ -42,7 +42,6 @@ import {
   APPLICATIONS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_HOME_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
   SEARCH_APPS_TITLE,
@@ -288,28 +287,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    core.application.register({
-      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
-      id: SEARCH_EXPERIENCES_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { SearchExperiences } = await import('./applications/search_experiences');
-
-        return renderApp(SearchExperiences, kibanaDeps, pluginData);
-      },
-      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
-      visibleIn: [],
-    });
-
     registerLocators(share!);
 
     core.application.register({
@@ -347,16 +324,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         path: ANALYTICS_PLUGIN.URL,
         showOnHomePage: false,
         title: ANALYTICS_PLUGIN.NAME,
-      });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: SEARCH_EXPERIENCES_PLUGIN.DESCRIPTION,
-        icon: 'logoElasticsearch',
-        id: SEARCH_EXPERIENCES_PLUGIN.ID,
-        path: SEARCH_EXPERIENCES_PLUGIN.URL,
-        showOnHomePage: false,
-        title: SEARCH_EXPERIENCES_PLUGIN.NAME,
       });
     }
   }
