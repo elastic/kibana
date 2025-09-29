@@ -11,8 +11,8 @@ import { monaco } from '@kbn/monaco';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import YAML from 'yaml';
-import type { StepInfo, WorkflowLookup } from './index_yaml_document';
-import { buildWorkflowLookup } from './index_yaml_document';
+import type { StepInfo, WorkflowLookup } from './build_workflow_lookup';
+import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
 
