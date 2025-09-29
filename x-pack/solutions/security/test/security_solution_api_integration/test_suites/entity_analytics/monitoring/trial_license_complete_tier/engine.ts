@@ -21,7 +21,7 @@ import {
   createIntegrationEntitySource,
 } from './utils';
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const privMonUtils = PrivMonUtils(getService);
@@ -393,7 +393,6 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.createEntitySourceForIndex();
 
         const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
-
         const user1Before = privMonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
         await indexSyncUtils.deleteUserFromIndex('user1');
