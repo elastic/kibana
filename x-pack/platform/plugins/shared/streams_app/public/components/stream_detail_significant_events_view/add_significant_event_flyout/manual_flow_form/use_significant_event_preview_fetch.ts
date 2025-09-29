@@ -77,7 +77,15 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [timeState, name, system, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
+    [
+      isQueryValid,
+      timeState.timeRange,
+      noOfBuckets,
+      system,
+      streams.streamsRepositoryClient,
+      name,
+      kqlQuery,
+    ]
   );
 
   return previewFetch;
