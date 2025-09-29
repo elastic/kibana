@@ -26,7 +26,7 @@ import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
-import { createActionThrottle, type ActionThrottle } from './utils';
+import { createActionThrottle } from './utils';
 import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
