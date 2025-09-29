@@ -190,6 +190,7 @@ const ResizableSuggestionsListDiv: React.FC<{
       style={{
         left: `${containerRect.left}px`,
         width: `${containerRect.width}px`,
+        zIndex: 6001,
         ...verticalListPosition,
       }}
     >

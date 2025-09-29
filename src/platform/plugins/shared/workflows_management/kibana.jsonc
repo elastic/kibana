@@ -20,6 +20,7 @@
       "security",
       "triggersActionsUi",
       "spaces",
+      "data",
       "dataViews",
       "fieldFormats",
       "unifiedSearch",

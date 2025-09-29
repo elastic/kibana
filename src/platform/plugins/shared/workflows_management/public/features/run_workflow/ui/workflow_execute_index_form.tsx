@@ -24,11 +24,12 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import type { Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { take } from 'rxjs';
 import type { WorkflowsPluginStartDependencies } from '../../../types';
 
 interface Document {
@@ -84,7 +85,7 @@ export const WorkflowExecuteIndexForm = ({
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
-  const [queryString, setQueryString] = useState<string>('');
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
 
   // Get current user
   useEffect(() => {
@@ -124,7 +125,7 @@ export const WorkflowExecuteIndexForm = ({
 
   // Fetch documents based on selected data view and query
   const fetchDocuments = useCallback(async () => {
-    if (!selectedDataView || !services.http) {
+    if (!selectedDataView || !services.data) {
       return;
     }
 
@@ -132,10 +133,12 @@ export const WorkflowExecuteIndexForm = ({
     setErrors(null);
 
     try {
+      const esQuery = buildEsQuery(selectedDataView, query ? [query] : [], []);
       const searchQuery = {
         bool: {
-          must: [...(queryString ? [{ query_string: { query: queryString } }] : [])],
+          must: esQuery.bool.must || [],
           filter: [
+            ...(esQuery.bool.filter || []),
             {
               range: {
                 '@timestamp': {
@@ -145,30 +148,32 @@ export const WorkflowExecuteIndexForm = ({
               },
             },
           ],
+          should: esQuery.bool.should || [],
+          must_not: esQuery.bool.must_not || [],
         },
       };
 
-      const { rawResponse: response } = await services.http.post<DocumentsResponse>(
-        `/internal/search/es`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Elastic-Api-Version': '1',
+      const request = {
+        params: {
+          index: selectedDataView.getIndexPattern(),
+          body: {
+            query: searchQuery,
+            size: 50,
+            sort: [{ '@timestamp': { order: 'desc' } }],
+            _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
           },
-          body: JSON.stringify({
-            index: selectedDataView.title,
-            body: {
-              query: searchQuery,
-              size: 50,
-              sort: [{ '@timestamp': { order: 'desc' } }],
-              _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
-            },
-          }),
-        }
-      );
+        },
+      };
 
-      if (response && response.hits && response.hits.hits) {
-        setDocuments(response.hits.hits);
+      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
+
+      if (
+        response &&
+        response.rawResponse &&
+        response.rawResponse.hits &&
+        response.rawResponse.hits.hits
+      ) {
+        setDocuments(response.rawResponse.hits.hits as Document[]);
       } else {
         setDocuments([]);
       }
@@ -178,7 +183,7 @@ export const WorkflowExecuteIndexForm = ({
     } finally {
       setDocumentsLoading(false);
     }
-  }, [selectedDataView, queryString, services.http, setErrors]);
+  }, [selectedDataView, query, services.data, setErrors]);
 
   // Fetch documents when data view, query, or filters change
   useEffect(() => {
@@ -217,7 +222,7 @@ export const WorkflowExecuteIndexForm = ({
             timestamp: doc._source['@timestamp'],
             data: doc._source,
           })),
-          query: queryString,
+          query: query.query,
           dataView: selectedDataView?.title,
           additionalData: {
             user: currentUser?.email || 'workflow-user@gmail.com',
@@ -307,12 +312,14 @@ export const WorkflowExecuteIndexForm = ({
           <EuiFormRow label="Documents" fullWidth>
             <SearchBar
               appName="workflow_management"
-              onQuerySubmit={({ query }: { dateRange: TimeRange; query?: Query }) => {
-                if (query && typeof query.query === 'string') {
-                  setQueryString(query.query);
+              onQuerySubmit={({ query: newQuery }: { dateRange: TimeRange; query?: Query }) => {
+                if (newQuery) {
+                  setQuery(newQuery);
+                } else {
+                  setQuery({ query: '', language: 'kuery' });
                 }
               }}
-              query={{ query: queryString, language: 'kuery' }}
+              query={query}
               indexPatterns={selectedDataView ? [selectedDataView] : []}
               showDatePicker={false}
               showFilterBar={false}
