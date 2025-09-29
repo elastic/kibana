@@ -28,7 +28,7 @@ import { createMetricLabel } from './create_metric_label';
 
 /*
  We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to
- `metrics-*,metricbeat-*`. There is a bug in TSVB when there is an empty index in the pattern
+ `metrics-*,metrics-system*,metricbeat-*`. There is a bug in TSVB when there is an empty index in the pattern
  the field dropdowns are not populated correctly. This index pattern is a temporary fix.
  See: https://github.com/elastic/kibana/issues/73987
 */
