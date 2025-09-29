@@ -10,6 +10,7 @@ import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
 import { FIELD_TYPE_MAP } from './constants';
+import { EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
 
 export const FieldType = ({
   type,
@@ -19,10 +20,19 @@ export const FieldType = ({
   aliasFor?: string;
 }) => {
   if (aliasFor) {
-    return i18n.translate('xpack.streams.fieldType.aliasFor', {
-      defaultMessage: 'Alias for {aliasFor}',
-      values: { aliasFor },
-    });
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiToken iconType="tokenAlias" aria-label='alias' />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {i18n.translate('xpack.streams.fieldType.aliasFor', {
+            defaultMessage: 'Alias for {aliasFor}',
+            values: { aliasFor },
+          })}
+        </EuiFlexItem>
+        </EuiFlexGroup>
+  );
   }
   return (
     <FieldNameWithIcon
