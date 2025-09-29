@@ -84,6 +84,8 @@ export interface CasesUiConfigType {
     additionalFields: {
       enabled: boolean;
     };
+  incrementalId: {
+    enabled: boolean;
   };
 }
 
