@@ -37,7 +37,6 @@ import {
 } from '../lib/monaco_connectors';
 import {
   createStepExecutionProvider,
-  createUnifiedActionsProvider,
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
@@ -439,20 +438,6 @@ export const WorkflowYAMLEditor = ({
       // Register hover provider with Monaco
       const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
       disposablesRef.current.push(hoverDisposable);
-
-      // Create other providers
-      const actionsProvider = createUnifiedActionsProvider(editor, providerConfig);
-      // Decorations provider disabled - user prefers only step background highlighting, not green dots
-      // const decorationsProvider = createUnifiedDecorationsProvider(editor, providerConfig);
-
-      // Setup event listener for CSS updates from actions provider
-
-      // Store provider references
-      unifiedProvidersRef.current = {
-        hover: null, // hover provider is managed by Monaco directly
-        actions: actionsProvider,
-        stepExecution: null, // will be created when needed
-      };
     }
 
     onMount?.(editor, monaco);
