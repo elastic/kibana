@@ -78,10 +78,6 @@ it('Provides a feature declaration ', () => {
           ],
         },
       },
-      "scope": Array [
-        "spaces",
-        "security",
-      ],
       "subFeatures": Array [],
     }
   `);
@@ -156,10 +152,6 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
           ],
         },
       },
-      "scope": Array [
-        "spaces",
-        "security",
-      ],
       "subFeatures": Array [
         Object {
           "name": "Reporting",

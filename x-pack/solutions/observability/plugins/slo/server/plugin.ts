@@ -18,7 +18,6 @@ import {
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -78,7 +77,6 @@ export class SLOPlugin
       }),
       order: 1200,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
       alerting: alertingFeatures,
