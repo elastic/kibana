@@ -12,9 +12,7 @@ import { waitFor, renderHook, act } from '@testing-library/react';
 import { useFetchCurrentUserConversations } from '../api';
 import { Conversation } from '../../assistant_context/types';
 import { mockConnectors } from '../../mock/connectors';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-} from '@kbn/management-settings-ids';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 const mockUseAssistantContext = {
   registerPromptContext: jest.fn(),
@@ -29,7 +27,7 @@ const mockUseAssistantContext = {
         return null;
       },
     },
-  }
+  },
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
