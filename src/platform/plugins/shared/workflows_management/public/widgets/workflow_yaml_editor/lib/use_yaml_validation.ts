@@ -166,7 +166,7 @@ const validateLiquidSyntax = (
     // Extract position information from the error
     const position = extractLiquidErrorPosition(template, errorMessage);
     // customer-facing error message without the line number and column number
-    const customerFacingErrorMessage = errorMessage.replace(/line:\d+, col:\d+/g, '');
+    const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
 
     return {
       isValid: false,
