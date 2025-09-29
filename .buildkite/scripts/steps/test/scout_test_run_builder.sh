@@ -18,5 +18,7 @@ node scripts/scout.js run-tests \
 --config src/platform/packages/shared/kbn-scout/test/scout/playwright.config.ts \
 --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+
 echo '--- Producing Scout Test Execution Steps'
 ts-node "$(dirname "${0}")/scout_test_run_builder.ts"
