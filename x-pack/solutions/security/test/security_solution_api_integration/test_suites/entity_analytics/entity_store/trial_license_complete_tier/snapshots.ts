@@ -170,6 +170,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         // Schedule transform and await a new timestamp, greater than timestampBeforeSnapshot
+        await ensureTransformStarted(providerContext);
         const { acknowledged } = await es.transform.scheduleNowTransform({
           transform_id: HOST_TRANSFORM_ID,
         });
@@ -256,7 +257,9 @@ async function createDocumentsAndTriggerTransform(
     const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
     expect(result).to.eql('created');
   }
-
+  if (transform.state === 'stopped') {
+    await ensureTransformStarted(providerContext);
+  }
   // Trigger the transform manually
   const { acknowledged } = await es.transform.scheduleNowTransform({
     transform_id: HOST_TRANSFORM_ID,
