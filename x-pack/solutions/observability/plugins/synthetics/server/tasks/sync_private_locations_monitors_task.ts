@@ -88,32 +88,31 @@ export class SyncPrivateLocationMonitorsTask {
     const lastStartedAt =
       taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
     const startedAt = taskInstance.startedAt || new Date();
-    let lastTotalParams = taskInstance.state.lastTotalParams || 0;
-    let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
-    let hasAlreadyDoneCleanup = taskInstance.state.hasAlreadyDoneCleanup || false;
+
+    const taskState = {
+      lastStartedAt,
+      startedAt: startedAt.toISOString(),
+      lastTotalParams: taskInstance.state.lastTotalParams || 0,
+      lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
+      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
+    };
 
     try {
-      this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
+      this.debugLog(
+        `Syncing private location monitors, current task state is ${JSON.stringify(taskState)}`
+      );
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
 
-      const { performSync, hasAlreadyDoneCleanup: newHasAlreadyDoneCleanup } =
-        await this.cleanUpDuplicatedPackagePolicies(
-          soClient,
-          taskInstance.state,
-          hasAlreadyDoneCleanup
-        );
-
-      hasAlreadyDoneCleanup = newHasAlreadyDoneCleanup;
+      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient, taskState);
 
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      const { totalMWs, totalParams, hasDataChanged } = await this.hasAnyDataChanged({
+      const { hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
-        taskInstance,
+        taskState,
       });
-      lastTotalParams = totalParams;
-      lastTotalMWs = totalMWs;
+
       if (hasDataChanged || performSync) {
         if (hasDataChanged) {
           this.debugLog(`Syncing private location monitors because data has changed`);
@@ -138,21 +137,11 @@ export class SyncPrivateLocationMonitorsTask {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       return {
         error,
-        state: {
-          lastStartedAt: startedAt.toISOString(),
-          lastTotalParams,
-          lastTotalMWs,
-          hasAlreadyDoneCleanup,
-        },
+        state: taskState,
       };
     }
     return {
-      state: {
-        lastStartedAt: startedAt.toISOString(),
-        lastTotalParams,
-        lastTotalMWs,
-        hasAlreadyDoneCleanup,
-      },
+      state: taskState,
     };
   }
 
@@ -175,16 +164,13 @@ export class SyncPrivateLocationMonitorsTask {
   };
 
   hasAnyDataChanged = async ({
-    taskInstance,
+    taskState,
     soClient,
   }: {
-    taskInstance: CustomTaskInstance;
+    taskState: TaskState;
     soClient: SavedObjectsClientContract;
   }) => {
-    const lastStartedAt =
-      taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
-    const lastTotalParams = taskInstance.state.lastTotalParams || 0;
-    const lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
+    const { lastTotalParams, lastTotalMWs, lastStartedAt } = taskState;
 
     const { totalParams, hasParamsChanges } = await this.hasAnyParamChanged({
       soClient,
@@ -196,8 +182,11 @@ export class SyncPrivateLocationMonitorsTask {
       lastStartedAt,
       lastTotalMWs,
     });
+    taskState.lastTotalParams = totalParams;
+    taskState.lastTotalMWs = totalMWs;
+
     const hasDataChanged = hasMWsChanged || hasParamsChanges;
-    return { hasDataChanged, totalParams, totalMWs };
+    return { hasDataChanged };
   };
 
   async syncGlobalParams({
@@ -412,18 +401,22 @@ export class SyncPrivateLocationMonitorsTask {
   }
 
   debugLog = (message: string) => {
-    this.serverSetup.logger.debug(`[syncGlobalParams] ${message} `);
+    this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message} `);
   };
 
   async cleanUpDuplicatedPackagePolicies(
     soClient: SavedObjectsClientContract,
-    taskState: Partial<TaskState>,
-    hasAlreadyDoneCleanup: boolean
+    taskState: TaskState
   ) {
     let performSync = false;
 
-    if (!hasAlreadyDoneCleanup) {
-      return { performSync, hasAlreadyDoneCleanup };
+    if (taskState.hasAlreadyDoneCleanup) {
+      this.debugLog(
+        'Skipping cleanup of duplicated package policies as it has already been done once'
+      );
+      return { performSync };
+    } else {
+      this.debugLog('Starting cleanup of duplicated package policies');
     }
     const { fleet } = this.serverSetup.pluginsStart;
     const { logger } = this.serverSetup;
@@ -494,13 +487,14 @@ export class SyncPrivateLocationMonitorsTask {
           spaceIds: ['*'],
         });
       }
-      return { performSync, hasAlreadyDoneCleanup: true };
+      taskState.hasAlreadyDoneCleanup = true;
+      return { performSync };
     } catch (e) {
       logger.error(
         '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
         { error: e }
       );
-      return { performSync, hasAlreadyDoneCleanup: false };
+      return { performSync };
     }
   }
 }
@@ -533,4 +527,22 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
       { error }
     );
   }
+};
+
+export const resetSyncPrivateCleanUpState = async ({
+  server,
+}: {
+  server: SyntheticsServerSetup;
+}) => {
+  const {
+    logger,
+    pluginsStart: { taskManager },
+  } = server;
+  logger.debug(`Resetting Synthetics sync private location monitors cleanup state`);
+  await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
+    ...state,
+    hasAlreadyDoneCleanup: false,
+  }));
+  await runSynPrivateLocationMonitorsTaskSoon({ server });
+  logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
 };
