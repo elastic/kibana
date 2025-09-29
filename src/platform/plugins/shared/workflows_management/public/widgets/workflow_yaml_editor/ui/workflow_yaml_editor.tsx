@@ -8,19 +8,11 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiIcon,
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  transparentize,
-} from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema, isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
@@ -100,6 +92,7 @@ export interface WorkflowYAMLEditorProps {
   highlightStep?: string;
   stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
+  highlightDiff?: boolean;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
@@ -121,6 +114,7 @@ export const WorkflowYAMLEditor = ({
   lastUpdatedAt,
   highlightStep,
   stepExecutions,
+  highlightDiff = false,
   onMount,
   onChange,
   onSave,
@@ -201,7 +195,6 @@ export const WorkflowYAMLEditor = ({
   });
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
-  const [showDiffHighlight, setShowDiffHighlight] = useState(false);
 
   // Helper to compute diff lines
   const calculateLineDifferences = useCallback((original: string, current: string) => {
@@ -217,7 +210,7 @@ export const WorkflowYAMLEditor = ({
 
   // Apply diff highlight when toggled
   useEffect(() => {
-    if (!showDiffHighlight || !originalValue || !editorRef.current || !isEditorMounted) {
+    if (!highlightDiff || !originalValue || !editorRef.current || !isEditorMounted) {
       if (changesHighlightDecorationCollectionRef.current) {
         changesHighlightDecorationCollectionRef.current.clear();
       }
@@ -243,7 +236,7 @@ export const WorkflowYAMLEditor = ({
     return () => {
       changesHighlightDecorationCollectionRef.current?.clear();
     };
-  }, [showDiffHighlight, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
+  }, [highlightDiff, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
 
   // Add a ref to track if the last change was just typing
   const lastChangeWasTypingRef = useRef(false);
@@ -1318,72 +1311,6 @@ export const WorkflowYAMLEditor = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div
-        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-      >
-        {hasChanges ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.accent,
-              cursor: 'pointer',
-              borderRadius: euiTheme.border.radius.small,
-              '&:hover': {
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              },
-            }}
-            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={showDiffHighlight}
-            aria-label={
-              showDiffHighlight
-                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
-                    defaultMessage: 'Hide diff highlighting',
-                  })
-                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
-                    defaultMessage: 'Show diff highlighting',
-                  })
-            }
-            onKeyDown={() => {}}
-            title={
-              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
-            }
-          >
-            <EuiIcon type="dot" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                defaultMessage="Unsaved changes"
-              />
-            </span>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.textSubdued,
-            }}
-          >
-            <EuiIcon type="check" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.saved"
-                defaultMessage="Saved"
-              />{' '}
-              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-            </span>
-          </div>
-        )}
-      </div>
       <div css={styles.editorContainer}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}

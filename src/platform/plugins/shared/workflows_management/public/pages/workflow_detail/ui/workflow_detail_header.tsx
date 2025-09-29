@@ -17,6 +17,8 @@ import {
   EuiFlexItem,
   EuiPageHeaderSection,
   EuiPageTemplate,
+  EuiSkeletonLoading,
+  EuiSkeletonRectangle,
   EuiSkeletonTitle,
   EuiSwitch,
   EuiTitle,
@@ -27,6 +29,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
 
@@ -46,11 +49,14 @@ export interface WorkflowDetailHeaderProps {
   handleTestClick: () => void;
   isValid: boolean;
   hasUnsavedChanges: boolean;
+  // TODO: manage it in a workflow state context
+  highlightDiff: boolean;
+  setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  lastUpdatedAt: Date | null;
 }
 
 export const WorkflowDetailHeader = ({
   name,
-  yaml,
   isLoading,
   activeTab,
   canRunWorkflow,
@@ -64,6 +70,9 @@ export const WorkflowDetailHeader = ({
   handleTabChange,
   isValid,
   hasUnsavedChanges,
+  highlightDiff,
+  setHighlightDiff,
+  lastUpdatedAt,
 }: WorkflowDetailHeaderProps) => {
   const styles = useMemoCss(componentStyles);
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
@@ -111,16 +120,39 @@ export const WorkflowDetailHeader = ({
       <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
         <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
           <EuiPageHeaderSection css={styles.headerSection}>
-            <EuiSkeletonTitle
-              size="l"
-              isLoading={isLoading}
-              contentAriaLabel={name}
-              css={styles.skeletonTitle}
+            <EuiFlexGroup
+              alignItems="center"
+              responsive={false}
+              gutterSize="m"
+              css={styles.titleGroup}
             >
-              <EuiTitle size="l" css={styles.title}>
-                <span>{name}</span>
-              </EuiTitle>
-            </EuiSkeletonTitle>
+              <EuiFlexItem grow={false} css={styles.titleItem}>
+                <EuiSkeletonTitle
+                  size="m"
+                  isLoading={isLoading}
+                  contentAriaLabel={name}
+                  css={styles.skeletonTitle}
+                >
+                  <EuiTitle size="m" css={styles.title}>
+                    <h1>{name}</h1>
+                  </EuiTitle>
+                </EuiSkeletonTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSkeletonLoading
+                  isLoading={isLoading}
+                  loadingContent={<EuiSkeletonRectangle width="80px" height="20px" />}
+                  loadedContent={
+                    <WorkflowUnsavedChangesBadge
+                      hasChanges={hasUnsavedChanges}
+                      highlightDiff={highlightDiff}
+                      setHighlightDiff={setHighlightDiff}
+                      lastUpdatedAt={lastUpdatedAt}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection
             css={{
@@ -265,6 +297,9 @@ const componentStyles = {
       '@media (max-width: 1024px)': {
         flexDirection: 'column',
       },
+      '& > div > div': {
+        gap: '24px', // increase gap between title+badge and the "workflow/executions" toggle
+      },
     }),
   headerSection: css({
     flexBasis: '40%',
@@ -280,7 +315,8 @@ const componentStyles = {
       alignSelf: 'stretch',
     }),
   skeletonTitle: css({
-    minWidth: '200px',
+    minWidth: '250px',
+    width: '100%',
     display: 'inline-block',
   }),
   title: css({
@@ -288,5 +324,12 @@ const componentStyles = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     display: 'inline-block',
+  }),
+  titleGroup: css({
+    overflow: 'hidden',
+  }),
+  titleItem: css({
+    minWidth: 0,
+    overflow: 'hidden',
   }),
 };

@@ -65,6 +65,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [highlightDiff, setHighlightDiff] = useState(false);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
@@ -260,7 +261,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
-        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
@@ -276,6 +276,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           setActiveTab(tab);
         }}
         hasUnsavedChanges={hasChanges}
+        highlightDiff={highlightDiff}
+        setHighlightDiff={setHighlightDiff}
+        lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
       />
       <EuiFlexGroup gutterSize="none" css={styles.container}>
         <EuiFlexItem css={styles.main}>
@@ -296,6 +299,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   selectedExecutionId={selectedExecutionId}
                   originalValue={workflow?.yaml ?? ''}
                   onStepActionClicked={handleStepRun}
+                  highlightDiff={highlightDiff}
                 />
               </React.Suspense>
             </EuiFlexItem>
