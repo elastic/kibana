@@ -42,8 +42,6 @@ export async function stepSaveSystemObject(context: InstallContext) {
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-  // console.log(pkgVersion);
-  // console.log(installedPkg?.attributes.version);
   await withPackageSpan('Update install status', () =>
     savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       version: pkgVersion,
