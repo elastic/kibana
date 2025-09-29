@@ -171,7 +171,7 @@ async function runConfigs(
 
         const args = [
           'scripts/jest',
-          '--config=',
+          '--config',
           config,
           '--runInBand',
           '--coverage=false',

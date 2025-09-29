@@ -125,12 +125,12 @@ describe('run_all.ts', () => {
       });
 
       // Complete all processes successfully
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.emit('exit', 0);
         if (mockSpawn.mock.calls.length > 1) {
           mockProcess.emit('exit', 0);
         }
-      }, 10);
+      });
 
       await runPromise;
 
@@ -175,9 +175,9 @@ describe('run_all.ts', () => {
         // Expected due to process.exit mock
       });
 
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.emit('exit', 0);
-      }, 10);
+      });
 
       await runPromise;
 
@@ -202,9 +202,9 @@ describe('run_all.ts', () => {
         // Expected due to process.exit mock
       });
 
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.emit('exit', 0);
-      }, 10);
+      });
 
       await runPromise;
 
@@ -230,9 +230,9 @@ describe('run_all.ts', () => {
         // Expected due to process.exit mock
       });
 
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.emit('exit', 0);
-      }, 10);
+      });
 
       await runPromise;
 
@@ -258,6 +258,8 @@ describe('run_all.ts', () => {
   });
 
   describe('Jest process execution', () => {
+    // Increase timeout for this suite as it involves async process mocking
+    jest.setTimeout(15000);
     it('should spawn Jest processes with correct arguments', async () => {
       mockGetopts.mockReturnValue({
         configs: 'config1.js',
@@ -279,9 +281,9 @@ describe('run_all.ts', () => {
         // Expected due to process.exit mock
       });
 
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.emit('exit', 0);
-      }, 10);
+      });
 
       await runPromise;
 
@@ -289,7 +291,7 @@ describe('run_all.ts', () => {
         process.execPath,
         [
           'scripts/jest',
-          '--config=',
+          '--config',
           '/path/to/config1.js',
           '--runInBand',
           '--coverage=false',
@@ -313,11 +315,11 @@ describe('run_all.ts', () => {
       });
 
       // Simulate process output
-      setTimeout(() => {
+      process.nextTick(() => {
         mockProcess.stdout.emit('data', Buffer.from('Test output from stdout'));
         mockProcess.stderr.emit('data', Buffer.from('Test output from stderr'));
         mockProcess.emit('exit', 0);
-      }, 10);
+      });
 
       await runPromise;
 
@@ -340,9 +342,9 @@ describe('run_all.ts', () => {
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          setTimeout(() => {
+          process.nextTick(() => {
             mockProcess.emit('exit', 1); // Always fail
-          }, 10);
+          });
 
           return mockProcess;
         });
@@ -374,9 +376,9 @@ describe('run_all.ts', () => {
           // Expected due to process.exit mock
         });
 
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.emit('exit', 0);
-        }, 10);
+        });
 
         await runPromise;
 
@@ -399,9 +401,9 @@ describe('run_all.ts', () => {
           // Expected due to process.exit mock
         });
 
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.emit('exit', 0);
-        }, 10);
+        });
 
         await runPromise;
 
@@ -421,10 +423,10 @@ describe('run_all.ts', () => {
         });
 
         // Simulate process with output
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.stdout.emit('data', Buffer.from('Test output'));
           mockProcess.emit('exit', 0);
-        }, 10);
+        });
 
         await runPromise;
 
@@ -443,9 +445,9 @@ describe('run_all.ts', () => {
           // Expected due to process.exit mock
         });
 
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.emit('exit', 0);
-        }, 10);
+        });
 
         await runPromise;
 
@@ -463,9 +465,9 @@ describe('run_all.ts', () => {
           // Expected due to process.exit mock
         });
 
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.emit('exit', 0);
-        }, 10);
+        });
 
         await runPromise;
 
@@ -497,10 +499,10 @@ describe('run_all.ts', () => {
           mockProcess.stderr = new EventEmitter();
 
           // Always fail both initial and retry attempts
-          setTimeout(() => {
+          process.nextTick(() => {
             mockProcess.emit('exit', 1);
             processCount++;
-          }, 10);
+          });
 
           return mockProcess;
         });
@@ -566,9 +568,9 @@ describe('run_all.ts', () => {
         });
 
         // Complete process after a delay
-        setTimeout(() => {
+        process.nextTick(() => {
           mockProcess.emit('exit', 0);
-        }, 50);
+        });
 
         await runPromise;
 
@@ -590,11 +592,11 @@ describe('run_all.ts', () => {
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          setTimeout(() => {
+          process.nextTick(() => {
             // Fail first time, succeed on retry
             mockProcess.emit('exit', callCount === 0 ? 1 : 0);
             callCount++;
-          }, 10);
+          });
 
           return mockProcess;
         });
@@ -623,9 +625,9 @@ describe('run_all.ts', () => {
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          setTimeout(() => {
+          process.nextTick(() => {
             mockProcess.emit('exit', 1);
-          }, 10);
+          });
 
           return mockProcess;
         });
