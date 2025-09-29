@@ -78,7 +78,12 @@ describe('ConnectorSelector', () => {
 
   it('should disable selection when isDisabled is true', () => {
     const { getByTestId } = render(
-      <ConnectorSelector connectors={connectors} onChange={mockOnChange} isDisabled settings={mockSettings} />
+      <ConnectorSelector
+        connectors={connectors}
+        onChange={mockOnChange}
+        isDisabled
+        settings={mockSettings}
+      />
     );
     expect(getByTestId(testSubj)).toBeDisabled();
   });
