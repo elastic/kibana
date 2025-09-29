@@ -194,6 +194,9 @@ export function SignificantEventsTable({
           },
         },
         {
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
           name: i18n.translate('xpack.streams.significantEventsTable.removeQueryActionTitle', {
             defaultMessage: 'Remove',
           }),
