@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../../..';
+import { withAutoSuggest } from './helpers';
 
 /**
  * This function provides suggestions for map expressions within a command.
@@ -43,17 +43,15 @@ export function getCommandMapExpressionSuggestions(
       (paramName) => !usedParams.has(paramName)
     );
 
-    return availableParamNames.map(
-      (paramName) =>
-        ({
-          label: paramName,
-          kind: 'Constant',
-          asSnippet: true,
-          text: `"${paramName}": "$0"`,
-          detail: paramName,
-          sortText: '1',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        } as ISuggestionItem)
+    return availableParamNames.map((paramName) =>
+      withAutoSuggest({
+        label: paramName,
+        kind: 'Constant',
+        asSnippet: true,
+        text: `"${paramName}": "$0"`,
+        detail: paramName,
+        sortText: '1',
+      })
     );
   }
 
