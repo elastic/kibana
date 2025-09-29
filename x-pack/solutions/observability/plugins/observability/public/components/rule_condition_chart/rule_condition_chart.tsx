@@ -185,7 +185,7 @@ export function RuleConditionChart({
         yAxis: [
           {
             value: (warningThreshold[0] || 0).toString(),
-            seriesColor: euiTheme.colors.danger,
+            seriesColor: euiTheme.colors.warning,
             fill: startFill,
           },
           warningComparator === COMPARATORS.BETWEEN
@@ -197,7 +197,7 @@ export function RuleConditionChart({
             : undefined,
           {
             value: (warningThreshold[1] || 0).toString(),
-            seriesColor: euiTheme.colors.danger,
+            seriesColor: euiTheme.colors.warning,
             fill: endFill,
           },
         ].filter(NonNullable),
