@@ -22,6 +22,8 @@ import { useGetSeverity } from './use_get_severity';
 import * as i18n from './translations';
 import { generateJSONValidator } from '../validate_json';
 import { JsonEditorField } from '../json_editor_field';
+import { useGetFields } from './use_get_fields';
+import { AdditionalFormField } from './additional_form_field';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http } = useKibana().services;
@@ -35,6 +37,27 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
     http,
     connector,
   });
+
+  const {
+    isLoading: isLoadingFields,
+    isFetching: isFetchingFields,
+    data: fieldsData,
+  } = useGetFields({
+    http,
+    connector,
+  });
+  const fieldComboOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
+    return (
+      fieldsData?.data?.map((field) => ({
+        label: field.text,
+        value: field.name,
+      })) ?? []
+    );
+  }, [fieldsData?.data]);
+
+  const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
+    []
+  );
 
   const {
     isLoading: isLoadingSeverityData,
@@ -72,6 +95,28 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
 
   return (
     <span data-test-subj={'connector-fields-resilient'}>
+      <EuiComboBox
+        data-test-subj="incidentTypeComboBox"
+        fullWidth
+        isClearable={true}
+        isDisabled={isLoadingFields}
+        isLoading={isFetchingFields || isLoadingFields}
+        onChange={setAdditionalFields}
+        options={fieldComboOptions}
+        placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
+        selectedOptions={additionalFields}
+      />
+
+      <div>
+        {additionalFields.map((field) => {
+          const fieldMetaData = fieldsData?.data?.find((f) => f.name === field.value);
+          if (!fieldMetaData) {
+            return null;
+          }
+          return <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />;
+        })}
+      </div>
+
       <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
