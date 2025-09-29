@@ -31,7 +31,6 @@ import {
   ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
 } from '../../..';
 
 /**
@@ -236,7 +235,6 @@ export class ScoutJestReporter extends BaseReporter {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.scoutLog);
     } catch (e) {
       // Log the error but don't propagate it
       this.scoutLog.error(e);

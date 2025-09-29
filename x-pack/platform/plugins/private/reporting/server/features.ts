@@ -8,7 +8,6 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 interface FeatureRegistrationOpts {
   features: FeaturesPluginSetup;
@@ -27,7 +26,6 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
         defaultMessage: 'Reporting',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [],
       privileges: {
         all: { savedObject: { all: [], read: [] }, ui: [] },
@@ -45,7 +43,6 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
       }),
       category: DEFAULT_APP_CATEGORIES.management,
       management: { insightsAndAlerting: ['reporting'] },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       hidden: true,
       app: [],
       privileges: null,

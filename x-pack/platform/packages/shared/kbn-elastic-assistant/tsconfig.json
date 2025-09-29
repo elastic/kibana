@@ -41,5 +41,11 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-default-llm-setting",
   ]
 }
