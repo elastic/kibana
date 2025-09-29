@@ -109,6 +109,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
         ...options,
         batchSize,
         total: res.total,
+        spaceId: currentSpaceId,
       },
       { pitId: await openPointInTime(esClient) }
     ).runActionAsyncTask();
