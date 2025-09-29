@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps } from '@elastic/eui';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
@@ -16,25 +18,156 @@ import {
   DataGridDensity,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ESQLStatsQueryMeta } from '../utils';
 
 interface ESQLDataCascadeLeafCellProps
   extends Omit<
-    UnifiedDataTableProps,
-    | 'loadingState'
-    | 'onSetColumns'
-    | 'sampleSizeState'
-    | 'onUpdateSampleSize'
-    | 'onUpdateDataGridDensity'
-    | 'expandedDoc'
-    | 'setExpandedDoc'
-  > {
+      UnifiedDataTableProps,
+      | 'loadingState'
+      | 'onSetColumns'
+      | 'sampleSizeState'
+      | 'onUpdateSampleSize'
+      | 'onUpdateDataGridDensity'
+      | 'expandedDoc'
+      | 'setExpandedDoc'
+    >,
+    CascadeRowCellNestedVirtualizationAnchorProps<DataTableRecord> {
   cellData: DataTableRecord[];
   cellId: string;
   queryMeta: ESQLStatsQueryMeta;
 }
+
+interface CustomCascadeGridBodyProps
+  extends EuiDataGridCustomBodyProps,
+    Pick<
+      CascadeRowCellNestedVirtualizationAnchorProps<DataTableRecord>,
+      'getScrollElement' | 'getScrollMargin'
+    > {
+  isFullScreenMode?: boolean;
+  initialOffset: () => number;
+  data: DataTableRecord[];
+}
+
+const customCascadeGridBodyStyle = {
+  wrapper: css({
+    width: '100%',
+    position: 'relative',
+    overflowAnchor: 'none',
+  }),
+  inner: css({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    overflowAnchor: 'none',
+  }),
+};
+
+/**
+ * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
+ * that allows for nested cascade virtualization that's compatible with the EUI Data Grid
+ */
+export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
+  isFullScreenMode,
+  initialOffset,
+  data,
+  getScrollElement,
+  getScrollMargin,
+  Cell,
+  visibleColumns,
+  visibleRowData,
+  headerRow,
+  footerRow,
+  setCustomGridBodyProps,
+}: CustomCascadeGridBodyProps) {
+  const visibleRows = useMemo(
+    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
+    [data, visibleRowData.startRow, visibleRowData.endRow]
+  );
+
+  const scrollMargin = useMemo(() => getScrollMargin(), [getScrollMargin]);
+
+  // create scroll element reference for custom nested virtualized grid
+  const customCascadeGridScrollRef = useRef<Element | null>(getScrollElement());
+
+  const scrollElementGetter = useCallback(() => customCascadeGridScrollRef.current, []);
+
+  const virtualizer = useVirtualizer({
+    count: visibleRows.length,
+    estimateSize: () => 50,
+    overscan: 15,
+    initialOffset,
+    scrollMargin,
+    getScrollElement: scrollElementGetter,
+    useAnimationFrameWithResizeObserver: true,
+  });
+
+  useEffect(() => {
+    const defaultScrollElement = getScrollElement();
+
+    return setCustomGridBodyProps({
+      ref: ($gridBody) => {
+        if (isFullScreenMode && !customCascadeGridScrollRef.current?.isSameNode($gridBody)) {
+          // assign the custom grid body element as scrollable element in full screen mode
+          customCascadeGridScrollRef.current = $gridBody;
+        } else if (
+          !isFullScreenMode &&
+          !customCascadeGridScrollRef.current?.isSameNode(defaultScrollElement)
+        ) {
+          // when exiting full screen mode we ensure the scroll element is reset to the default scroll container
+          customCascadeGridScrollRef.current = defaultScrollElement;
+        }
+      },
+    });
+  }, [getScrollElement, isFullScreenMode, setCustomGridBodyProps]);
+
+  const items = virtualizer.getVirtualItems();
+
+  return (
+    <div data-test-subj="dataGridBody" role="rowgroup">
+      <React.Fragment>{headerRow}</React.Fragment>
+      <div
+        css={customCascadeGridBodyStyle.wrapper}
+        style={{
+          height: virtualizer.getTotalSize(),
+        }}
+      >
+        <div
+          css={customCascadeGridBodyStyle.inner}
+          style={{
+            transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin ?? 0}px)`,
+          }}
+        >
+          {items.map((virtualRow) => (
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              className="euiDataGridRow"
+              css={{ display: 'flex' }}
+            >
+              {visibleColumns.map((column, colIndex) => {
+                return (
+                  <Cell
+                    key={`${virtualRow.index}-${colIndex}`}
+                    colIndex={colIndex}
+                    rowIndex={virtualRow.index}
+                    visibleRowIndex={virtualRow.index}
+                    columnId={column.id}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+      <React.Fragment>{footerRow}</React.Fragment>
+    </div>
+  );
+});
 
 export const ESQLDataCascadeLeafCell = React.memo(
   ({
@@ -49,6 +182,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showKeyboardShortcuts,
     renderDocumentView,
     externalCustomRenderers,
+    getScrollElement,
+    getScrollMargin,
+    getScrollOffset,
   }: ESQLDataCascadeLeafCellProps) => {
     const [, setVisibleColumns] = useState(queryMeta.groupByFields.map((group) => group.field));
     const [sampleSize, setSampleSize] = useState(cellData.length);
@@ -56,6 +192,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
+
+    const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -83,6 +221,35 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [setExpandedDoc]
     );
 
+    const renderCustomCascadeGridBodyCallback = useCallback(
+      ({
+        Cell,
+        visibleColumns,
+        visibleRowData,
+        setCustomGridBodyProps,
+        gridWidth,
+        headerRow,
+        footerRow,
+      }: EuiDataGridCustomBodyProps) => (
+        <CustomCascadeGridBodyMemoized
+          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          Cell={Cell}
+          data={cellData}
+          visibleColumns={visibleColumns}
+          visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
+          gridWidth={gridWidth}
+          getScrollMargin={getScrollMargin}
+          setCustomGridBodyProps={setCustomGridBodyProps}
+          getScrollElement={getScrollElement}
+          initialOffset={getScrollOffset}
+          isFullScreenMode={isCellInFullScreenMode}
+        />
+      ),
+      [cellData, cellId, getScrollElement, getScrollMargin, getScrollOffset, isCellInFullScreenMode]
+    );
+
     const derivedColumns = useMemo(() => [], []);
 
     return (
@@ -108,7 +275,10 @@ export const ESQLDataCascadeLeafCell = React.memo(
           dataGridDensityState={cascadeDataGridDensityState}
           onUpdateDataGridDensity={setCascadeDataGridDensityState}
           renderDocumentView={renderDocumentView}
+          renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+          onFullScreenChange={setIsCellInFullScreenMode}
           externalCustomRenderers={externalCustomRenderers}
+          paginationMode="infinite"
         />
       </EuiPanel>
     );
