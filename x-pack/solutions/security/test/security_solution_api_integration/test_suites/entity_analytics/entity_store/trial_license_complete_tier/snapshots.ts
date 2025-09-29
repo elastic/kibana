@@ -264,13 +264,14 @@ async function createDocumentsAndTriggerTransform(
   expect(acknowledged).to.be(true);
 
   const startedWaiting: number = new Date().valueOf();
+  const log = providerContext.getService('log');
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
     const response = await es.transform.getTransformStats({
       transform_id: HOST_TRANSFORM_ID,
     });
     transform = response.transforms[0];
     if (new Date().valueOf() - startedWaiting > TIMEOUT_MS * 0.95) {
-      console.log(JSON.stringify(response));
+      log.error(JSON.stringify(response));
     }
     expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);

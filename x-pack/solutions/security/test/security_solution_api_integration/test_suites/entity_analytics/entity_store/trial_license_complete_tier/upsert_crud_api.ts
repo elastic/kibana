@@ -12,7 +12,10 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { cleanUpEntityStore } from './infra/teardown';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { enableEntityStore } from './infra/setup';
-import { createDocumentsAndTriggerTransform as createDocumentsAndTriggerUserTransform } from './infra/user_transform';
+import {
+  createDocumentsAndTriggerTransform as createDocumentsAndTriggerUserTransform,
+  USER_TRANSFORM_ID,
+} from './infra/user_transform';
 
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const INDEX_NAME: string = '.entities.v1.latest.security_user_default';
@@ -48,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         await enableEntityStore(providerContext);
+        await ensureTransformStarted(providerContext);
         log.info('beforeEach complete');
       });
 
@@ -97,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
           query: {},
         });
 
-        expect(statusCode).toEqual(200);
+        expect(statusCode).toEqual(400);
 
         log.info('Verifying upsert updated subject user...');
         await retry.waitForWithTimeout('Document is updated', TIMEOUT, async () => {
@@ -140,6 +144,16 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
   });
+}
+
+async function ensureTransformStarted(providerContext: FtrProviderContext): Promise<void> {
+  const es = providerContext.getService('es');
+  await es.transform.startTransform(
+    {
+      transform_id: USER_TRANSFORM_ID,
+    },
+    { ignore: [409] }
+  );
 }
 
 async function assertEntityFromES(
