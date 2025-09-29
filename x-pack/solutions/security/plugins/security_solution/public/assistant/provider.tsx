@@ -145,6 +145,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     userProfile,
     chrome,
     productDocBase,
+    settings,
   } = useKibana().services;
 
   let inferenceEnabled = false;
@@ -243,6 +244,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       currentAppId={currentAppId ?? 'securitySolutionUI'}
       userProfileService={userProfile}
       chrome={chrome}
+      settings={settings}
     >
       {children}
     </ElasticAssistantProvider>
