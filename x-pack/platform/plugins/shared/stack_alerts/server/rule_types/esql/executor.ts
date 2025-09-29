@@ -7,13 +7,33 @@
 
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
+import { v4 } from 'uuid';
 import type { CoreSetup } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { FieldsObject } from '@kbn/alerting-rule-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { EsqlRuleParams } from '@kbn/response-ops-rule-params/esql';
+import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 
 import type { ExecutorOptions, OnlyEsqlQueryRuleParams } from './types';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
+
+export interface EsQueryRuleActionContext extends AlertInstanceContext {
+  // the date the rule was run as an ISO date
+  date: string;
+  // the value that met the threshold
+  value: number;
+  // threshold conditions
+  conditions: string;
+  // query matches
+  hits: estypes.SearchHit[];
+  // a link to see records that triggered the rule for Discover rule
+  // a link which navigates to stack management in case of Elastic query rule
+  link: string;
+  sourceFields: string[];
+  grouping?: FieldsObject;
+}
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRuleParams>) {
   const {
@@ -55,14 +75,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRul
     dateEnd,
   });
 
-  console.log(
-    'parsedResults',
-    JSON.stringify(parsedResults, null, 2),
-    'link',
-    link,
-    'index',
-    index
-  );
+  for (const result of parsedResults.results) {
+    alertsClient.report({
+      id: v4(),
+      actionGroup: 'query matched',
+      state: {},
+      context: {},
+      payload: {},
+    });
+  }
+  alertsClient.setAlertLimitReached(parsedResults.truncated);
+
   return { state: {} };
 }
 
