@@ -27,6 +27,8 @@ import {
   EuiToolTip,
   EuiBadge,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -200,49 +202,46 @@ export class JobsListUI extends Component {
         },
       },
       {
-        field: 'auditMessage',
         'data-test-subj': 'mlJobListColumnIcons',
         name: (
           <EuiScreenReaderOnly>
             <p>
               <FormattedMessage
-                id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
-                defaultMessage="This column displays icons when there are errors or warnings for the job in the past 24 hours"
+                id="xpack.ml.jobsList.iconsColumn.screenReaderDescription"
+                defaultMessage="This column displays an alert icon when the job has alert rules, or a status icon when there are warnings or errors in the past 24 hours"
               />
             </p>
           </EuiScreenReaderOnly>
         ),
-        render: (item) => <JobIcon message={item} showTooltip={true} />,
-      },
-      {
-        field: 'alertingRules',
-        'data-test-subj': 'mlJobListColumnAlertingRuleIndicator',
-        name: (
-          <EuiScreenReaderOnly>
-            <p>
-              <FormattedMessage
-                id="xpack.ml.jobsList.alertingRules.screenReaderDescription"
-                defaultMessage="This column displays icons when there are alert rules associated with a job"
-              />
-            </p>
-          </EuiScreenReaderOnly>
-        ),
-        width: '30px',
-        render: (item) => {
-          return Array.isArray(item) ? (
-            <EuiIconTip
-              position="bottom"
-              content={
-                <FormattedMessage
-                  id="xpack.ml.jobsList.alertingRules.tooltipContent"
-                  defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
-                  values={{ rulesCount: item.length }}
-                />
-              }
-              type="bell"
-            />
-          ) : (
-            <span />
+        width: '50px',
+        render: (row) => {
+          const showAlertIcon = Array.isArray(row.alertingRules) && row.alertingRules.length > 0;
+          const showAuditIcon = Boolean(row.auditMessage);
+          if (!showAlertIcon && !showAuditIcon) return null;
+          return (
+            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+              {showAlertIcon && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    position="bottom"
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.alertingRules.tooltipContent"
+                        defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one {rule} other {rules}}"
+                        values={{ rulesCount: row.alertingRules?.length }}
+                      />
+                    }
+                    type="bell"
+                    data-test-subj="mlJobListAlertRulesIcon"
+                  />
+                </EuiFlexItem>
+              )}
+              {showAuditIcon && (
+                <EuiFlexItem grow={false}>
+                  <JobIcon message={row.auditMessage} showTooltip={true} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       },

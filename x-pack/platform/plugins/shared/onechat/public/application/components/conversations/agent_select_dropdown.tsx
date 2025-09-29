@@ -27,6 +27,8 @@ import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { labels } from '../../utils/i18n';
 
+const agentSelectId = 'agentBuilderAgentSelect';
+
 interface AgentSelectButtonProps {
   selectedAgentName?: string;
   isLoading: boolean;
@@ -44,6 +46,7 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
     iconType="arrowDown"
     onClick={onClick}
     aria-haspopup="menu"
+    aria-labelledby={agentSelectId}
   >
     {selectedAgentName}
   </EuiButtonEmpty>
@@ -110,6 +113,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable
+        id={agentSelectId}
         aria-label={labels.conversations.selectAgentAriaLabel}
         searchable={false}
         options={options}

@@ -730,7 +730,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
-                rules: [],
               },
             },
           ]
