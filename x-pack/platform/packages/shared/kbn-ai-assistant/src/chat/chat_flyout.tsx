@@ -19,6 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { ApplicationStart } from '@kbn/core/public';
+import { navigateToConnectorsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -140,6 +142,11 @@ export function ChatFlyout({
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
     onFlyoutPositionModeChange?.(newFlyoutPositionMode);
+  };
+
+  const navigateToConnectorsManagementAppHandler = (application: ApplicationStart) => {
+    onClose();
+    navigateToConnectorsManagementApp(application);
   };
 
   return isOpen ? (
@@ -287,6 +294,7 @@ export function ChatFlyout({
                     }
                   : undefined
               }
+              navigateToConnectorsManagementApp={navigateToConnectorsManagementAppHandler}
             />
           </EuiFlexItem>
 
