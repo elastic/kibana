@@ -50,6 +50,7 @@ interface CreateToolClientParams {
   getRunner: () => Runner;
   toolSources: ToolSource[];
   request: KibanaRequest;
+  space: string;
 }
 
 export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
@@ -59,11 +60,13 @@ export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry
 class ToolRegistryImpl implements ToolRegistry {
   private readonly toolSources: ToolSource[];
   private readonly request: KibanaRequest;
+  private readonly space: string;
   private readonly getRunner: () => Runner;
 
-  constructor({ toolSources, request, getRunner }: CreateToolClientParams) {
+  constructor({ toolSources, request, space, getRunner }: CreateToolClientParams) {
     this.toolSources = toolSources;
     this.request = request;
+    this.space = space;
     this.getRunner = getRunner;
   }
 
@@ -78,7 +81,7 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async has(toolId: string) {
     for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request });
+      const client = await source.getClient({ request: this.request, space: this.space });
       if (await client.has(toolId)) {
         return true;
       }
@@ -88,7 +91,7 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async get(toolId: string) {
     for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request });
+      const client = await source.getClient({ request: this.request, space: this.space });
       if (await client.has(toolId)) {
         return client.get(toolId);
       }
@@ -99,7 +102,7 @@ class ToolRegistryImpl implements ToolRegistry {
   async list(opts?: ToolListParams | undefined) {
     const allTools: InternalToolDefinition[] = [];
     for (const type of this.toolSources) {
-      const client = await type.getClient({ request: this.request });
+      const client = await type.getClient({ request: this.request, space: this.space });
       const toolsFromType = await client.list();
       allTools.push(...toolsFromType);
     }
@@ -122,7 +125,7 @@ class ToolRegistryImpl implements ToolRegistry {
     if (!source) {
       throw createBadRequestError(`Unknown tool type ${type}`);
     }
-    const client = await source.getClient({ request: this.request });
+    const client = await source.getClient({ request: this.request, space: this.space });
     if (isToolTypeClient(client)) {
       return client.create(createRequest);
     } else {
@@ -132,7 +135,7 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async update(toolId: string, update: ToolUpdateParams) {
     for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request });
+      const client = await source.getClient({ request: this.request, space: this.space });
       if (await client.has(toolId)) {
         if (source.readonly) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be updated`);
@@ -149,7 +152,7 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async delete(toolId: string): Promise<boolean> {
     for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request });
+      const client = await source.getClient({ request: this.request, space: this.space });
       if (await client.has(toolId)) {
         if (source.readonly) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be deleted`);

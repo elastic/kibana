@@ -20,6 +20,10 @@ export enum ToolType {
    */
   esql = 'esql',
   /**
+   * Workflow tools
+   */
+  workflow = 'workflow',
+  /**
    * Index search tools
    */
   index_search = 'index_search',

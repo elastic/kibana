@@ -49,6 +49,10 @@ export const useChartLayers = ({
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
+    if (columns.length === 0) {
+      return [];
+    }
+
     const xAxisColumn = columns.find((col) => col.meta.type === 'date');
     const xAxis: LensSeriesLayer['xAxis'] = {
       type: 'dateHistogram',

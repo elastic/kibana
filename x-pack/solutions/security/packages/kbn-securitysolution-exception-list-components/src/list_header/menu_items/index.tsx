@@ -88,7 +88,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
         )}
       </EuiFlexItem>
 
-      {canUserEditList && (
+      {canUserEditList && !isReadonly && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj={`${dataTestSubj || ''}LinkRulesButton`}

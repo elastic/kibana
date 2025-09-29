@@ -98,7 +98,7 @@ export const EsqlQueryExpression: React.FC<
     groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
-    // The sourceFields param is ignored for the ES|QL type
+    // The sourceFields param is ignored
     sourceFields: [],
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
@@ -170,10 +170,11 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
-        isGroupAgg
+        isGroupAgg,
+        true
       );
       const warning = getWarning(duplicateAlertIds, longAlertIds);
 
