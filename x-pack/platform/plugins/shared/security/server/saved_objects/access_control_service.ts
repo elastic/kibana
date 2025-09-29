@@ -6,6 +6,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   AccessControlAuthorizeResult,
   AuthorizeObject,
@@ -48,13 +49,13 @@ export class AccessControlService {
 
     const results: AccessControlAuthorizeResult[] = objects.map((obj) => {
       let requiresManageAccessControl = false;
+
       // Alternatively just make two different checks based on anyActionsForcingDefaultCheck just for readability sake
       if (
         // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
-        // Is this due to the overuse of ts expect error?
         // Shouldn't we only need to check that accessControl is defined?
         typeRegistry.supportsAccessControl(obj.type) &&
-        (anyActionsForcingDefaultCheck || obj.accessControl?.accessMode === 'read_only') &&
+        (obj.accessControl?.accessMode === 'read_only' || anyActionsForcingDefaultCheck) &&
         obj.accessControl?.owner &&
         currentUser && // Sid - if we don't have a user, should't we ultimately throw?
         obj.accessControl.owner !== currentUser.profile_uid
@@ -86,7 +87,9 @@ export class AccessControlService {
   }) {
     if (authorizationResult.status === 'unauthorized') {
       const typeList = [...typesRequiringAccessControl].sort().join(',');
-      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+      );
     }
 
     const { typeMap } = authorizationResult;
@@ -111,7 +114,9 @@ export class AccessControlService {
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort().join(',');
-      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(`Access denied: Unable to manage access control for ${typeList}`)
+      );
     }
   }
 }

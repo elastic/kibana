@@ -36,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${readOnlyObjectsPlugin}`,
-        `savedObjects.enableAccessControl=true`,
+        `--savedObjects.enableAccessControl=true`,
       ],
     },
     security: {
