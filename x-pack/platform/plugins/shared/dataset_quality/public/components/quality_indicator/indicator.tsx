@@ -9,8 +9,8 @@ import type { IconType } from '@elastic/eui';
 import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { QualityIndicators } from '../../../common/types';
 import { css } from '@emotion/react';
+import type { QualityIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
@@ -38,14 +38,21 @@ export function QualityIndicator({
     good: 'checkCircle',
   };
 
-  const BadgeIconType =
-  () => <EuiIcon size='s' type={qualityIcons[quality]} color={qualityTextColors[quality]}  />
+  const BadgeIconType = () => (
+    <EuiIcon size="s" type={qualityIcons[quality]} color={qualityTextColors[quality]} />
+  );
 
   return (
     <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
-      <EuiText color={qualityTextColors[quality]} size='s' css={css`margin-left: ${euiTheme.size.xs};`}>
+      <EuiText
+        color={qualityTextColors[quality]}
+        size="s"
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+      >
         {description}
-        </EuiText>
+      </EuiText>
     </EuiBadge>
   );
 }

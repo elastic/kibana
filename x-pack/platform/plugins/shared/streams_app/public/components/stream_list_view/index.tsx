@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiBetaBadge,
-  EuiLink,
   useEuiTheme,
   EuiButton,
   EuiFlexItem,
