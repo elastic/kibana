@@ -55,7 +55,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'dashboard',
         'space',
         'index-pattern',
-        'legacy-url-alias',
       ]);
 
       // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
@@ -73,7 +72,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       'dashboard',
       'space',
       'index-pattern',
-      'legacy-url-alias',
       // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
       // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
       // the future.
@@ -104,11 +102,11 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       },
       {
         key: 'space_1',
-        doc_count: 11,
+        doc_count: 14,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'index-pattern', doc_count: 11 }],
+          buckets: [{ key: 'index-pattern', doc_count: 14 }],
         },
       },
       {
@@ -208,9 +206,11 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
           await loadSavedObjects();
         });
+
         after(async () => {
           await supertest.destroy();
           await unloadSavedObjects();
+          await kbnClient.savedObjects.cleanStandardList();
         });
 
         afterEach(async () => {
