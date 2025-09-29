@@ -235,9 +235,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         name: 'Last run',
         field: 'runHistory',
-        width: '12%',
+        width: '10%',
         render: (value, item) => {
-          if (item.history.length === 0) return;
+          if (!item.history || item.history.length === 0) return;
           const lastRun = item.history[0];
           return (
             <EuiText size="s">
@@ -251,9 +251,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'runHistory',
         width: '12%',
         render: (value, item) => {
-          if (item.history.length === 0) {
-            return;
-          }
+          if (!item.history || item.history.length === 0) return;
           return <StatusBadge status={item.history[0].status} />;
         },
       },

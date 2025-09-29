@@ -110,6 +110,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                             iconType="arrowDown"
                             flush="left"
                             data-test-subj="workflows-table-bulk-actions-button"
+                            aria-label="Bulk actions"
                           >
                             {i18n.translate('workflows.utilityBar.bulkActions', {
                               defaultMessage: 'Bulk actions',
@@ -132,6 +133,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                         iconType="cross"
                         flush="left"
                         data-test-subj="workflows-clear-selection-button"
+                        aria-label="Clear selection"
                       >
                         {i18n.translate('workflows.utilityBar.clearSelection', {
                           defaultMessage: 'Clear selection',
@@ -148,6 +150,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                     iconType="refresh"
                     flush="left"
                     data-test-subj="workflows-refresh-button"
+                    aria-label="Refresh"
                   >
                     {i18n.translate('workflows.utilityBar.refresh', {
                       defaultMessage: 'Refresh',
