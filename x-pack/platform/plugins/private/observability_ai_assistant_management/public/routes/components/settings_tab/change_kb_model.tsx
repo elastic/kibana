@@ -199,7 +199,7 @@ export function ChangeKbModel({
     if (error) {
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBase.errorLoadingModelsTitle',
             {

@@ -122,7 +122,7 @@ export const ConfigureStandaloneAgentStep = ({
             <EuiSpacer size="m" />
             {apiKey && (
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created', {
                   defaultMessage: 'API key created.',
                 })}

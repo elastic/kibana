@@ -209,7 +209,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         >
           {isNewPanel ? (
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               size="s"
               iconType="info"
               title={

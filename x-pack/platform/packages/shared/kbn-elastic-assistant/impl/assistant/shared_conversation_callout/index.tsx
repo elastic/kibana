@@ -64,7 +64,7 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
   );
   return localStorageShowConversation && selectedConversation ? (
     <EuiCallOut
-      announceOnMount
+      announceOnMount={false}
       data-test-subj="sharedConversationCallout"
       css={css`
         margin: ${euiTheme.size.m};

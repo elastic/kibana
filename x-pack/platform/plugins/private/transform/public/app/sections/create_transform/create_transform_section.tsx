@@ -72,7 +72,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         {searchItemsError !== undefined && (
           <>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={searchItemsError}
               color="danger"
               iconType="warning"

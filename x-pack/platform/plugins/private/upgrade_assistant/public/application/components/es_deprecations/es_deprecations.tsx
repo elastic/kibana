@@ -176,7 +176,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
           {remoteClusters && remoteClusters.length > 0 && (
             <>
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={i18nTexts.remoteClustersDetectedTitle}
                 color="warning"
                 iconType="question"

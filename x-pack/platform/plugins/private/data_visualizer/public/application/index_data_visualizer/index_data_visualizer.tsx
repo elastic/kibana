@@ -92,7 +92,7 @@ const DataVisualizerESQLStateContextProvider = () => {
   if (!isEsqlEnabled) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="xpack.dataVisualizer.esqlNotEnabledCalloutTitle"

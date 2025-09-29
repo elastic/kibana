@@ -67,7 +67,7 @@ export const ImportSummary: FC<Props> = ({
         <React.Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedTitle"

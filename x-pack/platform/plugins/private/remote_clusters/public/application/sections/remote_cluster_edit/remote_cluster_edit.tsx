@@ -144,7 +144,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
         {hasDeprecatedProxySetting ? (
           <>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.remoteClusters.edit.deprecatedSettingsTitle"

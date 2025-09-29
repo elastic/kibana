@@ -123,7 +123,7 @@ const callOut = (
   if (onlyDeprecationLogWritingEnabled) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={i18nTexts.onlyLogWritingEnabledTitle}
         color="warning"
         iconType="question"
@@ -137,7 +137,7 @@ const callOut = (
   if (!hasPrivileges && isDeprecationLogIndexingEnabled) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         iconType="question"
         color="warning"
         title={i18nTexts.deniedPrivilegeTitle}

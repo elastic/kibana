@@ -108,7 +108,7 @@ const ColorModeGroup: FC<{
         <>
           <EuiSpacer />
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={i18n.translate(
               'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
               {
