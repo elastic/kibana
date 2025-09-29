@@ -68,6 +68,11 @@ export function createTheme(
       { token: 'string.sql', foreground: euiTheme.colors.textDanger },
       { token: 'string.yaml', foreground: euiTheme.colors.textPrimary },
 
+      { token: 'string_literal', foreground: euiTheme.colors.textDanger },
+      { token: 'punctuation.start_triple_quote', foreground: euiTheme.colors.textDanger },
+      { token: 'punctuation.start_triple_quote.lang_marker', foreground: euiTheme.colors.textDanger },
+      { token: 'punctuation.end_triple_quote', foreground: euiTheme.colors.textDanger },
+
       { token: 'keyword', foreground: euiTheme.colors.textPrimary },
       { token: 'keyword.json', foreground: euiTheme.colors.textPrimary },
       { token: 'keyword.flow', foreground: euiTheme.colors.textWarning },
