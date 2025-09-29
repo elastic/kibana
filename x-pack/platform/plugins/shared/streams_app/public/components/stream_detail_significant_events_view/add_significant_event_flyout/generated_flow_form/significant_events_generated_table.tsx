@@ -6,22 +6,20 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCodeBlock,
-  EuiLink,
   EuiScreenReaderOnly,
+  EuiText,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useState, type ReactNode } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
+import { GeneratedEventPreview } from './generated_event_preview';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -38,13 +36,6 @@ export function SignificantEventsGeneratedTable({
   definition,
   isSubmitting,
 }: Props) {
-  const {
-    dependencies: {
-      start: { discover },
-    },
-  } = useKibana();
-  const { timeState } = useTimefilter();
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -57,11 +48,7 @@ export function SignificantEventsGeneratedTable({
       delete itemIdToExpandedRowMapValues[query.id];
     } else {
       itemIdToExpandedRowMapValues[query.id] = (
-        <PreviewDataSparkPlot
-          definition={definition}
-          query={query}
-          isQueryValid={!validation.kql.isInvalid}
-        />
+        <GeneratedEventPreview definition={definition} query={query} validation={validation} />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -69,41 +56,14 @@ export function SignificantEventsGeneratedTable({
 
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
-      field: 'title',
-      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
-        defaultMessage: 'Title',
-      }),
-      render: (_, query) => (
-        <EuiLink
-          target="_blank"
-          href={discover?.locator?.getRedirectUrl(
-            buildDiscoverParams(query, definition, timeState)
-          )}
-        >
-          {query.title}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'kql',
-      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
-        defaultMessage: 'Query',
-      }),
-      render: (_, item: StreamQueryKql) => (
-        <EuiCodeBlock paddingSize="s" fontSize="s">
-          {item.kql.query}
-        </EuiCodeBlock>
-      ),
-    },
-    {
       align: 'right',
       width: '40px',
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
           <span>
-            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.dataColumn', {
-              defaultMessage: 'Preview',
+            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.previewToggleColumn', {
+              defaultMessage: 'Preview toggle',
             })}
           </span>
         </EuiScreenReaderOnly>
@@ -121,6 +81,48 @@ export function SignificantEventsGeneratedTable({
         );
       },
     },
+    {
+      field: 'title',
+      width: '60%',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
+        defaultMessage: 'Title',
+      }),
+      render: (_, query) => <EuiText>{query.title}</EuiText>,
+    },
+    {
+      width: '20%',
+      field: 'system',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.systemColumn', {
+        defaultMessage: 'System',
+      }),
+      render: (_, item: StreamQueryKql) => <EuiBadge color="hollow">{item.system?.name}</EuiBadge>,
+    },
+    {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.dataColumn', {
+              defaultMessage: 'Data preview',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      width: '20%',
+      render: (query: StreamQueryKql) => {
+        const validation = validateQuery(query);
+        return (
+          <PreviewDataSparkPlot
+            definition={definition}
+            query={query}
+            isQueryValid={!validation.kql.isInvalid}
+            showTitle={false}
+            compressed={true}
+            hideXAxis={true}
+            height={40}
+          />
+        );
+      },
+    },
   ];
 
   const selection: EuiTableSelectionType<StreamQueryKql> = {
@@ -131,6 +133,7 @@ export function SignificantEventsGeneratedTable({
 
   return (
     <EuiBasicTable
+      tableLayout="auto"
       responsiveBreakpoint={false}
       items={generatedQueries}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
