@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -66,6 +66,9 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
   const router = useStreamsAppRouter();
 
+  const parent = getParentId(stream.name);
+  const hasRootAsParent = parent ? isRoot(parent) : false;
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -93,7 +96,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : field.status === 'inherited' ? (
+          ) : field.status === 'inherited' && !hasRootAsParent ? (
             <EuiFlexItem grow={2}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
