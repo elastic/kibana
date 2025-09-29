@@ -1,55 +1,106 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders control with warning 1`] = `
-<EuiFormRow
-  data-test-subj="inputControl0"
-  id="controlId"
-  label={
-    <React.Fragment>
-      <EuiIconTip
-        content="This is a warning"
-        position="top"
-        type="warning"
-      />
-      test control
-    </React.Fragment>
-  }
->
-  <div>
-    My Control
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span
+            data-euiicon-type="warning"
+            tabindex="0"
+          >
+            Info
+          </span>
+        </span>
+        test control
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        id="controlId"
+      >
+        My Control
+      </div>
+    </div>
   </div>
-</EuiFormRow>
+</div>
 `;
 
 exports[`renders disabled control with tooltip 1`] = `
-<EuiFormRow
-  data-test-subj="inputControl0"
-  id="controlId"
-  label="test control"
->
-  <EuiToolTip
-    anchorClassName="eui-displayBlock"
-    content="I am disabled for testing purposes"
-    delay="regular"
-    disableScreenReaderOutput={false}
-    display="inlineBlock"
-    position="top"
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
   >
-    <div>
-      My Control
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        test control
+      </label>
     </div>
-  </EuiToolTip>
-</EuiFormRow>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <span
+        class="euiToolTipAnchor eui-displayBlock emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <div>
+          My Control
+        </div>
+      </span>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`renders enabled control 1`] = `
-<EuiFormRow
-  data-test-subj="inputControl0"
-  id="controlId"
-  label="test control"
->
-  <div>
-    My Control
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        test control
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        id="controlId"
+      >
+        My Control
+      </div>
+    </div>
   </div>
-</EuiFormRow>
+</div>
 `;
