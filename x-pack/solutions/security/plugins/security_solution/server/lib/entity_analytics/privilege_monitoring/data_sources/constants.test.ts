@@ -45,19 +45,21 @@ describe('constants', () => {
   });*/
 
   it('should have correct INTEGRATION_MATCHERS_DETAILED', () => {
-    expect(INTEGRATION_MATCHERS_DETAILED.okta.values).toEqual(OKTA_ADMIN_ROLES);
+    expect(INTEGRATION_MATCHERS_DETAILED.entityanalytics_okta.values).toEqual(OKTA_ADMIN_ROLES);
     // expect(INTEGRATION_MATCHERS_DETAILED.ad.values).toEqual(AD_ADMIN_ROLES);
-    expect(INTEGRATION_MATCHERS_DETAILED.okta.fields).toEqual(['user.roles']);
+    expect(INTEGRATION_MATCHERS_DETAILED.entityanalytics_okta.fields).toEqual(['user.roles']);
     // expect(INTEGRATION_MATCHERS_DETAILED.ad.fields).toEqual(['user.roles']);
   });
 
   it('getMatchersFor returns correct matcher array', () => {
-    expect(getMatchersFor('okta')).toEqual([INTEGRATION_MATCHERS_DETAILED.okta]);
+    expect(getMatchersFor('entityanalytics_okta')).toEqual([
+      INTEGRATION_MATCHERS_DETAILED.entityanalytics_okta,
+    ]);
     // expect(getMatchersFor('ad')).toEqual([INTEGRATION_MATCHERS_DETAILED.ad]); add ad in follow-up PR
   });
 
   it('IntegrationType type should only allow okta and ad', () => {
-    const types: IntegrationType[] = ['okta']; // add ad in follow-up PR
+    const types: IntegrationType[] = ['entityanalytics_okta']; // add ad in follow-up PR
     expect(types).toEqual(INTEGRATION_TYPES);
   });
 
@@ -67,7 +69,7 @@ describe('constants', () => {
   });
 
   it('should generate integrationsSourceIndex', () => {
-    expect(integrationsSourceIndex('default', 'okta')).toBe(
+    expect(integrationsSourceIndex('default', 'entityanalytics_okta')).toBe(
       `${baseMonitoringUsersIndex}.sources.okta-default`
     );
     /* expect(integrationsSourceIndex('space1', 'ad')).toBe(
@@ -76,12 +78,16 @@ describe('constants', () => {
   });
 
   it('should generate correct stream index patterns', () => {
-    expect(STREAM_INDEX_PATTERNS.okta('default')).toBe('logs-entityanalytics_okta.user-default');
+    expect(STREAM_INDEX_PATTERNS.entityanalytics_okta('default')).toBe(
+      'logs-entityanalytics_okta.user-default'
+    );
     // expect(STREAM_INDEX_PATTERNS.ad('space1')).toBe('logs-entityanalytics_ad.user-space1');
   });
 
   it('getStreamPatternFor returns correct pattern', () => {
-    expect(getStreamPatternFor('okta', 'default')).toBe('logs-entityanalytics_okta.user-default');
+    expect(getStreamPatternFor('entityanalytics_okta', 'default')).toBe(
+      'logs-entityanalytics_okta.user-default'
+    );
     // expect(getStreamPatternFor('ad', 'space1')).toBe('logs-entityanalytics_ad.user-space1');
   });
 });
