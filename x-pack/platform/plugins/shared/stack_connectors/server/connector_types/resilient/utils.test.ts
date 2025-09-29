@@ -5,51 +5,10 @@
  * 2.0.
  */
 
-import { formatUpdateRequest, getValueTextContent } from './utils';
+import { formatUpdateRequest } from './utils';
 import { resilientFields } from './mocks';
 
 describe('utils', () => {
-  describe('getValueTextContent', () => {
-    test('transforms name correctly', () => {
-      expect(getValueTextContent('name', 'title')).toEqual({
-        text: 'title',
-      });
-    });
-
-    test('transforms correctly the description', () => {
-      expect(getValueTextContent('description', 'desc')).toEqual({
-        textarea: {
-          format: 'html',
-          content: 'desc',
-        },
-      });
-    });
-
-    test('transforms correctly the severityCode', () => {
-      expect(getValueTextContent('severityCode', 6)).toEqual({
-        id: 6,
-      });
-    });
-
-    test('transforms correctly the severityCode as string', () => {
-      expect(getValueTextContent('severityCode', '6')).toEqual({
-        id: 6,
-      });
-    });
-
-    test('transforms correctly the incidentTypes', () => {
-      expect(getValueTextContent('incidentTypes', [1101, 12])).toEqual({
-        ids: [1101, 12],
-      });
-    });
-
-    test('transforms default correctly', () => {
-      expect(getValueTextContent('randomField', 'this is random')).toEqual({
-        text: 'this is random',
-      });
-    });
-  });
-
   describe('formatUpdateRequest', () => {
     test('transforms correctly', () => {
       const oldIncident = {
