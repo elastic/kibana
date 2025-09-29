@@ -72,6 +72,7 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
 
 /**
  * Location state of internal Discover history instance
@@ -198,7 +199,7 @@ export const buildServices = ({
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
-      getTabsEnabled: () => true,
+      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
