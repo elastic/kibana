@@ -450,7 +450,7 @@ export function useYamlValidation({
       setValidationErrors(errorsUpdater);
       onValidationErrors?.(errorsUpdater);
     },
-    [onValidationErrors]
+    [onValidationErrors, workflowYamlSchema]
   );
 
   // Helper function to extract the received value from Monaco's error message

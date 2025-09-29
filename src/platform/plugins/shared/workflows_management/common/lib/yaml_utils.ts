@@ -32,45 +32,6 @@ interface FormatValidationErrorResult {
   formattedError: FormattedZodError;
 }
 
-/**
- * Cache for analyzed union schemas to avoid re-analysis
- */
-const UNION_ANALYSIS_CACHE = new Map<string, any>();
-
-/**
- * Cache for schema name mappings extracted from generated schemas
- */
-let SCHEMA_NAME_CACHE: Map<string, string> | null = null;
-
-/**
- * Extracts schema names from the generated schemas file to provide better error messages
- */
-async function extractSchemaNames(): Promise<Map<string, string>> {
-  if (SCHEMA_NAME_CACHE) {
-    return SCHEMA_NAME_CACHE;
-  }
-  
-  const schemaNames = new Map<string, string>();
-  
-  try {
-    // Try to dynamically import the generated schemas
-    const schemas = await import('@kbn/workflows/common/generated_kibana_schemas');
-    
-    // Extract schema names and their patterns
-    for (const [exportName, schema] of Object.entries(schemas)) {
-      if (exportName.startsWith('Cases_connector_properties_')) {
-        const connectorType = exportName.replace('Cases_connector_properties_', '');
-        schemaNames.set(connectorType, exportName);
-      }
-    }
-  } catch (error) {
-    // If we can't import the schemas, we'll work with what we have
-    console.warn('Could not load schema names for enhanced error messages:', error);
-  }
-  
-  SCHEMA_NAME_CACHE = schemaNames;
-  return schemaNames;
-}
 
 /**
  * Dynamically analyzes a Zod union schema to extract user-friendly option descriptions
@@ -267,11 +228,7 @@ function getGenericUnionErrorMessage(issue: any): string | null {
     return null;
   }
   
-  // Try custom handlers first
-  const customMessage = checkCustomUnionHandlers(issue);
-  if (customMessage) {
-    return customMessage;
-  }
+  // Note: Custom handlers removed for simplicity
   
   // Try dynamic analysis
   const dynamicMessage = getDynamicUnionErrorMessage(issue);
@@ -284,55 +241,6 @@ function getGenericUnionErrorMessage(issue: any): string | null {
   return `${fieldName} has an invalid value. Please check the expected format for this field.`;
 }
 
-/**
- * Enhanced union error message generator that can be extended for specific patterns
- * This function can be called to register custom union error handlers
- */
-export function createUnionErrorHandler(
-  pathPattern: string | RegExp,
-  handler: (issue: any) => string | null
-): void {
-  // Store custom handlers for future use
-  // This allows plugins or other parts of the system to register custom union error handling
-  if (!globalThis.__unionErrorHandlers) {
-    globalThis.__unionErrorHandlers = new Map();
-  }
-  globalThis.__unionErrorHandlers.set(pathPattern, handler);
-}
-
-/**
- * Checks custom union error handlers for a match
- */
-function checkCustomUnionHandlers(issue: any): string | null {
-  if (!globalThis.__unionErrorHandlers || !issue.path) {
-    return null;
-  }
-  
-  const pathString = issue.path.join('.');
-  
-  for (const [pattern, handler] of globalThis.__unionErrorHandlers.entries()) {
-    let matches = false;
-    
-    if (typeof pattern === 'string') {
-      matches = pathString === pattern || pathString.endsWith(pattern);
-    } else if (pattern instanceof RegExp) {
-      matches = pattern.test(pathString);
-    }
-    
-    if (matches) {
-      try {
-        const result = handler(issue);
-        if (result) {
-          return result;
-        }
-      } catch (error) {
-        console.warn('Custom union error handler failed:', error);
-      }
-    }
-  }
-  
-  return null;
-}
 
 // Cache for schema lookups to avoid repeated computation
 const schemaCache = new Map<string, any>();

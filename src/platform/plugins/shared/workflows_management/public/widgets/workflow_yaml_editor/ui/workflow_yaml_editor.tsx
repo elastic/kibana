@@ -34,12 +34,10 @@ import {
   getTriggerNodesWithType,
 } from '../../../../common/lib/yaml_utils';
 import {
-  parseWorkflowYamlToJSON,
   formatValidationError,
   getCurrentPath,
 } from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { getSchemaAtPath } from '../../../../common/lib/zod';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -53,7 +51,6 @@ import {
   createUnifiedActionsProvider,
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
-  createUnifiedHoverProvider,
 } from '../lib/monaco_providers';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
@@ -446,7 +443,7 @@ export const WorkflowYAMLEditor = ({
       // Intercept and modify markers at the source to fix connector validation messages
       // This prevents Monaco from ever seeing the problematic numeric enum messages
       const originalSetModelMarkers = monaco.editor.setModelMarkers;
-      const markerInterceptor = function(model: any, owner: string, markers: any[]) {
+      const markerInterceptor = function(editorModel: any, owner: string, markers: any[]) {
         // Only process YAML validation markers
         
         // Only modify YAML validation markers
@@ -480,15 +477,15 @@ export const WorkflowYAMLEditor = ({
             if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
               try {
                 // Get the YAML path at this marker position to determine context
-                const yamlDocument = yamlDocumentRef.current;
+                const currentYamlDocument = yamlDocumentRef.current;
                 let yamlPath: (string | number)[] = [];
                 
-                if (yamlDocument) {
-                  const markerPosition = model.getOffsetAt({
+                if (currentYamlDocument) {
+                  const markerPosition = editorModel.getOffsetAt({
                     lineNumber: marker.startLineNumber,
                     column: marker.startColumn
                   });
-                  yamlPath = getCurrentPath(yamlDocument, markerPosition);
+                  yamlPath = getCurrentPath(currentYamlDocument, markerPosition);
                 }
                 
                 // Create a mock Zod error with the path information
@@ -505,7 +502,7 @@ export const WorkflowYAMLEditor = ({
                 const { message: formattedMessage } = formatValidationError(
                   mockZodError as any, 
                   workflowYamlSchemaLoose,
-                  yamlDocument
+                  currentYamlDocument
                 );
                 
                 // Return the marker with the improved message
@@ -524,11 +521,11 @@ export const WorkflowYAMLEditor = ({
           });
           
           // Call the original function with fixed markers
-          return originalSetModelMarkers.call(monaco.editor, model, owner, fixedMarkers);
+          return originalSetModelMarkers.call(monaco.editor, editorModel, owner, fixedMarkers);
         }
         
         // For non-YAML markers, call original function unchanged
-        return originalSetModelMarkers.call(monaco.editor, model, owner, markers);
+        return originalSetModelMarkers.call(monaco.editor, editorModel, owner, markers);
       };
 
       // Override Monaco's setModelMarkers function
