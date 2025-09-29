@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const [PREBUILT_RULE_ID_A, PREBUILT_RULE_ID_B, PREBUILT_RULE_ID_C, PREBUILT_RULE_ID_D] = [
     'prebuilt-rule-a',
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -194,13 +194,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrebuiltRules(es, supertest);
 
         // Customize some of the installed prebuilt rules
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_B,
             tags: ['custom-tag-b'],
           },
         });
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_D,
             tags: ['custom-tag-d'],
@@ -290,7 +290,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -433,13 +433,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrebuiltRules(es, supertest);
 
         // Customize some of the installed prebuilt rules
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_B,
             tags: ['custom-tag-b'],
           },
         });
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_D,
             tags: ['custom-tag-d'],
@@ -500,7 +500,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })
@@ -615,13 +615,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrebuiltRules(es, supertest);
 
         // Customize some of the installed prebuilt rules
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_B,
             tags: ['custom-tag-b'],
           },
         });
-        await securitySolutionApi.patchRule({
+        await detectionsApi.patchRule({
           body: {
             rule_id: PREBUILT_RULE_ID_D,
             tags: ['custom-tag-d'],
@@ -710,7 +710,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const {
           body: { data: importedRules },
-        } = await securitySolutionApi
+        } = await detectionsApi
           .findRules({
             query: {},
           })

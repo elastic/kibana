@@ -81,6 +81,12 @@ export const SomeThings: StoryFn<{}> = () => {
               kql: {
                 query: '*',
               },
+              system: {
+                name: 'System',
+                filter: {
+                  always: {},
+                },
+              },
             },
             change_points: {
               type: {

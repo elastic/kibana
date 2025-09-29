@@ -23,7 +23,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Skip customization detection for unaffected prebuilt rule fields', () => {
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
           fieldName: string;
           value: unknown;
         }) => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .patchRule({
               body: { rule_id: PREBUILT_RULE_ID, [fieldName]: value },
             })
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }));
 
         it('leaves "is_customized" intact when bulk edit does not change the field value', async () => {
-          const { body: prebuiltRule } = await securitySolutionApi
+          const { body: prebuiltRule } = await detectionsApi
             .readRule({
               query: { rule_id: PREBUILT_RULE_ID },
             })
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
-          const { body: bulkResult } = await securitySolutionApi
+          const { body: bulkResult } = await detectionsApi
             .performRulesBulkAction({
               query: {},
               body: {
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // Check that the rule has not been customized
-          const { body: unchangedPrebuiltRule } = await securitySolutionApi
+          const { body: unchangedPrebuiltRule } = await detectionsApi
             .readRule({
               query: { rule_id: PREBUILT_RULE_ID },
             })
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('cannot change non-customizable rule fields', () => {
         it('"id" field', async () => {
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID,
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('"author" field', async () => {
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID,
@@ -181,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('"license" field', async () => {
-          await securitySolutionApi
+          await detectionsApi
             .patchRule({
               body: {
                 rule_id: PREBUILT_RULE_ID,

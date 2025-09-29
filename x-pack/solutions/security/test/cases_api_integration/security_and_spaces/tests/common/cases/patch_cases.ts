@@ -1707,6 +1707,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1726,6 +1727,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1798,7 +1800,7 @@ export default ({ getService }: FtrProviderContext): void => {
               cases: updatedIndWithStatus.map((caseInfo) => ({
                 id: caseInfo.id,
                 version: caseInfo.version,
-                settings: { syncAlerts: true },
+                settings: { syncAlerts: true, extractObservables: true },
               })),
             },
           });
@@ -1856,6 +1858,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCaseReq,
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           });
 
@@ -1927,7 +1930,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: updatedIndWithStatus[0].id,
                   version: updatedIndWithStatus[0].version,
-                  settings: { syncAlerts: true },
+                  settings: { syncAlerts: true, extractObservables: true },
                 },
               ],
             },
@@ -2031,7 +2034,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           const { id } = await createRule(supertest, log, rule);

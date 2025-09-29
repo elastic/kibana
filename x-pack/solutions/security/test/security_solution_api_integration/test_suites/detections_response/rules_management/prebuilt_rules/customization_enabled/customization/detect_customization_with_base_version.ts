@@ -19,7 +19,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Detect prebuilt rule customization (base version exists)', () => {
@@ -40,14 +40,14 @@ export default ({ getService }: FtrProviderContext): void => {
       // isn't provided for non custom query rule types.
       ruleType?: RuleResponse['type'];
     }) => {
-      const { body: nonCustomizedRule } = await securitySolutionApi
+      const { body: nonCustomizedRule } = await detectionsApi
         .readRule({
           query: { rule_id: PREBUILT_RULE_ID },
         })
         .expect(200);
 
       // Assert the customization for "fieldName" works
-      const { body: customizedResponse } = await securitySolutionApi
+      const { body: customizedResponse } = await detectionsApi
         .patchRule({
           body: { rule_id: PREBUILT_RULE_ID, type: ruleType, [fieldName]: customizedValue },
         })
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Assert that patching the "fieldName" to its original value reverts the customization
-      const { body: customizationRevertedResponse } = await securitySolutionApi
+      const { body: customizationRevertedResponse } = await detectionsApi
         .updateRule({
           body: { ...nonCustomizedRule, id: undefined },
         })
@@ -204,13 +204,13 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"timeline_template" fields', async () => {
-        const { body: nonCustomizedRule } = await securitySolutionApi
+        const { body: nonCustomizedRule } = await detectionsApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID },
           })
           .expect(200);
 
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID,
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext): void => {
           is_customized: true,
         });
 
-        const { body: customizationRevertedResponse } = await securitySolutionApi
+        const { body: customizationRevertedResponse } = await detectionsApi
           .updateRule({
             body: {
               ...nonCustomizedRule,
@@ -315,13 +315,13 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"data_view_id" field', async () => {
-        const { body: nonCustomizedRule } = await securitySolutionApi
+        const { body: nonCustomizedRule } = await detectionsApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID },
           })
           .expect(200);
 
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: { rule_id: PREBUILT_RULE_ID, data_view_id: 'new-data-view', index: [] },
           })
@@ -332,7 +332,7 @@ export default ({ getService }: FtrProviderContext): void => {
           is_customized: true,
         });
 
-        const { body: customizationRevertedResponse } = await securitySolutionApi
+        const { body: customizationRevertedResponse } = await detectionsApi
           .updateRule({
             body: {
               ...nonCustomizedRule,

@@ -14,14 +14,9 @@ import type { RuleMigrationStats } from '../../types';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
-
-jest.mock('../data_input_flyout/context', () => ({
-  useRuleMigrationDataInputContext: () => ({
-    openFlyout: jest.fn(),
-  }),
-}));
 
 jest.mock('../../logic/use_start_migration');
 const useStartMigrationMock = useStartMigration as jest.Mock;
@@ -72,7 +67,13 @@ const useGetMissingResourcesMock = useGetMissingResources as jest.Mock;
 
 const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
   return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
-    wrapper: TestProviders,
+    wrapper: ({ children }) => (
+      <TestProviders>
+        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+          {children}
+        </MigrationDataInputContextProvider>
+      </TestProviders>
+    ),
   });
 };
 
@@ -110,7 +111,13 @@ describe('MigrationReadyPanel', () => {
         isLoading: true,
       });
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />, {
-        wrapper: TestProviders,
+        wrapper: ({ children }) => (
+          <TestProviders>
+            <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+              {children}
+            </MigrationDataInputContextProvider>
+          </TestProviders>
+        ),
       });
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');

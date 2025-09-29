@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const retryService = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI Import prebuilt rules when the package is not installed', () => {
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const {
         body: { data: importedRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {},
         })
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const {
         body: { data: importedRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {},
         })
