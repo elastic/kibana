@@ -52,6 +52,8 @@ export interface GroupAndBulkCreateParams {
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   isLoggedRequestsEnabled: boolean;
+  pitId: string;
+  reassignPitId: (newPitId: string | undefined) => void;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
@@ -131,6 +133,8 @@ export const groupAndBulkCreate = async ({
   groupByFields,
   eventsTelemetry,
   isLoggedRequestsEnabled,
+  pitId,
+  reassignPitId,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = sharedParams.tuple;
@@ -237,6 +241,8 @@ export const groupAndBulkCreate = async ({
           eventsTelemetry,
           filter,
           services,
+          pitId,
+          reassignPitId,
         });
         toReturn = { ...toReturn, ...mergeReturns([toReturn, unsuppressedResult]) };
       }

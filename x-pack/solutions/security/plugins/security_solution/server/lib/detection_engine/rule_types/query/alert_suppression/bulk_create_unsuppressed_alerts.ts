@@ -26,6 +26,8 @@ type BulkCreateUnsuppressedAlerts = (params: {
   services: SecurityRuleServices;
   filter: QueryDslQueryContainer;
   eventsTelemetry: ITelemetryEventsSender | undefined;
+  pitId: string;
+  reassignPitId: (newPitId: string | undefined) => void;
 }) => Promise<SearchAfterAndBulkCreateReturnType>;
 
 /**
@@ -41,6 +43,8 @@ export const bulkCreateUnsuppressedAlerts: BulkCreateUnsuppressedAlerts = async 
   filter,
   services,
   eventsTelemetry,
+  pitId,
+  reassignPitId,
 }) => {
   const bulkCreatedResult = await searchAfterAndBulkCreate({
     sharedParams,
@@ -50,6 +54,8 @@ export const bulkCreateUnsuppressedAlerts: BulkCreateUnsuppressedAlerts = async 
     buildReasonMessage,
     additionalFilters: buildMissingFieldsFilter(groupByFields),
     maxSignalsOverride: size,
+    pitId,
+    reassignPitId,
   });
 
   return bulkCreatedResult;

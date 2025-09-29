@@ -31,8 +31,6 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import * as i18n from '../translations';
 
-const PIT_KEEP_ALIVE = '5m';
-
 const createLoggedRequestsConfig = (
   isLoggedRequestsEnabled: boolean | undefined,
   sortIds: estypes.SortResults | undefined,
@@ -73,6 +71,8 @@ export const searchAfterAndBulkCreateFactory = async ({
   getWarningMessage,
   isLoggedRequestsEnabled,
   maxSignalsOverride,
+  pitId,
+  reassignPitId,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
     inputIndex: inputIndexPattern,
@@ -95,13 +95,6 @@ export const searchAfterAndBulkCreateFactory = async ({
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
-    const pitResponse = await services.scopedClusterClient.asCurrentUser.openPointInTime({
-      index: inputIndexPattern,
-      keep_alive: PIT_KEEP_ALIVE,
-      allow_partial_search_results: true,
-      ignore_unavailable: true,
-    });
-    let pitId = pitResponse.id;
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -142,7 +135,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             searchingIteration
           ),
         });
-        pitId = searchResult.pit_id ?? pitId;
+        reassignPitId(searchResult.pit_id);
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({

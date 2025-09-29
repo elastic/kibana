@@ -78,6 +78,9 @@ describe('searchAfterAndBulkCreate', () => {
     },
   });
 
+  const pitId = 'test_pit_id';
+  const reassignPitId = () => {};
+
   beforeEach(async () => {
     jest.clearAllMocks();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
@@ -175,6 +178,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -255,6 +260,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -318,6 +325,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -363,6 +372,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -415,6 +426,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -460,6 +473,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -519,6 +534,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -575,6 +592,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -614,6 +633,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -652,6 +673,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -758,6 +781,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -826,6 +851,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       filter: defaultFilter,
       buildReasonMessage,
+      pitId,
+      reassignPitId,
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

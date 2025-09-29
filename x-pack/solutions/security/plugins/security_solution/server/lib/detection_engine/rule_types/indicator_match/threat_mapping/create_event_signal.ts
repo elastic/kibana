@@ -33,6 +33,8 @@ export const createEventSignal = async ({
   threatFilters,
   threatPitId,
   reassignThreatPitId,
+  sourcePitId,
+  reassignSourcePitId,
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
@@ -124,6 +126,8 @@ export const createEventSignal = async ({
     services,
     sortOrder,
     trackTotalHits: false,
+    pitId: sourcePitId,
+    reassignPitId: reassignSourcePitId,
   };
 
   if (
