@@ -7,3 +7,5 @@
 
 export { generateStreamDescription } from './src/description/generate_description';
 export { identifySystems } from './src/systems/identify_systems';
+export { partitionStream } from './workflows/partition_stream';
+export { generateSignificantEvents } from './src/significant_events/generate_significant_events';

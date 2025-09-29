@@ -37,7 +37,6 @@ const absentOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.absent_over_time', {
     defaultMessage: 'The absence of a field in the output result over time range.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -235,7 +234,6 @@ const avgOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.avg_over_time', {
     defaultMessage: 'The average over time of a numeric field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -283,7 +281,6 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.count_distinct_over_time', {
     defaultMessage: 'The count of distinct values over time for a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -851,7 +848,6 @@ const countOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.count_over_time', {
     defaultMessage: 'The count over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1050,7 +1046,6 @@ const firstOverTimeDefinition: FunctionDefinition = {
     defaultMessage:
       'The earliest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1099,7 +1094,6 @@ const lastOverTimeDefinition: FunctionDefinition = {
     defaultMessage:
       'The latest value of a field, where recency determined by the `@timestamp` field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1147,7 +1141,6 @@ const maxOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.max_over_time', {
     defaultMessage: 'The maximum over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1275,7 +1268,6 @@ const minOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.min_over_time', {
     defaultMessage: 'The minimum over time value of a field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1403,7 +1395,6 @@ const presentOverTimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.present_over_time', {
     defaultMessage: 'The presence of a field in the output result over time range.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -1601,7 +1592,6 @@ const rateDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-ast.esql.definitions.rate', {
     defaultMessage: 'The rate of a counter field.',
   }),
-  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [

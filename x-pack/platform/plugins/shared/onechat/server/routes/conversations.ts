@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -36,9 +37,10 @@ export function registerConversationRoutes({
       summary: 'List conversations',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -46,7 +48,20 @@ export function registerConversationRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { query: schema.object({ agent_id: schema.maybe(schema.string()) }) },
+          request: {
+            query: schema.object({
+              agent_id: schema.maybe(
+                schema.string({
+                  meta: {
+                    description: 'Optional agent ID to filter conversations by a specific agent.',
+                  },
+                })
+              ),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_list.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -75,9 +90,10 @@ export function registerConversationRoutes({
       summary: 'Get conversation by ID',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -87,9 +103,14 @@ export function registerConversationRoutes({
         validate: {
           request: {
             params: schema.object({
-              conversation_id: schema.string(),
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation to retrieve.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -116,9 +137,10 @@ export function registerConversationRoutes({
       summary: 'Delete conversation by ID',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -128,9 +150,14 @@ export function registerConversationRoutes({
         validate: {
           request: {
             params: schema.object({
-              conversation_id: schema.string(),
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation to delete.' },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_delete.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

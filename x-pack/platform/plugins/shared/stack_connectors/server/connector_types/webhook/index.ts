@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
-import { map, getOrElse } from 'fp-ts/Option';
+import { getOrElse, map } from 'fp-ts/Option';
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -18,17 +18,17 @@ import type {
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
-  WebhookConnectorType,
   ActionParamsType,
   ConnectorTypeConfigType,
+  WebhookConnectorType,
   WebhookConnectorTypeExecutorOptions,
 } from './types';
 
@@ -42,6 +42,7 @@ import { getAxiosConfig } from './get_axios_config';
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 export const ConnectorTypeId = '.webhook';
+const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
@@ -297,11 +298,13 @@ export async function executor(
         );
       }
 
-      if (status === 404) {
-        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
+      const errorResult = errorResultInvalid(actionId, message);
+
+      if (userErrorCodes.includes(status)) {
+        errorResult.errorSource = TaskErrorSource.USER;
       }
 
-      return errorResultInvalid(actionId, message);
+      return errorResult;
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
@@ -324,8 +327,7 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string,
-  errorSource?: TaskErrorSource
+  serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -335,13 +337,13 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
-    errorSource,
   };
 }
 
 function errorResultRequestFailed(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.requestFailedErrorMessage', {
     defaultMessage: 'error calling webhook, request failed',
@@ -351,6 +353,7 @@ function errorResultRequestFailed(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

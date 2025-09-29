@@ -32,9 +32,15 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const onClearRecentlyClosed: UnifiedTabsProps['onClearRecentlyClosed'] = useCallback(
+    () => dispatch(internalStateActions.clearRecentlyClosedTabs()),
     [dispatch]
   );
 
@@ -54,12 +60,14 @@ export const TabsView = (props: SingleTabViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
+      unsavedItemIds={unsavedTabIds}
       maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
+      onClearRecentlyClosed={onClearRecentlyClosed}
     />
   );
 };

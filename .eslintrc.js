@@ -1593,9 +1593,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1636,6 +1636,10 @@ module.exports = {
         'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
+        'playwright/valid-describe-callback': 'error',
+        'playwright/valid-title': 'error',
+        // Scout has a its own runtime validator for test tags
+        'playwright/valid-test-tags': 'off',
       },
     },
     {

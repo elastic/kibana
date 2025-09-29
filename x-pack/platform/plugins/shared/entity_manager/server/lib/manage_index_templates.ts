@@ -19,6 +19,7 @@ import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
 import { generateEntitiesHistoryIndexTemplateConfig } from './entities/templates/entities_history_template';
 import { generateEntitiesResetIndexTemplateConfig } from './entities/templates/entities_reset_template';
+import { generateEntitiesUpdatesIndexTemplateConfig } from './entities/templates/entities_updates_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -88,21 +89,24 @@ export async function createAndInstallTemplates(
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'template'; id: string }>> {
-  const templates: Array<{ type: 'template'; id: string }> = [];
-
   const latestTemplate = generateEntitiesLatestIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template: latestTemplate, logger });
-  templates.push({ type: 'template', id: latestTemplate.name });
-
   const historyTemplate = generateEntitiesHistoryIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template: historyTemplate, logger });
-  templates.push({ type: 'template', id: historyTemplate.name });
-
   const resetTemplate = generateEntitiesResetIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template: resetTemplate, logger });
-  templates.push({ type: 'template', id: resetTemplate.name });
+  const updatesTemplate = generateEntitiesUpdatesIndexTemplateConfig(definition);
 
-  return templates;
+  await Promise.all([
+    upsertTemplate({ esClient, template: latestTemplate, logger }),
+    upsertTemplate({ esClient, template: historyTemplate, logger }),
+    upsertTemplate({ esClient, template: resetTemplate, logger }),
+    upsertTemplate({ esClient, template: updatesTemplate, logger }),
+  ]);
+
+  return [
+    { type: 'template', id: latestTemplate.name },
+    { type: 'template', id: historyTemplate.name },
+    { type: 'template', id: resetTemplate.name },
+    { type: 'template', id: updatesTemplate.name },
+  ];
 }
 
 export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
