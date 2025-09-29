@@ -96,6 +96,9 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             onValueChange={(connectorId) => onChangeConnector(connectorId)}
             onAddConnectorClick={onNewConnectorClicked}
             defaultConnectorId={defaultConnectorId}
+            renderOption={(option) => (
+              <span data-test-subj={`connector-option-${option.label}`}>{option.label}</span>
+            )}
           />
         ),
       },
