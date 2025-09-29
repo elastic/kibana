@@ -92,7 +92,7 @@ async function registerAsBackgroundSearch(
 
   if (!hasBackgroundSearchEnabled) return;
 
-  const app = registerSearchSessionsMgmt(coreSetup, deps, config, kibanaVersion, true);
+  registerSearchSessionsMgmt(coreSetup, deps, config, kibanaVersion, true);
 }
 
 function registerSearchSessionsMgmt(
