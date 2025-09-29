@@ -75,7 +75,6 @@ describe('getAPIKeyTest', function () {
     expect(apiKey).toEqual({
       apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
       isValid: true,
-      insufficientPermissions: false,
     });
 
     expect(encryptedSavedObjects.getClient).toHaveBeenCalledTimes(1);
