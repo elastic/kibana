@@ -37,6 +37,7 @@ import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -111,6 +112,7 @@ export function StreamDetailEnrichmentContentImpl() {
           <SchemaChangesReviewModal
             fields={detectedFields}
             stream={definition.stream.name}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
             storedFields={[]}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}

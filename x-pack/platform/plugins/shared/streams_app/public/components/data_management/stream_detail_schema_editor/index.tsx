@@ -18,6 +18,7 @@ import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
@@ -66,6 +67,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           <SchemaChangesReviewModal
             fields={fields}
             stream={definition.stream.name}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
             storedFields={storedFields}
             submitChanges={submitChanges}
             onClose={() => overlay.close()}

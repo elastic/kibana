@@ -8,6 +8,8 @@
 import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
+import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation, SimulationContext } from './types';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
@@ -113,42 +115,144 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
   const detectedFields = context.simulation.detected_fields;
   const updatedCache = new Map(context.detectedSchemaFieldsCache);
   const streamName = context.streamName;
+  const streamType = context.streamType;
 
-  const schemaFields: SchemaField[] = detectedFields.map((field) => {
-    // Detected field already mapped by the user on previous simulation
-    const cachedField = updatedCache.get(field.name);
-    if (cachedField) {
-      return cachedField;
-    }
+  const schemaFields: SchemaField[] = detectedFields
+    .map((field) => {
+      // Detected field already mapped by the user on previous simulation
+      const cachedField = updatedCache.get(field.name);
+      if (cachedField) {
+        return cachedField;
+      }
 
-    // Detected field unmapped by default
-    let fieldSchema: SchemaField = {
-      status: 'unmapped',
-      esType: field.esType,
-      name: field.name,
-      parent: streamName,
-    };
-
-    // Detected field already inherited
-    if ('from' in field) {
-      fieldSchema = {
-        ...field,
-        status: 'inherited',
-        parent: field.from,
-      };
-    }
-    // Detected field already mapped
-    else if ('type' in field) {
-      fieldSchema = {
-        ...field,
-        status: 'mapped',
+      // Detected field unmapped by default
+      let fieldSchema: SchemaField = {
+        status: 'unmapped',
+        esType: field.esType,
+        name: field.name,
         parent: streamName,
       };
-    }
 
-    updatedCache.set(fieldSchema.name, fieldSchema);
-    return fieldSchema;
-  });
+      // Add description if available
+      if ('description' in field && field.description) {
+        fieldSchema.description = field.description as string;
+      }
+
+      // Add source if available (this is the metadata source like 'ecs', 'otel', etc.)
+      if ('source' in field && field.source) {
+        fieldSchema.source = field.source as string;
+      }
+
+      // Field Mapping Decision Tree:
+      // ┌─────────────────────────────────────────────────────────────────────────┐
+      // │ Field Processing Priority (top to bottom):                             │
+      // │                                                                         │
+      // │ 1. Inherited Fields (field.from exists)                               │
+      // │    └─► status: 'inherited', parent: field.from                        │
+      // │                                                                         │
+      // │ 2. ES Fields (field.esType exists)                                    │
+      // │    └─► status: 'mapped', retain esType, streamSource by stream type   │
+      // │                                                                         │
+      // │ 3. Metadata Fields (suggestedType + source exists)                    │
+      // │    ├─► Classic Stream:                                                 │
+      // │    │   ├─► ECS fields → status: 'mapped', streamSource: 'template'    │
+      // │    │   └─► All others → ignored (unmapped)                            │
+      // │    ├─► Wired Stream:                                                  │
+      // │    │   ├─► OTEL fields → status: 'mapped', streamSource: 'stream'    │
+      // │    │   └─► All others → ignored (unmapped)                            │
+      // │    └─► Unknown Stream → ECS fields only                               │
+      // │                                                                         │
+      // │ 4. User-Defined Fields (field.type exists)                           │
+      // │    └─► status: 'mapped', use provided type                            │
+      // │                                                                         │
+      // │ 5. Fallback → status: 'unmapped' (unmanaged/dynamic)                 │
+      // └─────────────────────────────────────────────────────────────────────────┘
+      // Detected field already inherited
+      if ('from' in field) {
+        fieldSchema = {
+          ...field,
+          status: 'inherited',
+          parent: field.from,
+        };
+      } else {
+        const isOtelField = 'source' in field && field.source === 'otel';
+        const isEcsField = 'source' in field && field.source === 'ecs';
+        const hasMetadataSuggestion =
+          'suggestedType' in field && field.suggestedType && 'source' in field && field.source;
+
+        // Field has ES type (already mapped in Elasticsearch)
+        if (Boolean(field.esType)) {
+          // Check if the ES type is supported by our FieldDefinitionType schema
+          const isSupportedType = FIELD_DEFINITION_TYPES.includes(
+            field.esType as FieldDefinitionType
+          );
+
+          // All ES fields are considered "mapped" from user perspective as they exist in the index already
+          fieldSchema = {
+            ...fieldSchema,
+            status: 'mapped',
+            streamSource: streamType === 'wired' ? 'stream' : 'template',
+            esType: field.esType,
+            // Set type based on whether ES type is supported by streams
+            type: isSupportedType ? (field.esType as FieldDefinitionType) : 'system',
+          };
+        }
+        // Field has metadata suggestion but no ES type - only handle ECS and OTEL fields
+        else if (hasMetadataSuggestion) {
+          if (streamType === 'classic') {
+            // Classic streams: Only handle ECS fields
+            // All other metadata fields (including OTEL) are ignored for classic streams
+            if (isEcsField) {
+              fieldSchema = {
+                ...fieldSchema,
+                status: 'mapped',
+                type: field.suggestedType as FieldDefinitionType,
+                streamSource: 'template',
+                // Clear esType for metadata fields to ensure proper categorization
+                esType: undefined,
+              };
+            }
+          } else if (streamType === 'wired') {
+            // Wired streams: Only handle OTEL fields, ignore everything else
+            if (isOtelField) {
+              fieldSchema = {
+                ...fieldSchema,
+                status: 'mapped',
+                type: field.suggestedType as FieldDefinitionType,
+                streamSource: 'stream',
+                // Clear esType for metadata fields to ensure proper categorization
+                esType: undefined,
+              };
+            }
+          } else {
+            // Unknown stream type - fall back to handling ECS fields only
+            if (isEcsField) {
+              fieldSchema = {
+                ...fieldSchema,
+                status: 'mapped',
+                type: field.suggestedType as FieldDefinitionType,
+                streamSource: 'template',
+                // Clear esType for metadata fields to ensure proper categorization
+                esType: undefined,
+              };
+            }
+          }
+        }
+        // Field with user-defined type
+        else if ('type' in field && field.type) {
+          fieldSchema = {
+            ...field,
+            status: 'mapped',
+            parent: streamName,
+            type: field.type as FieldDefinitionType,
+          };
+        }
+      }
+
+      updatedCache.set(fieldSchema.name, fieldSchema);
+      return fieldSchema;
+    })
+    .filter(Boolean);
 
   return {
     detectedSchemaFields: schemaFields.sort(compareFieldsByStatus),

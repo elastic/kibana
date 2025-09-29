@@ -120,6 +120,11 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Status',
     }),
   },
+  source: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablesourceHeader', {
+      defaultMessage: 'Source',
+    }),
+  },
 } as const;
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;

@@ -21,6 +21,7 @@ import type {
   FieldCapsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
   FlattenRecord,
@@ -56,6 +57,7 @@ export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface BaseSimulationError {
@@ -140,13 +142,18 @@ export type DetectedField =
   | WithNameAndEsType
   | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
 
-export type WithNameAndEsType<TObj = {}> = TObj & { name: string; esType?: string };
+export type WithNameAndEsType<TObj = {}> = TObj & {
+  name: string;
+  esType?: string;
+  suggestedType?: string;
+};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
   streamsClient,
+  fieldsMetadataClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
@@ -193,12 +200,13 @@ export const simulateProcessing = async ({
     streamFields
   );
 
-  /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
+  /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
     params,
     streamFields,
-    streamIndexFieldCaps
+    streamIndexFieldCaps,
+    fieldsMetadataClient
   );
 
   /* 6. Derive general insights and process final response body */
@@ -802,7 +810,8 @@ const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
-  streamFieldCaps: FieldCapsResponse['fields']
+  streamFieldCaps: FieldCapsResponse['fields'],
+  fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
@@ -815,18 +824,42 @@ const computeDetectedFields = async (
 
   const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
-  return uniqueFields.map((name) => {
-    const existingField = streamFields[name];
-    if (existingField) {
-      return { name, ...existingField };
-    }
+  return Promise.all(
+    uniqueFields.map(async (name) => {
+      const existingField = streamFields[name];
+      if (existingField) {
+        return { name, ...existingField };
+      }
 
-    const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
+      const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
+      const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
 
-    const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
+      let suggestedType: string | undefined;
+      let source: string | undefined;
+      let description: string | undefined;
 
-    return { name, type: confirmedValidDetectedFields[name]?.type, esType };
-  });
+      try {
+        const fieldMetadata = await fieldsMetadataClient.getByName(name);
+        if (fieldMetadata) {
+          suggestedType = fieldMetadata.type;
+          source = fieldMetadata.source;
+          description = fieldMetadata.description;
+        }
+      } catch (error) {
+        // Gracefully handle metadata service failures
+        // Field will remain unmapped if service is unavailable
+      }
+
+      return {
+        name,
+        type: confirmedValidDetectedFields[name]?.type,
+        esType,
+        suggestedType,
+        source,
+        description,
+      };
+    })
+  );
 };
 
 const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSimulationStatus) => {
