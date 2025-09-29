@@ -55,7 +55,9 @@ export function DiagnosticsApmDocuments() {
       field: 'docCount',
       render: (_, { docCount }) => (
         <EuiToolTip content={`${asInteger(docCount)} docs`}>
-          <div style={{ cursor: 'pointer' }} tabIndex={0}>{asBigNumber(docCount)}</div>
+          <div style={{ cursor: 'pointer' }} tabIndex={0}>
+            {asBigNumber(docCount)}
+          </div>
         </EuiToolTip>
       ),
       sortable: true,

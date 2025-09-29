@@ -22,7 +22,6 @@ import type {
   CustomIntegrationIcon,
 } from '@kbn/custom-integrations-plugin/common';
 
-import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';

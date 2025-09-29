@@ -111,7 +111,11 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.DESTINATION_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.destinationIp}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-destination-ip-kpi'} tabIndex={0}>
+            <EuiBadge
+              color="hollow"
+              data-test-subj={'siem-timeline-destination-ip-kpi'}
+              tabIndex={0}
+            >
               {formattedKpis.destinationIp}
             </EuiBadge>
           </EuiToolTip>

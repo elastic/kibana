@@ -68,7 +68,9 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge tabIndex={0} color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge tabIndex={0} color={isFailed ? 'danger' : 'hollow'}>
+              {routingState}
+            </EuiBadge>
           </EuiToolTip>
         );
       },

@@ -74,7 +74,9 @@ export function FieldName({
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiHighlight tabIndex={0} search={highlight}>{fieldDisplayName}</EuiHighlight>
+              <EuiHighlight tabIndex={0} search={highlight}>
+                {fieldDisplayName}
+              </EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 

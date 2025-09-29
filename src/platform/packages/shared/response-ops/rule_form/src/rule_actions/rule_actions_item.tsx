@@ -635,7 +635,12 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       return (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={ACTION_WARNING_TITLE}>
-            <EuiBadge tabIndex={0} data-test-subj="warning-badge" iconType="warning" color="warning" />
+            <EuiBadge
+              tabIndex={0}
+              data-test-subj="warning-badge"
+              iconType="warning"
+              color="warning"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       );

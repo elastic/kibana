@@ -62,7 +62,9 @@ export const InlineReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel
       content={RELEASE_BADGE_DESCRIPTION[release]}
       title={releaseLabel}
     >
-      <EuiBadge color="hollow" tabIndex={0}>{releaseLabel}</EuiBadge>
+      <EuiBadge color="hollow" tabIndex={0}>
+        {releaseLabel}
+      </EuiBadge>
     </EuiToolTip>
   );
 };

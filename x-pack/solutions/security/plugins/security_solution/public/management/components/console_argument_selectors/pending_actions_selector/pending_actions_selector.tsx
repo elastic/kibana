@@ -161,7 +161,9 @@ export const PendingActionsSelector = memo<
       if (option.disabled) {
         return (
           <EuiToolTip position="right" content={toolTipText} display="block">
-            <div style={{ cursor: 'not-allowed' }} tabIndex={0}>{content}</div>
+            <div style={{ cursor: 'not-allowed' }} tabIndex={0}>
+              {content}
+            </div>
           </EuiToolTip>
         );
       }

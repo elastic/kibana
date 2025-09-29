@@ -51,7 +51,9 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
       >
         {method && (
           <EuiToolTip content={methodLabel}>
-            <span tabIndex={0} data-test-subj="apmHttpInfoRequestMethod">{method.toUpperCase()}</span>
+            <span tabIndex={0} data-test-subj="apmHttpInfoRequestMethod">
+              {method.toUpperCase()}
+            </span>
           </EuiToolTip>
         )}{' '}
         {url && (

@@ -103,7 +103,10 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         content={severityMappingItem.field}
         data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
       >
-        <span tabIndex={0} data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
+        <span
+          tabIndex={0}
+          data-test-subj="severityOverrideField"
+        >{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>

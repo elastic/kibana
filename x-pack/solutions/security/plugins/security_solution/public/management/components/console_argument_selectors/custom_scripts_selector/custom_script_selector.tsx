@@ -165,7 +165,12 @@ export const CustomScriptSelector = memo<
           </EuiText>
           {hasDescription ? (
             <EuiToolTip position="right" content={descriptionText}>
-              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s" tabIndex={0}>
+              <EuiText
+                data-test-subj={`${option.label}-description`}
+                color="subdued"
+                size="s"
+                tabIndex={0}
+              >
                 <small css={SHARED_TRUNCATION_STYLE}>{descriptionText}</small>
               </EuiText>
             </EuiToolTip>

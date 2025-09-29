@@ -160,7 +160,12 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
 
     return (
       <EuiToolTip position="top" content={resolutionI18nTexts.resolutionCellTooltipLabel}>
-        <EuiFlexGroup tabIndex={0} gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
+        <EuiFlexGroup
+          tabIndex={0}
+          gutterSize="s"
+          alignItems="center"
+          data-test-subj="resolutionStatusCell"
+        >
           <EuiFlexItem grow={false}>
             <EuiIcon type={euiIconType} />
           </EuiFlexItem>
