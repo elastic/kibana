@@ -356,7 +356,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -464,7 +464,7 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            "; createdAt: string; totals: { alerts: number; userComments: number; }; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
+            "; createdAt: string; totals: { alerts: number; events: number; userComments: number; }; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -592,7 +592,7 @@
             "CustomFieldTypes",
             ".TOGGLE; value: boolean | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -600,7 +600,7 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; } & { comments?: ((({ comment: string; type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -617,6 +617,14 @@
               "text": "AttachmentType"
             },
             ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.AttachmentType",
+              "text": "AttachmentType"
+            },
+            ".event; eventId: string | string[]; index: string | string[]; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -1953,6 +1961,14 @@
             "section": "def-common.AttachmentType",
             "text": "AttachmentType"
           },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
           ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | (({ externalReferenceId: string; externalReferenceStorage: { type: ",
           {
             "pluginId": "cases",
@@ -2110,7 +2126,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2118,7 +2134,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2135,6 +2151,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2314,7 +2338,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; settings?: { syncAlerts: boolean; } | undefined; } & { status?: ",
+          ".NUMBER; value: number | null; })[] | undefined; settings?: ({ syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }) | undefined; } & { status?: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2401,7 +2425,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2508,7 +2532,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2516,7 +2540,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2533,6 +2557,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2759,7 +2791,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2767,7 +2799,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { incremental_id?: number | null | undefined; in_progress_at?: string | null | undefined; time_to_acknowledge?: number | null | undefined; time_to_investigate?: number | null | undefined; time_to_resolve?: number | null | undefined; } & { id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2784,6 +2816,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2948,7 +2988,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; extractObservables?: boolean | undefined; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2956,7 +2996,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2973,6 +3013,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; } | { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; } | { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3158,7 +3206,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; extractObservables?: boolean | undefined; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3166,7 +3214,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; incrementalId?: number | null | undefined; inProgressAt?: string | null | undefined; timeToAcknowledge?: number | null | undefined; timeToInvestigate?: number | null | undefined; timeToResolve?: number | null | undefined; id: string; totalComment: number; totalAlerts: number; totalEvents: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3183,6 +3231,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; } | { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; } | { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3400,7 +3456,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; createdAt: string; totals: { alerts: number; userComments: number; }; }[]"
+          "; createdAt: string; totals: { alerts: number; events: number; userComments: number; }; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/types/api/case/v1.ts",
         "deprecated": false,
@@ -3513,7 +3569,7 @@
             "section": "def-common.CaseStatuses",
             "text": "CaseStatuses"
           },
-          "; createdAt: string; totals: { alerts: number; userComments: number; }; }"
+          "; createdAt: string; totals: { alerts: number; events: number; userComments: number; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/types/domain/case/v1.ts",
         "deprecated": false,
@@ -3592,7 +3648,7 @@
         "label": "UserActionFindResponse",
         "description": [],
         "signature": [
-          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts: boolean; }; }; } | { type: \"status\"; payload: { status: ",
+          "{ userActions: (((({ type: \"description\"; payload: { description: string; }; } | { type: \"tags\"; payload: { tags: string[]; }; } | { type: \"title\"; payload: { title: string; }; } | { type: \"settings\"; payload: { settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; }; } | { type: \"status\"; payload: { status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3631,6 +3687,14 @@
             "text": "AttachmentType"
           },
           ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } | { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3766,7 +3830,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; } & { extractObservables?: boolean | undefined; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",

@@ -46,6 +46,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { SplitButton } from '@kbn/split-button';
+import { EuiIconBackgroundTask } from '@kbn/background-search';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
@@ -321,10 +322,7 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground =
-      props.isDirty ||
-      backgroundSearchState === SearchSessionState.Loading ||
-      backgroundSearchState === SearchSessionState.Completed;
+    const canSendToBackground = backgroundSearchState === SearchSessionState.Loading;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -607,7 +605,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed={shouldShowDatePickerAsBadge()}
+          compressed
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
@@ -627,15 +625,16 @@ export const QueryBarTopRow = React.memo(
           <SplitButton
             aria-label={buttonLabelCancel}
             color="text"
-            data-test-subj="queryCancelSplitButton"
+            data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="clock"
+            // TODO: Replace when the backgroundTask icon is available in EUI
+            secondaryButtonIcon={EuiIconBackgroundTask}
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size="s"
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -648,7 +647,7 @@ export const QueryBarTopRow = React.memo(
             iconType="cross"
             aria-label={buttonLabelCancel}
             onClick={onClickCancelButton}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size="s"
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
@@ -663,7 +662,7 @@ export const QueryBarTopRow = React.memo(
           iconType="cross"
           aria-label={buttonLabelCancel}
           onClick={onClickCancelButton}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          size="s"
           data-test-subj="queryCancelButton"
           color="text"
         >
@@ -688,7 +687,7 @@ export const QueryBarTopRow = React.memo(
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitSplitButton"
+          data-test-subj="querySubmitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
@@ -696,9 +695,10 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="clock"
+          // TODO: Replace when the backgroundTask icon is available in EUI
+          secondaryButtonIcon={EuiIconBackgroundTask}
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          size="s"
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
         </SplitButton>
@@ -710,7 +710,7 @@ export const QueryBarTopRow = React.memo(
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          size="s"
           color={props.isDirty ? 'success' : 'primary'}
           fill={false}
           needsUpdate={props.isDirty}
@@ -776,7 +776,7 @@ export const QueryBarTopRow = React.memo(
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{
-                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                size: 's',
                 display: 'empty',
               }}
               isDisabled={props.isDisabled}
@@ -794,7 +794,7 @@ export const QueryBarTopRow = React.memo(
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              size="s"
             />
           </EuiFlexItem>
         )

@@ -259,6 +259,7 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
-    "@kbn/core-analytics-server-mocks",
+    "@kbn/rrule",
+    "@kbn/core-analytics-server-mocks"
   ]
 }

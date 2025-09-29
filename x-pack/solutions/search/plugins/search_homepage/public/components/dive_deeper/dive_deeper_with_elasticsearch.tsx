@@ -22,11 +22,11 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
   return (
     <>
       <EuiTitle size="xxs">
-        <h4>
+        <h3>
           {i18n.translate('xpack.searchHomepage.diveDeeper.title', {
             defaultMessage: 'Dive deeper with Elasticsearch',
           })}
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>

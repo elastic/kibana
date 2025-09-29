@@ -16,8 +16,10 @@ export const usePaginatedFields = ({
   dimensions,
   pageSize,
   currentPage,
+  searchTerm,
 }: {
   fields: MetricField[];
+  searchTerm: string;
   dimensions: string[];
   pageSize: number;
   currentPage: number;
@@ -30,9 +32,13 @@ export const usePaginatedFields = ({
           dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
     );
 
-    const totalPages = Math.ceil(allFields.length / pageSize);
+    const filteredFieldsBySearch = allFields.filter((field) =>
+      field.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const currentPageFields = allFields.slice(
+    const totalPages = Math.ceil(filteredFieldsBySearch.length / pageSize);
+
+    const currentPageFields = filteredFieldsBySearch.slice(
       currentPage * pageSize,
       currentPage * pageSize + pageSize
     );
@@ -40,10 +46,11 @@ export const usePaginatedFields = ({
     return {
       allFields,
       currentPageFields,
+      filteredFieldsBySearch,
       totalPages,
       dimensions,
     };
-  }, [currentPage, dimensions, fields, pageSize]);
+  }, [currentPage, dimensions, fields, pageSize, searchTerm]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();

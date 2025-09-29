@@ -23,5 +23,6 @@
     "@kbn/inference-common",
     "@kbn/zod",
     "@kbn/inference-prompt-utils",
+    "@kbn/es-query",
   ]
 }

@@ -30,22 +30,6 @@ describe('useAddIntegrationPath', () => {
 
   it('returns asset discovery integration path if available', () => {
     mockUseAssetDiscoveryIntegration.mockReturnValue({
-      path: '/asset-discovery-path',
-      isLoading: false,
-      isError: false,
-      error: undefined,
-    });
-    mockGetUrlForApp.mockReturnValue('/integrations-path');
-
-    const { result } = renderHook(() => useAddIntegrationPath());
-    expect(result.current.addIntegrationPath).toBe('/asset-discovery-path');
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.isError).toBe(false);
-    expect(result.current.error).toBeUndefined();
-  });
-
-  it('returns integrations app path if asset discovery integration path is not available', () => {
-    mockUseAssetDiscoveryIntegration.mockReturnValue({
       path: undefined,
       isLoading: false,
       isError: false,
@@ -54,7 +38,12 @@ describe('useAddIntegrationPath', () => {
     mockGetUrlForApp.mockReturnValue('/integrations-path');
 
     const { result } = renderHook(() => useAddIntegrationPath());
-    expect(result.current.addIntegrationPath).toBe('/integrations-path');
+    expect(result.current.addIntegrationPath).toBe(
+      '/integrations-path/browse/security/asset_inventory'
+    );
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isError).toBe(false);
+    expect(result.current.error).toBeUndefined();
   });
 
   it('forwards loading and error states', () => {
