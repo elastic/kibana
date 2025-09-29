@@ -21,6 +21,7 @@ import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/pub
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
@@ -57,7 +58,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     stats = null,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled } =
+    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled, settings } =
       useAssistantContext();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -68,6 +69,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
       http,
       inferenceEnabled,
+      settings,
     });
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
@@ -185,6 +187,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
     );
 
+    const defaultAIConnectorId = settings.client.get<string | undefined>(
+      GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+      undefined
+    );
+
     return (
       <>
         {!connectorExists && !connectorOptions.length ? (
@@ -213,7 +220,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             isOpen={modalForceOpen}
             onChange={onChange}
             options={allConnectorOptions}
-            valueOfSelected={selectedConnectorId}
+            valueOfSelected={selectedConnectorId ?? defaultAIConnectorId}
             placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
