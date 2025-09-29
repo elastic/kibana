@@ -38,9 +38,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.openNewTab();
       await browser.get(sharedUrl);
       await discover.waitUntilTabIsLoaded();
+
+      // the shared link can be opened in a new browser tab, the Discover tabs are reset
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
+        expect(await queryBar.getQueryString()).to.be('bytes > 1000');
         expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql(['first tab', 'second tab']);
+      });
+
+      // after a browser refresh in the original browser tab, the Discover tabs are restored
+      await browser.switchTab(0);
+      await browser.refresh();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('12,653');
+        expect(await queryBar.getQueryString()).to.be('bytes > 1000');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['first tab', 'second tab']);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
+          'Untitled',
+          'first tab',
+          'second tab',
+        ]);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.eql('second tab');
+      });
+
+      // the shared link can be opened in a new browser tab where local storage is empty
+      await browser.setLocalStorageItem('discover.tabs', '');
+      await browser.openNewTab();
+      await browser.get(sharedUrl);
+      await discover.waitUntilTabIsLoaded();
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('12,653');
+        expect(await queryBar.getQueryString()).to.be('bytes > 1000');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([]);
       });
     });
   });
