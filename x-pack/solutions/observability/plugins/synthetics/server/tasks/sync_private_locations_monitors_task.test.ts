@@ -128,8 +128,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
         hasDataChanged: false,
-        totalParams: 1,
-        totalMWs: 1,
       });
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
@@ -149,10 +147,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
-        lastCleanUpAt: expect.anything(),
-        lastStartedAt: taskInstance.startedAt?.toISOString(),
+        hasAlreadyDoneCleanup: false,
+        startedAt: expect.anything(),
+        lastStartedAt: expect.anything(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
+        maxCleanUpRetries: 2,
       });
     });
 
@@ -160,8 +160,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
         hasDataChanged: true,
-        totalParams: 2,
-        totalMWs: 1,
       });
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
@@ -174,26 +172,28 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       jest.spyOn(task, 'syncGlobalParams').mockResolvedValue(undefined);
 
       const result = await task.runTask({ taskInstance });
-
-      expect(mockLogger.debug).toHaveBeenNthCalledWith(
-        1,
-        '[syncGlobalParams] Syncing private location monitors, last total params 1 '
-      );
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         2,
-        '[syncGlobalParams] Syncing private location monitors because data has changed '
+        '[SyncPrivateLocationMonitorsTask] Starting cleanup of duplicated package policies '
       );
+
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         3,
-        '[syncGlobalParams] Sync of private location monitors succeeded '
+        '[SyncPrivateLocationMonitorsTask] Syncing private location monitors because data has changed '
+      );
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        4,
+        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded '
       );
       expect(task.syncGlobalParams).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
-        lastCleanUpAt: expect.anything(),
-        lastStartedAt: taskInstance.startedAt?.toISOString(),
-        lastTotalParams: 2,
+        lastTotalParams: 1,
         lastTotalMWs: 1,
+        maxCleanUpRetries: 2,
+        hasAlreadyDoneCleanup: false,
+        lastStartedAt: expect.anything(),
+        startedAt: expect.anything(),
       });
     });
 
@@ -201,8 +201,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'hasAnyDataChanged').mockResolvedValue({
         hasDataChanged: true,
-        totalParams: 2,
-        totalMWs: 1,
       });
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
       jest.spyOn(task, 'syncGlobalParams');
@@ -212,7 +210,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(getPrivateLocationsModule.getPrivateLocations).toHaveBeenCalled();
       expect(task.syncGlobalParams).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenLastCalledWith(
-        '[syncGlobalParams] Sync of private location monitors succeeded '
+        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded '
       );
     });
 
@@ -228,10 +226,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       expect(result.error).toBe(error);
       expect(result.state).toEqual({
-        lastCleanUpAt: expect.anything(),
-        lastStartedAt: taskInstance.startedAt?.toISOString(),
+        startedAt: expect.anything(),
+        lastStartedAt: expect.anything(),
         lastTotalParams: 1,
         lastTotalMWs: 1,
+        hasAlreadyDoneCleanup: false,
+        maxCleanUpRetries: 2,
       });
     });
   });
@@ -244,15 +244,16 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       jest
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
+      const taskState = { lastTotalParams: 1, lastTotalMWs: 1 };
 
       const res = await task.hasAnyDataChanged({
-        taskInstance: getMockTaskInstance(),
+        taskState: taskState as any,
         soClient: mockSoClient as any,
       });
 
       expect(res.hasDataChanged).toBe(true);
-      expect(res.totalParams).toBe(2);
-      expect(res.totalMWs).toBe(1);
+      expect(taskState.lastTotalParams).toBe(2);
+      expect(taskState.lastTotalMWs).toBe(1);
     });
 
     it('should return true if maintenance windows changed', async () => {
@@ -264,7 +265,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .mockResolvedValue({ hasMWsChanged: true, totalMWs: 2 } as any);
 
       const res = await task.hasAnyDataChanged({
-        taskInstance: getMockTaskInstance(),
+        taskState: { lastTotalParams: 1, lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
       });
 
@@ -279,8 +280,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
 
+      const taskState = { lastTotalParams: 1, lastTotalMWs: 1 };
+
       const res = await task.hasAnyDataChanged({
-        taskInstance: getMockTaskInstance(),
+        taskState: taskState as any,
         soClient: mockSoClient as any,
       });
 
@@ -487,7 +490,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1-space1'];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, false);
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
       expect(result.performSync).toBe(false);
     });
@@ -498,7 +501,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield ['monitor1-loc1-space1', 'unexpected-policy'];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, false);
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
         mockSoClient,
         expect.anything(),
@@ -514,13 +517,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           yield [];
         })()
       );
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, false);
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(result.performSync).toBe(true);
     });
 
     it('should handle errors gracefully and return performSync', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
-      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, false);
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toHaveProperty('performSync');
     });
