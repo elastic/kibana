@@ -207,6 +207,11 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
         execution_summary:
           $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
+        gap_status:
+          type: string
+          nullable: true
+          description: Aggregated gap status for the rule when enrichment is enabled
+          enum: [IN_PROGRESS, UNFILLED, FILLED]
       required:
         - id
         - rule_id

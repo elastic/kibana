@@ -70,6 +70,7 @@ export interface FetchRulesProps {
     start: string;
     end: string;
   };
+  includeGapStatus?: boolean;
   signal?: AbortSignal;
 }
 

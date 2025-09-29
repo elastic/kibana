@@ -194,6 +194,7 @@ export const fetchRules = async ({
     perPage: 20,
   },
   gapsRange,
+  includeGapStatus,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
@@ -204,6 +205,7 @@ export const fetchRules = async ({
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
     ...(gapsRange ? { gaps_range_start: gapsRange.start, gaps_range_end: gapsRange.end } : {}),
+    ...(includeGapStatus ? { include_gap_status: true } : {}),
     ...(kql !== '' ? { filter: kql } : {}),
   };
 

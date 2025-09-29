@@ -83,6 +83,30 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             fields: query.fields,
             ruleIds,
           });
+          console.log('1');
+          // Optional enrichment: aggregated gap status per rule
+          if (query.include_gap_status) {
+            console.log('2');
+            const pageRuleIds = rules.data.map((r) => r.id);
+            if (pageRuleIds.length > 0) {
+              console.log('3');
+              const timeRange =
+                query.gaps_range_start && query.gaps_range_end
+                  ? { from: query.gaps_range_start, to: query.gaps_range_end }
+                  : undefined;
+              const summaries = await rulesClient.getAggregatedGapStatusByRuleIds({
+                ruleIds: pageRuleIds,
+                timeRange,
+              });
+              console.log('4');
+              console.log('summaries', JSON.stringify(summaries, null, 2));
+              rules.data = rules.data.map((r) => ({
+                ...r,
+                // Attach top-level gap_status, null when no active gaps
+                gap_status: summaries[r.id]?.status ?? null,
+              })) as typeof rules.data;
+            }
+          }
 
           const transformed = transformFindAlerts(rules);
           return response.ok({ body: transformed ?? {} });

@@ -41,7 +41,7 @@ export const internalRuleToAPIResponse = (
   });
   const normalizedRuleParams = normalizeRuleParams(rule.params);
 
-  return {
+  const ruleResponse: RequiredOptional<RuleResponse> = {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
@@ -67,4 +67,12 @@ export const internalRuleToAPIResponse = (
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
+
+  // Carry through optional top-level enrichments (e.g., gap_status) when present on the source rule
+  const maybeGapStatus = rule?.gap_status;
+  if (maybeGapStatus !== undefined) {
+    ruleResponse.gap_status = maybeGapStatus;
+  }
+
+  return ruleResponse;
 };

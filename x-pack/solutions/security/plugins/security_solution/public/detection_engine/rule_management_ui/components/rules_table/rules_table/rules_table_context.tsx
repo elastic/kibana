@@ -313,6 +313,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       sortingOptions,
       pagination,
       ...(gapRangeForSearch ? { gapsRange: gapRangeForSearch } : {}),
+      includeGapStatus: true,
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off

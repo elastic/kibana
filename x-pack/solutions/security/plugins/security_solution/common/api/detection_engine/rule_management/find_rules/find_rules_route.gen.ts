@@ -82,6 +82,13 @@ Filters the returned results according to the value of the specified field, usin
    * Gaps range end
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Include aggregated gap status in response enrichment
+   */
+  include_gap_status: z
+    .preprocess((v) => (typeof v === 'string' ? v === 'true' : v), z.boolean())
+    .optional()
+    .default(false),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

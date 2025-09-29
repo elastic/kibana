@@ -104,6 +104,11 @@ import type { CreateGapFillAutoSchedulerParams } from '../application/gap_auto_f
 import type { GetGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/get/types';
 import type { UpdateGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';
 import type { GetGapFillAutoSchedulerLogsParams } from '../application/gap_auto_fill_scheduler/methods/get_logs/types';
+import type {
+  GetAggregatedGapStatusByRuleIdsParams,
+  RuleGapStatusSummary,
+} from '../application/rule/methods/get_aggregated_gap_status_by_rule_ids';
+import { getAggregatedGapStatusByRuleIds } from '../application/rule/methods/get_aggregated_gap_status_by_rule_ids';
 
 interface UpdateGapFillAutoSchedulerMethodParams {
   id: string;
@@ -277,4 +282,9 @@ export class RulesClient {
 
   public getTaskManager = () => this.context.taskManager;
   public getEventLogClient = () => this.context.getEventLogClient();
+
+  public getAggregatedGapStatusByRuleIds = (
+    params: GetAggregatedGapStatusByRuleIdsParams
+  ): Promise<Record<string, RuleGapStatusSummary>> =>
+    getAggregatedGapStatusByRuleIds(this.context, params);
 }

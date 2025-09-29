@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
@@ -514,6 +515,7 @@ export const useMonitoringColumns = ({
     mlJobs,
   });
   const gapDurationColumn = useGapDurationColumn();
+  const gapStatusColumn = useGapStatusColumn();
 
   return useMemo(
     () => [
@@ -524,6 +526,7 @@ export const useMonitoringColumns = ({
       MODIFIED_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
+      gapStatusColumn,
       INDEXING_DURATION_COLUMN,
       SEARCH_DURATION_COLUMN,
       gapDurationColumn,
@@ -537,9 +540,48 @@ export const useMonitoringColumns = ({
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
+      gapStatusColumn,
       gapDurationColumn,
       hasCRUDPermissions,
       showRelatedIntegrations,
     ]
+  );
+};
+
+export const useGapStatusColumn = (): TableColumn => {
+  return useMemo(
+    () => ({
+      field: 'gap_status',
+      name: i18n.COLUMN_GAP_STATUS ?? 'Gap status',
+      render: (value: 'IN_PROGRESS' | 'UNFILLED' | 'FILLED' | null | undefined) => {
+        if (!value) return getEmptyTagValue();
+        const color =
+          value === 'IN_PROGRESS' ? '#9170B8' : value === 'UNFILLED' ? '#FDDDD8' : '#C9F3E3';
+        const label =
+          value === 'IN_PROGRESS'
+            ? kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.inProgress',
+                { defaultMessage: 'In progress' }
+              )
+            : value === 'UNFILLED'
+            ? kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.unfilled',
+                { defaultMessage: 'Unfilled' }
+              )
+            : kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.filled',
+                { defaultMessage: 'Filled' }
+              );
+        return (
+          <EuiBadge color={color} data-test-subj="gapStatusBadge">
+            {label}
+          </EuiBadge>
+        );
+      },
+      sortable: false,
+      truncateText: true,
+      width: '120px',
+    }),
+    []
   );
 };

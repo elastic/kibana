@@ -188,41 +188,6 @@ export const getExecutionLogMetricsColumns = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<RuleExecutionResult>> => [
   {
-    field: 'gap_duration_s',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_GAP_DURATION}
-        customTooltip={
-          <div css={{ maxWidth: '20px' }}>
-            <PopoverTooltip columnName={i18n.COLUMN_GAP_DURATION}>
-              <EuiText size={'s'} css={{ width: 350 }}>
-                <p>
-                  <FormattedMessage
-                    defaultMessage="Duration of gap in Rule execution (hh:mm:ss:SSS). Adjust Rule look-back or {seeDocs} for mitigating gaps."
-                    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip"
-                    values={{
-                      seeDocs: (
-                        <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
-                          {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </PopoverTooltip>
-          </div>
-        }
-      />
-    ),
-    render: (value: number) => (
-      <>{value ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}</>
-    ),
-    sortable: true,
-    truncateText: false,
-    width: '10%',
-  },
-  {
     field: 'indexing_duration_ms',
     name: (
       <TableHeaderTooltipCell
