@@ -230,6 +230,7 @@ export interface FunctionFilterPredicates {
   location: Location;
   returnTypes?: string[];
   ignored?: string[];
+  allowed?: string[];
 }
 
 export interface Literals {

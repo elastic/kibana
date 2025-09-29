@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,
   handleFragment,
@@ -14,7 +15,6 @@ import {
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
@@ -53,17 +53,15 @@ export async function autocomplete(
         return [];
       }
 
-      return filteredMnemonics.map(
-        ([mnemonic, description], i) =>
-          ({
-            label: mnemonic,
-            text: mnemonic + ' $0',
-            asSnippet: true,
-            detail: description,
-            kind: 'Keyword',
-            sortText: `${i}-MNEMONIC`,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          } as ISuggestionItem)
+      return filteredMnemonics.map(([mnemonic, description], i) =>
+        withAutoSuggest({
+          label: mnemonic,
+          text: mnemonic + ' $0',
+          asSnippet: true,
+          detail: description,
+          kind: 'Keyword',
+          sortText: `${i}-MNEMONIC`,
+        })
       );
     }
 
@@ -106,7 +104,7 @@ export async function autocomplete(
     }
 
     case 'after_index': {
-      const suggestion: ISuggestionItem = {
+      const suggestion: ISuggestionItem = withAutoSuggest({
         label: 'ON',
         text: 'ON ',
         detail: i18n.translate('kbn-esql-ast.esql.autocomplete.join.onKeyword', {
@@ -114,8 +112,7 @@ export async function autocomplete(
         }),
         kind: 'Keyword',
         sortText: '0-ON',
-        command: TRIGGER_SUGGESTION_COMMAND,
-      };
+      });
 
       return [suggestion];
     }
