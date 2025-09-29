@@ -66,8 +66,6 @@ export function getExpressionType(
         return 'boolean';
       case 'string':
         return 'keyword';
-      case 'text':
-        return 'keyword';
       case 'datetime':
         return 'date';
       default:
@@ -227,6 +225,8 @@ export function argMatchesParamType(
     // all ES|QL functions accept null, but this is not reflected
     // in our function definitions so we let it through here
     givenType === 'null' ||
+    // Check array types
+    givenType === unwrapArrayOneLevel(expectedType) ||
     // all functions accept keywords for text parameters
     bothStringTypes(givenType, expectedType)
   ) {
@@ -330,8 +330,9 @@ export function buildPartialMatcher(str: string) {
   return pattern;
 }
 
-const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
-const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
+// Handles: "IS ", "IS N", "IS NU", "IS NUL" with flexible whitespace
+const isNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('nul') + ')?$', 'i');
+const isNotNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('not nul') + ')?$', 'i');
 
 // --- Expression types helpers ---
 

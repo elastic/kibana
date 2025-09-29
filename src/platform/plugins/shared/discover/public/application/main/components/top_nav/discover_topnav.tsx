@@ -15,8 +15,6 @@ import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -67,7 +65,7 @@ export const DiscoverTopNav = ({
 
   const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
 
-  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
@@ -76,7 +74,9 @@ export const DiscoverTopNav = ({
     TABS_ENABLED_FEATURE_FLAG_KEY,
     false
   );
-  const savedSearch = useSavedSearchInitial();
+  const discoverSessionTitle = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession?.title
+  );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
@@ -86,7 +86,6 @@ export const DiscoverTopNav = ({
   }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   // ES|QL controls logic
   const { onSaveControl, getActivePanels } = useESQLVariables({
@@ -102,9 +101,6 @@ export const DiscoverTopNav = ({
       // Make sure to close the editors when unmounting
       if (closeFieldEditor.current) {
         closeFieldEditor.current();
-      }
-      if (closeDataViewEditor.current) {
-        closeDataViewEditor.current();
       }
     };
   }, []);
@@ -137,13 +133,6 @@ export const DiscoverTopNav = ({
     () => (canEditDataView && editField ? () => editField() : undefined),
     [editField, canEditDataView]
   );
-
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: stateContainer.actions.onDataViewCreated,
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, stateContainer]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;
@@ -206,23 +195,14 @@ export const DiscoverTopNav = ({
       },
       currentDataViewId: dataView?.id,
       onAddField: addField,
-      onDataViewCreated: createNewDataView,
+      onDataViewCreated: stateContainer.actions.onDataViewCreated,
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
       adHocDataViews,
-      managedDataViews,
       savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
-  }, [
-    adHocDataViews,
-    addField,
-    createNewDataView,
-    dataView,
-    managedDataViews,
-    savedDataViews,
-    stateContainer,
-  ]);
+  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
@@ -270,7 +250,10 @@ export const DiscoverTopNav = ({
     <span css={floatingActionStyles}>
       <SearchBar
         {...topNavProps}
-        useBackgroundSearchButton={services.data.search.isBackgroundSearchEnabled}
+        useBackgroundSearchButton={
+          services.data.search.isBackgroundSearchEnabled &&
+          !!services.capabilities.discover_v2.storeSearchSession
+        }
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
@@ -279,7 +262,7 @@ export const DiscoverTopNav = ({
         onSavedQueryIdChange={updateSavedQueryId}
         query={query}
         savedQueryId={savedQuery}
-        screenTitle={savedSearch.title}
+        screenTitle={discoverSessionTitle}
         showDatePicker={showDatePicker}
         allowSavingQueries
         showSearchBar={true}

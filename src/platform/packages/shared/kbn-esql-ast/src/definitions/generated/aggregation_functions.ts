@@ -2523,7 +2523,7 @@ const stdDevDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS],
   examples: [
-    'FROM employees\n| STATS STD_DEV(height)',
+    'FROM employees\n| STATS std_dev_height = STD_DEV(height)',
     'FROM employees\n| STATS stddev_salary_change = STD_DEV(MV_MAX(salary_change))',
   ],
 };

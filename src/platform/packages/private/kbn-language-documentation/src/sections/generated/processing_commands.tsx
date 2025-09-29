@@ -314,6 +314,97 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.fork', {
+        defaultMessage: 'FORK',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
+            defaultMessage: `### FORK
+\`FORK\` creates multiple execution branches to operate on the same input data and combines the results in a single output table.
+
+\`\`\` esql
+FORK ( <processing_commands> ) ( <processing_commands> ) ... ( <processing_commands> )
+\`\`\`
+
+**Description**
+
+The \`FORK\` processing command creates multiple execution branches to operate
+on the same input data and combines the results in a single output table. A discriminator column (\`_fork\`) is added to identify which branch each row came from.
+
+**Branch identification:**
+- The \`_fork\` column identifies each branch with values like \`fork1\`, \`fork2\`, \`fork3\`, etc.
+- Values correspond to the order in which branches are defined
+- \`fork1\` always indicates the first branch
+
+**Column handling:**
+- \`FORK\` branches can output different columns
+- Columns with the same name must have the same data type across all branches
+- Missing columns are filled with \`null\` values
+
+**Row ordering:**
+- \`FORK\` preserves row order within each branch
+- Rows from different branches may be interleaved
+- Use \`SORT _fork\` to group results by branch
+
+NOTE:
+\`FORK\` branches default to \`LIMIT 1000\` if no \`LIMIT\` is provided.
+
+**Limitations**
+
+- \`FORK\` supports at most 8 execution branches.
+- Using remote cluster references and \`FORK\` is not supported.
+- Using more than one \`FORK\` command in a query is not supported.
+
+**Examples**
+
+In the following example, each \`FORK\` branch returns one row.
+Notice how \`FORK\` adds a \`_fork\` column that indicates which row the branch originates from:
+
+\`\`\` esql
+FROM employees
+| FORK ( WHERE emp_no == 10001 )
+       ( WHERE emp_no == 10002 )
+| KEEP emp_no, _fork
+| SORT emp_no
+\`\`\`
+
+| emp_no:integer | _fork:keyword |
+| --- | --- |
+| 10001 | fork1 |
+| 10002 | fork2 |
+
+The next example, returns total number of rows that match the query along with
+the top five rows sorted by score.
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE author:"Faulkner"
+| EVAL score = round(_score, 2)
+| FORK (SORT score DESC, author | LIMIT 5 | KEEP author, score)
+       (STATS total = COUNT(*))
+| SORT _fork, score DESC, author
+\`\`\`
+
+| author:text | score:double | _fork:keyword | total:long |
+| --- | --- | --- | --- |
+| William Faulkner | 2.39 | fork1 | null |
+| William Faulkner | 2.39 | fork1 | null |
+| Colleen Faulkner | 1.59 | fork1 | null |
+| Danny Faulkner | 1.59 | fork1 | null |
+| Keith Faulkner | 1.59 | fork1 | null |
+| null | null | fork2 | 18 |
+            `,
+            description:
+              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            ignoreTag: true,
+          })}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.grok', {
         defaultMessage: 'GROK',
       }),
@@ -509,6 +600,134 @@ FROM employees
               ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.rerank', {
+        defaultMessage: 'RERANK',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.rerank.markdown',
+            {
+              defaultMessage: `### RERANK
+\`RERANK\` uses an inference model to compute a new relevance score
+for an initial set of documents, directly within your ES|QL queries.
+
+\`\`\` esql
+RERANK [column =] query ON field [, field, ...] [WITH '{ "inference_id" : "my_inference_endpoint" }']
+\`\`\`
+
+**Usage**
+
+Typically, you first use a \`WHERE\` clause with a function like \`MATCH\` to
+retrieve an initial set of documents. This set is often sorted by \`_score\` and
+reduced to the top results (for example, 100) using \`LIMIT\`. The \`RERANK\`
+command then processes this smaller, refined subset, which is a good balance
+between performance and accuracy.
+
+**Parameters**
+
+\`column\`
+:   (Optional) The name of the output column containing the reranked scores.
+If not specified, the results will be stored in a column named \`_score\`.
+If the specified column already exists, it will be overwritten with the new
+results.
+
+\`query\`
+:   The query text used to rerank the documents. This is typically the same
+query used in the initial search.
+
+\`field\`
+:   One or more fields to use for reranking. These fields should contain the
+text that the reranking model will evaluate.
+
+\`my_inference_endpoint\`
+:   The ID of the inference endpoint to use for the task.
+The inference endpoint must be configured with the \`rerank\` task type.
+
+**Requirements**
+
+To use this command, you must deploy your reranking model in Elasticsearch as
+an [inference endpoint](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put)
+with the
+task type \`rerank\`.
+
+#### Handling timeouts
+
+\`RERANK\` commands may time out when processing large datasets or complex
+queries. The default timeout is 10 minutes, but you can increase this limit if
+necessary. Refer to [the documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/rerank#handling-timeouts) for more details.
+
+**Examples**
+
+Rerank search results using a simple query and a single field:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit")
+| SORT _score DESC
+| LIMIT 100
+| RERANK "hobbit" ON description WITH '{ "inference_id" : "test_reranker" }'
+| LIMIT 3
+| KEEP title, _score
+\`\`\`
+
+| title:text | _score:double |
+| --- | --- |
+| Poems from the Hobbit | 0.0015673980815336108 |
+| A Tolkien Compass: Including J. R. R. Tolkien's Guide to the Names in The Lord of the Rings | 0.007936508394777775 |
+| Return of the King Being the Third Part of The Lord of the Rings | 9.960159659385681E-4 |
+
+Rerank search results using a query and multiple fields, and store the new score
+in a column named \`rerank_score\`:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH '{ "inference_id" : "test_reranker" }'
+| SORT rerank_score
+| LIMIT 3
+| KEEP title, _score, rerank_score
+\`\`\`
+
+| title:text | _score:double | rerank_score:double |
+| --- | --- | --- |
+| Return of the Shadow | 2.8181066513061523 | 5.740527994930744E-4 |
+| Return of the King Being the Third Part of The Lord of the Rings | 3.6248698234558105 | 9.000900317914784E-4 |
+| The Lays of Beleriand | 1.3002015352249146 | 9.36329597607255E-4 |
+
+Combine the original score with the reranked score:
+
+\`\`\`esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH '{ "inference_id" : "test_reranker" }'
+| EVAL original_score = _score, _score = rerank_score + original_score
+| SORT _score
+| LIMIT 3
+| KEEP title, original_score, rerank_score, _score
+\`\`\`
+
+| title:text | _score:double | rerank_score:double | rerank_score:double |
+| --- | --- | --- | --- |
+| Poems from the Hobbit | 4.012462615966797 | 0.001396648003719747 | 0.001396648003719747 |
+| The Lord of the Rings - Boxed Set | 3.768855094909668 | 0.0010020040208473802 | 0.001396648003719747 |
+| Return of the King Being the Third Part of The Lord of the Rings | 3.6248698234558105 | 9.000900317914784E-4 | 0.001396648003719747 |
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
