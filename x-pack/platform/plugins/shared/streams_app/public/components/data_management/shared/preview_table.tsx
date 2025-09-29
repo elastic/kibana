@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+// import { css } from '@emotion/css';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -33,6 +33,40 @@ import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_man
 import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
 
 const emptyCell = <>&nbsp;</>;
+
+// Create context for row selection
+interface RowSelectionContextType {
+  selectedRowIndex?: number;
+  onRowSelected?: (rowIndex: number) => void;
+}
+
+export const RowSelectionContext = createContext<RowSelectionContextType>({});
+
+const useRowSelection = () => useContext(RowSelectionContext);
+
+// Extract row selection button to separate component
+function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
+  const { selectedRowIndex, onRowSelected } = useRowSelection();
+
+  return (
+    <EuiButtonIcon
+      onClick={() => {
+        if (onRowSelected) {
+          onRowSelected(rowIndex);
+        }
+      }}
+      aria-label={i18n.translate(
+        'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+        {
+          defaultMessage: 'Select row {rowIndex}',
+          values: { rowIndex: rowIndex + 1 },
+        }
+      )}
+      iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+      color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
+    />
+  );
+}
 
 export const MemoPreviewTable = React.memo(PreviewTable);
 
@@ -47,10 +81,8 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
-  selectedRowIndex,
   showRowSourceAvatars = false,
   originalSamples,
-  onRowSelected,
   cellActions,
 }: {
   documents: SampleDocument[];
@@ -63,12 +95,11 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
-  selectedRowIndex?: number;
   showRowSourceAvatars?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
-  onRowSelected?: (rowIndex: number) => void;
   cellActions?: EuiDataGridColumnCellAction[];
 }) {
+  console.log('rendering PreviewTable');
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
@@ -145,26 +176,25 @@ export function PreviewTable({
         id: 'selection',
         width: showRowSourceAvatars ? 72 : 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => {
+        rowCellRender: ({ rowIndex, setCellProps }) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { selectedRowIndex } = useRowSelection();
+
+          if (selectedRowIndex === rowIndex) {
+            setCellProps({
+              style: {
+                backgroundColor: theme.colors.highlight,
+              },
+            });
+          } else {
+            setCellProps({
+              style: {},
+            });
+          }
           const originalSample = originalSamples?.[rowIndex];
           return (
             <EuiFlexGroup gutterSize="s">
-              <EuiButtonIcon
-                onClick={() => {
-                  if (onRowSelected) {
-                    onRowSelected(rowIndex);
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-                  {
-                    defaultMessage: 'Select row {rowIndex}',
-                    values: { rowIndex: rowIndex + 1 },
-                  }
-                )}
-                iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
-                color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
-              />
+              <RowSelectionButton rowIndex={rowIndex} />
               {showRowSourceAvatars && originalSample && (
                 <RowSourceAvatar originalSample={originalSample} />
               )}
@@ -173,7 +203,7 @@ export function PreviewTable({
         },
       },
     ],
-    [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
+    [showRowSourceAvatars, originalSamples, theme.colors.highlight] // selectedRowIndex removed from dependencies
   );
 
   // Derive visibleColumns from canonical order
@@ -230,17 +260,6 @@ export function PreviewTable({
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
-      gridStyle={
-        selectedRowIndex !== undefined
-          ? {
-              rowClasses: {
-                [String(selectedRowIndex)]: css`
-                  background-color: ${theme.colors.highlight};
-                `,
-              },
-            }
-          : undefined
-      }
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
@@ -248,7 +267,22 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId }) => {
+      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { selectedRowIndex } = useRowSelection();
+
+        if (selectedRowIndex === rowIndex) {
+          setCellProps({
+            style: {
+              backgroundColor: theme.colors.highlight,
+            },
+          });
+        } else {
+          setCellProps({
+            style: {},
+          });
+        }
+
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
           return emptyCell;
