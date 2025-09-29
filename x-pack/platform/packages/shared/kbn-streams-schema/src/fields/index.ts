@@ -21,7 +21,6 @@ import { recursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
-  'text',
   'match_only_text',
   'long',
   'double',
