@@ -240,7 +240,7 @@ export const AwsCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {!showCloudTemplates && isCloudFormationSupported && (
         <>
-          <EuiCallOut announceOnMount color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
               defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
