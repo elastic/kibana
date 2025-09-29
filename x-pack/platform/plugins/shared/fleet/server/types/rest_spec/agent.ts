@@ -234,7 +234,7 @@ export const AgentResponseSchema = schema.object({
   default_api_key_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
   policy_revision: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
-  last_checkin: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  last_checkin: schema.maybe(schema.string()),
   last_checkin_status: schema.maybe(
     schema.oneOf([
       schema.literal('error'),
