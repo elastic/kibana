@@ -87,6 +87,7 @@ describe('MetricsExperienceGrid', () => {
     },
     services: {} as UnifiedHistogramServices,
     input$,
+    isComponentVisible: true,
   };
 
   beforeEach(() => {
