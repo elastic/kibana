@@ -147,8 +147,8 @@ describe('QueryBarTopRowTopRow', () => {
     {
       value: true,
       description: 'enabled',
-      submitId: 'querySubmitSplitButton',
-      cancelId: 'queryCancelSplitButton',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
     },
   ])('when background search is $description', ({ value, submitId, cancelId }) => {
     describe('when it is NOT loading', () => {
@@ -190,13 +190,13 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   describe('when background search is enabled', () => {
-    const data = dataPluginMock.createStartContract();
-    const session = getSessionServiceMock({
-      state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
-    });
-    data.search.session = session;
-
     describe('when it is NOT loading', () => {
+      const data = dataPluginMock.createStartContract();
+      const session = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
+      });
+      data.search.session = session;
+
       describe('when the user clicks the main button', () => {
         it('should call the submit callback', async () => {
           // Given
@@ -218,44 +218,42 @@ describe('QueryBarTopRowTopRow', () => {
               { servicesOverride: { data } }
             )
           );
-          await user.click(getByTestId('querySubmitSplitButton-primary-button'));
+          await user.click(getByTestId('querySubmitButton'));
 
           // Then
           expect(onSubmit).toHaveBeenCalled();
         });
       });
 
-      describe('when the user clicks the secondary button', () => {
-        it('should call the send to background callback', async () => {
-          // Given
-          const user = userEvent.setup();
-          const onSendToBackground = jest.fn();
+      it('the secondary button should be disabled', () => {
+        // When
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Another Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
 
-          // When
-          const { getByTestId } = render(
-            wrapQueryBarTopRowInContext(
-              {
-                query: kqlQuery,
-                screenTitle: 'Another Screen',
-                isDirty: false,
-                indexPatterns: [stubIndexPattern],
-                timeHistory: mockTimeHistory,
-                onSendToBackground,
-                useBackgroundSearchButton: true,
-              },
-              { servicesOverride: { data } }
-            )
-          );
-          await user.click(getByTestId('querySubmitSplitButton-secondary-button'));
-
-          // Then
-          expect(onSendToBackground).toHaveBeenCalled();
-        });
+        // Then
+        expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
       });
     });
 
     describe('when it is loading', () => {
       const isLoading = true;
+
+      const data = dataPluginMock.createStartContract();
+      const loadingSession = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Loading).asObservable(),
+      });
+      data.search.session = loadingSession;
 
       describe('when the user clicks the main button', () => {
         it('should call the cancel callback', async () => {
@@ -279,7 +277,7 @@ describe('QueryBarTopRowTopRow', () => {
               { servicesOverride: { data } }
             )
           );
-          await user.click(getByTestId('queryCancelSplitButton-primary-button'));
+          await user.click(getByTestId('queryCancelButton'));
 
           // Then
           expect(onCancel).toHaveBeenCalled();
@@ -310,7 +308,7 @@ describe('QueryBarTopRowTopRow', () => {
             )
           );
 
-          await user.click(getByTestId('queryCancelSplitButton-secondary-button'));
+          await user.click(getByTestId('queryCancelButton-secondary-button'));
 
           // Then
           expect(onSendToBackground).toHaveBeenCalled();

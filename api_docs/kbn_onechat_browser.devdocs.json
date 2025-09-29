@@ -212,8 +212,8 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolDefinitionWithSchema",
-                "text": "ToolDefinitionWithSchema"
+                "section": "def-common.ToolDefinition",
+                "text": "ToolDefinition"
               },
               "<Record<string, unknown>>[]>"
             ],
