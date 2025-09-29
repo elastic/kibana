@@ -85,7 +85,7 @@ run(
               )
               .map(({ instancePath, message }) => {
                 errorCount++;
-                return `${chalk.gray(instancePath)}\n${message}`;
+                return `${chalk.bold(instancePath)}\n${message}`;
               })
               .join('\n\n');
           } else if (typeof result.errors === 'string') {

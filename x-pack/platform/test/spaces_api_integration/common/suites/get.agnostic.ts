@@ -98,7 +98,7 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'securitySolutionNotes',
             'securitySolutionSiemMigrations',
             'securitySolutionTimeline',
-            'siemV3',
+            'siemV4',
             'slo',
             'streams',
             'uptime',

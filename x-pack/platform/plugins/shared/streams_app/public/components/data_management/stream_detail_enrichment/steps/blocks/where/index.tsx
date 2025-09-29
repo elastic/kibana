@@ -19,6 +19,7 @@ import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
 import useToggle from 'react-use/lib/useToggle';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { i18n } from '@kbn/i18n';
 import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { getStepPanelColour } from '../../../utils';
@@ -90,17 +91,19 @@ export const WhereBlock = ({
     <>
       <EuiPanel
         data-test-subj="streamsAppConditionBlock"
-        paddingSize="m"
         hasShadow={false}
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
         css={
           isUnderEdit
-            ? css`
+            ? // eslint-disable-next-line @elastic/eui/no-css-color
+              css`
                 border: 1px solid ${euiTheme.colors.borderStrongPrimary};
                 box-sizing: border-box;
               `
             : css`
                 border: ${euiTheme.border.thin};
+                padding: ${euiTheme.size.m};
+                border-radius: ${euiTheme.size.s};
               `
         }
       >
@@ -112,19 +115,25 @@ export const WhereBlock = ({
         {isUnderEdit ? (
           <WhereBlockConfiguration stepRef={stepRef} ref={freshBlockRef} />
         ) : (
-          <EuiFlexGroup direction="column">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 {hasChildren ? (
                   <EuiFlexItem
                     grow={false}
                     css={css`
-                      margin-left: -${euiTheme.size.m};
+                      margin-left: -${euiTheme.size.xxs};
                     `}
                   >
                     <EuiButtonIcon
                       iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                       onClick={toggle}
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
+                        {
+                          defaultMessage: 'Toggle nested steps',
+                        }
+                      )}
                     />
                   </EuiFlexItem>
                 ) : null}
@@ -145,7 +154,7 @@ export const WhereBlock = ({
             </EuiFlexItem>
             {hasChildren && !isExpanded && (
               <EuiFlexItem>
-                <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="m">
+                <EuiPanel color={nestedSummaryPanelColour} hasShadow={false} paddingSize="s">
                   <NestedChildrenProcessingSummary
                     childIds={descendantIds!}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
@@ -157,7 +166,7 @@ export const WhereBlock = ({
         )}
         {hasChildren && isExpanded && (
           <>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <ConnectedNodesList>
               {childSteps.map((childStep) => (
                 <li key={childStep.id}>
