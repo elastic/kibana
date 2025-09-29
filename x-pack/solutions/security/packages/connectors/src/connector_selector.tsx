@@ -10,18 +10,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInputPopover,
-  EuiSuperSelect,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { some } from 'lodash';
 import * as i18n from './translations';
 import { useConnectorSelectorStyles } from './connector_selector.styles';
-import { ADD_NEW_CONNECTOR } from './constants';
 import { ConnectorSelectable, ConnectorSelectableComponentProps } from '@kbn/ai-assistant-connector-selector-action';
 import type { ActionConnector as AiConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
@@ -48,8 +42,6 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     onNewConnectorClicked,
     isDisabled,
     mode = 'default',
-    isLoading,
-    isInvalid,
     settings
   }) => {
     const styles = useConnectorSelectorStyles(mode);
