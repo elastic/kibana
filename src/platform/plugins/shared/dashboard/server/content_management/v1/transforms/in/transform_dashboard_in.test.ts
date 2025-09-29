@@ -46,12 +46,12 @@ describe('transformDashboardIn', () => {
       },
       panels: [
         {
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          panelConfig: {
+          grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          config: {
             enhancements: {},
             savedObjectId: '1',
           },
-          panelIndex: '1',
+          uid: '1',
           title: 'title1',
           type: 'type1',
           version: '2',

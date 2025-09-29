@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './management_app.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import type { BehaviorSubject, Observable } from 'rxjs';
 

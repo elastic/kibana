@@ -270,6 +270,7 @@ export const basicCase: CaseUI = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -309,6 +310,7 @@ export const caseWithAlertsSyncOff = {
   totalAlerts: 2,
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   id: caseWithAlertsSyncOffId,
 };
@@ -410,6 +412,7 @@ export const mockCase: CaseUI = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   assignees: [],
   category: null,
@@ -487,8 +490,15 @@ export const cases: CasesUI = [
     comments: [],
     status: CaseStatuses['in-progress'],
     severity: CaseSeverity.MEDIUM,
+    incrementalId: 1,
   },
-  { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
+  {
+    ...pushedCase,
+    updatedAt: laterTime,
+    id: '2',
+    totalComment: 0,
+    comments: [],
+  },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
@@ -615,6 +625,7 @@ export const caseWithAlertsSyncOffSnake = {
   totalAlerts: 2,
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   id: caseWithAlertsSyncOffId,
 };
@@ -655,6 +666,7 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
+    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],
@@ -742,7 +754,7 @@ export const getUserAction = (
           severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
-          settings: { syncAlerts: true },
+          settings: { syncAlerts: true, extractObservables: true },
           owner: SECURITY_SOLUTION_OWNER,
           assignees: [],
         },
@@ -776,7 +788,7 @@ export const getUserAction = (
       return {
         ...commonProperties,
         type: UserActionTypes.settings,
-        payload: { settings: { syncAlerts: true } },
+        payload: { settings: { syncAlerts: true, extractObservables: true } },
         ...overrides,
       };
     case UserActionTypes.status:

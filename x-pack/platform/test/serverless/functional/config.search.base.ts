@@ -32,9 +32,6 @@ export default createTestConfig({
     '--xpack.searchSynonyms.enabled=true',
   ],
   apps: {
-    serverlessElasticsearch: {
-      pathname: '/app/elasticsearch/getting_started',
-    },
     serverlessConnectors: {
       pathname: '/app/connectors',
     },
