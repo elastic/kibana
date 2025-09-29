@@ -6,7 +6,10 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
-import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
+import {
+  ATTACK_DISCOVERY_API_ACTION_ALL,
+  ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+} from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
@@ -32,7 +35,10 @@ export const createAttackDiscoverySchedulesRoute = (
       path: ATTACK_DISCOVERY_SCHEDULES,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [
+            ATTACK_DISCOVERY_API_ACTION_ALL,
+            ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+          ],
         },
       },
     })

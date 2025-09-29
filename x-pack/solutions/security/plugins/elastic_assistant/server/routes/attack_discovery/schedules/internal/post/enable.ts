@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE } from '@kbn/security-solution-features/actions';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import {
@@ -30,7 +31,7 @@ export const enableAttackDiscoverySchedulesInternalRoute = (
         authz: {
           requiredPrivileges: [
             'elasticAssistant',
-            'securitySolution-updateAttackDiscoverySchedule',
+            ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
           ],
         },
       },
