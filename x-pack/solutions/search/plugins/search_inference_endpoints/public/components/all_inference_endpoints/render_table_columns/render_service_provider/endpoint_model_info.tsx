@@ -33,7 +33,7 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
 
   const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
   const description = endpointInfo?.inference_id.startsWith('.')
-    ? descriptions[endpointInfo?.service]
+    ? descriptions[endpointInfo?.service ?? '']
     : undefined;
 
   return (
