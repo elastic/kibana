@@ -21,7 +21,7 @@ import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
-import { TAB_ACTION, type TabsUrlState } from '../../../../common/types';
+import { TabUrlAction, type TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -407,7 +407,7 @@ export const createTabsStorageManager = ({
         // append a new tab if requested via URL
         selectedTabId === NEW_TAB_ID ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
-        (selectedTabAction === TAB_ACTION.shared && persistedDiscoverSession)
+        (selectedTabAction === TabUrlAction.shared && persistedDiscoverSession)
       ) {
         const newTab = {
           ...defaultTabState,
@@ -458,7 +458,7 @@ export const createTabsStorageManager = ({
       ...createTabItem([]),
     };
 
-    if (enabled && selectedTabAction === TAB_ACTION.shared && tabsStateFromURL?.tabLabel) {
+    if (enabled && selectedTabAction === TabUrlAction.shared && tabsStateFromURL?.tabLabel) {
       newDefaultTab.label = tabsStateFromURL.tabLabel;
     }
 

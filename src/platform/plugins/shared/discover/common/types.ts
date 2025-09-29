@@ -9,7 +9,7 @@
 
 import type { NEW_TAB_ID } from './constants';
 
-export enum TAB_ACTION {
+export enum TabUrlAction {
   /**
    * The `action` value used to indicate that a link was created via Share functionality.
    */
@@ -28,5 +28,5 @@ export interface TabsUrlState {
   /**
    * (Optional) Action for the tab, used when creating and opening a shared link.
    */
-  action?: TAB_ACTION;
+  action?: TabUrlAction;
 }
