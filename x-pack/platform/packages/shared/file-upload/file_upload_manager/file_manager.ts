@@ -114,6 +114,7 @@ export class FileUploadManager {
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
   private docCountService: DocCountService;
+  private initializedWithExistingIndex: boolean = false;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -153,6 +154,7 @@ export class FileUploadManager {
     onAllDocsSearchable?: (indexName: string) => void
   ) {
     this.setExistingIndexName(existingIndexName);
+    this.initializedWithExistingIndex = existingIndexName !== null;
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
@@ -277,7 +279,7 @@ export class FileUploadManager {
   }
 
   async addFile(file: File) {
-    const f = new FileWrapper(file, this.fileUpload);
+    const f = new FileWrapper(file, this.fileUpload, this.data);
     const files = this.getFiles();
     files.push(f);
     this.files$.next(files);
@@ -333,6 +335,10 @@ export class FileUploadManager {
     return this._uploadStatus$.getValue();
   }
 
+  public getInitializedWithExistingIndex() {
+    return this.initializedWithExistingIndex;
+  }
+
   public getExistingIndexName() {
     return this._existingIndexName$.getValue();
   }
@@ -343,6 +349,7 @@ export class FileUploadManager {
     this._existingIndexName$.next(name);
     if (name === null) {
       this.existingIndexMappings$.next(null);
+      this.autoCreateDataView = true;
     } else {
       this.loadExistingIndexMappings();
       this.autoCreateDataView = false;
