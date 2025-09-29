@@ -8,6 +8,7 @@
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { CloudConnectorServiceInterface } from '@kbn/fleet-plugin/server';
 import type { CloudSecurityCSPMCloudConnectorUsageStats } from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';

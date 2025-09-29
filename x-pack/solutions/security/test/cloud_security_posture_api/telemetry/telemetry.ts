@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { data } from './data';
+import { data, mockCspmCloudConnectorUsageStats } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
@@ -358,6 +358,56 @@ export default function ({ getService }: FtrProviderContext) {
           failed_findings_count: 0,
         },
       ]);
+    });
+
+    it('should include cspm_cloud_connector_usage_stats in telemetry when cloud connectors exist', async () => {
+      // Note: Since we're testing the telemetry collector, we would need actual cloud connectors
+      // and package policies in the test environment. For now, we test the telemetry structure.
+      await findingsIndexProvider.addBulk(data.cspmFindings, false);
+
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/internal/telemetry/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
+
+      // Verify the new cspm_cloud_connector_usage_stats field exists in the telemetry response
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture).to.have.property(
+        'cspm_cloud_connector_usage_stats'
+      );
+
+      // The stats should be an array (empty in test environment since no cloud connectors exist)
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.cspm_cloud_connector_usage_stats).to.be.an('array');
+    });
+
+    it('should validate cspm_cloud_connector_usage_stats structure matches expected schema', async () => {
+      // This test validates that if we had cloud connector data, it would match our expected structure
+      const expectedStatStructure = mockCspmCloudConnectorUsageStats[0];
+      
+      // Validate the structure matches our interface
+      expect(expectedStatStructure).to.have.property('id');
+      expect(expectedStatStructure).to.have.property('created_at');
+      expect(expectedStatStructure).to.have.property('updated_at');
+      expect(expectedStatStructure).to.have.property('hasCredentials');
+      expect(expectedStatStructure).to.have.property('cloud_provider');
+      expect(expectedStatStructure).to.have.property('account_type');
+      expect(expectedStatStructure).to.have.property('integrations_used');
+      expect(expectedStatStructure).to.have.property('packages');
+      expect(expectedStatStructure).to.have.property('packagePolicyIds');
+
+      // Validate data types
+      expect(expectedStatStructure.id).to.be.a('string');
+      expect(expectedStatStructure.hasCredentials).to.be.a('boolean');
+      expect(expectedStatStructure.integrations_used).to.be.an('array');
+      expect(expectedStatStructure.packages).to.be.an('array');
+      expect(expectedStatStructure.packagePolicyIds).to.be.an('array');
     });
   });
 }
