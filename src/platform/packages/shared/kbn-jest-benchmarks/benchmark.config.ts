@@ -29,23 +29,23 @@ function createBenchmark(name: string, config: string, shards: number) {
 const config: InitialBenchConfig = {
   name: 'jest',
   benchmarks: [
-    createBenchmark('cases-partial', 'x-pack/platform/plugins/shared/cases/jest.config.js', 32),
-    createBenchmark(
-      'security-lib-partial',
-      'x-pack/solutions/security/plugins/security_solution/server/lib/jest.config.js',
-      16
-    ),
     createBenchmark(
       'security-endpoint-partial',
       'x-pack/solutions/security/plugins/security_solution/server/endpoint/jest.config.js',
-      16
-    ),
-    createBenchmark(
-      'alerting-plugin-test',
-      'x-pack/platform/plugins/shared/alerting/jest.config.js --testPathPattern x-pack/platform/plugins/shared/alerting/server/plugin.test.ts',
       1
     ),
-    createBenchmark('streams-full', 'x-pack/platform/plugins/shared/streams/jest.config.js', 1),
+    // createBenchmark(
+    //   'security-lib-partial',
+    //   'x-pack/solutions/security/plugins/security_solution/server/lib/jest.config.js',
+    //   16
+    // ),
+    createBenchmark('cases-partial', 'x-pack/platform/plugins/shared/cases/jest.config.js', 32),
+    // createBenchmark(
+    //   'alerting-plugin-test',
+    //   'x-pack/platform/plugins/shared/alerting/jest.config.js --testPathPattern x-pack/platform/plugins/shared/alerting/server/plugin.test.ts',
+    //   1
+    // ),
+    // createBenchmark('streams-full', 'x-pack/platform/plugins/shared/streams/jest.config.js', 1),
   ],
   runs: 5,
   timeout: 10 * 300_000,
