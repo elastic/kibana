@@ -146,7 +146,7 @@ export const SideNavPopover = ({
     --popover-max-height: 37.5rem;
 
     max-height: var(--popover-max-height);
-    ${useEuiOverflowScroll('y')}
+    ${useEuiOverflowScroll('y', true)}
   `;
 
   const maskStyles = css`

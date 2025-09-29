@@ -51,7 +51,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
       <EuiPanel
         className="side_panel"
         css={css`
-          ${useEuiOverflowScroll('y')}
+          ${useEuiOverflowScroll('y', true)}
           border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
           scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
