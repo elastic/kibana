@@ -443,6 +443,7 @@ export class TimeSeriesExplorer extends React.Component {
               contextForecastData: undefined,
               focusChartData: undefined,
               focusForecastData: undefined,
+              showForecastCheckbox: false,
               modelPlotEnabled:
                 isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
                 isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
