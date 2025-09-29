@@ -22,9 +22,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { get } from 'lodash';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-} from '@kbn/management-settings-ids';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -53,9 +51,9 @@ const mockContext = {
           return '123';
         }
         return get(mockValues, key);
-      }
-    }
-  }
+      },
+    },
+  },
 };
 const onClose = jest.fn();
 const onSave = jest.fn().mockResolvedValue(() => {});
