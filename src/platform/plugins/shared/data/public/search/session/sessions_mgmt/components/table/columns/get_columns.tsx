@@ -144,7 +144,7 @@ export const getColumns = ({
 
           return (
             <EuiToolTip content={toolTipContent}>
-              <EuiBadge color="warning" data-test-subj="sessionManagementStatusCol">
+              <EuiBadge tabIndex={0} color="warning" data-test-subj="sessionManagementStatusCol">
                 {statusContent}
               </EuiBadge>
             </EuiToolTip>

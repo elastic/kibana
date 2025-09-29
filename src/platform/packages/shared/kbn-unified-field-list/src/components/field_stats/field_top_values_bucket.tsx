@@ -117,7 +117,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 })}
                 delay="long"
               >
-                <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
+                <EuiText tabIndex={0} size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
                   {formattedPercentage}
                 </EuiText>
               </EuiToolTip>
@@ -132,7 +132,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             >
               {(formattedFieldValue?.length ?? 0) > 0 ? (
                 <EuiToolTip content={formattedFieldValue} delay="long">
-                  <EuiTextBlockTruncate lines={3}>
+                  <EuiTextBlockTruncate tabIndex={0} lines={3}>
                     <EuiText size="xs" color={'subdued'} {...textProps}>
                       {formattedFieldValue}
                     </EuiText>

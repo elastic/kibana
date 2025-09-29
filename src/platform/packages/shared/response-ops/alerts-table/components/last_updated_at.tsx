@@ -71,6 +71,7 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
       <EuiToolTip
         content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}
         anchorProps={{
+          tabIndex: 0,
           css: css`
             // Replicate the sizing of neighbouring buttons
             line-height: ${euiTheme.size.l};

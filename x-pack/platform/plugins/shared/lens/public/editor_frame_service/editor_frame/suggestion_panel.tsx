@@ -211,8 +211,9 @@ const SuggestionPreview = ({
                 flex-direction: column;
                 flex-basis: calc(50% - 9px);
               `,
+              tabIndex: 0,
             }
-          : undefined
+          : { tabIndex: 0 }
       }
     >
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>

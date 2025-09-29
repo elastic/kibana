@@ -34,6 +34,9 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
   tooltipText,
   ...props
 }) => {
+  const hasInteractiveAttr = 'tabIndex' in props || 'href' in props || 'onClick' in props;
+  const badgeTabIndex = hasInteractiveAttr ? (props as any).tabIndex : 0;
+
   return (
     <EuiToolTip content={tooltipText ?? getIndexResultToolTip(incompatible)}>
       <EuiBadge
@@ -41,6 +44,7 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
         data-test-subj="indexResultBadge"
         color={getCheckTextColor(incompatible)}
         {...props}
+        tabIndex={badgeTabIndex}
       >
         {incompatible > 0 ? FAIL : PASS}
       </EuiBadge>

@@ -161,7 +161,7 @@ export const DataDriftOverviewTable = ({
               'Indicates how extreme the change is. Lower values indicate greater change.',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.dataVisualizer.dataDrift.pValueLabel', {
               defaultMessage: 'Similarity p-value',
             })}

@@ -46,6 +46,7 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
     >
       <EuiToolTip content={tactic.name}>
         <EuiText
+          tabIndex={0}
           css={css`
             h4 {
               white-space: nowrap;

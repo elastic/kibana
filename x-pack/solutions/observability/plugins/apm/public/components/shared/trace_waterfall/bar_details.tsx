@@ -103,7 +103,7 @@ export function BarDetails({
               data-test-subj="apmBarDetailsFailureTooltip"
               content={`${item.status.fieldName} = ${item.status.value}`}
             >
-              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger" tabIndex={0}>
                 {item.status.value}
               </EuiBadge>
             </EuiToolTip>

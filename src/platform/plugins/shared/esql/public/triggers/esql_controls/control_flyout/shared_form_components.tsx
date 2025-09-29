@@ -109,6 +109,7 @@ export function ControlType({
         condition={isDisabled}
         anchorProps={{
           css: { width: '100%' },
+          tabIndex: 0,
         }}
       >
         <EuiFormRow
@@ -353,6 +354,7 @@ export function Header({
               label=""
               iconType="beaker"
               size="s"
+              tabIndex={0}
               css={css`
                 vertical-align: middle;
               `}

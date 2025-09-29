@@ -108,7 +108,7 @@ export const mapToCard = ({
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
-      isReauthorizationRequired = hasDeferredInstallations(item);
+      isReauthorizationRequired = hasDeferred_installations(item);
     }
 
     const url = getHref('integration_details_overview', {
@@ -178,7 +178,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge tabIndex={0} color="danger" iconType="error">
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailed"
                 defaultMessage="Update failed"
@@ -208,7 +208,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge tabIndex={0} color="danger" iconType="error">
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailed"
                 defaultMessage="Install failed"

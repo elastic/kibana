@@ -117,7 +117,7 @@ export const RangePopover = ({
               }}
               append={
                 <EuiToolTip content={lteTooltipContent}>
-                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                  <EuiText tabIndex={0} size="s">{lteAppendLabel}</EuiText>
                 </EuiToolTip>
               }
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
@@ -155,7 +155,7 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                  <EuiText tabIndex={0} size="s">{ltPrependLabel}</EuiText>
                 </EuiToolTip>
               }
               compressed

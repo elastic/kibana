@@ -179,6 +179,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
                 status,
               },
             })}
+            tabIndex={0}
           >
             {status}
           </EuiHealth>
@@ -222,6 +223,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
             <EuiToolTip
               anchorProps={{
                 style: { lineHeight: '1' },
+                tabIndex: 0,
               }}
               position="bottom"
               content={tail.join(', ')}

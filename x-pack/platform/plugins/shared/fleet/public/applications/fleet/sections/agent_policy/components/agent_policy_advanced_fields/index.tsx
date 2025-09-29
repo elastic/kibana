@@ -545,7 +545,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                     />
                   }
                 >
-                  <EuiBadge color="warning">
+                  <EuiBadge color="warning" tabIndex={0}>
                     <FormattedMessage
                       id="xpack.fleet.agentPolicyForm.inactivityTimeoutBadge"
                       defaultMessage="Warning"

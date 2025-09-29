@@ -177,7 +177,7 @@ export function SubChart({
                             }
                           )}
                         >
-                          <EuiBadge color="primary">{`-> ${children.length}`}</EuiBadge>
+                          <EuiBadge color="primary" tabIndex={0}>{`-> ${children.length}`}</EuiBadge>
                         </EuiToolTip>
                       }
                     >

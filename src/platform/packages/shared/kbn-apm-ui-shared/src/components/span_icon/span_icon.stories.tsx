@@ -34,7 +34,7 @@ export const List: StoryFn = () => {
                 icon={
                   <p>
                     <EuiToolTip position="top" content="Icon rendered with `EuiImage`">
-                      <EuiImage size="s" hasShadow alt={id} src={getSpanIcon(type, subtype)} />
+                      <EuiImage size="s" hasShadow alt={id} src={getSpanIcon(type, subtype)} tabIndex={0} />
                     </EuiToolTip>
                   </p>
                 }
@@ -43,7 +43,7 @@ export const List: StoryFn = () => {
                   <>
                     <div>
                       <EuiToolTip position="bottom" content="Icon rendered with `SpanIcon`">
-                        <SpanIcon type={type} subtype={subtype} />
+                        <SpanIcon type={type} subtype={subtype} tabIndex={0} />
                       </EuiToolTip>
                     </div>
 

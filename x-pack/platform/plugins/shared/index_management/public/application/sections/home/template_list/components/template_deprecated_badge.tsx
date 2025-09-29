@@ -17,7 +17,7 @@ export const TemplateDeprecatedBadge = () => {
           'This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one.',
       })}
     >
-      <EuiBadge color="warning" data-test-subj="deprecatedTemplateBadge">
+      <EuiBadge color="warning" data-test-subj="deprecatedTemplateBadge" tabIndex={0}>
         {i18n.translate('xpack.idxMgmt.templateList.table.deprecatedTemplateBadgeText', {
           defaultMessage: 'Deprecated',
         })}

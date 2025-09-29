@@ -395,7 +395,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <div data-test-subj="last-results-date">
+            <div data-test-subj="last-results-date" tabIndex={0}>
               <FormattedRelative value={timestamp} />
             </div>
           </EuiToolTip>
@@ -588,7 +588,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
     return (
       <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground tabIndex={0}>
           {content}
         </EuiCodeBlock>
       </EuiToolTip>

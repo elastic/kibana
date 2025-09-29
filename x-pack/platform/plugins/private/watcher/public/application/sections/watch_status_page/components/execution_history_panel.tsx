@@ -152,7 +152,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -175,7 +175,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
@@ -208,7 +208,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
@@ -284,7 +284,7 @@ export const ExecutionHistoryPanel = () => {
                 }
               )}
             >
-              <span>
+              <span tabIndex={0}>
                 {i18n.translate(
                   'xpack.watcher.sections.watchHistory.watchActionStatusTable.state',
                   {

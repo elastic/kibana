@@ -146,7 +146,7 @@ function renderOption(option: Option) {
       <EuiFlexItem>
         {option.value?.description ? (
           <EuiToolTip position="left" content={option.value?.description}>
-            <EuiText size="s">{option.label}</EuiText>
+            <EuiText size="s" tabIndex={0}>{option.label}</EuiText>
           </EuiToolTip>
         ) : (
           <EuiText size="s">{option.label}</EuiText>

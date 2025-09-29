@@ -273,7 +273,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
     {field.customLabel && field.customLabel !== field.name ? (
       <div>
         <EuiToolTip content={labelDescription}>
-          <EuiBadge iconType="flag" iconSide="left">
+          <EuiBadge iconType="flag" iconSide="left" tabIndex={0}>
             {field.customLabel}
           </EuiBadge>
         </EuiToolTip>

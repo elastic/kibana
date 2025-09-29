@@ -70,7 +70,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTitle"
                             defaultMessage="CPU"
@@ -92,7 +92,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.memoryTitle"
                             defaultMessage="Memory"
@@ -114,7 +114,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                       </FlexItemWithMinWidth>
                       <FlexItemWithMinWidth grow={4}>
                         <EuiToolTip position="top" content={tooltip}>
-                          <EuiDescriptionListDescription className="eui-textTruncate">
+                          <EuiDescriptionListDescription tabIndex={0} className="eui-textTruncate">
                             {description}
                           </EuiDescriptionListDescription>
                         </EuiToolTip>
@@ -350,7 +350,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 </FlexItemWithMinWidth>
                 <FlexItemWithMinWidth grow={7}>
                   <EuiToolTip position="top" content={tooltip}>
-                    <EuiDescriptionListDescription className="eui-textTruncate">
+                    <EuiDescriptionListDescription tabIndex={0} className="eui-textTruncate">
                       {description}
                     </EuiDescriptionListDescription>
                   </EuiToolTip>

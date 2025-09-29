@@ -171,6 +171,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       color="subdued"
                       size="xs"
                       className="eui-textNoWrap"
+                      tabIndex={0}
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
@@ -240,7 +241,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         { defaultMessage: 'Upgrade Available' }
                       )}
                     >
-                      <EuiIcon type="warning" color="warning" />
+                      <EuiIcon type="warning" color="warning" tabIndex={0} />
                     </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

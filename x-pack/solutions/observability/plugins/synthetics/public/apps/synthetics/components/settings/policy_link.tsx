@@ -40,7 +40,7 @@ export const PolicyLink = ({ name }: { name: string }) => {
   if (!canManageILM) {
     return (
       <EuiToolTip content={PERMISSIONS_NEEDED}>
-        <EuiText size="m">{name}</EuiText>
+        <EuiText size="m" tabIndex={0}>{name}</EuiText>
       </EuiToolTip>
     );
   }

@@ -29,7 +29,7 @@ const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
 ): React.ReactNode => (
   <EuiToolTip content={`${option.label}: ${getIlmPhaseDescription(option.label)}`}>
-    <div css={optionCss}>
+    <div css={optionCss} tabIndex={0}>
       <span css={optionLabelCss}>{`${option.label}`}</span>
       {': '}
       <span>{getIlmPhaseDescription(option.label)}</span>
@@ -54,7 +54,7 @@ const IlmPhaseFilterComponent: React.FC = () => {
 
   return (
     <EuiToolTip display="block" content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-      <EuiFormControlLayout css={formControlLayoutCss} fullWidth={true} prepend={ilmFormLabel}>
+      <EuiFormControlLayout css={formControlLayoutCss} fullWidth={true} prepend={ilmFormLabel} tabIndex={0}>
         <EuiComboBox
           id={labelInputId}
           data-test-subj="selectIlmPhases"

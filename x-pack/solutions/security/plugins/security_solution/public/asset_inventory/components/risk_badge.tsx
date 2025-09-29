@@ -41,9 +41,13 @@ const tooltips = {
 export const RiskBadge = ({ risk, ...props }: RiskBadgeProps) => {
   const riskLevel = getRiskLevel(risk);
   const color = RISK_SEVERITY_COLOUR[riskLevel];
+  const badgeProps = { ...(props as Record<string, any>) } as Record<string, any>;
+  if (!('tabIndex' in badgeProps) && !('href' in badgeProps) && !('onClick' in badgeProps)) {
+    badgeProps.tabIndex = 0;
+  }
   return (
     <EuiToolTip content={tooltips[riskLevel]}>
-      <EuiBadge {...props} color={color}>
+      <EuiBadge {...badgeProps} color={color}>
         {risk}
       </EuiBadge>
     </EuiToolTip>

@@ -98,6 +98,7 @@ export const PresentationPanelTitle = ({
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
+          tabIndex: 0,
         }}
       >
         <div

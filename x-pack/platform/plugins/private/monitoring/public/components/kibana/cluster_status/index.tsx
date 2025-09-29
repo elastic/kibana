@@ -138,7 +138,7 @@ function OverviewPageStatusIndicator({ staleMessage }: IndicatorProps) {
     <>
       <div style={{ marginBottom: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
-          <EuiBadge iconType="warning" color="warning">
+          <EuiBadge tabIndex={0} iconType="warning" color="warning">
             {i18n.translate(
               'xpack.monitoring.kibana.clusterStatus.overview.staleStatusInstancesLabel',
               {
@@ -176,7 +176,7 @@ function OverviewPageStatusIndicator({ staleMessage }: IndicatorProps) {
 function InstancesPageStatusIndicator({ staleMessage }: IndicatorProps) {
   const title = (
     <EuiToolTip position="top" content={staleMessage}>
-      <EuiBadge iconType="warning" color="warning">
+      <EuiBadge tabIndex={0} iconType="warning" color="warning">
         {i18n.translate(
           'xpack.monitoring.kibana.clusterStatus.instances.staleStatusInstancesLabel',
           {

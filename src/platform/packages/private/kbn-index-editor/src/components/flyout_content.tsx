@@ -112,6 +112,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                   })}
                 >
                   <EuiBetaBadge
+                    tabIndex={0}
                     label=""
                     iconType="beaker"
                     size="s"

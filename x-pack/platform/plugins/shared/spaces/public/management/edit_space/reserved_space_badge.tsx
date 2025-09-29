@@ -30,7 +30,7 @@ export const ReservedSpaceBadge = (props: Props) => {
           />
         }
       >
-        <EuiBadge color="warning" iconType="question" iconSide="right">
+        <EuiBadge tabIndex={0} color="warning" iconType="question" iconSide="right">
           Reserved space
         </EuiBadge>
       </EuiToolTip>

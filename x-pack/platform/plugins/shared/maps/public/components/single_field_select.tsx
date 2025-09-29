@@ -58,6 +58,7 @@ function fieldsToOptions(
                     left: 0;
                     right: 0;
                   `,
+                  tabIndex: 0,
                 }}
               >
                 <div />

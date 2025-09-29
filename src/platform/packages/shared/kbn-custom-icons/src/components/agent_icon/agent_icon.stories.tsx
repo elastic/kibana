@@ -35,13 +35,14 @@ export const List: StoryFn = () => {
                       hasShadow
                       alt={agentName}
                       src={getAgentIcon(agentName, false)}
+                      tabIndex={0}
                     />
                   </EuiToolTip>
                 }
                 title={agentName}
                 description={
                   <EuiToolTip position="bottom" content="Icon rendered with `AgentIcon`">
-                    <AgentIcon agentName={agentName} />
+                    <AgentIcon agentName={agentName} tabIndex={0} />
                   </EuiToolTip>
                 }
               />
