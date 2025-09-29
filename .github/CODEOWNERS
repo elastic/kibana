@@ -930,6 +930,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
@@ -1118,7 +1119,6 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/o
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
-x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
