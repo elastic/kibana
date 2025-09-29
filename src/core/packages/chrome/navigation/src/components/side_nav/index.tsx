@@ -19,7 +19,7 @@ import { SideNavPanel } from './panel';
 import { SideNavPopover } from '../popover';
 import { SideNavPrimaryMenu } from './primary_menu';
 import { SideNavPrimaryMenuItem } from './primary_menu_item';
-import { EXPANDED_WIDTH } from '../../hooks/use_layout_width';
+import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 
 export interface SideNavProps {
   children: ReactNode;
@@ -43,9 +43,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
     <div
       className="side-nav"
       css={css`
-        // There is no token for this value
-        --expanded-side-nav-width: ${EXPANDED_WIDTH}px;
-
+        box-sizing: border-box;
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
@@ -53,7 +51,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
         height: 100%;
         padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? euiTheme.size.xxxl : 'var(--expanded-side-nav-width)'};
+        width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH};
       `}
     >
       {children}

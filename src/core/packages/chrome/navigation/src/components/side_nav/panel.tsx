@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useRovingIndex } from '../../hooks/use_roving_index';
 import type { MenuItem } from '../../../types';
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
 export interface SideNavPanelProps {
   children: ReactNode;
@@ -51,12 +52,14 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
       <EuiPanel
         className="side_panel"
         css={css`
+          box-sizing: border-box;
           ${useEuiOverflowScroll('y', true)}
           border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
           scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
           display: flex;
           flex-direction: column;
+          width: ${SIDE_PANEL_WIDTH}px;
         `}
         color="subdued"
         // > For instance, only plain or transparent panels can have a border and/or shadow.

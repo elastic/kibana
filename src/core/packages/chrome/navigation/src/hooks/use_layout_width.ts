@@ -9,9 +9,9 @@
 
 import { useEffect } from 'react';
 
-export const COLLAPSED_WIDTH = 47;
+export const COLLAPSED_WIDTH = 48;
 export const EXPANDED_WIDTH = 100;
-export const DEFAULT_SIDE_PANEL_WIDTH = 261;
+export const SIDE_PANEL_WIDTH = 260;
 
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;
@@ -31,9 +31,7 @@ export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLa
     setWidth(isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
     if (isSidePanelOpen) {
       setWidth(
-        isCollapsed
-          ? COLLAPSED_WIDTH + DEFAULT_SIDE_PANEL_WIDTH
-          : EXPANDED_WIDTH + DEFAULT_SIDE_PANEL_WIDTH
+        isCollapsed ? COLLAPSED_WIDTH + SIDE_PANEL_WIDTH : EXPANDED_WIDTH + SIDE_PANEL_WIDTH
       );
     }
   }, [isCollapsed, isSidePanelOpen, setWidth]);
