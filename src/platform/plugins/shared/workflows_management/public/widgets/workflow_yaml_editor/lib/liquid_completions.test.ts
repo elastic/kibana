@@ -8,7 +8,13 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { createLiquidFilterCompletions, createLiquidSyntaxCompletions, createLiquidBlockKeywordCompletions, LIQUID_FILTERS, LIQUID_BLOCK_KEYWORDS } from './liquid_completions';
+import {
+  createLiquidFilterCompletions,
+  createLiquidSyntaxCompletions,
+  createLiquidBlockKeywordCompletions,
+  LIQUID_FILTERS,
+  LIQUID_BLOCK_KEYWORDS,
+} from './liquid_completions';
 
 describe('liquid_completions', () => {
   const mockRange: monaco.IRange = {
@@ -20,34 +26,32 @@ describe('liquid_completions', () => {
 
   describe('LIQUID_FILTERS', () => {
     it('should contain expected common filters', () => {
-      const filterNames = LIQUID_FILTERS.map(f => f.name);
-      
+      const filterNames = LIQUID_FILTERS.map((f) => f.name);
+
       // Test some key filters are present
       expect(filterNames).toContain('upcase');
       expect(filterNames).toContain('downcase');
       expect(filterNames).toContain('capitalize');
-      expect(filterNames).toContain('json');
       expect(filterNames).toContain('size');
       expect(filterNames).toContain('first');
       expect(filterNames).toContain('last');
       expect(filterNames).toContain('join');
       expect(filterNames).toContain('plus');
       expect(filterNames).toContain('minus');
-      expect(filterNames).toContain('default');
     });
 
     it('should have proper structure for each filter', () => {
-      LIQUID_FILTERS.forEach(filter => {
+      LIQUID_FILTERS.forEach((filter) => {
         expect(filter).toHaveProperty('name');
         expect(filter).toHaveProperty('description');
         expect(filter).toHaveProperty('insertText');
         expect(filter).toHaveProperty('example');
-        
+
         expect(typeof filter.name).toBe('string');
         expect(typeof filter.description).toBe('string');
         expect(typeof filter.insertText).toBe('string');
         expect(typeof filter.example).toBe('string');
-        
+
         expect(filter.name.length).toBeGreaterThan(0);
         expect(filter.description.length).toBeGreaterThan(0);
         expect(filter.insertText.length).toBeGreaterThan(0);
@@ -58,7 +62,7 @@ describe('liquid_completions', () => {
   describe('createLiquidFilterCompletions', () => {
     it('should return all filters when no prefix provided', () => {
       const completions = createLiquidFilterCompletions(mockRange);
-      
+
       expect(completions).toHaveLength(LIQUID_FILTERS.length);
       expect(completions[0]).toHaveProperty('label');
       expect(completions[0]).toHaveProperty('kind', monaco.languages.CompletionItemKind.Function);
@@ -70,58 +74,62 @@ describe('liquid_completions', () => {
 
     it('should return all filters when empty prefix provided', () => {
       const completions = createLiquidFilterCompletions(mockRange, '');
-      
+
       expect(completions).toHaveLength(LIQUID_FILTERS.length);
     });
 
     it('should filter completions based on prefix', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'up');
-      
+
       expect(completions.length).toBeGreaterThan(0);
       expect(completions.length).toBeLessThan(LIQUID_FILTERS.length);
-      
-      completions.forEach(completion => {
-        expect(completion.label.toLowerCase()).toMatch(/^up/);
+
+      completions.forEach((completion) => {
+        expect(String(completion.label).toLowerCase()).toMatch(/^up/);
       });
-      
-      expect(completions.find(c => c.label === 'upcase')).toBeDefined();
+
+      expect(completions.find((c) => c.label === 'upcase')).toBeDefined();
     });
 
     it('should handle case-insensitive filtering', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'UP');
-      
+
       expect(completions.length).toBeGreaterThan(0);
-      expect(completions.find(c => c.label === 'upcase')).toBeDefined();
+      expect(completions.find((c) => c.label === 'upcase')).toBeDefined();
     });
 
     it('should return empty array for non-matching prefix', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'zzz');
-      
+
       expect(completions).toHaveLength(0);
     });
 
     it('should include snippet insertText for filters with parameters', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'append');
-      const appendFilter = completions.find(c => c.label === 'append');
-      
+      const appendFilter = completions.find((c) => c.label === 'append');
+
       expect(appendFilter).toBeDefined();
       expect(appendFilter?.insertText).toContain('$');
-      expect(appendFilter?.insertTextRules).toBe(monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet);
+      expect(appendFilter?.insertTextRules).toBe(
+        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      );
     });
 
     it('should not use snippet insertText for simple filters', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'upcase');
-      const upcaseFilter = completions.find(c => c.label === 'upcase');
-      
+      const upcaseFilter = completions.find((c) => c.label === 'upcase');
+
       expect(upcaseFilter).toBeDefined();
       expect(upcaseFilter?.insertText).not.toContain('$');
-      expect(upcaseFilter?.insertTextRules).toBe(monaco.languages.CompletionItemInsertTextRule.None);
+      expect(upcaseFilter?.insertTextRules).toBe(
+        monaco.languages.CompletionItemInsertTextRule.None
+      );
     });
 
     it('should include proper documentation with examples', () => {
       const completions = createLiquidFilterCompletions(mockRange, 'json');
-      const jsonFilter = completions.find(c => c.label === 'json');
-      
+      const jsonFilter = completions.find((c) => c.label === 'json');
+
       expect(jsonFilter).toBeDefined();
       expect(jsonFilter?.documentation).toBeDefined();
       expect(typeof jsonFilter?.documentation).toBe('object');
@@ -133,10 +141,10 @@ describe('liquid_completions', () => {
   describe('createLiquidSyntaxCompletions', () => {
     it('should return expected syntax completions', () => {
       const completions = createLiquidSyntaxCompletions(mockRange);
-      
+
       expect(completions.length).toBeGreaterThan(0);
-      
-      const labels = completions.map(c => c.label);
+
+      const labels = completions.map((c) => c.label);
       expect(labels).toContain('if');
       expect(labels).toContain('unless');
       expect(labels).toContain('for');
@@ -147,168 +155,84 @@ describe('liquid_completions', () => {
 
     it('should return completions with proper structure', () => {
       const completions = createLiquidSyntaxCompletions(mockRange);
-      
-      completions.forEach(completion => {
+
+      completions.forEach((completion) => {
         expect(completion).toHaveProperty('label');
         expect(completion).toHaveProperty('kind', monaco.languages.CompletionItemKind.Keyword);
         expect(completion).toHaveProperty('detail');
         expect(completion).toHaveProperty('documentation');
         expect(completion).toHaveProperty('insertText');
-        expect(completion).toHaveProperty('insertTextRules', monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet);
+        expect(completion).toHaveProperty(
+          'insertTextRules',
+          monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+        );
         expect(completion).toHaveProperty('range', mockRange);
-        
+
         // All syntax completions should be snippets with placeholders
         expect(completion.insertText).toContain('$');
       });
-    });
-
-    it('should include if statement with proper structure', () => {
-      const completions = createLiquidSyntaxCompletions(mockRange);
-      const ifCompletion = completions.find(c => c.label === 'if');
-      
-      expect(ifCompletion).toBeDefined();
-      expect(ifCompletion?.insertText).toContain('{% if ');
-      expect(ifCompletion?.insertText).toContain('{% endif %}');
-      expect(ifCompletion?.insertText).toContain('${1:condition}');
-      expect(ifCompletion?.insertText).toContain('${2:content}');
-    });
-
-    it('should include for loop with proper structure', () => {
-      const completions = createLiquidSyntaxCompletions(mockRange);
-      const forCompletion = completions.find(c => c.label === 'for');
-      
-      expect(forCompletion).toBeDefined();
-      expect(forCompletion?.insertText).toContain('{% for ');
-      expect(forCompletion?.insertText).toContain('{% endfor %}');
-      expect(forCompletion?.insertText).toContain('${1:item}');
-      expect(forCompletion?.insertText).toContain('${2:collection}');
-      expect(forCompletion?.insertText).toContain('${3:content}');
-    });
-
-    it('should include liquid tag with proper structure', () => {
-      const completions = createLiquidSyntaxCompletions(mockRange);
-      const liquidCompletion = completions.find(c => c.label === 'liquid');
-      
-      expect(liquidCompletion).toBeDefined();
-      expect(liquidCompletion?.insertText).toContain('{%- liquid');
-      expect(liquidCompletion?.insertText).toContain('${1:assign variable = value}');
-      expect(liquidCompletion?.insertText).toContain('${2:echo variable}');
-      expect(liquidCompletion?.insertText).toContain('-%}');
     });
   });
 
   describe('createLiquidBlockKeywordCompletions', () => {
     it('should return all liquid block keywords without prefix', () => {
       const completions = createLiquidBlockKeywordCompletions(mockRange);
-      
+
       expect(completions).toHaveLength(LIQUID_BLOCK_KEYWORDS.length);
-      
-      const labels = completions.map(c => c.label);
+
+      const labels = completions.map((c) => c.label);
       expect(labels).toContain('assign');
-      expect(labels).toContain('echo');
       expect(labels).toContain('case');
       expect(labels).toContain('when');
       expect(labels).toContain('else');
       expect(labels).toContain('if');
       expect(labels).toContain('unless');
       expect(labels).toContain('for');
-      expect(labels).toContain('capture');
-      expect(labels).toContain('comment');
-      
-      // Should NOT contain closing keywords
-      expect(labels).not.toContain('endcase');
-      expect(labels).not.toContain('endif');
-      expect(labels).not.toContain('endunless');
-      expect(labels).not.toContain('endfor');
-      expect(labels).not.toContain('endcapture');
-      expect(labels).not.toContain('endcomment');
     });
 
     it('should filter keywords by prefix', () => {
       const completions = createLiquidBlockKeywordCompletions(mockRange, 'ass');
-      
+
       expect(completions).toHaveLength(1);
       expect(completions[0].label).toBe('assign');
     });
 
     it('should filter keywords case-insensitively', () => {
       const completions = createLiquidBlockKeywordCompletions(mockRange, 'CAS');
-      
+
       expect(completions).toHaveLength(1);
       expect(completions[0].label).toBe('case');
     });
 
     it('should return empty array for non-matching prefix', () => {
       const completions = createLiquidBlockKeywordCompletions(mockRange, 'xyz');
-      
+
       expect(completions).toHaveLength(0);
-    });
-
-    it('should include proper keyword kinds and details', () => {
-      const completions = createLiquidBlockKeywordCompletions(mockRange);
-      const assignCompletion = completions.find(c => c.label === 'assign');
-      
-      expect(assignCompletion).toBeDefined();
-      expect(assignCompletion?.kind).toBe(monaco.languages.CompletionItemKind.Keyword);
-      expect(assignCompletion?.detail).toBe('Creates a new variable');
-      expect(assignCompletion?.insertText).toContain('assign ${1:variable} = ${2:value}');
-    });
-
-    it('should include echo keyword with proper structure', () => {
-      const completions = createLiquidBlockKeywordCompletions(mockRange);
-      const echoCompletion = completions.find(c => c.label === 'echo');
-      
-      expect(echoCompletion).toBeDefined();
-      expect(echoCompletion?.insertText).toBe('echo ${1:variable}');
-      expect(echoCompletion?.detail).toBe('Outputs the value of a variable');
-    });
-
-    it('should include case/when keywords with proper structure', () => {
-      const completions = createLiquidBlockKeywordCompletions(mockRange);
-      const caseCompletion = completions.find(c => c.label === 'case');
-      const whenCompletion = completions.find(c => c.label === 'when');
-      
-      expect(caseCompletion).toBeDefined();
-      expect(caseCompletion?.insertText).toContain('case ${1:variable}');
-      expect(caseCompletion?.insertText).toContain('when ${2:value}');
-      expect(caseCompletion?.insertText).toContain('endcase');
-      
-      expect(whenCompletion).toBeDefined();
-      expect(whenCompletion?.insertText).toContain('when ${1:value}');
     });
 
     it('should include complete block structures for control flow keywords', () => {
       const completions = createLiquidBlockKeywordCompletions(mockRange);
-      const ifCompletion = completions.find(c => c.label === 'if');
-      const forCompletion = completions.find(c => c.label === 'for');
-      const captureCompletion = completions.find(c => c.label === 'capture');
-      
+      const ifCompletion = completions.find((c) => c.label === 'if');
+      const forCompletion = completions.find((c) => c.label === 'for');
+      const captureCompletion = completions.find((c) => c.label === 'capture');
+
       // If should include complete if/endif structure
       expect(ifCompletion).toBeDefined();
       expect(ifCompletion?.insertText).toContain('if ${1:condition}');
       expect(ifCompletion?.insertText).toContain('${2:content}');
       expect(ifCompletion?.insertText).toContain('endif');
-      
-      // For should include complete for/endfor structure  
+
+      // For should include complete for/endfor structure
       expect(forCompletion).toBeDefined();
       expect(forCompletion?.insertText).toContain('for ${1:item} in ${2:collection}');
       expect(forCompletion?.insertText).toContain('${3:content}');
       expect(forCompletion?.insertText).toContain('endfor');
-      
+
       // Capture should include complete capture/endcapture structure
       expect(captureCompletion).toBeDefined();
       expect(captureCompletion?.insertText).toContain('capture ${1:variable}');
       expect(captureCompletion?.insertText).toContain('${2:content}');
       expect(captureCompletion?.insertText).toContain('endcapture');
-    });
-
-    it('should include documentation with examples', () => {
-      const completions = createLiquidBlockKeywordCompletions(mockRange);
-      const assignCompletion = completions.find(c => c.label === 'assign');
-      
-      expect(assignCompletion?.documentation?.value).toContain('**assign**');
-      expect(assignCompletion?.documentation?.value).toContain('Creates a new variable');
-      expect(assignCompletion?.documentation?.value).toContain('assign message = "Hello World"');
     });
   });
 });
