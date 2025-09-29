@@ -33,16 +33,12 @@ export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
 export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
-interface ESQLTelemetry {
-  hover?: {
-    // Callback fired when the user hovers over a decoration with a hover message.
-    onDecorationHoverShown?: (hoverMessage: string) => void;
-  };
-}
-
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
-    telemetry: ESQLTelemetry;
+    telemetry: {
+      // Callback fired when the user hovers over a decoration with a hover message.
+      onDecorationHoverShown?: (hoverMessage: string) => void;
+    };
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
@@ -100,7 +96,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         if (
           hoveredWord &&
           hoveredWord.word !== lastHoveredWord &&
-          deps?.telemetry?.hover?.onDecorationHoverShown
+          deps?.telemetry?.onDecorationHoverShown
         ) {
           lastHoveredWord = hoveredWord.word;
 
@@ -108,7 +104,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
             hoveredWord,
             position,
             model,
-            deps?.telemetry?.hover?.onDecorationHoverShown
+            deps?.telemetry?.onDecorationHoverShown
           );
         }
 
@@ -168,6 +164,10 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   },
 };
 
+/**
+ * Gets the decorations affecting the given word, and looks for hover messages in it,
+ * if found it calls the telemetry tracking method.
+ */
 function trackDecorationHovered(
   word: monaco.editor.IWordAtPosition,
   position: monaco.Position,

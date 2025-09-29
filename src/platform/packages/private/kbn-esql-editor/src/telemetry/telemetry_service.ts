@@ -27,6 +27,16 @@ export class ESQLEditorTelemetryService {
     }
   }
 
+  /**
+   * Receives an hover message content.
+   * If it corresponds to a lookup index action, the event is tracked.
+   *
+   * Example of hover message:
+   * `[Create index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22my_index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%7D)`
+   *
+   * @param hoverMessage The hover message content.
+   * @returns
+   */
   public trackLookupJoinHoverActionShown(hoverMessage: string) {
     if (!hoverMessage.includes(`command:${LOOKUP_INDEX_EDITOR_COMMAND}`)) {
       return;

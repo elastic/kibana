@@ -39,7 +39,8 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       higher_privilege: {
         type: 'keyword',
         _meta: {
-          description: 'User privileges. Possible values are: create|edit|read',
+          description:
+            'The higher privilege the user has for this index. Possible values are: create|edit|read',
         },
       },
     },

@@ -217,7 +217,6 @@ export const useLookupIndexCommand = (
             hoverMessage: {
               value: commandString,
               isTrusted: true,
-              supportHtml: true,
             },
 
             inlineClassName:

@@ -593,9 +593,7 @@ const ESQLEditorInternal = function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
-    getJoinIndices,
     kibana.services?.esql,
-    canCreateLookupIndex,
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
@@ -610,6 +608,8 @@ const ESQLEditorInternal = function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
     histogramBarTarget,
     activeSolutionId,
+    canCreateLookupIndex,
+    getJoinIndices,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -768,10 +768,8 @@ const ESQLEditorInternal = function ESQLEditor({
       ESQLLang.getHoverProvider?.({
         ...esqlCallbacks,
         telemetry: {
-          hover: {
-            onDecorationHoverShown:
-              telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
-          },
+          onDecorationHoverShown:
+            telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
         },
       }),
     [esqlCallbacks, telemetryService]
@@ -818,7 +816,6 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       hover: {
         above: false,
-        // delay: 500,
       },
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
@@ -1160,5 +1157,4 @@ const ESQLEditorInternal = function ESQLEditor({
 };
 
 export const ESQLEditor = withRestorableState(ESQLEditorInternal);
-
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
