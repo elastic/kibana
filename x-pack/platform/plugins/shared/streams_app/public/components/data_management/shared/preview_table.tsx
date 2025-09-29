@@ -34,7 +34,6 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enri
 
 const emptyCell = <>&nbsp;</>;
 
-// Create context for row selection
 interface RowSelectionContextType {
   selectedRowIndex?: number;
   onRowSelected?: (rowIndex: number) => void;
@@ -44,7 +43,6 @@ export const RowSelectionContext = createContext<RowSelectionContextType>({});
 
 const useRowSelection = () => useContext(RowSelectionContext);
 
-// Extract row selection button to separate component
 function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
   const { selectedRowIndex, onRowSelected } = useRowSelection();
 
@@ -99,7 +97,6 @@ export function PreviewTable({
   originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
 }) {
-  console.log('rendering PreviewTable');
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
@@ -203,7 +200,7 @@ export function PreviewTable({
         },
       },
     ],
-    [showRowSourceAvatars, originalSamples, theme.colors.highlight] // selectedRowIndex removed from dependencies
+    [showRowSourceAvatars, originalSamples, theme.colors.highlight]
   );
 
   // Derive visibleColumns from canonical order

@@ -151,7 +151,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     return toDataTableRecordWithIndex(documents);
   }, [documents]);
 
-  // Move document expansion hook here instead of inside useMemo
   const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
     useDocumentExpansion(hits);
 
