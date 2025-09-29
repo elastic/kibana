@@ -36,7 +36,7 @@ describe('transformDashboardIn', () => {
         autoApplySelections: false,
       },
       description: 'description',
-      kibanaSavedObjectMeta: { searchSource: { query: { query: 'test', language: 'KQL' } } },
+      query: { query: 'test', language: 'KQL' },
       options: {
         hidePanelTitles: true,
         useMargins: false,
@@ -104,7 +104,6 @@ describe('transformDashboardIn', () => {
       timeRestore: false,
       panels: [],
       options: DEFAULT_DASHBOARD_OPTIONS,
-      kibanaSavedObjectMeta: {},
     };
 
     const output = transformDashboardIn({ dashboardState });

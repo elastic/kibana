@@ -34,8 +34,7 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
-      dashboardState;
+    const { controlGroupInput, filters, options, panels, query, tags, ...rest } = dashboardState;
 
     const tagReferences = transformTagsIn({
       tags,
@@ -49,8 +48,10 @@ export const transformDashboardIn = ({
 
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
-    const { searchSourceJSON, references: searchSourceReferences } =
-      transformSearchSourceIn(kibanaSavedObjectMeta);
+    const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
+      filters,
+      query
+    );
 
     const attributes = {
       ...rest,
@@ -64,9 +65,7 @@ export const transformDashboardIn = ({
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
-      ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: { searchSourceJSON },
-      }),
+      kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
       attributes,
