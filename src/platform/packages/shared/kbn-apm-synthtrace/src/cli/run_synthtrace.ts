@@ -99,7 +99,7 @@ function options(y: Argv) {
         let scenarioOptions: Record<string, unknown> = {};
 
         try {
-          scenarioOptions = JSON.parse(arg);
+          scenarioOptions = typeof arg === 'string' ? JSON.parse(arg) : arg;
         } catch (error) {
           scenarioOptions = Object.fromEntries(
             arg.split(',').map((kv) => {

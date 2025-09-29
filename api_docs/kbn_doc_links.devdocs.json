@@ -778,7 +778,7 @@
             "label": "spaces",
             "description": [],
             "signature": [
-              "{ readonly kibanaLegacyUrlAliases: string; readonly kibanaDisableLegacyUrlAliasesApi: string; }"
+              "{ readonly kibanaLegacyUrlAliases: string; readonly kibanaDisableLegacyUrlAliasesApi: string; readonly kibanaManageSpaces: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

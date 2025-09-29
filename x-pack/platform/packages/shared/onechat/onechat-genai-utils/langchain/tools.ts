@@ -94,7 +94,7 @@ export const createToolIdMappings = <T extends { id: string }>(tools: T[]): Tool
   return mapping;
 };
 
-export const toolToLangchain = ({
+export const toolToLangchain = async ({
   tool,
   toolId,
   logger,
@@ -106,13 +106,15 @@ export const toolToLangchain = ({
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
-}): StructuredTool => {
+}): Promise<StructuredTool> => {
   const description = tool.llmDescription
     ? tool.llmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;
 
+  const schema = await tool.schema();
+
   return toTool(
-    async (rawInput, config): Promise<[string, RunToolReturn]> => {
+    async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
       let onEvent: ToolEventHandlerFn | undefined;
       if (sendEvent) {
         const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
@@ -155,9 +157,9 @@ export const toolToLangchain = ({
               .string()
               .optional()
               .describe('Brief reasoning of why you are calling this tool'),
-            ...tool.schema.shape,
+            ...schema.shape,
           })
-        : tool.schema,
+        : schema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',

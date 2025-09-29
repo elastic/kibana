@@ -25,11 +25,13 @@ import {
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
 import { convertToFieldDefinitionConfig } from './utils';
@@ -38,6 +40,7 @@ interface SchemaChangesReviewModalProps {
   onClose: () => void;
   stream: string;
   streamType?: 'wired' | 'classic' | 'unknown';
+  definition: Streams.ingest.all.GetResponse;
   fields: SchemaField[];
   storedFields: SchemaField[];
   submitChanges: () => Promise<void>;
@@ -47,6 +50,7 @@ export function SchemaChangesReviewModal({
   fields,
   stream,
   streamType,
+  definition,
   storedFields,
   submitChanges,
   onClose,
@@ -60,18 +64,7 @@ export function SchemaChangesReviewModal({
   } = useKibana();
   const { signal } = useAbortController();
 
-  const changes = React.useMemo(() => {
-    const addedFields = fields.filter(
-      (field) => !storedFields.some((stored) => stored.name === field.name)
-    );
-
-    const changedFields = fields.filter((field) => {
-      const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return stored && !isEqual(stored, field);
-    });
-
-    return [...addedFields, ...changedFields];
-  }, [fields, storedFields]);
+  const changes = React.useMemo(() => getChanges(fields, storedFields), [fields, storedFields]);
 
   const existingFields = React.useMemo(() => {
     // Fields that have esType (from Field Caps API) - these are existing in ES
@@ -122,29 +115,34 @@ export function SchemaChangesReviewModal({
           name: field.name,
         }));
 
-      const simulationResults = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/schema/fields_simulation',
-        {
-          signal,
-          params: {
-            path: { name: stream },
-            body: {
-              field_definitions: mappedFields,
+      try {
+        const simulationResults = await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            signal,
+            params: {
+              path: { name: definition.stream.name },
+              body: {
+                field_definitions: mappedFields,
+              },
             },
-          },
+          }
+        );
+
+        if (simulationResults.status === 'failure') {
+          setHasSimulationErrors(true);
+          setSimulationError(simulationResults.simulationError);
         }
-      );
-
-      if (simulationResults.status === 'failure') {
+      } catch (err) {
         setHasSimulationErrors(true);
-        setSimulationError(simulationResults.simulationError);
+        setSimulationError(getFormattedError(err).message);
+      } finally {
+        setIsSimulating(false);
       }
-
-      setIsSimulating(false);
     }
 
     simulate();
-  }, [changes, streamsRepositoryClient, signal, stream]);
+  }, [changes, streamsRepositoryClient, signal, definition.stream.name]);
 
   const confirmChangesTitle = i18n.translate(
     'xpack.streams.schemaEditor.confirmChangesModal.title',
@@ -272,15 +270,17 @@ export function SchemaChangesReviewModal({
         <EuiModalHeaderTitle>{confirmChangesTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
-            {
-              defaultMessage: 'Schema edits affect all dependent streams.',
-            }
-          )}
-          iconType="info"
-        />
+        {Streams.WiredStream.GetResponse.is(definition) ? (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
+              {
+                defaultMessage: 'Schema edits affect all dependent streams.',
+              }
+            )}
+            iconType="info"
+          />
+        ) : null}
         <EuiSpacer size="m" />
         <EuiText>
           {i18n.translate(
@@ -325,13 +325,34 @@ export function SchemaChangesReviewModal({
           fill
           color="primary"
           onClick={handleSubmit}
-          isLoading={loading}
+          isLoading={loading || isSimulating}
           disabled={isSimulating || hasSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
-          {confirmChangesTitle}
+          {isSimulating
+            ? i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.verifyingChangesText',
+                { defaultMessage: 'Verifying changes' }
+              )
+            : confirmChangesTitle}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
+}
+
+export function getChanges(fields: SchemaField[], storedFields: SchemaField[]) {
+  const addedFields = fields.filter(
+    (field) =>
+      field.status === 'mapped' && !storedFields.some((stored) => stored.name === field.name)
+  );
+
+  const changedFields = fields.filter((field) => {
+    const stored = storedFields.find(
+      (storedField) => field.status !== 'inherited' && storedField.name === field.name
+    );
+    return stored && !isEqual(stored, field);
+  });
+
+  return [...addedFields, ...changedFields];
 }
