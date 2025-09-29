@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
 import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
 import { Version } from '@kbn/upgrade-assistant-pkg-common';

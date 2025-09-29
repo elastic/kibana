@@ -235,12 +235,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
-        next: (hasChanged) => {
-          if (hasChanged) {
-            const latestSavedSearchState = stateContainer.savedSearchState.getState();
-            setDiscoverSavedSearchState(latestSavedSearchState);
-          }
+      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
+        next: (latestSavedSearchState) => {
+          setDiscoverSavedSearchState(latestSavedSearchState);
         },
       });
 

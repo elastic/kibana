@@ -14,6 +14,8 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiButton,
+  EuiFlyout,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +29,7 @@ import { AdvancedFieldMappingOptions } from './advanced_field_mapping_options';
 export interface SchemaEditorFlyoutProps {
   field: SchemaField;
   isEditingByDefault?: boolean;
-  onClose?: () => void;
+  onClose: () => void;
   onStage: (field: SchemaField) => void;
   stream: Streams.ingest.all.Definition;
   withFieldSimulation?: boolean;
@@ -45,6 +47,8 @@ export const SchemaEditorFlyout = ({
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
   const [isValidSimulation, setValidSimulation] = useState(true);
 
+  const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-field' });
+
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
       ({
@@ -57,13 +61,12 @@ export const SchemaEditorFlyout = ({
   const hasValidFieldType = nextField.type !== undefined;
 
   return (
-    <>
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutId} maxWidth={500}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{field.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary
@@ -74,8 +77,8 @@ export const SchemaEditorFlyout = ({
             stream={stream}
           />
           <AdvancedFieldMappingOptions
-            field={nextField}
-            onChange={setNextField}
+            value={nextField.additionalParameters}
+            onChange={(additionalParameters) => setNextField({ additionalParameters })}
             onValidate={setValidAdvancedFieldMappings}
             isEditing={isEditing}
           />
@@ -90,7 +93,6 @@ export const SchemaEditorFlyout = ({
           )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
-
       {isEditing && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -122,6 +124,6 @@ export const SchemaEditorFlyout = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}
-    </>
+    </EuiFlyout>
   );
 };

@@ -141,10 +141,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
           await ml.testExecution.logTestStep('should display components of the file details page');
-          await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
-          await ml.dataVisualizerFileBased.assertFileContentPanelExists();
-          await ml.dataVisualizerFileBased.assertSummaryPanelExists();
-          await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+          await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle, 0);
+          await ml.dataVisualizerFileBased.assertFilePreviewPanelExists(0);
+          await ml.dataVisualizerFileBased.setIndexName('user-import_1');
           await ml.dataVisualizerFileBased.assertImportButtonEnabled(false);
         });
 

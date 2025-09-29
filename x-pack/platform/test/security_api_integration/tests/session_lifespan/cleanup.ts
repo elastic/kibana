@@ -85,7 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
     await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
   }
 
-  describe('Session Lifespan cleanup', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/233551
+  describe.skip('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await addESDebugLoggingSettings();
