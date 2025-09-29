@@ -57,24 +57,27 @@ const optionalFields = asMutableArray([
   KIND,
 ] as const);
 
-export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
-  const groupedErrorCountByDocId: Record<string, number> = {};
+export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
+  const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
-  function incrementErrorCount(id: string) {
-    if (!groupedErrorCountByDocId[id]) {
-      groupedErrorCountByDocId[id] = 0;
+  function addError(id: string, errorDocId: string) {
+    if (!groupedErrorsByDocId[id]) {
+      groupedErrorsByDocId[id] = [];
     }
-    groupedErrorCountByDocId[id] += 1;
+    groupedErrorsByDocId[id].push({ errorDocId });
   }
 
-  unifiedTraceErrors.apmErrors.forEach((doc) =>
-    doc.parent?.id ? incrementErrorCount(doc.parent.id) : undefined
-  );
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((doc) =>
-    doc.id ? incrementErrorCount(doc.id) : undefined
+  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
+    const id = errorDoc.transaction?.id || errorDoc.span?.id;
+    if (id) {
+      addError(id, errorDoc.id);
+    }
+  });
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) =>
+    errorDoc.spanId ? addError(errorDoc.spanId, errorDoc.id) : undefined
   );
 
-  return groupedErrorCountByDocId;
+  return groupedErrorsByDocId;
 }
 
 /**
@@ -145,7 +148,7 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
+  const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, fields);
@@ -155,7 +158,7 @@ export async function getUnifiedTraceItems({
         return undefined;
       }
 
-      const docErrorCount = errorCountByDocId[id] || 0;
+      const docErrors = errorsByDocId[id] || [];
       return {
         id: event.span?.id ?? event.transaction?.id,
         timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
@@ -168,7 +171,7 @@ export async function getUnifiedTraceItems({
             value: event.event?.outcome || event.status?.code,
           },
         }),
-        errorCount: docErrorCount,
+        errors: docErrors,
         parentId: event.parent?.id,
         serviceName: event.service.name,
         type: event.span?.subtype || event.span?.type || event.kind,
