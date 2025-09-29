@@ -41,11 +41,9 @@ describe('usePaginatedFields', () => {
     );
 
     await waitFor(() => {
-      expect(result.current?.allFields).toHaveLength(4);
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field2']);
+      expect(result.current?.totalPages).toBe(2);
     });
-
-    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field2']);
-    expect(result.current?.totalPages).toBe(2);
   });
 
   it('returns correct search results with searchTerm provided', async () => {
@@ -69,11 +67,9 @@ describe('usePaginatedFields', () => {
     );
 
     await waitFor(() => {
-      expect(result.current?.allFields).toHaveLength(5);
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field4', 'field44']);
+      expect(result.current?.totalPages).toBe(1);
     });
-
-    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field4', 'field44']);
-    expect(result.current?.totalPages).toBe(1);
   });
 
   it('returns correct pagination for second page', async () => {
@@ -96,11 +92,9 @@ describe('usePaginatedFields', () => {
     );
 
     await waitFor(() => {
-      expect(result.current?.allFields).toHaveLength(4);
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field3', 'field4']);
+      expect(result.current?.totalPages).toBe(2);
     });
-
-    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field3', 'field4']);
-    expect(result.current?.totalPages).toBe(2);
   });
 
   it('filters fields based on dimensions', async () => {
@@ -122,11 +116,9 @@ describe('usePaginatedFields', () => {
     );
 
     await waitFor(() => {
-      expect(result.current?.allFields).toHaveLength(2);
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field3']);
+      expect(result.current?.totalPages).toBe(1);
     });
-
-    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field3']);
-    expect(result.current?.totalPages).toBe(1);
   });
 
   it('ignores fields with noData', async () => {
@@ -144,10 +136,8 @@ describe('usePaginatedFields', () => {
     );
 
     await waitFor(() => {
-      expect(result.current?.allFields).toHaveLength(1);
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1']);
+      expect(result.current?.totalPages).toBe(1);
     });
-
-    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1']);
-    expect(result.current?.totalPages).toBe(1);
   });
 });

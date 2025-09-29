@@ -55,9 +55,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
+  const valuesByField = new Map<string, Set<string>>();
   if (filters && filters.length) {
-    const valuesByField = new Map<string, Set<string>>();
-
     for (const filter of filters) {
       const currentValues = valuesByField.get(filter.field);
       if (currentValues) {
@@ -79,7 +78,12 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
   const queryPipeline = source.pipe(
     ...whereConditions,
     dimensions.length > 0
-      ? where(dimensions.map((dim) => `${dim} IS NOT NULL`).join(' AND '))
+      ? where(
+          dimensions
+            .filter((dim) => !valuesByField.has(dim))
+            .map((dim) => `${dim} IS NOT NULL`)
+            .join(' AND ')
+        )
       : (query) => query,
     instrument === 'counter'
       ? stats(

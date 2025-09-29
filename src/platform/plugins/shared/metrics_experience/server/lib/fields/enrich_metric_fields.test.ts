@@ -43,7 +43,7 @@ describe('enrichMetricFields', () => {
     name,
     index,
     type: 'long',
-    dimensions: [{ name: TEST_HOST_FIELD, type: ES_FIELD_TYPES.KEYWORD, description: '' }],
+    dimensions: [{ name: TEST_HOST_FIELD, type: ES_FIELD_TYPES.KEYWORD }],
     ...overrides,
   });
 
@@ -71,7 +71,6 @@ describe('enrichMetricFields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     logger = {
       info: jest.fn(),
       error: jest.fn(),
@@ -80,10 +79,8 @@ describe('enrichMetricFields', () => {
     } as unknown as Logger;
 
     dataStreamFieldCapsMap = new Map();
-
     extractDimensionsMock.mockImplementation(
-      (_caps, names) =>
-        names?.map((name) => ({ name, type: ES_FIELD_TYPES.KEYWORD, description: '' })) ?? []
+      (_caps, names) => names?.map((name) => ({ name, type: ES_FIELD_TYPES.KEYWORD })) ?? []
     );
   });
 
@@ -120,7 +117,7 @@ describe('enrichMetricFields', () => {
           name: TEST_METRIC_NAME,
           index: TEST_INDEX,
           noData: false,
-          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword', description: '' }],
+          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
         },
       },
     ];
@@ -169,7 +166,6 @@ describe('enrichMetricFields', () => {
         {
           dimensions: [
             {
-              description: '',
               name: TEST_HOST_FIELD,
               type: 'keyword',
             },

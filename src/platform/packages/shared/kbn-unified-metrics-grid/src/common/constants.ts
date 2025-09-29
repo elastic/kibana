@@ -18,6 +18,7 @@ export const METRICS_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrict
 // Selection limits
 export const MAX_VALUES_SELECTIONS = 10;
 export const MAX_DIMENSIONS_SELECTIONS = 10;
+export const PAGE_SIZE = 20;
 
 export const DIMENSION_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
