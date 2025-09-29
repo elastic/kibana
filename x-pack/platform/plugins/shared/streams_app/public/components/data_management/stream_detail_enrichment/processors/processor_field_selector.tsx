@@ -80,7 +80,6 @@ export const ProcessorFieldSelector = ({
       </EuiFormRow>
       {isUnsupported && (
         <EuiCallOut
-          announceOnMount={false}
           color="warning"
           iconType="alert"
           title={i18n.translate(
