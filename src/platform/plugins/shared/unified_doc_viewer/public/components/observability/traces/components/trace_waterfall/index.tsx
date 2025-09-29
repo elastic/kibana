@@ -11,7 +11,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiLink, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDelayRender, EuiLink, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentFrameworkSection } from '../../../../..';
@@ -164,7 +164,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           getParentApi={getParentApi}
           hidePanelChrome
         />
-        {renderTourStep}
+        <EuiDelayRender delay={500}>{renderTourStep}</EuiDelayRender>
       </ContentFrameworkSection>
     </>
   );
