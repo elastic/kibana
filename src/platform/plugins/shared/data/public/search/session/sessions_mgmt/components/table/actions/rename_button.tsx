@@ -46,6 +46,9 @@ const RenameDialog = ({
 
   const modalTitleId = useGeneratedHtmlId();
 
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.renameModal.backgroundSearchTitle', {
+    defaultMessage: 'Edit background search name',
+  });
   const confirm = i18n.translate('data.mgmt.searchSessions.renameModal.renameButton', {
     defaultMessage: 'Save',
   });
@@ -68,7 +71,7 @@ const RenameDialog = ({
       initialFocus="[name=newName]"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>bgsTitle</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{bgsTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
