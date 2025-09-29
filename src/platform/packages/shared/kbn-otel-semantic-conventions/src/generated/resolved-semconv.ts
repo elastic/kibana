@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 136
- * Metric groups: 420
+ * Metric groups: 422
  * Hardcoded fields: 34
- * Total fields: 1142
+ * Total fields: 1148
  *
  * @internal
  *
- * WARNING: This object contains 1142+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1148+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -91,6 +91,19 @@ export const semconvFlat = {
     description: 'The y (vertical) component of a screen coordinate, in screen pixels.',
     type: 'long',
     example: '12',
+  },
+  'app.screen.id': {
+    name: 'app.screen.id',
+    description:
+      'An identifier that uniquely differentiates this screen from other screens in the same application.',
+    type: 'keyword',
+    example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
+  },
+  'app.screen.name': {
+    name: 'app.screen.name',
+    description: 'The name of an application screen.',
+    type: 'keyword',
+    example: 'MainActivity',
   },
   'app.widget.id': {
     name: 'app.widget.id',
@@ -1375,10 +1388,9 @@ export const semconvFlat = {
   },
   'error.type': {
     name: 'error.type',
-    description:
-      'A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.',
+    description: 'Describes a class of error the operation ended with.',
     type: 'keyword',
-    example: 'queue_full',
+    example: 'timeout',
   },
   'event.name': {
     name: 'event.name',
@@ -2799,6 +2811,20 @@ export const semconvFlat = {
     description: 'The name of the Pod.',
     type: 'keyword',
     example: 'opentelemetry-pod-autoconf',
+  },
+  'k8s.pod.status.phase': {
+    name: 'k8s.pod.status.phase',
+    description:
+      'The phase for the pod. Corresponds to the `phase` field of the: [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core)',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.pod.status.reason': {
+    name: 'k8s.pod.status.reason',
+    description:
+      'The reason for the pod state. Corresponds to the `reason` field of the: [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core)',
+    type: 'keyword',
+    example: 'Evicted',
   },
   'k8s.pod.uid': {
     name: 'k8s.pod.uid',
@@ -4404,6 +4430,17 @@ export const semconvFlat = {
     description: 'Network bytes for the Pod.',
     type: 'double',
   },
+  'metrics.k8s.pod.status.phase': {
+    name: 'metrics.k8s.pod.status.phase',
+    description: 'Describes number of K8s Pods that are currently in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.status.reason': {
+    name: 'metrics.k8s.pod.status.reason',
+    description:
+      'Describes the number of K8s Pods that are currently in a state for a given reason.',
+    type: 'double',
+  },
   'metrics.k8s.pod.uptime': {
     name: 'metrics.k8s.pod.uptime',
     description: 'The time the Pod has been running.',
@@ -5890,8 +5927,7 @@ export const semconvFlat = {
   },
   'rpc.method': {
     name: 'rpc.method',
-    description:
-      'The name of the (logical) method being called, must be equal to the $method part in the span name.',
+    description: 'This is the logical name of the method from the RPC interface perspective.',
     type: 'keyword',
     example: 'e',
   },
