@@ -124,21 +124,17 @@ export const AdditionalFormField = React.memo<{ field: ResilientFieldMetadata }>
       );
     case 'multiselect':
       return (
-        <UseField<string[]> path={path} config={{ defaultValue: [] }}>
+        <UseField<number[]> path={path} config={{ defaultValue: [] }}>
           {(_field) => {
             const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-              _field.setValue(changedOptions.map((option) => option.value as string));
+              _field.setValue(changedOptions.map((option) => parseInt(option.value as string, 10)));
             };
 
-            const selectedOptions =
-              _field.value && field.values?.length
-                ? _field.value.map((incidentType) => ({
-                    value: incidentType,
-                    label:
-                      field.values?.find((type) => incidentType === type.value.toString())?.label ??
-                      '',
-                  }))
-                : [];
+            const selectedOptions = _field.value.map((val) => ({
+              value: val.toString(),
+              label:
+                field.values?.find((type) => val.toString() === type.value.toString())?.label ?? '',
+            }));
 
             const isInvalid = false;
             return (
