@@ -182,13 +182,17 @@ describe('buildFiltersForEntityType', () => {
     expect(filters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          should: expect.arrayContaining([
-            expect.objectContaining({
-              match: expect.objectContaining({
-                'service.name': 'nginx',
-              }),
+          must_not: expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  match: expect.objectContaining({
+                    'service.name': 'nginx',
+                  }),
+                }),
+              ]),
             }),
-          ]),
+          }),
         }),
       })
     );
