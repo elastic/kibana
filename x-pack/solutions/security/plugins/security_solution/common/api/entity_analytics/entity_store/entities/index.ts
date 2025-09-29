@@ -7,5 +7,9 @@
 
 export * from './common.gen';
 export * from './delete_entity.gen';
+export * from './get_entity.gen';
 export * from './list_entities.gen';
 export * from './upsert_entity.gen';
+
+// Re-export Entity type explicitly for better visibility
+export type { Entity } from './common.gen';

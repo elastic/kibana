@@ -15,7 +15,7 @@ import {
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
 } from './errors';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities';
 import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
 
@@ -477,6 +477,77 @@ describe('EntityStoreCrudClient', () => {
       });
 
       expect(v4Spy).toBeCalledTimes(1);
+    });
+  });
+
+  describe('getEntity', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    it('should throw EngineNotRunningError when engine is not running', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
+        new EngineNotRunningError('host')
+      );
+    });
+
+    it('should throw CapabilityNotEnabledError when CRUD capability is not enabled', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
+        new CapabilityNotEnabledError('host', EntityStoreCapability.CRUD)
+      );
+    });
+
+    it('should return entity when found', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+
+      const mockEntity: Entity = {
+        entity: {
+          id: 'host-id',
+        },
+      };
+
+      esClientMock.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: mockEntity }],
+        },
+      } as any);
+
+      const result = await client.getEntity('host', 'host-id');
+
+      expect(result).toEqual(mockEntity);
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: '.entities.v1.latest.security_host_default',
+        query: {
+          term: {
+            'entity.id': 'host-id',
+          },
+        },
+        size: 1,
+      });
+    });
+
+    it('should throw error when entity not found', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+
+      esClientMock.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 0, relation: 'eq' },
+          hits: [],
+        },
+      } as any);
+
+      await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
+        "Entity with id 'host-id' not found"
+      );
     });
   });
 

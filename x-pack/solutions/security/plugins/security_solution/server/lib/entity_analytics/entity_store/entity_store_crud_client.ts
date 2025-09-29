@@ -191,6 +191,29 @@ export class EntityStoreCrudClient {
     return { deleted: true };
   }
 
+  public async getEntity(type: APIEntityType, entityId: string): Promise<Entity> {
+    await this.assertEngineIsRunning(type);
+    await this.assertCRUDApiIsEnabled(type);
+
+    this.logger.info(`Getting entity '${entityId}' (type ${type})`);
+
+    const searchResp = await this.esClient.search({
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          [ENTITY_ID_FIELD]: entityId,
+        },
+      },
+      size: 1,
+    });
+
+    if (searchResp.hits.total === 0 || (typeof searchResp.hits.total === 'object' && searchResp.hits.total.value === 0)) {
+      throw new Error(`Entity with id '${entityId}' not found`);
+    }
+
+    return searchResp.hits.hits[0]._source as Entity;
+  }
+
   private async assertEngineIsRunning(type: APIEntityType) {
     const engineRunning = await this.dataClient.isEngineRunning(EntityType[type]);
 
