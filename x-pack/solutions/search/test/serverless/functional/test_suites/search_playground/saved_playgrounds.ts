@@ -56,7 +56,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
         // Add a connector to the playground
-
         await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
