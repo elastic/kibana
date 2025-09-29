@@ -344,6 +344,7 @@ export function LensEditConfigurationFlyout({
             css={css`
               pointer-events: auto;
               background-color: ${euiTheme.euiTheme.colors.emptyShade};
+              border-bottom: ${euiTheme.euiTheme.border.thin};
             `}
           >
             <LayerTabsWrapper
