@@ -11,7 +11,6 @@ import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import * as YAML from 'yaml';
 import { useEditorState } from '../../lib/state/state';
 
 export interface CopyWorkflowStepOption {
@@ -31,14 +30,7 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
     try {
       // Get the entire step YAML
-      const doc = new YAML.Document(undefined, {
-        // use the core schema (not strictly JSON)
-        schema: 'core',
-        toStringDefaults: { collectionStyle: 'block' }, // ← multiline block style
-      });
-      doc.contents = focusedStepInfo.stepYamlNode;
-
-      await navigator.clipboard.writeText(doc.toString());
+      await navigator.clipboard.writeText(focusedStepInfo.stepYamlNode.toString());
 
       if (notifications) {
         notifications.toasts.addSuccess({
