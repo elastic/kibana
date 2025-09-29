@@ -353,7 +353,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         if (await this.isV2()) {
           try {
             const panel = await testSubjects.find(
-              `side-navigation-panel-${sectionId}`,
+              `side-navigation-panel_${sectionId}`,
               TIMEOUT_CHECK
             );
             return !!panel;
