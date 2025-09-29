@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return "error" when the security data view does not exist', async () => {
         await dataView.delete('security-solution');
 
-        const { body, status } = await api.initEntityEngine(
+        const { body, status } = await entityAnalyticsApi.initEntityEngine(
           {
             params: { entityType: 'host' },
             body: {},
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('get', () => {
         it('should return the host entity engine', async () => {
-          const getResponse = await api
+          const getResponse = await entityAnalyticsApi
             .getEntityEngine({
               params: { entityType: 'host' },
             })
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should return the user entity engine', async () => {
-          const getResponse = await api
+          const getResponse = await entityAnalyticsApi
             .getEntityEngine({
               params: { entityType: 'user' },
             })
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('list', () => {
         it('should return the list of entity engines', async () => {
-          const { body } = await api.listEntityEngines().expect(200);
+          const { body } = await entityAnalyticsApi.listEntityEngines().expect(200);
 
           // @ts-expect-error body is any
           const sortedEngines = body.engines.sort((a, b) => a.type.localeCompare(b.type));
@@ -157,13 +157,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should stop the entity engine', async () => {
-        await api
+        await entityAnalyticsApi
           .stopEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
 
-        const { body } = await api
+        const { body } = await entityAnalyticsApi
           .getEntityEngine({
             params: { entityType: 'host' },
           })
@@ -173,13 +173,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should start the entity engine', async () => {
-        await api
+        await entityAnalyticsApi
           .startEntityEngine({
             params: { entityType: 'host' },
           })
           .expect(200);
 
-        const { body } = await api
+        const { body } = await entityAnalyticsApi
           .getEntityEngine({
             params: { entityType: 'host' },
           })
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete the host entity engine', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
-        await api
+        await entityAnalyticsApi
           .deleteEntityEngine({
             params: { entityType: 'host' },
             query: { data: true },
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete the user entity engine', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['user']);
 
-        await api
+        await entityAnalyticsApi
           .deleteEntityEngine({
             params: { entityType: 'user' },
             query: { data: true },
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return "not_installed" when no engines have been initialized', async () => {
-        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
+        const { body } = await entityAnalyticsApi.getEntityStoreStatus({ query: {} }).expect(200);
 
         expect(body).toEqual({
           engines: [],
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host', 'user'],
         });
 
-        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
+        const { body } = await entityAnalyticsApi.getEntityStoreStatus({ query: {} }).expect(200);
 
         expect(body.status).toEqual('installing');
         expect(body.engines.length).toEqual(2);
@@ -253,7 +253,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return "started" when all engines are started', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
 
-        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
+        const { body } = await entityAnalyticsApi.getEntityStoreStatus({ query: {} }).expect(200);
 
         expect(body.status).toEqual('running');
         expect(body.engines.length).toEqual(2);
@@ -263,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('status with components', () => {
         it('should return empty list when when no engines have been initialized', async () => {
-          const { body } = await api
+          const { body } = await entityAnalyticsApi
             .getEntityStoreStatus({ query: { include_components: true } })
             .expect(200);
 
@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return components status when engines are installed', async () => {
           await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
-          const { body } = await api
+          const { body } = await entityAnalyticsApi
             .getEntityStoreStatus({ query: { include_components: true } })
             .expect(200);
 
@@ -325,14 +325,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it("should not update the index patten when it didn't change", async () => {
-        const response = await api.applyEntityEngineDataviewIndices();
+        const response = await entityAnalyticsApi.applyEntityEngineDataviewIndices();
 
         expect(response.body).toEqual({ success: true, result: [{ type: 'host', changes: {} }] });
       });
 
       it('should update the index pattern when the data view changes', async () => {
         await dataView.updateIndexPattern('security-solution', 'test-*');
-        const response = await api.applyEntityEngineDataviewIndices();
+        const response = await entityAnalyticsApi.applyEntityEngineDataviewIndices();
 
         expect(response.body).toEqual({
           success: true,
