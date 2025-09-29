@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { enableActionSecrets } from '../../helpers';
+import { disableActionSecrets, enableActionSecrets } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -218,6 +218,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agents/bulk_privilege_level_change', () => {
       it('should return 200 if the PRIVILEGE_LEVEL_CHANGE action was created on multiple agents', async () => {
+        await disableActionSecrets(providerContext);
         await supertest
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')

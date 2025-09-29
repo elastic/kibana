@@ -69,29 +69,28 @@ export async function bulkChangePrivilegeAgentsBatch(
   const total = options.total ?? agents.length;
   const agentIds = agentsToAction.map((agent) => agent.id);
 
-  // Fail fast if agent policies contain an integration that requires root access.
-  if (agents.length > 0) {
-    const agentPolicyIds = agents.map((agent) => agent.policy_id);
-    await pMap(
-      agentPolicyIds,
-      async (agentPolicyId) => {
-        if (agentPolicyId) {
-          const allPackagePolicies =
-            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicyId)) || [];
-          const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
-          if (packagesWithRootAccess.length > 0) {
-            throw new FleetUnauthorizedError(
-              `Agent policy ${agentPolicyId} contains integrations that require root access: ${packagesWithRootAccess
-                .map((pkg) => pkg?.name)
-                .join(', ')}`
-            );
-          }
+  // Fail fast if agents contain integrations that require root access.
+  await pMap(
+    agents,
+    async (agent) => {
+      if (agent?.policy_id) {
+        const allPackagePolicies =
+          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
+        const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
+        if (packagesWithRootAccess.length > 0) {
+          // find list of agents on that agent policy
+          errors[agent.id] = new FleetUnauthorizedError(
+            `Agent ${
+              agent.id
+            } contains integrations that require root access: ${packagesWithRootAccess
+              .map((pkg) => pkg?.name)
+              .join(', ')}`
+          );
         }
-        return undefined;
-      },
-      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
-    );
-  }
+      }
+    },
+    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+  );
 
   // Extract password from options if provided and pass it as a secret.
   const res = await createAgentAction(esClient, soClient, {
