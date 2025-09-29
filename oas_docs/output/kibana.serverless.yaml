@@ -27301,6 +27301,8 @@ paths:
                             previous_version:
                               nullable: true
                               type: string
+                            rolled_back:
+                              type: boolean
                             type:
                               type: string
                             updated_at:
@@ -28512,6 +28514,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
@@ -29164,6 +29168,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
