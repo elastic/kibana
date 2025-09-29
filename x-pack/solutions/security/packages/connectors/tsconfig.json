@@ -16,8 +16,8 @@
     "@kbn/i18n",
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/core",
     "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": ["target/**/*"]
 }
