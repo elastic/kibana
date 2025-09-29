@@ -9,17 +9,24 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
+import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
-import { deserializeJson, serializeXJson } from '../../../../helpers';
+import {
+  deserializeJson,
+  serializeXJson,
+  loadProcessorSuggestions,
+  buildProcessorInsertText,
+  hasOddQuoteCount,
+} from '../../../../helpers';
 
 export const JsonEditor = () => {
   const {
-    core: { docLinks },
+    core: { docLinks, http },
   } = useKibana();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
@@ -75,6 +82,71 @@ export const JsonEditor = () => {
     field.onChange(deserializeJson(newValue));
   };
 
+  const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
+    return {
+      triggerCharacters: ['"'],
+      provideCompletionItems: (
+        model: monaco.editor.ITextModel,
+        position: monaco.Position
+      ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
+        const lineContentAfter = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: position.column,
+          endLineNumber: position.lineNumber,
+          endColumn: model.getLineMaxColumn(position.lineNumber),
+        });
+        const wordUntil = model.getWordUntilPosition(position);
+        const range: monaco.IRange = {
+          startLineNumber: position.lineNumber,
+          startColumn: wordUntil.startColumn,
+          endLineNumber: position.lineNumber,
+          endColumn: lineContentAfter.startsWith('"') ? position.column + 1 : position.column,
+        };
+
+        const beforeRange: monaco.IRange = {
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        };
+        const bodyContent = model.getValueInRange(beforeRange);
+        const lastLine = bodyContent.split('\n').pop()!.trim();
+        const alreadyOpenedQuote = hasOddQuoteCount(lastLine);
+
+        return Promise.resolve(loadProcessorSuggestions(http)).then((terms) => {
+          const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
+            const label = String(t.name);
+            const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
+            return {
+              label,
+              kind: monaco.languages.CompletionItemKind.Constant,
+              detail: 'API',
+              insertText,
+              range,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            } as monaco.languages.CompletionItem;
+          });
+          return { suggestions } as monaco.languages.CompletionList;
+        });
+      },
+    };
+  }, [http]);
+
+  React.useEffect(() => {
+    const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);
+    return () => disposable.dispose();
+  }, [suggestionProvider]);
+
+  const editorOptions = React.useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
+    () => ({
+      automaticLayout: true,
+      wordWrap: 'on' as 'on',
+      quickSuggestions: { strings: true, other: true, comments: false },
+      suggestOnTriggerCharacters: true,
+    }),
+    []
+  );
+
   return (
     <EuiFormRow
       label={i18n.translate(
@@ -120,10 +192,7 @@ export const JsonEditor = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
           { defaultMessage: 'Ingest pipeline processors editor' }
         )}
-        options={{
-          automaticLayout: true,
-          wordWrap: 'on',
-        }}
+        options={editorOptions}
       />
     </EuiFormRow>
   );

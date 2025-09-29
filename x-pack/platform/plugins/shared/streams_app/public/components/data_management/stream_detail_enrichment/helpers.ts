@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
+
+const CONSOLE_API_SERVER = '/api/console/api_server';
+
+
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
     return defaultVal;
@@ -50,4 +55,60 @@ const formatXJsonString = (input: string) => {
     });
   }
   return formattedJsonString;
+};
+
+
+export type ProcessorSuggestion = { name: string; template?: any };
+
+let processorsCache: ProcessorSuggestion[] | null = null;
+
+export const loadProcessorSuggestions = async (http: HttpStart): Promise<ProcessorSuggestion[]> => {
+  if (processorsCache) {
+    return processorsCache;
+  }
+  try {
+    const res = await http.get<{ es: any }>(CONSOLE_API_SERVER);
+    const endpoints = res?.es?.endpoints ?? {};
+    const ingest = endpoints['ingest.put_pipeline'];
+    const rules = ingest?.data_autocomplete_rules;
+    const oneOf = rules?.processors?.[0]?.__one_of as Array<Record<string, any>> | undefined;
+    if (!oneOf) {
+      processorsCache = [];
+      return processorsCache;
+    }
+    processorsCache = oneOf.map((entry) => {
+      const name = Object.keys(entry)[0];
+      const def = (entry)[name];
+      const template = def?.__template;
+      return { name, template } as ProcessorSuggestion;
+    });
+    return processorsCache;
+  } catch {
+    processorsCache = [];
+    return processorsCache;
+  }
+};
+
+
+export const hasOddQuoteCount = (text: string) => ((text.match(/\"/g) || []).length % 2) === 1;
+
+
+export const buildProcessorInsertText = (
+  name: string,
+  template: any | undefined,
+  alreadyOpenedQuote: boolean
+): string => {
+  let insertText = alreadyOpenedQuote ? `${name}"` : `"${name}"`;
+
+  if (template) {
+    const json = typeof template === 'string' ? template : JSON.stringify(template, null, 2);
+    insertText += `: ${json.split('\n').join('\n')}`;
+  } else {
+    insertText += ': {}';
+  }
+
+  if (insertText.endsWith('{}')) insertText = insertText.slice(0, -2) + '{$0}';
+  if (insertText.endsWith('[]')) insertText = insertText.slice(0, -2) + '[$0]';
+
+  return insertText;
 };
