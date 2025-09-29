@@ -45,8 +45,11 @@ export const createSyncMarkersService = (
     }
   };
 
-  const updateLastFullSyncMarker = async (marker: string): Promise<void> => {
-    // update latest full sync to saved object
+  const updateLastFullSyncMarker = async (
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> => {
+    await monitoringIndexSourceClient.updateLastFullSyncMarker(source, lastFullSyncMarker);
   };
 
   const getLastFullSyncMarker = async (

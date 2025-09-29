@@ -199,18 +199,13 @@ export class MonitoringEntitySourceDescriptorClient {
     source: MonitoringEntitySource,
     lastFullSyncMarker: string
   ): Promise<void> {
-    try {
-      await this.update({
-        ...source,
-        integrations: {
-          syncData: {
-            lastFullSync: lastFullSyncMarker,
-          },
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastFullSync: lastFullSyncMarker,
         },
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error updating last full sync marker:', error);
-    }
+      },
+    });
   }
 }
