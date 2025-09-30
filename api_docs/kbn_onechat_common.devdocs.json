@@ -885,7 +885,7 @@
         "signature": [
           "(toolName: string) => boolean"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -899,7 +899,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4404,7 +4404,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4826,7 +4826,7 @@
         "signature": [
           "{ readonly platformCore: \"platform.core\"; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
