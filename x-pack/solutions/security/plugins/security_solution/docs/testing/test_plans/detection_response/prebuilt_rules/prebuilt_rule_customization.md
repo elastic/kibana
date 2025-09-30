@@ -48,6 +48,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: prebuilt rule's `is_customized` is set to true after it is customized when base version is missing**](#scenario-prebuilt-rules-is_customized-is-set-to-true-after-it-is-customized-when-base-version-is-missing)
     - [**Scenario: prebuilt rule's `is_customized` stays unchanged after it is saved unchanged when base version is missing**](#scenario-prebuilt-rules-is_customized-stays-unchanged-after-it-is-saved-unchanged-when-base-version-is-missing)
     - [**Scenario: prebuilt rule's `is_customized` value is not affected by specific fields when base version is missing**](#scenario-prebuilt-rules-is_customized-value-is-not-affected-by-specific-fields-when-base-version-is-missing)
+    - [**Scenario: prebuilt rule's `customized_fields` resets to an empty array if rule was previously edited with base version present**](#scenario-prebuilt-rules-customized_fields-resets-to-an-empty-array-if-rule-was-previously-edited-with-base-version-present)
   - [Calculating the Modified badge in the UI](#calculating-the-modified-badge-in-the-ui)
     - [**Scenario: Modified badge should appear on the rule details page when prebuilt rule is customized**](#scenario-modified-badge-should-appear-on-the-rule-details-page-when-prebuilt-rule-is-customized)
     - [**Scenario: Modified badge should not appear on the rule details page when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-details-page-when-prebuilt-rule-isnt-customized)
@@ -356,10 +357,6 @@ And the rule's `customized_fields` value should be an empty array
 And the rule's `has_base_version` value should be false
 ```
 
-**Examples:**
-
-`<field_name>` = all customizable rule fields
-
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields when base version is missing**
 
 **Automation**: one integration test per field.
@@ -382,6 +379,21 @@ And the rule's `has_base_version` value should be false
 | enabled |
 | revision |
 | meta |
+
+#### **Scenario: prebuilt rule's `customized_fields` resets to an empty array if rule was previously edited with base version present**
+
+**Automation**: one integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And the prebuilt rule has a populated `customized_fields` value
+And the prebuilt rule doesn't have a matching base version
+When user opens the corresponding rule editing page
+And saves the form unchanged
+Then the rule's `is_customized` value should remain true
+And the rule's `customized_fields` value should be an empty array
+And the rule's `has_base_version` value should be false
+```
 
 ### Calculating the Modified badge in the UI
 
