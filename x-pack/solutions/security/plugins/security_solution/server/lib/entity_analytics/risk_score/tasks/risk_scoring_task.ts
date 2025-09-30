@@ -304,6 +304,7 @@ export const runTask = async ({
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
+
       while (!isWorkComplete) {
         const now = Date.now();
         const result = await riskScoreService.calculateAndPersistScores({
@@ -319,15 +320,35 @@ export const runTask = async ({
           excludeAlertStatuses,
           excludeAlertTags,
         });
-        const tookMs = Date.now() - now;
 
+        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
+        const isFirstRunForEntityType = !runs.some((r) => r.identifierType === identifierType);
+
+        /* Tricky boolean logic
+         * Always run resetToZero on first run of an entity type
+         * For any subsequent run, if work is complete we skip resetToZero
+         *
+         * The last run is always an "extra" run, with empty afterKeys and entities list, used to detect work completion
+         * Running reset to zero on an empty list will result in ALL scores being reset to zero, hence skipping it
+         **/
+        if (
+          (isFirstRunForEntityType || !isWorkComplete) &&
+          experimentalFeatures.enableRiskScoreResetToZero
+        ) {
+          log(`Resetting to zero all ${identifierType} risk scores without recent risk input data`);
+          await riskScoreService.resetToZero({
+            entityType: identifierType,
+            refresh: 'wait_for',
+            excludedEntities: result.entities[identifierType],
+          });
+        }
+
+        const tookMs = Date.now() - now;
         runs.push({
           identifierType,
           scoresWritten: result.scores_written,
           tookMs,
         });
-
-        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
         afterKeys = result.after_keys;
         scoresWritten += result.scores_written;
       }
