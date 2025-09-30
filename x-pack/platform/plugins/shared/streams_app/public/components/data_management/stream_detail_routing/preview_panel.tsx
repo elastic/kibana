@@ -222,7 +222,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
       <EuiFlexGroup gutterSize="m" direction="column">
         {!isNaN(matchedDocumentPercentage) && (
           <DocumentMatchFilterControls
-            initialFilter={samplesSnapshot.context.documentMatchFilter}
             onFilterChange={setDocumentMatchFilter}
             matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
             isDisabled={!!documentsError || !condition}
