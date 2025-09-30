@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPageBody, useEuiTheme } from '@elastic/eui';
+import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 
@@ -70,16 +70,20 @@ export const ManagementLandingPage = ({
 
   return (
     <EuiPageBody restrictWidth={true}>
-      {shouldShowAutoOpsPromotion && (
-        <div
-          css={css`
-            max-width: 600px;
-          `}
-        >
-          <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.base}` }} />
-        </div>
-      )}
-      <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          {shouldShowAutoOpsPromotion && (
+            <div
+              css={css`
+                max-width: 600px;
+              `}
+            >
+              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+            </div>
+          )}
+          <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPageBody>
   );
 };
