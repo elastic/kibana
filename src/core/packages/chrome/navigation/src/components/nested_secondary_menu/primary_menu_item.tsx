@@ -10,7 +10,7 @@
 import type { ComponentProps, FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
@@ -39,9 +39,10 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const handleClick = useCallback(() => {
-    onClick?.();
     if (hasSubmenu && submenuPanelId) {
       goToPanel(submenuPanelId);
+    } else {
+      onClick?.();
     }
   }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
 
@@ -67,19 +68,11 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
         isCurrent={isCurrent}
         onClick={handleClick}
         {...props}
+        as={hasSubmenu ? 'button' : 'a'}
       >
         {children}
+        {hasSubmenu && <EuiIcon color="text" css={arrowStyle} type="arrowRight" size="m" />}
       </SideNav.PrimaryMenuItem>
-      {hasSubmenu && (
-        <EuiButtonIcon
-          aria-label={`${children} has submenu`}
-          color="text"
-          css={arrowStyle}
-          display="empty"
-          iconType="arrowRight"
-          size="xs"
-        />
-      )}
     </div>
   );
 };
