@@ -518,28 +518,49 @@
           "items": {
             "properties": {
               "id": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The unique identifier of the cloud connector"
+                }
               },
               "created_at": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "The date and time the cloud connector was created"
+                }
               },
               "updated_at": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "The date and time the cloud connector was updated"
+                }
               },
               "hasCredentials": {
-                "type": "boolean"
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the cloud connector has credentials"
+                }
               },
               "cloud_provider": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The cloud provider associated with the cloud connector"
+                }
               },
               "packagePolicyIds": {
                 "type": "array",
                 "items": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "List of package policy IDs associated with the cloud connector"
+                  }
                 }
               },
               "packagePolicyCount": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "Number of package policies associated with the cloud connector"
+                }
               }
             }
           },
