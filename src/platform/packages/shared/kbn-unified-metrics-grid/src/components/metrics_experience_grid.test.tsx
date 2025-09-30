@@ -53,8 +53,8 @@ const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
 const input$ = new Subject<UnifiedHistogramInputMessage>();
 
 const dimensions: Dimension[] = [
-  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD, description: 'some description' },
-  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD, description: 'some description' },
+  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
 ];
 const allFields: MetricField[] = [
   {
