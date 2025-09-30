@@ -167,7 +167,7 @@ export async function bulkEditRules<Params extends RuleParams>(
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
       }),
-    qNodeFilterWithAuth
+    finalFilter
   );
 
   if (apiKeysToInvalidate.length > 0) {
