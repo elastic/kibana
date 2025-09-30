@@ -71,13 +71,14 @@ export const casesMutationsKeys = {
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
+  bulkPostObservables: ['bulk-post-observables'] as const,
 };
 
 export const inferenceKeys = {
   getConnectors: () => ['get-inference-connectors'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.text'];
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {

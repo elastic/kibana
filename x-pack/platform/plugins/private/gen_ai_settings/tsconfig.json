@@ -28,6 +28,7 @@
     "@kbn/management-settings-field-definition",
     "@kbn/react-kibana-context-theme",
     "@kbn/licensing-plugin",
+    "@kbn/management-settings-components-field-row",
   ],
   "exclude": ["target/**/*"]
 }
