@@ -374,7 +374,7 @@ export class SessionService {
 
         // when search completes and session has just been saved,
         // trigger polling once again to save search into a session and extend its keep_alive
-        if (this.isStored()) {
+        if (this.isStored(state)) {
           const search = state.selectors.getSearch(searchDescriptor);
           if (search && !search.searchMeta.isStored) {
             search.searchDescriptor.poll().catch((e) => {
@@ -511,7 +511,9 @@ export class SessionService {
 
   private storeSessionSnapshot() {
     if (!this.getSessionId()) return;
-    const currentState = createSessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>();
+    const currentState = createSessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>({
+      freeze: false,
+    });
     currentState.stateContainer.set(this.state.get());
     this.sessionSnapshots.set(this.getSessionId()!, currentState.stateContainer);
   }
