@@ -15,7 +15,6 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -29,12 +28,17 @@ import type {
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 
-import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
+import type {
+  CalculateResults,
+  CalculateScoresParams,
+  RiskScoreBucket,
+  RiskScoreCompositeBuckets,
+} from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { filterFromRange, processScores } from './calculate_risk_scores';
 
 type ESQLResults = Array<
-  [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
+  [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }, string[]]
 >;
 
 export const calculateScoresWithESQL = async (
@@ -44,7 +48,7 @@ export const calculateScoresWithESQL = async (
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
   } & CalculateScoresParams
-): Promise<RiskScoresPreviewResponse> =>
+): Promise<CalculateResults> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const { identifierType, logger, esClient } = params;
     const now = new Date().toISOString();
@@ -69,14 +73,15 @@ export const calculateScoresWithESQL = async (
       throw new Error('No aggregations in composite response');
     }
 
-    const promises = toEntries(response.aggregations).map(
+    const promises = toEntries(response.aggregations).map<Promise<ESQLResults[number]>>(
       ([entityType, { buckets, after_key: afterKey }]) => {
         const entities = buckets.map(({ key }) => key[EntityTypeToIdentifierField[entityType]]);
 
         if (entities.length === 0) {
           return Promise.resolve([
             entityType as EntityType,
-            { afterKey, scores: [] },
+            { afterKey: afterKey as EntityAfterKey, scores: [] },
+            entities,
           ] satisfies ESQLResults[number]);
         }
         const bounds = {
@@ -114,6 +119,7 @@ export const calculateScoresWithESQL = async (
                 scores,
                 afterKey: afterKey as EntityAfterKey,
               },
+              entities,
             ];
           })
 
@@ -124,23 +130,26 @@ export const calculateScoresWithESQL = async (
             logger.error(`Query: ${query}`);
             return [
               entityType as EntityType,
-              { afterKey, scores: [] },
-            ] satisfies ESQLResults[number];
+              { afterKey: afterKey as EntityAfterKey, scores: [] },
+              entities,
+            ];
           });
       }
     );
     const esqlResults = await Promise.all(promises);
 
-    const results: RiskScoresPreviewResponse = esqlResults.reduce<{
+    const results: CalculateResults = esqlResults.reduce<{
       after_keys: Record<string, EntityAfterKey>;
       scores: Record<string, EntityRiskScoreRecord[]>;
+      entities: Record<EntityType, string[]>;
     }>(
-      (res, [entityType, { afterKey, scores }]) => {
+      (res, [entityType, { afterKey, scores }, entities]) => {
         res.after_keys[entityType] = afterKey;
         res.scores[entityType] = scores;
+        res.entities[entityType] = entities;
         return res;
       },
-      { after_keys: {}, scores: {} }
+      { after_keys: {}, scores: {}, entities: { user: [], service: [], host: [], generic: [] } }
     );
 
     return results;

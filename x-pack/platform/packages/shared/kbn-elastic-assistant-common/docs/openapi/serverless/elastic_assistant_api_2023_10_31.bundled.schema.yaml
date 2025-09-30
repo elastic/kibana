@@ -874,6 +874,12 @@ paths:
               schema:
                 type: object
                 properties:
+                  defend_insights_exists:
+                    description: >-
+                      Indicates if Defend Insights documentation exists in the
+                      KnowledgeBase.
+                    example: true
+                    type: boolean
                   elser_exists:
                     description: Indicates if the ELSER model exists for the KnowledgeBase.
                     example: true
