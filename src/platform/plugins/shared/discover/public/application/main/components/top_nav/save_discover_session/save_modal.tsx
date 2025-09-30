@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverServices } from '../../../../../build_services';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 
 export type DiscoverSessionSaveModalOnSaveCallback = (
   props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
@@ -36,7 +35,7 @@ export interface DiscoverSessionSaveModalProps {
 
 export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
-  services: { savedObjectsTagging, core },
+  services: { savedObjectsTagging, discoverFeatureFlags },
   title,
   description,
   tags,
@@ -49,7 +48,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
 }) => {
   const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
   const [currentTags, setCurrentTags] = useState(tags);
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const onModalSave = async (params: OnSaveProps) => {
     await onSave({
