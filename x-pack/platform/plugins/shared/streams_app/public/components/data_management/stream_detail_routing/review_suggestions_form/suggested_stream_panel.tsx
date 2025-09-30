@@ -51,8 +51,8 @@ export function SuggestedStreamPanel({
   const { timeState } = useTimefilter();
   const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
-  const isUnderReview =
-    useStreamsRoutingSelector((snapshot) => snapshot.context.suggestedRuleId) === partition.name;
+  const suggestedRuleId = useStreamsRoutingSelector((snapshot) => snapshot.context.suggestedRuleId);
+  const isUnderReview = suggestedRuleId === partition.name;
   const isSelected = Boolean(
     selectedPreview &&
       selectedPreview.type === 'suggestion' &&

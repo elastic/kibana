@@ -418,7 +418,6 @@ export const streamRoutingMachine = setup({
         reviewSuggestedRule: {
           id: 'reviewSuggestedRule',
           initial: 'reviewing',
-          exit: [{ type: 'resetSuggestedRuleId' }],
           states: {
             reviewing: {
               on: {
@@ -428,6 +427,7 @@ export const streamRoutingMachine = setup({
                 },
                 'routingRule.cancel': {
                   target: '#idle',
+                  actions: [{ type: 'resetSuggestedRuleId' }],
                 },
               },
             },
@@ -453,7 +453,7 @@ export const streamRoutingMachine = setup({
                 },
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }],
+                  actions: [{ type: 'refreshDefinition' }, { type: 'resetSuggestedRuleId' }],
                 },
                 onError: {
                   target: 'reviewing',
