@@ -24,7 +24,7 @@ export function WiredAdvancedView({
   refreshDefinition: () => void;
 }) {
   const {
-    features: { contentPacks },
+    features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
 
   return (
@@ -36,7 +36,7 @@ export function WiredAdvancedView({
         </>
       )}
 
-      <StreamSystemConfiguration definition={definition.stream} />
+      {significantEvents?.available && <StreamSystemConfiguration definition={definition.stream} />}
       <EuiSpacer size="m" />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
