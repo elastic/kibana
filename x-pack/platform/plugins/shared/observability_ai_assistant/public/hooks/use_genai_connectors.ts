@@ -126,7 +126,8 @@ export function useGenAIConnectorsWithoutContext(
       .finally(() => {
         setLoading(false);
       });
-  }, [assistant, controller.signal, http, setLastUsedConnector, isConnectorSelectionRestricted, defaultConnector]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assistant, controller.signal, defaultConnector, isConnectorSelectionRestricted]);
 
   useEffect(() => {
     fetchConnectors();
@@ -134,7 +135,7 @@ export function useGenAIConnectorsWithoutContext(
     return () => {
       controller.abort();
     };
-  }, [assistant, controller, fetchConnectors, setLastUsedConnector]);
+  }, [controller, fetchConnectors]);
 
   return {
     connectors,
