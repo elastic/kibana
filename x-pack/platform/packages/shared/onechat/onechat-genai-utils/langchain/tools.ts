@@ -107,8 +107,8 @@ export const toolToLangchain = async ({
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
 }): Promise<StructuredTool> => {
-  const description = tool.llmDescription
-    ? tool.llmDescription({ description: tool.description, config: tool.configuration })
+  const description = tool.getLlmDescription
+    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;
 
   const schema = await tool.getSchema();

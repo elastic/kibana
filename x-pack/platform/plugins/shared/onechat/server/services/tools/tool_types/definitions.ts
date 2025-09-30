@@ -13,6 +13,9 @@ import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
+/**
+ * Descriptor for a tool type.
+ */
 export interface ToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
@@ -27,11 +30,18 @@ export interface ToolTypeDefinition<
   validateForUpdate: ToolTypeUpdateValidator<TConfig>;
 }
 
+/**
+ * Descriptor for disabled tool types.
+ * Can be used to register types which aren't usable, e.g. workflow tools without the plugin being enabled.
+ */
 export interface DisabledToolTypeDefinition<TType extends ToolType = ToolType> {
   toolType: TType;
   disabled: true;
 }
 
+/**
+ * Specific descriptor for builtin tool types.
+ */
 export interface BuiltinToolTypeDefinition {
   toolType: ToolType.builtin;
   builtin: true;
@@ -99,7 +109,10 @@ export const isDisabledDefinition = <
   return 'disabled' in definition && definition.disabled;
 };
 
-export interface ToolHandlerSchemaTuple<TSchema extends ZodObject<any> = ZodObject<any>> {
+export interface ToolHandlerDynamicProps<
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>
+> {
   /**
    * The zod schema attached to this tool.
    */
@@ -112,7 +125,7 @@ export interface ToolHandlerSchemaTuple<TSchema extends ZodObject<any> = ZodObje
    * Optional handler to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.
    */
-  llmDescription?: LlmDescriptionHandler;
+  getLlmDescription?: LlmDescriptionHandler<TConfig>;
 }
 
 export interface ToolDynamicPropsContext {
@@ -126,4 +139,4 @@ export type ToolHandlerDynamicPropsFn<
 > = (
   config: TConfig,
   ctx: ToolDynamicPropsContext
-) => MaybePromise<ToolHandlerSchemaTuple<TSchema>>;
+) => MaybePromise<ToolHandlerDynamicProps<TConfig, TSchema>>;

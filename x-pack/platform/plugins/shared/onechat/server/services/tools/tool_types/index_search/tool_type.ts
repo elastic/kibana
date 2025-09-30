@@ -43,6 +43,12 @@ export const getIndexSearchToolType = (): ToolTypeDefinition<
           };
         },
         getSchema: () => searchSchema,
+        getLlmDescription: (opts) => {
+          return getFullDescription({
+            description: opts.description,
+            pattern: opts.config.pattern,
+          });
+        },
       };
     },
 
@@ -61,4 +67,21 @@ export const getIndexSearchToolType = (): ToolTypeDefinition<
       return mergedConfig;
     },
   };
+};
+
+const getFullDescription = ({ pattern, description }: { pattern: string; description: string }) => {
+  return `${description}
+  ## Tool usage
+
+  This tool is a a powerful search tool for searching and analyzing data within your Elasticsearch cluster.
+  It is configured to search against the following index pattern: \`${pattern}\`.
+  It supports both full-text relevance searches and structured analytical queries, based on a natural language query.
+
+  Examples of queries:
+  - "find documents about serverless architecture"
+  - "search for documents mentioning '[some term]' or '[another term]'"
+  - "list all documents where the category is 'electronics'"
+  - "show me the last 5 documents from that index"
+  - "show me the sales over the last year break down by month"
+`;
 };

@@ -41,5 +41,9 @@ export const convertPersistedDefinition = ({
       const props = await getDynamicProps();
       return props.getHandler();
     },
+    getLlmDescription: async (args) => {
+      const props = await getDynamicProps();
+      return props.getLlmDescription ? props.getLlmDescription(args) : description;
+    },
   };
 };

@@ -28,7 +28,7 @@ export interface InternalToolDefinition<
    * Optional handled to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.
    */
-  llmDescription?: LlmDescriptionHandler<TConfig>;
+  getLlmDescription?: LlmDescriptionHandler<TConfig>;
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {

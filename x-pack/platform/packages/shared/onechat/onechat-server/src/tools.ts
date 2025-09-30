@@ -31,7 +31,7 @@ export interface ExecutableTool<
    * Optional handled to add additional instructions to the LLM.
    * When provided, will replace the description when converting to llm tool.
    */
-  llmDescription?: LlmDescriptionHandler<TConfig>;
+  getLlmDescription?: LlmDescriptionHandler<TConfig>;
 }
 
 export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
@@ -41,7 +41,7 @@ export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
 
 export type LlmDescriptionHandler<TConfig extends object = {}> = (
   params: LLmDescriptionHandlerParams<TConfig>
-) => string;
+) => MaybePromise<string>;
 
 /**
  * Param type for {@link ExecutableToolHandlerFn}
