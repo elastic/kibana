@@ -37,11 +37,27 @@ const setSelectedSettingsTab = jest.fn();
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
-  http: {},
+  http: {
+    get: jest.fn(),
+  },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
   },
+  settings: {
+    client: {
+      get: jest.fn((key) => {
+        if (key === 'genAiSettings:defaultAIConnector') {
+          return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
+        }
+        if (key === 'genAiSettings:defaultAIConnectorDefaultOnly') {
+          return false;
+        }
+        return undefined;
+      }),
+    },
+  },
+  assistantFeatures: { assistantModelEvaluation: true },
 };
 const onClose = jest.fn();
 const onSave = jest.fn().mockResolvedValue(() => {});
