@@ -37,7 +37,6 @@ export interface BuiltinToolTypeDefinition {
   builtin: true;
 }
 
-
 export interface ToolTypeConversionContext {
   request: KibanaRequest;
   spaceId: string;

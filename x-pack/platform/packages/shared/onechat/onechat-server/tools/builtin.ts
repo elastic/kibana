@@ -13,7 +13,7 @@ import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools/types/wor
 import type { ToolHandlerFn } from './handler';
 
 /**
- * Onechat built-in tools, as registered by built-in tool providers.
+ * Built-in tool, as registered as static tool.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
   extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'> {
