@@ -452,7 +452,7 @@ export function alertingServiceProvider(
         record.entityValue = getEntityFieldValue(recordSource);
       }
 
-      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record, true);
 
       const anomalyDescriptionSummary = `${anomalyDescription}${
         mvDescription ? ` (${mvDescription})` : ''

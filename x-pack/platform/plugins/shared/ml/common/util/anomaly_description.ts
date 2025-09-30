@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 
-export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): {
+export function getAnomalyDescription(
+  anomaly: MlAnomaliesTableRecordExtended,
+  escapeUrlLikeStrings: boolean = false
+): {
   anomalyDescription: string;
   mvDescription: string | undefined;
 } {
@@ -25,7 +28,7 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
     anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.foundForLabel', {
       defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
       values: {
-        anomalyEntityName: anomaly.entityName,
+        anomalyEntityName: escapeUrlLikeStrings ? `${anomaly.entityName}-` : anomaly.entityName,
         anomalyEntityValue: anomaly.entityValue,
       },
     });
@@ -38,7 +41,9 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
     anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.detectedInLabel', {
       defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
       values: {
-        sourcePartitionFieldName: source.partition_field_name,
+        sourcePartitionFieldName: escapeUrlLikeStrings
+          ? `${source.partition_field_name}-`
+          : source.partition_field_name,
         sourcePartitionFieldValue: source.partition_field_value,
       },
     });
@@ -53,7 +58,7 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
         'multivariate correlations found in {sourceByFieldName}; ' +
         '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
       values: {
-        sourceByFieldName: source.by_field_name,
+        sourceByFieldName: escapeUrlLikeStrings ? `${source.by_field_name}-` : source.by_field_name,
         sourceByFieldValue: source.by_field_value,
         sourceCorrelatedByFieldValue: source.correlated_by_field_value,
       },
