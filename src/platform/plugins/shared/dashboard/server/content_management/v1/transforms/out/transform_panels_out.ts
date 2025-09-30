@@ -21,27 +21,35 @@ export function transformPanelsOut(
   sections: SavedDashboardSection[] = [],
   references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
-  const panels = JSON.parse(panelsJSON);
-  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
-    (prev, section) => {
-      const sectionId = section.gridData.i;
-      return { ...prev, [sectionId]: { ...section, panels: [] } };
-    },
-    {}
-  );
-  panels.forEach((panel: SavedDashboardPanel) => {
+  const topLevelPanels: DashboardPanel[] = [];
+  const sectionsMap: { [uuid: string]: DashboardSection } = {};
+  sections.forEach(section => {
+    const { gridData: grid, ...restOfSection } = section;
+    const { i: sectionId, ...restOfGrid } = grid;
+    sectionsMap[sectionId] = {
+      ...restOfSection,
+      uid: sectionId,
+      grid: restOfGrid,
+      panels: []
+    };
+  });
+  
+  JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
     const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(
+      sectionsMap[sectionId].panels.push(
         transformPanelProperties(panel, panelReferences)
       );
     } else {
-      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
+      topLevelPanels.push(transformPanelProperties(panel, panelReferences));
     }
   });
-  return Object.values(sectionsMap);
+  return [
+    ...topLevelPanels,
+    ...Object.values(sectionsMap)
+  ];
 }
 
 function transformPanelProperties(
@@ -97,6 +105,6 @@ function transformPanelProperties(
     config: transformedPanelConfig ? transformedPanelConfig : config,
     uid: panelIndex,
     type: panelType,
-    version,
+    ...(version && { version }),
   };
 }
