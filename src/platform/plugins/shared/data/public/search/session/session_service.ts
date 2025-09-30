@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
+import type { Logger } from '@kbn/logging';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
@@ -196,6 +197,7 @@ export class SessionService {
   private toastService?: ToastService;
 
   private sessionSnapshots: LRUCache<string, SessionSnapshot>;
+  private logger: Logger;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -216,6 +218,7 @@ export class SessionService {
     this.sessionMeta$ = sessionMeta$;
 
     this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
+    this.logger = initializerContext.logger.get();
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -368,7 +371,12 @@ export class SessionService {
         const state = this.isCurrentSession(sessionId)
           ? this.state
           : this.sessionSnapshots.get(sessionId!);
-        if (!state) return;
+        if (!state) {
+          this.logger.error(
+            `SearchSessionService trackSearch complete: sessionId not found: "${sessionId}"`
+          );
+          return;
+        }
 
         state.transitions.completeSearch(searchDescriptor);
 
@@ -388,7 +396,12 @@ export class SessionService {
         const state = this.isCurrentSession(sessionId)
           ? this.state
           : this.sessionSnapshots.get(sessionId!);
-        if (!state) return;
+        if (!state) {
+          this.logger.error(
+            `SearchSessionService trackSearch error: sessionId not found: "${sessionId}"`
+          );
+          return;
+        }
 
         state.transitions.errorSearch(searchDescriptor);
       },
