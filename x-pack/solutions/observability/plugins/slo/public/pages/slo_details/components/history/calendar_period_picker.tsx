@@ -7,11 +7,11 @@
 
 import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { toDuration } from '../../../../utils/slo/duration';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 
 interface Props {
   slo: SLOWithSummaryResponse;
