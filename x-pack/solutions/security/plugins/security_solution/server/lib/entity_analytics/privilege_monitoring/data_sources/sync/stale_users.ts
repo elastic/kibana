@@ -36,5 +36,6 @@ export const findStaleUsersForIndexFactory =
       username: hit._source?.user?.name ?? 'unknown',
       existingUserId: hit._id,
       sourceId,
+      isPrivileged: false,
     }));
   };
