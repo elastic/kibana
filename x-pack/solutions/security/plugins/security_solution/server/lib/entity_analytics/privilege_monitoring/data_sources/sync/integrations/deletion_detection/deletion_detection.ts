@@ -65,13 +65,13 @@ export const createDeletionDetectionService = (
         completedEventTimeStamp,
       });
       // get all users in the privileged index for this source that are not in integrations docs
-      const staleUsers = await findStaleUsers(
+      /* const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
         'entity_analytics_integration' // TODO: confirm index/type constant
-      );
+      );*/
       // soft delete them
-      const ops = bulkUtilsService.bulkSoftDeleteOperations(
+      /* const ops = bulkUtilsService.bulkSoftDeleteOperations(
         staleUsers,
         dataClient.index,
         'entity_analytics_integration'
@@ -89,7 +89,7 @@ export const createDeletionDetectionService = (
           `${failures.length} errors upserting users with bulk operations.
           The first error is: ${JSON.stringify(failures[0])}`
         );
-      }
+      }*/
     }
   };
   const timeStampsAreValid = async (

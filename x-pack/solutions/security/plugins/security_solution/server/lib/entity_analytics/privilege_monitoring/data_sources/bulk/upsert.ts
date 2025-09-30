@@ -36,7 +36,10 @@ if (params.new_privileged_status == false) {
     ctx._source.labels.sources.add(params.labels.sources[0]);
   }
 }
+ctx._source['@timestamp'] = params.now;
+ctx._source.event.ingested = params.now;  
 `;
+// TODO: will all be replaced with https://github.com/elastic/kibana/pull/236511
 
 export const INDEX_SCRIPT = `
               if (ctx._source.labels == null) {
@@ -146,7 +149,8 @@ export const bulkUpsertOperationsFactory =
 
 type ParamsBuilder<T extends PrivMonBulkUser> = (
   user: T,
-  sourceLabel?: Object
+  sourceLabel?: Object,
+  timestamp?: string
 ) => Record<string, unknown>;
 
 export const bulkUpsertOperationsFactoryShared =
@@ -163,15 +167,21 @@ export const bulkUpsertOperationsFactoryShared =
   ): object[] => {
     const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
     const ops: object[] = [];
+    const now = new Date().toISOString();
     dataClient.log('debug', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
         ops.push(
           { update: { _index: dataClient.index, _id: user.existingUserId } },
-          { script: { source: updateScriptSource, params: buildUpdateParams(user, sourceLabel) } } // user should have latestDoc and labels
+          {
+            script: {
+              source: updateScriptSource,
+              params: buildUpdateParams(user, sourceLabel, now),
+            },
+          } // user should have latestDoc and labels
         );
       } else if (shouldCreate(user)) {
-        ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
+        ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel, now));
       }
     }
     return ops;
@@ -187,6 +197,7 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
         labels: user.labels,
       }),
       buildCreateDoc: (user) => ({
+        '@timestamp': new Date().toISOString(),
         user: { name: user.username, is_privileged: user.isPrivileged },
         labels: user.labels,
       }),
