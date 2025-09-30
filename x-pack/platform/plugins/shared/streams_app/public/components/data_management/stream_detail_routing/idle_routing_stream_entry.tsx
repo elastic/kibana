@@ -24,7 +24,7 @@ import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { ConditionMessage } from '../condition_message';
+import { ConditionPanel } from '../shared';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
 function VerticalRule() {
@@ -32,6 +32,7 @@ function VerticalRule() {
   const CentralizedContainer = styled.div`
     display: flex;
     align-items: center;
+    padding: 0 ${euiTheme.size.xs};
   `;
 
   const Border = styled.div`
@@ -52,12 +53,16 @@ export function IdleRoutingStreamEntry({
   isEditingEnabled,
   onEditIconClick,
   routingRule,
+  totalRoutingRules,
+  isEditMode,
 }: {
   availableStreams: string[];
   draggableProvided: DraggableProvided;
   isEditingEnabled: boolean;
   onEditIconClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
+  totalRoutingRules: number;
+  isEditMode: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
@@ -70,18 +75,19 @@ export function IdleRoutingStreamEntry({
     <EuiPanel
       hasShadow={false}
       hasBorder
-      paddingSize="s"
       data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
         .streamsDragHandle {
           transition: margin-left ${euiTheme.animation.normal};
           padding: ${euiTheme.size.s} 0;
-          margin-left: -${euiTheme.size.l};
+          margin-left: -${euiTheme.size.xl};
         }
         &:hover .streamsDragHandle {
           margin-left: 0;
         }
+        padding: ${euiTheme.size.m} 16px;
+        border-radius: ${euiTheme.size.s};
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -91,28 +97,32 @@ export function IdleRoutingStreamEntry({
           alignItems="center"
           responsive={false}
         >
-          <EuiFlexItem grow={false}>
-            <EuiPanel
-              className="streamsDragHandle"
-              color="transparent"
-              paddingSize="s"
-              data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
-              {...draggableProvided.dragHandleProps}
-              aria-label={i18n.translate(
-                'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
-                { defaultMessage: 'Drag Handle' }
-              )}
-            >
-              <EuiIcon type="grabOmnidirectional" />
-            </EuiPanel>
-          </EuiFlexItem>
+          {totalRoutingRules > 1 && !isEditMode && (
+            <EuiFlexItem grow={false}>
+              <EuiPanel
+                className="streamsDragHandle"
+                color="transparent"
+                paddingSize="s"
+                data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
+                {...draggableProvided.dragHandleProps}
+                aria-label={i18n.translate(
+                  'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
+                  { defaultMessage: 'Drag Handle' }
+                )}
+              >
+                <EuiIcon type="grabOmnidirectional" />
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
           <EuiLink
             href={router.link('/{key}/management/{tab}', {
               path: { key: routingRule.destination, tab: 'partitioning' },
             })}
             data-test-subj="streamsAppRoutingStreamEntryButton"
           >
-            <EuiText size="s">{routingRule.destination}</EuiText>
+            <EuiText size="m">
+              <h6>{routingRule.destination}</h6>
+            </EuiText>
           </EuiLink>
 
           <EuiFlexGroup
@@ -158,14 +168,13 @@ export function IdleRoutingStreamEntry({
           </EuiFlexGroup>
         </EuiFlexGroup>
         <EuiFlexItem
+          grow={false}
           className={css`
             overflow: hidden;
-            padding-left: ${euiTheme.size.s};
+            padding: ${euiTheme.size.xs} 0px;
           `}
         >
-          <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.where} />
-          </EuiText>
+          <ConditionPanel condition={routingRule.where} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

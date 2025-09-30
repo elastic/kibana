@@ -74,10 +74,7 @@ export function clusterSampleDocs({
 
   for (const hit of hits) {
     // flatten object into key-value pairs so it can be converted into integers
-    const src = {
-      ...hit.fields,
-      ...getFlattenedObject(hit._source ?? {}),
-    };
+    const src = getFlattenedObject(hit._source ?? {});
 
     const fields = Object.keys(src);
 
