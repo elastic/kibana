@@ -204,9 +204,11 @@ describe('transformDashboardOut', () => {
         value: 1000,
       },
       tags: ['tag1', 'tag2'],
-      timeFrom: 'now-15m',
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       timeRestore: true,
-      timeTo: 'now',
       title: 'title',
     });
   });

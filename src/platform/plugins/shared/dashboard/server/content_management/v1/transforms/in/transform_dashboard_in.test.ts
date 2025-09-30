@@ -61,8 +61,10 @@ describe('transformDashboardIn', () => {
       timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
-      timeFrom: 'now-15m',
-      timeTo: 'now',
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
     };
 
     const output = transformDashboardIn({ dashboardState });

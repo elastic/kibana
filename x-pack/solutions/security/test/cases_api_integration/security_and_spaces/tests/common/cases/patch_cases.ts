@@ -2090,7 +2090,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           const { id } = await createRule(supertest, log, rule);
@@ -2138,7 +2138,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseStatusUpdated[0].id,
                   version: caseStatusUpdated[0].version,
-                  settings: { syncAlerts: true },
+                  settings: { syncAlerts: true, extractObservables: true },
                 },
               ],
             },
@@ -2196,7 +2196,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseUpdated.id,
                   version: caseUpdated.version,
-                  settings: { syncAlerts: false },
+                  settings: { syncAlerts: false, extractObservables: false },
                 },
               ],
             },
