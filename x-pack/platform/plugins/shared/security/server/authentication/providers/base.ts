@@ -17,6 +17,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
 import type { Tokens } from '../tokens';
@@ -35,6 +36,7 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  uiam?: UiamServicePublic;
   urls: {
     loggedOut: (request: KibanaRequest) => string;
   };
