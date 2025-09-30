@@ -126,7 +126,14 @@ export function useGenAIConnectorsWithoutContext(
       .finally(() => {
         setLoading(false);
       });
-  }, [assistant, controller.signal, http, setLastUsedConnector, isConnectorSelectionRestricted, defaultConnector]);
+  }, [
+    assistant,
+    controller.signal,
+    http,
+    setLastUsedConnector,
+    isConnectorSelectionRestricted,
+    defaultConnector,
+  ]);
 
   useEffect(() => {
     fetchConnectors();
