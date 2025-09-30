@@ -79,10 +79,6 @@ export const INTEGRATION_KNOWLEDGE_TOOL: AssistantTool = {
             _source: ['package_name', 'filename', 'content', 'version'],
           });
 
-          if (response.hits.hits.length === 0) {
-            return 'No integration knowledge found for the given query. The integration knowledge base may not be installed or may not contain relevant information.';
-          }
-
           const citedDocs = response.hits.hits.map((hit) => {
             const source = hit._source as {
               package_name: string;

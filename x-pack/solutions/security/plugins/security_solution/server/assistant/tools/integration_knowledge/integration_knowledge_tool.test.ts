@@ -225,9 +225,7 @@ describe('IntegrationKnowledgeTool', () => {
 
       const result = await tool.func({ question: 'nonexistent integration' });
 
-      expect(result).toBe(
-        'No integration knowledge found for the given query. The integration knowledge base may not be installed or may not contain relevant information.'
-      );
+      expect(result).toBe('[]');
     });
 
     it('handles search errors gracefully', async () => {
