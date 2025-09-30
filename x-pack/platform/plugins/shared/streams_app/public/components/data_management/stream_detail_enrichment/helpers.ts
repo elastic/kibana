@@ -15,6 +15,9 @@ type ProcessorEntry = Record<string, ProcessorDef>;
 type DataAutocompleteRules = { processors?: Array<{ __one_of?: ProcessorEntry[] }> };
 type IngestPutPipelineEndpoint = { data_autocomplete_rules?: DataAutocompleteRules };
 
+export type ProcessorSuggestion = { name: string; template?: JsonValue };
+
+let processorsCache: ProcessorSuggestion[] | null = null;
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -64,9 +67,7 @@ const formatXJsonString = (input: string) => {
 };
 
 
-export type ProcessorSuggestion = { name: string; template?: JsonValue };
 
-  let processorsCache: ProcessorSuggestion[] | null = null;
 
 export const loadProcessorSuggestions = async (http: HttpStart): Promise<ProcessorSuggestion[]> => {
 
