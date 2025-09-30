@@ -38,6 +38,7 @@ describe('ChatHeader', () => {
     onToggleFlyoutPositionMode: jest.fn(),
     navigateToConversation: jest.fn(),
     onCopyConversation: jest.fn(),
+    navigateToConnectorsManagementApp: jest.fn(),
   };
 
   beforeEach(() => {
@@ -74,6 +75,7 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -96,6 +98,7 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          isConnectorSelectionRestricted: false,
         }}
       />
     );

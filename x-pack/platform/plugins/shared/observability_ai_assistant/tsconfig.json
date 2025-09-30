@@ -51,10 +51,10 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/core-http-browser",
     "@kbn/core-security-server",
     "@kbn/core-security-server",
     "@kbn/i18n-react",
+    "@kbn/core-http-browser",
   ],
   "exclude": ["target/**/*"]
 }
