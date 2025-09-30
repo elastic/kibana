@@ -25,8 +25,10 @@ function createFetchFunction(
     esClient: any;
   }): Promise<StreamsStatsTelemetry> {
     try {
+      const streamsClient = await getStreamsClient();
+
       const [allStreamsData, significantEventsMetrics, ruleExecutionMetrics] = await Promise.all([
-        fetchAllStreamsData(esClient),
+        streamsClient.listStreams(),
         fetchSignificantEventsMetrics(esClient),
         fetchRuleExecutionMetrics(esClient),
       ]);
@@ -54,20 +56,7 @@ function createFetchFunction(
     }
   };
 
-  async function fetchAllStreamsData(esClient: any) {
-    const allStreams = await esClient.search({
-      index: '.kibana_streams',
-      size: 10000,
-      sort: [{ name: 'asc' }],
-      track_total_hits: false,
-      _source: true,
-      query: { match_all: {} },
-    });
-
-    return allStreams.hits?.hits ?? [];
-  }
-
-  function processStreamsData(hits: any[]) {
+  function processStreamsData(streamDefinitions: Streams.all.Definition[]) {
     let changedCount = 0;
     let withProcessingCount = 0;
     let withFieldsCount = 0;
@@ -76,11 +65,12 @@ function createFetchFunction(
 
     const streamsCache = new Map();
 
-    for (const hit of hits) {
-      const definition = hit._source ?? {};
-
-      if (Streams.ClassicStream.Definition.is(definition)) {
-        // Presence of a classic stream in `.kibana_streams` implies it has been stored/changed
+    for (const definition of streamDefinitions) {
+      if (Streams.WiredStream.Definition.is(definition)) {
+        wiredCount++;
+        streamsCache.set(definition.name, definition);
+      } else if (Streams.ClassicStream.Definition.is(definition)) {
+        // Presence of a classic stream in the streams client implies it has been stored/changed
         changedCount++;
 
         if (hasProcessingSteps(definition)) {
@@ -94,14 +84,9 @@ function createFetchFunction(
         if (hasChangedRetention(definition.ingest.lifecycle)) {
           withChangedRetentionCount++;
         }
-      }
 
-      if (Streams.WiredStream.Definition.is(definition)) {
-        wiredCount++;
+        streamsCache.set(definition.name, definition);
       }
-
-      // Cache the stream definition for later use
-      streamsCache.set(definition.name, definition);
     }
 
     return {
@@ -112,7 +97,6 @@ function createFetchFunction(
         with_changed_retention_count: withChangedRetentionCount,
       },
       wiredStreamsCount: wiredCount,
-      allStreamsData: hits, // Return for potential reuse in categorizeStreamsByType
       streamsCache, // Return the cache
     };
   }

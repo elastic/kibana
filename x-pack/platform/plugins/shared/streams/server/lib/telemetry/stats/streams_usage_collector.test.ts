@@ -12,7 +12,11 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
 const mockLogger = loggingSystemMock.createLogger();
-const mockGetStreamsClient = async () => ({} as any);
+const mockGetStreamsClient = async () => {
+  return {
+    listStreams: jest.fn().mockResolvedValue([]),
+  } as any;
+};
 
 describe('Streams Usage Collector', () => {
   let usageCollectionMock: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
@@ -84,20 +88,61 @@ describe('Streams Usage Collector', () => {
       );
     });
     it('returns computed metrics when data is available', async () => {
-      // Mock search calls - for streams, rules, significant events, and event log
+      // Create a mock StreamsClient with test data
+      const mockStreamsClientWithData = async () => {
+        return {
+          listStreams: jest.fn().mockResolvedValue([
+            // Mock classic stream with processing and changed retention
+            {
+              name: 'logs.test',
+              description: 'Test classic stream',
+              ingest: {
+                lifecycle: { data_retention: '7d' }, // Changed retention (not inherit)
+                processing: {
+                  steps: [{ dissect: { field: 'message', pattern: '%{field1} %{field2}' } }],
+                },
+                settings: {},
+                classic: {
+                  field_overrides: {
+                    custom_field: { type: 'keyword' }, // Field overrides
+                  },
+                },
+              },
+            },
+            // Mock wired stream
+            {
+              name: 'logs.wired',
+              description: 'Test wired stream',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                wired: {},
+              },
+            },
+            // Mock stream that has both classic and wired properties (should be counted as wired)
+            {
+              name: 'logs.android',
+              description: 'Test stream with both properties',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                classic: {}, // Has classic property
+                wired: {}, // But also has wired property - should be counted as wired
+              },
+            },
+          ]),
+        } as any;
+      };
+
+      // Mock search calls - for rules, significant events, and event log (no longer need .kibana_streams)
       esClient.search.mockImplementation(async (params: any) => {
         const baseResponse = {
           took: 1,
           timed_out: false,
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         };
-
-        if (params.index === '.kibana_streams') {
-          return {
-            ...baseResponse,
-            hits: { hits: [], total: { value: 0, relation: 'eq' } },
-          } as any;
-        }
         if (params.index === '.kibana*') {
           // Mock rules count
           return {
@@ -137,19 +182,24 @@ describe('Streams Usage Collector', () => {
         } as any;
       });
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
+      registerStreamsUsageCollector(
+        usageCollectionMock,
+        mockLogger,
+        mockStreamsClientWithData,
+        false
+      );
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
       const result = await collector.fetch({ esClient });
 
       expect(result).toEqual({
         classic_streams: {
-          changed_count: 0, // No streams in .kibana_streams index in this test
-          with_processing_count: 0,
-          with_fields_count: 0,
-          with_changed_retention_count: 0,
+          changed_count: 1, // 1 classic stream from StreamsClient
+          with_processing_count: 1, // 1 stream with dissect processing
+          with_fields_count: 1, // 1 stream with field overrides
+          with_changed_retention_count: 1, // 1 stream with changed retention
         },
         wired_streams: {
-          count: 0,
+          count: 2, // 2 wired streams from StreamsClient (logs.wired + logs.android)
         },
         significant_events: {
           rules_count: 5,
