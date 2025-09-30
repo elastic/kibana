@@ -18,10 +18,27 @@ export {
   type ReasoningStepData,
   type ReasoningStep,
   type ToolCallProgress,
+  type BaseContentReference,
+  type ContentReference,
+  type ContentReferences,
+  type ContentReferenceBlock,
+  type KnowledgeBaseEntryContentReference,
+  type EsqlContentReference,
+  type HrefContentReference,
+  type ProductDocumentationContentReference,
+  type ContentReferencesStore,
+  newContentReferencesStore,
+  pruneContentReferences,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
 } from './conversation';
+export {
+  knowledgeBaseReference,
+  hrefReference,
+  esqlQueryReference,
+  productDocumentationReference,
+} from './content_reference_utils';
 export {
   ChatEventType,
   type ChatEventBase,

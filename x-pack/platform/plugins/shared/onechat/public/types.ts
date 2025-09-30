@@ -14,6 +14,7 @@ import type {
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+import type { ContentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -43,4 +44,8 @@ export interface OnechatPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Content reference registry for registering custom content reference components.
+   */
+  contentReferenceRegistry: ContentReferenceRegistry;
 }

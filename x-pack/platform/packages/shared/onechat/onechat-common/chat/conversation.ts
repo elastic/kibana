@@ -118,6 +118,193 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
 /**
+ * The basis of a content reference
+ */
+export interface BaseContentReference {
+  /**
+   * Id of the content reference
+   */
+  id: string;
+  /**
+   * Type of the content reference
+   */
+  type: string;
+}
+
+/**
+ * References a knowledge base entry
+ */
+export interface KnowledgeBaseEntryContentReference extends BaseContentReference {
+  type: 'KnowledgeBaseEntry';
+  /**
+   * Id of the Knowledge Base Entry
+   */
+  knowledgeBaseEntryId: string;
+  /**
+   * Name of the knowledge base entry
+   */
+  knowledgeBaseEntryName: string;
+}
+
+/**
+ * References an ESQL query
+ */
+export interface EsqlContentReference extends BaseContentReference {
+  type: 'EsqlQuery';
+  /**
+   * An ESQL query
+   */
+  query: string;
+  /**
+   * Label of the query
+   */
+  label: string;
+  /**
+   * Time range to select in the time picker.
+   */
+  timerange?: {
+    from: string;
+    to: string;
+  };
+}
+
+/**
+ * References an external URL
+ */
+export interface HrefContentReference extends BaseContentReference {
+  type: 'Href';
+  /**
+   * Label of the query
+   */
+  label?: string;
+  /**
+   * URL to the external resource
+   */
+  href: string;
+}
+
+/**
+ * References the product documentation
+ */
+export interface ProductDocumentationContentReference extends BaseContentReference {
+  type: 'ProductDocumentation';
+  /**
+   * Title of the documentation
+   */
+  title: string;
+  /**
+   * URL to the documentation
+   */
+  url: string;
+}
+
+/**
+ * A content reference
+ */
+export type ContentReference =
+  | KnowledgeBaseEntryContentReference
+  | ProductDocumentationContentReference
+  | EsqlContentReference
+  | HrefContentReference;
+
+/**
+ * A union of all content reference types
+ */
+export type ContentReferences = Record<string, ContentReference>;
+
+/**
+ * A content reference block in the format {reference(id)}
+ */
+export type ContentReferenceBlock = `{reference(${string})}`;
+
+/**
+ * Content reference store interface
+ */
+export interface ContentReferencesStore {
+  /**
+   * Adds a content reference into the ContentReferencesStore.
+   * @param generator A function that returns a new ContentReference.
+   * @param generator.params Generator parameters that may be used to generate a new ContentReference.
+   * @param generator.params.id An ID that is guaranteed to not exist in the store. Intended to be used as the Id of the ContentReference but not required.
+   * @returns the new ContentReference
+   */
+  add: <T extends ContentReference>(
+    generator: (params: { id: string }) => T
+  ) => T | undefined;
+
+  /**
+   * Used to read the content reference store.
+   * @returns a record that contains all of the ContentReference that have been added .
+   */
+  getStore: () => ContentReferences;
+
+  /**
+   * Options used to configure the ContentReferencesStore.
+   */
+  options?: {
+    disabled?: boolean;
+  };
+}
+
+/**
+ * Creates a new content references store
+ */
+export const newContentReferencesStore = (options?: ContentReferencesStore['options']): ContentReferencesStore => {
+  const store: Record<string, ContentReference> = {};
+  let currentId = 1;
+
+  const add: ContentReferencesStore['add'] = (creator) => {
+    if (options?.disabled) {
+      return undefined;
+    }
+    const id = `ref_${currentId++}`;
+    const contentReference = creator({ id });
+    store[id] = contentReference;
+    return contentReference;
+  };
+
+  const getStore: ContentReferencesStore['getStore'] = () => {
+    return store;
+  };
+
+  return {
+    add,
+    getStore,
+    options,
+  };
+};
+
+/**
+ * Prunes content references from content and returns the pruned store
+ */
+export const pruneContentReferences = (
+  content: string,
+  contentReferencesStore: ContentReferencesStore
+): { prunedContentReferencesStore: ContentReferences } => {
+  const store = contentReferencesStore.getStore();
+  const prunedStore: Record<string, ContentReference> = {};
+  
+  // Extract all content reference IDs from the content
+  const referenceIds = new Set<string>();
+  const regex = /\{reference\(([^)]+)\)\}/g;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    referenceIds.add(match[1]);
+  }
+  
+  // Only include references that are actually used in the content
+  for (const [id, reference] of Object.entries(store)) {
+    if (referenceIds.has(id)) {
+      prunedStore[id] = reference;
+    }
+  }
+  
+  return {
+    prunedContentReferencesStore: prunedStore,
+  };
+};
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
@@ -132,6 +319,10 @@ export interface ConversationRound {
   response: AssistantResponse;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
+  /** Additional metadata for the round, including content references */
+  metadata?: {
+    contentReferences?: ContentReferences;
+  };
 }
 
 export interface Conversation {

@@ -24,7 +24,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   manager: RunnerManager;
 }): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger, contentReferencesStore } =
     manager.deps;
   return {
     request,
@@ -38,6 +38,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    contentReferencesStore,
   };
 };
 
