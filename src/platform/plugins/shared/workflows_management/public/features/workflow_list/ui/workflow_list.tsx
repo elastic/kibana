@@ -35,7 +35,6 @@ import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../..
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
-import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
@@ -254,27 +253,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         render: (value, item) => {
           if (!item.history || item.history.length === 0) return;
           return <StatusBadge status={item.history[0].status} />;
-        },
-      },
-      {
-        name: 'Next execution',
-        field: 'triggers',
-        render: (value, item: WorkflowListItemDto) =>
-          item.definition?.triggers ? (
-            <NextExecutionTime triggers={item.definition.triggers} />
-          ) : (
-            <EuiText size="s" color="subdued">
-              {i18n.translate('workflows.workflowList.nextExecutionTime.none', {
-                defaultMessage: 'No scheduled triggers',
-              })}
-            </EuiText>
-          ),
-      },
-      {
-        name: 'Valid',
-        field: 'valid',
-        render: (value: boolean) => {
-          return <WorkflowStatus valid={value} />;
         },
       },
       {
