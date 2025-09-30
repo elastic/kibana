@@ -10,7 +10,7 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
 export default function ({ getService }: FtrProviderContext) {

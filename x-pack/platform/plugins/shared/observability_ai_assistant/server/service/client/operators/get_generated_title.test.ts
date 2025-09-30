@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError } from 'rxjs';
-import { ChatCompleteResponse } from '@kbn/inference-common';
-import { Message, MessageRole } from '../../../../common';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 import {
   TITLE_CONVERSATION_FUNCTION_NAME,
   getTitleSystemMessage,
   getGeneratedTitle,
 } from './get_generated_title';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [
@@ -87,6 +88,7 @@ describe('getGeneratedTitle', () => {
 
     expect(title).toEqual('My title');
   });
+
   it('calls chat with the user message', async () => {
     const { chatSpy, title$ } = callGenerateTitle(
       ['observability'],
@@ -212,5 +214,22 @@ describe('getGeneratedTitle', () => {
         systemMessage: getTitleSystemMessage(scopes),
       })
     );
+  });
+
+  it('falls back to response.content when toolCalls is empty', async () => {
+    const { title$ } = callGenerateTitle(
+      ['observability'],
+      [
+        createChatCompletionResponse({
+          content: '"My fallback title"',
+        }),
+      ]
+    );
+
+    const title = await lastValueFrom(
+      title$.pipe(filter((event): event is string => typeof event === 'string'))
+    );
+
+    expect(title).toEqual('My fallback title');
   });
 });

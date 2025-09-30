@@ -23,7 +23,7 @@ import { assertTelemetryPayload } from '@kbn/telemetry-tools';
 import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import type { UsageStatsPayloadTestFriendly } from '../../../../api_integration/services/usage_api';
 import type { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');

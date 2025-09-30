@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAppServices } from '../../../../application/types';
-import { SeriesConfig, SeriesUrl } from '../types';
+import type { ObservabilityAppServices } from '../../../../application/types';
+import type { SeriesConfig, SeriesUrl } from '../types';
 import { useAppDataViewContext } from './use_app_data_view';
 import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';

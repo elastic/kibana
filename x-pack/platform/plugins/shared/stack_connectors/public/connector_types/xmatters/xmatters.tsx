@@ -12,7 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../types';
+import type { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
   XmattersConfig,

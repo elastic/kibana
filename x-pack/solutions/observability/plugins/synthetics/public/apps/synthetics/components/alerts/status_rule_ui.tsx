@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { StatusRuleViz } from './status_rule_viz';
 import { FieldFilters } from './common/field_filters';
 import { AlertSearchBar } from './query_bar';

@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { ContentPackManifest } from '@kbn/content-packs-schema';
+import type { ContentPackManifest } from '@kbn/content-packs-schema';
 import React from 'react';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function ContentPackMetadata({
   manifest,
@@ -22,37 +30,55 @@ export function ContentPackMetadata({
     <>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={3}>
-          <EuiFieldText
-            readOnly={readonly}
-            prepend={'Name'}
-            fullWidth
-            value={manifest.name}
-            isInvalid={manifest.name.length === 0}
-            onChange={(e) => onChange?.({ ...manifest, name: e.target.value })}
-          />
+          <EuiFormRow label="Name" fullWidth>
+            <EuiFieldText
+              name="name"
+              readOnly={readonly}
+              fullWidth
+              value={manifest.name}
+              isInvalid={manifest.name.length === 0}
+              onChange={(e) => onChange?.({ ...manifest, name: e.target.value })}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem grow={1}>
-          <EuiFieldText
-            readOnly={readonly}
-            prepend={'Version'}
-            fullWidth
-            value={manifest.version}
-            onChange={(e) => onChange?.({ ...manifest, version: e.target.value })}
-          />
+          <EuiFormRow label="Version" fullWidth>
+            <EuiFieldText
+              readOnly={readonly}
+              name="version"
+              fullWidth
+              value={manifest.version}
+              onChange={(e) => onChange?.({ ...manifest, version: e.target.value })}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <EuiFlexItem grow={true}>
-        <EuiFieldText
-          readOnly={readonly}
-          prepend={'Description'}
+        <EuiFormRow
+          label="Description"
+          labelAppend={
+            !readonly && (
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.streams.contentPack.description.optionalLabel', {
+                  defaultMessage: 'Optional',
+                })}
+              </EuiText>
+            )
+          }
           fullWidth
-          value={manifest.description}
-          onChange={(e) => onChange?.({ ...manifest, description: e.target.value })}
-        />
+        >
+          <EuiFieldText
+            name="description"
+            readOnly={readonly}
+            fullWidth
+            value={manifest.description}
+            onChange={(e) => onChange?.({ ...manifest, description: e.target.value })}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     </>
   );

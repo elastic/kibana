@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/server/services';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
+import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -29,7 +30,7 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import {
   isResourceNotFoundException,

@@ -6,28 +6,28 @@
  */
 
 import {
+  type CasesPublicSetup,
   CasesDeepLinkId,
-  CasesPublicStart,
+  type CasesPublicStart,
   getCasesDeepLinks,
-  CasesPublicSetup,
 } from '@kbn/cases-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import {
+import type {
+  IUiSettingsClient,
   App,
   AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
   ToastsStart,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -50,7 +50,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
+import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -75,10 +75,10 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -91,10 +91,8 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import {
-  ObservabilityRuleTypeRegistry,
-  createObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 import {
   CaseDetailsLocatorDefinition,
@@ -123,6 +121,7 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
+  managedOtlpServiceUrl: string;
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
@@ -179,7 +178,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
-  streams?: StreamsPluginStart;
+  streams: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
@@ -199,6 +198,7 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
   private telemetry: TelemetryService;
+  private isServerless: boolean = false;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -226,12 +226,14 @@ export class Plugin
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
+    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    const startServicesPromise = coreSetup.getStartServices();
     if (pluginsSetup.cases) {
       this.deepLinks.push(
         getCasesDeepLinks({
@@ -456,6 +458,40 @@ export class Plugin
                     ...sloLink,
                     ...casesLink,
                     ...aiAssistantLink,
+                  ],
+                },
+              ];
+            })
+          )
+        )
+      )
+    );
+
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(startServicesPromise).pipe(
+        switchMap(([_, pluginsStart]) =>
+          pluginsStart.streams.navigationStatus$.pipe(
+            map(({ status }) => {
+              if (status !== 'enabled') {
+                return [];
+              }
+
+              return [
+                {
+                  label: '',
+                  sortKey: 101,
+                  entries: [
+                    {
+                      label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
+                        defaultMessage: 'Streams',
+                      }),
+                      app: 'streams',
+                      path: '/',
+                      isTechnicalPreview: this.isServerless,
+                      matchPath(currentPath: string) {
+                        return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                      },
+                    },
                   ],
                 },
               ];

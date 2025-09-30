@@ -5,32 +5,31 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  ALL_VALUE,
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type {
   CreateSLOParams,
   HistogramIndicator,
-  sloDefinitionSchema,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_MODEL_VERSION, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
+import type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
-  Duration,
-  DurationUnit,
   Indicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
   SLODefinition,
   StoredSLODefinition,
 } from '../../domain/models';
+import { Duration, DurationUnit } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
+import { toStoredSLO } from '../slo_repository';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -190,9 +189,11 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
 });
 
 export const aStoredSLO = (slo: SLODefinition): SavedObject<StoredSLODefinition> => {
+  const { storedSLO } = toStoredSLO(slo);
+
   return {
     id: slo.id,
-    attributes: sloDefinitionSchema.encode(slo),
+    attributes: storedSLO,
     type: SO_SLO_TYPE,
     references: [],
   };

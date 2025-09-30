@@ -15,10 +15,12 @@ import type {
 } from '../../types';
 
 /* base types */
-export enum DataSchemaFormat {
+export enum DataSchemaFormatEnum {
   ECS = 'ecs',
   SEMCONV = 'semconv',
 }
+
+export type DataSchemaFormat = `${DataSchemaFormatEnum}`;
 
 export type SchemaBasedFormula = Omit<LensBaseLayer, 'value'> & {
   value: Record<DataSchemaFormat, LensBaseLayer['value']>;

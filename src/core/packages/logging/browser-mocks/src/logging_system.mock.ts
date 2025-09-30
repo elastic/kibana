@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { IBrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createLoggingSystemMock = () => {
   const mockLog: MockedLogger = loggerMock.create();
@@ -18,15 +20,14 @@ const createLoggingSystemMock = () => {
     context,
   }));
 
-  const mocked: jest.Mocked<IBrowserLoggingSystem> = {
-    get: jest.fn(),
+  const mocked: jest.Mocked<IBrowserLoggingSystem> = lazyObject({
+    get: jest.fn().mockImplementation((...context) => ({
+      ...mockLog,
+      context,
+    })),
     asLoggerFactory: jest.fn(),
-  };
+  });
 
-  mocked.get.mockImplementation((...context) => ({
-    ...mockLog,
-    context,
-  }));
   mocked.asLoggerFactory.mockImplementation(() => mocked);
 
   return mocked;

@@ -10,7 +10,7 @@ import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { PingsResponseType } from '@kbn/uptime-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 function decodePingsResponseData(response: any) {
   const decoded = PingsResponseType.decode(response);

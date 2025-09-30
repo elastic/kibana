@@ -488,6 +488,38 @@
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceSetup}"
+            ],
+            "signature": [
+              "CoreDiServiceSetup"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.dataStreams",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [
+              "{@link DataStreamSetup}"
+            ],
+            "signature": [
+              "DataStreamsSetup"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -746,6 +778,38 @@
             ],
             "signature": [
               "UserProfileService"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.injection",
+            "type": "Object",
+            "tags": [],
+            "label": "injection",
+            "description": [
+              "{@link CoreDiServiceStart}"
+            ],
+            "signature": [
+              "CoreDiServiceStart"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.dataStreams",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [
+              "{@link DataStreamsStart}"
+            ],
+            "signature": [
+              "DataStreamsStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
             "deprecated": false,

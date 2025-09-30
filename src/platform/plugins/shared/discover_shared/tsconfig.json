@@ -3,16 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../../../typings/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/discover-utils",
     "@kbn/core",
     "@kbn/unified-data-table",
+    "@kbn/es-query",
+    "@kbn/apm-types",
+    "@kbn/apm-types-shared"
   ]
 }

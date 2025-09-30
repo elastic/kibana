@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { TextBasedDimensionEditor, TextBasedDimensionEditorProps } from './dimension_editor';
+import type { TextBasedDimensionEditorProps } from './dimension_editor';
+import { TextBasedDimensionEditor } from './dimension_editor';
 
 // Mock fetchFieldsFromESQL
 jest.mock('@kbn/esql-editor', () => ({

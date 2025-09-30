@@ -6,8 +6,8 @@
  */
 
 import path from 'path';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

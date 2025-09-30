@@ -6,11 +6,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
@@ -39,8 +39,8 @@ import {
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
-import { MapStoreState } from '../reducers/store';
-import {
+import type { MapStoreState } from '../reducers/store';
+import type {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
@@ -56,12 +56,12 @@ import {
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { ISource } from '../classes/sources/source';
-import { IVectorSource } from '../classes/sources/vector_source';
-import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
-import { EMSTMSSource } from '../classes/sources/ems_tms_source';
-import { IRasterSource } from '../classes/sources/raster_source';
-import { ILayer } from '../classes/layers/layer';
+import type { ISource } from '../classes/sources/source';
+import type { IVectorSource } from '../classes/sources/vector_source';
+import type { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import type { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import type { IRasterSource } from '../classes/sources/raster_source';
+import type { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
 function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {
@@ -125,7 +125,7 @@ export function createLayerInstance(
           customIcons,
         });
       default:
-        throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+        throw new Error(`Unrecognized layerType ${(layerDescriptor as { type: string }).type}`);
     }
   } catch (error) {
     return new InvalidLayer(layerDescriptor, error);

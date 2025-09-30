@@ -8,12 +8,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAttackDiscoveryBulk } from '.';
 import { TestProviders } from '../../../common/mock';
-import * as featureFlagsModule from '../use_kibana_feature_flags';
 import * as appToastsModule from '../../../common/hooks/use_app_toasts';
 import * as invalidateModule from '../use_find_attack_discoveries';
 import * as kibanaModule from '../../../common/lib/kibana';
 
-jest.mock('../use_kibana_feature_flags');
 jest.mock('../../../common/hooks/use_app_toasts');
 jest.mock('../use_find_attack_discoveries');
 jest.mock('../../../common/lib/kibana');
@@ -35,9 +33,6 @@ const getHook = () =>
 describe('useAttackDiscoveryBulk', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (featureFlagsModule.useKibanaFeatureFlags as jest.Mock).mockReturnValue({
-      attackDiscoveryAlertsEnabled: true,
-    });
     (appToastsModule.useAppToasts as jest.Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
@@ -56,7 +51,6 @@ describe('useAttackDiscoveryBulk', () => {
 
     await act(async () => {
       await result.current.mutateAsync({
-        attackDiscoveryAlertsEnabled: true,
         ids: defaultIds,
         kibanaAlertWorkflowStatus: defaultStatus,
         visibility: defaultVisibility,
@@ -73,7 +67,6 @@ describe('useAttackDiscoveryBulk', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          attackDiscoveryAlertsEnabled: true,
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
@@ -86,33 +79,12 @@ describe('useAttackDiscoveryBulk', () => {
     expect(mockAddError).toHaveBeenCalled();
   });
 
-  it('does not call addSuccess or addError if feature flag is disabled', async () => {
-    (featureFlagsModule.useKibanaFeatureFlags as jest.Mock).mockReturnValue({
-      attackDiscoveryAlertsEnabled: false,
-    });
-    mockHttpPost.mockResolvedValueOnce({ data: [] });
-    const { result } = getHook();
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        attackDiscoveryAlertsEnabled: false,
-        ids: defaultIds,
-        kibanaAlertWorkflowStatus: defaultStatus,
-        visibility: defaultVisibility,
-      });
-    });
-
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-    expect(mockAddError).not.toHaveBeenCalled();
-  });
-
   it('calls invalidateFindAttackDiscoveries on success if status is set', async () => {
     mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
     const { result } = getHook();
 
     await act(async () => {
       await result.current.mutateAsync({
-        attackDiscoveryAlertsEnabled: true,
         ids: defaultIds,
         kibanaAlertWorkflowStatus: defaultStatus,
         visibility: defaultVisibility,

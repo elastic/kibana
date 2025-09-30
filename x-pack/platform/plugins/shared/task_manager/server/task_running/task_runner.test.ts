@@ -1363,6 +1363,8 @@ describe('TaskManagerRunner', () => {
 
     test('cancel cancels the task runner, if it is cancellable', async () => {
       let wasCancelled = false;
+      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
           bar: {
@@ -1387,6 +1389,7 @@ describe('TaskManagerRunner', () => {
       await promise;
 
       expect(wasCancelled).toBeTruthy();
+      expect(abortSpy).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -2721,6 +2724,43 @@ describe('TaskManagerRunner', () => {
       expect(logger.debug).toHaveBeenNthCalledWith(3, 'Task bar "foo" ended', {
         tags: ['task:end', 'foo', 'bar'],
       });
+    });
+
+    test('Disables task if shouldDisableTask: true is returned', async () => {
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: {
+          schedule: {
+            interval: `1m`,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return {
+                  state: {},
+                  shouldDisableTask: true,
+                };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: false,
+          id: 'foo',
+          status: 'idle',
+        }),
+        expect.anything()
+      );
+      expect(logger.warn).toBeCalledTimes(1);
+      expect(logger.warn).toBeCalledWith(
+        'Disabling task bar:foo as it indicated it should disable itself',
+        { tags: ['bar'] }
+      );
     });
   });
 

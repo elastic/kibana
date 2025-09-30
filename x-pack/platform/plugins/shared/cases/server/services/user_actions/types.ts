@@ -237,6 +237,15 @@ export interface UserActionsStatsAggsResult {
       doc_count: number;
     }>;
   };
+  deletions: {
+    doc_count: number;
+    deletions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {

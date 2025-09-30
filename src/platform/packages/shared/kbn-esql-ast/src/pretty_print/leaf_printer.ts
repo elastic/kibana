@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KEYWORDS } from '../parser/constants';
-import {
+import { quotableKeywords } from './utils';
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLColumn,
@@ -46,7 +46,7 @@ export const LeafPrinter = {
 
   identifier: (node: ESQLIdentifier) => {
     const name = node.name;
-    const isKeyword = KEYWORDS.has(name.toUpperCase());
+    const isKeyword = quotableKeywords().has(name.toUpperCase());
     const isQuotationNeeded = !regexUnquotedIdPattern.test(name);
 
     if (isKeyword || isQuotationNeeded) {

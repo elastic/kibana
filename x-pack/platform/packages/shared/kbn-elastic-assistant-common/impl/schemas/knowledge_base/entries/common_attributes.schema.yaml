@@ -191,6 +191,7 @@ components:
       type: string
       enum:
         - security_labs
+        - defend_insights
         - user
       example: "security_labs"
 

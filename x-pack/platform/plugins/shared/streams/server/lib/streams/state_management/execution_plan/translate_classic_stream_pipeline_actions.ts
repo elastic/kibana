@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexTemplate, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { castArray, groupBy, omit, uniq } from 'lodash';
@@ -15,7 +15,7 @@ import type {
   AppendProcessorToIngestPipelineAction,
   DeleteProcessorFromIngestPipelineAction,
   ElasticsearchAction,
-  UpsertWriteIndexOrRolloverAction,
+  UpdateDefaultIngestPipelineAction,
 } from './types';
 
 export const MANAGED_BY_STREAMS = 'streams';
@@ -111,21 +111,28 @@ async function createStreamsManagedPipeline({
     },
   });
 
+  // Remove properties from the GET response that cannot be in the PUT request
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { created_date_millis, modified_date_millis, ...safeTemplate } =
+    indexTemplate.index_template as IndicesIndexTemplate & {
+      created_date_millis: number;
+      modified_date_millis: number;
+    };
+
   actionsByType.upsert_index_template.push({
     type: 'upsert_index_template',
     request: {
       name: indexTemplate.name,
-      ...indexTemplate.index_template,
-      ignore_missing_component_templates: indexTemplate.index_template
-        .ignore_missing_component_templates
-        ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
+      ...safeTemplate,
+      ignore_missing_component_templates: safeTemplate.ignore_missing_component_templates
+        ? castArray(safeTemplate.ignore_missing_component_templates)
         : [],
       template: {
-        ...(indexTemplate.index_template.template ?? {}),
+        ...(safeTemplate.template ?? {}),
         settings: {
-          ...(indexTemplate.index_template.template?.settings ?? {}),
+          ...(safeTemplate.template?.settings ?? {}),
           index: {
-            ...(indexTemplate.index_template.template?.settings?.index ?? {}),
+            ...(safeTemplate.template?.settings?.index ?? {}),
             default_pipeline: pipelineName,
           },
         },
@@ -133,11 +140,12 @@ async function createStreamsManagedPipeline({
     },
   });
 
-  actionsByType.upsert_write_index_or_rollover.push(
-    ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-      type: 'upsert_write_index_or_rollover',
+  actionsByType.update_default_ingest_pipeline.push(
+    ...actions.map<UpdateDefaultIngestPipelineAction>((action) => ({
+      type: 'update_default_ingest_pipeline',
       request: {
         name: action.dataStream,
+        pipeline: pipelineName,
       },
     }))
   );
@@ -174,64 +182,18 @@ async function updateExistingStreamsManagedPipeline({
     }
   }
 
-  if (processors.length !== 0) {
-    actionsByType.upsert_ingest_pipeline.push({
-      type: 'upsert_ingest_pipeline',
-      // All of these are ClassicStreams so take any stream name to use for the ordering of operations
-      stream: actions[0].dataStream,
-      request: {
-        id: pipelineName,
-        ...pipeline,
-        processors,
-      },
-    });
-  } else {
-    actionsByType.delete_ingest_pipeline.push({
-      type: 'delete_ingest_pipeline',
-      request: {
-        name: pipelineName,
-      },
-    });
-
-    const targetTemplateNames = uniq(actions.map((action) => action.template));
-    if (targetTemplateNames.length !== 1) {
-      throw new Error(
-        'Actions targeting the same existing Streams managed pipeline target different templates'
-      );
-    }
-    const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
-
-    actionsByType.upsert_index_template.push({
-      type: 'upsert_index_template',
-      request: {
-        name: indexTemplate.name,
-        ...indexTemplate.index_template,
-        ignore_missing_component_templates: indexTemplate.index_template
-          .ignore_missing_component_templates
-          ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
-          : [],
-        template: {
-          ...(indexTemplate.index_template.template ?? {}),
-          settings: {
-            ...(indexTemplate.index_template.template?.settings ?? {}),
-            index: {
-              ...(indexTemplate.index_template.template?.settings?.index ?? {}),
-              default_pipeline: undefined,
-            },
-          },
-        },
-      },
-    });
-
-    actionsByType.upsert_write_index_or_rollover.push(
-      ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-        type: 'upsert_write_index_or_rollover',
-        request: {
-          name: action.dataStream,
-        },
-      }))
-    );
-  }
+  // If all the processors are removed, we just leave the ingest pipeline in place and referenced by the template
+  // Since it's hard to correctly clean it up from all previous write indices which would allow us to delete the pipeline
+  actionsByType.upsert_ingest_pipeline.push({
+    type: 'upsert_ingest_pipeline',
+    // All of these are ClassicStreams so take any stream name to use for the ordering of operations
+    stream: actions[0].dataStream,
+    request: {
+      id: pipelineName,
+      ...pipeline,
+      processors,
+    },
+  });
 }
 
 async function updateExistingUserManagedPipeline({

@@ -9,7 +9,8 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, LogDocumentOverview, fieldConstants, formatFieldValue } from '../..';
+import type { DataTableRecord, LogDocumentOverview } from '../..';
+import { fieldConstants, formatFieldValue } from '../..';
 
 export function getLogDocumentOverview(
   doc: DataTableRecord,
@@ -39,6 +40,8 @@ export function getLogDocumentOverview(
   // Service
   const serviceName = formatField(fieldConstants.SERVICE_NAME_FIELD);
   const traceId = formatField(fieldConstants.TRACE_ID_FIELD);
+  const transactionId = formatField(fieldConstants.TRANSACTION_ID_FIELD);
+  const spanId = formatField(fieldConstants.SPAN_ID_FIELD);
 
   // Infrastructure
   const hostname = formatField(fieldConstants.HOST_NAME_FIELD);
@@ -66,6 +69,8 @@ export function getLogDocumentOverview(
     [fieldConstants.EVENT_ORIGINAL_FIELD]: eventOriginal,
     [fieldConstants.SERVICE_NAME_FIELD]: serviceName,
     [fieldConstants.TRACE_ID_FIELD]: traceId,
+    [fieldConstants.TRANSACTION_ID_FIELD]: transactionId,
+    [fieldConstants.SPAN_ID_FIELD]: spanId,
     [fieldConstants.HOST_NAME_FIELD]: hostname,
     [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
     [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,

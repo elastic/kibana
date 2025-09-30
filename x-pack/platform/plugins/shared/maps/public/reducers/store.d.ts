@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
-import { MapState } from './map';
-import { MapUiState } from './ui';
-import { NonSerializableState } from './non_serializable_instances';
+import type { Store } from 'redux';
+import type { MapState } from './map';
+import type { MapUiState } from './ui';
+import type { NonSerializableState } from './non_serializable_instances';
 
 export interface MapStoreState {
   ui: MapUiState;

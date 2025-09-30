@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
+import type { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');

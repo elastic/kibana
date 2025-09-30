@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import {
+import type { JsonObject } from '@kbn/utility-types';
+import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   Logger,
   ServiceStatus,
 } from '@kbn/core/server';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-// import { ATTR_SERVICE_INSTANCE_ID } from '@opentelemetry/semantic-conventions/incubating';
-// Ideally we would import. But our tooling doesn't like how subdirs in these packages are exported (via "exports" in package.json).
-const ATTR_SERVICE_INSTANCE_ID = 'service.instance.id';
-import * as grpc from '@grpc/grpc-js';
-import { PrometheusExporter } from './lib/prometheus_exporter';
-import { MonitoringCollectionConfig } from './config';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { PrometheusExporter } from '@kbn/metrics';
+import type { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute, registerV1PrometheusRoute, PROMETHEUS_PATH } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
 
@@ -42,7 +35,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly initializerContext: PluginInitializerContext;
   private readonly logger: Logger;
   private readonly config: MonitoringCollectionConfig;
-  private readonly otlpLogger: api.DiagLogger;
 
   private metrics: Record<string, Metric<any>> = {};
 
@@ -52,14 +44,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
-
-    this.otlpLogger = {
-      debug: (message) => this.logger.debug(message),
-      error: (message) => this.logger.error(message),
-      info: (message) => this.logger.info(message),
-      warn: (message) => this.logger.warn(message),
-      verbose: (message) => this.logger.trace(message),
-    };
   }
 
   async getMetric(type: string) {
@@ -77,7 +61,11 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     const uuid = this.initializerContext.env.instanceUuid;
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
 
-    this.configureOpentelemetryMetrics(server.name, uuid, kibanaVersion);
+    if (this.config.opentelemetry?.metrics.prometheus.enabled) {
+      // Add Prometheus exporter
+      this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_PATH}`);
+      this.prometheusExporter = PrometheusExporter.get();
+    }
 
     let status: ServiceStatus<unknown>;
     core.status.overall$.subscribe((newStatus) => {
@@ -119,67 +107,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         this.metrics[metric.type] = metric;
       },
     };
-  }
-
-  private configureOpentelemetryMetrics(
-    serviceName?: string,
-    serviceInstanceId?: string,
-    serviceVersion?: string
-  ) {
-    const meterReaders: metrics.IMetricReader[] = [];
-
-    const otlpConfig = this.config.opentelemetry?.metrics.otlp;
-    const url =
-      otlpConfig?.url ??
-      process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ??
-      process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-    if (url) {
-      // Add OTLP exporter
-      // Set Authorization headers
-      // OTLPMetricExporter internally will look at OTEL_EXPORTER_OTLP_METRICS_HEADERS env variable
-      // if `headers` is not present in the kibana config file
-      const metadata = new grpc.Metadata();
-      if (otlpConfig.headers) {
-        for (const [key, value] of Object.entries(otlpConfig.headers)) {
-          metadata.add(key, value);
-        }
-      }
-
-      const otlpLogLevel = otlpConfig.logLevel.toUpperCase() as keyof typeof api.DiagLogLevel;
-      api.diag.setLogger(this.otlpLogger, api.DiagLogLevel[otlpLogLevel]);
-
-      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
-      meterReaders.push(
-        new metrics.PeriodicExportingMetricReader({
-          exporter: new OTLPMetricExporter({ url, metadata }),
-          exportIntervalMillis: otlpConfig.exportIntervalMillis,
-        })
-      );
-    }
-
-    if (this.config.opentelemetry?.metrics.prometheus.enabled) {
-      // Add Prometheus exporter
-      this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_PATH}`);
-      this.prometheusExporter = new PrometheusExporter();
-      meterReaders.push(this.prometheusExporter);
-    }
-
-    // TODO: Figure out how to make this compatible with the meter provider registered in @kbn/telemetry
-    // * A potential idea is to use a LateBindingMeterProvider similar to the LateBindingSpanProcessor.
-    // * Another one is to register these readers on the global meter provider by intercepting this config in @kbn/telemetry
-    // Related issue: https://github.com/open-telemetry/opentelemetry-js/issues/4112
-    if (meterReaders.length > 0) {
-      const meterProvider = new metrics.MeterProvider({
-        resource: resources.resourceFromAttributes({
-          [ATTR_SERVICE_NAME]: serviceName,
-          [ATTR_SERVICE_INSTANCE_ID]: serviceInstanceId,
-          [ATTR_SERVICE_VERSION]: serviceVersion,
-        }),
-        readers: meterReaders,
-      });
-
-      api.metrics.setGlobalMeterProvider(meterProvider);
-    }
   }
 
   start() {}

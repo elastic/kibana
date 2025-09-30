@@ -21,7 +21,7 @@ import type {
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
-import { ModelProviderFactoryFn } from './model_provider';
+import type { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext } from './utils/run_context';
 import { runTool } from './run_tool';
 import { runAgent } from './run_agent';

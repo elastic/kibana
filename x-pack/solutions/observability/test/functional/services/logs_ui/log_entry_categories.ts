@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['infraLogs']);
@@ -18,7 +18,7 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
     },
 
     async getNoDataScreen(): Promise<WebElementWrapper> {
-      return await testSubjects.find('noDataPage');
+      return await testSubjects.find('kbnNoDataPage');
     },
 
     async getSetupScreen(): Promise<WebElementWrapper> {

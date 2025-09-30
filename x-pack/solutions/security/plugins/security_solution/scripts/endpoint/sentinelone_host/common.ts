@@ -212,13 +212,23 @@ export const installSentinelOneAgent = async ({
     await hostVm.exec(`sudo ${installPath} control start`);
 
     const status = (
-      await pRetry(async () => {
-        return hostVm.exec(`sudo ${installPath} control status`);
-      })
+      await pRetry(
+        async () => {
+          return hostVm.exec(`sudo ${installPath} control status`);
+        },
+        {
+          onFailedAttempt: (error) => {
+            log.debug(
+              `Attempt ${error.attemptNumber} to get S1 agent status failed. There are ${error.retriesLeft} retries left.`
+            );
+          },
+        }
+      )
     ).stdout;
 
     try {
-      // Generate an alert in SentinelOne
+      // Generate an alert in SentinelOne (NOTE: this only works because there is a custom
+      // rule setup in S1 to trigger alert on `nslookup`)
       const command = 'nslookup elastic.co';
 
       log?.info(`Triggering alert using command: ${command}`);

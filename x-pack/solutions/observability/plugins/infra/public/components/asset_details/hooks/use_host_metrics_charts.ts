@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
@@ -26,7 +27,7 @@ export const useHostCharts = ({
     const hostCharts = await getHostsCharts({
       metric,
       overview,
-      schema: schema ?? DataSchemaFormat.ECS,
+      schema: schema ?? 'ecs',
     });
 
     return hostCharts.map((chart) => ({
@@ -45,18 +46,14 @@ export const useHostCharts = ({
 export const useKubernetesCharts = ({
   dataViewId,
   overview,
-  schema,
 }: {
   dataViewId?: string;
   overview?: boolean;
-  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kubernetesNode } = await model.metrics.getCharts({
-      schema: schema ?? DataSchemaFormat.ECS,
-    });
+    const { kubernetesNode } = await model.metrics.getCharts();
 
     if (!kubernetesNode) {
       return [];
@@ -81,7 +78,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [model.metrics, schema, overview, dataViewId]);
+  }, [model.metrics, overview, dataViewId]);
 
   return { charts, error };
 };
@@ -109,7 +106,7 @@ export const useHostKpiCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts({
-      schema: schema ?? DataSchemaFormat.ECS,
+      schema: schema ?? 'ecs',
     });
 
     return [
@@ -145,7 +142,7 @@ const getHostsCharts = async ({
   const model = findInventoryModel('host');
 
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
-    schema: schema ?? DataSchemaFormat.ECS,
+    schema: schema ?? 'ecs',
   });
 
   switch (metric) {

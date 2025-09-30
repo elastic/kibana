@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText, EuiTitle } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import { EuiLink, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import { useKibana } from '../../../../shared_imports';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    title: css`
+      padding-left: ${euiTheme.size.s};
+    `,
+  };
+};
+
 export const OnFailureProcessorsTitle: FunctionComponent = () => {
   const { services } = useKibana();
+  const styles = useStyles();
 
   return (
-    <div className="pipelineEditor__onFailureTitle">
+    <div css={styles.title}>
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage

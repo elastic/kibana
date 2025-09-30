@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
-  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -23,8 +23,8 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;

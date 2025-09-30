@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
 
 describe('validateTypeMigrations', () => {

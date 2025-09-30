@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { CommandDefinition, FunctionDefinition, LicenseInfo, MultipleLicenseInfo } from '../types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
+  CommandDefinition,
+  FunctionDefinition,
+  LicenseInfo,
+  MultipleLicenseInfo,
+} from '../types';
 import { aggregateLicensesFromSignatures } from './aggregate_licenses_from_signatures';
 
 /**
@@ -17,7 +22,7 @@ function transformLicenseMap(licensesMap: Map<string, Set<string>>): LicenseInfo
   return Array.from(licensesMap.entries()).map(([name, paramsSet]) => {
     const paramsWithLicense = Array.from(paramsSet);
     return {
-      name,
+      name: name.toLowerCase() as LicenseType,
       isSignatureSpecific: paramsWithLicense.length > 0,
       paramsWithLicense,
     };
@@ -34,7 +39,7 @@ export function getLicenseInfoForFunctions(
   // Case 1: A top-level license exists. This takes precedence over all signature-specific licenses.
   if (fnDefinition.license) {
     const licenseInfo: LicenseInfo = {
-      name: fnDefinition.license,
+      name: fnDefinition.license.toLowerCase() as LicenseType,
       isSignatureSpecific: false,
       paramsWithLicense: [],
     };
@@ -72,7 +77,7 @@ export function getLicenseInfoForCommand(
   return {
     licenses: [
       {
-        name: commandDef.license,
+        name: commandDef.license.toLowerCase() as LicenseType,
       },
     ],
     hasMultipleLicenses: false,

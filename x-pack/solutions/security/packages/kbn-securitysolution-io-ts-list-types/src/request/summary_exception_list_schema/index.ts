@@ -7,10 +7,11 @@
 
 import * as t from 'io-ts';
 
-import { NamespaceType } from '../../common/default_namespace';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { NamespaceType } from '../../common/default_namespace';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
-import { filter, Filter } from '../../common/filter';
+import type { Filter } from '../../common/filter';
+import { filter } from '../../common/filter';
 import { list_id } from '../../common/list_id';
 import { namespace_type } from '../../common/namespace_type';
 

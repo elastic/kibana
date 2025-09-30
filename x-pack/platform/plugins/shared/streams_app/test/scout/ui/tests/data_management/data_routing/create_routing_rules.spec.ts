@@ -23,7 +23,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   });
 
   test('should create a new routing rule successfully', async ({ page, pageObjects }) => {
-    await page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
+    await pageObjects.streams.clickCreateRoutingRule();
 
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
@@ -35,7 +35,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Set up routing condition
     await pageObjects.streams.fillConditionEditor({
       field: 'service.name',
-      value: 'nginx',
+      value: 'nginxlogs',
       operator: 'equals',
     });
 
@@ -44,7 +44,9 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     // Verify success
     await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
-    await expect(page.getByText('service.name eq nginx')).toBeVisible();
+    await expect(page.getByText('service.name')).toBeVisible();
+    await expect(page.getByText('equals')).toBeVisible();
+    await expect(page.getByText('nginxlogs')).toBeVisible();
   });
 
   test('should cancel creating new routing rule', async ({ page, pageObjects }) => {

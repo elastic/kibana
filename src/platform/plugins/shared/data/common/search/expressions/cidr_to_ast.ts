@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionCidr, Cidr } from './cidr';
+import type { ExpressionFunctionCidr, Cidr } from './cidr';
 
 export const cidrToAst = (cidr: Cidr) => {
   return buildExpression([buildExpressionFunction<ExpressionFunctionCidr>('cidr', cidr)]).toAst();

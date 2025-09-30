@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MessageDescriptor } from '@formatjs/intl';
-import { TranslationInput } from '@kbn/i18n';
+import type { MessageDescriptor } from '@formatjs/intl';
+import type { TranslationInput } from '@kbn/i18n';
 
 export interface FileOutput {
   messages: Record<string, string | { text: string; comment: string }>;

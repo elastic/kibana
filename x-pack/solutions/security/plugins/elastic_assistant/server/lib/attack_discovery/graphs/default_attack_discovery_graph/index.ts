@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
@@ -24,7 +24,7 @@ import { getCombinedAttackDiscoveryPrompt } from './prompts/get_combined_attack_
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';
 import { getAttackDiscoveriesGenerationSchema } from './schemas';
-import { CombinedPrompts } from './prompts';
+import type { CombinedPrompts } from './prompts';
 import { getDefaultGraphAnnotation } from './state';
 
 export interface GetDefaultAttackDiscoveryGraphParams {

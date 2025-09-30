@@ -6,8 +6,8 @@
  */
 
 import { postAnalyzeLogs } from '../../../../common/lib/api/analyze_logs';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { User } from '../../../../common/lib/authentication/types';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { User } from '../../../../common/lib/authentication/types';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

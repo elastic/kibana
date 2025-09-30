@@ -6,7 +6,8 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { SavedPlaygroundRouterParameters, PlaygroundViewMode } from '../types';
+import type { SavedPlaygroundRouterParameters } from '../types';
+import { PlaygroundViewMode } from '../types';
 
 export const useSavedPlaygroundParameters = () => {
   const { playgroundId, pageMode, viewMode } = useParams<SavedPlaygroundRouterParameters>();

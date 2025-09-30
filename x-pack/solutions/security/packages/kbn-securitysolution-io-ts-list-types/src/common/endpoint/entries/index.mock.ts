@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointEntriesArray } from '.';
+import type { EndpointEntriesArray } from '.';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';

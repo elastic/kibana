@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { isOpenSourceModel } from './utils';
 import {
   OPENAI_CHAT_URL,

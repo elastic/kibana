@@ -8,7 +8,7 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import type { OptionsListControlState } from '@kbn/controls-plugin/public';
+import type { OptionsListDSLControlState } from '@kbn/controls-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { FilterControlConfig } from './types';
 
@@ -65,7 +65,7 @@ export const TEST_IDS = {
   },
 };
 
-export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<OptionsListControlState> = {
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<OptionsListDSLControlState> = {
   hideExclude: true,
   hideSort: true,
   placeholder: '',

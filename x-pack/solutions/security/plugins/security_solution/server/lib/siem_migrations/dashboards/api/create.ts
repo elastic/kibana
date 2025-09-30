@@ -10,11 +10,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { SIEM_DASHBOARD_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/utils/authz';
+import { authz } from '../../common/api/util/authz';
 import type { CreateDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { CreateDashboardMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import { withLicense } from '../../common/utils/with_license';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
+import { withLicense } from '../../common/api/util/with_license';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 
 export const registerSiemDashboardMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -37,7 +37,10 @@ export const registerSiemDashboardMigrationsCreateRoute = (
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateDashboardMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'dashboards'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const dashboardMigrationsClient =

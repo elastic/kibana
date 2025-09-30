@@ -283,6 +283,7 @@ export const createBulkIndexOperationTuple = (
   doc: SavedObjectsRawDoc,
   typeIndexMap: Record<string, string> = {}
 ): BulkIndexOperationTuple => {
+  const idChanged = doc._source.originId && doc._source.originId !== doc._id;
   return [
     {
       index: {
@@ -292,8 +293,9 @@ export const createBulkIndexOperationTuple = (
         }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
-        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
-        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+        ...(typeof doc._seq_no !== 'undefined' && !idChanged && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' &&
+          !idChanged && { if_primary_term: doc._primary_term }),
       },
     },
     doc._source,

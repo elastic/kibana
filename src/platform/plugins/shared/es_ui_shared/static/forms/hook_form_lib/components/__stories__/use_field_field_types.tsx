@@ -11,7 +11,7 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { EuiText, EuiTextColor, EuiSpacer, EuiHealth } from '@elastic/eui';
 
-import { FieldConfig } from '../../types';
+import type { FieldConfig } from '../../types';
 import {
   TextField,
   TextAreaField,

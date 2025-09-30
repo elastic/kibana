@@ -9,7 +9,7 @@
 
 import { basename } from 'path';
 
-import { Config, Platform } from '../../lib';
+import type { Config, Platform } from '../../lib';
 
 export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const version = config.getNodeVersion();
@@ -22,8 +22,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     } else {
       variants = ['glibc-217'];
     }
-    // disabled, see https://github.com/nodejs/node/issues/54531
-    // if (platform.isServerless()) variants.push('pointer-compression');
+    if (platform.isServerless()) variants.push('pointer-compression');
   }
 
   return variants.map((variant) => {

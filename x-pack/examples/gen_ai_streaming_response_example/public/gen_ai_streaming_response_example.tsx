@@ -18,11 +18,11 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import {
+import type {
   ActionType,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import {
   ConnectorAddModal,
   loadActionTypes,

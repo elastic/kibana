@@ -6,28 +6,33 @@
  */
 
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import {
+import type {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
-  ChatCompletionErrorCode,
   ChatCompletionErrorEvent,
-  concatenateChatCompletionChunks,
   ConversationCreateEvent,
   FunctionDefinition,
-  isChatCompletionError,
   MessageAddEvent,
   StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ChatCompletionErrorCode,
+  concatenateChatCompletionChunks,
+  isChatCompletionError,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
+import type { OperatorFunction, Observable } from 'rxjs';
 import {
   concatMap,
   defer,
@@ -35,19 +40,18 @@ import {
   from,
   lastValueFrom,
   of,
-  OperatorFunction,
   retry,
   switchMap,
   timer,
   toArray,
   catchError,
-  Observable,
   throwError,
 } from 'rxjs';
-import { format, parse, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format, parse } from 'url';
 import { inspect } from 'util';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
-import { EvaluationResult } from './types';
+import type { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
@@ -171,6 +175,7 @@ export class KibanaClient {
           pathname: '/internal/observability_ai_assistant/kb/setup',
           query: {
             inference_id: '.elser-2-elasticsearch',
+            wait_until_complete: true,
           },
         });
         this.log.info('Knowledge base is ready');
@@ -294,14 +299,16 @@ export class KibanaClient {
     >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
       return (source$) => {
         const processed$ = source$.pipe(
-          concatMap((buffer: Buffer) =>
-            buffer
+          concatMap((buffer: Buffer) => {
+            return buffer
               .toString('utf-8')
               .split('\n')
               .map((line) => line.trim())
               .filter(Boolean)
-              .map((line) => JSON.parse(line) as T | BufferFlushEvent)
-          ),
+              .map((line) => {
+                return JSON.parse(line) as T | BufferFlushEvent;
+              });
+          }),
           throwSerializedChatCompletionErrors(),
           retry({
             count: 1,

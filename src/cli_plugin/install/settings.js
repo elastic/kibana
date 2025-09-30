@@ -8,7 +8,6 @@
  */
 
 import { resolve } from 'path';
-import expiry from 'expiry-js';
 import { fromRoot } from '@kbn/repo-info';
 
 function generateUrls({ version, plugin }) {
@@ -19,16 +18,37 @@ function generateUrls({ version, plugin }) {
 }
 
 export function parseMilliseconds(val) {
-  let result;
-
-  try {
-    const timeVal = expiry(val);
-    result = timeVal.asMilliseconds();
-  } catch (ex) {
-    result = 0;
+  if (typeof val === 'number') return val;
+  if (typeof val !== 'string') return 0;
+  const regex = /^(\d+)(ms|milliseconds?|s|seconds?|m|minutes?|h|hours?|d|days?)?$/;
+  const match = val.trim().match(regex);
+  if (!match) return 0;
+  const num = parseInt(match[1], 10);
+  const unit = match[2] || 'ms';
+  switch (unit) {
+    case 'ms':
+    case 'millisecond':
+    case 'milliseconds':
+      return num;
+    case 's':
+    case 'second':
+    case 'seconds':
+      return num * 1000;
+    case 'm':
+    case 'minute':
+    case 'minutes':
+      return num * 60 * 1000;
+    case 'h':
+    case 'hour':
+    case 'hours':
+      return num * 60 * 60 * 1000;
+    case 'd':
+    case 'day':
+    case 'days':
+      return num * 24 * 60 * 60 * 1000;
+    default:
+      return num;
   }
-
-  return result;
 }
 
 export function parse(command, options, kbnPackage) {

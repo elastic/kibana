@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 
 import { AttackDiscoveryGenerationConfig, AttackDiscoveryResponse } from './common_attributes.gen';
 

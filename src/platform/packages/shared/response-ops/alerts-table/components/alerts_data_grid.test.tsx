@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, useMemo, useReducer } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsDataGrid } from './alerts_data_grid';
-import { AlertsDataGridProps, BulkActionsState } from '../types';
-import { AdditionalContext, RenderContext } from '../types';
-import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import type { AlertsDataGridProps, BulkActionsState } from '../types';
+import type { AdditionalContext, RenderContext } from '../types';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
@@ -64,11 +66,13 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
   leadingControlColumns: [],
   trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
+  columnVisibility: {
+    visibleColumns: mockColumns.map((c) => c.id),
+    setVisibleColumns: mockOnChangeVisibleColumns,
+  },
   'data-test-subj': 'testTable',
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
@@ -443,8 +447,10 @@ describe('AlertsDataGrid', () => {
             toolbarVisibility={{
               showColumnSelector: true,
             }}
-            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
-            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+            columnVisibility={{
+              visibleColumns: mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay),
+              setVisibleColumns: mockOnChangeVisibleColumns,
+            }}
           />
         );
         const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');

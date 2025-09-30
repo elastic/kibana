@@ -2,196 +2,178 @@
 
 exports[`CustomUrlList renders a list of custom URLs 1`] = `
 <div
+  aria-label="Custom URL configurations"
   data-test-subj="mlJobEditCustomUrlsList"
+  role="list"
 >
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    aria-labelledby="custom-url-heading-0"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
     data-test-subj="mlJobEditCustomUrlItem_0"
+    role="listitem"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        data-test-subj="mlJobEditCustomUrlItemLabel"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <label
+          class="euiFormLabel emotion-euiFormLabel"
+          id="custom-url-heading-0"
+        >
+          Custom URL 1
+        </label>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Label
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-row-actionButtons"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Test custom URL"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
+                data-test-subj="mlJobEditTestCustomUrlButton"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="popout"
+                />
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormRow emotion-euiFormRow"
+              id="generated-id-row"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                data-test-subj="mlJobEditCustomUrlLabelInput_0"
-                id="generated-id"
-                type="text"
-                value="Show data"
-              />
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  <button
+                    aria-label="Delete custom URL"
+                    class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+                    data-test-subj="mlJobEditDeleteCustomUrlButton_0"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            URL
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          data-test-subj="mlJobEditCustomUrlItemLabel"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              Label
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText-fullWidth"
-                data-test-subj="mlJobEditCustomUrlInput_0"
-                id="generated-id"
-                readonly=""
-                type="text"
-                value="discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:'airline:\\"$airline$\\"'))"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-invalid="false"
+                  aria-label="Label for custom URL 1"
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlLabelInput_0"
+                  id="generated-id"
+                  type="text"
+                  value="Show data"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-6-urlField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Time range
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              URL
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                id="generated-id"
-                placeholder="auto"
-                type="text"
-                value="auto"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-label="URL value for Show data. Click to expand for editing."
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlInput_0"
+                  id="generated-id"
+                  type="text"
+                  value="discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:'airline:\\"$airline$\\"'))"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              aria-label="Test custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
-              data-test-subj="mlJobEditTestCustomUrlButton"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="popout"
-              />
-            </button>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              aria-label="Delete custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-              data-test-subj="mlJobEditDeleteCustomUrlButton_0"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="trash"
-              />
-            </button>
-          </span>
         </div>
       </div>
     </div>
@@ -200,193 +182,215 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    aria-labelledby="custom-url-heading-1"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
     data-test-subj="mlJobEditCustomUrlItem_1"
+    role="listitem"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        data-test-subj="mlJobEditCustomUrlItemLabel"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <label
+          class="euiFormLabel emotion-euiFormLabel"
+          id="custom-url-heading-1"
+        >
+          Custom URL 2
+        </label>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Label
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-row-actionButtons"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Test custom URL"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
+                data-test-subj="mlJobEditTestCustomUrlButton"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="popout"
+                />
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormRow emotion-euiFormRow"
+              id="generated-id-row"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                data-test-subj="mlJobEditCustomUrlLabelInput_1"
-                id="generated-id"
-                type="text"
-                value="Show dashboard"
-              />
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  <button
+                    aria-label="Delete custom URL"
+                    class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+                    data-test-subj="mlJobEditDeleteCustomUrlButton_1"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            URL
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          data-test-subj="mlJobEditCustomUrlItemLabel"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              Label
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText-fullWidth"
-                data-test-subj="mlJobEditCustomUrlInput_1"
-                id="generated-id"
-                readonly=""
-                type="text"
-                value="dashboards#/view/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\\"$airline$\\"'))"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-invalid="false"
+                  aria-label="Label for custom URL 2"
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlLabelInput_1"
+                  id="generated-id"
+                  type="text"
+                  value="Show dashboard"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Time range
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              Time range
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                id="generated-id"
-                placeholder="auto"
-                type="text"
-                value="1h"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-invalid="false"
+                  aria-label="Time range for custom URL 2"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  id="generated-id"
+                  placeholder="auto"
+                  type="text"
+                  value="auto"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
       <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-6-urlField"
       >
         <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          id="generated-id-row"
         >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          <div
+            class="euiFormRow__labelWrapper"
           >
-            <button
-              aria-label="Test custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
-              data-test-subj="mlJobEditTestCustomUrlButton"
-              type="button"
+            <label
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
             >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="popout"
-              />
-            </button>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              URL
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
-            <button
-              aria-label="Delete custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-              data-test-subj="mlJobEditDeleteCustomUrlButton_1"
-              type="button"
+            <div
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="trash"
-              />
-            </button>
-          </span>
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-label="URL value for Show dashboard. Click to expand for editing."
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlInput_1"
+                  id="generated-id"
+                  type="text"
+                  value="dashboards#/view/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\\"$airline$\\"'))"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -395,193 +399,215 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    aria-labelledby="custom-url-heading-2"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
     data-test-subj="mlJobEditCustomUrlItem_2"
+    role="listitem"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        data-test-subj="mlJobEditCustomUrlItemLabel"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <label
+          class="euiFormLabel emotion-euiFormLabel"
+          id="custom-url-heading-2"
+        >
+          Custom URL 3
+        </label>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Label
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-row-actionButtons"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Test custom URL"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
+                data-test-subj="mlJobEditTestCustomUrlButton"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="popout"
+                />
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormRow emotion-euiFormRow"
+              id="generated-id-row"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                data-test-subj="mlJobEditCustomUrlLabelInput_2"
-                id="generated-id"
-                type="text"
-                value="Show airline"
-              />
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  <button
+                    aria-label="Delete custom URL"
+                    class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+                    data-test-subj="mlJobEditDeleteCustomUrlButton_2"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="trash"
+                    />
+                  </button>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            URL
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          data-test-subj="mlJobEditCustomUrlItemLabel"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              Label
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText-fullWidth"
-                data-test-subj="mlJobEditCustomUrlInput_2"
-                id="generated-id"
-                readonly=""
-                type="text"
-                value="http://airlinecodes.info/airline-code-$airline$"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-invalid="false"
+                  aria-label="Label for custom URL 3"
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlLabelInput_2"
+                  id="generated-id"
+                  type="text"
+                  value="Show airline"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
       <div
-        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
       >
         <div
-          class="euiFormRow__labelWrapper"
-        >
-          <label
-            aria-invalid="false"
-            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-            for="generated-id"
-            id="generated-id-label"
-          >
-            Time range
-          </label>
-        </div>
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          id="generated-id-row"
         >
           <div
-            class="euiFormControlLayout emotion-euiFormControlLayout"
+            class="euiFormRow__labelWrapper"
+          >
+            <label
+              aria-invalid="false"
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
+            >
+              Time range
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <input
-                class="euiFieldText emotion-euiFieldText"
-                id="generated-id"
-                placeholder="auto"
-                type="text"
-                value="auto"
-              />
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-invalid="false"
+                  aria-label="Time range for custom URL 3"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  id="generated-id"
+                  placeholder="auto"
+                  type="text"
+                  value="auto"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
       <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiFlexItem emotion-euiFlexItem-grow-6-urlField"
       >
         <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+          id="generated-id-row"
         >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          <div
+            class="euiFormRow__labelWrapper"
           >
-            <button
-              aria-label="Test custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-primary"
-              data-test-subj="mlJobEditTestCustomUrlButton"
-              type="button"
+            <label
+              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+              for="generated-id"
+              id="generated-id-label"
             >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="popout"
-              />
-            </button>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <div
-        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFormRow__fieldWrapper"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              URL
+            </label>
+          </div>
+          <div
+            class="euiFormRow__fieldWrapper"
           >
-            <button
-              aria-label="Delete custom URL"
-              class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-              data-test-subj="mlJobEditDeleteCustomUrlButton_2"
-              type="button"
+            <div
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="trash"
-              />
-            </button>
-          </span>
+              <div
+                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-label="URL value for Show airline. Click to expand for editing."
+                  aria-required="true"
+                  class="euiFieldText emotion-euiFieldText-fullWidth"
+                  data-test-subj="mlJobEditCustomUrlInput_2"
+                  id="generated-id"
+                  type="text"
+                  value="http://airlinecodes.info/airline-code-$airline$"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

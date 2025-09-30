@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 
 import { codeSuccessCss } from '../../../../../../../../styles';
-import { AllowedValue, EcsCompliantFieldMetadata } from '../../../../../../../../types';
+import type { AllowedValue, EcsCompliantFieldMetadata } from '../../../../../../../../types';
 import { FIELD } from '../../../../../../../../translations';
 import { EcsAllowedValues } from '../../../../ecs_allowed_values';
 import { ECS_MAPPING_TYPE, ECS_VALUES } from '../translations';

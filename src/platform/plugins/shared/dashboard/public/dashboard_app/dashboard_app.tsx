@@ -10,14 +10,15 @@
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { History } from 'history';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardState } from '../../common/types';
-import { DashboardApi, DashboardCreationOptions } from '..';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { DashboardState } from '../../common/types';
+import type { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
@@ -37,7 +38,8 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
-import { DashboardRedirect, type DashboardEmbedSettings } from './types';
+import type { DashboardRedirect } from './types';
+import { type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
@@ -139,6 +141,7 @@ export function DashboardApp({
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
     const getInitialInput = () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
@@ -188,6 +191,9 @@ export function DashboardApp({
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
       getInitialInput,
+      getPassThroughContext: () =>
+        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })
+          ?.passThroughContext,
       validateLoadedSavedObject: validateOutcome,
       fullScreenMode:
         kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)

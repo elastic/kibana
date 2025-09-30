@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PublicLicense } from '@kbn/licensing-types';
 
 import { License } from './license';
-import { PublicLicense } from './types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 
 function license({ error, ...customLicense }: { error?: string; [key: string]: any } = {}) {

@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
-import { IVectorSource } from '../sources/vector_source';
-import { IJoinSource } from '../sources/join_sources';
+import type { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
+import type { IVectorSource } from '../sources/vector_source';
+import type { IJoinSource } from '../sources/join_sources';
 
 export function buildVectorRequestMeta(
   source: IVectorSource | IJoinSource,

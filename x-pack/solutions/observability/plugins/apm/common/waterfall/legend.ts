@@ -7,7 +7,7 @@
 
 export enum WaterfallLegendType {
   ServiceName = 'serviceName',
-  SpanType = 'spanType',
+  Type = 'type',
 }
 export interface IWaterfallLegend {
   type: WaterfallLegendType;

@@ -8,7 +8,7 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
   ChatCompletionChunkEvent,
@@ -26,12 +26,12 @@ import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { ChatActionClickHandler } from './components/chat/types';
 import type { InsightProps } from './components/insight/insight';
-import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
-import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
-import { useChat } from './hooks/use_chat';
+import type { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
+import type { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
+import type { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
-import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import { createScreenContextAction } from './utils/create_screen_context_action';
+import type { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import type { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 

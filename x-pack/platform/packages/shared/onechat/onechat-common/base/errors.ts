@@ -29,6 +29,8 @@ export type OnechatError<
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
 
+export type SerializedOnechatError = ReturnType<OnechatError<OnechatErrorCode>['toJSON']>;
+
 export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCode> => {
   return err instanceof OnechatError;
 };

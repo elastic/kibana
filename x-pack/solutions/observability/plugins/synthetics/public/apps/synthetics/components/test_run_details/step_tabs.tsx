@@ -8,7 +8,10 @@
 import { EuiCodeBlock, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types';
+import type {
+  JourneyStep,
+  SyntheticsJourneyApiResponse,
+} from '../../../../../common/runtime_types';
 
 type TabId = 'code' | 'console' | 'stackTrace';
 

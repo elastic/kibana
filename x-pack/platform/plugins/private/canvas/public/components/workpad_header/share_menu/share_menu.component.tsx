@@ -11,7 +11,8 @@ import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { ClosePopoverFn, Popover } from '../../popover';
+import type { ClosePopoverFn } from '../../popover';
+import { Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
 
 const strings = {

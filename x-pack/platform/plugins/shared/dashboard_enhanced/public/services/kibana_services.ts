@@ -6,8 +6,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
-import { StartDependencies } from '../plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { StartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let uiActionsEnhancedServices: StartDependencies['uiActionsEnhanced'];

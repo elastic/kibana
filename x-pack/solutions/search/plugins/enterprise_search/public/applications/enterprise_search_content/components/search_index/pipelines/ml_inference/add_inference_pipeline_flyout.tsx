@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,12 +21,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiStepStatus,
   EuiTitle,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -43,16 +43,16 @@ import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { ReviewPipeline } from './review_pipeline';
+import * as Styles from './styles';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
-
-import './add_inference_pipeline_flyout.scss';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
 }
 
 export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const { indexName } = useValues(IndexNameLogic);
   const { setIndexName, makeMlInferencePipelinesRequest, startPollingModels, makeMappingRequest } =
@@ -69,7 +69,7 @@ export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProp
   return (
     <EuiFlyout
       onClose={props.onClose}
-      className="enterpriseSearchInferencePipelineFlyout"
+      css={Styles.enterpriseSearchInferencePipelineFlyoutStyles(euiTheme)}
       size="l"
       aria-labelledby={modalTitleId}
     >
@@ -121,6 +121,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         {createErrors.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.createErrors',
                 { defaultMessage: 'Error creating pipeline' }

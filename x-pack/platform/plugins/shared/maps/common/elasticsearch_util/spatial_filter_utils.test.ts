@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Polygon } from 'geojson';
-import { DataViewBase } from '@kbn/es-query';
+import type { Polygon } from 'geojson';
+import type { DataViewBase } from '@kbn/es-query';
 import {
   createDistanceFilterWithMeta,
   createExtentFilter,

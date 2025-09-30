@@ -13,6 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -122,6 +123,8 @@ export function fetchAll(
           expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          esqlVariables: currentTab.esqlVariables,
+          searchSessionId: params.searchSessionId,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -129,10 +132,19 @@ export function fetchAll(
       'discoverFetchAllRequestsOnly'
     );
 
+    // Calculate query range in seconds
+    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
+      ? getTimeDifferenceInSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
+      : 0;
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent({ meta: { fetchType } });
+        fetchAllRequestOnlyTracker.reportEvent({
+          meta: { fetchType },
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+        });
 
         if (isEsqlQuery) {
           const fetchStatus =
@@ -157,16 +169,34 @@ export function fetchAll(
         }
 
         /**
-         * The partial state for ES|QL mode is necessary in case the query has changed
-         * In the follow up useEsqlMode hook in this case new columns are added to AppState
-         * So the data table shows the new columns of the table. The partial state was introduced to prevent
-         * To frequent change of state causing the table to re-render to often, which causes race conditions
-         * So it takes too long, a bad user experience, also a potential flakniess in tests
+         * Determine the appropriate fetch status for ES|QL queries.
+         *
+         * The partial state for ES|QL mode is necessary in several scenarios:
+         * 1. Initial query execution (no previous query)
+         * 2. Query has changed from the previous execution
+         * 3. ESQL variables are present (indicating parameterized queries that may affect results)
+         *
+         * In the follow-up useEsqlMode hook, when queries change, new columns are added to AppState
+         * so the data table shows the updated columns. The partial state was introduced to prevent
+         * too frequent state changes that cause the table to re-render too often, which can cause
+         * race conditions, poor user experience, and potential test flakiness.
+         *
+         * For non-ES|QL queries, we always use COMPLETE status as they don't require this
+         * special handling.
          */
-        const fetchStatus =
-          isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
+        const fetchStatus = (() => {
+          if (!isEsqlQuery) {
+            return FetchStatus.COMPLETE;
+          }
+
+          const isFirstQuery = !prevQuery;
+          const queryChanged = !isEqual(query, prevQuery);
+          const hasEsqlVariables = Boolean(currentTab.esqlVariables?.length);
+
+          return isFirstQuery || queryChanged || hasEsqlVariables
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
+        })();
 
         dataSubjects.documents$.next({
           fetchStatus,

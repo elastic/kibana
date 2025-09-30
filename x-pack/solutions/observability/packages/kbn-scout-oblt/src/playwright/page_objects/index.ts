@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
 import { OnboardingHomePage } from './onboarding_home';
 import { CustomLogsPage } from './custom_logs';
 import { ObservabilityNavigation } from './observability_navigation';

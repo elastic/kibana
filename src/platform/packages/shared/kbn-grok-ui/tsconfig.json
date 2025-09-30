@@ -24,5 +24,6 @@
     "@kbn/code-editor",
     "@kbn/i18n",
     "@kbn/object-utils",
+    "@kbn/react-hooks",
   ]
 }

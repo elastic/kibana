@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CommonTokenStream, Token } from 'antlr4';
+import type { Token } from 'antlr4';
+import { type CommonTokenStream } from 'antlr4';
 import { Builder } from '../builder';
 import { Visitor } from '../visitor';
 import type {
@@ -24,7 +25,7 @@ import type {
   ParsedFormattingDecorationLines,
 } from './types';
 import { HIDDEN_CHANNEL } from './constants';
-import { findVisibleToken, isLikelyPunctuation } from './helpers';
+import { findVisibleToken, isLikelyPunctuation } from './tokens';
 
 const commentSubtype = (text: string): ESQLAstComment['subtype'] | undefined => {
   if (text[0] === '/') {

@@ -9,6 +9,7 @@
 
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -49,6 +50,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   featureFlags: FeatureFlagsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
+  /** {@link CoreDiServiceSetup} */
+  injection: CoreDiServiceSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */

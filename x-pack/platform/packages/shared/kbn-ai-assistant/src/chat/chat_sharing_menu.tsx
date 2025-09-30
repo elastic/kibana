@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiBadge,
@@ -13,7 +14,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelectableOption,
   EuiIcon,
   useEuiTheme,
   EuiLoadingSpinner,

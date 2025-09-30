@@ -8,7 +8,8 @@
 import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PipelineStructureTree, PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
+import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
+import { PipelineStructureTree } from '@kbn/ingest-pipelines-shared';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../../shared_imports';
 

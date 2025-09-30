@@ -15,8 +15,8 @@ import {
 } from '@kbn/typed-react-router-config';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
-import { StreamsAppServices } from '../../services/types';
+import type { StreamsAppStartDependencies } from '../../types';
+import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 
 export function AppRoot({

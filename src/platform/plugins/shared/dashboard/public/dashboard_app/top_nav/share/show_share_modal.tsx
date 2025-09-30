@@ -9,18 +9,19 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 
 import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import { QueryState } from '@kbn/data-plugin/common';
+import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 
-import { DashboardLocatorParams } from '../../../../common';
+import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';

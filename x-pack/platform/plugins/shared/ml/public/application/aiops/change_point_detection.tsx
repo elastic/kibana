@@ -23,6 +23,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml/serverless_context';
+import { PageTitle } from '../components/page_title';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
@@ -35,9 +36,13 @@ export const ChangePointDetectionPage: FC = () => {
       <MlPageHeader>
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.changePointDetection.pageHeader"
-              defaultMessage="Change point detection"
+            <PageTitle
+              title={
+                <FormattedMessage
+                  id="xpack.ml.changePointDetection.pageHeader"
+                  defaultMessage="Change point detection"
+                />
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

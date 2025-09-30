@@ -9,8 +9,8 @@
 
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
-import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Readable } from 'stream';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
@@ -79,6 +79,7 @@ export async function loadAction({
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const targetsWithoutIdGeneration: string[] = [];
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -107,8 +108,16 @@ export async function loadAction({
       docsOnly,
       isArchiveInExceptionList,
       log,
+      targetsWithoutIdGeneration,
     }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, performance),
+    createIndexDocRecordsStream(
+      client,
+      stats,
+      progress,
+      useCreate,
+      performance,
+      targetsWithoutIdGeneration
+    ),
   ]);
 
   progress.deactivate();

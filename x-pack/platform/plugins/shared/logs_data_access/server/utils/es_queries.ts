@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 export function existsQuery(field: string): QueryDslQueryContainer[] {

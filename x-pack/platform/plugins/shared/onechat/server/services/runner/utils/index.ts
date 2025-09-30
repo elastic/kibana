@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { getConnectorList } from './get_connector_list';
-export { getDefaultConnector } from './get_default_connector';
 export {
   createEmptyRunContext,
   forkContextForToolRun,

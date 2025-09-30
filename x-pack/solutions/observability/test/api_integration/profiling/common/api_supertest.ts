@@ -6,8 +6,8 @@
  */
 
 import { formatRequest } from '@kbn/server-route-repository';
-import request from 'superagent';
-import supertest from 'supertest';
+import type request from 'superagent';
+import type supertest from 'supertest';
 import { format } from 'url';
 
 export function createProfilingApiClient(st: supertest.Agent) {

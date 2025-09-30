@@ -411,6 +411,7 @@ export class SecurityPlugin
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     this.authorizationService.start({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Metric } from './classes/metric';
+import type { Metric } from './classes/metric';
 import { metrics as elasticsearchMetrics } from './elasticsearch/metrics';
 import { metrics as kibanaMetrics } from './kibana/metrics';
 import { metrics as logstashMetrics } from './logstash/metrics';

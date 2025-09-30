@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { StreamsPluginStartDependencies } from '../../types';
-import {
-  ContentClient,
-  ContentStorageSettings,
-  StoredContentPack,
-  contentStorageSettings,
-} from './content_client';
+import type { StreamsPluginStartDependencies } from '../../types';
+import type { ContentStorageSettings, StoredContentPack } from './content_client';
+import { ContentClient, contentStorageSettings } from './content_client';
 
 export class ContentService {
   constructor(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -29,7 +30,7 @@ import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/typ
 import { useDownloadRenderedWorkpad } from '../../../hooks';
 import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
-import { OnCloseFn } from '../share_menu.component';
+import type { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';

@@ -14,25 +14,28 @@ jest.mock('../../../../lib/content_stream', () => ({
 }));
 
 import type { estypes } from '@elastic/elasticsearch';
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
-import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ExportType } from '@kbn/reporting-server';
+import type { ExportType } from '@kbn/reporting-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
-import { ReportingCore } from '../../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import { ContentStream, getContentStream } from '../../../../lib';
+import type { ReportingCore } from '../../../..';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
+import type { ContentStream } from '../../../../lib';
+import { getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { STATUS_CODES } from '../../../common/jobs/constants';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';

@@ -6,7 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, setupEnvironment } from './processor.helpers';
+import type { SetupResult } from './processor.helpers';
+import { setup, setupEnvironment } from './processor.helpers';
 
 describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;

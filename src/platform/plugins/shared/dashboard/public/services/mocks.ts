@@ -32,10 +32,10 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
-import { DashboardAttributes } from '../../server/content_management';
-import { DashboardCapabilities } from '../../common';
-import { LoadDashboardReturn } from './dashboard_content_management_service/types';
-import { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
+import type { DashboardAttributes } from '../../server/content_management';
+import type { DashboardCapabilities } from '../../common';
+import type { LoadDashboardReturn } from './dashboard_content_management_service/types';
+import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,

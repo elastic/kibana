@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SearchHit } from '@kbn/es-types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SearchHit } from '@kbn/es-types';
 import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { TIMESTAMP } from '../../../../common/es_fields';
 import { createDatasetQualityESClient } from '../../../utils';

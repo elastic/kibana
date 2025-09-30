@@ -24,12 +24,8 @@ import {
   SAVED_PLAYGROUND_SEARCH_PATH,
   SAVED_PLAYGROUND_SEARCH_QUERY_PATH,
 } from '../../routes';
-import {
-  PlaygroundPageMode,
-  PlaygroundViewMode,
-  SavedPlaygroundForm,
-  SavedPlaygroundFormFields,
-} from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
+import { PlaygroundPageMode, PlaygroundViewMode, SavedPlaygroundFormFields } from '../../types';
 import { isSavedPlaygroundFormDirty } from '../../utils/saved_playgrounds';
 
 import { Chat } from '../chat';

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 import moment from 'moment';
 import { chain, sumBy } from 'lodash';
-import { ReportSchemaType } from './schema';
+import type { ReportSchemaType } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
 import { type UsageCountersServiceSetup } from '../usage_counters';
 

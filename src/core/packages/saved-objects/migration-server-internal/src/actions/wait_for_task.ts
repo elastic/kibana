@@ -9,9 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/Either';
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
@@ -19,8 +19,16 @@ import {
 } from './catch_retryable_es_client_errors';
 
 /** @internal */
+export interface WaitForTaskResponseError {
+  type: string;
+  reason?: string | null;
+  index?: string;
+  caused_by?: WaitForTaskResponseError;
+}
+
+/** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason?: string | null; index?: string }>;
+  error: Option.Option<WaitForTaskResponseError>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;

@@ -6,9 +6,9 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { EcsMappingState } from '../../types';
+import type { EcsMappingState } from '../../types';
 import { ECS_MISSING_KEYS_PROMPT } from './prompts';
-import { EcsNodeParams } from './types';
+import type { EcsNodeParams } from './types';
 
 export async function handleMissingKeys({
   state,

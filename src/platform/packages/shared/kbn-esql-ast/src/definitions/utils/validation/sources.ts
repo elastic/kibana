@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLMessage, ESQLSource } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ESQLMessage, ESQLSource } from '../../../types';
+import type { ICommandContext } from '../../../commands_registry/types';
 import { sourceExists } from '../sources';
 import { getMessageFromId } from '../errors';
 

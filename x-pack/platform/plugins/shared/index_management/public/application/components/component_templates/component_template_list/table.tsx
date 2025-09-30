@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiInMemoryTableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
-  EuiInMemoryTableProps,
   EuiTextColor,
   EuiIcon,
   EuiLink,
@@ -21,12 +22,12 @@ import {
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
-  EuiSelectableOption,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
+import type { ComponentTemplateListItem } from '../shared_imports';
+import { reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
@@ -194,8 +195,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         <EuiButton
           fill
           iconType="plusInCircle"
-          data-test-subj="createPipelineButton"
-          key="createPipelineButton"
+          data-test-subj="createComponentTemplateButton"
+          key="createComponentTemplateButton"
           {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {

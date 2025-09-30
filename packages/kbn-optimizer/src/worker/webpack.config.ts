@@ -24,7 +24,8 @@ import {
 } from '@kbn/optimizer-webpack-helpers';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
-import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
+import type { Bundle, BundleRemotes, WorkerConfig } from '../common';
+import { parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plugin';

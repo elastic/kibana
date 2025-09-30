@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { castArray } from 'lodash';
-import moment, { unitOfTime } from 'moment';
-import { SynthtraceGenerator } from '../types';
-import { Fields } from './entity';
-import { Serializable } from './serializable';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
+import type { SynthtraceGenerator } from '../types';
+import type { Fields } from './entity';
+import type { Serializable } from './serializable';
 import { TimerangeProgressReporter } from './timerange_progress_reporter';
 
 export function parseInterval(interval: string): {

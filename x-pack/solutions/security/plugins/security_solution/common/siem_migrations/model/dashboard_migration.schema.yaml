@@ -6,6 +6,11 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    OriginalDashboardVendor:
+      type: string
+      description: The original dashboard vendor identifier.
+      enum:
+        - splunk
 
     DashboardMigration:
       description: The dashboard migration object with its settings.
@@ -18,6 +23,62 @@ components:
               description: The dashboard migration id
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/DashboardMigrationData'
+
+    DashboardMigrationTranslationStats:
+      type: object
+      description: The dashboard migration translation stats object.
+      required:
+        - id
+        - dashboards
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        dashboards:
+          type: object
+          description: The dashboards migration translation stats.
+          required:
+            - total
+            - success
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of dashboards in the migration.
+            success:
+              type: object
+              description: The number of dashboards that have been successfully translated.
+              required:
+                - total
+                - result
+                - installable
+              properties:
+                total:
+                  type: integer
+                  description: The total number of dashboards that have been successfully translated.
+                result:
+                  type: object
+                  description: The translation results
+                  required:
+                    - full
+                    - partial
+                    - untranslatable
+                  properties:
+                    full:
+                      type: integer
+                      description: The number of dashboards that have been fully translated.
+                    partial:
+                      type: integer
+                      description: The number of dashboards that have been partially translated.
+                    untranslatable:
+                      type: integer
+                      description: The number of dashboards that could not be translated.
+                installable:
+                  type: integer
+                  description: The number of dashboards that have been successfully translated and can be installed.
+            failed:
+              type: integer
+              description: The number of dashboards that have failed translation.
 
     DashboardMigrationData:
       type: object
@@ -34,12 +95,11 @@ components:
           description: The user profile ID of the user who created the migration.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         created_at:
-          description:  The moment migration was created
+          description: The moment migration was created
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
           description: The last execution of the dashboard migration task.
           $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
-
 
     DashboardMigrationDashboard:
       description: The dashboard migration document object.
@@ -75,16 +135,41 @@ components:
         original_dashboard:
           description: The original dashboard to migrate.
           $ref: '#/components/schemas/OriginalDashboard'
+        elastic_dashboard:
+          description: The translated elastic dashboard.
+          $ref: '#/components/schemas/ElasticDashboard'
+        translation_result:
+          description: The rule translation result.
+          $ref: './common.schema.yaml#/components/schemas/MigrationTranslationResult'
         status:
           description: The status of the dashboard migration process.
           $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
         updated_at:
           type: string
           description: The moment of the last update
         updated_by:
           type: string
           description: The user who last updated the migration
+
+    UpdateMigrationDashboard:
+      type: object
+      description: The dashboard migration data object for dashboard update operation
+      required:
+        - id
+      properties:
+        id:
+          description: The dashboard migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_dashboard:
+          description: The migrated elastic dashboard attributes to update.
+          $ref: '#/components/schemas/ElasticDashboardPartial'
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
 
     OriginalDashboard:
       type: object
@@ -94,7 +179,6 @@ components:
         - title
         - description
         - data
-        - last_updated
         - format
       description: The raw dashboard object from different vendors
       properties:
@@ -102,8 +186,8 @@ components:
           type: string
           description: The unique identifier for the dashboard
         vendor:
-          type: string
-          description: The vendor of the dashboard (e.g., 'splunk')
+          description: The original dashboard vendor identifier.
+          $ref: '#/components/schemas/OriginalDashboardVendor'
         title:
           type: string
           description: The title of the dashboard
@@ -111,66 +195,59 @@ components:
           type: string
           description: The description of the dashboard
         data:
-          type: object
-          description: The data of the dashboard, typically in JSON format
+          type: string
+          description: The data of the dashboard in the specified format
         last_updated:
           type: string
           description: The last updated timestamp of the dashboard
         format:
           type: string
-          description: The format of the dashboard (e.g., 'json', 'xml')
+          description: The format of the dashboard data (e.g., 'json', 'xml')
         splunk_properties:
           description: Additional properties specific to the splunk
           $ref: './vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardProperties'
 
-    DashboardMigrationTaskStats:
+    ElasticDashboard:
       type: object
-      description: The dashboard migration task stats object.
+      description: The elastic dashboard translation.
       required:
-        - id
-        - name
-        - status
-        - dashboard
-        - created_at
-        - last_updated_at
+        - title
       properties:
         id:
-          description: The migration id
-          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        name:
-          description: The migration name
-          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        status:
-          description: Indicates if the migration task status.
-          $ref: './common.schema.yaml#/components/schemas/MigrationTaskStatus'
-        dashboards:
-          type: object
-          description: The dashboards migration stats.
-          required:
-            - total
-            - pending
-            - processing
-            - completed
-            - failed
-          properties:
-            total:
-              type: integer
-              description: The total number of dashboards to migrate.
-            pending:
-              type: integer
-              description: The number of dashboards that are pending migration.
-            processing:
-              type: integer
-              description: The number of dashboards that are being migrated.
-            completed:
-              type: integer
-              description: The number of dashboards that have been migrated successfully.
-            failed:
-              type: integer
-              description: The number of dashboards that have failed migration.
-        created_at:
           type: string
-          description: The moment the migration was created.
-        last_updated_at:
+          description: The unique identifier for the dashboard installed Saved Object
+        title:
           type: string
-          description: The moment of the last update.
+          description: The title of the dashboard
+        description:
+          type: string
+          description: The description of the dashboard
+        data:
+          type: string
+          description: The data of the dashboard, format could depend on the vendor
+
+    ElasticDashboardPartial:
+      description: The partial version of the migrated elastic dashboard.
+      $ref: '#/components/schemas/ElasticDashboard'
+      x-modify: partial
+
+    DashboardMigrationTaskStats:
+      description: The dashboard migration task stats object.
+      $ref: './common.schema.yaml#/components/schemas/MigrationTaskStats'
+
+    DashboardMigrationTaskExecutionSettings:
+      type: object
+      description: The dashboard migration task execution settings.
+      required:
+        - connector_id
+      properties:
+        connector_id:
+          type: string
+          description: The connector ID used in the last execution.
+
+    DashboardMigrationRetryFilter:
+      type: string
+      description: Indicates the filter to retry the migrations dashboards translation
+      enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
+        - failed
+        - not_fully_translated

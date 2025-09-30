@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';

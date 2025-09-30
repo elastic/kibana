@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { invokeAttackDiscoveryGraph } from '../post/helpers/invoke_attack_discovery_graph';
 

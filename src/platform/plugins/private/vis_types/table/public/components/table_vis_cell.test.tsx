@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { createTableVisCell } from './table_vis_cell';
-import { FormattedColumns } from '../types';
+import type { FormattedColumns } from '../types';
 
 describe('table vis cell', () => {
   it('should return a cell component with data in scope', () => {

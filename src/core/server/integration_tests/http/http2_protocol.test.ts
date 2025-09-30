@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server } from 'http';
+import type { Server } from 'http';
 import supertest from 'supertest';
 import { of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';

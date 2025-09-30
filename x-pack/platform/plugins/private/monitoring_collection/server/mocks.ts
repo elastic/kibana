@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCollectionSetup } from '.';
+import type { MonitoringCollectionSetup } from '.';
 
 const createSetupMock = (): jest.Mocked<MonitoringCollectionSetup> => {
   const mock = {

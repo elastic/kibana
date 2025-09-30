@@ -7,14 +7,13 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  ReindexStatusResponse,
-  ReindexStatus,
-  ReindexStep,
-  IndexWarning,
-} from '../../../../../../common/types';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexStatusResponse, IndexWarning } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
+import { generateNewIndexName } from './index_settings';
 
 const POLL_INTERVAL = 3000;
 
@@ -117,12 +116,14 @@ export const useReindex = ({
   isInDataStream,
   isClosedIndex,
   api,
+  kibanaVersion,
 }: {
   indexName: string;
   isFrozen: boolean;
   isInDataStream: boolean;
   isClosedIndex: boolean;
   api: ApiService;
+  kibanaVersion: Version;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
@@ -218,6 +219,8 @@ export const useReindex = ({
       return;
     }
 
+    data.meta.reindexName = generateNewIndexName(indexName, kibanaVersion);
+
     setReindexState((prevValue: ReindexState) => {
       return getReindexState(prevValue, data);
     });
@@ -228,7 +231,7 @@ export const useReindex = ({
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
       simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
+  }, [clearPollInterval, api, indexName, simulateExtraSteps, kibanaVersion]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
@@ -244,7 +247,9 @@ export const useReindex = ({
       };
     });
 
-    const { data: reindexOp, error } = await api.startReindexTask(indexName);
+    const newIndexName = generateNewIndexName(indexName, kibanaVersion);
+
+    const { data: reindexOp, error } = await api.startReindexTask({ indexName, newIndexName });
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -259,10 +264,13 @@ export const useReindex = ({
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, {
+        reindexOp: reindexOp || undefined,
+        meta: prevValue.meta,
+      });
     });
     updateStatus();
-  }, [api, indexName, updateStatus]);
+  }, [api, indexName, updateStatus, kibanaVersion]);
 
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {

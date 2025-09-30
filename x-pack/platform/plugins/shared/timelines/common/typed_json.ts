@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonObject } from '@kbn/utility-types';
-import { BoolQuery } from '@kbn/es-query';
+import type { JsonObject } from '@kbn/utility-types';
+import type { BoolQuery } from '@kbn/es-query';
 
 export type ESQuery =
   | ESRangeQuery

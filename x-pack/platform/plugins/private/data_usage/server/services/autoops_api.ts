@@ -10,17 +10,16 @@ import https from 'https';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import { LogMeta } from '@kbn/core/server';
+import type { LogMeta } from '@kbn/core/server';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { momentDateParser } from '../../common/utils';
-import {
-  UsageMetricsAutoOpsResponseSchema,
-  type UsageMetricsAutoOpsResponseSchemaBody,
-  type UsageMetricsRequestBody,
-} from '../../common/rest_types';
-import { AutoOpsConfig } from '../types';
+import { METRIC_TYPE_VALUES, type MetricTypes } from '../../common/rest_types';
+import type { UsageMetricsRequestBody } from '../routes/internal/usage_metrics';
+import type { AutoOpsConfig } from '../types';
 import { AutoOpsError } from '../errors';
 import { appContextService } from './app_context';
 
@@ -212,3 +211,33 @@ export class AutoOpsAPIService {
     return error.cause;
   };
 }
+
+export const metricTypesSchema = schema.oneOf(
+  METRIC_TYPE_VALUES.map((metricType) => schema.literal(metricType)) as [Type<MetricTypes>] // Create a oneOf schema for the keys
+);
+
+const UsageMetricsAutoOpsResponseSchema = {
+  body: () =>
+    schema.recordOf(
+      metricTypesSchema,
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          error: schema.nullable(schema.string()),
+          data: schema.maybe(
+            schema.nullable(
+              schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }))
+            )
+          ),
+        })
+      )
+    ),
+};
+
+export type UsageMetricsAutoOpsResponseMetricSeries = TypeOf<
+  typeof UsageMetricsAutoOpsResponseSchema.body
+>[MetricTypes][number];
+
+export type UsageMetricsAutoOpsResponseSchemaBody = Partial<
+  Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>
+>;

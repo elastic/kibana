@@ -6,7 +6,7 @@
  */
 
 import { TRANSACTION_DURATION, TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
-import { SetupUX } from '../../../typings/ui_filters';
+import type { SetupUX } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
 import { callDateMath } from './call_date_math';
 import { mergeProjection } from '../../../common/utils/merge_projection';

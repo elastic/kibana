@@ -89,11 +89,13 @@ describe('links', () => {
       getLinksWithout(
         SecurityPageName.blocklist,
         SecurityPageName.endpoints,
+        SecurityPageName.endpointExceptions,
         SecurityPageName.eventFilters,
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.policies,
         SecurityPageName.responseActionsHistory,
-        SecurityPageName.trustedApps
+        SecurityPageName.trustedApps,
+        SecurityPageName.trustedDevices
       )
     );
   });
@@ -202,6 +204,18 @@ describe('links', () => {
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
+    });
+
+    it('should hide Endpoint Exceptions for user without privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointExceptions: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.endpointExceptions));
     });
 
     it('should hide Event Filters for user without privilege', async () => {

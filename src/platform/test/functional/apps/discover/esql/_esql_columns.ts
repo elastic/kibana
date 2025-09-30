@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS = 'nonTransformationalInitialColumns';
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'nonTransformationalCustomColumns';

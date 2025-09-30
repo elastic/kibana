@@ -8,7 +8,7 @@
 import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { Job } from '@kbn/reporting-public';
+import type { Job } from '@kbn/reporting-public';
 import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { Frequency } from '@kbn/rrule';
 import type {
@@ -19,7 +19,7 @@ import {
   RRULE_TO_ISO_WEEKDAYS,
   RecurrenceEnd,
 } from '@kbn/response-ops-recurring-schedule-form/constants';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ScheduledReport } from '../types';
 
 /**

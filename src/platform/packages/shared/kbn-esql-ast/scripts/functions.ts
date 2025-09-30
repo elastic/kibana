@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, FunctionDefinitionTypes } from '../src/definitions/types';
+import type { FunctionDefinition } from '../src/definitions/types';
+import { FunctionDefinitionTypes } from '../src/definitions/types';
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
-  dateDiffOptions,
   dateExtractOptions,
 } from './constants';
 
@@ -50,28 +50,20 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   date_diff: {
     signatures: [
       {
-        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
+        params: [{ suggestedValues: dateDiffSuggestions }],
       },
     ],
   },
   date_extract: {
     signatures: [
       {
-        params: [{ acceptedValues: dateExtractOptions }],
-      },
-    ],
-  },
-  date_trunc: {
-    signatures: [
-      {
-        // override the first param to be of type time_duration
-        params: [{ type: 'time_duration' }],
+        params: [{ suggestedValues: dateExtractOptions }],
       },
     ],
   },
   mv_sort: {
     signatures: new Array(10).fill({
-      params: [{}, { acceptedValues: ['asc', 'desc'] }],
+      params: [{}, { suggestedValues: ['asc', 'desc'] }],
     }),
   },
   percentile: {
@@ -81,7 +73,11 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   },
   top: {
     signatures: new Array(6).fill({
-      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
+      params: [
+        {},
+        { constantOnly: true },
+        { constantOnly: true, suggestedValues: ['asc', 'desc'] },
+      ],
     }),
   },
   count: {

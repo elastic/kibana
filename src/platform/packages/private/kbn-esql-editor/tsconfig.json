@@ -32,13 +32,14 @@
     "@kbn/content-management-favorites-common",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/shared-ux-table-persist",
     "@kbn/esql-types",
     "@kbn/field-types",
-    "@kbn/licensing-plugin",
     "@kbn/i18n-react",
     "@kbn/esql-ast",
-    "@kbn/restorable-state"
+    "@kbn/restorable-state",
+    "@kbn/licensing-types",
+    "@kbn/index-editor",
+    "@kbn/react-hooks"
   ],
   "exclude": [
     "target/**/*",

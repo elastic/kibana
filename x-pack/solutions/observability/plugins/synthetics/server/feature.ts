@@ -7,14 +7,13 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
@@ -85,7 +84,6 @@ export const syntheticsFeature = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },

@@ -70,6 +70,7 @@ export async function buildArtifact(
 export type ArtifactListId =
   | typeof ENDPOINT_LIST_ID
   | typeof ENDPOINT_ARTIFACT_LISTS.trustedApps.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
   | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
   | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
   | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id;

@@ -18,17 +18,19 @@ export const GRID_SIZE = 10;
 /**
  * The vertical padding between nodes when being stacked, in pixels.
  */
-export const STACK_NODE_VERTICAL_PADDING = 24;
+export const STACK_NODE_VERTICAL_PADDING = 20;
 
 /**
  * The horizontal padding between nodes when being stacked, in pixels.
  */
 export const STACK_NODE_HORIZONTAL_PADDING = 20;
 
-/**
- * Minimum height of a stack node, in pixels.
- * Must be a multiple of `GRID_SIZE * 2`.
- */
-export const STACK_NODE_MIN_HEIGHT = 60;
-
-export { NODE_WIDTH, NODE_HEIGHT, NODE_LABEL_WIDTH, NODE_LABEL_HEIGHT } from './node/styles';
+export {
+  NODE_WIDTH,
+  NODE_HEIGHT,
+  ENTITY_NODE_TOTAL_HEIGHT,
+  NODE_LABEL_TOTAL_HEIGHT,
+  NODE_LABEL_WIDTH,
+  NODE_LABEL_HEIGHT,
+  NODE_LABEL_DETAILS,
+} from './node/styles';

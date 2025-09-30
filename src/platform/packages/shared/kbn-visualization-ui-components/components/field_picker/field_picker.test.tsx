@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { FieldPicker, FieldPickerProps } from './field_picker';
+import type { FieldPickerProps } from './field_picker';
+import { FieldPicker } from './field_picker';
 import { render, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
-import { DataType, FieldOptionValue } from './types';
+import type { DataType, FieldOptionValue } from './types';
 
 const generateFieldWithLabelOfLength = (length: number) => ({
   label: faker.string.alpha(length),

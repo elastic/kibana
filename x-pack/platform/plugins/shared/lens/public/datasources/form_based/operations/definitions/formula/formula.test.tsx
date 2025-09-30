@@ -15,10 +15,10 @@ import {
 import type { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
-import { IndexPattern } from '../../../../../types';
-import { TermsIndexPatternColumn } from '../terms';
+import type { IndexPattern } from '../../../../../types';
+import type { TermsIndexPatternColumn } from '../terms';
 import type { MovingAverageIndexPatternColumn } from '../calculations';
-import { StaticValueIndexPatternColumn } from '../static_value';
+import type { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';

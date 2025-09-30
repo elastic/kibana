@@ -11,16 +11,28 @@ import {
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
+  isIdentifier,
   isIntegerLiteral,
   isLiteral,
+  isParamLiteral,
   isProperNode,
 } from '../ast/is';
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
-import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
-import { ESQLAstExpressionNode, Visitor } from '../visitor';
+import {
+  BinaryExpressionGroup,
+  binaryExpressionGroup,
+  unaryExpressionGroup,
+} from '../ast/grouping';
+import type { ESQLAstExpressionNode } from '../visitor';
+import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
+import type {
+  ESQLAstBaseItem,
+  ESQLAstCommand,
+  ESQLAstQueryExpression,
+  ESQLProperNode,
+} from '../types';
 
 export interface BasicPrettyPrinterOptions {
   /**
@@ -69,11 +81,14 @@ export class BasicPrettyPrinter {
    * @returns A single-line string representation of the query.
    */
   public static readonly print = (
-    query: ESQLAstQueryExpression,
+    node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter(opts);
-    return printer.print(query);
+    return node.type === 'query'
+      ? BasicPrettyPrinter.query(node, opts)
+      : node.type === 'command'
+      ? BasicPrettyPrinter.command(node, opts)
+      : BasicPrettyPrinter.expression(node, opts);
   };
 
   /**
@@ -87,8 +102,17 @@ export class BasicPrettyPrinter {
   public static readonly multiline = (
     query: ESQLAstQueryExpression,
     opts?: BasicPrettyPrinterMultilineOptions
+  ): string => BasicPrettyPrinter.print(query, { ...opts, multiline: true });
+
+  /**
+   * @param query ES|QL query AST to print.
+   * @returns A single-line string representation of the query.
+   */
+  public static readonly query = (
+    query: ESQLAstQueryExpression,
+    opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter({ ...opts, multiline: true });
+    const printer = new BasicPrettyPrinter(opts);
     return printer.print(query);
   };
 
@@ -305,7 +329,21 @@ export class BasicPrettyPrinter {
           operator = this.keyword(operator);
 
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          const formatted = `${operator}${separator}${ctx.visitArgument(0, undefined)}`;
+
+          const argument = ctx.arguments()[0];
+          let argumentFormatted = ctx.visitArgument(0, undefined);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted = `(${argumentFormatted})`;
+          }
+
+          const formatted = `${operator}${separator}${argumentFormatted}`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }
@@ -358,8 +396,14 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
-          if (opts.lowercaseFunctions) {
-            operator = operator.toLowerCase();
+          // Check if function name is a parameter stored in node.operator
+          if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+            operator = LeafPrinter.param(ctx.node.operator);
+          } else {
+            if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
+              operator = ctx.node.operator.name;
+            }
+            operator = opts.lowercaseFunctions ? operator.toLowerCase() : operator.toUpperCase();
           }
 
           let args = '';

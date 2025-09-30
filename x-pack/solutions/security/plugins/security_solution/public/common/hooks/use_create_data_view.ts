@@ -21,7 +21,7 @@ interface UseCreateDataViewParams {
   /**
    * Whether to skip the data view creation.
    */
-  skip: boolean;
+  skip?: boolean;
 }
 
 interface UseCreateDataViewResults {
@@ -43,7 +43,7 @@ interface UseCreateDataViewResults {
 export const useCreateDataView = ({
   dataViewSpec,
   loading = false,
-  skip,
+  skip = false,
 }: UseCreateDataViewParams): UseCreateDataViewResults => {
   const { dataViews } = useKibana().services;
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);

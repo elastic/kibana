@@ -8,7 +8,7 @@
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { Runnable } from '@langchain/core/runnables';
+import type { Runnable } from '@langchain/core/runnables';
 import { StructuredOutputParser } from '@langchain/core/output_parsers';
 
 import type { GraphInsightTypes } from '../../../../graphs';

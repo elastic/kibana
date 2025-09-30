@@ -30,7 +30,7 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 
 /** This constant refers to the parts of the saved search state that can be edited from a dashboard */
-export const EDITABLE_SAVED_SEARCH_KEYS: Readonly<Array<keyof SavedSearchAttributes>> = [
+export const EDITABLE_SAVED_SEARCH_KEYS = [
   'sort',
   'columns',
   'rowHeight',
@@ -39,7 +39,7 @@ export const EDITABLE_SAVED_SEARCH_KEYS: Readonly<Array<keyof SavedSearchAttribu
   'headerRowHeight',
   'density',
   'grid',
-] as const;
+] as const satisfies ReadonlyArray<keyof SavedSearchAttributes>;
 
 /** This constant refers to the dashboard panel specific state */
 export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableSerializedState>> = [

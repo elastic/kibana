@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { RiskScoreMapping } from '../risk_score_mapping';
 
 /**

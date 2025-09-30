@@ -7,7 +7,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';

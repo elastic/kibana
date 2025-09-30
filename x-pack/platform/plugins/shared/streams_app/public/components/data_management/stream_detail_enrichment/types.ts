@@ -5,48 +5,41 @@
  * 2.0.
  */
 
-import {
-  DateProcessorConfig,
-  DissectProcessorConfig,
-  GrokProcessorConfig,
-  ProcessorDefinition,
-  ProcessorTypeOf,
-} from '@kbn/streams-schema';
-import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
-import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
-
-export type WithUIAttributes<T extends ProcessorDefinition> = T & {
-  id: string;
-  type: ProcessorTypeOf<T>;
-};
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type {
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  SetProcessor,
+  StreamlangWhereBlockWithUIAttributes,
+} from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
 /**
  * Processors' types
  */
-export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
-export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
-  type: 'grok';
+export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
   patterns: DraftGrokExpression[];
 };
 
-export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
+export type DissectFormState = DissectProcessor;
+export type DateFormState = DateProcessor;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 
-export type DateFormState = DateProcessorConfig & { type: 'date' };
-
-export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig & {
-  type: 'manual_ingest_pipeline';
-};
+export type SetFormState = SetProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
-  | ManualIngestPipelineFormState;
+  | ManualIngestPipelineFormState
+  | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

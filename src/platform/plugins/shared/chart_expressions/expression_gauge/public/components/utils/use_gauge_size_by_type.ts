@@ -8,8 +8,9 @@
  */
 
 import { useEffect } from 'react';
-import { ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { GaugeShape, GaugeShapes } from '../../../common';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { GaugeShape } from '../../../common';
+import { GaugeShapes } from '../../../common';
 
 export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSizeSpec) => void) => {
   useEffect(() => {

@@ -28,7 +28,7 @@ import {
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,

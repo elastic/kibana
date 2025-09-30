@@ -23,6 +23,20 @@
             }
           }
         },
+        "user": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "geo": {
+          "properties": {
+            "country_name": {
+              "type": "keyword"
+            }
+          }
+        },
         "observer": {
           "properties": {
             "os": {

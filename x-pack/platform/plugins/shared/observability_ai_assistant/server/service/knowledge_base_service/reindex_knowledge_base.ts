@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { last } from 'lodash';
 import pRetry from 'p-retry';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import { resourceNames } from '..';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { createKnowledgeBaseIndex } from './create_knowledge_base_index';
 import { updateKnowledgeBaseWriteIndexAlias } from './update_knowledge_base_index_alias';
 

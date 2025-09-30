@@ -37,7 +37,10 @@ jest.mock('@kbn/react-kibana-mount', () => {
     toMountPoint: jest.fn(),
   };
 });
-describe('use_update_data_view', () => {
+
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('use_update_data_view', () => {
   const mockError = jest.fn();
 
   beforeEach(() => {

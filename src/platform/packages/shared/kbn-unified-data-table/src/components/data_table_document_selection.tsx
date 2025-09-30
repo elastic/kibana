@@ -10,11 +10,11 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridCellValueElementProps,
   EuiDataGridToolbarControl,
   EuiPopover,
   EuiFlexGroup,
@@ -33,6 +33,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
+import type { CustomBulkActions } from '../types';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
@@ -153,6 +154,7 @@ export function DataTableDocumentToolbarBtn({
   pageSize,
   toastNotifications,
   columns,
+  customBulkActions,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -166,6 +168,7 @@ export function DataTableDocumentToolbarBtn({
   pageSize: number | undefined;
   toastNotifications: ToastsStart;
   columns: string[];
+  customBulkActions?: CustomBulkActions;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
@@ -185,6 +188,24 @@ export function DataTableDocumentToolbarBtn({
 
   const getMenuItems = useCallback(() => {
     return [
+      // Custom bulk actions
+      ...(customBulkActions
+        ? customBulkActions.map((bulkAction) => {
+            return (
+              <EuiContextMenuItem
+                data-test-subj={bulkAction['data-test-subj']}
+                key={bulkAction.key}
+                icon={bulkAction.icon}
+                onClick={() => {
+                  closePopover();
+                  bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
+                }}
+              >
+                {bulkAction.label}
+              </EuiContextMenuItem>
+            );
+          })
+        : []),
       // Compare selected documents
       ...(enableComparisonMode && selectedDocsCount > 1
         ? [
@@ -284,6 +305,7 @@ export function DataTableDocumentToolbarBtn({
     isPlainRecord,
     setIsFilterActive,
     clearAllSelectedDocs,
+    customBulkActions,
   ]);
 
   const toggleSelectionToolbar = useCallback(

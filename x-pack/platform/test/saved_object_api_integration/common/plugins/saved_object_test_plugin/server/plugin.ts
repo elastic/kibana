@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObject } from '@kbn/core/server';
+import type { CoreSetup, SavedObject } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}
@@ -78,6 +78,27 @@ export class Plugin {
       namespaceType: 'multiple',
       management,
       mappings,
+    });
+    core.savedObjects.registerType({
+      name: 'nestedtype',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          author: { type: 'keyword' },
+          comments: {
+            type: 'nested',
+            properties: {
+              user: { type: 'keyword' },
+              message: { type: 'text' },
+              date: { type: 'date' },
+              rating: { type: 'integer' },
+            },
+          },
+        },
+      },
     });
   }
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { LicenseStatus } from '../common';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicenseStatus } from '../common';
 
 export interface AppServerPluginDependencies {
   licensing: LicensingPluginSetup;

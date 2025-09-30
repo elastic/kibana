@@ -17,7 +17,7 @@ import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/tel
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 

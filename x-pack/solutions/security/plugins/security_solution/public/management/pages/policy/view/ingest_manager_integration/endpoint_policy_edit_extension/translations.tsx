@@ -95,3 +95,26 @@ export const TRUSTED_APPS_LABELS = {
     />
   ),
 };
+
+export const TRUSTED_DEVICES_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedDevicesSummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch trusted devices stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.trustedDevices.fleetIntegration.title"
+      defaultMessage="Trusted devices"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.trustedDevicesManageLabel"
+      defaultMessage="Manage trusted devices"
+    />
+  ),
+};

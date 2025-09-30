@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DynamicActionsState } from '../../common';
+import type { DynamicActionsState } from '../../common';
 import { getMetricKey } from './get_metric_key';
 
 export const dynamicActionsCollector = (

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-  SynthtraceClientsManager,
 } from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
+import { SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extendToolingLog } from '@kbn/apm-synthtrace';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 export interface SynthtraceEsClients {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;

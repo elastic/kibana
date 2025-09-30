@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsAggregationContainer,
   AggregationsDateRangeAggregate,
   AggregationsSumAggregate,
@@ -13,14 +13,14 @@ import {
   SearchSearchRequestBody,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Duration, SLODefinition } from '../domain/models';
+import type { DateRange, Duration, SLODefinition } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';

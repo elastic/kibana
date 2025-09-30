@@ -1,0 +1,349 @@
+{
+  "id": "@kbn/core-di",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.PluginSetup",
+        "type": "Function",
+        "tags": [],
+        "label": "PluginSetup",
+        "description": [
+          "\nPlugin's setup dependency."
+        ],
+        "signature": [
+          "(plugin: string | number | symbol) => ",
+          "ServiceIdentifier",
+          "<T>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di",
+            "id": "def-common.PluginSetup.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "plugin",
+            "description": [
+              "The dependency plugin name."
+            ],
+            "signature": [
+              "string | number | symbol"
+            ],
+            "path": "src/core/packages/di/common/src/services/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.PluginStart",
+        "type": "Function",
+        "tags": [],
+        "label": "PluginStart",
+        "description": [
+          "\nPlugin's start dependency."
+        ],
+        "signature": [
+          "(plugin: string | number | symbol) => ",
+          "ServiceIdentifier",
+          "<T>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di",
+            "id": "def-common.PluginStart.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "plugin",
+            "description": [
+              "The dependency plugin name."
+            ],
+            "signature": [
+              "string | number | symbol"
+            ],
+            "path": "src/core/packages/di/common/src/services/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.CoreDiServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreDiServiceSetup",
+        "description": [
+          "\nPublic setup contract of the DI service."
+        ],
+        "path": "src/core/packages/di/common/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di",
+            "id": "def-common.CoreDiServiceSetup.getContainer",
+            "type": "Function",
+            "tags": [],
+            "label": "getContainer",
+            "description": [
+              "\nGet the plugin-scoped container"
+            ],
+            "signature": [
+              "() => ",
+              "Container"
+            ],
+            "path": "src/core/packages/di/common/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.CoreDiServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreDiServiceStart",
+        "description": [
+          "\nPublic start contract of the DI service."
+        ],
+        "signature": [
+          "CoreDiServiceStart",
+          " extends ",
+          "CoreDiServiceSetup"
+        ],
+        "path": "src/core/packages/di/common/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di",
+            "id": "def-common.CoreDiServiceStart.fork",
+            "type": "Function",
+            "tags": [],
+            "label": "fork",
+            "description": [
+              "\nFork the current plugin scope"
+            ],
+            "signature": [
+              "() => ",
+              "Container"
+            ],
+            "path": "src/core/packages/di/common/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.Logger",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Logger",
+        "description": [
+          "\nPlugin's default logger instance."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.LoggerFactory",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "LoggerFactory",
+        "description": [
+          "\nPlugin's logger factory."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.OnSetup",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "OnSetup",
+        "description": [
+          "\nPlugin's setup lifecycle hook."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<(container: ",
+          "Container",
+          ") => void, any[]> | ",
+          "AbstractNewable",
+          "<(container: ",
+          "Container",
+          ") => void, any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.OnStart",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "OnStart",
+        "description": [
+          "\nPlugin's start lifecycle hook."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<(container: ",
+          "Container",
+          ") => void, any[]> | ",
+          "AbstractNewable",
+          "<(container: ",
+          "Container",
+          ") => void, any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.Setup",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Setup",
+        "description": [
+          "\nPlugin's setup contract."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<unknown, any[]> | ",
+          "AbstractNewable",
+          "<unknown, any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.Start",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Start",
+        "description": [
+          "\nPlugin's start contract."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<unknown, any[]> | ",
+          "AbstractNewable",
+          "<unknown, any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

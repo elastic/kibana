@@ -7,8 +7,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import rawExpect from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   PrivateLocation,
   ProjectMonitorsRequest,
   ServiceLocation,
@@ -22,7 +22,7 @@ import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';

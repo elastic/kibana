@@ -10,7 +10,8 @@ import moment from 'moment';
 
 import numeral from '@elastic/numeral';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_DS_DEPRECATION,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 

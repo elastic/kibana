@@ -45,6 +45,20 @@ describe('NumberFormat', () => {
   `);
   });
 
+  test('object input stringified', () => {
+    const formatter = new NumberFormat({}, getConfig);
+    expect(
+      formatter.convert('{"min":-302.5,"max":702.3,"sum":200.0,"value_count":25}')
+    ).toMatchInlineSnapshot(
+      `"{\\"min\\":-302.5,\\"max\\":702.3,\\"sum\\":200.0,\\"value_count\\":25}"`
+    );
+    expect(
+      formatter.convert('{"min":-302.5,"max":702.3,"sum":200.0,"value_count":25}', 'html')
+    ).toMatchInlineSnapshot(
+      `"{\\"min\\":-302.5,\\"max\\":702.3,\\"sum\\":200.0,\\"value_count\\":25}"`
+    );
+  });
+
   test('null input', () => {
     const formatter = new NumberFormat({}, getConfig);
     expect(formatter.convert(null)).toMatchInlineSnapshot(`"-"`);

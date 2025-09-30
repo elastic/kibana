@@ -8,8 +8,8 @@
 import { get, map, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
-import { Metric } from '../../../metrics/metrics';
-import { Bucket } from '../../../../types';
+import type { Metric } from '../../../metrics/metrics';
+import type { Bucket } from '../../../../types';
 
 type MetricBucket = Bucket & { metric_deriv?: { value: number; normalized_value: number } };
 interface TimeOptions {

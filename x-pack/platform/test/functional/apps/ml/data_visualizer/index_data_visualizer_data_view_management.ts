@@ -6,8 +6,8 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;

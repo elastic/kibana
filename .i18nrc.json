@@ -57,8 +57,6 @@
     "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "src/platform/packages/shared/kbn-grouping/src",
     "alertsGrouping": "x-pack/solutions/observability/packages/kbn-alerts-grouping",
-    "guidedOnboarding": "src/platform/plugins/shared/guided_onboarding",
-    "guidedOnboardingPackage": "src/platform/packages/shared/kbn-guided-onboarding",
     "home": "src/platform/plugins/shared/home",
     "homePackages": "src/platform/packages/shared/home",
     "indexPatternEditor": "src/platform/plugins/shared/data_view_editor",
@@ -86,6 +84,7 @@
       "src/platform/packages/shared/kbn-management",
       "packages/kbn-management"
     ],
+    "metricsExperience": "src/platform/packages/shared/kbn-unified-metrics-grid/src",
     "monaco": "src/platform/packages/shared/kbn-monaco/src",
     "navigation": ["src/platform/plugins/shared/navigation", "packages/solution-nav"],
     "links": "src/platform/plugins/private/links",

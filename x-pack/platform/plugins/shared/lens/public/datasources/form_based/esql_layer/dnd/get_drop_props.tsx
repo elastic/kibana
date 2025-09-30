@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DropType } from '@kbn/dom-drag-drop';
+import type { DropType } from '@kbn/dom-drag-drop';
 import { isOperation } from '../../../../types';
 import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../../types';

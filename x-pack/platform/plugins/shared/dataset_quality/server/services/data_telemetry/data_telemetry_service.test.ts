@@ -6,14 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { FetchResult } from '@kbn/task-manager-plugin/server/task_store';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { DataTelemetryEvent, DataTelemetryObject } from './types';
+import type { DataTelemetryEvent, DataTelemetryObject } from './types';
 import { MAX_STREAMS_TO_REPORT } from './constants';
 import { DataTelemetryService } from './data_telemetry_service';
 
@@ -470,7 +470,10 @@ function setupMocks() {
   const runTask = () => {
     const taskDefinitions = taskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
     const taskType = Object.keys(taskDefinitions)[0];
-    const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
+    const taskRunner = taskDefinitions[taskType].createTaskRunner({
+      taskInstance: {} as any,
+      abortController: new AbortController(),
+    });
 
     return taskRunner.run();
   };

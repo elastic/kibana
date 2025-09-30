@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { processors } from './processors';
+import { closeDataStream, rolloverDataStream } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -131,6 +132,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await synthtraceLogsEsClient.refresh();
         });
 
+        after(async () => {
+          await synthtraceLogsEsClient.clean();
+        });
+
         it('returns stats correctly', async () => {
           await retry.tryForTime(180 * 1000, async () => {
             const stats = await callApiAs(supertestViewerWithCookieCredentials);
@@ -151,10 +156,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             });
           });
         });
-
-        after(async () => {
-          await synthtraceLogsEsClient.clean();
-        });
       });
 
       describe('and there are not log documents', () => {
@@ -162,6 +163,113 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const stats = await callApiAs(supertestViewerWithCookieCredentials);
 
           expect(stats.body.failedDocs.length).to.be(0);
+        });
+      });
+
+      describe('when there are data streams closed', () => {
+        before(async () => {
+          await synthtraceLogsEsClient.index([
+            timerange(start, end)
+              .interval('1m')
+              .rate(1)
+              .generator((timestamp) =>
+                log
+                  .create()
+                  .message('This is a log message')
+                  .timestamp(timestamp)
+                  .dataset('synth.1')
+                  .defaults({
+                    'log.file.path': '/my-service.log',
+                  })
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(1)
+              .generator((timestamp) =>
+                log
+                  .create()
+                  .message('This is a log message')
+                  .timestamp(timestamp)
+                  .dataset('synth.2')
+                  .logLevel('5')
+                  .defaults({
+                    'log.file.path': '/my-service.log',
+                  })
+              ),
+          ]);
+
+          await closeDataStream(esClient, 'logs-synth.2-default::failures');
+        });
+
+        after(async () => {
+          await synthtraceLogsEsClient.clean();
+        });
+
+        it('returns stats correctly', async () => {
+          const stats = await callApiAs(supertestViewerWithCookieCredentials);
+
+          expect(stats.body.failedDocs.length).to.be(0);
+        });
+
+        describe('when new backing indices are open', () => {
+          before(async () => {
+            await rolloverDataStream(esClient, 'logs-synth.2-default::failures');
+
+            await synthtraceLogsEsClient.index([
+              timerange(start, end)
+                .interval('1m')
+                .rate(1)
+                .generator((timestamp) =>
+                  log
+                    .create()
+                    .message('This is a log message')
+                    .timestamp(timestamp)
+                    .dataset('synth.1')
+                    .defaults({
+                      'log.file.path': '/my-service.log',
+                    })
+                ),
+              timerange(start, end)
+                .interval('1m')
+                .rate(1)
+                .generator((timestamp) =>
+                  log
+                    .create()
+                    .message('This is a log message')
+                    .timestamp(timestamp)
+                    .dataset('synth.2')
+                    .logLevel('5')
+                    .defaults({
+                      'log.file.path': '/my-service.log',
+                    })
+                ),
+            ]);
+          });
+
+          after(async () => {
+            await synthtraceLogsEsClient.clean();
+          });
+
+          it('returns stats correctly when some of the backing indices are closed and others are open', async () => {
+            await retry.tryForTime(180 * 1000, async () => {
+              const stats = await callApiAs(supertestViewerWithCookieCredentials);
+              expect(stats.body.failedDocs.length).to.be(1);
+
+              const failedDocsStats = stats.body.failedDocs.reduce(
+                (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
+                  ...acc,
+                  [curr.dataset]: {
+                    count: curr.count,
+                  },
+                }),
+                {}
+              );
+
+              expect(failedDocsStats['logs-synth.2-default']).to.eql({
+                count: 1,
+              });
+            });
+          });
         });
       });
     });

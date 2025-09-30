@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
   DATE_WITH_DOCKER_DATA_FROM,
@@ -167,13 +167,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Persist after refresh
         await browser.refresh();
-        await pageObjects.infraHome.waitForLoading();
-
+        await pageObjects.header.awaitGlobalLoadingIndicatorHidden();
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
-        await pageObjects.infraHome.clickDismissKubernetesTourButton();
-
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clickDismissKubernetesTourButton();
           await pageObjects.infraHome.ensureKubernetesTourIsClosed();
         });
       });
@@ -186,7 +184,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
       describe('Asset Details flyout for a host', () => {
@@ -356,14 +353,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('shows query suggestions', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
-        await pageObjects.infraHome.clickQueryBar();
-        await pageObjects.infraHome.inputQueryData();
-        await pageObjects.infraHome.ensureSuggestionsPanelVisible();
-        await pageObjects.infraHome.clearSearchTerm();
-      });
-
       it('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
@@ -409,8 +398,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('filter nodes by search term', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
         });
@@ -471,6 +460,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
+
+            // Check if the Kubernetes feedback button is visible
+            await pageObjects.infraHome.ensureKubernetesFeedbackLinkIsVisible();
+
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 

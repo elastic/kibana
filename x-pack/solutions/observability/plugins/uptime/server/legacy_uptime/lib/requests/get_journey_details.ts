@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import {
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type {
   JourneyStep,
   SyntheticsJourneyApiResponse,
 } from '../../../../common/runtime_types/ping/synthetics';

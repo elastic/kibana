@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import { DatasetQualityDetailsControllerStateService } from '../../state_machines/dataset_quality_details_controller';
-import { ITelemetryClient } from '../../services/telemetry';
+import type { DatasetQualityDetailsControllerStateService } from '../../state_machines/dataset_quality_details_controller';
+import type { ITelemetryClient } from '../../services/telemetry';
 
 export interface DatasetQualityDetailsContextValue {
   service: DatasetQualityDetailsControllerStateService;

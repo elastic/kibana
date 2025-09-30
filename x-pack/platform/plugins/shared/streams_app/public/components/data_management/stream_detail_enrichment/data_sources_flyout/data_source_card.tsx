@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -21,14 +22,12 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from '../state_management/data_source_state_machine';
+import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
+import { useDataSourceSelector } from '../state_management/data_source_state_machine';
 import { AssetImage } from '../../../asset_image';
-import { PreviewTable } from '../../preview_table';
+import { PreviewTable } from '../../shared/preview_table';
 import { DATA_SOURCES_I18N } from './translations';
 
 interface DataSourceCardProps {

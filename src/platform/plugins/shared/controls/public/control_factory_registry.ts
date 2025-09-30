@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlFactory, DefaultControlApi } from './controls/types';
+import type { ControlFactory, DefaultControlApi } from './controls/types';
 
 const registry: { [key: string]: () => Promise<ControlFactory<any, any>> } = {};
 

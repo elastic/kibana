@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField, DataViewLazy } from '../../../../common';
-import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../../constants';
+import type { DataViewField, DataViewLazy } from '../../../../common';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
+import { SERVICE_KEY_LEGACY, SERVICE_KEY } from '../../../constants';
+import { toApiSpec } from '../util/to_api_spec';
 
 interface ResponseFormatterArgs {
   serviceKey: SERVICE_KEY_TYPE;
@@ -24,13 +26,13 @@ export const responseFormatter = async ({
   const response = {
     body: {
       fields: fields.map((field) => field.toSpec()),
-      [SERVICE_KEY]: await dataView.toSpec(),
+      [SERVICE_KEY]: toApiSpec(await dataView.toSpec()),
     },
   };
 
   const legacyResponse = {
     body: {
-      [SERVICE_KEY_LEGACY]: await dataView.toSpec(),
+      [SERVICE_KEY_LEGACY]: toApiSpec(await dataView.toSpec()),
       field: fields[0].toSpec(),
     },
   };

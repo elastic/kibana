@@ -8,8 +8,8 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SqlSearchStrategyResponse } from '../../../../common';
+import type { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlSearchStrategyResponse } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**

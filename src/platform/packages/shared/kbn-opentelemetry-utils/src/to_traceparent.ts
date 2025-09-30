@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpanContext } from '@opentelemetry/api';
+import type { SpanContext } from '@opentelemetry/api';
 
 export function toTraceparent(sc: SpanContext): string {
   const flags = sc.traceFlags.toString(16).padStart(2, '0');

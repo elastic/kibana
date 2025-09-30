@@ -6,21 +6,16 @@
  */
 
 import _ from 'lodash';
+import type { VECTOR_STYLES } from '../constants';
 import {
   AGG_DELIMITER,
   AGG_TYPE,
   FIELD_ORIGIN,
   JOIN_FIELD_NAME_PREFIX,
   LAYER_TYPE,
-  VECTOR_STYLES,
 } from '../constants';
 import { getJoinAggKey } from '../get_agg_key';
-import {
-  AggDescriptor,
-  JoinDescriptor,
-  LayerDescriptor,
-  VectorLayerDescriptor,
-} from '../descriptor_types';
+import type { AggDescriptor, JoinDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import type { MapAttributes } from '../content_management';
 
 const GROUP_BY_DELIMITER = '_groupby_';
@@ -65,7 +60,7 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layerDescriptor: LayerDescriptor) => {
+  layerList.forEach((layerDescriptor: { type: string }) => {
     if (
       // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
       layerDescriptor.type === 'VECTOR' ||

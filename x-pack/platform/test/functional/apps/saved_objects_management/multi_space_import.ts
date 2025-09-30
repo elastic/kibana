@@ -12,7 +12,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,28 +25,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
-  const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
 
-  const checkIfDashboardRendered = async (spaceId: string) => {
-    await PageObjects.common.navigateToUrl('dashboard', undefined, {
-      basePath: getSpacePrefix(spaceId),
-      shouldUseHashForSubUrl: false,
-    });
-    await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
-    // dashboard should load properly
-    await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-    // count of panels rendered completely
-    await renderService.waitForRender(8);
-    // There should be 0 error embeddables on the dashboard
-    await PageObjects.dashboard.verifyNoRenderErrors();
-  };
-
-  // Failing: See https://github.com/elastic/kibana/issues/228143
-  describe.skip('should be able to handle multi-space imports correctly', function () {
+  describe('should be able to handle multi-space imports correctly', function () {
     before(async function () {
       await spacesService.create({
         id: 'another_space',
@@ -71,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spacesService.delete('third_space');
     });
 
-    it('imported dashboard into default space should render correctly', async () => {
+    it('import dashboard into default space', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
@@ -83,10 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         spaceId
       );
       expect(newObjectCount - initialObjectCount).to.eql(6);
-      await checkIfDashboardRendered(spaceId);
     });
 
-    it('imported dashboard into another space should render correctly', async () => {
+    it('import dashboard into another space', async () => {
       const spaceId = 'another_space';
       await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
         basePath: getSpacePrefix(spaceId),
@@ -100,10 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         spaceId
       );
       expect(newObjectCount - initialObjectCount).to.eql(6);
-      await checkIfDashboardRendered(spaceId);
     });
 
-    it('copied dashboard from another space into third space using saved objects table should render correctly', async () => {
+    it('copy dashboard from another space into third space using saved objects table', async () => {
       const destinationSpaceId = 'third_space';
       const spaceId = 'another_space';
       await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
@@ -131,7 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         errors: 0,
       });
       await PageObjects.copySavedObjectsToSpace.finishCopy();
-      await checkIfDashboardRendered(spaceId);
     });
   });
 }

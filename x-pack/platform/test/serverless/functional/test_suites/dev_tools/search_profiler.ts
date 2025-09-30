@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const indexName = 'my_index';
 const testQuery = {
@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -90,6 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.searchProfiler.clickProfileButton();
 
+        await testSubjects.existOrFail('profileTree');
         const content = await PageObjects.searchProfiler.getProfileContent();
         expect(content).to.contain(indexName);
       });

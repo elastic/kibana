@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  FormulaPublicApi,
+  TermsIndexPatternColumn,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { DataViewsCommon } from './config_builder';
+import type { DataViewsCommon } from './config_builder';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -66,6 +70,9 @@ export interface LensBaseLayer {
   format?: 'bits' | 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
   decimals?: number;
   normalizeByUnit?: 's' | 'm' | 'h' | 'd';
+  suffix?: string;
+  fromUnit?: string;
+  toUnit?: string;
   compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
@@ -102,6 +109,7 @@ export interface LensConfigOptions {
 export interface LensAxisTitleVisibilityConfig {
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
+  showYRightAxisTitle?: boolean;
 }
 
 export interface LensYBoundsConfig {
@@ -138,6 +146,7 @@ export interface LensBreakdownTopValuesConfig {
   type: 'topValues';
   field: string;
   size?: number;
+  orderBy?: Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>;
 }
 
 export type LensBreakdownConfig =
@@ -238,10 +247,14 @@ export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHe
 
 export interface LensReferenceLineLayerBase {
   type: 'reference';
-  lineThickness?: number;
-  color?: string;
-  fill?: 'none' | 'above' | 'below';
-  value?: string;
+  yAxis: Array<
+    LensBaseLayer & {
+      lineThickness?: number;
+      color?: string;
+      fill?: 'none' | 'above' | 'below';
+      value?: string;
+    }
+  >;
 }
 
 export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseXYLayer;
@@ -288,10 +301,10 @@ export interface LensXYConfigBase {
   emphasizeFitting?: boolean;
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
+  valueLabels?: 'hide' | 'show';
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;
-  formulaAPI?: FormulaPublicApi;
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;

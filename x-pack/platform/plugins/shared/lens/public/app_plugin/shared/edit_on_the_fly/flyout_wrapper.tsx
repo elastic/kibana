@@ -20,8 +20,8 @@ import {
   EuiBetaBadge,
   EuiText,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +40,7 @@ export const FlyoutWrapper = ({
   onApply,
   isReadOnly,
 }: FlyoutWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isInlineFlyoutVisible && displayFlyoutHeader && (
@@ -47,7 +48,7 @@ export const FlyoutWrapper = ({
           hasBorder
           css={css`
             pointer-events: auto;
-            background-color: ${euiThemeVars.euiColorEmptyShade};
+            background-color: ${euiTheme.colors.emptyShade};
           `}
           data-test-subj="editFlyoutHeader"
         >
@@ -118,8 +119,8 @@ export const FlyoutWrapper = ({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          padding-left: ${euiTheme.components.forms.maxWidth};
+          margin-left: -${euiTheme.components.forms.maxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
             transform: initial;

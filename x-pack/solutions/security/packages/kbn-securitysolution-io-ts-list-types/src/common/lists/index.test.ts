@@ -8,7 +8,8 @@
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 import { getEndpointListMock, getListArrayMock, getListMock } from './index.mock';
-import { List, list, ListArray, listArray, ListArrayOrUndefined, listArrayOrUndefined } from '.';
+import type { List, ListArray, ListArrayOrUndefined } from '.';
+import { list, listArray, listArrayOrUndefined } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('Lists', () => {
@@ -85,7 +86,7 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}>"',
+        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_devices" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -116,8 +117,8 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}> | undefined)"',
-        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_devices" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "rule_default" | "endpoint" | "endpoint_trusted_devices" | "endpoint_trusted_apps" | "endpoint_events" | "endpoint_host_isolation_exceptions" | "endpoint_blocklists", namespace_type: "agnostic" | "single" |}> | undefined)"',
       ]);
       expect(message.schema).toEqual({});
     });

@@ -5,11 +5,11 @@ workflow:
   description: 'Remind users to enroll in JAMF'
   enabled: true
   triggers:
-    - type: triggers.elastic.scheduled
+    - type: scheduled
       with:
         every: 1
         unit: day
-    - type: triggers.elastic.manual
+    - type: manual
   inputs:
   consts:
     - name: jamf-server-url
@@ -23,7 +23,7 @@ workflow:
           Accept: 'application/json'
           Content-Type: 'application/json'
     - name: Send reminder
-      type: slack.sendMessage
+      type: slack
       foreach: '{{steps.get_unenrolled_users.results.users}}'
       with:
         message: 'Hi {{foreach.value.name}}, please enroll in JAMF.'
@@ -36,13 +36,13 @@ workflow:
           max-attempts: 3
           timeout: 5
     - name: Report success
-      type: slack.sendMessage
+      type: slack
       connectorId: 'uuid-slack-send-5678'
       with:
         message: 'Successfully sent reminder to {{keep.len(steps.send_reminder.results)}} users'
         channel: '{{consts.INFOSEC_CHANNEL}}'
     - name: Report failure # if we use some default behavior, how to ensure this step is not executed in case of success?
-      type: slack.sendMessage
+      type: slack
       connectorId: 'uuid-slack-send-5678'
       with:
         message: 'Failed to send JAMF reminder  due to {{error}}'

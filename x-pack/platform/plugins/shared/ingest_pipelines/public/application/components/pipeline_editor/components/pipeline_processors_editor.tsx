@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { memo, useMemo } from 'react';
 import { ProcessorsTree } from '.';
 import { usePipelineProcessorsContext } from '../context';
 
-import { ON_FAILURE_STATE_SCOPE, PROCESSOR_STATE_SCOPE } from '../processors_reducer';
+import type { ON_FAILURE_STATE_SCOPE, PROCESSOR_STATE_SCOPE } from '../processors_reducer';
 
 export interface Props {
   stateSlice: typeof ON_FAILURE_STATE_SCOPE | typeof PROCESSOR_STATE_SCOPE;

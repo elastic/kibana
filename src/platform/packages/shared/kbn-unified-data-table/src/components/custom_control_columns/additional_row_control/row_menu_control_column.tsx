@@ -8,16 +8,16 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridCellValueElementProps,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**

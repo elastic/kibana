@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
 import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { FilePicker, Props as FilePickerProps } from './file_picker';
+import type { Props as FilePickerProps } from './file_picker';
+import { FilePicker } from './file_picker';
 
 type ListResponse = ReturnType<FilesClient['list']>;
 type MetaDecorators = Pick<Meta, 'decorators'>;

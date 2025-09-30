@@ -15,21 +15,16 @@ import { sharedStateSelector } from '../redux/selectors';
  * The list excludes managed data views (default security solution data view and alert data view)
  */
 export const useSavedDataViews = (): DataViewListItem[] => {
-  const {
-    dataViews: dataViewSpecs,
-    defaultDataViewId,
-    alertDataViewId,
-  } = useSelector(sharedStateSelector);
+  const { dataViews: dataViewSpecs } = useSelector(sharedStateSelector);
 
   return useMemo(
     () =>
-      dataViewSpecs
-        .filter((dv) => dv.id !== defaultDataViewId && dv.id !== alertDataViewId)
-        .map((spec) => ({
-          id: spec.id ?? '',
-          title: spec.title ?? '',
-          name: spec.name,
-        })),
-    [dataViewSpecs, defaultDataViewId, alertDataViewId]
+      dataViewSpecs.map((spec) => ({
+        id: spec.id ?? '',
+        title: spec.title ?? '',
+        name: spec.name,
+        managed: spec.managed,
+      })),
+    [dataViewSpecs]
   );
 };

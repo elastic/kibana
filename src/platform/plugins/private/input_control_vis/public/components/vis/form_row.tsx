@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
-import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiToolTip, EuiIconTip } from '@elastic/eui';
 
 export interface FormRowProps {
   label: string;
@@ -32,9 +33,7 @@ export function FormRow(props: FormRowProps) {
 
   const label = props.warningMsg ? (
     <>
-      <EuiToolTip position="top" content={props.warningMsg}>
-        <EuiIcon type="warning" />
-      </EuiToolTip>
+      <EuiIconTip content={props.warningMsg} type="warning" position="top" />
       {props.label}
     </>
   ) : (

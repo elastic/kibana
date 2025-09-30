@@ -10,7 +10,7 @@ import React from 'react';
 import 'jest-styled-components';
 import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
-import { Tls } from '../../../../../common/runtime_types';
+import type { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from './status_bar';
 import * as redux from 'react-redux';
 import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../lib';

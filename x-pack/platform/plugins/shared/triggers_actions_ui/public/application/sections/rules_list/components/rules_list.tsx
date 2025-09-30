@@ -7,42 +7,36 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {
-  EuiButtonIcon,
-  EuiDescriptionList,
-  EuiPageTemplate,
-  EuiSelectableOption,
-  EuiSpacer,
-  EuiTableSortingType,
-} from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
+import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { usePageReady } from '@kbn/ebt-tools';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
-  RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
-import {
+import type {
   BulkEditActions,
   Pagination,
-  Percentiles,
   Rule,
   RuleStatus,
   RuleTableItem,
@@ -51,6 +45,7 @@ import {
   UpdateFiltersProps,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -771,6 +766,7 @@ export const RulesList = ({
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
       <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
+      <EuiSpacer size="s" />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

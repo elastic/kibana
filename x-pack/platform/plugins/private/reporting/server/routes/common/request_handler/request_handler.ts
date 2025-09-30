@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 import moment from 'moment';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type {
   IKibanaResponse,
   KibanaRequest,
@@ -19,8 +20,8 @@ import type { BaseParams } from '@kbn/reporting-common/types';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
-import { RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
+import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';

@@ -9,17 +9,18 @@ import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { SetupServerReturn, setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
-import { ReportingCore } from '../../../..';
-import { ReportingStore } from '../../../../lib';
+import type { ReportingCore } from '../../../..';
+import type { ReportingStore } from '../../../../lib';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {
@@ -27,7 +28,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
@@ -279,5 +280,10 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       });
 
     expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
+    expect(eventTracker.createReport).toHaveBeenCalledWith({
+      isDeprecated: false,
+      isPublicApi: false,
+      scheduleType: 'single',
+    });
   });
 });

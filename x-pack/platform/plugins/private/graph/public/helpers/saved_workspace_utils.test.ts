@@ -6,8 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { GraphWorkspaceSavedObject } from '../types';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { GraphWorkspaceSavedObject } from '../types';
 import { saveSavedWorkspace } from './saved_workspace_utils';
 
 const core = coreMock.createStart();

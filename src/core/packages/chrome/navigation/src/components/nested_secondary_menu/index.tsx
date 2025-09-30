@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, ReactNode, FC } from 'react';
+import type { ReactNode, FC } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { NestedMenuContext } from './use_nested_menu';

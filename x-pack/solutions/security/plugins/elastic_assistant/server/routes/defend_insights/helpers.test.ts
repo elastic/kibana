@@ -8,10 +8,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from '@langchain/core/documents';
-import type { DefendInsights } from '@kbn/elastic-assistant-common';
+import type { DefendInsights, ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import {
-  ContentReferencesStore,
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,

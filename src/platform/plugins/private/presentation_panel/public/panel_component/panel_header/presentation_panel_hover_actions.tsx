@@ -9,39 +9,30 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, {
-  MouseEventHandler,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
-  IconType,
   useEuiTheme,
 } from '@elastic/eui';
-import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';
+import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiCanLockHoverActions,
-  EmbeddableApiContext,
-  PublishesTitle,
   useBatchedOptionalPublishingSubjects,
-  ViewMode,
 } from '@kbn/presentation-publishing';
-import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
@@ -50,9 +41,8 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
   panelNotificationTrigger,
 } from '../../panel_actions';
-import { AnyApiAction } from '../../panel_actions/types';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { useHoverActionStyles } from './use_hover_actions_styles';
+import type { AnyApiAction } from '../../panel_actions/types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -79,6 +69,7 @@ const QUICK_ACTION_IDS = {
     'ACTION_CUSTOMIZE_PANEL',
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
+    'CONVERT_LEGACY_MARKDOWN',
   ],
   view: [
     'ACTION_SHOW_CONFIG_PANEL',
@@ -109,6 +100,19 @@ const createClickHandler =
     action.execute(context);
   };
 
+export interface PresentationPanelHoverActionsProps {
+  api: DefaultPresentationPanelApi | null;
+  index?: number;
+  getActions: PresentationPanelInternalProps['getActions'];
+  setDragHandle: (id: string, ref: HTMLElement | null) => void;
+  actionPredicate?: (actionId: string) => boolean;
+  children: ReactElement;
+  className?: string;
+  viewMode?: ViewMode;
+  showNotifications?: boolean;
+  showBorder?: boolean;
+}
+
 export const PresentationPanelHoverActions = ({
   api,
   index,
@@ -119,19 +123,7 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
   showNotifications = true,
-  showBorder,
-}: {
-  index?: number;
-  api: DefaultPresentationPanelApi | null;
-  getActions: PresentationPanelInternalProps['getActions'];
-  setDragHandle: (id: string, ref: HTMLElement | null) => void;
-  actionPredicate?: (actionId: string) => boolean;
-  children: ReactElement;
-  className?: string;
-  viewMode?: ViewMode;
-  showNotifications?: boolean;
-  showBorder?: boolean;
-}) => {
+}: PresentationPanelHoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [showNotification, setShowNotification] = useState<boolean>(false);
@@ -141,9 +133,8 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
+  const [title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
     useBatchedOptionalPublishingSubjects(
-      api?.defaultTitle$,
       api?.title$,
       api?.description$,
       api?.hideTitle$,
@@ -438,27 +429,12 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
-  const { containerStyles, hoverActionStyles } = useHoverActionStyles(
-    viewMode === 'edit',
-    showBorder
-  );
 
   return (
-    <div
-      className={classNames('embPanel__hoverActionsAnchor', {
-        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
-        'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
-      })}
-      data-test-embeddable-id={api?.uuid}
-      data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
-        /\s/g,
-        ''
-      )}`}
-      css={containerStyles}
-    >
+    <>
       {children}
       {api && hasHoverActions && (
-        <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
+        <div className={classNames('embPanel__hoverActions', className)}>
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
@@ -522,6 +498,6 @@ export const PresentationPanelHoverActions = ({
           </span>
         </div>
       )}
-    </div>
+    </>
   );
 };

@@ -6,15 +6,15 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { SLOPublicPluginsStart } from '../../../../..';
+import type { SLOPublicPluginsStart } from '../../../../..';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { getDataViewPatternOrId, useAdhocDataViews } from './use_adhoc_data_views';
 
 const BTN_MAX_WIDTH = 515;
@@ -27,11 +27,8 @@ const SETTINGS_SYNC_FIELD = 'settings.syncField';
 
 export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
-  const {
-    dataViews: dataViewsService,
-    dataViewFieldEditor,
-    dataViewEditor,
-  } = useKibana<SLOPublicPluginsStart>().services;
+  const { dataViews: dataViewsService, dataViewFieldEditor } =
+    useKibana<SLOPublicPluginsStart>().services;
 
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);
@@ -122,20 +119,15 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
                 adHocDataViews,
               })
             }
-            onDataViewCreated={() => {
-              dataViewEditor.openEditor({
-                allowAdHocDataView: true,
-                onSave: (dataView: DataView) => {
-                  if (!dataView.isPersisted()) {
-                    setAdHocDataViews((prev) => [...prev, dataView]);
-                  } else {
-                    refetchDataViewsList();
-                  }
+            onDataViewCreated={(dataView: DataView) => {
+              if (!dataView.isPersisted()) {
+                setAdHocDataViews((prev) => [...prev, dataView]);
+              } else {
+                refetchDataViewsList();
+              }
 
-                  field.onChange(dataView.id);
-                  updateDataViewDependantFields(dataView.getIndexPattern(), dataView.timeFieldName);
-                },
-              });
+              field.onChange(dataView.id);
+              updateDataViewDependantFields(dataView.getIndexPattern(), dataView.timeFieldName);
             }}
           />
         )}

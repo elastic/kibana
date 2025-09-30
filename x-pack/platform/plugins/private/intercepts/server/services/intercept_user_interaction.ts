@@ -6,11 +6,11 @@
  */
 
 import assert from 'assert';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import {
   type CoreSetup,
   type CoreStart,
   type Logger,
-  RequestHandlerContext,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';

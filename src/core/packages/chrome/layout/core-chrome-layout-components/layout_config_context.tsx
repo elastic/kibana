@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  useContext,
-  ReactNode,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react';
-import { LayoutDimensions } from './layout.types';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import type { LayoutDimensions } from './layout.types';
 
 /**
  * Configuration for the layout.
@@ -28,7 +22,6 @@ export type LayoutConfig = Pick<
   | 'footerHeight'
   | 'navigationWidth'
   | 'sidebarWidth'
-  | 'sidebarPanelWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
 >;

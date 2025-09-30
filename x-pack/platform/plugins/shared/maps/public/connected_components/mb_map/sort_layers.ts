@@ -6,7 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
-import { ILayer } from '../../classes/layers/layer';
+import type { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following
 // 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.

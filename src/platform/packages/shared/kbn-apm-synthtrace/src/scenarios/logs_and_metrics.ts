@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  LogDocument,
-  log,
-  generateShortId,
-  generateLongId,
-  apm,
-  Instance,
-} from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates a combination of log documents and APM metrics for several services.
+ */
+
+import type { LogDocument, Instance } from '@kbn/apm-synthtrace-client';
+import { log, generateShortId, generateLongId, apm } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';

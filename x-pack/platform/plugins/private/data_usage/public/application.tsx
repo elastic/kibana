@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -14,7 +14,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
-import { DataUsageStartDependencies, DataUsagePublicStart } from './types';
+import type { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';
 import { DataUsageReactQueryClientProvider } from '../common/query_client';
 import { DataUsageMetricsPage } from './app/data_usage_metrics_page';

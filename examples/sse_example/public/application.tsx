@@ -9,7 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SseExampleApp } from './components/app';
 

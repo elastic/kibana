@@ -17,7 +17,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getIndices } from '../../../../lib/elasticsearch/indices';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function esIndicesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postElasticsearchIndicesRequestParamsRT);

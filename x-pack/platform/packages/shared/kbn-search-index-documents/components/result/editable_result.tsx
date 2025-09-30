@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 import { ResultFields } from './results_fields';
 
 export interface EditableResultProps {

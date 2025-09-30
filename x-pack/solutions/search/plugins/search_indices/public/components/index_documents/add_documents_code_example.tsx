@@ -6,19 +6,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
-import { WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
 import { useKibana } from '../../hooks/use_kibana';
-import { IngestCodeSnippetParameters } from '../../types';
+import type { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { AvailableLanguages, LanguageOptions, Languages } from '../../code_examples';
+import type { AvailableLanguages } from '../../code_examples';
+import { LanguageOptions, Languages } from '../../code_examples';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';

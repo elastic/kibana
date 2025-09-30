@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { KibanaSolutionAvatar, IconTypeProps, KnownSolutionProps } from './solution_avatar';
+import type { IconTypeProps, KnownSolutionProps } from './solution_avatar';
+import { KibanaSolutionAvatar } from './solution_avatar';
 
 export default {
   title: 'Avatar/Solution',

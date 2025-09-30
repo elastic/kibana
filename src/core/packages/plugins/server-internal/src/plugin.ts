@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Container, ContainerModule } from 'inversify';
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -23,9 +24,22 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import { Setup, Start } from '@kbn/core-di';
+import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
+
+interface PluginDefinition<
+  TSetup = unknown,
+  TStart = unknown,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
+> {
+  readonly config?: PluginConfigDescriptor;
+  readonly module?: ContainerModule;
+  readonly plugin?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+}
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -55,11 +69,15 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
+  private definition?: PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>;
+  private container?: Container;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
+  private readonly startDependencies$ = new Subject<
+    [CoreStart, TPluginsStart, TStart | undefined]
+  >();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
 
   constructor(
@@ -87,7 +105,16 @@ export class PluginWrapper<
   }
 
   public async init() {
+    this.log.debug('Initializing plugin');
+
+    this.definition = this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
+
+    if (!('plugin' in this.definition || 'module' in this.definition)) {
+      throw new Error(
+        `Plugin "${this.name}" does not export the "plugin" definition or "module" (${this.path}).`
+      );
+    }
   }
 
   /**
@@ -101,15 +128,24 @@ export class PluginWrapper<
     setupContext: CoreSetup<TPluginsStart, TStart> | CorePreboot,
     plugins: TPluginsSetup
   ): TSetup | Promise<TSetup> {
-    if (!this.instance) {
+    if (!this.definition) {
       throw new Error('The plugin is not initialized. Call the init method first.');
     }
 
-    if (this.isPrebootPluginInstance(this.instance)) {
+    if (this.instance && this.isPrebootPluginInstance(this.instance)) {
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
 
-    return this.instance.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins);
+    if (this.definition.module) {
+      this.container = (setupContext as CoreSetup).injection.getContainer();
+      this.container.loadSync(this.definition.module);
+      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+    }
+
+    return [
+      this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
+      this.container?.get<TSetup>(Setup),
+    ].find(Boolean)!;
   }
 
   /**
@@ -120,73 +156,73 @@ export class PluginWrapper<
    * is the contract returned by the dependency's `start` function.
    */
   public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
-    if (this.instance === undefined) {
+    if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    if (this.isPrebootPluginInstance(this.instance)) {
+    if (this.instance && this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    const startContract = this.instance.start(startContext, plugins);
-    if (isPromise(startContract)) {
-      return startContract.then((resolvedContract) => {
+    this.container?.loadSync(createStartModule(startContext, plugins));
+    const contract = [
+      this.instance?.start(startContext, plugins),
+      this.container?.get<TStart>(Start),
+    ].find(Boolean)!;
+
+    if (isPromise(contract)) {
+      return contract.then((resolvedContract) => {
         this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract;
+        return resolvedContract!;
       });
-    } else {
-      this.startDependencies$.next([startContext, plugins, startContract]);
-      return startContract;
     }
+
+    this.startDependencies$.next([startContext, plugins, contract]);
+
+    return contract;
   }
 
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {
-    if (this.instance === undefined) {
+    if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance.stop === 'function') {
-      await this.instance.stop();
-    }
-
+    await this.instance?.stop?.();
+    await this.container?.unbindAll();
     this.instance = undefined;
+    this.container = undefined;
   }
 
   public getConfigDescriptor(): PluginConfigDescriptor | null {
     if (!this.manifest.server) {
       return null;
     }
-    const pluginPathServer = join(this.path, 'server');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pluginDefinition = require(pluginPathServer);
-
-    if (!('config' in pluginDefinition)) {
-      this.log.debug(`"${pluginPathServer}" does not export "config".`);
+    const definition = this.getPluginDefinition();
+    if (!definition.config) {
+      this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
     }
 
-    const configDescriptor = pluginDefinition.config;
-    if (!isConfigSchema(configDescriptor.schema)) {
+    const { config } = definition;
+    if (!isConfigSchema(config.schema)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
-    return configDescriptor;
+    return config;
   }
 
-  private async createPluginInstance() {
-    this.log.debug('Initializing plugin');
+  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+    return require(join(this.path, 'server')) ?? {};
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pluginDefinition = require(join(this.path, 'server'));
-    if (!('plugin' in pluginDefinition)) {
-      throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
+  protected async createPluginInstance() {
+    if (!this.definition?.plugin) {
+      return;
     }
 
-    const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-    };
+    const { plugin: initializer } = this.definition;
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }

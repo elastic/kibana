@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
+import type { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
 
 export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
 

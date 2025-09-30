@@ -7,7 +7,7 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import type { Search } from 'history';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../common/inventory/types';
 
 export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
@@ -75,11 +75,12 @@ export interface AssetDetailsProps {
   overrides?: OverridableTabState;
   renderMode: RenderMode;
   links?: LinkOptions[];
+  preferredSchema?: DataSchemaFormat | null;
 }
 
 export type TabsStateChangeFn = (state: TabState) => void;
 
-export type ContentTemplateProps = Pick<AssetDetailsProps, 'tabs' | 'links'>;
+export type ContentTemplateProps = Pick<AssetDetailsProps, 'tabs' | 'links' | 'preferredSchema'>;
 
 export interface RouteState {
   originAppId: string;

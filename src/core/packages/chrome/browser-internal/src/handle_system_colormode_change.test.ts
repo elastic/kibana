@@ -16,8 +16,8 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { ReplaySubject } from 'rxjs';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
-import { UserProfileData } from '@kbn/core-user-profile-common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 const mockbrowsersSupportsSystemTheme = jest.fn();
 

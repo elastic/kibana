@@ -12,7 +12,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { useBehaviorSubject } from './hooks/use_behavior_subject';
-import { TabID } from './types';
+import type { TabID } from './types';
 
 export const Tabs: React.FC = () => {
   type Tab = [id: TabID, name: string];

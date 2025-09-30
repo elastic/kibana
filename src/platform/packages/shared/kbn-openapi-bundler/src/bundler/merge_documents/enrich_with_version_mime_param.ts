@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenAPIV3 } from 'openapi-types';
-import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { isRefNode } from '../process_document';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
 import { KNOWN_HTTP_METHODS } from './http_methods';

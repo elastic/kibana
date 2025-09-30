@@ -12,7 +12,7 @@ import { Entity } from '../entity';
 import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
+import type { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
 
 export class Instance extends Entity<ApmFields> {
   transaction(

@@ -25,6 +25,7 @@ export const isAgentTypeAndActionSupported = (
   const features = ExperimentalFeaturesService.get();
   const isSentinelOneV1Enabled = features.responseActionsSentinelOneV1Enabled;
   const isSentinelOneGetFileEnabled = features.responseActionsSentinelOneGetFileEnabled;
+  const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
   const isCrowdstrikeHostIsolationEnabled =
     features.responseActionsCrowdstrikeManualHostIsolationEnabled;
   const isMicrosoftDefenderEndpointEnabled = features.responseActionsMSDefenderEndpointEnabled;
@@ -48,6 +49,10 @@ export const isAgentTypeAndActionSupported = (
               isActionNameSupported = false;
             }
             break;
+          case 'runscript':
+            if (!isSentinelOneRunScriptEnabled) {
+              isActionNameSupported = false;
+            }
         }
 
         break;

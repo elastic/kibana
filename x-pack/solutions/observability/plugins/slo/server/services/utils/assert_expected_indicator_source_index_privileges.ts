@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SLODefinition } from '../../domain/models';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SLODefinition } from '../../domain/models';
 import { SecurityException } from '../../errors';
 
 export async function assertExpectedIndicatorSourceIndexPrivileges(

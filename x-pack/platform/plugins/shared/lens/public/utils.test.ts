@@ -6,7 +6,7 @@
  */
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { getUniqueLabelGenerator, inferTimeField, renewIDs } from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import { getGroupedStackframes } from '.';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 

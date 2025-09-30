@@ -12,12 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
-import { Alignment, GaugeType, GaugeTypeProps } from '../types';
+import type { GaugeTypeProps } from '../types';
+import { Alignment, GaugeType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getGaugeOptions } from '../editor/components';
-import { GaugeVisParams } from '../types';
+import type { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
 
 export const getGaugeVisTypeDefinition = (

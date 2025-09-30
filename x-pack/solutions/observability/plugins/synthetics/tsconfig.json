@@ -118,7 +118,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
-    "@kbn/page-attachment-schema"
+    "@kbn/licensing-types",
+    "@kbn/content-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

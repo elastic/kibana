@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaDeps } from '../../../../../../common/types';
+import type { KibanaDeps } from '../../../../../../common/types';
 
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';

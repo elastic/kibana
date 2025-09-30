@@ -9,16 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  fromEvent,
-  Observable,
-  of,
-  Subscription,
-  throwError,
-} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -38,7 +30,7 @@ import type {
   SqlGetAsyncResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
@@ -48,6 +40,7 @@ import type {
   CoreStart,
   DocLinksStart,
   ExecutionContextSetup,
+  FeatureFlagsStart,
   I18nStart,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -56,7 +49,8 @@ import type {
 } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type {
   SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
@@ -70,26 +64,28 @@ import {
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
   EVENT_PROPERTY_EXECUTION_CONTEXT,
 } from '../constants';
+import type { IAsyncSearchOptions } from '../../../common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   getTotalLoaded,
-  IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
-import { SearchUsageCollector } from '../collectors';
+import type { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { ISessionService, SearchSessionState } from '../session';
+import type { ISessionService } from '../session';
+import { SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../session/constants';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -125,6 +121,7 @@ export class SearchInterceptor {
   private application!: ApplicationStart;
   private docLinks!: DocLinksStart;
   private inspector!: InspectorStart;
+  private featureFlags!: FeatureFlagsStart;
 
   /*
    * Services for toMountPoint
@@ -149,6 +146,7 @@ export class SearchInterceptor {
       this.docLinks = docLinks;
       this.startRenderServices = startRenderServices;
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
+      this.featureFlags = coreStart.featureFlags;
     });
 
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
@@ -516,6 +514,7 @@ export class SearchInterceptor {
               rawResponse: esqlResponse,
               isPartial: esqlResponse.is_partial,
               isRunning: esqlResponse.is_running,
+              isRestored,
               requestParams,
               warning,
             };
@@ -651,10 +650,21 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (_sessionId?: string) => {
+  private showRestoreWarningToast = async (_sessionId?: string) => {
+    const isBackgroundSearchEnabled = await this.featureFlags.getBooleanValue(
+      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+      false
+    );
+
     this.deps.toasts.addWarning(
       {
-        title: 'Your search session is still running',
+        title: isBackgroundSearchEnabled
+          ? i18n.translate('data.searchService.backgroundSearchRestoreWarning', {
+              defaultMessage: 'Your background search is still running',
+            })
+          : i18n.translate('data.searchService.restoreWarning', {
+              defaultMessage: 'Your search session is still running',
+            }),
         text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), this.startRenderServices),
       },
       {

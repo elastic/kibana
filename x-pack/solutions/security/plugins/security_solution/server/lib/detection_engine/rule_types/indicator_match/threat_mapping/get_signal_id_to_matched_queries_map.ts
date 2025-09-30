@@ -16,6 +16,7 @@ import type {
   ThreatListItem,
   AllowedFieldsForTermsQuery,
   EventItem,
+  BaseThreatNamedQuery,
 } from './types';
 import { getThreatList } from './get_threat_list';
 import {
@@ -29,7 +30,11 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import type { SecurityRuleServices, SecuritySharedParams } from '../../types';
 import type { ThreatRuleParams } from '../../../rule_schema';
 
-export type SignalIdToMatchedQueriesMap = Map<string, ThreatMatchNamedQuery[]>;
+export interface MatchedHitAndQuery {
+  threatHit: ThreatListItem;
+  query: BaseThreatNamedQuery;
+}
+export type SignalIdToMatchedQueriesMap = Map<string, MatchedHitAndQuery[]>;
 
 interface GetSignalIdToMatchedQueriesMapOptions {
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
@@ -59,23 +64,19 @@ const addMatchedQueryToMaps = ({
   const signalMatch = signalIdToMatchedQueriesMap.get(signalId);
 
   const threatQuery = {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    id: threatHit._id!,
-    index: threatHit._index,
-    field: decodedQuery.field,
-    value: decodedQuery.value,
+    threatMappingIndex: decodedQuery.threatMappingIndex,
     queryType: decodedQuery.queryType,
   };
 
   if (!signalMatch) {
-    signalIdToMatchedQueriesMap.set(signalId, [threatQuery]);
+    signalIdToMatchedQueriesMap.set(signalId, [{ threatHit, query: threatQuery }]);
     return;
   }
 
   if (signalMatch.length === MAX_NUMBER_OF_SIGNAL_MATCHES) {
     maxThreatsReachedMap.set(signalId, true);
   } else if (signalMatch.length < MAX_NUMBER_OF_SIGNAL_MATCHES) {
-    signalMatch.push(threatQuery);
+    signalMatch.push({ threatHit, query: threatQuery });
   }
 };
 
@@ -93,17 +94,15 @@ export async function getSignalIdToMatchedQueriesMap({
   threatFilters,
   threatIndexFields,
   threatIndicatorPath,
-}: GetSignalIdToMatchedQueriesMapOptions): Promise<{
-  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap;
-  threatList: ThreatListItem[];
-}> {
+}: GetSignalIdToMatchedQueriesMapOptions): Promise<SignalIdToMatchedQueriesMap> {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap = new Map();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
   const maxThreatsReachedMap = new Map<string, boolean>();
+  const threatMappings = sharedParams.completeRule.ruleParams.threatMapping;
 
   const threatFiltersFromEvents = buildThreatMappingFilter({
-    threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
+    threatMappings,
     threatList: signals,
     entryKey: 'field',
     allowedFieldsForTermsQuery,
@@ -112,7 +111,7 @@ export async function getSignalIdToMatchedQueriesMap({
   if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    return { signalIdToMatchedQueriesMap, threatList: [] };
+    return signalIdToMatchedQueriesMap;
   }
 
   const threatMatchedFields = getMatchedFields(sharedParams.completeRule.ruleParams.threatMapping);
@@ -135,8 +134,6 @@ export async function getSignalIdToMatchedQueriesMap({
   });
 
   threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
-  const threatListPage1 = threatList.hits.hits;
-
   while (maxThreatsReachedMap.size < signals.length && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = Array.isArray(threatHit?.matched_queries)
@@ -145,15 +142,17 @@ export async function getSignalIdToMatchedQueriesMap({
 
       matchedQueries.forEach((matchedQuery) => {
         const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);
-        const signalId = decodedQuery.id;
+        const threatMappingIndex = decodedQuery.threatMappingIndex;
+        const threatMapping = threatMappings[threatMappingIndex];
 
         if (decodedQuery.queryType === ThreatMatchQueryType.term) {
-          const threatValue = get(threatHit?._source, decodedQuery.value);
+          const threatValue = get(threatHit?._source, threatMapping.entries[0].value);
           const values = Array.isArray(threatValue) ? threatValue : [threatValue];
 
           values.forEach((value) => {
             if (value && fieldAndValueToDocIdsMap) {
-              const ids = fieldAndValueToDocIdsMap[decodedQuery.field][value?.toString()];
+              const ids =
+                fieldAndValueToDocIdsMap[threatMapping.entries[0].field][value?.toString()];
 
               ids?.forEach((id: string) => {
                 addMatchedQueryToMaps({
@@ -167,6 +166,7 @@ export async function getSignalIdToMatchedQueriesMap({
             }
           });
         } else {
+          const signalId = decodedQuery.id;
           if (!signalId) {
             return;
           }
@@ -188,5 +188,5 @@ export async function getSignalIdToMatchedQueriesMap({
     });
   }
 
-  return { signalIdToMatchedQueriesMap, threatList: threatListPage1 };
+  return signalIdToMatchedQueriesMap;
 }

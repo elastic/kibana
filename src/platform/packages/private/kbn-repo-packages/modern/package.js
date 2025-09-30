@@ -21,7 +21,7 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
- * Representation of a Bazel Package in the Kibana repository
+ * Representation of a Package in the Kibana repository
  * @class
  */
 class Package {
@@ -196,9 +196,7 @@ class Package {
       dir.startsWith('x-pack/platform/test/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||
-      dir.startsWith('x-pack/solutions/security/test/') ||
-      dir.startsWith('x-pack/test/');
-
+      dir.startsWith('x-pack/solutions/security/test/');
     return {
       oss,
       example,
@@ -248,8 +246,7 @@ class Package {
   }
 
   /**
-   * Custom inspect handler so that logging variables in scripts/generate doesn't
-   * print all the BUILD.bazel files
+   * Custom inspect handler
    */
   [inspect.custom]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;

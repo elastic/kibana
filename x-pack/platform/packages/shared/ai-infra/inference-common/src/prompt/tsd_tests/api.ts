@@ -7,6 +7,7 @@
 
 import { expectAssignable, expectType } from 'tsd';
 import { z } from '@kbn/zod';
+import type { Assign } from 'utility-types';
 import type {
   PromptAPI,
   PromptCompositeResponse,
@@ -16,12 +17,12 @@ import type {
   PromptStreamResponse,
 } from '../api';
 import type { Prompt, PromptVersion, MustachePromptTemplate } from '../types';
-import {
-  ToolCallsOf,
-  ToolChoiceType,
-  ToolDefinition,
-  ToolResponseOf,
-} from '../../chat_complete/tools';
+import type { ToolDefinition } from '../../chat_complete/tools';
+import { ToolChoiceType } from '../../chat_complete/tools';
+import type {
+  ToolCallArgumentsOfToolDefinition,
+  ToolCallOfToolOptions,
+} from '../../chat_complete/tools_of';
 
 declare const mockApi: PromptAPI;
 
@@ -41,7 +42,7 @@ const getWeatherToolDefinition = {
   schema: {
     type: 'object',
     properties: { location: { type: 'string' } },
-    required: ['location'],
+    required: ['location' as const],
   },
   description: 'Get weather',
 } satisfies ToolDefinition;
@@ -79,33 +80,19 @@ const promptNoTools = {
 
 type PromptNoTools = typeof promptNoTools;
 
-const promptWithToolsAuto = {
-  name: 'WithToolsAutoPrompt',
-  description: 'A prompt with tools and toolChoice:auto.',
+const promptWithTools = {
+  name: 'WithToolsPrompt',
+  description: 'A prompt with tools',
   input: MinimalPromptInputSchema,
   versions: [
     {
       template: mustacheTemplate,
       tools: promptTools,
-      toolChoice: ToolChoiceType.auto,
-    } satisfies PromptVersion<{ tools: PromptTools; toolChoice: ToolChoiceType.auto }>,
+    } satisfies PromptVersion<PromptTools>,
   ],
 } satisfies Prompt<MinimalPromptInput>;
 
-type PromptWithToolsAuto = typeof promptWithToolsAuto;
-
-const promptWithToolsNone = {
-  name: 'WithToolsNonePrompt',
-  description: 'A prompt with tools and toolChoice:none.',
-  input: MinimalPromptInputSchema,
-  versions: [
-    {
-      template: mustacheTemplate,
-      tools: promptTools,
-      toolChoice: ToolChoiceType.none,
-    } satisfies PromptVersion<{ tools: PromptTools; toolChoice: ToolChoiceType.none }>,
-  ],
-} satisfies Prompt<MinimalPromptInput>;
+type PromptWithTools = typeof promptWithTools;
 
 const promptWithGetWeatherToolChoice = {
   name: 'WithToolsSpecificPrompt',
@@ -115,11 +102,7 @@ const promptWithGetWeatherToolChoice = {
     {
       template: mustacheTemplate,
       tools: promptTools,
-      toolChoice: { function: 'get_weather' as const },
-    } satisfies PromptVersion<{
-      tools: PromptTools;
-      toolChoice: { function: 'get_weather' };
-    }>,
+    } satisfies PromptVersion<PromptTools>,
   ],
 } satisfies Prompt<MinimalPromptInput>;
 
@@ -130,22 +113,23 @@ const promptWithGetWeatherToolChoice = {
 // No tools in prompt version
 declare const noToolsPromptResponse: Awaited<PromptResponseOf<PromptNoTools>>;
 
-expectType<{ content: string; toolCalls: [] }>(noToolsPromptResponse);
+expectType<{ content: string; toolCalls: never[] }>(noToolsPromptResponse);
 
 // With tools defined in prompt version
-declare const specificToolPromptResponse: Awaited<PromptResponseOf<PromptWithToolsAuto>>;
+declare const specificToolPromptResponse: Awaited<PromptResponseOf<PromptWithTools>>;
+
 expectType<{
   content: string;
   toolCalls: Array<{
     toolCallId: string;
     function: {
       name: keyof PromptTools;
-      arguments: ToolResponseOf<PromptTools[keyof PromptTools]>;
+      arguments: ToolCallArgumentsOfToolDefinition<PromptTools[keyof PromptTools]>;
     };
   }>;
 }>(specificToolPromptResponse);
 
-if (specificToolPromptResponse.toolCalls && specificToolPromptResponse.toolCalls.length > 0) {
+if (specificToolPromptResponse.toolCalls) {
   const firstToolCall = specificToolPromptResponse.toolCalls[0];
   expectAssignable<'get_weather' | 'get_stock_price'>(firstToolCall.function.name);
 }
@@ -153,26 +137,22 @@ if (specificToolPromptResponse.toolCalls && specificToolPromptResponse.toolCalls
 /**
  * Test PromptCompositeResponse type
  */
-type PromptOptsWithToolsAuto = PromptOptions<PromptWithToolsAuto>;
+type PromptOptsWithTools = PromptOptions<PromptWithTools>;
 
 // stream: false
-type CompositeNonStream = PromptCompositeResponse<PromptOptsWithToolsAuto & { stream: false }>;
+type CompositeNonStream = PromptCompositeResponse<PromptOptsWithTools & { stream: false }>;
 
-expectType<PromptResponseOf<PromptWithToolsAuto>>({} as CompositeNonStream);
+expectType<PromptResponseOf<PromptWithTools>>({} as CompositeNonStream);
 
 // stream: true
-type PromptOptsWithToolsAutoStreamResponse = PromptStreamResponse<PromptOptsWithToolsAuto>;
+type CompositeStream = PromptCompositeResponse<PromptOptsWithTools & { stream: true }>;
 
-expectType<PromptResponseOf<PromptWithToolsAuto, true>>(
-  {} as PromptOptsWithToolsAutoStreamResponse
-);
+expectType<PromptResponseOf<PromptWithTools, true>>({} as CompositeStream);
 
 // stream: boolean
-type CompositeResponse = PromptCompositeResponse<PromptOptsWithToolsAuto & { stream: boolean }>;
+type CompositeResponse = PromptCompositeResponse<Assign<PromptOptsWithTools, { stream: boolean }>>;
 
-expectAssignable<
-  Promise<PromptResponse<PromptOptsWithToolsAuto>> | PromptStreamResponse<PromptOptsWithToolsAuto>
->({} as CompositeResponse);
+expectAssignable<CompositeNonStream | CompositeStream>({} as CompositeResponse);
 
 /**
  * Test PromptAPI runtime inference
@@ -181,15 +161,15 @@ expectAssignable<
 // Default stream (false), with tools
 const resWithTools = mockApi({
   connectorId: 'c1',
-  prompt: promptWithToolsAuto,
+  prompt: promptWithTools,
   input: minimalInput,
 });
 
-expectType<Promise<PromptResponse<PromptOptsWithToolsAuto>>>(resWithTools);
+expectType<Promise<PromptResponse<PromptOptsWithTools>>>(resWithTools);
 resWithTools.then((r) => {
   if (r.toolCalls && r.toolCalls.length > 0) {
     expectType<'get_weather' | 'get_stock_price'>(r.toolCalls[0].function.name);
-    expectAssignable<ToolResponseOf<PromptTools[keyof PromptTools]>>(
+    expectAssignable<ToolCallArgumentsOfToolDefinition<PromptTools[keyof PromptTools]>>(
       r.toolCalls[0].function.arguments
     );
   }
@@ -198,40 +178,12 @@ resWithTools.then((r) => {
 // stream: true, with tools
 const resStreamWithTools = mockApi({
   connectorId: 'c1',
-  prompt: promptWithToolsAuto,
+  prompt: promptWithTools,
   input: minimalInput,
   stream: true,
 });
 
-expectType<PromptStreamResponse<PromptOptsWithToolsAuto>>(resStreamWithTools);
-
-// toolChoice: none
-const resToolChoiceNone = mockApi({
-  connectorId: 'c1',
-  prompt: promptWithToolsNone,
-  input: minimalInput,
-});
-resToolChoiceNone.then((r) => {
-  expectType<[]>(r.toolCalls);
-});
-
-// toolChoice: specific function
-const resToolChoiceSpecific = mockApi({
-  connectorId: 'c1',
-  prompt: promptWithGetWeatherToolChoice,
-  input: minimalInput,
-});
-
-expectType<PromptResponseOf<typeof promptWithGetWeatherToolChoice>>(resToolChoiceSpecific);
-
-resToolChoiceSpecific.then((r) => {
-  if (r.toolCalls && r.toolCalls.length > 0) {
-    // With a specific tool choice, only that tool should be possible.
-    // The ToolOptionsOfPrompt<typeof promptWithToolsSpecific> should correctly narrow this.
-    expectType<'get_weather'>(r.toolCalls[0].function.name);
-    expectType<ToolResponseOf<PromptTools['get_weather']>>(r.toolCalls[0].function.arguments);
-  }
-});
+expectType<PromptStreamResponse<PromptOptsWithTools>>(resStreamWithTools);
 
 // New tool definition for API call options
 const getGeolocationToolDefinition = {
@@ -260,7 +212,7 @@ const resNoPromptToolsWithApiTools = mockApi({
 expectType<
   Promise<{
     content: string;
-    toolCalls: ToolCallsOf<{ tools: typeof apiCallTools }>['toolCalls'];
+    toolCalls: Array<ToolCallOfToolOptions<{ tools: typeof apiCallTools }>>;
   }>
 >(resNoPromptToolsWithApiTools);
 
@@ -279,20 +231,22 @@ resNoPromptToolsWithApiTools.then((r) => {
 // scenario: prompt tools + api tools
 const resPromptToolsWithApiTools = mockApi({
   connectorId: 'c1',
-  prompt: promptWithToolsAuto,
+  prompt: promptWithTools,
   input: minimalInput,
-  tools: apiCallTools,
+  extraTools: apiCallTools,
   toolChoice: ToolChoiceType.auto,
 });
 
 expectType<
-  Promise<PromptResponse<PromptOptions<PromptWithToolsAuto> & { tools: typeof apiCallTools }>>
+  Promise<PromptResponse<PromptOptions<PromptWithTools> & { tools: typeof apiCallTools }>>
 >(resPromptToolsWithApiTools);
 
 // merges tools from prompt with api
 resPromptToolsWithApiTools.then((r) => {
   if (r.toolCalls && r.toolCalls.length > 0) {
-    expectType<'get_geolocation' | 'get_weather' | 'get_stock_price'>(r.toolCalls[0].function.name);
+    expectAssignable<'get_geolocation' | 'get_weather' | 'get_stock_price'>(
+      r.toolCalls[0].function.name
+    );
   }
 });
 

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;
@@ -108,6 +109,7 @@ describe('simple trace', () => {
       'trace.id': expect.stringContaining('00000000000000000000000241'),
       'transaction.duration.us': 1000000,
       'transaction.id': expect.stringContaining('0000000240'),
+      'span.id': expect.stringContaining('0000000240'),
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,

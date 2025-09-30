@@ -14,15 +14,15 @@ import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import {
+import type {
   ApiDeclaration,
   ApiStats,
   PluginApi,
   PluginOrPackage,
   Reference,
   TextWithLinks,
-  TypeKind,
 } from '../types';
+import { TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';

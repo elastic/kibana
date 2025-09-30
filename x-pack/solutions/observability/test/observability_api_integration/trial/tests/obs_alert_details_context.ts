@@ -8,9 +8,9 @@
 import moment from 'moment';
 import { log, apm, generateShortId, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
-import { SupertestReturnType } from '../../common/obs_api_supertest';
-import { ObsFtrProviderContext } from '../../common/ftr_provider_context';
+import type { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
+import type { SupertestReturnType } from '../../common/obs_api_supertest';
+import type { ObsFtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: ObsFtrProviderContext) {
   const obsApiClient = getService('obsApiClient');

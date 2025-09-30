@@ -25,17 +25,13 @@ import { css } from '@emotion/react';
 import { isLeft } from 'fp-ts/Either';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import type { GetLensAttributes } from '../../../../../common/components/visualization_actions/types';
+import { VisualizationContextMenuActions } from '../../../../../common/components/visualization_actions/types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
 import { DASHBOARD_TABLE_QUERY_ID, useDashboardTableQuery } from './hooks';
 import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const DEFAULT_PAGE_SIZE = 10;
-
-export interface VisualizationStackByOption {
-  text: string;
-  value: string;
-}
 
 export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>({
   stackByField,
@@ -141,6 +137,13 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           height={260}
           id="GenericDashboard"
           timerange={timerange}
+          withActions={[
+            VisualizationContextMenuActions.inspect,
+            VisualizationContextMenuActions.addToNewCase,
+            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.saveToLibrary,
+            // Excluding VisualizationContextMenuActions.openInLens
+          ]}
         />
       </EuiFlexGroup>
       <EuiSpacer size="l" />

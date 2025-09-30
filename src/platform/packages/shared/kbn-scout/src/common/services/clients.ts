@@ -8,8 +8,8 @@
  */
 
 import { createEsClientForTesting, KbnClient } from '@kbn/test';
-import { ScoutLogger } from './logger';
-import { ScoutTestConfig, EsClient } from '../../types';
+import type { ScoutLogger } from './logger';
+import type { ScoutTestConfig, EsClient } from '../../types';
 
 interface ClientOptions {
   serviceName: string;

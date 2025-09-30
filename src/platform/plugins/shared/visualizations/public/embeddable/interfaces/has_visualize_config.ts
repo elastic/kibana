@@ -8,8 +8,8 @@
  */
 
 import type { HasType } from '@kbn/presentation-publishing';
-import { VisParams } from '../../types';
-import Vis from '../../vis';
+import type { VisParams } from '../../types';
+import type Vis from '../../vis';
 
 export type HasVisualizeConfig = HasType<'visualization'> & {
   getVis: () => Vis<VisParams>;

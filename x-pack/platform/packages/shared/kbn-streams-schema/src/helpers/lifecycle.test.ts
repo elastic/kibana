@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Streams } from '../models/streams';
-import { IngestStreamLifecycle } from '../models/ingest/lifecycle';
+import type { Streams } from '../models/streams';
+import type { IngestStreamLifecycle } from '../models/ingest/lifecycle';
 import { findInheritedLifecycle, findInheritingStreams } from './lifecycle';
 
 function createMockWiredStream(
@@ -19,7 +19,8 @@ function createMockWiredStream(
     ingest: {
       lifecycle,
       wired: { fields: {}, routing: [] },
-      processing: [],
+      processing: { steps: [] },
+      settings: {},
     },
   };
 }

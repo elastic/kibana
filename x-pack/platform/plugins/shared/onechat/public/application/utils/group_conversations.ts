@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import moment from 'moment';
 
 enum SectionGroup {

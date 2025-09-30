@@ -18,14 +18,15 @@ import gulpBrotli from 'gulp-brotli';
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
 import zlib from 'zlib';
 
-import { Task, write } from '../lib';
+import type { Task } from '../lib';
+import { write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;

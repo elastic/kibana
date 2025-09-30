@@ -8,4 +8,3 @@
  */
 
 export { LayoutSidebar, type LayoutSidebarProps } from './layout_sidebar';
-export { LayoutSidebarPanel, type LayoutSidebarPanelProps } from './layout_sidebar_panel';

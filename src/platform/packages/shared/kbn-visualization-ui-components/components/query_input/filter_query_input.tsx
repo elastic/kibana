@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiPopoverProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiLink,
   EuiPanel,
@@ -17,10 +18,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIconTip,
-  EuiPopoverProps,
   euiTextBreakWord,
   useEuiFontSize,
-  UseEuiTheme,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { css } from '@emotion/react';

@@ -15,7 +15,7 @@ import {
   getKnowledgeBaseEntrySearchEsMock,
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 export const mockUser = {
-  username: 'my_username',
+  username: 'elastic',
   authentication_realm: {
     type: 'my_realm_type',
     name: 'my_realm_name',

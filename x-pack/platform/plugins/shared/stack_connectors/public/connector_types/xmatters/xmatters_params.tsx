@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isUndefined } from 'lodash';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { XmattersActionParams } from '../types';
+import type { XmattersActionParams } from '../types';
 
 const severityOptions = [
   {

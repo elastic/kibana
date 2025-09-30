@@ -8,8 +8,8 @@
 import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
-  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,
@@ -27,6 +27,7 @@ import { ApmIndicatorOverview } from '../overview/apm_indicator_overview';
 import { DisplayQuery } from '../overview/display_query';
 import { DefinitionItem } from './definition_item';
 import { SyntheticsIndicatorOverview } from '../overview/synthetics_indicator_overview';
+import { LinkedDashboards } from './linked_dashboards';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -152,6 +153,12 @@ export function Definition({ slo }: Props) {
             defaultMessage: 'Frequency',
           })}
           subtitle={slo.settings.frequency}
+        />
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.dashboards', {
+            defaultMessage: 'Linked dashboards',
+          })}
+          subtitle={<LinkedDashboards dashboards={slo.artifacts?.dashboards ?? []} />}
         />
       </EuiFlexGrid>
     </EuiPanel>

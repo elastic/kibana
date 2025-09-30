@@ -13,11 +13,9 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { Panel } from '../../../../common/types';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
-import {
-  createFieldsFetcher,
-  FieldsFetcherServices,
-} from '../../search_strategies/lib/fields_fetcher';
-import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import type { FieldsFetcherServices } from '../../search_strategies/lib/fields_fetcher';
+import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(
   panel: Panel,

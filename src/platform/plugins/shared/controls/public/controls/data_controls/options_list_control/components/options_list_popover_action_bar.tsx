@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -18,7 +19,6 @@ import {
   EuiFormRow,
   EuiText,
   EuiToolTip,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -28,7 +28,7 @@ import {
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { OptionsListSuggestions } from '../../../../../common/options_list';
+import type { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';

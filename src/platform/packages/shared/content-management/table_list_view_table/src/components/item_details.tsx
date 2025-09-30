@@ -11,7 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiLink, EuiSpacer, EuiHighlight, useEuiTheme } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FavoriteButton } from '@kbn/content-management-favorites-public';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { css } from '@emotion/react';
 
 import type { Tag } from '../types';

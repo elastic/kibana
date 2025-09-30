@@ -7,8 +7,8 @@
 
 import { spawn, spawnSync } from 'child_process';
 import * as path from 'path';
-import { CliOptions } from '../types';
-import { KibanaAPIClient } from './kibana_api_client';
+import type { CliOptions } from '../types';
+import type { KibanaAPIClient } from './kibana_api_client';
 
 export async function enrollAgent(
   { kibanaUrl, elasticsearchHost }: CliOptions,

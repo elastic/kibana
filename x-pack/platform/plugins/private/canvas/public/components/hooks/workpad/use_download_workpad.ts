@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
 import { useNotifyService } from '../../../services';
-import { CanvasWorkpad } from '../../../../types';
+import type { CanvasWorkpad } from '../../../../types';
 import type { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
 import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 

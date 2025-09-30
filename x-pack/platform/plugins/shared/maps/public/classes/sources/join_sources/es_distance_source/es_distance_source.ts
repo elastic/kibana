@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import { AbstractESAggSource } from '../../es_agg_source';
 import type { BucketProperties } from '../../../../../common/elasticsearch_util';
-import {
+import type {
   DataFilters,
   ESDistanceSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../../util/valid_string_config';
-import { IJoinSource } from '../types';
+import type { IJoinSource } from '../types';
 import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
-import { IField } from '../../../fields/field';
+import type { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { processDistanceResponse } from './process_distance_response';
 import { isSpatialSourceComplete } from '../is_spatial_source_complete';
@@ -34,12 +34,15 @@ export const DEFAULT_WITHIN_DISTANCE = 5;
 type ESDistanceSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
 
+type NormalizedESDistanceSourceDescriptor = ESDistanceSourceDescriptor &
+  Required<Pick<ESDistanceSourceDescriptor, 'distance' | 'metrics'>>;
+
 export class ESDistanceSource extends AbstractESAggSource implements IJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_DISTANCE_SOURCE;
 
   static createDescriptor(
     descriptor: Partial<ESDistanceSourceDescriptor>
-  ): ESDistanceSourceDescriptor {
+  ): NormalizedESDistanceSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.geoField)) {
       throw new Error('Cannot create an ESDistanceSource without a geoField property');
@@ -53,12 +56,16 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     };
   }
 
-  readonly _descriptor: ESDistanceSourceDescriptor;
+  readonly _descriptor: NormalizedESDistanceSourceDescriptor;
 
   constructor(descriptor: Partial<ESDistanceSourceDescriptor>) {
     const sourceDescriptor = ESDistanceSource.createDescriptor(descriptor);
     super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   hasCompleteConfig(): boolean {

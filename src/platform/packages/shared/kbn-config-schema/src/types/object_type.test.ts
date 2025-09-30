@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { offeringBasedSchema, schema } from '../..';
-import { TypeOf } from './object_type';
+import type { Props, TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -176,6 +176,55 @@ describe('#validate', () => {
       foo: {
         bar: 'baz',
       },
+    });
+  });
+});
+
+describe('#getPropSchemas', () => {
+  test('should return original props', () => {
+    const props = {
+      str: schema.string(),
+      num: schema.number(),
+    } satisfies Props;
+    const type = schema.object(props);
+
+    expect(type.getPropSchemas()).not.toBe(props);
+    expect(type.getPropSchemas()).toEqual(props);
+  });
+
+  test('should be spreadable into new schema type', () => {
+    const type = schema.object({
+      str: schema.string(),
+      num: schema.number(),
+    });
+    const newType = schema.object({
+      ...type.getPropSchemas(),
+      bool: schema.boolean(),
+    });
+
+    expect(newType.validate({ str: 'test', num: 1, bool: true })).toEqual({
+      str: 'test',
+      num: 1,
+      bool: true,
+    });
+  });
+
+  test('should handle maybe and object types', () => {
+    const type = schema.object({
+      obj: schema.object({
+        str: schema.string(),
+      }),
+      num: schema.maybe(schema.number()),
+    });
+
+    const newType = schema.object({
+      ...type.getPropSchemas(),
+      bool: schema.boolean(),
+    });
+
+    expect(newType.validate({ obj: { str: 'test' }, bool: true })).toEqual({
+      obj: { str: 'test' },
+      bool: true,
     });
   });
 });

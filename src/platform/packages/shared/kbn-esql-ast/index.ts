@@ -32,14 +32,13 @@ export type {
 } from './src/types';
 
 export * from './src/ast/is';
+export * from './src/ast/location';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
-  createParser,
   parse,
   Parser,
-  parseErrors,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
@@ -50,6 +49,9 @@ export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walk
 
 export * as synth from './src/synth';
 export { qry, cmd, exp } from './src/synth';
+export * from './src/composer';
+
+export { esql, e } from './src/composer/esql';
 
 export {
   LeafPrinter,
@@ -74,3 +76,6 @@ export * from './src/definitions/constants';
 export * from './src/definitions/types';
 export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
+export { withAutoSuggest } from './src/definitions/utils/autocomplete/helpers';
+
+export { getNoValidCallSignatureError } from './src/definitions/utils/validation/utils';

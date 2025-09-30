@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndexTypesMap } from './mappings';
+import type { IndexTypesMap } from './mappings';
 
 /**
  * This map holds the default breakdown of SO types per index (pre 8.8.0)
@@ -57,8 +57,6 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
     'fleet-preconfiguration-deletion-record',
     'fleet-proxy',
     'graph-workspace',
-    'guided-onboarding-guide-state',
-    'guided-onboarding-plugin-state',
     'index-pattern',
     'infrastructure-monitoring-log-view',
     'infrastructure-ui-source',

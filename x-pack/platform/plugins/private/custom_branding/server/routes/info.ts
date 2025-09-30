@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
-import { CustomBrandingInfoResponse } from '../../common/types';
-import { CustomBrandingRouter } from '../types';
+import type { ILicense } from '@kbn/licensing-types';
+import type { CustomBrandingInfoResponse } from '../../common/types';
+import type { CustomBrandingRouter } from '../types';
 
 export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(

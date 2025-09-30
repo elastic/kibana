@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AuditLogger,
   ElasticsearchClient,
   KibanaRequest,
@@ -14,23 +14,21 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
+import type { CreatedAtSearchResponse } from './scheduled_query';
 import {
   transformResponse,
   scheduledQueryFactory,
-  CreatedAtSearchResponse,
   transformSingleResponse,
 } from './scheduled_query';
-import { ReportingCore } from '../../..';
-import { ScheduledReportType } from '../../../types';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ReportingCore } from '../../..';
+import type { ScheduledReportType } from '../../../types';
+import { TaskStatus, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { omit } from 'lodash';
+import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 
 const fakeRawRequest = {
   headers: {
@@ -60,23 +58,11 @@ const savedObjects: Array<SavedObject<ScheduledReportType>> = [
       createdBy: 'elastic',
       enabled: true,
       jobType: 'printable_pdf_v2',
-      meta: {
-        isDeprecated: false,
-        layout: 'preserve_layout',
-        objectType: 'dashboard',
-      },
+      meta: { isDeprecated: false, layout: 'preserve_layout', objectType: 'dashboard' },
       migrationVersion: '9.1.0',
       title: '[Logs] Web Traffic',
       payload,
-      schedule: {
-        rrule: {
-          freq: 3,
-          interval: 3,
-          byhour: [12],
-          byminute: [0],
-          tzid: 'UTC',
-        },
-      },
+      schedule: { rrule: { freq: 3, interval: 3, byhour: [12], byminute: [0], tzid: 'UTC' } },
     },
     references: [],
     managed: false,
@@ -95,27 +81,13 @@ const savedObjects: Array<SavedObject<ScheduledReportType>> = [
       createdBy: 'not-elastic',
       enabled: true,
       jobType: 'PNGV2',
-      meta: {
-        isDeprecated: false,
-        layout: 'preserve_layout',
-        objectType: 'dashboard',
-      },
+      meta: { isDeprecated: false, layout: 'preserve_layout', objectType: 'dashboard' },
       migrationVersion: '9.1.0',
-      notification: {
-        email: {
-          to: ['user@elastic.co'],
-        },
-      },
+      notification: { email: { to: ['user@elastic.co'] } },
       title: 'Another cool dashboard',
       payload:
         '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
-      schedule: {
-        rrule: {
-          freq: 1,
-          interval: 3,
-          tzid: 'UTC',
-        },
-      },
+      schedule: { rrule: { freq: 1, interval: 3, tzid: 'UTC' } },
     },
     references: [],
     managed: false,
@@ -145,29 +117,106 @@ const lastRunResponse: CreatedAtSearchResponse = {
         _index: '.ds-.kibana-reporting-2025.05.06-000001',
         _id: '7c14d3e0-5d3f-4374-87f8-1758d2aaa10b',
         _score: null,
-        _source: {
-          created_at: '2025-05-06T21:12:07.198Z',
-        },
-        fields: {
-          scheduled_report_id: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        },
+        _source: { created_at: '2025-05-06T21:12:07.198Z' },
+        fields: { scheduled_report_id: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'] },
         sort: [1746565930198],
       },
       {
         _index: '.ds-.kibana-reporting-2025.05.06-000001',
         _id: '895f9620-cf3c-4e9e-9bf2-3750360ebd81',
         _score: null,
-        _source: {
-          created_at: '2025-05-06T12:00:00.500Z',
-        },
-        fields: {
-          scheduled_report_id: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        },
+        _source: { created_at: '2025-05-06T12:00:00.500Z' },
+        fields: { scheduled_report_id: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'] },
         sort: [1746565930198],
       },
     ],
   },
 };
+
+const nextRunResponse: BulkGetResult = [
+  {
+    tag: 'ok',
+    value: {
+      taskType: 'report:execute-scheduled',
+      state: {},
+      ownerId: '',
+      params: {
+        id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        spaceId: 'default',
+        jobtype: 'printable_pdf_v2',
+      },
+      schedule: {
+        rrule: {
+          dtstart: '2025-09-03T16:49:00.000Z',
+          tzid: 'America/New_York',
+          byhour: [12],
+          byminute: [49],
+          freq: 3,
+          interval: 1,
+          byweekday: ['WE'],
+        },
+      },
+      traceparent: '',
+      enabled: true,
+      attempts: 0,
+      scheduledAt: new Date('2025-09-03T16:49:17.952Z'),
+      startedAt: null,
+      retryAt: null,
+      runAt: new Date('2025-09-10T16:49:00.000Z'),
+      status: TaskStatus.Idle,
+      partition: 146,
+      userScope: {
+        apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
+        spaceId: 'default',
+        apiKeyCreatedByUser: false,
+      },
+      apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
+      id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+      version: 'WzYzMSwxXQ==',
+    },
+  },
+  {
+    tag: 'ok',
+    value: {
+      taskType: 'report:execute-scheduled',
+      state: {},
+      ownerId: '',
+      params: {
+        id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        spaceId: 'default',
+        jobtype: 'printable_pdf_v2',
+      },
+      schedule: {
+        rrule: {
+          dtstart: '2025-09-03T16:49:00.000Z',
+          tzid: 'America/New_York',
+          byhour: [12],
+          byminute: [49],
+          freq: 3,
+          interval: 1,
+          byweekday: ['WE'],
+        },
+      },
+      traceparent: '',
+      enabled: true,
+      attempts: 0,
+      scheduledAt: new Date('2025-09-03T16:49:17.952Z'),
+      startedAt: null,
+      retryAt: null,
+      runAt: new Date('2025-09-12T08:30:00.000Z'),
+      status: TaskStatus.Idle,
+      partition: 146,
+      userScope: {
+        apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
+        spaceId: 'default',
+        apiKeyCreatedByUser: false,
+      },
+      apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
+      id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      version: 'WzYzMSwxXQ==',
+    },
+  },
+];
 
 const mockLogger = loggingSystemMock.createLogger();
 
@@ -209,6 +258,7 @@ describe('scheduledQueryFactory', () => {
       tasks: savedObjects.map((so) => ({ id: so.id })),
       errors: [],
     }));
+    taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
     scheduledQuery = scheduledQueryFactory(core);
     jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
 
@@ -257,6 +307,11 @@ describe('scheduledQueryFactory', () => {
         size: 10,
         sort: [{ created_at: { order: 'desc' } }],
       });
+      expect(taskManager.bulkGet).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkGet).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -307,7 +362,7 @@ describe('scheduledQueryFactory', () => {
             enabled: true,
             jobtype: 'printable_pdf_v2',
             last_run: '2025-05-06T12:00:00.500Z',
-            next_run: expect.any(String),
+            next_run: '2025-09-10T16:49:00.000Z',
             payload: jsonPayload,
             schedule: {
               rrule: {
@@ -328,7 +383,7 @@ describe('scheduledQueryFactory', () => {
             enabled: true,
             jobtype: 'PNGV2',
             last_run: '2025-05-06T21:12:07.198Z',
-            next_run: expect.any(String),
+            next_run: '2025-09-12T08:30:00.000Z',
             notification: {
               email: {
                 to: ['user@elastic.co'],
@@ -413,6 +468,7 @@ describe('scheduledQueryFactory', () => {
         perPage: 10,
       });
       expect(client.search).not.toHaveBeenCalled();
+      expect(taskManager.bulkGet).not.toHaveBeenCalled();
       expect(result).toEqual({ page: 1, per_page: 10, total: 0, data: [] });
     });
 
@@ -436,6 +492,9 @@ describe('scheduledQueryFactory', () => {
           "statusCode": 500,
         }
       `);
+
+      expect(client.search).not.toHaveBeenCalled();
+      expect(taskManager.bulkGet).not.toHaveBeenCalled();
     });
 
     it('should gracefully handle esClient.search errors', async () => {
@@ -452,6 +511,12 @@ describe('scheduledQueryFactory', () => {
         10
       );
 
+      expect(taskManager.bulkGet).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkGet).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
       expect(result).toEqual({
         page: 1,
         per_page: 10,
@@ -463,7 +528,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'elastic',
             enabled: true,
             jobtype: 'printable_pdf_v2',
-            next_run: expect.any(String),
+            next_run: '2025-09-10T16:49:00.000Z',
             payload: jsonPayload,
             schedule: {
               rrule: {
@@ -483,7 +548,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
-            next_run: expect.any(String),
+            next_run: '2025-09-12T08:30:00.000Z',
             notification: {
               email: {
                 to: ['user@elastic.co'],
@@ -506,6 +571,152 @@ describe('scheduledQueryFactory', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         `Error getting last run for scheduled reports: Some other error`
       );
+    });
+
+    it('should gracefully handle taskManager.bulkGet errors', async () => {
+      taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
+        throw new Error('task manager error');
+      });
+      const result = await scheduledQuery.list(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
+
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkGet).toHaveBeenCalledTimes(1);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+
+      expect(result).toEqual({
+        page: 1,
+        per_page: 10,
+        total: 2,
+        data: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            created_at: '2025-05-06T21:10:17.137Z',
+            created_by: 'elastic',
+            enabled: true,
+            jobtype: 'printable_pdf_v2',
+            last_run: '2025-05-06T12:00:00.500Z',
+            next_run: expect.any(String),
+            payload: jsonPayload,
+            schedule: {
+              rrule: {
+                freq: 3,
+                interval: 3,
+                byhour: [12],
+                byminute: [0],
+                tzid: 'UTC',
+              },
+            },
+            space_id: 'a-space',
+            title: '[Logs] Web Traffic',
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            created_at: '2025-05-06T21:12:06.584Z',
+            created_by: 'not-elastic',
+            enabled: true,
+            jobtype: 'PNGV2',
+            last_run: '2025-05-06T21:12:07.198Z',
+            next_run: expect.any(String),
+            notification: {
+              email: {
+                to: ['user@elastic.co'],
+              },
+            },
+            payload: jsonPayload,
+            space_id: 'a-space',
+            title: 'Another cool dashboard',
+            schedule: {
+              rrule: {
+                freq: 1,
+                interval: 3,
+                tzid: 'UTC',
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    it('should gracefully handle errors in taskManager.bulkGet result', async () => {
+      taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
+        return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
+      });
+      const result = await scheduledQuery.list(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
+
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkGet).toHaveBeenCalledTimes(1);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+
+      expect(result).toEqual({
+        page: 1,
+        per_page: 10,
+        total: 2,
+        data: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            created_at: '2025-05-06T21:10:17.137Z',
+            created_by: 'elastic',
+            enabled: true,
+            jobtype: 'printable_pdf_v2',
+            last_run: '2025-05-06T12:00:00.500Z',
+            next_run: '2025-09-10T16:49:00.000Z',
+            payload: jsonPayload,
+            schedule: {
+              rrule: {
+                freq: 3,
+                interval: 3,
+                byhour: [12],
+                byminute: [0],
+                tzid: 'UTC',
+              },
+            },
+            space_id: 'a-space',
+            title: '[Logs] Web Traffic',
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            created_at: '2025-05-06T21:12:06.584Z',
+            created_by: 'not-elastic',
+            enabled: true,
+            jobtype: 'PNGV2',
+            last_run: '2025-05-06T21:12:07.198Z',
+            next_run: expect.any(String),
+            notification: {
+              email: {
+                to: ['user@elastic.co'],
+              },
+            },
+            payload: jsonPayload,
+            space_id: 'a-space',
+            title: 'Another cool dashboard',
+            schedule: {
+              rrule: {
+                freq: 1,
+                interval: 3,
+                tzid: 'UTC',
+              },
+            },
+          },
+        ],
+      });
     });
   });
 
@@ -1084,6 +1295,61 @@ describe('transformResponse', () => {
     jest.clearAllMocks();
   });
   it('should correctly transform the responses', () => {
+    expect(transformResponse(mockLogger, soResponse, lastRunResponse, nextRunResponse)).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: '2025-05-06T12:00:00.500Z',
+          next_run: '2025-09-10T16:49:00.000Z',
+          payload: jsonPayload,
+          schedule: {
+            rrule: {
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+          title: '[Logs] Web Traffic',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          created_at: '2025-05-06T21:12:06.584Z',
+          created_by: 'not-elastic',
+          enabled: true,
+          jobtype: 'PNGV2',
+          last_run: '2025-05-06T21:12:07.198Z',
+          next_run: '2025-09-12T08:30:00.000Z',
+          notification: {
+            email: {
+              to: ['user@elastic.co'],
+            },
+          },
+          payload: jsonPayload,
+          title: 'Another cool dashboard',
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 3,
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+        },
+      ],
+    });
+  });
+
+  it('should still calculate the next_run date when nextRunResponse is undefined', () => {
     expect(transformResponse(mockLogger, soResponse, lastRunResponse)).toEqual({
       page: 1,
       per_page: 10,

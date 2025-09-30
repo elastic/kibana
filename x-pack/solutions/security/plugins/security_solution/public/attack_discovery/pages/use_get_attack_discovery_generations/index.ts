@@ -21,7 +21,6 @@ import type {
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -51,7 +50,6 @@ export const useGetAttackDiscoveryGenerations = ({
   refetchOnWindowFocus = false,
 }: Props): UseGetAttackDiscoveryGenerations => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -76,7 +74,7 @@ export const useGetAttackDiscoveryGenerations = ({
     ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
     queryFn,
     {
-      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      enabled: isAssistantEnabled,
       onError: (e: ServerError) => {
         addError(e.body && e.body.message ? new Error(e.body.message) : e, {
           title: i18n.ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS,

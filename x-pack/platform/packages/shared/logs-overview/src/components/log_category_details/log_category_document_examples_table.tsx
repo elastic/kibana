@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
-import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
 export interface LogCategoryDocumentExamplesTableDependencies {
   embeddable: EmbeddableStart;

@@ -8,14 +8,15 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 
 import { Navigation } from './navigation';
 import { SideNavV2CollapseButton } from './collapse_button';
-import { NavigationProps } from './types';
+import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
   toggle: (isVisible: boolean) => void;
@@ -70,6 +71,10 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         pushMinBreakpoint="xs"
         hideCloseButton={true}
         onClose={() => {}}
+        className="hide-for-sharing"
+        css={css`
+          border-inline-end: none; // Remove default euiFlyout border when used as a sidenav
+        `}
       >
         <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { OnDragEndResponder } from '@hello-pangea/dnd';
+import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { euiDragDropReorder } from '@elastic/eui';
 import { AnalyticsEvents } from '../../../analytics/constants';
-import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
+import type { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { useUsageTracker } from '../../../hooks/use_usage_tracker';

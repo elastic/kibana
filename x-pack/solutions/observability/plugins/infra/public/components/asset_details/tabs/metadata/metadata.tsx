@@ -22,7 +22,7 @@ export interface MetadataSearchUrlState {
 
 export const Metadata = () => {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { overrides, entity } = useAssetDetailsRenderPropsContext();
+  const { overrides, entity, schema } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -30,7 +30,7 @@ export const Metadata = () => {
   } = useMetadataStateContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
-  const fields = useMemo(() => getAllFields(metadata), [metadata]);
+  const fields = useMemo(() => getAllFields(metadata, schema), [metadata, schema]);
 
   const onSearchChange = useCallback(
     (newQuery: string) => {
@@ -45,7 +45,7 @@ export const Metadata = () => {
 
   return (
     <>
-      <MetadataExplanationMessage entityType={entity.type} />
+      <MetadataExplanationMessage entityType={entity.type} schema={schema} />
       <EuiHorizontalRule margin="m" />
       <Table
         search={urlState?.metadataSearch}

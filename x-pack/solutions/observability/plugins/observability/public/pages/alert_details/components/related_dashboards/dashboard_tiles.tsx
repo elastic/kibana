@@ -17,18 +17,22 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { RelatedDashboard } from '@kbn/observability-schema';
-import { ActionButtonProps, DashboardTile } from './dashboard_tile';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { ActionButtonProps } from './dashboard_tile';
+import { DashboardTile } from './dashboard_tile';
 
 export function DashboardTiles({
   title,
   isLoadingDashboards,
   dashboards,
   dataTestSubj,
+  timeRange,
 }: {
   title: string;
   isLoadingDashboards: boolean;
   dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (
@@ -61,7 +65,12 @@ export function DashboardTiles({
 
   return wrapWithHeader(
     dashboards.map(({ actionButtonProps, ...rest }) => (
-      <DashboardTile key={rest.id} dashboard={rest} actionButtonProps={actionButtonProps} />
+      <DashboardTile
+        key={rest.id}
+        dashboard={rest}
+        actionButtonProps={actionButtonProps}
+        timeRange={timeRange}
+      />
     ))
   );
 }

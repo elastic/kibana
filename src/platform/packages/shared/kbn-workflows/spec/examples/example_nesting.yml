@@ -4,11 +4,11 @@ workflow:
   description: "Handle alerts based on maliciousness"
   enabled: true
   triggers:
-    - type: triggers.elastic.scheduled
+    - type: scheduled
       with:
         every: 1
         unit: day
-    - type: triggers.elastic.manual
+    - type: manual
   steps:
     - name: Check if alert is malicious
       type: if
@@ -23,7 +23,7 @@ workflow:
           foreach: "{{alert.teams}}"
           steps:
             - name: Send message
-              type: slack.sendMessage
+              type: slack
               with:
                 message: "Alert for {{foreach.value}}"
                 channel: "{{foreach.value}}"

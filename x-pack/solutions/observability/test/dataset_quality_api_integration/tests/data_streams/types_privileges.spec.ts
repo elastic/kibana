@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { DatasetQualityApiClientKey } from '../../common/config';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DatasetQualityApiClientKey } from '../../common/config';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -39,12 +39,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         canRead: false,
         canMonitor: false,
         canReadFailureStore: false,
+        canManageFailureStore: false,
       };
 
       const fullPrivileges = {
         canRead: true,
         canMonitor: true,
         canReadFailureStore: true,
+        canManageFailureStore: true,
       };
 
       it('returns no privileges for noAccessUser with single type', async () => {

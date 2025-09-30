@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject } from 'rxjs';
+import type { ReplaySubject } from 'rxjs';
 import type { AnalyticsServiceSetup, Event } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 

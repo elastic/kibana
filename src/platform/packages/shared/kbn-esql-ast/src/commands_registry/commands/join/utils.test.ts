@@ -8,7 +8,7 @@
  */
 
 import { getPosition, suggestionIntersection, suggestionUnion } from './utils';
-import { ISuggestionItem } from '../../types';
+import type { ISuggestionItem } from '../../types';
 
 describe('getPosition()', () => {
   test('returns correct position on complete modifier matches', () => {

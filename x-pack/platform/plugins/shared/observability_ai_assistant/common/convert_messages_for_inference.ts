@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  AssistantMessage,
-  Message as InferenceMessage,
-  MessageRole as InferenceMessageRole,
-} from '@kbn/inference-common';
+import type { AssistantMessage, Message as InferenceMessage } from '@kbn/inference-common';
+import { MessageRole as InferenceMessageRole } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { takeWhile } from 'lodash';
-import { Message, MessageRole } from '.';
+import type { Message } from '.';
+import { MessageRole } from '.';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {

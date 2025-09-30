@@ -9,19 +9,15 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import {
-  EuiContextMenuPanelDescriptor,
-  type EuiCodeProps,
-  type EuiIconProps,
-  type EuiFlyoutProps,
-} from '@elastic/eui';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;
@@ -64,7 +60,10 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C;
+      /**
+       * callback that yields the share configuration for the share as a promise, enables the possibility to dynamically fetch the share configuration
+       */
+      config: (ctx: ShareActionConfigArgs) => Promise<C>;
       /**
        * when provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
@@ -82,7 +81,7 @@ type ShareImplementationFactory<
 
 // New type definition to extract the config return type
 type ShareImplementation<T> = Omit<T, 'config'> & {
-  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+  config: T extends ShareImplementationFactory<ShareTypes, infer R> ? R : never;
 };
 
 /**
@@ -254,11 +253,21 @@ export interface SharingData {
   };
 }
 
-interface ShareRegistryInternalApi {
-  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
-  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+export type ShareIntegrationMapKey = `integration-${string}`;
 
-  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+export interface RegisterShareIntegrationArgs<I extends ShareIntegration = ShareIntegration>
+  extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
+  getShareIntegrationConfig: I['config'];
+}
+
+export interface ShareRegistryInternalApi {
+  registerShareIntegration<I extends ShareIntegration>(
+    shareObject: string,
+    arg: RegisterShareIntegrationArgs<I>
+  ): void;
+  registerShareIntegration<I extends ShareIntegration>(arg: RegisterShareIntegrationArgs<I>): void;
+
+  resolveShareItemsForShareContext(args: ShareContext): Promise<ShareConfigs[]>;
 }
 
 export abstract class ShareRegistryPublicApi {

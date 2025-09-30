@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { GenericMetricsChart } from '@kbn/apm-plugin/server/routes/metrics/fetch_and_transform_metrics';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { GenericMetricsChart } from '@kbn/apm-plugin/server/routes/metrics/fetch_and_transform_metrics';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
-import { SupertestReturnType } from '../../../services/apm_api';
+import type { SupertestReturnType } from '../../../services/apm_api';
 
 type ChartResponse = SupertestReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
 

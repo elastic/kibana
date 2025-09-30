@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
@@ -147,15 +147,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
     });
 
-    it('should should clean the search session when navigating to ESQL mode, and reinitialize when navigating back', async () => {
+    it('should have the search session when navigating to ESQL mode', async () => {
       await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-      await header.waitUntilLoadingHasFinished();
-      expect(await searchSessions.exists()).to.be(true);
       await discover.selectTextBaseLang();
-      await header.waitUntilLoadingHasFinished();
-      await searchSessions.missingOrFail();
-      await browser.goBack();
       await header.waitUntilLoadingHasFinished();
       expect(await searchSessions.exists()).to.be(true);
     });

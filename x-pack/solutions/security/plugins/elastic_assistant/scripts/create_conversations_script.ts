@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -12,7 +13,7 @@ import { Client } from '@elastic/elasticsearch';
 import axios from 'axios';
 import pLimit from 'p-limit';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-import { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
+import type { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
 import { getEsCreateConversationSchemaMock } from '../server/__mocks__/conversations_schema.mock';
 
 /**
@@ -168,8 +169,8 @@ const getMockConversationContent = (): {
     updated_at: timestamp,
     '@timestamp': timestamp,
     messages: [
-      { content: 'Hello robot', role: 'user', '@timestamp': timestamp },
-      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp },
+      { content: 'Hello robot', role: 'user', '@timestamp': timestamp, id: uuidv4() },
+      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp, id: uuidv4() },
     ],
   };
 };

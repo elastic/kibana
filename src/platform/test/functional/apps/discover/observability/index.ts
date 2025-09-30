@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
   const { spaceSettings } = getPageObjects(['common', 'spaceSettings']);
@@ -31,5 +31,6 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logs/_get_pagination_config'));
     loadTestFile(require.resolve('./embeddable/_get_doc_viewer'));
     loadTestFile(require.resolve('./logs/_get_doc_viewer'));
+    loadTestFile(require.resolve('./logs/_get_recommended_fields'));
   });
 }

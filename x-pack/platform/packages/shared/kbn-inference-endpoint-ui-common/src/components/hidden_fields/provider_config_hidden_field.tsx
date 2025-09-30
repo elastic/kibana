@@ -8,17 +8,17 @@
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import React from 'react';
-import { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView } from '../../types/types';
 import { getNonEmptyValidator } from '../../utils/helpers';
 
 interface ProviderConfigHiddenFieldProps {
-  providerSchema: ConfigEntryView[];
+  requiredProviderFormFields: ConfigEntryView[];
   setRequiredProviderFormFields: React.Dispatch<React.SetStateAction<ConfigEntryView[]>>;
   isSubmitting: boolean;
 }
 
 export const ProviderConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps> = ({
-  providerSchema,
+  requiredProviderFormFields,
   setRequiredProviderFormFields,
   isSubmitting,
 }) => (
@@ -29,7 +29,7 @@ export const ProviderConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps>
       validations: [
         {
           validator: getNonEmptyValidator(
-            providerSchema,
+            requiredProviderFormFields,
             setRequiredProviderFormFields,
             isSubmitting
           ),

@@ -10,19 +10,20 @@ import React from 'react';
 
 import { render as testingLibraryRender } from '@testing-library/react';
 
-import { LogicWrapper, Provider, resetContext } from 'kea';
+import type { LogicWrapper } from 'kea';
+import { Provider, resetContext } from 'kea';
 
 import { of } from 'rxjs';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { Capabilities } from '@kbn/core-capabilities-common';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { searchNavigationMock } from '@kbn/search-navigation/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -30,7 +31,8 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 
 import { mountHttpLogic } from '../shared/http';
-import { mountKibanaLogic, KibanaLogicProps } from '../shared/kibana';
+import type { KibanaLogicProps } from '../shared/kibana';
+import { mountKibanaLogic } from '../shared/kibana';
 
 export const mockKibanaProps: KibanaLogicProps = {
   application: {

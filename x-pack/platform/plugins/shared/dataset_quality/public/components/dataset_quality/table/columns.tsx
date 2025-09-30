@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonRectangle,
   EuiTableHeader,
@@ -19,11 +19,11 @@ import {
   EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
@@ -33,7 +33,7 @@ import {
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { TimeRangeConfig } from '../../../../common/types';
+import type { TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { IntegrationIcon, PrivilegesWarningIconWrapper } from '../../common';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
@@ -284,14 +284,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
-          <EuiToolTip content={datasetQualityColumnTooltip}>
-            <span>
-              {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>{datasetQualityColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: datasetQualityColumnTooltip,
+        icon: 'question',
+      },
       field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -305,14 +304,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
-          <EuiToolTip content={degradedDocsColumnTooltip}>
-            <span>
-              {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>{degradedDocsColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: degradedDocsColumnTooltip,
+        icon: 'question',
+      },
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -340,18 +338,20 @@ export const getDatasetQualityTableColumns = ({
           {
             name: (
               <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <EuiToolTip content={failedDocsColumnTooltip}>
-                  <span>
-                    {`${failedDocsColumnName} `}
-                    <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-                  </span>
-                </EuiToolTip>
+                <span>{failedDocsColumnName}</span>
               </EuiTableHeader>
             ),
+            nameTooltip: {
+              content: failedDocsColumnTooltip,
+              icon: 'question',
+            },
             field: 'failedDocs.percentage',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
-              if (!dataStreamStat.hasFailureStore) {
+              if (
+                !dataStreamStat.hasFailureStore &&
+                dataStreamStat.userPrivileges?.canReadFailureStore
+              ) {
                 const FailureStoreHoverLink = () => {
                   const [hovered, setHovered] = React.useState(false);
                   const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
@@ -436,9 +436,12 @@ export const getDatasetQualityTableColumns = ({
                 {!isActiveDataset(timestamp) ? (
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="info" size="s" />
-                    </EuiToolTip>
+                    <EuiIconTip
+                      position="top"
+                      content={inactiveDatasetActivityColumnTooltip}
+                      type="info"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 ) : (
                   fieldFormats
@@ -477,7 +480,7 @@ const RedirectLink = ({
 }) => {
   const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: `${dataStreamStat.rawName},${dataStreamStat.rawName}${FAILURE_STORE_SELECTOR}`,
     sendTelemetry,
     timeRangeConfig: timeRange,
   });

@@ -7,8 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { EndpointModelInfo, EndpointModelInfoProps } from './endpoint_model_info';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { EndpointModelInfoProps } from './endpoint_model_info';
+import { EndpointModelInfo } from './endpoint_model_info';
 
 interface ServiceProviderProps extends EndpointModelInfoProps {
   service: ServiceProviderKeys;

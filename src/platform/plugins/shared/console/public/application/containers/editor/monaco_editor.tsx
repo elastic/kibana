@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { CSSProperties } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, ESQLCallbacks, monaco } from '@kbn/monaco';
+import type { ESQLCallbacks, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { FieldType } from '@kbn/esql-ast/src/definitions/types';
+import type { FieldType } from '@kbn/esql-ast/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
@@ -34,6 +36,21 @@ import {
 } from '../../contexts';
 import { ContextMenu } from './components';
 import { useSetInputEditor } from '../../hooks';
+import { useActionStyles, useHighlightedLinesClassName } from './styles';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { actions } = useActionStyles();
+
+  return {
+    editorActions: css`
+      ${actions}
+
+      // For IE11
+      min-width: calc(${euiTheme.size.l} * 2);
+    `,
+  };
+};
 
 export interface EditorProps {
   localStorageValue: string | undefined;
@@ -55,7 +72,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       application,
     },
     docLinkVersion,
-    config: { isDevMode },
   } = context;
   const { toasts } = notifications;
   const {
@@ -76,6 +92,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
+  const styles = useStyles();
+  const highlightedLinesClassName = useHighlightedLinesClassName();
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -100,13 +118,17 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
+      const provider = new MonacoEditorActionsProvider(
+        editor,
+        setEditorActionsCss,
+        highlightedLinesClassName
+      );
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+    [highlightedLinesClassName, setInputEditor, setupResizeChecker]
   );
 
   useEffect(() => {
@@ -157,6 +179,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
                   name: c.name,
                   type: c.meta.esType as FieldType,
                   hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+                  userDefined: false,
                 };
               }) || []
             );
@@ -214,7 +237,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
-        className="conApp__editorActions"
+        css={styles.editorActions}
         id="ConAppEditorActions"
         gutterSize="xs"
         responsive={false}

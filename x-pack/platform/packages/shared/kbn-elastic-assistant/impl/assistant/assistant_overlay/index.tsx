@@ -12,7 +12,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { createGlobalStyle } from 'styled-components';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
+import type { ShowAssistantOverlayProps } from '../../assistant_context';
+import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import {
   useAssistantLastConversation,
@@ -80,6 +81,31 @@ export const AssistantOverlay = React.memo(() => {
     setIsModalVisible(!isModalVisible);
   }, [isModalVisible, getLastConversation, assistantTelemetry]);
 
+  const hasOpenedFromUrl = useRef(false);
+
+  const handleOpenFromUrlState = useCallback(
+    (id: string) => {
+      if (!isModalVisible) {
+        setSelectedConversation(getLastConversation({ id }));
+        assistantTelemetry?.reportAssistantInvoked({
+          invokedBy: 'url',
+        });
+        setIsModalVisible(true);
+      }
+    },
+    [isModalVisible, getLastConversation, assistantTelemetry]
+  );
+
+  useEffect(() => {
+    if (hasOpenedFromUrl.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const assistantId = params.get('assistant');
+    if (assistantId && !isModalVisible) {
+      hasOpenedFromUrl.current = true;
+      handleOpenFromUrlState(assistantId);
+    }
+  }, [handleOpenFromUrlState, isModalVisible]);
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

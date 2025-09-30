@@ -7,32 +7,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { Query, Filter } from '@kbn/es-query';
-import { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { Query, Filter } from '@kbn/es-query';
+import type { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useAsync from 'react-use/lib/useAsync';
+import type { LensAttributes, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import {
-  LensAttributes,
   LensAttributesBuilder,
   XYChart,
   XYDataLayer,
-  XYLayerOptions,
   XYReferenceLinesLayer,
   XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { TimeRange } from '@kbn/es-query';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { TimeUnitChar } from '../../../common';
-import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { TimeUnitChar } from '../../../common';
+import type { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import { EventsAsUnit } from '../../../common/constants';
-import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import type { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
-import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
+import type { AggMap } from './painless_tinymath_parser';
+import { PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
   lensFieldFormatter,
   getBufferThreshold,
@@ -126,9 +125,6 @@ export function RuleConditionChart({
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
-  const formulaAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
 
   // Handle Lens error
   useEffect(() => {
@@ -333,7 +329,7 @@ export function RuleConditionChart({
   }, [aggMap, equation]);
 
   useEffect(() => {
-    if (!formulaAsync.value || !dataView || !formula) {
+    if (!dataView || !formula) {
       return;
     }
     const formatId = lensFieldFormatter(metrics);
@@ -428,7 +424,6 @@ export function RuleConditionChart({
           },
         },
         layers,
-        formulaAPI: formulaAsync.value.formula,
         dataView,
       }),
     }).build();
@@ -441,7 +436,6 @@ export function RuleConditionChart({
     label,
     searchConfiguration,
     formula,
-    formulaAsync.value,
     groupBy,
     interval,
     metrics,

@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
-import { asAbsoluteDateTime, TimeUnit } from '../utils/formatters/datetime';
+import type { TimeUnit } from '../utils/formatters/datetime';
+import { asAbsoluteDateTime } from '../utils/formatters/datetime';
 
 interface Props {
   /**

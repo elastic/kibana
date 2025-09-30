@@ -17,15 +17,13 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useConversationsUpdater } from '../../../settings/use_settings_updater/use_conversations_updater';
-import {
-  SystemPromptSettings,
-  useSystemPromptUpdater,
-} from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import { useSystemPromptUpdater } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 import { useAssistantContext, useFetchCurrentUserConversations } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
-import { AIConnector } from '../../../../connectorland/connector_selector';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
 import { useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -63,6 +61,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {

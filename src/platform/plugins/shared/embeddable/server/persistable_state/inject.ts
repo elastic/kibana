@@ -8,9 +8,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
-import { PersistableState } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from './types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { EmbeddableStateWithType } from './types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
 export const getInjectFunction = (

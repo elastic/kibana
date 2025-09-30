@@ -6,7 +6,7 @@
  */
 
 import { noIntegrationsPrivileges, onlyActions as onlyActionsRole } from './roles';
-import { User } from './types';
+import type { User } from './types';
 
 export const superUser: User = {
   username: 'superuser',

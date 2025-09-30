@@ -15,7 +15,7 @@ import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_select
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
-} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+} from '../../../detections/hooks/use_rule_from_timeline';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';

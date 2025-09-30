@@ -11,7 +11,8 @@
 // Splitting classes across files runs into issues with circular dependencies
 // and makes it harder to understand the code structure.
 
-import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
+import type { SharedData } from './global_visitor_context';
+import { type GlobalVisitorContext } from './global_visitor_context';
 import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstChangePointCommand,

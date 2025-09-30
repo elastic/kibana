@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH, PUBLIC_API_VERSION } from '@kbn/lens-plugin/server';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
+import type { LensSearchResponseBody } from '@kbn/lens-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,23 +18,27 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     it('should get list of lens visualizations', async () => {
       const response = await supertest
-        .get(`${PUBLIC_API_PATH}/visualizations`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, PUBLIC_API_VERSION)
+        .get(LENS_VIS_API_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send();
 
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(4);
+
+      const body: LensSearchResponseBody = response.body;
+      expect(body.data.length).to.be(4);
     });
 
     it('should filter lens visualizations by title and description', async () => {
       const response = await supertest
-        .get(`${PUBLIC_API_PATH}/visualizations`)
+        .get(LENS_VIS_API_PATH)
         .query({ query: '1' })
-        .set(ELASTIC_HTTP_VERSION_HEADER, PUBLIC_API_VERSION)
+        .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send();
 
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(2);
+
+      const body: LensSearchResponseBody = response.body;
+      expect(body.data.length).to.be(2);
     });
   });
 }

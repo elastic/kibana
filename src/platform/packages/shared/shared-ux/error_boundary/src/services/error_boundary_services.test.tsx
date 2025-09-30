@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { KibanaErrorBoundaryProviderDeps } from '../../types';
+import type { KibanaErrorBoundaryProviderDeps } from '../../types';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '../..';
 import { BadComponent } from '../../mocks';
 import userEvent from '@testing-library/user-event';

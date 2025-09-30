@@ -32,7 +32,6 @@ export * from './src/saved_object_attributes';
 export * from './src/severity';
 export * from './src/severity_mapping';
 export * from './src/threat';
-export * from './src/threat_mapping';
 export * from './src/threat_subtechnique';
 export * from './src/threat_tactic';
 export * from './src/threat_technique';

@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type {
   ExecutableTool,
   ExecutableToolHandlerFn,
+  BuiltinToolDefinition,
   ToolProvider,
   ToolHandlerFn,
 } from '@kbn/onechat-server';
@@ -44,6 +45,7 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
+    getToolTypeInfo: jest.fn(),
     getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
   };
 };
@@ -56,12 +58,30 @@ export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
   execute: jest.MockedFunction<ExecutableToolHandlerFn>;
 };
 
+export type MockedBuiltinTool = Omit<BuiltinToolDefinition, 'handler'> & {
+  handler: jest.MockedFunction<ToolHandlerFn>;
+};
+
+export const createMockedBuiltinTool = (
+  parts: Partial<MockedBuiltinTool> = {}
+): MockedBuiltinTool => {
+  return {
+    id: 'test-tool',
+    description: 'test description',
+    schema: z.object({}),
+    tags: ['tag-1', 'tag-2'],
+    handler: jest.fn(parts.handler),
+    ...parts,
+  };
+};
+
 export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool => {
   return {
     id: 'test-tool',
     type: ToolType.builtin,
     description: 'test description',
     configuration: {},
+    readonly: false,
     schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
     handler: jest.fn(parts.handler),
@@ -76,7 +96,8 @@ export const createMockedExecutableTool = (
     id: 'test-tool',
     type: ToolType.builtin,
     description: 'test description',
-    schema: z.object({}),
+    readonly: false,
+    schema: () => z.object({}),
     configuration: {},
     tags: ['tag-1', 'tag-2'],
     ...parts,

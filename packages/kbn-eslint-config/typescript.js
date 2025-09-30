@@ -74,6 +74,14 @@ module.exports = {
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
           camelcase: 'off',
+          "@typescript-eslint/consistent-type-imports": [
+            "error",
+            {
+              "prefer": "type-imports",
+              "disallowTypeAnnotations": false,
+              "fixStyle": "separate-type-imports"
+            }
+          ],
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -220,7 +228,7 @@ module.exports = {
           'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': 'error',
+          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
           'no-unused-labels': 'error',
           'no-var': 'error',
           'object-shorthand': 'error',

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Pagination } from '@elastic/eui';
-import { SearchHit } from '@kbn/es-types';
-import { pageToPagination, Paginate } from '@kbn/search-index-documents';
+import type { Pagination } from '@elastic/eui';
+import type { SearchHit } from '@kbn/es-types';
+import type { Paginate } from '@kbn/search-index-documents';
+import { pageToPagination } from '@kbn/search-index-documents';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../use_kibana';
 import { QueryKeys, DEFAULT_DOCUMENT_PAGE_SIZE } from '../../constants';

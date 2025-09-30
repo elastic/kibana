@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from '@kbn/core/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
   Style,

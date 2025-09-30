@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createServer, IncomingMessage, ServerResponse } from 'http';
+import type { IncomingMessage, ServerResponse } from 'http';
+import { createServer } from 'http';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { readFileSync } from 'fs';

@@ -84,6 +84,18 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_CONNECTORS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_CONNECTORS_ID",
+        "description": [],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.ENTERPRISE_SEARCH_CONTENT_APP_ID",
         "type": "string",
         "tags": [],
@@ -92,6 +104,18 @@
         "signature": [
           "\"enterpriseSearchContent\""
         ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_WEB_CRAWLERS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_WEB_CRAWLERS_ID",
+        "description": [],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -174,6 +198,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ES_SEARCH_SYNONYMS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ES_SEARCH_SYNONYMS_ID",
+        "description": [],
+        "signature": [
+          "\"searchSynonyms\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.SEARCH_HOMEPAGE",
         "type": "string",
         "tags": [],
@@ -234,6 +273,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_QUERY_RULES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_QUERY_RULES_ID",
+        "description": [],
+        "signature": [
+          "\"searchQueryRules\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.SERVERLESS_ES_APP_ID",
         "type": "string",
         "tags": [],
@@ -256,6 +310,36 @@
         "description": [],
         "signature": [
           "\"serverlessConnectors\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID",
+        "description": [],
+        "signature": [
+          "\"searchInferenceEndpoints\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SERVERLESS_ES_WEB_CRAWLERS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SERVERLESS_ES_WEB_CRAWLERS_ID",
+        "description": [],
+        "signature": [
+          "\"serverlessWebCrawlers\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,

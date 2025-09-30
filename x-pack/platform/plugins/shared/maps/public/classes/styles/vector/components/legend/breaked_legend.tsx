@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
-import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const EMPTY_VALUE = '';
 

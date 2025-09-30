@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestTrack, TestTrackLoad } from './test_track';
+import type { TestTrackLoad } from './test_track';
+import { TestTrack } from './test_track';
 
 describe('TestTrack', () => {
   it('should not create lanes when the track is created', () => {

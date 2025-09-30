@@ -8,17 +8,20 @@
  */
 
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
+import { getApiKeyHeader } from './get_api_key_header';
 
 export function getKibanaClient({
   target,
   username,
   password,
+  apiKey,
   logger,
 }: {
   target: string;
   username?: string;
   password?: string;
+  apiKey?: string;
   logger: Logger;
 }) {
   const url = new URL(target);
@@ -29,6 +32,7 @@ export function getKibanaClient({
 
   const kibanaClient = new KibanaClient({
     target: url.toString(),
+    headers: getApiKeyHeader(apiKey),
   });
 
   return kibanaClient;

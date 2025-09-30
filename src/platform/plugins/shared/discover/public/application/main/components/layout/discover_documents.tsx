@@ -15,9 +15,11 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -62,7 +64,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -109,11 +110,14 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
+  const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = useSavedSearchInitial();
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
   const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
@@ -307,7 +311,7 @@ function DiscoverDocumentsComponent({
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        savedSearchId={savedSearch.id}
+        savedSearchId={persistedDiscoverSession?.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
@@ -320,7 +324,7 @@ function DiscoverDocumentsComponent({
     ),
     [
       dataView,
-      savedSearch.id,
+      persistedDiscoverSession?.id,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
@@ -330,20 +334,38 @@ function DiscoverDocumentsComponent({
     ]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+    },
+    [dispatch, setDataGridUiState]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererDensity = useMemo(
+    () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
+    [density, dataGridUiState, services.storage]
+  );
+  const cellRendererRowHeight = useMemo(
+    () =>
+      getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight ?? dataGridUiState?.rowHeight,
+        configRowHeight,
+      }),
+    [rowHeight, dataGridUiState, services.storage, configRowHeight]
+  );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density: density ?? getDataGridDensity(services.storage, 'discover'),
-      rowHeight: getRowHeight({
-        storage: services.storage,
-        consumer: 'discover',
-        rowHeightState: rowHeight,
-        configRowHeight,
-      }),
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -382,7 +404,7 @@ function DiscoverDocumentsComponent({
           css={styles.progress}
         />
       ) : null,
-    [isDataLoading]
+    [isDataLoading, styles.progress]
   );
 
   const renderCustomToolbarWithElements = useMemo(
@@ -397,14 +419,6 @@ function DiscoverDocumentsComponent({
         ),
       }),
     [viewModeToggle, callouts, loadingIndicator]
-  );
-
-  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
-  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
-  const onInitialStateChange = useCallback(
-    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
-      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
-    [dispatch, setDataGridUiState]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -428,7 +442,7 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      <div className="unifiedDataTable">
+      <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -445,8 +459,8 @@ function DiscoverDocumentsComponent({
             }
             rows={rows}
             sort={(sort as SortOrder[]) || []}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
+            searchDescription={persistedDiscoverSession?.description}
+            searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
             settings={grid}
@@ -496,7 +510,7 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const styles = {
+const componentStyles = {
   container: css({
     position: 'relative',
     minHeight: 0,
@@ -512,4 +526,53 @@ const styles = {
     height: '100%',
     width: '100%',
   }),
+  // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
+  dataTable: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      maxWidth: '100%',
+      height: '100%',
+      overflow: 'hidden',
+
+      '.unifiedDataTable__cell--highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      },
+
+      '.unifiedDataTable__cell--expanded': {
+        backgroundColor: euiTheme.colors.highlight,
+      },
+
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+      },
+
+      // Custom styles for data grid header cell.
+      // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+      '.unifiedDataTable__headerCell': {
+        alignItems: 'start',
+
+        '.euiDataGridHeaderCell__draggableIcon': {
+          paddingBlock: `calc(${euiTheme.size.xs} / 2)`, // to align with a token height
+        },
+        '.euiDataGridHeaderCell__button': {
+          marginBlock: -euiTheme.size.xs, // to override Eui value for Density "Expanded"
+        },
+      },
+
+      '.unifiedDataTable__rowControl': {
+        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
+      },
+      // Compact density - 'auto & custom' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
+        {
+          marginTop: -2.5,
+        },
+
+      // Compact density - 'single' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
+        {
+          alignSelf: 'flex-start',
+          marginTop: -3,
+        },
+    }),
 };

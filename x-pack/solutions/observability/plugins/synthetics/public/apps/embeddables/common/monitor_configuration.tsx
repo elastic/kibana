@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,13 +20,13 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 import { MonitorFiltersForm } from './monitor_filters_form';
-import { DEFAULT_OVERVIEW_VIEW, OverviewView } from '../../synthetics/state';
+import type { OverviewView } from '../../synthetics/state';
+import { DEFAULT_OVERVIEW_VIEW } from '../../synthetics/state';
 
 const MonitorConfigurationContext = React.createContext<{
   overviewView: OverviewView;

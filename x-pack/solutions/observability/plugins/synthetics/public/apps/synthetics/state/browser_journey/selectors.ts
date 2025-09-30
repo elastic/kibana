@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyntheticsAppState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
 export const selectBrowserJourneyState = (state: SyntheticsAppState) => state.browserJourney;
 export const selectBrowserJourney = (checkGroup?: string) => (state: SyntheticsAppState) =>

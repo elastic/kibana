@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const getCustomPipelines = async (
   indexName: string,

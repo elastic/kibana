@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ManageProcessorsTestBed } from './helpers/manage_processors.helpers';
+import type { ManageProcessorsTestBed } from './helpers/manage_processors.helpers';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import type { GeoipDatabase } from '../../common/types';

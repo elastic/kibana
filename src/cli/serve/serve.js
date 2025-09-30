@@ -238,6 +238,7 @@ export default function (program) {
       pluginPathCollector,
       []
     )
+    .option('--allow-root', 'Required if Kibana is ran as root')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {

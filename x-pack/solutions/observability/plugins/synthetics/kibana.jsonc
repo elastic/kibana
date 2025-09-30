@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "contentManagement",
       "data",
       "fleet",
       "embeddable",

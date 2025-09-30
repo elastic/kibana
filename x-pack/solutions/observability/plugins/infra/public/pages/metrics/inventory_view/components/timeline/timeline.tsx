@@ -55,14 +55,14 @@ interface Props {
 
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId, source } = useSourceContext();
-  const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, nodeType, accountId, region, preferredSchema } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
   const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline({
-    kuery: filterQuery.expression,
+    kuery: filterQuery.query,
     metrics: [metric],
     nodeType,
     sourceId,
@@ -100,20 +100,27 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
-  const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(anomalyParams, {
-    active: nodeType === 'host',
-  });
+  const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
+    { ...anomalyParams, schema: preferredSchema ?? 'ecs' },
+    {
+      active: nodeType === 'host',
+    }
+  );
   const { metricsK8sAnomalies } = useMetricsK8sAnomaliesResults(anomalyParams, {
     active: nodeType === 'pod',
   });
 
   const anomalies = useMemo(() => {
+    if (preferredSchema === 'semconv') {
+      return;
+    }
+
     if (nodeType === 'host') {
       return metricsHostsAnomalies;
     } else if (nodeType === 'pod') {
       return metricsK8sAnomalies;
     }
-  }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  }, [preferredSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
   const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
@@ -236,26 +243,29 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{
-                    backgroundColor: euiTheme.colors.backgroundFilledAccent,
-                    height: 5,
-                    width: 10,
-                  }}
-                />
-                <EuiFlexItem>
-                  <EuiText size={'xs'}>
-                    <FormattedMessage
-                      id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
-                      defaultMessage="Anomaly detected"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {preferredSchema !== 'semconv' ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
+                  <EuiFlexItem
+                    grow={false}
+                    style={{
+                      backgroundColor: euiTheme.colors.backgroundFilledAccent,
+                      height: 5,
+                      width: 10,
+                    }}
+                  />
+
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      <FormattedMessage
+                        id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
+                        defaultMessage="Anomaly detected"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </TimelineHeader>

@@ -9,13 +9,15 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 
-import {
+import type {
   EsDataTypeGeoPoint,
   EsDataTypeGeoPointRange,
   EsDataTypeRange,
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
   EsDataTypeUnion,
+} from './schemas';
+import {
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,
   esDataTypeRange,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { deleteRuleset } from './delete_query_rules_ruleset';
 
 describe('delete ruleset lib function', () => {

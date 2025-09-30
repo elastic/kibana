@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TelemetryConfig } from '@kbn/telemetry-config';
-import type { Instrumentation } from '@opentelemetry/instrumentation';
-
 jest.mock('@opentelemetry/instrumentation', () => {
   const originalPkg = jest.requireActual('@opentelemetry/instrumentation');
 
@@ -28,55 +25,41 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { initTelemetry } from '..';
-import type { DeepPartial } from '@kbn/utility-types';
+import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
+import { resources } from '@elastic/opentelemetry-node/sdk';
+import { initTelemetry } from '..';
 
 describe('initTelemetry', () => {
-  describe('auto-instrumentations', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test.each<[string, DeepPartial<TelemetryConfig>, string[]]>([
-      ['telemetry is disabled', { enabled: false }, []],
-      [
-        'telemetry is enabled but tracing and metrics are disabled',
-        { enabled: true, tracing: { enabled: false }, metrics: { enabled: false } },
-        [],
-      ],
-      [
-        'only telemetry tracing is enabled',
-        { enabled: true, tracing: { enabled: true }, metrics: { enabled: false } },
-        [],
-      ],
-      [
-        'only telemetry metrics is enabled',
-        { enabled: true, tracing: { enabled: false }, metrics: { enabled: true } },
-        [
-          // This test will scream at us if any of these have been removed or renamed and no-longer registered
-          '@opentelemetry/instrumentation-runtime-node',
-        ],
-      ],
-    ])('validate registered instrumentations when %s', (_, config, expected) => {
-      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
-      loadConfiguration.mockImplementation(
-        () => new ApmConfiguration(REPO_ROOT, { telemetry: config as TelemetryConfig }, false)
+  describe('resource attributes', () => {
+    test('ensure naming consistency', () => {
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        { elastic: { apm: { environment: 'test-environment' } } },
+        false
       );
 
-      initTelemetry([], REPO_ROOT, false, 'test-service');
-      const { registerInstrumentations } = jest.requireMock('@opentelemetry/instrumentation');
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
 
-      if (expected.length > 0) {
-        const { instrumentations } = registerInstrumentations.mock.calls[0][0];
-        const instrumentationNames = instrumentations.map(
-          ({ instrumentationName }: Instrumentation) => instrumentationName
-        );
-        expect(instrumentationNames).toEqual(expected);
-      } else {
-        expect(registerInstrumentations).not.toHaveBeenCalled();
-      }
+      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+
+      initTelemetry([], REPO_ROOT, false, 'test-service');
+
+      expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
+          'service.name': 'test-service',
+          'service.version': PKG_JSON.version,
+          'service.instance.id': undefined,
+          'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
+          git_rev: expect.any(String),
+        })
+      );
     });
   });
 });

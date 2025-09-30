@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NoDataPagePublicSetup, NoDataPagePublicStart } from '../types';
+import type { NoDataPagePublicSetup, NoDataPagePublicStart } from '../types';
 
 const initialize = <T extends NoDataPagePublicSetup>() => {
   return () =>

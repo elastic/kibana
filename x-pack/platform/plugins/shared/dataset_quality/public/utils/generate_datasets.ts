@@ -6,12 +6,12 @@
  */
 
 import { DEFAULT_QUALITY_DOC_STATS } from '../../common/constants';
-import { DataStreamDocsStat } from '../../common/api_types';
-import { DataStreamStatType } from '../../common/data_streams_stats/types';
+import type { DataStreamDocsStat } from '../../common/api_types';
+import type { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { mapPercentageToQuality } from '../../common/utils';
-import { Integration } from '../../common/data_streams_stats/integration';
+import type { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
+import type { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
 import { calculatePercentage } from './calculate_percentage';
 

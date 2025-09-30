@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-import { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
+import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,

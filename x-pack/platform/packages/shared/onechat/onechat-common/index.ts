@@ -7,14 +7,18 @@
 
 export type { OnechatEvent } from './base/events';
 export {
+  internalNamespaces as toolNamespaces,
+  protectedNamespaces as toolReservedNamespaces,
+  isInProtectedNamespace,
+} from './base/namespaces';
+export {
   ToolType,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
-  builtInToolIdPrefix,
-  builtinToolIds,
-  builtinTags,
+  platformCoreTools,
+  defaultAgentToolIds,
+  editableToolTypes,
   isReservedToolId,
-  isBuiltInToolId,
   type ByIdsToolSelection,
   type ToolSelection,
   isByIdsToolSelection,
@@ -29,7 +33,18 @@ export {
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
-  idRegexp,
+  toolIdRegexp,
+  toolIdMaxLength,
+  activeToolsCountWarningThreshold,
+  validateToolId,
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
+  type IndexSearchToolDefinitionWithSchema,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -55,15 +70,18 @@ export {
   type OnechatConversationNotFoundError,
   type OnechatBadRequestError,
   type OnechatRequestAbortedError,
+  type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
+export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,
-  AgentMode,
-  type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,
@@ -86,7 +104,11 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
+  type ToolProgressEvent,
+  type ToolProgressEventData,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -99,6 +121,7 @@ export {
   type MessageCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type ToolCallProgress,
   isToolCallEvent,
   isToolResultEvent,
   isReasoningEvent,
@@ -107,4 +130,5 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isToolProgressEvent,
 } from './chat';

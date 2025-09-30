@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMaintenanceWindows } from './use_maintenance_windows';
 

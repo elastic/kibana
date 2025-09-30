@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
 import { useDataViewContext } from '../../contexts/data_view_context';
-import { FindingsBaseESQueryConfig, FindingsBaseURLQuery } from '../../types';
+import type { FindingsBaseESQueryConfig, FindingsBaseURLQuery } from '../../types';
 import { useKibana } from '../use_kibana';
 
 const getBaseQuery = ({

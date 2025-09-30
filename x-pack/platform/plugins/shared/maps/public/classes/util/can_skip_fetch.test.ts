@@ -7,8 +7,8 @@
 
 import { canSkipSourceUpdate, updateDueToExtent } from './can_skip_fetch';
 import { DataRequest } from './data_request';
-import { Filter } from '@kbn/es-query';
-import { ISource } from '../sources/source';
+import type { Filter } from '@kbn/es-query';
+import type { ISource } from '../sources/source';
 
 describe('updateDueToExtent', () => {
   it('should be false when buffers are the same', async () => {

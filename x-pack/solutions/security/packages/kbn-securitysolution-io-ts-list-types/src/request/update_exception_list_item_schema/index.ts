@@ -6,15 +6,17 @@
  */
 
 import * as t from 'io-ts';
-import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
-import { NamespaceType } from '../../common/default_namespace';
+import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
+import type { NamespaceType } from '../../common/default_namespace';
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { Tags, tags } from '../../common/tags';
-import { UpdateCommentsArray } from '../../common/update_comment';
+import type { OsTypeArray } from '../../common/os_type';
+import { osTypeArrayOrUndefined } from '../../common/os_type';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { Tags } from '../../common/tags';
+import { tags } from '../../common/tags';
+import type { UpdateCommentsArray } from '../../common/update_comment';
 import { description } from '../../common/description';
 import { name } from '../../common/name';
 import { _version } from '../../common/underscore_version';
@@ -22,7 +24,8 @@ import { id } from '../../common/id';
 import { item_id } from '../../common/item_id';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
-import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
+import type { ExpireTimeOrUndefined } from '../../common';
+import { expireTimeOrUndefined } from '../../common';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(

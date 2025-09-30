@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({
@@ -24,6 +25,7 @@ export const configSchema = schema.object({
   maximumWaitTimeForAllCollectorsInS: schema.number({
     defaultValue: DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
   }),
+  maxCollectorConcurrency: schema.number({ defaultValue: 5 }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

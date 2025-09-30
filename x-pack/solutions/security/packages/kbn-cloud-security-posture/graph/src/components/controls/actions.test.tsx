@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { Actions, ActionsProps } from './actions';
+import type { ActionsProps } from './actions';
+import { Actions } from './actions';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,

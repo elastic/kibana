@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
@@ -18,7 +18,7 @@ import {
   removeMonitorEmptyValues,
   transformPublicKeys,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export const keyToOmitList = [

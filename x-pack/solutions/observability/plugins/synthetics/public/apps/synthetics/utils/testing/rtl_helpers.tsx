@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React, { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, of } from 'rxjs';
+
+import type { MatcherFunction, RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import {
-  render as reactTestLibRender,
-  MatcherFunction,
-  RenderOptions,
-  configure,
-} from '@testing-library/react';
+import { render as reactTestLibRender, configure } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 
 import { merge, mergeWith } from 'lodash';
-import { createMemoryHistory, History } from 'history';
-import { CoreStart } from '@kbn/core/public';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
+import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 import { stringifyUrlParams } from '../url_params';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { SyntheticsRefreshContextProvider } from '../../contexts';
 import { kibanaService } from '../../../../utils/kibana_service';
 

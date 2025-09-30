@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamType } from '../../common/types';
+import type { DataStreamType } from '../../common/types';
 
 export function flattenStats<T>(
   stats: Record<DataStreamType, T[]>

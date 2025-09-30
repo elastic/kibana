@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ChatCompleteAPI, MessageRole, ChatCompleteOptions } from '@kbn/inference-common';
+import type { ChatCompleteAPI, ChatCompleteOptions } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { createChatCompleteRestApi } from './chat_complete';
 import { getMockHttpFetchStreamingResponse } from '../utils/mock_http_fetch_streaming';
 

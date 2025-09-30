@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldsListItemContainer } from './fields_list_item_container';
-import { NormalizedField, State } from '../../../types';
+import type { NormalizedField, State } from '../../../types';
 
 interface Props {
   fields?: NormalizedField[];

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorStop, CustomPaletteParams, PaletteOutput, getValidColor } from '@kbn/coloring';
+import type { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { getValidColor } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
-import { Panel, Series } from '../../../../../common/types';
+import type { Panel, Series } from '../../../../../common/types';
 
 const Operators = {
   GTE: 'gte',

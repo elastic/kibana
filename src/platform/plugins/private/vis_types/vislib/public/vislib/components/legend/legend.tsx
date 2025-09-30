@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
@@ -23,15 +24,16 @@ import {
   euiFontSize,
 } from '@elastic/eui';
 
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
-import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
+import type { LegendItem } from './models';
+import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';
-import { BasicVislibParams } from '../../../types';
+import type { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;

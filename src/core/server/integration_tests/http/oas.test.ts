@@ -15,8 +15,8 @@ import type {
   InternalContextPreboot,
   InternalContextSetup,
 } from '@kbn/core-http-context-server-internal';
-import { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { IRouter } from '@kbn/core-http-server';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { createInternalHttpService } from '../utilities';
 

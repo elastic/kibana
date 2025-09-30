@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -24,6 +24,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
@@ -50,6 +51,19 @@ export interface PaginationConfigExtension {
    * @returns paginationMode - which mode to use for loading Pagination toolbar
    */
   paginationMode: DataGridPaginationMode;
+}
+
+/**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: Array<DataViewField['name']>;
 }
 
 /**
@@ -363,6 +377,13 @@ export interface Profile {
   ) => TypedLensByValueInput['attributes'];
 
   /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * This allows modifying the chart section with a custom component
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
+
+  /**
    * Data grid
    */
 
@@ -438,4 +459,10 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
 }

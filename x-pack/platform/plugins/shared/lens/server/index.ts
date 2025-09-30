@@ -13,6 +13,32 @@ export const plugin = async (initContext: PluginInitializerContext) => {
   return new LensServerPlugin(initContext);
 };
 
-export { PUBLIC_API_PATH, PUBLIC_API_VERSION } from './api/constants';
+export {
+  lensGetRequestParamsSchema,
+  lensGetResponseBodySchema,
+  lensCreateRequestBodySchema,
+  lensCreateResponseBodySchema,
+  lensUpdateRequestParamsSchema,
+  lensUpdateRequestBodySchema,
+  lensUpdateResponseBodySchema,
+  lensDeleteRequestParamsSchema,
+  lensSearchRequestQuerySchema,
+  lensSearchResponseBodySchema,
+} from './api/schema';
 
 export type { LensDocShape715 } from './migrations/types';
+
+export type {
+  LensCreateRequestBody,
+  LensCreateResponseBody,
+  LensUpdateRequestParams,
+  LensUpdateRequestBody,
+  LensUpdateResponseBody,
+  LensGetRequestParams,
+  LensGetResponseBody,
+  LensSearchRequestQuery,
+  LensSearchResponseBody,
+  LensDeleteRequestParams,
+  RegisterAPIRoutesArgs,
+  RegisterAPIRouteFn,
+} from './types';

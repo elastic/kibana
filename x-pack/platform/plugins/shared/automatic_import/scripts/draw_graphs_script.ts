@@ -6,15 +6,12 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Graph as RunnableGraph } from '@langchain/core/runnables/graph';
+import type { Graph as RunnableGraph } from '@langchain/core/runnables/graph';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getCategorizationGraph } from '../server/graphs/categorization/graph';
 import { getEcsGraph, getEcsSubGraph } from '../server/graphs/ecs/graph';
 import { getLogFormatDetectionGraph } from '../server/graphs/log_type_detection/graph';
@@ -27,7 +24,7 @@ import { getApiAnalysisGraph } from '../server/graphs/api_analysis';
 // Some mock elements just to get the graph to compile
 const model = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 const client = 'test' as unknown as IScopedClusterClient;
 
 const logger = new ToolingLog({

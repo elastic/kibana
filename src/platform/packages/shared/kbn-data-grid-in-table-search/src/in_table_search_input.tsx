@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback } from 'react';
+import type { ChangeEvent, FocusEvent } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFieldSearch,

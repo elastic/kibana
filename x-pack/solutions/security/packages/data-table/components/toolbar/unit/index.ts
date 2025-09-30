@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import * as i18n from './translations';
-
 export * from './styles';
-export const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);

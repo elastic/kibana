@@ -57,6 +57,7 @@ export interface JobSelectorFlyoutProps {
   withTimeRangeSelector?: boolean;
   applyTimeRangeConfig?: boolean;
   onTimeRangeConfigChange?: (v: boolean) => void;
+  flyoutTitleId?: string;
 }
 
 export interface MlJobGroupWithTimeRange {
@@ -76,6 +77,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   applyTimeRangeConfig: initialApplyTimeRangeConfig,
   onTimeRangeConfigChange,
   withTimeRangeSelector = true,
+  flyoutTitleId = 'flyoutTitle',
 }) => {
   const {
     services: {
@@ -194,7 +196,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
               defaultMessage: 'Job selection',
             })}

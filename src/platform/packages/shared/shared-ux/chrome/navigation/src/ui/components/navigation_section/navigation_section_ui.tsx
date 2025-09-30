@@ -25,7 +25,7 @@ import { useNavigation as useServices } from '../../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode, isSpecialClick } from '../../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../../types';
 import { useNavigation } from '../../navigation';
-import { EventTracker } from '../../../analytics';
+import type { EventTracker } from '../../../analytics';
 import { useAccordionState } from '../../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
@@ -33,7 +33,8 @@ import {
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
 } from '../../constants';
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../../types';
-import { PanelContext, usePanel } from '../panel';
+import type { PanelContext } from '../panel';
+import { usePanel } from '../panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 import { sectionStyles } from './styles';
 
@@ -44,7 +45,7 @@ const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNod
 
 /** Predicate to determine if a node should be visible in the main side nav.*/
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
-  if (item.sideNavStatus === 'hidden') return false;
+  if (item.sideNavStatus === 'hidden' || item.sideNavVersion === 'v2') return false;
 
   if (item.renderItem) return true;
 

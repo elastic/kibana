@@ -5,15 +5,14 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { IStorageClient } from '@kbn/storage-adapter';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IStorageClient } from '@kbn/storage-adapter';
 import { keyBy, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import {
-  ASSET_TYPES,
+import type {
   Asset,
   AssetLink,
   AssetLinkRequest,
@@ -26,15 +25,10 @@ import {
   RuleLink,
   SloLink,
 } from '../../../../common/assets';
-import {
-  ASSET_ID,
-  ASSET_TYPE,
-  ASSET_UUID,
-  QUERY_KQL_BODY,
-  QUERY_TITLE,
-  STREAM_NAME,
-} from './fields';
-import { AssetStorageSettings } from './storage_settings';
+import { ASSET_TYPES } from '../../../../common/assets';
+import { QUERY_KQL_BODY, QUERY_SYSTEM_FILTER, QUERY_SYSTEM_NAME, QUERY_TITLE } from './fields';
+import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
+import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
@@ -141,17 +135,28 @@ interface AssetBulkDeleteOperation {
 
 function fromStorage(link: StoredAssetLink): AssetLink {
   if (link[ASSET_TYPE] === 'query') {
+    const storedQueryLink: StoredQueryLink & {
+      [QUERY_SYSTEM_NAME]: string;
+      [QUERY_SYSTEM_FILTER]: string;
+    } = link as any;
     return {
-      ...link,
+      ...storedQueryLink,
       query: {
-        id: link['asset.id'],
-        title: link['query.title'],
+        id: storedQueryLink[ASSET_ID],
+        title: storedQueryLink[QUERY_TITLE],
         kql: {
-          query: link['query.kql.query'],
+          query: storedQueryLink[QUERY_KQL_BODY],
         },
+        system: storedQueryLink[QUERY_SYSTEM_NAME]
+          ? {
+              name: storedQueryLink[QUERY_SYSTEM_NAME],
+              filter: JSON.parse(storedQueryLink[QUERY_SYSTEM_FILTER]),
+            }
+          : undefined,
       },
     } satisfies QueryLink;
   }
+
   return link;
 }
 
@@ -162,9 +167,11 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     return {
       ...rest,
       [STREAM_NAME]: name,
-      'query.title': query.title,
-      'query.kql.query': query.kql.query,
-    };
+      [QUERY_TITLE]: query.title,
+      [QUERY_KQL_BODY]: query.kql.query,
+      [QUERY_SYSTEM_NAME]: query.system ? query.system.name : '',
+      [QUERY_SYSTEM_FILTER]: query.system ? JSON.stringify(query.system.filter) : '',
+    } as unknown as StoredAssetLink;
   }
 
   return {
@@ -377,11 +384,20 @@ export class AssetClient {
       Promise.all(
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
-            this.clients.rulesClient.get({ id: ruleId }).then((rule) => {
-              return ruleToAsset(ruleId, rule);
-            })
+            this.clients.rulesClient
+              .get({ id: ruleId })
+              .then((rule) => {
+                return ruleToAsset(ruleId, rule);
+              })
+              .catch((error) => {
+                // Handle missing rules gracefully (404, etc.)
+                // Return null for missing/inaccessible rules, filter them out later
+                return null;
+              })
           );
         })
+      ).then((results) =>
+        results.filter((rule): rule is NonNullable<typeof rule> => rule !== null)
       ),
       idsByType.slo.length
         ? this.clients.soClient

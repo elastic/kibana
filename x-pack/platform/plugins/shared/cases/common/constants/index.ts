@@ -28,7 +28,7 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins
+ * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -94,6 +94,10 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
+export const INTERNAL_CASE_SUMMARY_URL = `${CASES_INTERNAL_URL}/{case_id}/summary` as const;
+export const INTERNAL_INFERENCE_CONNECTORS_URL = '/internal/inference/connectors' as const;
+export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
+  `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 
 /**
  * Action routes
@@ -163,6 +167,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
   observables: { enabled: true },
+  events: { enabled: true },
 });
 
 /**
@@ -171,6 +176,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
 
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
 export const ANALYTICS_BACKFILL_TASK_TYPE = 'cai:cases_analytics_index_backfill';
+export const ANALYTICS_SCHEDULER_TASK_TYPE = 'cai:cases_analytics_index_scheduler';
 export const ANALYTICS_SYNCHRONIZATION_TASK_TYPE = 'cai:cases_analytics_index_synchronization';
 
 /**

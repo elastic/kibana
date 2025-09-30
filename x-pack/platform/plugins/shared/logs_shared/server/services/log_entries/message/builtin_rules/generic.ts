@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMessageFormattingRule } from '../rule_types';
+import type { LogMessageFormattingRule } from '../rule_types';
 
 const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message'];
 const BUILTIN_FALLBACK_MESSAGE_FIELDS = ['log.original', 'event.original'];

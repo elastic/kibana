@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useExpandedPingList } from './use_ping_expanded';
 import { formatDuration } from '../../../../utils/formatting';
-import { Ping } from '../../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../../common/runtime_types';
 import * as I18LABELS from './translations';
 import { PingStatusColumn } from './columns/ping_status';
 import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL } from './translations';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetQualityFtrProviderContext } from '../config';
+import type { DatasetQualityFtrProviderContext } from '../config';
 
 const datasetQualityRoles = {
   fullAccess: {
@@ -80,6 +80,27 @@ const datasetQualityRoles = {
       {
         feature: {
           dataQuality: ['none'],
+          discover: ['all'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+  canNotReadFailureStore: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [
+        {
+          names: ['logs-*'],
+          privileges: ['read'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          dataQuality: ['minimal_all', 'manage_rules'],
           discover: ['all'],
           fleet: ['read'],
         },

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  ExpressionsServerStart,
+  ExpressionsServerSetup,
+} from '@kbn/expressions-plugin/server';
 import { tagcloudFunction } from '../common/expression_functions';
 
 interface SetupDeps {

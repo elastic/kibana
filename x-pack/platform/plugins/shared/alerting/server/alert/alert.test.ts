@@ -26,6 +26,27 @@ describe('getId()', () => {
   });
 });
 
+describe('matchesUuid()', () => {
+  test('returns true if alert UUID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+
+    expect(alert.matchesUuid(uuid)).toBe(true);
+  });
+
+  test('returns true if alert ID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('123');
+
+    expect(alert.matchesUuid('123')).toBe(true);
+  });
+
+  test('returns false if neither alert ID or UUID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('123');
+
+    expect(alert.matchesUuid('xyz')).toBe(false);
+  });
+});
+
 describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');

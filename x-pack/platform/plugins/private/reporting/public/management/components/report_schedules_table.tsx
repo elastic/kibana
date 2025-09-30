@@ -6,11 +6,10 @@
  */
 
 import { Fragment, default as React, useCallback, useState } from 'react';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -25,7 +24,8 @@ import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
 import {
   guessAppIconTypeFromObjectType,
   getDisplayNameFromObjectType,

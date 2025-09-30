@@ -1,0 +1,152 @@
+{
+  "id": "@kbn/dashboards-selector",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dashboards-selector",
+        "id": "def-public.DashboardsSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardsSelector",
+        "description": [],
+        "signature": [
+          "({\n  contentManagement,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}: { contentManagement: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.ContentManagementPublicStart",
+            "text": "ContentManagementPublicStart"
+          },
+          "; dashboardsFormData: { id: string; }[]; onChange: (selectedOptions: ",
+          "EuiComboBoxOptionOption",
+          "<string>[]) => void; placeholder?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboards-selector",
+            "id": "def-public.DashboardsSelector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  contentManagement,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.contentManagement",
+                "type": "Object",
+                "tags": [],
+                "label": "contentManagement",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "public",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-public.ContentManagementPublicStart",
+                    "text": "ContentManagementPublicStart"
+                  }
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.dashboardsFormData",
+                "type": "Array",
+                "tags": [],
+                "label": "dashboardsFormData",
+                "description": [],
+                "signature": [
+                  "{ id: string; }[]"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(selectedOptions: ",
+                  "EuiComboBoxOptionOption",
+                  "<string>[]) => void"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/dashboards-selector",
+                    "id": "def-public.DashboardsSelector.$1.onChange.$1",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "selectedOptions",
+                    "description": [],
+                    "signature": [
+                      "EuiComboBoxOptionOption",
+                      "<string>[]"
+                    ],
+                    "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/dashboards-selector",
+                "id": "def-public.DashboardsSelector.$1.placeholder",
+                "type": "string",
+                "tags": [],
+                "label": "placeholder",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

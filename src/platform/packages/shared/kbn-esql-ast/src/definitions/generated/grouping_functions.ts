@@ -73,13 +73,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -101,13 +101,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -129,41 +129,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'keyword',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -185,13 +157,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'keyword',
-          optional: true,
+          type: 'date',
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -213,69 +185,41 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'keyword',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'text',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'text',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'date',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'text',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -297,13 +241,69 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'text',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -357,41 +357,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date_nanos',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date_nanos',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'keyword',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -413,13 +385,41 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'date',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -441,13 +441,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -469,13 +469,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -497,13 +497,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -525,13 +525,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'date',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -553,13 +553,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'keyword',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -581,13 +581,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'text',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -657,13 +657,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -685,13 +685,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -713,13 +713,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -741,41 +741,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'integer',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -797,13 +769,41 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'integer',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -825,41 +825,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -881,13 +853,41 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'long',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -957,41 +957,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -1013,196 +985,12 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'long',
           optional: false,
           constantOnly: true,
         },
@@ -1213,39 +1001,7 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'double',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
           type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
           optional: false,
         },
         {
@@ -1257,13 +1013,213 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1280,18 +1236,6 @@ const bucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'integer',
           optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -1313,41 +1257,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'double',
-          optional: true,
-          constantOnly: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
           optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-          constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1368,14 +1284,14 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
-          type: 'integer',
-          optional: true,
+          type: 'double',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'integer',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1396,14 +1312,14 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
-          type: 'integer',
-          optional: true,
+          type: 'double',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1424,14 +1340,70 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
-          type: 'long',
-          optional: true,
+          type: 'integer',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'double',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1453,13 +1425,13 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
-          type: 'integer',
-          optional: true,
+          type: 'double',
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1481,13 +1453,41 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'from',
           type: 'long',
-          optional: true,
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
           constantOnly: true,
         },
         {
           name: 'to',
           type: 'long',
-          optional: true,
+          optional: false,
           constantOnly: true,
         },
       ],
@@ -1543,7 +1543,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'keyword',
     },
     {
@@ -1554,12 +1554,76 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
-  license: 'PLATINUM',
+  license: 'platinum',
+  observabilityTier: 'COMPLETE',
   examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
 };
-export const groupingFunctionDefinitions = [bucketDefinition, categorizeDefinition];
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const tbucketDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.GROUPING,
+  name: 'tbucket',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.tbucket', {
+    defaultMessage:
+      'Creates groups of values - buckets - out of a @timestamp attribute. The size of the buckets must be provided directly.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'date_period',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'date_period',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'time_duration',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'time_duration',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+  ],
+  locationsAvailable: [Location.STATS, Location.STATS_BY],
+  examples: [
+    'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET(1 hour)\n| SORT min',
+    'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET("1 hour")\n| SORT min',
+  ],
+};
+export const groupingFunctionDefinitions = [
+  bucketDefinition,
+  categorizeDefinition,
+  tbucketDefinition,
+];

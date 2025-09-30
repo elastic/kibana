@@ -2777,7 +2777,7 @@
             "signature": [
               "(core: ",
               "CoreStart",
-              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: ",
+              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2812,7 +2812,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode }",
+                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"
@@ -4329,7 +4329,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4365,6 +4365,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -7358,9 +7385,43 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nHuman-readable name"
+            ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.DataViewListItem.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [
+              "\nTime field name if applicable"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.DataViewListItem.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the data view is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -8047,18 +8108,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -8076,10 +8125,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -15912,7 +15957,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -16695,6 +16740,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -19522,7 +19569,7 @@
               },
               " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
               "MappingTimeSeriesMetricType",
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; metadata_field?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -23771,9 +23818,43 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nHuman-readable name"
+            ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewListItem.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [
+              "\nTime field name if applicable"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewListItem.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the data view is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -24158,7 +24239,7 @@
               },
               "> | undefined; fieldAttrs?: ",
               "FieldAttrsAsObject",
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -24429,18 +24510,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -24458,10 +24527,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -25261,7 +25326,7 @@
           },
           "> | undefined; fieldAttrs?: ",
           "FieldAttrsAsObject",
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "deprecated": false,
@@ -25368,7 +25433,7 @@
           },
           " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
           "MappingTimeSeriesMetricType",
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; metadata_field?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "deprecated": false,

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstQueryExpression, Walker } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { Walker } from '@kbn/esql-ast';
 import { ParameterReplacer } from '../transformers/parameter_replacer';
-import { Params } from '../types';
+import type { Params } from '../types';
 
 export function replaceParameters(queryAst: ESQLAstQueryExpression, params?: Params) {
   const parameterReplacer = new ParameterReplacer(params);

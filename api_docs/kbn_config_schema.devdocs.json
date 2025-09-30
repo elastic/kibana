@@ -884,6 +884,24 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.ObjectType.getPropSchemas",
+            "type": "Function",
+            "tags": [],
+            "label": "getPropSchemas",
+            "description": [
+              "\nReturn the schema for this object's underlying properties"
+            ],
+            "signature": [
+              "() => P"
+            ],
+            "path": "src/platform/packages/shared/kbn-config-schema/src/types/object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-common.ObjectType.validateKey",
             "type": "Function",
             "tags": [],

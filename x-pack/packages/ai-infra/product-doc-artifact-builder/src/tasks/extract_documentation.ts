@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client as ElasticsearchClient8 } from 'elasticsearch-8.x';
+import type { Client as ElasticsearchClient8 } from 'elasticsearch-8.x';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';

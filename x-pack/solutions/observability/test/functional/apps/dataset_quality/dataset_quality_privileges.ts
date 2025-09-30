@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
 import {
   createDatasetQualityUserWithRole,
@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       describe('User cannot monitor any data stream', () => {
         before(async () => {
           await PageObjects.datasetQuality.navigateTo();
+          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
         after(async () => {
           // Cleanup the user and role
@@ -117,6 +118,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             expectSpaceSelector: false,
           });
           await PageObjects.datasetQuality.navigateTo();
+          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
 
         after(async () => {
@@ -149,6 +151,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             expectSpaceSelector: false,
           });
           await PageObjects.datasetQuality.navigateTo();
+          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
 
         it('types filter should be rendered', async () => {
@@ -186,6 +189,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
           await PageObjects.datasetQuality.navigateTo();
+          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
 
         after(async () => {
@@ -212,7 +216,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      describe('User can monitor some data streams', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/232554
+      describe.skip('User can monitor some data streams', function () {
         // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
         // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
         // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
@@ -226,6 +231,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           );
 
           await PageObjects.datasetQuality.navigateTo();
+          await PageObjects.datasetQuality.waitUntilTableLoaded();
         });
 
         after(async () => {

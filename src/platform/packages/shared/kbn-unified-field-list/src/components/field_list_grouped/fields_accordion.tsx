@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
+import type { FieldsGroupNames } from '../../types';
+import { type FieldListItem, type RenderFieldItemParams } from '../../types';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;

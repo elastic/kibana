@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
-import { Shape } from '../../../canvas_plugin_src/renderers/shape';
+import type { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';

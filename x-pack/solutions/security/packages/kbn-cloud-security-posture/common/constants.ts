@@ -4,8 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { VulnSeverity } from './types/vulnerabilities';
-import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
+import type { VulnSeverity } from './types/vulnerabilities';
+import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
+
+export const ORGANIZATION_ACCOUNT = 'organization-account';
+export const SINGLE_ACCOUNT = 'single-account';
+export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
@@ -74,3 +83,7 @@ export const INTERNAL_FEATURE_FLAGS = {
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+
+// space plachoder - to be replaced by the specific kibana space
+export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
+  'entity_store_field_retention_generic_<space>_v1.0.0';

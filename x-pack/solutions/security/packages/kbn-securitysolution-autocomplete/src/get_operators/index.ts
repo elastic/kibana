@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
+import type { OperatorOption } from '@kbn/securitysolution-list-utils';
 import {
   ALL_OPERATORS,
   ENDPOINT_ARTIFACT_OPERATORS,
-  OperatorOption,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,

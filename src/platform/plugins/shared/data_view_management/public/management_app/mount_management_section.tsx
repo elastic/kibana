@@ -13,22 +13,22 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from '@kbn/core/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
 import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
   IndexPatternTableContainerRouter,
 } from '../components';
-import {
+import type {
   IndexPatternManagementStartDependencies,
   IndexPatternManagementStart,
   IndexPatternManagementSetupDependencies,
 } from '../plugin';
-import { IndexPatternManagmentContext } from '../types';
+import type { IndexPatternManagmentContext } from '../types';
 import { DataViewMgmtService } from './data_view_management_service';
 
 const readOnlyBadge = {

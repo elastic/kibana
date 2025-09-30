@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { getTemperatureIfValid } from './get_temperature';
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_CONNECTOR = { type: InferenceConnectorType.OpenAI } as InferenceConnector;
 const GEMINI_CONNECTOR = { type: InferenceConnectorType.Gemini } as InferenceConnector;
@@ -25,7 +26,7 @@ describe('getTemperatureIfValid', () => {
     expect(
       getTemperatureIfValid(0.7, {
         connector: OPENAI_CONNECTOR,
-        modelName: 'gpt-fake-o1',
+        modelName: 'gpt-fake',
       })
     ).toEqual({
       temperature: 0.7,

@@ -8,7 +8,7 @@
  */
 
 import { memoize } from 'lodash';
-import { ResolvedLink } from '../types';
+import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
 import { validateUrl } from '../components/external_link/external_link_tools';

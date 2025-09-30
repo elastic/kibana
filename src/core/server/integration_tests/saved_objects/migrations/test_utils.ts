@@ -9,7 +9,7 @@
 
 import { Env } from '@kbn/config';
 import { getDocLinksMeta, getDocLinks } from '@kbn/doc-links';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';

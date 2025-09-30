@@ -23,7 +23,7 @@ import { RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY, WEEKDAY_OPTIONS } from '../co
 import { getInitialByWeekday } from '../utils/get_initial_by_weekday';
 import { parseSchedule } from '../utils/parse_schedule';
 import { getWeekdayInfo } from '../utils/get_weekday_info';
-import { RecurringSchedule } from '../types';
+import type { RecurringSchedule } from '../types';
 import {
   RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY,
   RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT,

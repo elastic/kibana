@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { createApplicationResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {

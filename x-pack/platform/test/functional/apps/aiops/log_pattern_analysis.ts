@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { USER } from '../../../api_integration/services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

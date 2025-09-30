@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { BoundInferenceClient, ShortIdTable } from '@kbn/inference-common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { ShortIdTable } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { sumBy, uniqBy } from 'lodash';
 import pRetry from 'p-retry';
-import { Evaluator } from '../../types';
+import type { Evaluator } from '../../types';
 import { LlmCriteriaEvaluationPrompt } from './prompt';
 
 type EvaluationCriterionText = string;

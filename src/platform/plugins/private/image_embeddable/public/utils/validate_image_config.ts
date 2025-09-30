@@ -8,8 +8,8 @@
  */
 
 import type { RecursivePartial } from '@elastic/eui';
-import { ImageConfig } from '../types';
-import { ValidateUrlFn } from './validate_url';
+import type { ImageConfig } from '../types';
+import type { ValidateUrlFn } from './validate_url';
 
 export type DraftImageConfig = RecursivePartial<ImageConfig>;
 export function validateImageConfig(

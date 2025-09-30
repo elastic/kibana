@@ -12,16 +12,18 @@ import type {
   RunToolParams,
   RunAgentParams,
 } from '@kbn/onechat-server';
+import type {
+  CreateScopedRunnerDepsMock,
+  MockedTool,
+  MockedAgent,
+  AgentRegistryMock,
+  ToolRegistryMock,
+} from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
   createMockedAgent,
-  CreateScopedRunnerDepsMock,
-  MockedTool,
-  MockedAgent,
-  AgentClientMock,
-  createMockedAgentClient,
-  ToolRegistryMock,
+  createMockedAgentRegistry,
   createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
@@ -75,7 +77,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -100,7 +101,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -108,19 +108,19 @@ describe('Onechat runner', () => {
 
   describe('runAgent', () => {
     let agent: MockedAgent;
-    let agentClient: AgentClientMock;
+    let agentClient: AgentRegistryMock;
     let agentHandler: jest.MockedFn<any>;
 
     beforeEach(() => {
       agent = createMockedAgent();
 
-      agentClient = createMockedAgentClient();
+      agentClient = createMockedAgentRegistry();
       agentClient.get.mockResolvedValue(agent);
 
       const {
-        agentsService: { getScopedClient },
+        agentsService: { getRegistry },
       } = runnerDeps;
-      getScopedClient.mockResolvedValue(agentClient);
+      getRegistry.mockResolvedValue(agentClient);
 
       agentHandler = jest.fn();
       agentHandler.mockResolvedValue({
@@ -154,7 +154,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });
@@ -183,7 +182,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });

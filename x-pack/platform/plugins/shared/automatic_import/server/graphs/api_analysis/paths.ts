@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { ApiAnalysisState } from '../../types';
-import { ApiAnalysisNodeParams } from './types';
+import type { ApiAnalysisState } from '../../types';
+import type { ApiAnalysisNodeParams } from './types';
 import { SUGGESTED_PATHS_PROMPT } from './prompts';
 import { EX_ANSWER_PATHS } from './constants';
 

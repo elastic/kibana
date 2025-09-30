@@ -11,7 +11,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elast
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
-import { Column } from './types';
+import type { Column } from './types';
 
 export interface BodyRowProps<Item> {
   columns: Array<Column<Item>>;

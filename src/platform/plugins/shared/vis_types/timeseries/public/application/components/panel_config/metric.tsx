@@ -32,7 +32,8 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/enums';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import type { PanelConfigProps } from './types';
+import { PANEL_CONFIG_TABS } from './types';
 import { panelConfigContainerStyles } from './_panel_config';
 
 export class MetricPanelConfig extends Component<

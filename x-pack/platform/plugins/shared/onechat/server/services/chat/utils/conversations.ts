@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { of, defer, shareReplay, forkJoin, switchMap, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, defer, shareReplay, forkJoin, switchMap } from 'rxjs';
 import { type Conversation, type RoundCompleteEvent } from '@kbn/onechat-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -17,11 +18,13 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 export const createConversation$ = ({
   agentId,
   conversationClient,
+  conversationId,
   title$,
   roundCompletedEvents$,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
+  conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -31,6 +34,7 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
+        id: conversationId,
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
@@ -74,27 +78,67 @@ export const updateConversation$ = ({
   );
 };
 
+export const conversationExists$ = ({
+  conversationId,
+  conversationClient,
+}: {
+  conversationId: string;
+  conversationClient: ConversationClient;
+}): Observable<boolean> => {
+  return defer(() => conversationClient.exists(conversationId));
+};
+
 export const getConversation$ = ({
   agentId,
   conversationId,
+  autoCreateConversationWithId = false,
   conversationClient,
 }: {
   agentId: string;
   conversationId: string | undefined;
+  autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
   return defer(() => {
     if (conversationId) {
-      return conversationClient.get(conversationId);
+      if (autoCreateConversationWithId) {
+        return conversationExists$({ conversationId, conversationClient }).pipe(
+          switchMap((exists) => {
+            if (exists) {
+              return conversationClient.get(conversationId);
+            } else {
+              return of(placeholderConversation({ conversationId, agentId }));
+            }
+          })
+        );
+      } else {
+        return conversationClient.get(conversationId);
+      }
     } else {
       return of(placeholderConversation({ agentId }));
     }
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+export const createPlaceholderConversation$ = ({
+  agentId,
+  conversationId,
+}: {
+  agentId: string;
+  conversationId?: string;
+}): Observable<Conversation> => {
+  return of(placeholderConversation({ agentId, conversationId }));
+};
+
+const placeholderConversation = ({
+  agentId,
+  conversationId,
+}: {
+  agentId: string;
+  conversationId?: string;
+}): Conversation => {
   return {
-    id: uuidv4(),
+    id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
     rounds: [],

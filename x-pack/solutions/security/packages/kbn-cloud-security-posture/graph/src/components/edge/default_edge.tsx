@@ -12,6 +12,7 @@ import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
+import { GRAPH_EDGE_ID } from '../test_ids';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -73,6 +74,7 @@ export const DefaultEdge = memo(
     return (
       <>
         <BaseEdge
+          data-test-subj={GRAPH_EDGE_ID}
           id={id}
           path={edgePath}
           interactionWidth={0}

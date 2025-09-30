@@ -11,10 +11,10 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
-import { RuleStatus } from '../../types';
+import type { RuleStatus } from '../../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({

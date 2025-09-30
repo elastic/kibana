@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const pdfPayload: JobParamsPDFV2 = {
   browserTimezone: 'UTC',

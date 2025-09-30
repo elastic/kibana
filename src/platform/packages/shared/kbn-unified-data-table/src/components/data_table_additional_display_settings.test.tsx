@@ -11,10 +11,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  UnifiedDataTableAdditionalDisplaySettings,
-  UnifiedDataTableAdditionalDisplaySettingsProps,
-} from './data_table_additional_display_settings';
+import type { UnifiedDataTableAdditionalDisplaySettingsProps } from './data_table_additional_display_settings';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import lodash from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

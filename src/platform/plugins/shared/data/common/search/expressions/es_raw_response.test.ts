@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsRawResponse, esRawResponse } from './es_raw_response';
+import type { EsRawResponse } from './es_raw_response';
+import { esRawResponse } from './es_raw_response';
 
 jest.mock('@kbn/i18n', () => {
   return {

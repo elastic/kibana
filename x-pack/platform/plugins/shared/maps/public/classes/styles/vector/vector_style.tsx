@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { CSSProperties, ReactElement } from 'react';
-import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import { FeatureCollection } from 'geojson';
-import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
+import type { CSSProperties, ReactElement } from 'react';
+import React from 'react';
+import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import type { FeatureCollection } from 'geojson';
+import type { Writable } from '@kbn/utility-types';
+import type { StyleProperties } from './components/vector_style_editor';
+import { VectorStyleEditor } from './components/vector_style_editor';
 import {
   getDefaultStaticProperties,
   LABEL_STYLES,
@@ -30,7 +33,8 @@ import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { getHasLabel } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
-import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
 import { StaticSizeProperty } from './properties/static_size_property';
 import { StaticColorProperty } from './properties/static_color_property';
@@ -46,7 +50,7 @@ import { extractColorFromStyleProperty } from './components/legend/extract_color
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
 import { StaticIconProperty } from './properties/static_icon_property';
 import { DynamicIconProperty } from './properties/dynamic_icon_property';
-import {
+import type {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
@@ -55,6 +59,7 @@ import {
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
+  IconStop,
   IconStylePropertyDescriptor,
   LabelDynamicOptions,
   LabelStaticOptions,
@@ -71,13 +76,14 @@ import {
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
-import { IStyle } from '../style';
-import { IStyleProperty } from './properties/style_property';
-import { IField } from '../../fields/field';
-import { IVectorLayer } from '../../layers/vector_layer';
-import { IVectorSource } from '../../sources/vector_source';
-import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
-import { IESAggField } from '../../fields/agg';
+import type { IStyle } from '../style';
+import type { IStyleProperty } from './properties/style_property';
+import type { IField } from '../../fields/field';
+import type { IVectorLayer } from '../../layers/vector_layer';
+import type { IVectorSource } from '../../sources/vector_source';
+import type { StyleFieldsHelper } from './style_fields_helper';
+import { createStyleFieldsHelper } from './style_fields_helper';
+import type { IESAggField } from '../../fields/agg';
 
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;
@@ -164,8 +170,12 @@ export interface IVectorStyle extends IStyle {
   }) => void;
 }
 
+type NormalizedVectorStyleDescriptor = VectorStyleDescriptor & {
+  properties: Writable<Required<VectorStyleDescriptor['properties']>>;
+};
+
 export class VectorStyle implements IVectorStyle {
-  private readonly _descriptor: VectorStyleDescriptor;
+  private readonly _descriptor: NormalizedVectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
   private readonly _customIcons: CustomIcon[];
   private readonly _source: IVectorSource;
@@ -189,12 +199,12 @@ export class VectorStyle implements IVectorStyle {
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
     isTimeAware = true
-  ) {
+  ): NormalizedVectorStyleDescriptor {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
-    };
+    } as NormalizedVectorStyleDescriptor;
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
@@ -406,8 +416,8 @@ export class VectorStyle implements IVectorStyle {
         },
       } as any;
 
-      if ('field' in updatedProperties[key].options) {
-        delete (updatedProperties[key].options as DynamicStylePropertyOptions).field;
+      if ('field' in updatedProperties[key]!.options) {
+        delete (updatedProperties[key]!.options as Writable<DynamicStylePropertyOptions>).field;
       }
     });
 
@@ -541,11 +551,11 @@ export class VectorStyle implements IVectorStyle {
   }
 
   isTimeAware() {
-    return this._descriptor.isTimeAware;
+    return this._descriptor.isTimeAware ?? true;
   }
 
-  getPropertiesDescriptor(): VectorStylePropertiesDescriptor {
-    return this._descriptor.properties || {};
+  getPropertiesDescriptor(): NormalizedVectorStyleDescriptor['properties'] {
+    return this._descriptor.properties;
   }
 
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>> {
@@ -726,7 +736,7 @@ export class VectorStyle implements IVectorStyle {
       : this._getLegendDetailStyleProperties().length > 0;
   }
 
-  renderLegendDetails() {
+  renderLegendDetails(): ReactElement | null {
     const symbolId = this._getSymbolId();
     const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
 
@@ -1014,7 +1024,7 @@ export class VectorStyle implements IVectorStyle {
         options.customIconStops.forEach((iconStop) => {
           const meta = this._getIconMeta(iconStop.icon);
           if (meta) {
-            iconStop.iconSource = meta.iconSource;
+            (iconStop.iconSource as Writable<IconStop['iconSource']>) = meta.iconSource;
           }
         });
       }

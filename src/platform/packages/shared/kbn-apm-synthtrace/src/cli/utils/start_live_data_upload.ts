@@ -11,13 +11,13 @@ import Path from 'path';
 import { once } from 'lodash';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
-import { SynthtraceClientTypes } from './clients_manager';
+import type { SynthtraceClientTypes } from './clients_manager';
 import { startPerformanceLogger } from './performance_logger';
 import { runWorker } from './workers/run_worker';
 import { logMessage } from './workers/log_message';
-import { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
+import type { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
 
 export async function startLiveDataUpload({
   runOptions,

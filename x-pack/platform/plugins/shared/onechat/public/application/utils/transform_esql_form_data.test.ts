@@ -5,45 +5,66 @@
  * 2.0.
  */
 
-import { EsqlToolDefinition, ToolType } from '@kbn/onechat-common';
-import { CreateToolPayload } from '../../../common/http_api/tools';
+import { omit } from 'lodash';
+import type { EsqlToolDefinition } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
+import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
   transformEsqlFormDataForCreate,
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
   transformFormDataToEsqlTool,
 } from './transform_esql_form_data';
-import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
+import {
+  EsqlParamSource,
+  type EsqlToolFormData,
+} from '../components/tools/form/types/tool_form_types';
 
 describe('transformEsqlFormData', () => {
-  let mockFormData: OnechatEsqlToolFormData;
+  let mockFormData: EsqlToolFormData;
   let mockTool: EsqlToolDefinition;
 
   beforeEach(() => {
     mockFormData = {
-      name: 'my-test-tool',
+      toolId: 'my-test-tool',
       description: 'A tool for testing.',
       esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
       params: [
-        { name: 'param1', type: 'text', description: 'A string parameter.' },
-        { name: 'param2', type: 'long', description: 'A number parameter.' },
+        {
+          name: 'param1',
+          type: 'text',
+          description: 'A string parameter.',
+          source: EsqlParamSource.Custom,
+          optional: false,
+        },
+        {
+          name: 'param2',
+          type: 'long',
+          description: 'A number parameter.',
+          source: EsqlParamSource.Custom,
+          optional: false,
+        },
       ],
-      tags: ['test', 'esql'],
+      labels: ['test', 'esql'],
+      type: ToolType.esql,
     };
 
     mockTool = {
       id: 'my-test-tool',
       description: 'A tool for testing.',
+      readonly: false,
       configuration: {
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
           param1: {
             type: 'text',
             description: 'A string parameter.',
+            optional: false,
           },
           param2: {
             type: 'long',
             description: 'A number parameter.',
+            optional: false,
           },
         },
       },
@@ -71,14 +92,17 @@ describe('transformEsqlFormData', () => {
         name: 'unusedParam',
         description: 'An unused parameter.',
         type: 'text',
+        source: EsqlParamSource.Custom,
+        optional: false,
       });
 
-      const expectedTool = mockTool;
+      const expectedTool = { ...mockTool };
       expectedTool.configuration.query = 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1';
       expectedTool.configuration.params = {
         param1: {
           description: 'A string parameter.',
           type: 'text',
+          optional: false,
         },
       };
 
@@ -90,19 +114,20 @@ describe('transformEsqlFormData', () => {
 
   describe('transformEsqlFormDataForCreate', () => {
     it('should transform ES|QL form data to a create tool payload', () => {
-      const expectedPayload: CreateToolPayload = mockTool;
+      const expectedPayload: CreateToolPayload = omit(mockTool, ['readonly']);
 
       const result = transformEsqlFormDataForCreate(mockFormData);
       expect(result).toEqual(expectedPayload);
     });
 
     it('should handle empty params and tags', () => {
-      const formData: OnechatEsqlToolFormData = {
-        name: 'simple-test-tool',
+      const formData: EsqlToolFormData = {
+        toolId: 'simple-test-tool',
         description: 'A simple tool with no params or tags.',
         esql: 'FROM other_index',
         params: [],
-        tags: [],
+        labels: [],
+        type: ToolType.esql,
       };
 
       const expectedPayload: CreateToolPayload = {
@@ -121,15 +146,28 @@ describe('transformEsqlFormData', () => {
     });
 
     it('should filter out params that are not used in the ES|QL query', () => {
-      const formData: OnechatEsqlToolFormData = {
-        name: 'my-test-tool',
+      const formData: EsqlToolFormData = {
+        toolId: 'my-test-tool',
         description: 'A tool for testing.',
         esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
         params: [
-          { name: 'param1', type: 'text', description: 'A string parameter.' },
-          { name: 'param2', type: 'long', description: 'A number parameter.' },
+          {
+            name: 'param1',
+            type: 'text',
+            description: 'A string parameter.',
+            source: EsqlParamSource.Custom,
+            optional: false,
+          },
+          {
+            name: 'param2',
+            type: 'long',
+            description: 'A number parameter.',
+            source: EsqlParamSource.Custom,
+            optional: false,
+          },
         ],
-        tags: ['test', 'esql'],
+        labels: ['test', 'esql'],
+        type: ToolType.esql,
       };
 
       const expectedPayload: CreateToolPayload = {
@@ -141,6 +179,7 @@ describe('transformEsqlFormData', () => {
             param1: {
               type: 'text',
               description: 'A string parameter.',
+              optional: false,
             },
           },
         },
@@ -154,7 +193,7 @@ describe('transformEsqlFormData', () => {
   });
   describe('transformEsqlFormDataForUpdate', () => {
     it('should transform ES|QL form data to an update tool payload', () => {
-      const { id, type, ...toolWithoutIdAndType } = mockTool;
+      const toolWithoutIdAndType = omit(mockTool, ['id', 'type', 'readonly']);
 
       const result = transformEsqlFormDataForUpdate(mockFormData);
       expect(result).toEqual(toolWithoutIdAndType);

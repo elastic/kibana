@@ -10,9 +10,9 @@
 import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
 import apm from 'elastic-apm-node';
 import { reportSearchError } from '../report_search_error';

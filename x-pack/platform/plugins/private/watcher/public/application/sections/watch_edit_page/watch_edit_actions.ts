@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ToastsSetup } from '@kbn/core/public';
+import type { ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
-import { BaseWatch } from '../../../../common/types/watch_types';
+import type { BaseWatch } from '../../../../common/types/watch_types';
 import { createWatch } from '../../lib/api';
 import { goToWatchList } from '../../lib/navigation';
 

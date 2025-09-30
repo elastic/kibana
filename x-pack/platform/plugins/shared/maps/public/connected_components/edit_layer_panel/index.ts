@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { StyleDescriptor } from '../../../common/descriptor_types';
+import type { StyleDescriptor } from '../../../common/descriptor_types';
 import { EditLayerPanel } from './edit_layer_panel';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer, updateSourceProps } from '../../actions';
-import { MapStoreState } from '../../reducers/store';
+import type { MapStoreState } from '../../reducers/store';
 import type { OnSourceChangeArgs } from '../../classes/sources/source';
 import { hasVectorSourceMethod } from '../../classes/sources/vector_source';
 import { isLayerGroup } from '../../classes/layers/layer_group';

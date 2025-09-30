@@ -6,7 +6,8 @@
  */
 
 import { getConnectorDefaultModel } from './connector_config';
-import { InferenceConnector, InferenceConnectorType } from './connectors';
+import type { InferenceConnector } from './connectors';
+import { InferenceConnectorType } from './connectors';
 
 /**
  * Guesses the model based on the connector type and configuration.

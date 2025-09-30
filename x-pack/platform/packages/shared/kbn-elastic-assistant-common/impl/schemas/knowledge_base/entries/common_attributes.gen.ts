@@ -61,7 +61,7 @@ export const KnowledgeBaseEntryErrorSchema = z
  * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
  */
 export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
-export const KnowledgeBaseResource = z.enum(['security_labs', 'user']);
+export const KnowledgeBaseResource = z.enum(['security_labs', 'defend_insights', 'user']);
 export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
 export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
 

@@ -7,11 +7,11 @@
 
 import { cloneDeep } from 'lodash';
 
-import { SerializedPolicy } from '../../../../../common/types';
+import type { SerializedPolicy } from '../../../../../common/types';
 import { splitSizeAndUnits } from '../../../lib/policies';
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 import { getDefaultRepository } from '../lib';
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 import { CLOUD_DEFAULT_REPO } from '../constants';
 
 export const createDeserializer =

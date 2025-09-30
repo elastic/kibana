@@ -49,7 +49,7 @@ jest.mock('../../../lib/autocomplete/engine', () => {
 });
 
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -95,7 +95,11 @@ describe('Editor actions provider', () => {
 
     const setEditorActionsCssMock = jest.fn();
 
-    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock, true);
+    editorActionsProvider = new MonacoEditorActionsProvider(
+      editor,
+      setEditorActionsCssMock,
+      '.sampleHighlightedLinesClassName'
+    );
   });
 
   describe('getCurl', () => {

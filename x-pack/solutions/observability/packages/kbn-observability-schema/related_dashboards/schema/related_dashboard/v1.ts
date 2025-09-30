@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { relevantPanelSchema } from '../relevant_panel/latest';
 
 const commonDashboardSchema = {
   id: z.string(),
@@ -22,8 +21,6 @@ export const linkedDashboardSchema = z.object({
     index: z.array(z.string()).optional(),
     linked: z.boolean().optional(),
   }),
-  relevantPanelCount: z.number().optional(),
-  relevantPanels: z.array(relevantPanelSchema).optional(),
 });
 
 export const suggestedDashboardSchema = z.object({
@@ -32,8 +29,6 @@ export const suggestedDashboardSchema = z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
   }),
-  relevantPanelCount: z.number(),
-  relevantPanels: z.array(relevantPanelSchema),
   score: z.number(),
 });
 

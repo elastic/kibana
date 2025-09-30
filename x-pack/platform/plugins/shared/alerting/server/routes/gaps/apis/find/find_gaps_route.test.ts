@@ -34,6 +34,7 @@ describe('findGapsRoute', () => {
 
   const createMockGap = () => {
     const gap = new Gap({
+      ruleId: 'abc',
       timestamp: '2024-01-30T00:00:00.000Z',
       range: {
         gte: '2023-11-16T08:00:00.000Z',

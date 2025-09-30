@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import { DataStreamMigrationStatus } from '../../../../../../common/data_stream_types';
-import { Step } from './flyout/steps/types';
+import type { Step } from './flyout/steps/types';
 
 export function useMigrationStep(
   status: DataStreamMigrationStatus | undefined,

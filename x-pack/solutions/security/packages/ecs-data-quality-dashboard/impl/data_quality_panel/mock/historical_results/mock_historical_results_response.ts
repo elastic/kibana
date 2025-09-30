@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NonLegacyHistoricalResult } from '../../types';
+import type { NonLegacyHistoricalResult } from '../../types';
 
 export const mockHistoricalResult: NonLegacyHistoricalResult = {
   batchId: 'b483fd8b-f46e-4db4-a419-f12214d9967f',

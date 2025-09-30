@@ -27,15 +27,17 @@
  * THE SOFTWARE.
  */
 
-import {
-  monaco as monacoEditor,
-  monaco,
-  defaultThemesResolvers,
-  initializeSupportedLanguages,
-} from '@kbn/monaco';
+import type { monaco as monacoEditor } from '@kbn/monaco';
+import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+
+if (process.env.NODE_ENV !== 'production') {
+  import(
+    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
+  );
+}
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
 

@@ -5,13 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  FunctionDefinition,
-  MessageRole,
-  type Message,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
+import type { LlmProxy } from '../utils/create_llm_proxy';
+import { createLlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

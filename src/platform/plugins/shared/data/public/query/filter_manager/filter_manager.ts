@@ -10,18 +10,18 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { FilterStateStore } from '@kbn/es-query';
 
+import type { Filter } from '@kbn/es-query';
 import {
   isFilterPinned,
   onlyDisabledFiltersChanged,
-  Filter,
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 

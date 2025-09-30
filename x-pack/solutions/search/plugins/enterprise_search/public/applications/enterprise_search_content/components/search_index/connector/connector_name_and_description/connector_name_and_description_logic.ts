@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
-import {
-  ConnectorNameAndDescriptionApiLogic,
+import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import type {
   PutConnectorNameAndDescriptionArgs,
   PutConnectorNameAndDescriptionResponse,
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
-} from '../../../../api/index/cached_fetch_index_api_logic';
-import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
+import { ConnectorNameAndDescriptionApiLogic } from '../../../../api/connector/update_connector_name_and_description_api_logic';
+import type { CachedFetchIndexApiLogicActions } from '../../../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../../api/index/cached_fetch_index_api_logic';
+import type { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;

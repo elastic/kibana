@@ -11,7 +11,7 @@ import React from 'react';
 import { ConfirmDeleteEndpointModal } from '.';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../../../../../../hooks/use_scan_usage');
 const mockUseScanUsage = useScanUsage as jest.Mock;

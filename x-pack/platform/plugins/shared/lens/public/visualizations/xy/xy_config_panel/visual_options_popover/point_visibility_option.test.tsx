@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { PointVisibilityOption, PointVisibilityOptionProps } from './point_visibility_option';
+import type { PointVisibilityOptionProps } from './point_visibility_option';
+import { PointVisibilityOption } from './point_visibility_option';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

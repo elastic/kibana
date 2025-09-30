@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import pRetry from 'p-retry';
-import { Logger } from '../utils/create_logger';
-import { KibanaClient, KibanaClientHttpError } from './base_kibana_client';
+import type { Logger } from '../utils/create_logger';
+import type { KibanaClient } from './base_kibana_client';
+import { KibanaClientHttpError } from './base_kibana_client';
 
 export class FleetClient {
   constructor(private readonly kibanaClient: KibanaClient, private readonly logger: Logger) {}

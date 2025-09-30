@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React, { PureComponent } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
-import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
-import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { InputControlVisDependencies } from '../../plugin';
+import type { ControlParams, ControlParamsOptions } from '../../editor_utils';
+import type { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;

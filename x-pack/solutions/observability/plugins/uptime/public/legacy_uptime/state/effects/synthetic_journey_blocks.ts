@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
-import {
-  ScreenshotBlockDoc,
-  ScreenshotBlockCache,
-  isPendingBlock,
-} from '../../../../common/runtime_types';
+import type { ScreenshotBlockDoc, ScreenshotBlockCache } from '../../../../common/runtime_types';
+import { isPendingBlock } from '../../../../common/runtime_types';
 import { fetchScreenshotBlockSet } from '../api/journey';
 import {
   fetchBlocksAction,

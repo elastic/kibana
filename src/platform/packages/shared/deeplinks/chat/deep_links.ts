@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ONECHAT_APP_ID, WORKCHAT_APP_ID } from './constants';
+import type { ONECHAT_APP_ID, WORKCHAT_APP_ID } from './constants';
 
 export type WorkchatApp = typeof WORKCHAT_APP_ID;
 export type OnechatApp = typeof ONECHAT_APP_ID;

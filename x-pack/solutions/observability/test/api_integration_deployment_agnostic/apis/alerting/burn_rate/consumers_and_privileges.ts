@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_TYPE_ID = 'slo.rules.burnRate';
 const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';

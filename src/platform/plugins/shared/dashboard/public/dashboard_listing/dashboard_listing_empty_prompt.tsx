@@ -30,7 +30,7 @@ import {
   noItemsStrings,
 } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DashboardListingProps } from './types';
+import type { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;

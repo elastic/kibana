@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +26,8 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
-import { NodeViewModel } from '../types';
+import type { NodeViewModel } from '../types';
+import { isLabelNode, showErrorToast } from '../utils';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -86,6 +87,11 @@ export interface GraphInvestigationProps {
    */
   initialState: {
     /**
+     * The index patterns to use for the graph investigation view.
+     */
+    indexPatterns?: string[];
+
+    /**
      * The data view to use for the graph investigation view.
      */
     dataView: DataView;
@@ -144,7 +150,7 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
@@ -206,10 +212,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const { data, refresh, isFetching } = useFetchGraphData({
+    const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
           originEventIds,
+          indexPatterns,
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
@@ -221,6 +228,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         keepPreviousData: true,
       },
     });
+
+    useEffect(() => {
+      const toasts = notifications?.toasts;
+      if (isError && error && toasts) {
+        showErrorToast(toasts, error);
+      }
+    }, [error, isError, notifications]);
 
     const nodeDetailsClickHandler = useCallback(
       (node: NodeProps) => {
@@ -244,6 +258,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       ({ state: { isOpen } }) => isOpen
     );
 
+    const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
+      const eventIds = new Set<string>();
+      const alertIds = new Set<string>();
+
+      originEventIds.forEach(({ id, isAlert }) => {
+        if (isAlert) {
+          alertIds.add(id);
+        } else {
+          eventIds.add(id);
+        }
+      });
+
+      return {
+        originEventIdsSet: eventIds,
+        originAlertIdsSet: alertIds,
+      };
+    }, [originEventIds]);
+
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
@@ -252,9 +284,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               expandButtonClick: nodeExpandButtonClickHandler,
             };
-          } else if (node.shape === 'label') {
+          } else if (isLabelNode(node)) {
+            const docEventIds: string[] =
+              'documentsData' in node && Array.isArray(node.documentsData)
+                ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
+                : [];
             return {
               ...node,
+              isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
+              isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
             };
           }
@@ -263,7 +301,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes]);
+    }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
@@ -355,6 +393,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
+              showMinimap={true}
             >
               <Panel position="top-right">
                 <Actions

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,5 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_esql_columns'));
     loadTestFile(require.resolve('./_esql_view'));
+    loadTestFile(require.resolve('./_index_editor'));
   });
 }

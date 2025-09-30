@@ -18,18 +18,18 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import {
+import type {
   ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { css } from '@emotion/react';
-import { InspectorViewDescription } from '../types';
-import { Adapters } from '../../common';
+import type { InspectorViewDescription } from '../types';
+import type { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {

@@ -51,6 +51,7 @@ export const validateKafkaHost = (input: string): string | undefined => {
 const secretRefSchema = schema.oneOf([
   schema.object({
     id: schema.string(),
+    hash: schema.maybe(schema.string()),
   }),
   schema.string(),
 ]);
@@ -137,6 +138,7 @@ export const ElasticSearchSchema = {
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
   preset: schema.maybe(PresetSchema),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
 
 const ElasticSearchUpdateSchema = {
@@ -144,6 +146,7 @@ const ElasticSearchUpdateSchema = {
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
   preset: schema.maybe(PresetSchema),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
 
 /**

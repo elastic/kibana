@@ -13,7 +13,7 @@ import { CLOUD_PROVIDERS, getBenchmarkApplicableTo } from '../../common/utils/he
 import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/constants';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
-import { BenchmarkData } from '../../common/types_old';
+import type { BenchmarkData } from '../../common/types_old';
 import { FINDINGS_GROUPING_OPTIONS, FINDINGS_FILTER_OPTIONS } from '../common/constants';
 
 // order in array will determine order of appearance in the dashboard

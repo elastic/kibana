@@ -60,10 +60,6 @@ jest.mock('../../../../../../use_attack_discovery_bulk', () => ({
   useAttackDiscoveryBulk: () => ({ mutateAsync: mockMutateAsync }),
 }));
 
-jest.mock('../../../../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => ({ attackDiscoveryAlertsEnabled: true }),
-}));
-
 jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: (...args: unknown[]) => mockIsAttackDiscoveryAlert(...args),
 }));

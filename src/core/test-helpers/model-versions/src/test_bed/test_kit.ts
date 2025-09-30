@@ -10,7 +10,8 @@
 import fs from 'fs/promises';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env, BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
@@ -28,7 +29,7 @@ import {
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

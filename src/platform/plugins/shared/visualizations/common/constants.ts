@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendValue } from '@elastic/charts';
+import type { LegendValue } from '@elastic/charts';
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+export const VISUALIZE_SAVED_OBJECT_TYPE = 'visualization';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

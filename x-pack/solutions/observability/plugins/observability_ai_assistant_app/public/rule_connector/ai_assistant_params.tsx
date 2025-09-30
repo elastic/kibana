@@ -19,12 +19,10 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import {
-  ObservabilityAIAssistantService,
-  useGenAIConnectorsWithoutContext,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { RuleFormParamsErrors } from '@kbn/alerts-ui-shared';
-import { ObsAIAssistantActionParams } from './types';
+import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
+import { useGenAIConnectorsWithoutContext } from '@kbn/observability-ai-assistant-plugin/public';
+import type { RuleFormParamsErrors } from '@kbn/alerts-ui-shared';
+import type { ObsAIAssistantActionParams } from './types';
 import { ALERT_STATUSES } from '../../common/constants';
 import { MESSAGE_REQUIRED, STATUS_REQUIRED } from './translations';
 

@@ -57,6 +57,7 @@ const enabledActionTypes = [
   '.servicenow-sir',
   '.servicenow-itom',
   '.jira',
+  '.jira-service-management',
   '.resilient',
   '.gen-ai',
   '.d3security',

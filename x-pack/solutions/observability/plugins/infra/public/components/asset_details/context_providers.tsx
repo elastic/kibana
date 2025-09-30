@@ -12,6 +12,7 @@ import { DatePickerProvider } from './hooks/use_date_picker';
 import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import type { AssetDetailsProps, RenderMode } from './types';
+import { EntityDetailsTimeRangeMetadataProvider } from './entity_details_metadata_provider';
 
 const RenderWithOptionalSearchSessionProvider = ({
   renderMode,
@@ -41,6 +42,7 @@ export const ContextProviders = ({
     overrides,
     entityType = 'host',
     renderMode,
+    preferredSchema,
   } = props;
 
   return (
@@ -48,15 +50,18 @@ export const ContextProviders = ({
       <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
         <LoadingStateProvider>
           <MetadataStateProvider entityId={entityId} entityType={entityType}>
-            <AssetDetailsRenderPropsProvider
-              entityId={entityId}
-              entityName={entityName}
-              entityType={entityType}
-              overrides={overrides}
-              renderMode={renderMode}
-            >
-              {children}
-            </AssetDetailsRenderPropsProvider>
+            <EntityDetailsTimeRangeMetadataProvider entityType={entityType} entityId={entityId}>
+              <AssetDetailsRenderPropsProvider
+                entityId={entityId}
+                entityName={entityName}
+                entityType={entityType}
+                overrides={overrides}
+                renderMode={renderMode}
+                preferredSchema={preferredSchema}
+              >
+                {children}
+              </AssetDetailsRenderPropsProvider>
+            </EntityDetailsTimeRangeMetadataProvider>
           </MetadataStateProvider>
         </LoadingStateProvider>
       </DatePickerProvider>

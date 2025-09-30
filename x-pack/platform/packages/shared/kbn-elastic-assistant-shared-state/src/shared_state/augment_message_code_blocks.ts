@@ -7,8 +7,8 @@
 
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs';
-import { Conversation } from '@kbn/elastic-assistant';
-import { UnmountCallback } from '@kbn/core-mount-utils-browser';
+import type { Conversation } from '@kbn/elastic-assistant';
+import type { UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 export interface AugmentMessageCodeBlocks {
   mount: (args: {

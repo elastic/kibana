@@ -107,9 +107,17 @@ export function useSetupTechnology({
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
   const allowedSetupTechnologies = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
-      ? [SetupTechnology.AGENTLESS]
-      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+    const setupTechnologies = [];
+
+    if (isAgentlessIntegrationFn(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENTLESS);
+    }
+
+    if (!isOnlyAgentlessIntegration(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENT_BASED);
+    }
+
+    return setupTechnologies;
   }, [integrationToEnable, packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED

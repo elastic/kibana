@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ErrorCallout } from './error_callout';
-import { IHttpSerializedFetchError } from '../../../state';
+import type { IHttpSerializedFetchError } from '../../../state';
 
 describe('ErrorCallout', () => {
   it('renders error info', () => {

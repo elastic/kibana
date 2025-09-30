@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiTitle,
@@ -14,7 +15,6 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  IconType,
   EuiSpacer,
   EuiBetaBadge,
 } from '@elastic/eui';

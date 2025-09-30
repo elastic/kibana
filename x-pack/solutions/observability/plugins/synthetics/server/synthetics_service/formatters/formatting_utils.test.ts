@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { inlineSourceFormatter, replaceStringWithParams } from './formatting_utils';
+import {
+  handleMultilineStringFormatter,
+  inlineSourceFormatter,
+  replaceStringWithParams,
+} from './formatting_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 
@@ -248,5 +252,24 @@ describe('replaceStringWithParams', () => {
       ConfigKey.SOURCE_INLINE
     );
     expect(value).toEqual('const a = $${b}; const c = $${d}');
+  });
+});
+
+describe('handleMultilineStringFormatter', () => {
+  it('should handle multiline strings', () => {
+    const value = handleMultilineStringFormatter("const a = 'line1\nline2';");
+    expect(value).toEqual(`const a = 'line1\n\nline2';`);
+  });
+
+  it('should handle multiline strings with template literals', () => {
+    const value = handleMultilineStringFormatter(
+      `-----BEGIN CERTIFICATE-----\nMIICMJBgNV\n\npAqElJlQND\n-----END CERTIFICATE-----`
+    );
+    expect(value).toEqual(
+      `-----BEGIN CERTIFICATE-----\n\nMIICMJBgNV\n\n\npAqElJlQND\n\n-----END CERTIFICATE-----`
+    );
+    expect(JSON.stringify(value)).toEqual(
+      '"-----BEGIN CERTIFICATE-----\\n\\nMIICMJBgNV\\n\\n\\npAqElJlQND\\n\\n-----END CERTIFICATE-----"'
+    );
   });
 });

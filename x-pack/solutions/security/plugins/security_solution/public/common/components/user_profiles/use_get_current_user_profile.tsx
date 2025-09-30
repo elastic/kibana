@@ -39,6 +39,7 @@ export const useGetCurrentUserProfile = () => {
     {
       retry: false,
       staleTime: Infinity,
+      refetchOnWindowFocus: false,
       onError: (e) => {
         addError(e, { title: CURRENT_USER_PROFILE_FAILURE });
       },

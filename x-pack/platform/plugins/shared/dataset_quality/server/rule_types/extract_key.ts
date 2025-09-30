@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX } from '../../common/es_fields';
 import { extractIndexNameFromBackingIndex } from '../../common/utils';
 

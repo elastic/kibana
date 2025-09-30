@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import mimeType from 'mime';
-import { createId } from '@paralleldrive/cuid2';
+import { randomUUID } from 'crypto';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -28,22 +28,20 @@ import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
-import { getCounters, Counters } from '../usage';
+import type { Counters } from '../usage';
+import { getCounters } from '../usage';
 import { File as FileImpl } from '../file';
-import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
+import type { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
-import {
-  PerfArgs,
-  withReportPerformanceMetric,
-  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
-} from '../performance';
+import type { PerfArgs } from '../performance';
+import { withReportPerformanceMetric, FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME } from '../performance';
 import { createFileHashTransform } from './stream_transforms/file_hash_transform';
 import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
-import { SupportedFileHashAlgorithm } from '../saved_objects/file';
+import type { SupportedFileHashAlgorithm } from '../saved_objects/file';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
@@ -130,7 +128,7 @@ export class FileClientImpl implements FileClient {
   public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
     const serializedMetadata = serializeJSON({ ...metadata, mimeType: metadata.mime });
     const result = await this.metadataClient.create({
-      id: id || createId(),
+      id: id || randomUUID(),
       metadata: {
         ...createDefaultFileAttributes(),
         ...serializedMetadata,

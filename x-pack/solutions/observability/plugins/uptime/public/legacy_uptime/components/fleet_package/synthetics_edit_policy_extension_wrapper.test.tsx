@@ -9,7 +9,7 @@ import 'jest-canvas-mock';
 
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
 
 // ensures that fields appropriately match to their label

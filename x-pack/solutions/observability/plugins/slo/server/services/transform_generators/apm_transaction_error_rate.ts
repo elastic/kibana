@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   apmTransactionErrorRateIndicatorSchema,
@@ -20,7 +20,7 @@ import {
   getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
+import type { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 

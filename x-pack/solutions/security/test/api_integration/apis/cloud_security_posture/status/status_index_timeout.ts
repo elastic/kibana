@@ -16,7 +16,7 @@ import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
 const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
