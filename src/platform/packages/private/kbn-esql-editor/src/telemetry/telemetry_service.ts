@@ -68,7 +68,7 @@ export class ESQLEditorTelemetryService {
       this._reportEvent(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
         trigger_source: 'esql_hover',
         trigger_action: triggerAction,
-        higher_privilege: commandData.highestPrivilege,
+        highest_privilege: commandData.highestPrivilege,
       });
     }
   }

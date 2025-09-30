@@ -37,7 +37,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
             'The way how the index editor action has been triggered. Possible values are: esql_hover|esql_autocomplete',
         },
       },
-      higher_privilege: {
+      highest_privilege: {
         type: 'keyword',
         _meta: {
           description:

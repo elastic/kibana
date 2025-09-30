@@ -59,7 +59,7 @@ describe('ESQLEditorTelemetryService', () => {
         expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
           trigger_source: 'esql_hover',
           trigger_action: 'create',
-          higher_privilege: 'create',
+          highest_privilege: 'create',
         });
       });
 
@@ -77,7 +77,7 @@ describe('ESQLEditorTelemetryService', () => {
         expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
           trigger_source: 'esql_hover',
           trigger_action: 'edit',
-          higher_privilege: 'edit',
+          highest_privilege: 'edit',
         });
       });
 
@@ -95,7 +95,7 @@ describe('ESQLEditorTelemetryService', () => {
         expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
           trigger_source: 'esql_hover',
           trigger_action: 'read',
-          higher_privilege: 'read',
+          highest_privilege: 'read',
         });
       });
     });
