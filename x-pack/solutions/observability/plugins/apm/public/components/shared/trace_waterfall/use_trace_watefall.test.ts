@@ -32,7 +32,7 @@ const root: TraceItem = {
   traceId: 't1',
   duration: 1000,
   serviceName: 'svcA',
-  errorCount: 0,
+  errors: [],
 };
 const child1: TraceItem = {
   id: '2',
@@ -42,7 +42,7 @@ const child1: TraceItem = {
   traceId: 't1',
   duration: 400,
   serviceName: 'svcB',
-  errorCount: 0,
+  errors: [],
 };
 const child2: TraceItem = {
   id: '3',
@@ -52,7 +52,7 @@ const child2: TraceItem = {
   traceId: 't1',
   duration: 100,
   serviceName: 'svcC',
-  errorCount: 0,
+  errors: [],
 };
 const grandchild: TraceItem = {
   id: '4',
@@ -62,7 +62,7 @@ const grandchild: TraceItem = {
   traceId: 't1',
   duration: 50,
   serviceName: 'svcD',
-  errorCount: 0,
+  errors: [],
 };
 
 describe('getFlattenedTraceWaterfall', () => {
@@ -184,7 +184,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '2',
@@ -193,7 +193,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '3',
@@ -202,7 +202,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcC',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '4',
@@ -212,7 +212,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcC',
         type: 'db',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '5',
@@ -222,7 +222,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcC',
         type: 'http',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '6',
@@ -232,7 +232,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcC',
         type: 'cache',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -257,7 +257,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '2',
@@ -266,7 +266,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '3',
@@ -275,7 +275,7 @@ describe('getLegends', () => {
         traceId: '',
         duration: 1,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '5',
@@ -285,7 +285,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcB',
         type: 'http',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '6',
@@ -295,7 +295,7 @@ describe('getLegends', () => {
         duration: 1,
         serviceName: 'svcB',
         type: 'http',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -322,7 +322,7 @@ describe('getLegends', () => {
       traceId: '',
       duration: 1,
       serviceName: `svc${i}`,
-      errorCount: 0,
+      errors: [],
     }));
 
     const result = getLegends(traceItems);
@@ -368,7 +368,7 @@ describe('getTraceMap', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '2',
@@ -378,7 +378,7 @@ describe('getTraceMap', () => {
         duration: 50,
         serviceName: 'svcB',
         parentId: '1',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '3',
@@ -388,7 +388,7 @@ describe('getTraceMap', () => {
         duration: 30,
         serviceName: 'svcC',
         parentId: '1',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '4',
@@ -398,7 +398,7 @@ describe('getTraceMap', () => {
         duration: 10,
         serviceName: 'svcD',
         parentId: '2',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -421,7 +421,7 @@ describe('getTraceMap', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -440,7 +440,7 @@ describe('getTraceMap', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '2',
@@ -449,7 +449,7 @@ describe('getTraceMap', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -521,7 +521,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 0,
         skew: 0,
         color: 'red',
-        errorCount: 0,
+        errors: [],
         isOrphan: false,
       },
       {
@@ -535,7 +535,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 80,
         skew: 10,
         color: 'blue',
-        errorCount: 0,
+        errors: [],
         isOrphan: false,
       },
       {
@@ -549,7 +549,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 120,
         skew: 5,
         color: 'green',
-        errorCount: 0,
+        errors: [],
         isOrphan: false,
       },
     ];

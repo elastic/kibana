@@ -14,6 +14,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
+import { filterSchema } from './filter';
 
 export const sharedPanelInfoSchema = {
   /**
@@ -45,6 +46,8 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
+  filters: schema.maybe(schema.arrayOf(filterSchema)),
+  query: schema.maybe(filterSchema),
 };
 
 export const layerSettingsSchema = {

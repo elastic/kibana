@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiToken, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
@@ -71,15 +71,6 @@ export const DimensionBadges = ({
             {!hasIcon && ` (${dimension.type})`}
           </EuiBadge>
         );
-
-        // Show tooltip only if description is available
-        if (dimension.description) {
-          return (
-            <EuiToolTip key={dimension.name} content={dimension.description}>
-              {badgeContent}
-            </EuiToolTip>
-          );
-        }
 
         return badgeContent;
       })}

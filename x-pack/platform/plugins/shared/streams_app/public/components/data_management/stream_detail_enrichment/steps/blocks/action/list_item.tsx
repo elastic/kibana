@@ -34,6 +34,8 @@ export const ActionBlockListItem = ({
   stepUnderEdit,
   rootLevelMap,
   stepsProcessingSummaryMap,
+  isFirstStepInLevel,
+  isLastStepInLevel,
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const { euiTheme } = useEuiTheme();
@@ -95,7 +97,12 @@ export const ActionBlockListItem = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
+                  <StepContextMenu
+                    stepRef={stepRef}
+                    stepUnderEdit={stepUnderEdit}
+                    isFirstStepInLevel={isFirstStepInLevel}
+                    isLastStepInLevel={isLastStepInLevel}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

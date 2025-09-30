@@ -58,6 +58,7 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
       stepsTotal={state.steps.length}
       content={currentStep.content}
       anchorPosition={'leftCenter'}
+      display="block"
       footerAction={
         tourManager.isLastStep() ? (
           <EuiButton size="s" color="success" onClick={handleFinish}>

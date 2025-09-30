@@ -291,6 +291,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               color="success"
               size="s"
               title={i18n.translate(

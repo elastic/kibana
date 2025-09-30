@@ -23,10 +23,15 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import { FIELD_VALUE_SEPARATOR } from '../common/constants';
+import { PAGE_SIZE } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
+import {
+  usePaginatedFields,
+  useMetricFieldsQuery,
+  useMetricsGridState,
+  useValueFilters,
+} from '../hooks';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
 
@@ -68,12 +73,11 @@ export const MetricsExperienceGrid = ({
   const {
     currentPageFields = [],
     totalPages = 0,
-    dimensions: appliedDimensions = [],
     filteredFieldsBySearch = [],
   } = usePaginatedFields({
     fields,
     dimensions,
-    pageSize: 20,
+    pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
   }) ?? {};
@@ -83,21 +87,7 @@ export const MetricsExperienceGrid = ({
     [currentPageFields]
   );
 
-  const filters = useMemo(() => {
-    if (!valueFilters || valueFilters.length === 0) {
-      return [];
-    }
-
-    return valueFilters
-      .map((selectedValue) => {
-        const [field, value] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
-        return {
-          field,
-          value,
-        };
-      })
-      .filter((filter) => filter.field !== '');
-  }, [valueFilters]);
+  const filters = useValueFilters(valueFilters);
 
   if (fields.length === 0) {
     return <EmptyState isLoading={isFieldsLoading} />;
@@ -171,7 +161,7 @@ export const MetricsExperienceGrid = ({
           <MetricsGrid
             pivotOn="metric"
             columns={columns}
-            dimensions={appliedDimensions}
+            dimensions={dimensions}
             filters={filters}
             services={services}
             fields={currentPageFields}

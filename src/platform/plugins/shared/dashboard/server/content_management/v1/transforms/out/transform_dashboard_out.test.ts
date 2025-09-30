@@ -80,13 +80,13 @@ describe('transformDashboardOut', () => {
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',
           },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          panelIndex: '1',
+          grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          uid: '1',
           type: 'type1',
           version: '2',
         },
@@ -183,19 +183,19 @@ describe('transformDashboardOut', () => {
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',
           },
-          gridData: {
+          grid: {
             x: 0,
             y: 0,
             w: 10,
             h: 10,
             i: '1',
           },
-          panelIndex: '1',
+          uid: '1',
           type: 'type1',
           version: '2',
         },
@@ -205,9 +205,11 @@ describe('transformDashboardOut', () => {
         value: 1000,
       },
       tags: ['tag1', 'tag2'],
-      timeFrom: 'now-15m',
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       timeRestore: true,
-      timeTo: 'now',
       title: 'title',
     });
   });

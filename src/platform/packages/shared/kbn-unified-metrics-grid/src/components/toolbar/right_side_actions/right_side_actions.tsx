@@ -8,11 +8,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useToolbarActions } from '../hooks/use_toolbar_actions';
@@ -35,13 +39,20 @@ export const RightSideActions = ({
   renderToggleActions,
   requestParams,
 }: RightSideActionsProps) => {
-  const { onShowSearch, showSearchInput, isFullscreen, onToggleFullscreen, onClearSearch } =
-    useToolbarActions({
-      fields,
-      indexPattern,
-      renderToggleActions,
-      requestParams,
-    });
+  const { euiTheme } = useEuiTheme();
+  const {
+    onShowSearch,
+    showSearchInput,
+    isFullscreen,
+    onToggleFullscreen,
+    onClearSearch,
+    onKeyDown,
+  } = useToolbarActions({
+    fields,
+    indexPattern,
+    renderToggleActions,
+    requestParams,
+  });
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,105 +61,89 @@ export const RightSideActions = ({
     [onSearchTermChange]
   );
 
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === keys.ESCAPE) {
-        onClearSearch();
-      }
-    },
-    [onClearSearch]
-  );
-
   const onBlur = useCallback(() => {
     if (searchTerm === '') {
       onClearSearch();
     }
   }, [onClearSearch, searchTerm]);
 
-  const buttons: IconButtonGroupProps['buttons'] = [
-    ...(!showSearchInput
-      ? [
-          {
-            iconType: 'search',
-            label: i18n.translate('metricsExperience.searchButton', {
-              defaultMessage: 'Search',
-            }),
-            onClick: onShowSearch,
-            'data-test-subj': 'metricsExperienceToolbarSearch',
-          },
-        ]
-      : []),
-    {
-      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
-      label: isFullscreen
-        ? i18n.translate('metricsExperience.fullScreenExitButton', {
-            defaultMessage: 'Exit fullscreen',
-          })
-        : i18n.translate('metricsExperience.fullScreenButton', {
-            defaultMessage: 'Enter fullscreen',
-          }),
-      onClick: onToggleFullscreen,
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-      css: showSearchInput
-        ? css`
-            &.euiButtonGroupButton {
-              border-left: none !important;
+  const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
+    defaultMessage: 'Search',
+  });
 
-              &:first-of-type {
-                border-top-left-radius: 0px !important;
-                border-bottom-left-radius: 0px !important;
-              }
-
-              &:last-of-type {
-                border-left: none !important;
-                border-top-left-radius: 0px !important;
-                border-bottom-left-radius: 0px !important;
-              }
-
-              &:not(:first-child):not(.euiButtonGroupButton-isSelected):not(:disabled) {
-                box-shadow: unset;
-              }
-            }
-          `
-        : undefined,
-    },
-  ];
+  const fullscreenButtonLabel = isFullscreen
+    ? i18n.translate('metricsExperience.fullScreenExitButton', {
+        defaultMessage: 'Exit fullscreen (esc)',
+      })
+    : i18n.translate('metricsExperience.fullScreenButton', {
+        defaultMessage: 'Enter fullscreen',
+      });
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
-      {showSearchInput ? (
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch
-            autoFocus
-            value={searchTerm}
-            onChange={onSearchChange}
-            onKeyDown={onKeyDown}
-            onBlur={onBlur}
-            placeholder={i18n.translate('metricsExperience.searchInputPlaceholder', {
-              defaultMessage: 'Search metrics',
-            })}
-            fullWidth={false}
-            compressed
-            aria-label={i18n.translate('metricsExperience.searchInputAriaLabel', {
-              defaultMessage: 'Search metrics',
-            })}
-            data-test-subj={dataTestSubj}
-            css={css`
-              border-top-right-radius: 0;
-              border-bottom-right-radius: 0;
-              min-width: 200px;
-            `}
-          />
-        </EuiFlexItem>
-      ) : null}
       <EuiFlexItem grow={false}>
-        <IconButtonGroup
-          legend={i18n.translate('metricsExperience.chartActions', {
-            defaultMessage: 'Chart actions',
-          })}
-          buttons={buttons}
-          buttonSize="s"
-        />
+        <EuiFlexGroup gutterSize="none" alignItems="center">
+          {showSearchInput ? (
+            <EuiFlexItem grow={false}>
+              <EuiFieldSearch
+                autoFocus
+                value={searchTerm}
+                onChange={onSearchChange}
+                onKeyDown={onKeyDown}
+                onBlur={onBlur}
+                placeholder={i18n.translate('metricsExperience.searchInputPlaceholder', {
+                  defaultMessage: 'Search metrics',
+                })}
+                fullWidth={false}
+                compressed
+                aria-label={i18n.translate('metricsExperience.searchInputAriaLabel', {
+                  defaultMessage: 'Search metrics',
+                })}
+                data-test-subj={dataTestSubj}
+                css={css`
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                  min-width: 200px;
+                `}
+              />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="search"
+                aria-label={searchButtonLabel}
+                title={searchButtonLabel}
+                onClick={onShowSearch}
+                data-test-subj="metricsExperienceToolbarSearch"
+                size="s"
+                css={css`
+                  border: ${euiTheme.border.thin};
+                  border-right: none;
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                `}
+                color="text"
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+              aria-label={fullscreenButtonLabel}
+              title={fullscreenButtonLabel}
+              onClick={onToggleFullscreen}
+              data-test-subj="metricsExperienceToolbarFullScreen"
+              size="s"
+              css={css`
+                border: ${euiTheme.border.thin};
+                border-left: ${showSearchInput ? 'none' : euiTheme.border.thin};
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+              `}
+              color="text"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

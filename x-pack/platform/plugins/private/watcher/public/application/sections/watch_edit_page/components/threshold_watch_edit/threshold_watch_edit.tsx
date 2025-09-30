@@ -27,6 +27,7 @@ import {
   EuiPageHeader,
   EuiPageSection,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_UNITS } from '../../../../../../common/constants';
@@ -45,6 +46,15 @@ import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
+
+const styles = {
+  watcherThresholdAlertAggFieldContainer: css`
+    width: 300px;
+  `,
+  watcherThresholdInBetweenComparatorText: css`
+    align-self: center;
+  `,
+};
 
 const expressionFieldsWithValidation = [
   'aggField',
@@ -544,7 +554,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexGroup>
                         <EuiFlexItem
                           grow={false}
-                          className="watcherThresholdAlertAggFieldContainer"
+                          css={styles.watcherThresholdAlertAggFieldContainer}
                         >
                           <ErrableFormRow
                             errorKey="aggField"
@@ -762,7 +772,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                               {i > 0 ? (
                                 <EuiFlexItem
                                   grow={false}
-                                  className="watcherThresholdWatchInBetweenComparatorText"
+                                  css={styles.watcherThresholdInBetweenComparatorText}
                                 >
                                   <EuiText>{andThresholdText}</EuiText>
                                   {hasErrors && <EuiSpacer />}

@@ -12,6 +12,7 @@ import {
   constructAssigneesFilter,
   constructReportersFilter,
   constructCustomFieldsFilter,
+  getIncrementalIdSearchOverrides,
 } from './utils';
 
 import type { CaseUI } from './types';
@@ -216,6 +217,37 @@ describe('utils', () => {
           'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': [false],
           'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': [true, false],
         },
+      });
+    });
+  });
+
+  describe('getIncrementalIdSearchOverrides', () => {
+    it('returns an empty object if the search is not an incremental id search', () => {
+      const shouldReturnEmpty = [
+        '',
+        ' ',
+        'test',
+        '123',
+        'abc',
+        '#abc',
+        '##123',
+        '##123##',
+        '#123 abc',
+      ];
+
+      shouldReturnEmpty.forEach((search) => {
+        expect(getIncrementalIdSearchOverrides(search)).toEqual({});
+      });
+    });
+
+    it('returns the correct overrides for an incremental id search', () => {
+      expect(getIncrementalIdSearchOverrides('#123')).toEqual({
+        searchFields: ['incremental_id.text'],
+        search: '123',
+      });
+      expect(getIncrementalIdSearchOverrides('   #123   ')).toEqual({
+        searchFields: ['incremental_id.text'],
+        search: '123',
       });
     });
   });

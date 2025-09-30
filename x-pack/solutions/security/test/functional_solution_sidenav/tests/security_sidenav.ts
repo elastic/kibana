@@ -49,11 +49,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check the Investigations subsection
-        await solutionNavigation.sidenav.openPanel('securityGroup:investigations'); // open Investigations panel
-        await solutionNavigation.sidenav.clickPanelLink(`timelines`);
-        await solutionNavigation.sidenav.expectLinkActive({
-          navId: 'securityGroup:investigations',
-        });
+        await solutionNavigation.sidenav.expandMore();
+        // open Investigations popover and navigate to some link inside the popover to open the panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:timelines',

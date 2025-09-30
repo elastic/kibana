@@ -12,5 +12,5 @@ import type { DashboardAttributes, DashboardPanel } from '../server/content_mana
 export const isDashboardPanel = (
   widget: DashboardAttributes['panels'][number]
 ): widget is DashboardPanel => {
-  return 'panelConfig' in widget;
+  return 'config' in widget;
 };

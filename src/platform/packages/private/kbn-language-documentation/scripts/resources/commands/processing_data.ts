@@ -93,6 +93,17 @@ COMPLETION [column =] prompt WITH inference_id
 * \`prompt\`: The input text or expression that will be used as the prompt for the completion. This can be a string literal or a reference to a column containing text.
 * \`inference_id\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
 
+**Best practices**
+
+Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
+
+Be careful to test with small datasets first before running on production data or in automated workflows, to avoid unexpected costs.
+
+1. **Start with dry runs**: Validate your query logic and row counts by running without \`COMPLETION\` initially. Use \`| STATS count = COUNT(*)\` to check result size.
+2. **Filter first**: Use \`WHERE\` clauses to limit rows before applying \`COMPLETION\`.
+3. **Test with \`LIMIT\`**: Always start with a low \`LIMIT\` and gradually increase.
+4. **Monitor usage**: Track your LLM API consumption and costs.
+
 **Examples**
 
 The following is a basic example with an inline prompt:

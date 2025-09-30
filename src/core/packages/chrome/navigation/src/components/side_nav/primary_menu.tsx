@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import type { ForwardedRef, ReactNode } from 'react';
 import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import type { ForwardedRef, ReactNode } from 'react';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { PRIMARY_NAVIGATION_ID } from '../../constants';
 import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavPrimaryMenuProps {
@@ -31,9 +32,9 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
 
     return (
       <nav
-        id="primary-navigation"
+        id={PRIMARY_NAVIGATION_ID}
         aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
-          defaultMessage: 'Main navigation',
+          defaultMessage: 'Main',
         })}
         ref={localRef}
         css={css`

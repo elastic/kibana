@@ -23,7 +23,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '2',
@@ -37,7 +37,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 50,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '3',
@@ -51,7 +51,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 30,
         serviceName: 'svcC',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '4',
@@ -65,7 +65,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 10,
         serviceName: 'svcD',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -91,7 +91,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
       },
     ];
 
@@ -114,7 +114,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 50,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
       },
       {
         id: '3',
@@ -128,7 +128,7 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 30,
         serviceName: 'svcC',
-        errorCount: 0,
+        errors: [],
       },
     ];
 

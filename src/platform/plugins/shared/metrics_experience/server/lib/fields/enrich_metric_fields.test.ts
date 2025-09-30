@@ -42,7 +42,7 @@ describe('enrichMetricFields', () => {
     name,
     index,
     type: 'long',
-    dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword', description: '' }],
+    dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
     ...overrides,
   });
 
@@ -81,7 +81,7 @@ describe('enrichMetricFields', () => {
     dataStreamFieldCapsMap = new Map();
 
     extractDimensionsMock.mockImplementation(
-      (_caps, names) => names?.map((name) => ({ name, type: 'keyword', description: '' })) ?? []
+      (_caps, names) => names?.map((name) => ({ name, type: 'keyword' })) ?? []
     );
   });
 
@@ -118,7 +118,7 @@ describe('enrichMetricFields', () => {
           name: TEST_METRIC_NAME,
           index: TEST_INDEX,
           noData: false,
-          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword', description: '' }],
+          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
         },
       },
     ];
@@ -167,7 +167,6 @@ describe('enrichMetricFields', () => {
         {
           dimensions: [
             {
-              description: '',
               name: TEST_HOST_FIELD,
               type: 'keyword',
             },

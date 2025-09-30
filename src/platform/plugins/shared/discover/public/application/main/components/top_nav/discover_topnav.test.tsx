@@ -24,6 +24,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverTopNavMenuProvider } from './discover_topnav_menu';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -93,7 +94,9 @@ const getTestComponent = (props: DiscoverTopNavProps) =>
       stateContainer={props.stateContainer}
       runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
     >
-      <DiscoverTopNav {...props} />
+      <DiscoverTopNavMenuProvider>
+        <DiscoverTopNav {...props} />
+      </DiscoverTopNavMenuProvider>
     </DiscoverTestProvider>
   );
 
@@ -126,7 +129,7 @@ describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = getTestComponent(props);
-    const topNavMenu = component.find(TopNavMenu);
+    const topNavMenu = component.find(TopNavMenu).at(0);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'save']);
   });
@@ -135,7 +138,7 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = getTestComponent(props);
 
-    const topNavMenu = component.find(TopNavMenu).props();
+    const topNavMenu = component.find(TopNavMenu).at(0).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['inspect', 'new', 'open']);
   });
@@ -154,7 +157,7 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = getTestComponent(props);
 
-      const topNavMenu = component.find(TopNavMenu);
+      const topNavMenu = component.find(TopNavMenu).at(0);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
       expect(topMenuConfig).toEqual([]);
     });
@@ -181,7 +184,7 @@ describe('Discover topnav component', () => {
         const props = getProps();
         const component = getTestComponent(props);
 
-        const topNavMenu = component.find(TopNavMenu);
+        const topNavMenu = component.find(TopNavMenu).at(0);
         const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
         expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
       });
@@ -205,7 +208,7 @@ describe('Discover topnav component', () => {
         const props = getProps();
         const component = getTestComponent(props);
 
-        const topNavMenu = component.find(TopNavMenu).props();
+        const topNavMenu = component.find(TopNavMenu).at(0).props();
         const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
         expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'export', 'share', 'save']);
       });
@@ -231,7 +234,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = getTestComponent(props);
 
-      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      const topNav = component
+        .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
+        .at(1);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
       const dataViewPickerOverride = mountWithIntl(
         topNav.prop('dataViewPickerOverride') as ReactElement
@@ -249,7 +254,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = getTestComponent(props);
 
-      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      const topNav = component
+        .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
+        .at(1);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
     });
   });

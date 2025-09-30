@@ -1853,6 +1853,19 @@ module.exports = {
     },
 
     /**
+     * Search overrides
+     */
+
+    {
+      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
+      excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
+    },
+
+    /**
      * Enterprise Search overrides
      * NOTE: We also have a single rule at the bottom of the file that
      * overrides Prettier's default of not linting unnecessary backticks
@@ -1902,8 +1915,6 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },

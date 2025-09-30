@@ -21,6 +21,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
 } from '@kbn/management-settings-ids';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -39,6 +40,7 @@ const useSettingsContext = () => {
 const SETTING_KEYS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -119,6 +121,10 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           updateErrors.push(error);
         });
         try {
+          const fieldsMap = fieldsQuery.data ?? {};
+          const requiresReload = Object.keys(unsavedChanges).some(
+            (key) => fieldsMap[key]?.requiresPageReload === true
+          );
           await Promise.all(
             Object.entries(unsavedChanges).map(([key, value]) => {
               return settings.client.set(key, value.unsavedValue);
@@ -129,12 +135,14 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           if (updateErrors.length > 0) {
             throw combineErrors(updateErrors);
           }
+          return requiresReload;
         } finally {
           if (subscription) {
             subscription.unsubscribe();
           }
         }
       }
+      return false;
     },
   });
 

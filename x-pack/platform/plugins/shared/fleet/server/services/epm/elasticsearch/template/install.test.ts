@@ -10,6 +10,7 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
 import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
@@ -28,7 +29,11 @@ const packageInstallContext = {
 
 describe('EPM index template install', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    appContextService.start(
+      createAppContextStartContractMock({}, undefined, undefined, {
+        enableOtelIntegrations: true,
+      } as ExperimentalFeatures)
+    );
 
     mockedLoadFieldsFromYaml.mockReturnValue([
       {
@@ -562,9 +567,14 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock({
-          internal: { disableILMPolicies: false },
-        } as any)
+        createAppContextStartContractMock(
+          {
+            internal: { disableILMPolicies: false },
+          } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
       );
 
       const dataStream = {
@@ -603,6 +613,18 @@ describe('EPM index template install', () => {
       });
 
       expect(componentTemplates).toStrictEqual({
+        'logs-otel@custom': {
+          _meta: {
+            managed: true,
+            managed_by: 'fleet',
+            package: {
+              name: 'otel-input-package',
+            },
+          },
+          template: {
+            settings: {},
+          },
+        },
         'logs-package.dataset@custom': {
           _meta: {
             managed: true,
@@ -625,6 +647,7 @@ describe('EPM index template install', () => {
           },
           template: {
             mappings: {
+              dynamic: true,
               dynamic_templates: undefined,
               properties: {
                 test_dimension: {
@@ -636,7 +659,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'logs-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'logs',
+                  name: 'logs@lifecycle',
                 },
                 mapping: {
                   total_fields: {
@@ -695,9 +718,14 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock({
-          internal: { disableILMPolicies: false },
-        } as any)
+        createAppContextStartContractMock(
+          {
+            internal: { disableILMPolicies: false },
+          } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
       );
 
       const dataStream = {
@@ -736,6 +764,18 @@ describe('EPM index template install', () => {
       });
 
       expect(componentTemplates).toStrictEqual({
+        'metrics-otel@custom': {
+          _meta: {
+            managed: true,
+            managed_by: 'fleet',
+            package: {
+              name: 'otel-input-package',
+            },
+          },
+          template: {
+            settings: {},
+          },
+        },
         'metrics-package.dataset@custom': {
           _meta: {
             managed: true,
@@ -758,6 +798,7 @@ describe('EPM index template install', () => {
           },
           template: {
             mappings: {
+              dynamic: true,
               dynamic_templates: undefined,
               properties: {
                 test_dimension: {
@@ -769,7 +810,7 @@ describe('EPM index template install', () => {
               index: {
                 default_pipeline: 'metrics-package.dataset-0.0.1',
                 lifecycle: {
-                  name: 'metrics',
+                  name: 'metrics@lifecycle',
                 },
                 mapping: {
                   total_fields: {
@@ -834,6 +875,64 @@ describe('EPM index template install', () => {
       );
 
       expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
+    });
+
+    it('should not include shared otel component templates in tracked assets', async () => {
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        lifecycle: {
+          data_retention: '3d',
+        },
+        streams: [
+          {
+            input: 'otelcol',
+            vars: [
+              {
+                name: 'period',
+                type: 'text',
+                title: 'Collection Interval',
+                multi: false,
+                required: true,
+                show_user: true,
+                default: '1m',
+              },
+            ],
+          },
+        ],
+      } as RegistryDataStream;
+      const otelInputPackageInfo = {
+        packageInfo: {
+          name: 'otel-input-package',
+          version: '0.0.1',
+          type: 'input',
+          policy_templates: [
+            {
+              name: 'template1',
+              title: 'HTTP Check',
+              input: 'otelcol',
+              type: 'metrics',
+              template_path: 'input.yml.hbs',
+              vars: [],
+            },
+          ],
+          data_streams: [dataStream],
+        },
+        paths: ['path1'],
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+      } as any as PackageInstallContext;
+
+      const { assetsToAdd } = await prepareToInstallTemplates(otelInputPackageInfo, [], []);
+
+      expect(assetsToAdd).not.toContainEqual({
+        id: 'metrics-otel@mappings',
+        type: 'component_template',
+      });
     });
   });
 });

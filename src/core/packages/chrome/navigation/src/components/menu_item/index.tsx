@@ -132,12 +132,14 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-    const horizontalStyles =
-      !isHorizontal &&
-      css`
-        ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `;
+    const verticalStyles = css`
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `;
+
+    const horizontalStyles = css`
+      font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
+    `;
 
     const content = (
       <>
@@ -150,10 +152,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             textAlign="center"
             css={css`
               ${truncatedStyles}
-              ${horizontalStyles}
+              ${isHorizontal ? horizontalStyles : verticalStyles}
               overflow: hidden;
               max-width: 100%;
-              padding: 0 ${euiTheme.size.xs};
+              padding: 0 ${euiTheme.size.s};
             `}
           >
             {children}

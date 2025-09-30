@@ -431,7 +431,7 @@ export function useYamlValidation({
             ],
           };
 
-          const { message } = formatValidationError(mockError);
+          const { message } = formatValidationError(mockError, workflowYamlSchema);
           formattedMessage = message;
         }
 
@@ -450,7 +450,7 @@ export function useYamlValidation({
       setValidationErrors(errorsUpdater);
       onValidationErrors?.(errorsUpdater);
     },
-    [onValidationErrors]
+    [onValidationErrors, workflowYamlSchema]
   );
 
   // Helper function to extract the received value from Monaco's error message
