@@ -77,6 +77,12 @@ export const calculateScoresWithESQL = async (
           user: [],
           service: [],
         },
+        entities: {
+          user: [],
+          service: [],
+          host: [],
+          generic: [],
+        },
       };
     }
 
