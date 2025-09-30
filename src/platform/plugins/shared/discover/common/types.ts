@@ -9,13 +9,6 @@
 
 import type { NEW_TAB_ID } from './constants';
 
-export enum TabUrlAction {
-  /**
-   * The `action` value used to indicate that a link was created via Share functionality.
-   */
-  shared = 'shared',
-}
-
 export interface TabsUrlState {
   /**
    * Syncing the selected tab id with the URL
@@ -25,8 +18,4 @@ export interface TabsUrlState {
    * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
    */
   tabLabel?: string;
-  /**
-   * (Optional) Action for the tab, used when creating and opening a shared link.
-   */
-  action?: TabUrlAction;
 }

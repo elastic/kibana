@@ -23,7 +23,6 @@ import {
   getTabStateMock,
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { TabUrlAction } from '../../../../common/types';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -922,7 +921,6 @@ describe('TabsStorageManager', () => {
     urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: persistedTabId,
       tabLabel: 'Shared tab',
-      action: TabUrlAction.shared,
     });
 
     jest.spyOn(urlStateStorage, 'set');
@@ -978,7 +976,6 @@ describe('TabsStorageManager', () => {
     urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabId: 'unknown',
       tabLabel: 'Shared tab',
-      action: TabUrlAction.shared,
     });
 
     jest.spyOn(urlStateStorage, 'set');
@@ -1021,7 +1018,6 @@ describe('TabsStorageManager', () => {
 
     urlStateStorage.set(TAB_STATE_URL_KEY, {
       tabLabel: 'Shared tab',
-      action: TabUrlAction.shared,
     });
 
     jest.spyOn(urlStateStorage, 'set');

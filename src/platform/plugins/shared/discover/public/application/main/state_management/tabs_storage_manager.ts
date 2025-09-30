@@ -21,7 +21,7 @@ import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
-import { TabUrlAction, type TabsUrlState } from '../../../../common/types';
+import type { TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -365,7 +365,6 @@ export const createTabsStorageManager = ({
         ? undefined
         : tabsStateFromURL?.tabId
       : undefined;
-    const selectedTabAction = enabled ? tabsStateFromURL?.action : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -420,7 +419,7 @@ export const createTabsStorageManager = ({
         // append a new tab if requested via URL
         selectedTabId === NEW_TAB_ID ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
-        (selectedTabAction === TabUrlAction.shared && persistedDiscoverSession)
+        (selectedTabId && persistedDiscoverSession)
       ) {
         const newTab = {
           ...defaultTabState,
@@ -444,7 +443,7 @@ export const createTabsStorageManager = ({
       }
 
       // otherwise try to reopen some of the previously closed tabs
-      if (selectedTabId && !persistedDiscoverSession && !selectedTabAction) {
+      if (selectedTabId && !persistedDiscoverSession && !tabsStateFromURL?.tabLabel) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
@@ -471,7 +470,7 @@ export const createTabsStorageManager = ({
       ...createTabItem([]),
     };
 
-    if (enabled && selectedTabAction === TabUrlAction.shared && tabsStateFromURL?.tabLabel) {
+    if (enabled && tabsStateFromURL?.tabLabel) {
       newDefaultTab.label = tabsStateFromURL.tabLabel;
     }
 

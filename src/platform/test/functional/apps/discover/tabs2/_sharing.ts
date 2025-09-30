@@ -55,12 +55,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
         expect(await queryBar.getQueryString()).to.be('bytes > 1000');
-        expect(await unifiedTabs.getTabLabels()).to.eql(['second tab']);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql(['first tab', 'second tab']);
+        expect(await unifiedTabs.getTabLabels()).to.eql(['first tab', 'second tab']);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([]);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.eql('second tab');
       });
 
       // modify the opened tab state
-      await unifiedTabs.editTabLabel(0, 'second tab (modified)');
+      await unifiedTabs.editTabLabel(1, 'second tab (modified)');
       await queryBar.setQuery('bytes > 500');
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
@@ -74,13 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('12,653');
         expect(await queryBar.getQueryString()).to.be('bytes > 1000');
-        expect(await unifiedTabs.getTabLabels()).to.eql(['first tab', 'second tab']);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([
-          'second tab (modified)',
-          'first tab',
-          'second tab',
-        ]);
-        expect(await unifiedTabs.getSelectedTabLabel()).to.eql('second tab');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['first tab', 'second tab (modified)']);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).to.eql([]);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.eql('second tab (modified)');
       });
 
       // the shared link can be opened in a new browser tab where local storage is empty
@@ -104,11 +101,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(1, 'esql2');
-      const queryEsql = 'FROM logstash-* | LIMIT 11';
+      const queryEsql = 'FROM logstash-* | LIMIT 20';
       await esql.setEsqlEditorQuery(queryEsql);
       await esql.submitEsqlEditorQuery();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCount()).to.be('11');
+      expect(await discover.getHitCount()).to.be('20');
       expect(await unifiedTabs.getTabLabels()).to.eql(['esql1', 'esql2']);
 
       await discover.saveSearch('esql');
@@ -122,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // the shared link can be opened in a new browser tab - one of the existing tabs will be preselected
       await retry.try(async () => {
-        expect(await discover.getHitCount()).to.be('11');
+        expect(await discover.getHitCount()).to.be('20');
         expect(await esql.getEsqlEditorQuery()).to.be(queryEsql);
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('esql2');
         expect(await unifiedTabs.getTabLabels()).to.eql(['esql1', 'esql2']);
@@ -131,12 +128,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // modify the opened tab state
-      const queryEsqlModified = 'FROM logstash-* | LIMIT 12';
+      const queryEsqlModified = 'FROM logstash-* | LIMIT 22';
       await unifiedTabs.editTabLabel(1, 'esql2 (modified)');
       await esql.setEsqlEditorQuery(queryEsqlModified);
       await esql.submitEsqlEditorQuery();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCount()).to.be('12');
+      expect(await discover.getHitCount()).to.be('22');
 
       // after a browser refresh in the original browser tab, the Discover tabs are restored as modified
       await browser.closeCurrentWindow();
@@ -144,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
       await retry.try(async () => {
-        expect(await discover.getHitCount()).to.be('11');
+        expect(await discover.getHitCount()).to.be('20');
         expect(await esql.getEsqlEditorQuery()).to.be(queryEsql); // same as in the original URL
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('esql2 (modified)');
         expect(await unifiedTabs.getTabLabels()).to.eql(['esql1', 'esql2 (modified)']);
@@ -158,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(sharedUrl);
       await discover.waitUntilTabIsLoaded();
       await retry.try(async () => {
-        expect(await discover.getHitCount()).to.be('11');
+        expect(await discover.getHitCount()).to.be('20');
         expect(await esql.getEsqlEditorQuery()).to.be(queryEsql);
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('esql2');
         expect(await unifiedTabs.getTabLabels()).to.eql(['esql1', 'esql2']);

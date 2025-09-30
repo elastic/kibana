@@ -21,7 +21,6 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
-import { TabUrlAction } from '../../../../../../common/types';
 import type { TabState } from '../../../state_management/redux/types';
 
 export const getShareAppMenuItem = ({
@@ -82,9 +81,8 @@ export const getShareAppMenuItem = ({
 
     if (tabsEnabled && currentTab) {
       params.tab = {
-        ...(persistedDiscoverSession?.id ? { id: currentTab.id } : {}), // skip tab id unless it's a persisted session
+        id: currentTab.id,
         label: currentTab.label,
-        action: TabUrlAction.shared,
       };
     }
 
