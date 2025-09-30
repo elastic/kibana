@@ -12,6 +12,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
 const mockLogger = loggingSystemMock.createLogger();
+const mockGetStreamsClient = async () => ({} as any);
 
 describe('Streams Usage Collector', () => {
   let usageCollectionMock: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
@@ -23,7 +24,7 @@ describe('Streams Usage Collector', () => {
   });
 
   it('registers a streams collector', () => {
-    registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+    registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'streams',
@@ -42,7 +43,7 @@ describe('Streams Usage Collector', () => {
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       } as any);
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
       const result = await collector.fetch({ esClient });
 
@@ -71,7 +72,7 @@ describe('Streams Usage Collector', () => {
     it('throws error on client error and logs it', async () => {
       esClient.search.mockRejectedValue(new Error('ES error'));
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
 
       await expect(collector.fetch({ esClient })).rejects.toThrow('ES error');
@@ -136,7 +137,7 @@ describe('Streams Usage Collector', () => {
         } as any;
       });
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
       const result = await collector.fetch({ esClient });
 
@@ -176,7 +177,7 @@ describe('Streams Usage Collector', () => {
       };
       esClientMock.search.mockRejectedValue(circuitBreakerError);
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
 
       await expect(collector.fetch({ esClient: esClientMock })).rejects.toThrow(
@@ -204,7 +205,7 @@ describe('Streams Usage Collector', () => {
       };
       esClientMock2.search.mockRejectedValue(httpLineError);
 
-      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
 
       await expect(collector.fetch({ esClient: esClientMock2 })).rejects.toThrow(

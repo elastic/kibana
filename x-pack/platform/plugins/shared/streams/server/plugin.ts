@@ -75,7 +75,8 @@ export class StreamsPlugin
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.statsTelemetryService = new StatsTelemetryService(
-      this.logger.get('streams-stats-telemetry')
+      this.logger.get('streams-stats-telemetry'),
+      this.isDev
     );
   }
 
@@ -89,7 +90,7 @@ export class StreamsPlugin
     } as StreamsServer;
 
     this.ebtTelemetryService.setup(core.analytics);
-    this.statsTelemetryService.setup(plugins.usageCollection);
+    this.statsTelemetryService.setup(core, plugins.usageCollection);
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,

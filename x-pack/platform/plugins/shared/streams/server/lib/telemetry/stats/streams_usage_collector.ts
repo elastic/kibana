@@ -9,11 +9,16 @@ import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { Streams } from '@kbn/streams-schema';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { StreamsClient } from '../../streams/client';
 import { hasChangedRetention, percentiles } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
 
-function createFetchFunction(logger: Logger) {
+function createFetchFunction(
+  logger: Logger,
+  getStreamsClient: () => Promise<StreamsClient>,
+  isDev: boolean
+) {
   return async function fetchStreamsUsageStats({
     esClient,
   }: {
@@ -300,10 +305,12 @@ function createFetchFunction(logger: Logger) {
  */
 export function registerStreamsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  logger: Logger
+  logger: Logger,
+  getStreamsClient: () => Promise<StreamsClient>,
+  isDev: boolean
 ) {
   registerCollector(usageCollection, {
     isReady: () => true,
-    fetch: createFetchFunction(logger),
+    fetch: createFetchFunction(logger, getStreamsClient, isDev),
   });
 }

@@ -36,5 +36,3 @@ export function percentiles(arr: number[], p: number[]): number[] {
     return sorted[base];
   });
 }
-
-export const isDevMode = () => process.env.NODE_ENV !== 'production';
