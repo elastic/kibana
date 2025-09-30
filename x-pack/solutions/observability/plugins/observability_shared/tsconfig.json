@@ -49,6 +49,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
     "@kbn/config-schema",
+    "@kbn/react-hooks",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
