@@ -75,12 +75,14 @@ if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
 
-echo "actual full command is:"
-echo "NODE_OPTIONS=\"$node_opts\" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests"
+full_command="NODE_OPTIONS=\"$node_opts\" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests --maxParallel=\"$JEST_MAX_PARALLEL\""
+
+echo "Actual full command is:"
+echo "$full_command"
 echo ""
 
 set +e
-NODE_OPTIONS="$node_opts" node ./scripts/jest_all --configs="$CONFIGS_CSV" --coverage=false --passWithNoTests
+eval "$full_command"
 code=$?
 set -e
 
