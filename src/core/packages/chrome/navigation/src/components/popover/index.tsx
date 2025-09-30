@@ -14,8 +14,9 @@ import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 're
 import { useEuiTheme } from '@elastic/eui';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
+import { useRovingIndex } from '../../hooks/use_roving_index';
+import { useIsElementReady } from '../../hooks/use_is_element_ready';
 import { usePopoverOpen } from './use_popover_open';
-import { useKeyboardManagement } from './use_keyboard_management';
 import { usePopoverHover } from './use_popover_hover';
 import { usePersistentPopover } from './use_persistent_popover';
 import {
@@ -58,6 +59,9 @@ export const SideNavPopover = ({
 
   const { isOpen, open, close } = usePopoverOpen();
   const { isPersistent, setPersistent, clearPersistent } = usePersistentPopover();
+  const isPopoverReady = useIsElementReady(isOpen, popoverRef);
+
+  useRovingIndex(popoverRef, isPopoverReady);
 
   const handleClose = useCallback(() => {
     close();
@@ -83,7 +87,7 @@ export const SideNavPopover = ({
     }
   }, [persistent, isOpen, isPersistent, handleClose, clearTimeout, open, setPersistent]);
 
-  const handleKeyDown: KeyboardEventHandler = useCallback(
+  const handleTriggerKeyDown: KeyboardEventHandler = useCallback(
     (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         trigger.props.onKeyDown?.(e);
@@ -101,6 +105,16 @@ export const SideNavPopover = ({
     [trigger, hasContent, open]
   );
 
+  const handlePopoverKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+        triggerRef.current?.focus();
+      }
+    },
+    [handleClose, triggerRef]
+  );
+
   const handleBlur: FocusEventHandler = (e) => {
     clearTimeout();
 
@@ -114,14 +128,22 @@ export const SideNavPopover = ({
     }
   };
 
-  useKeyboardManagement(isOpen, handleClose, triggerRef, popoverRef);
-
   useEffect(() => {
     return () => {
       clearTimeout();
       handleClose();
     };
   }, [clearTimeout, handleClose]);
+
+  useEffect(() => {
+    const popover = popoverRef.current;
+
+    if (popover && isOpen) {
+      popover.addEventListener('keydown', handlePopoverKeyDown, true);
+
+      return () => popover.removeEventListener('keydown', handlePopoverKeyDown, true);
+    }
+  }, [isOpen, handleClose, triggerRef, handlePopoverKeyDown]);
 
   const enhancedTrigger = useMemo(
     () =>
@@ -133,9 +155,9 @@ export const SideNavPopover = ({
           trigger.props.onClick?.(e);
           handleTriggerClick();
         },
-        onKeyDown: handleKeyDown,
+        onKeyDown: handleTriggerKeyDown,
       }),
-    [trigger, hasContent, isOpen, handleKeyDown, handleTriggerClick]
+    [trigger, hasContent, isOpen, handleTriggerKeyDown, handleTriggerClick]
   );
 
   const wrapperStyles = css`

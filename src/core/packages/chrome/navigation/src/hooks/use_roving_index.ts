@@ -12,7 +12,7 @@ import { useCallback, useEffect } from 'react';
 
 import { getFocusableElements } from '../utils/get_focusable_elements';
 
-export const useRovingIndex = (ref: RefObject<HTMLElement> | null) => {
+export const useRovingIndex = (ref: RefObject<HTMLElement> | null, condition: boolean = true) => {
   const updateTabIndices = useCallback((elements: HTMLElement[]) => {
     elements.forEach((el, idx) => {
       el.tabIndex = idx === 0 ? 0 : -1;
@@ -52,6 +52,8 @@ export const useRovingIndex = (ref: RefObject<HTMLElement> | null) => {
   );
 
   useEffect(() => {
+    if (!condition) return;
+
     const container = ref?.current;
     if (!container) return;
 
@@ -77,5 +79,5 @@ export const useRovingIndex = (ref: RefObject<HTMLElement> | null) => {
       container.removeEventListener('keydown', handleKeyDown);
       observer.disconnect();
     };
-  }, [ref, handleKeyDown, updateTabIndices]);
+  }, [ref, handleKeyDown, updateTabIndices, condition]);
 };
