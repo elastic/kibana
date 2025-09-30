@@ -8,6 +8,8 @@
 import { getParseOriginalDashboardNode } from './parse_original_dashboard';
 import type { MigrateDashboardState } from '../../types';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { generateAssistantComment } from '../../../../../common/task/util/comments';
 
 // Mock the SplunkXmlDashboardParser
 jest.mock('../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml');
@@ -98,43 +100,88 @@ describe('getParseOriginalDashboardNode', () => {
     );
   });
 
-  it('should throw error for unsupported Splunk XML - wrong root tag', async () => {
+  it('should return untranslatable result for unsupported Splunk XML - wrong root tag', async () => {
     mockSplunkXmlDashboardParser.isSupportedSplunkXml = jest.fn().mockReturnValue({
       isSupported: false,
       reason: 'Unsupported root tag: form',
     });
 
     const node = getParseOriginalDashboardNode();
+    const result = await node(mockState, mockConfig);
 
-    await expect(node(mockState, mockConfig)).rejects.toThrow(
-      'Unsupported Splunk XML: Unsupported root tag: form'
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
     );
+    expect(result).toEqual({
+      parsed_original_dashboard: {
+        title: 'Test Dashboard',
+        panels: [],
+      },
+      translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      comments: [
+        {
+          message: 'Unsupported Splunk XML: Unsupported root tag: form',
+          created_by: 'assistant',
+          created_at: expect.any(String),
+        },
+      ],
+    });
   });
 
-  it('should throw error for unsupported Splunk XML - wrong version', async () => {
+  it('should return untranslatable result for unsupported Splunk XML - wrong version', async () => {
     mockSplunkXmlDashboardParser.isSupportedSplunkXml = jest.fn().mockReturnValue({
       isSupported: false,
       reason: 'Unsupported version. Only version 1.1 is supported.',
     });
 
     const node = getParseOriginalDashboardNode();
+    const result = await node(mockState, mockConfig);
 
-    await expect(node(mockState, mockConfig)).rejects.toThrow(
-      'Unsupported Splunk XML: Unsupported version. Only version 1.1 is supported.'
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
     );
+    expect(result).toEqual({
+      parsed_original_dashboard: {
+        title: 'Test Dashboard',
+        panels: [],
+      },
+      translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      comments: [
+        {
+          message: 'Unsupported Splunk XML: Unsupported version. Only version 1.1 is supported.',
+          created_by: 'assistant',
+          created_at: expect.any(String),
+        },
+      ],
+    });
   });
 
-  it('should throw error for unsupported Splunk XML - no rows', async () => {
+  it('should return untranslatable result for unsupported Splunk XML - no rows', async () => {
     mockSplunkXmlDashboardParser.isSupportedSplunkXml = jest.fn().mockReturnValue({
       isSupported: false,
       reason: 'No <row> elements found in the provided Dashboard XML.',
     });
 
     const node = getParseOriginalDashboardNode();
+    const result = await node(mockState, mockConfig);
 
-    await expect(node(mockState, mockConfig)).rejects.toThrow(
-      'Unsupported Splunk XML: No <row> elements found in the provided Dashboard XML.'
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
     );
+    expect(result).toEqual({
+      parsed_original_dashboard: {
+        title: 'Test Dashboard',
+        panels: [],
+      },
+      translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      comments: [
+        {
+          message: 'Unsupported Splunk XML: No <row> elements found in the provided Dashboard XML.',
+          created_by: 'assistant',
+          created_at: expect.any(String),
+        },
+      ],
+    });
   });
 
   it('should handle parser errors gracefully', async () => {
@@ -152,6 +199,9 @@ describe('getParseOriginalDashboardNode', () => {
     const node = getParseOriginalDashboardNode();
 
     await expect(node(mockState, mockConfig)).rejects.toThrow('Parser error');
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
+    );
   });
 
   it('should return empty panels array when parser returns no panels', async () => {
@@ -169,6 +219,9 @@ describe('getParseOriginalDashboardNode', () => {
     const node = getParseOriginalDashboardNode();
     const result = await node(mockState, mockConfig);
 
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
+    );
     expect(result).toEqual({
       parsed_original_dashboard: {
         title: 'Test Dashboard',
@@ -209,6 +262,9 @@ describe('getParseOriginalDashboardNode', () => {
     const node = getParseOriginalDashboardNode();
     const result = await node(mockState, mockConfig);
 
+    expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
+      mockState.original_dashboard.data
+    );
     expect(result).toEqual({
       parsed_original_dashboard: {
         title: 'Test Dashboard',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
 import type { GraphNode } from '../../types';
 
@@ -19,7 +21,14 @@ export const getParseOriginalDashboardNode = (): GraphNode => {
       state.original_dashboard.data
     );
     if (!supportCheck.isSupported) {
-      throw new Error(`Unsupported Splunk XML: ${supportCheck.reason}`);
+      return {
+        parsed_original_dashboard: {
+          title: state.original_dashboard.title,
+          panels: [],
+        },
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+        comments: [generateAssistantComment(`Unsupported Splunk XML: ${supportCheck.reason}`)],
+      };
     }
 
     const parser = new SplunkXmlDashboardParser(state.original_dashboard.data);
