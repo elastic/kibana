@@ -255,7 +255,6 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      // eslint-disable-next-line @kbn/i18n/i18n_translate_should_start_with_the_right_id
                       aria-label={i18n.translate(
                         isCollapsed
                           ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
