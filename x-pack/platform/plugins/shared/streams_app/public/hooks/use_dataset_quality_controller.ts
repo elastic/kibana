@@ -111,6 +111,8 @@ export const useDatasetQualityController = (
     timeState.timeRange.from,
     timeState.timeRange.to,
     setTime,
+    refreshInterval,
+    setRefreshInterval,
   ]);
 
   return controller;

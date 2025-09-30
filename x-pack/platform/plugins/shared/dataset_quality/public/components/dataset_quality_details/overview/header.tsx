@@ -8,13 +8,18 @@
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 import { overviewHeaderTitle } from '../../../../common/translations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function OverviewHeader({ handleRefresh }: { handleRefresh: () => void }) {
+export default function OverviewHeader({
+  handleRefresh,
+}: {
+  handleRefresh: (dateRange: TimeRange) => void;
+}) {
   const { timeRange, updateTimeRange, onRefreshChange } = useDatasetQualityDetailsState();
   const { unifiedSearch } = useKibanaContextForPlugin().services;
 
@@ -60,7 +65,7 @@ export default function OverviewHeader({ handleRefresh }: { handleRefresh: () =>
           onQuerySubmit={(payload) =>
             onTimeChange({ start: payload.dateRange.from, end: payload.dateRange.to })
           }
-          onRefresh={handleRefresh}
+          onRefresh={(payload) => handleRefresh(payload.dateRange)}
           onRefreshChange={({ refreshInterval, isPaused }) =>
             onRefreshChange({ refreshInterval, isPaused })
           }
