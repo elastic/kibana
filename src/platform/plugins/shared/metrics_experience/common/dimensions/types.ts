@@ -12,5 +12,4 @@ import { type ES_FIELD_TYPES } from '@kbn/field-types';
 export interface Dimension {
   name: string;
   type: ES_FIELD_TYPES;
-  description?: string;
 }
