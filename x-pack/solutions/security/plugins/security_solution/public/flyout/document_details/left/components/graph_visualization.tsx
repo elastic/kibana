@@ -74,8 +74,6 @@ export const GraphVisualization: React.FC = memo(() => {
     dataFormattedForFieldBrowser,
   });
 
-  console.log({ eventIds });
-
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
