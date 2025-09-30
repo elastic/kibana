@@ -8,12 +8,19 @@
 import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { GraphGroupedNodePreviewPanel, type GraphGroupedNodePreviewPanelProps } from '.';
+import type { GraphGroupedNodePreviewPanelProps } from '.';
 import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/grouped_item/types';
+import { LoadingBody } from './components/loading_body';
+import { EmptyBody } from './components/empty_body';
+import { ContentBody } from './components/content_body';
 
-const meta: Meta<Partial<GraphGroupedNodePreviewPanelProps>> = {
+// Interface for ContentTemplate args that includes the items property
+interface ContentTemplateArgs extends Partial<GraphGroupedNodePreviewPanelProps> {
+  items?: PanelItems;
+}
+
+const meta: Meta<ContentTemplateArgs> = {
   title: 'Components/Flyout components/GraphGroupedNodePreviewPanel',
-  component: GraphGroupedNodePreviewPanel,
   decorators: [GlobalStylesStorybookDecorator],
   argTypes: {
     items: {
@@ -70,13 +77,55 @@ const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
   ...overrides,
 });
 
-const Template: StoryFn<Partial<GraphGroupedNodePreviewPanelProps>> = (args) => (
+const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
+  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
+  const items = args.items || [];
+  const paginatedItems = items.slice(
+    pagination.pageIndex * pagination.pageSize,
+    (pagination.pageIndex + 1) * pagination.pageSize
+  );
+
+  // Determine the icon and type based on the items
+  const firstItem = items[0];
+  let icon = 'index';
+  let groupedItemsType = 'Events';
+
+  const capitalize = (str: string) =>
+    !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
+
+  if (firstItem && firstItem.itemType === 'entity') {
+    icon = firstItem.icon ?? icon;
+    groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
+  }
+
+  return (
+    <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+      <ContentBody
+        items={paginatedItems}
+        totalHits={items.length}
+        icon={icon}
+        groupedItemsType={groupedItemsType}
+        pagination={pagination}
+        onChangePage={(pageIndex) => setPagination({ ...pagination, pageIndex })}
+        onChangeItemsPerPage={(pageSize) => setPagination({ pageIndex: 0, pageSize })}
+      />
+    </div>
+  );
+};
+
+const LoadingTemplate: StoryFn = () => (
   <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
-    <GraphGroupedNodePreviewPanel {...args} />
+    <LoadingBody />
   </div>
 );
 
-export const EntitiesGroup: StoryFn<Partial<GraphGroupedNodePreviewPanelProps>> = Template.bind({});
+const EmptyTemplate: StoryFn = () => (
+  <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+    <EmptyBody onRefresh={() => {}} />
+  </div>
+);
+
+export const EntitiesGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 EntitiesGroup.args = {
   items: [
     createEntityItem({
@@ -116,7 +165,7 @@ EntitiesGroup.parameters = {
   },
 };
 
-export const EventsGroup: StoryFn<Partial<GraphGroupedNodePreviewPanelProps>> = Template.bind({});
+export const EventsGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 EventsGroup.args = {
   items: [
     createEventItem({
@@ -148,7 +197,7 @@ EventsGroup.parameters = {
   },
 };
 
-export const AlertsGroup: StoryFn<Partial<GraphGroupedNodePreviewPanelProps>> = Template.bind({});
+export const AlertsGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 AlertsGroup.args = {
   items: [
     createAlertItem({
@@ -180,8 +229,7 @@ AlertsGroup.parameters = {
   },
 };
 
-export const EventsAndAlertsGroup: StoryFn<Partial<GraphGroupedNodePreviewPanelProps>> =
-  Template.bind({});
+export const EventsAndAlertsGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 EventsAndAlertsGroup.args = {
   items: [
     createEventItem({
@@ -219,7 +267,7 @@ EventsAndAlertsGroup.parameters = {
   },
 };
 
-export const LargeGroup: StoryFn<GraphGroupedNodePreviewPanelProps> = Template.bind({});
+export const LargeGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 LargeGroup.args = {
   items: Array.from({ length: 10 }, (_, index) => {
     const itemTypes = ['entity', 'event', 'alert'] as const;
@@ -271,10 +319,7 @@ LargeGroup.parameters = {
   },
 };
 
-export const LoadingState: StoryFn<GraphGroupedNodePreviewPanelProps> = Template.bind({});
-LoadingState.args = {
-  showLoadingState: true,
-};
+export const LoadingState: StoryFn = LoadingTemplate.bind({});
 LoadingState.parameters = {
   docs: {
     description: {
@@ -284,10 +329,7 @@ LoadingState.parameters = {
   },
 };
 
-export const EmptyState: StoryFn<GraphGroupedNodePreviewPanelProps> = Template.bind({});
-EmptyState.args = {
-  items: [],
-};
+export const EmptyState: StoryFn = EmptyTemplate.bind({});
 EmptyState.parameters = {
   docs: {
     description: {
