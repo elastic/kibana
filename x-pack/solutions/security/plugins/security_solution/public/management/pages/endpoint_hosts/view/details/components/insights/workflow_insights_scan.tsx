@@ -10,11 +10,11 @@ import React, { useCallback, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';
 import { noop } from 'lodash/fp';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiText,
@@ -149,7 +149,7 @@ export const WorkflowInsightsScanSection = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <AssistantIcon />
+                <EuiIcon type="sparkles" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
