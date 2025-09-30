@@ -28,23 +28,26 @@ function createFetchFunction(logger: Logger) {
     esClient: any;
   }): Promise<StreamsStatsTelemetry> {
     try {
-      const [
-        classicStreamsMetrics,
-        wiredStreamsCount,
-        significantEventsMetrics,
-        ruleExecutionMetrics,
-      ] = await Promise.all([
-        fetchClassicStreamsMetrics(esClient),
-        fetchWiredStreamsCount(esClient),
+      const [allStreamsData, significantEventsMetrics, ruleExecutionMetrics] = await Promise.all([
+        fetchAllStreamsData(esClient),
         fetchSignificantEventsMetrics(esClient),
         fetchRuleExecutionMetrics(esClient),
       ]);
+
+      const { classicStreamsMetrics, wiredStreamsCount, streamsCache } =
+        processStreamsData(allStreamsData);
+
+      // Pass the cache to avoid additional ES calls
+      const categorizedSignificantEventsMetrics = await categorizeSignificantEvents(
+        significantEventsMetrics,
+        streamsCache
+      );
 
       return {
         classic_streams: classicStreamsMetrics,
         wired_streams: { count: wiredStreamsCount },
         significant_events: {
-          ...significantEventsMetrics,
+          ...categorizedSignificantEventsMetrics,
           ...ruleExecutionMetrics,
         },
       };
@@ -54,7 +57,7 @@ function createFetchFunction(logger: Logger) {
     }
   };
 
-  async function fetchClassicStreamsMetrics(esClient: any) {
+  async function fetchAllStreamsData(esClient: any) {
     const allStreams = await esClient.search({
       index: '.kibana_streams',
       size: 10000,
@@ -64,11 +67,17 @@ function createFetchFunction(logger: Logger) {
       query: { match_all: {} },
     });
 
-    const hits = allStreams.hits?.hits ?? [];
+    return allStreams.hits?.hits ?? [];
+  }
+
+  function processStreamsData(hits: any[]) {
     let changedCount = 0;
     let withProcessingCount = 0;
     let withFieldsCount = 0;
     let withChangedRetentionCount = 0;
+    let wiredCount = 0;
+
+    const streamsCache = new Map();
 
     for (const hit of hits) {
       const definition = hit._source ?? {};
@@ -89,37 +98,26 @@ function createFetchFunction(logger: Logger) {
           withChangedRetentionCount++;
         }
       }
-    }
 
-    return {
-      changed_count: changedCount,
-      with_processing_count: withProcessingCount,
-      with_fields_count: withFieldsCount,
-      with_changed_retention_count: withChangedRetentionCount,
-    };
-  }
-
-  async function fetchWiredStreamsCount(esClient: any) {
-    const allStreams = await esClient.search({
-      index: '.kibana_streams',
-      size: 10000,
-      sort: [{ name: 'asc' }],
-      track_total_hits: false,
-      _source: true,
-      query: { match_all: {} },
-    });
-
-    const hits = allStreams.hits?.hits ?? [];
-    let wiredCount = 0;
-
-    for (const hit of hits) {
-      const definition = hit._source ?? {};
       if (isWiredStream(definition) && !isGroupStream(definition)) {
         wiredCount++;
       }
+
+      // Cache the stream definition for later use
+      streamsCache.set(definition.name, definition);
     }
 
-    return wiredCount;
+    return {
+      classicStreamsMetrics: {
+        changed_count: changedCount,
+        with_processing_count: withProcessingCount,
+        with_fields_count: withFieldsCount,
+        with_changed_retention_count: withChangedRetentionCount,
+      },
+      wiredStreamsCount: wiredCount,
+      allStreamsData: hits, // Return for potential reuse in categorizeStreamsByType
+      streamsCache, // Return the cache
+    };
   }
 
   async function fetchSignificantEventsMetrics(esClient: any) {
@@ -130,9 +128,7 @@ function createFetchFunction(logger: Logger) {
 
     return {
       rules_count: rulesCount,
-      stored_count: eventsData.stored_count,
-      unique_wired_streams_with_stored_count: eventsData.unique_wired_streams_with_stored_count,
-      unique_classic_streams_with_stored_count: eventsData.unique_classic_streams_with_stored_count,
+      ...eventsData,
     };
   }
 
@@ -156,7 +152,7 @@ function createFetchFunction(logger: Logger) {
 
   async function fetchSignificantEventsData(esClient: any) {
     const significantEventsResponse = await esClient.search({
-      index: '.alerts-streams.alerts-default',
+      index: '.alerts-streams.alerts-*', // Changed from .alerts-streams.alerts-default to capture all spaces
       size: 0,
       query: {
         bool: {
@@ -189,43 +185,51 @@ function createFetchFunction(logger: Logger) {
     const streamTagsAgg = significantEventsResponse.aggregations?.by_stream_tags as any;
     const streamTags = streamTagsAgg?.buckets || [];
 
+    return {
+      stored_count: storedCount,
+      stream_tags: streamTags.map((bucket: any) => bucket.key),
+    };
+  }
+
+  async function categorizeSignificantEvents(
+    significantEventsMetrics: any,
+    streamsCache: Map<string, any>
+  ) {
+    const { stored_count: storedCount, stream_tags: streamTags } = significantEventsMetrics;
+
     if (streamTags.length === 0) {
       return {
+        rules_count: significantEventsMetrics.rules_count,
         stored_count: storedCount,
         unique_wired_streams_with_stored_count: 0,
         unique_classic_streams_with_stored_count: 0,
       };
     }
 
-    const { uniqueWiredStreamsCount, uniqueClassicStreamsCount } = await categorizeStreamsByType(
-      esClient,
-      streamTags.map((bucket: any) => bucket.key)
+    const { uniqueWiredStreamsCount, uniqueClassicStreamsCount } = categorizeStreamsByTypeFromCache(
+      streamTags,
+      streamsCache
     );
 
     return {
+      rules_count: significantEventsMetrics.rules_count,
       stored_count: storedCount,
       unique_wired_streams_with_stored_count: uniqueWiredStreamsCount,
       unique_classic_streams_with_stored_count: uniqueClassicStreamsCount,
     };
   }
 
-  async function categorizeStreamsByType(esClient: any, streamNames: string[]) {
-    const streamDefinitionsResponse = await esClient.search({
-      index: '.kibana_streams',
-      size: streamNames.length,
-      query: {
-        bool: {
-          filter: [{ terms: { name: streamNames } }],
-        },
-      },
-      _source: true,
-    });
-
+  function categorizeStreamsByTypeFromCache(streamNames: string[], streamsCache: Map<string, any>) {
     let wiredCount = 0;
     let classicCount = 0;
 
-    for (const hit of streamDefinitionsResponse.hits?.hits || []) {
-      const definition = hit._source ?? {};
+    for (const streamName of streamNames) {
+      const definition = streamsCache.get(streamName);
+
+      if (!definition) {
+        // Stream not found in cache, skip
+        continue;
+      }
 
       if (isWiredStream(definition) && !isGroupStream(definition)) {
         wiredCount++;

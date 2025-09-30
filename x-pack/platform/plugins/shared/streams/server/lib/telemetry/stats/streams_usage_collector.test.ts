@@ -104,7 +104,7 @@ describe('Streams Usage Collector', () => {
             hits: { hits: [], total: { value: 5, relation: 'eq' } },
           } as any;
         }
-        if (params.index === '.alerts-streams.alerts-default') {
+        if (params.index === '.alerts-streams.alerts-*') {
           return {
             ...baseResponse,
             hits: { hits: [], total: { value: 123, relation: 'eq' } },
