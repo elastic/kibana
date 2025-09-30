@@ -129,7 +129,7 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      gridData: GridData;
+      grid: GridData;
       serializedState: SerializedPanelState;
     };
     hasOverlays$: PublishingSubject<boolean>;
