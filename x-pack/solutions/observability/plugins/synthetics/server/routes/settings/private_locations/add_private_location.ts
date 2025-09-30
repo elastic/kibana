@@ -44,12 +44,14 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server } = routeContext;
+    const { response, request, server, spaceId } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const location = request.body as PrivateLocationObject;
     const agentPolicy = await server.fleet?.agentPolicyService.get(
       internalSOClient,
-      location.agentPolicyId
+      location.agentPolicyId,
+      true,
+      { spaceId }
     );
 
     if (!agentPolicy) {
