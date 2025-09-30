@@ -72,7 +72,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
               ) : (
                 <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
                   <strong>{`${item.title}: `}</strong>
-                  {`${item.description}`}
+                  {item.description}
                 </EuiText>
               )
             )}

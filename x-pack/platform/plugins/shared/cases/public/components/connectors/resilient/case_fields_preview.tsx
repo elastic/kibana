@@ -18,6 +18,7 @@ import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
 import { useGetFields } from './use_get_fields';
 import type { ResilientFieldMetadata } from './types';
+import { PreferenceFormattedDate } from '../../formatted_date';
 
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
@@ -96,7 +97,10 @@ const ResilientFieldsComponent: React.FunctionComponent<
       ...(showAdditionalFields && additionalFields != null && additionalFields.length > 0
         ? Object.keys(additionalFieldsParsed).map((key) => ({
             title: fieldsMetadataRecord[key]?.text ?? key,
-            description: `${additionalFieldsParsed[key]}`,
+            description: renderAddtionalFieldsDescription(
+              fieldsMetadataRecord[key],
+              additionalFieldsParsed[key]
+            ),
           }))
         : []),
     ];
@@ -119,6 +123,59 @@ const ResilientFieldsComponent: React.FunctionComponent<
     />
   );
 };
+
+function renderAddtionalFieldsDescription(
+  fieldMetaData: ResilientFieldMetadata | undefined,
+  fieldValue: string | number | boolean | string[] | number[] | null | undefined
+) {
+  if (!fieldMetaData) {
+    return fieldValue;
+  }
+  switch (fieldMetaData.input_type) {
+    case 'boolean':
+      return typeof fieldValue === 'boolean' ? (fieldValue ? 'true' : 'false') : '';
+    case 'number':
+      return typeof fieldValue === 'number' ? fieldValue.toString() : '';
+    case 'datepicker':
+      return typeof fieldValue === 'number' ? (
+        <PreferenceFormattedDate dateFormat="MMMM D, YYYY" value={new Date(fieldValue)} />
+      ) : (
+        fieldValue
+      );
+    case 'datetimepicker':
+      return typeof fieldValue === 'number' ? (
+        <PreferenceFormattedDate
+          dateFormat="MMMM D, YYYY @ HH:mm:ss"
+          value={new Date(fieldValue)}
+        />
+      ) : (
+        fieldValue
+      );
+    case 'select': {
+      const option =
+        fieldValue &&
+        fieldMetaData.values?.find((item) => item.value.toString() === fieldValue.toString());
+      return option ? option.label : fieldValue;
+    }
+    case 'multiselect': {
+      return Array.isArray(fieldValue) && fieldMetaData?.values
+        ? (fieldValue as Array<string | number>)
+            .map((val) => {
+              const option = fieldMetaData.values?.find(
+                (item) => item.value.toString() === val.toString()
+              );
+              return option ? option.label : val.toString();
+            })
+            .join(', ')
+        : '';
+    }
+
+    case 'text':
+    case 'textarea':
+    default:
+      return fieldValue ?? '';
+  }
+}
 
 ResilientFieldsComponent.displayName = 'ResilientFields';
 // eslint-disable-next-line import/no-default-export
