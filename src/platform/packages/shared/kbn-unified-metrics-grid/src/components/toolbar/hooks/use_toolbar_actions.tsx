@@ -78,36 +78,36 @@ export const useToolbarActions = ({
     ]
   );
 
-  const fullscreenButtonLabel = isFullscreen
-    ? i18n.translate('metricsExperience.fullScreenExitButton', {
-        defaultMessage: 'Exit fullscreen (esc)',
-      })
-    : i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Enter fullscreen',
-      });
+  const rightSideActions: IconButtonGroupProps['buttons'] = useMemo(() => {
+    const fullscreenButtonLabel = isFullscreen
+      ? i18n.translate('metricsExperience.fullScreenExitButton', {
+          defaultMessage: 'Exit fullscreen (esc)',
+        })
+      : i18n.translate('metricsExperience.fullScreenButton', {
+          defaultMessage: 'Enter fullscreen',
+        });
 
-  const rightSideActions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
-      label: fullscreenButtonLabel,
-      title: fullscreenButtonLabel,
-      onClick: onToggleFullscreen,
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-      css: css`
-        &.euiButtonGroupButton:first-of-type {
-          border: ${euiTheme.border.thin} !important;
-          border-left: ${euiTheme.border.thin} !important;
-          border-top-left-radius: 0px !important;
-          border-bottom-left-radius: 0px !important;
-        }
-      `,
-    },
-  ];
+    return [
+      {
+        iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+        label: fullscreenButtonLabel,
+        title: fullscreenButtonLabel,
+        onClick: onToggleFullscreen,
+        'data-test-subj': 'metricsExperienceToolbarFullScreen',
+        css: css`
+          &.euiButtonGroupButton:first-of-type {
+            border: ${euiTheme.border.thin} !important;
+            border-left: none !important;
+            border-top-left-radius: 0px !important;
+            border-bottom-left-radius: 0px !important;
+          }
+        `,
+      },
+    ] as IconButtonGroupProps['buttons'];
+  }, [isFullscreen, onToggleFullscreen, euiTheme.border.thin]);
 
   return {
     leftSideActions,
     rightSideActions,
-    isFullscreen,
-    onToggleFullscreen,
   };
 };

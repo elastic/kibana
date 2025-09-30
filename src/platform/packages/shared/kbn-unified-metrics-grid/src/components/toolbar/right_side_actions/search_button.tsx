@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -20,11 +21,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 interface RightSideActionsProps {
-  searchTerm: string;
+  value: string;
   'data-test-subj'?: string;
   isFullscreen: boolean;
   onSearchTermChange: (value: string) => void;
-  onClearSearchTerm: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -32,17 +32,22 @@ const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
   defaultMessage: 'Search',
 });
 
+const DEBOUNCE_TIME = 300;
+
 export const SearchButton = ({
-  searchTerm,
+  value,
   isFullscreen,
   'data-test-subj': dataTestSubj,
   onSearchTermChange,
-  onClearSearchTerm,
   onKeyDown,
 }: RightSideActionsProps) => {
   const { euiTheme } = useEuiTheme();
 
+  const [searchTerm, setSearchTerm] = useState(value);
+
   const [showSearchInput, setShowSearchInput] = useState(false);
+
+  useDebounce(() => onSearchTermChange(searchTerm), DEBOUNCE_TIME, [searchTerm]);
 
   const onShowSearch = useCallback(() => {
     setShowSearchInput(true);
@@ -50,8 +55,8 @@ export const SearchButton = ({
 
   const onClearSearch = useCallback(() => {
     setShowSearchInput(false);
-    onClearSearchTerm();
-  }, [onClearSearchTerm]);
+    onSearchTermChange('');
+  }, [onSearchTermChange]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
@@ -66,9 +71,9 @@ export const SearchButton = ({
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onSearchTermChange(e.target.value);
+      setSearchTerm(e.target.value);
     },
-    [onSearchTermChange]
+    [setSearchTerm]
   );
 
   const onBlur = useCallback(() => {
@@ -101,7 +106,12 @@ export const SearchButton = ({
                 css={css`
                   border-top-right-radius: 0;
                   border-bottom-right-radius: 0;
+                  border-right: 0;
                   min-width: 200px;
+
+                  &::after {
+                    border-right: 0;
+                  }
                 `}
               />
             </EuiFlexItem>
@@ -116,9 +126,13 @@ export const SearchButton = ({
                 size="s"
                 css={css`
                   border: ${euiTheme.border.thin};
-                  border-right: none;
                   border-top-right-radius: 0;
                   border-bottom-right-radius: 0;
+
+                  &:focus {
+                    outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+                    outline-offset: -${euiTheme.focus.width};
+                  }
                 `}
                 color="text"
               />

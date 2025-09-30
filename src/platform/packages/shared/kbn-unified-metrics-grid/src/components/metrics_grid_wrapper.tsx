@@ -50,7 +50,7 @@ export const MetricsGridWrapper = ({
     requestParams,
   });
 
-  const { searchTerm, onSearchTermChange, onClearSearchTerm, isFullscreen, onToggleFullscreen } =
+  const { searchTerm, onSearchTermChange, isFullscreen, onToggleFullscreen } =
     useMetricsGridState();
 
   const { metricsGridId, setMetricsGridWrapper, styles } = useMetricsGridFullScreen();
@@ -68,7 +68,7 @@ export const MetricsGridWrapper = ({
   );
 
   const fullHeightCss = css`
-    height: '100%';
+    height: 100%;
   `;
 
   return (
@@ -106,10 +106,9 @@ export const MetricsGridWrapper = ({
               additionalControls: {
                 prependRight: (
                   <SearchButton
-                    searchTerm={searchTerm}
+                    value={searchTerm}
                     isFullscreen={isFullscreen}
                     onSearchTermChange={onSearchTermChange}
-                    onClearSearchTerm={onClearSearchTerm}
                     onKeyDown={onKeyDown}
                     data-test-subj="metricsExperienceGridToolbarSearch"
                   />

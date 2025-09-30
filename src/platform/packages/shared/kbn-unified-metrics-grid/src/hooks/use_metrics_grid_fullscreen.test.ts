@@ -15,6 +15,7 @@ import {
 } from './use_metrics_grid_fullscreen';
 import {
   METRICS_GRID_FULL_SCREEN_CLASS,
+  METRICS_GRID_RESTRICT_BODY_CLASS,
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
 } from '../common/constants';
 
@@ -35,7 +36,7 @@ const mockUseMutationObserver = useMutationObserver as jest.MockedFunction<
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
     mockUseEuiTheme.mockReturnValue({
-      euiTheme: { levels: { header: 1000 } },
+      euiTheme: { levels: { header: 2000 }, colors: { backgroundBasePlain: '#000' } },
       colorMode: 'LIGHT',
       highContrastMode: false,
       modifications: undefined,
@@ -77,8 +78,9 @@ describe('useMetricsGridFullScreen', () => {
     metricsGrid.classList.add(METRICS_GRID_FULL_SCREEN_CLASS);
     toggleMetricsGridFullScreen(metricsGrid);
     expect(document.body.classList.add).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+      METRICS_GRID_RESTRICT_BODY_CLASS,
+      expect.any(String)
     );
   });
 
@@ -86,8 +88,9 @@ describe('useMetricsGridFullScreen', () => {
     const metricsGrid = document.createElement('div');
     toggleMetricsGridFullScreen(metricsGrid);
     expect(document.body.classList.remove).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+      METRICS_GRID_RESTRICT_BODY_CLASS,
+      expect.any(String)
     );
   });
 });
