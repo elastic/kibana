@@ -129,10 +129,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: true,
+
   /**
-   * Enables the Risk Score AI Assistant tool.
+   * Enable resetting risk scores to zero for outdated entities
    */
-  riskScoreAssistantToolEnabled: false,
+  enableRiskScoreResetToZero: false,
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolDisabled: false,
 
   /**
    * disables ES|QL rules
@@ -244,7 +249,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsightsPolicyResponseFailure: false,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
