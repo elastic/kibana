@@ -43,6 +43,7 @@ import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
+import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -50,6 +51,7 @@ export interface SingleTabViewProps {
   urlStateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 interface SessionInitializationState {
@@ -67,6 +69,7 @@ export const SingleTabView = ({
   urlStateStorage,
   internalState,
   runtimeStateManager,
+  searchSessionManager,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -105,6 +108,7 @@ export const SingleTabView = ({
         stateStorageContainer: urlStateStorage,
         internalState,
         runtimeStateManager,
+        searchSessionManager,
       });
       const customizationService = await getConnectedCustomizationService({
         stateContainer,

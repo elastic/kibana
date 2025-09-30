@@ -58,6 +58,7 @@ describe('tab mapping utils', () => {
         Object {
           "controlGroupState": undefined,
           "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
@@ -128,6 +129,7 @@ describe('tab mapping utils', () => {
         Object {
           "controlGroupState": undefined,
           "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,

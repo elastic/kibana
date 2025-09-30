@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { History } from 'history';
+import type { History, Location } from 'history';
 import type * as Rx from 'rxjs';
 import { filter } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -15,7 +15,9 @@ import {
   createQueryParamObservable,
   getQueryParams,
   removeQueryParam,
+  url,
 } from '@kbn/kibana-utils-plugin/public';
+import { stringify } from 'query-string';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {
@@ -66,7 +68,32 @@ export class DiscoverSearchSessionManager {
         this.deps.session.restore(searchSessionIdFromURL);
       }
     }
-    return searchSessionIdFromURL ?? this.deps.session.start();
+    return {
+      searchSessionId: searchSessionIdFromURL ?? this.deps.session.start(),
+      isSearchSessionRestored: Boolean(searchSessionIdFromURL),
+    };
+  }
+
+  pushSearchSessionIdToURL(
+    searchSessionId: string,
+    { replace = true }: { replace?: boolean } = { replace: true }
+  ) {
+    const oldLocation = this.deps.history.location;
+    const query = getQueryParams(oldLocation);
+
+    query[SEARCH_SESSION_ID_QUERY_PARAM] = searchSessionId;
+
+    const newSearch = stringify(url.encodeQuery(query), { sort: false, encode: false });
+    const newLocation: Location = {
+      ...oldLocation,
+      search: newSearch,
+    };
+
+    if (replace) {
+      this.deps.history.replace(newLocation);
+    } else {
+      this.deps.history.push(newLocation);
+    }
   }
 
   /**

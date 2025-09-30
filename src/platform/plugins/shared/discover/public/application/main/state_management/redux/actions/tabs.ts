@@ -97,7 +97,11 @@ export const updateTabs: InternalStateThunkActionCreator<
   Promise<void>
 > =
   ({ items, selectedItem }) =>
-  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
+  async (
+    dispatch,
+    getState,
+    { services, runtimeStateManager, urlStateStorage, searchSessionManager }
+  ) => {
     const currentState = getState();
     const currentTabId = currentState.tabs.unsafeCurrentId;
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -209,8 +213,17 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         if (nextTab.dataRequestParams.searchSessionId) {
           services.data.search.session.continue(nextTab.dataRequestParams.searchSessionId, true);
-        } else {
-          services.data.search.session.start();
+
+          if (nextTab.dataRequestParams.isSearchSessionRestored) {
+            searchSessionManager.pushSearchSessionIdToURL(
+              nextTab.dataRequestParams.searchSessionId,
+              { replace: true }
+            );
+          }
+        }
+
+        if (!nextTab.dataRequestParams.isSearchSessionRestored) {
+          searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         }
 
         nextTabStateContainer.actions.initializeAndSync();
@@ -222,6 +235,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);
+        searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
       }
 
       dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
@@ -384,6 +398,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       newDefaultTab.dataRequestParams = {
         ...newDefaultTab.dataRequestParams,
         searchSessionId,
+        isSearchSessionRestored: true,
       };
     }
 

@@ -19,6 +19,7 @@ import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
+import { DiscoverSearchSessionManager } from '../discover_search_session';
 
 describe('InternalStateStore', () => {
   const createTestStore = async () => {
@@ -35,6 +36,10 @@ describe('InternalStateStore', () => {
       runtimeStateManager,
       urlStateStorage,
       tabsStorageManager,
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: services.history,
+        session: services.data.search.session,
+      }),
     });
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
 
@@ -81,26 +86,14 @@ describe('InternalStateStore', () => {
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].dataRequestParams).toEqual({
       searchSessionId: params.searchSessionId,
+      isSearchSessionRestored: true,
       timeRangeAbsolute: undefined,
       timeRangeRelative: undefined,
     });
   });
 
   it('should set control state', async () => {
-    const services = createDiscoverServicesMock();
-    const urlStateStorage = createKbnUrlStateStorage();
-    const runtimeStateManager = createRuntimeStateManager();
-    const tabsStorageManager = createTabsStorageManager({
-      urlStateStorage,
-      storage: services.storage,
-    });
-    const store = createInternalStateStore({
-      services,
-      customizationContext: mockCustomizationContext,
-      runtimeStateManager,
-      urlStateStorage,
-      tabsStorageManager,
-    });
+    const { store } = await createTestStore();
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(selectTab(store.getState(), tabId).controlGroupState).toBeUndefined();
