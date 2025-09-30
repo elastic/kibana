@@ -184,7 +184,7 @@ describe('checkIntegrationFipsLooseCompatibility', () => {
         description: '',
         fips_compatible: false,
       },
-    ] as RegistryPolicyTemplate[]
+    ] as RegistryPolicyTemplate[],
   };
 
   it('should return true if an integration has no packageInfo', () => {
@@ -239,7 +239,7 @@ describe('checkIntegrationFipsLooseCompatibility', () => {
         inputs: [
           {
             type: OTEL_COLLECTOR_INPUT_TYPE,
-          }
+          },
         ],
       },
       {
@@ -249,7 +249,7 @@ describe('checkIntegrationFipsLooseCompatibility', () => {
         inputs: [
           {
             type: OTEL_COLLECTOR_INPUT_TYPE,
-          }
+          },
         ],
         fips_compatible: true,
       },

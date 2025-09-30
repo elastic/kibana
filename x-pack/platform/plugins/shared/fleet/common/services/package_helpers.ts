@@ -77,7 +77,7 @@ export function checkIntegrationFipsLooseCompatibility(
   return false;
 }
 
-/**Return true if a policy template is fips compatible.
+/** Return true if a policy template is fips compatible.
  * It is fips compatible if it says so, or if it doesn't contain an OTel input.
  */
 function checkPolicyTemplateFipsCompatibility(template: RegistryPolicyTemplate) {
