@@ -12,10 +12,10 @@ steps:
     key: generate_components
     commands:
       - set -euo pipefail
-      - git clone https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/catalog-info.git ../catalog-info # clone catalog-info outside of kibana folder
-      - rm -rf ../catalog-info/locations/kibana # clean old entries
-      - mkdir -p ../catalog-info/locations/kibana # ensure dir exists
-      - ts-node .buildkite/pipelines/catalog/generate_kibana_catalog_components.ts # generate new entries in ../catalog-info/locations/kibana
+      - git clone https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/kibana-package-catalog.git ../kibana-package-catalog # clone kibana-package-catalog outside of kibana folder
+      - rm -rf ../kibana-package-catalog/packages # clean old entries
+      - mkdir -p ../kibana-package-catalog/packages # ensure dir exists
+      - ts-node .buildkite/pipelines/catalog/generate_kibana_catalog_components.ts # generate new entries in ../kibana-packages-catalog/packages
       - ts-node .buildkite/pipelines/catalog/compare-and-commit-catalog-changes.ts # compare, commit, and create/update PR in catalog-info repo
     agents:
       image: family/kibana-ubuntu-2404

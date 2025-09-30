@@ -16,7 +16,7 @@ import { getGithubClient } from '#pipeline-utils';
 const github = getGithubClient();
 
 const owner = 'elastic';
-const repo = 'catalog-info';
+const repo = 'kibana-package-catalog';
 const branch = 'kibana/bulk-update';
 const base = 'main';
 const title = 'Update Kibana packages';
@@ -53,18 +53,18 @@ async function main() {
     });
 
     // Stage generated files (limit scope)
-    console.log(`Staging changes under locations/kibana in ${repoDir}`);
-    execSync('git add locations/kibana', { cwd: repoDir, stdio: ['ignore', 'pipe', 'pipe'] });
+    console.log(`Staging changes under packages in ${repoDir}`);
+    execSync('git add packages', { cwd: repoDir, stdio: ['ignore', 'pipe', 'pipe'] });
 
-    console.log('Getting git diff of staged changes under locations/kibana');
-    const diffStatus = execSync('git diff --cached --name-status -- locations/kibana', {
+    console.log('Getting git diff of staged changes under packages');
+    const diffStatus = execSync('git diff --cached --name-status -- packages', {
       cwd: repoDir,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     if (!diffStatus.trim()) {
-      console.log('No staged changes under locations/kibana');
+      console.log('No staged changes under packages');
       return;
     }
 
@@ -74,7 +74,7 @@ async function main() {
       .filter(
         (l) =>
           l.length > 0 &&
-          /locations\/kibana\/kibana-.*\.yml$/.test((l.split(/\s+/)[1] as string | undefined) || '')
+          /packages\/kibana-.*\.yml$/.test((l.split(/\s+/)[1] as string | undefined) || '')
       );
 
     if (lines.length > 0) {
@@ -99,7 +99,7 @@ async function main() {
             change = status.toLowerCase();
         }
         table += `| ${id
-          .replace('locations/kibana/', '')
+          .replace('packages/', '')
           .replace('.yml', '')} | \`${id}\` | **${change}** |\n`;
       }
 
