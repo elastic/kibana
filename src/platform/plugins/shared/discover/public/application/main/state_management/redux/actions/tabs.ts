@@ -30,8 +30,11 @@ import {
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
 } from '../runtime_state';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
-import { TabUrlAction } from '../../../../../../common/types';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+} from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
@@ -354,13 +357,15 @@ export const initializeTabs = createInternalStateAsyncThunk(
   }
 );
 
-export const restoreTab: InternalStateThunkActionCreator<
-  [{ restoreTabId: string; action?: TabUrlAction }]
-> = ({ restoreTabId, action }) =>
+export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string }]> = ({
+  restoreTabId,
+}) =>
   function restoreTabThunkFn(dispatch, getState) {
     const currentState = getState();
 
-    if (restoreTabId === currentState.tabs.unsafeCurrentId || action === TabUrlAction.new) {
+    // Restoring the 'new' tab ID is a no-op because it represents a placeholder for creating new tabs,
+    // not an actual tab that can be restored.
+    if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
 

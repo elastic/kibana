@@ -20,6 +20,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { appLocatorGetLocationCommon } from './app_locator_get_location';
 import { TabUrlAction } from './types';
+import { NEW_TAB_ID } from './constants';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -249,7 +250,7 @@ describe('Discover url generator', () => {
   test('can specify to open in a new tab', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      tab: { action: TabUrlAction.new, label: 'My new tab' },
+      tab: { id: NEW_TAB_ID, label: 'My new tab' },
       query: {
         esql: 'SELECT * FROM test',
       },
@@ -257,11 +258,11 @@ describe('Discover url generator', () => {
     });
 
     expect(path).toMatchInlineSnapshot(
-      `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(action:new,tabLabel:'My%20new%20tab')"`
+      `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:new,tabLabel:'My%20new%20tab')"`
     );
   });
 
-  test('can create a shared link with a selected tab in discover session', async () => {
+  test('can create a shared link with a selected tab', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
       tab: { id: 'tab_test_id', action: TabUrlAction.shared, label: 'My new tab' },
@@ -273,20 +274,6 @@ describe('Discover url generator', () => {
 
     expect(path).toMatchInlineSnapshot(
       `"#/view/saved_search_test_id?_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(action:shared,tabId:tab_test_id,tabLabel:'My%20new%20tab')"`
-    );
-  });
-
-  test('can create a shared link with a selected tab', async () => {
-    const { locator } = await setup();
-    const { path } = await locator.getLocation({
-      tab: { action: TabUrlAction.shared, label: 'My new tab' },
-      query: {
-        esql: 'SELECT * FROM test',
-      },
-    });
-
-    expect(path).toMatchInlineSnapshot(
-      `"#/?_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(action:shared,tabLabel:'My%20new%20tab')"`
     );
   });
 

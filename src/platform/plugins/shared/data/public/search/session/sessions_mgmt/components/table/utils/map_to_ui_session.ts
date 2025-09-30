@@ -67,7 +67,7 @@ export const mapToUISession = ({
     enableOpeningInNewTab
       ? {
           ...restoreState,
-          tab: { action: 'new', label: name },
+          tab: { id: 'new', label: name },
         }
       : restoreState
   );

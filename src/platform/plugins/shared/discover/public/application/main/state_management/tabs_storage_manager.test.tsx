@@ -16,7 +16,7 @@ import {
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
-import { TAB_STATE_URL_KEY } from '../../../../common/constants';
+import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
@@ -151,7 +151,7 @@ describe('TabsStorageManager', () => {
       { replace: true }
     );
 
-    await urlStateStorage.set(TAB_STATE_URL_KEY, { action: TabUrlAction.new });
+    await urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
     await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id-3');
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(
@@ -800,7 +800,7 @@ describe('TabsStorageManager', () => {
     });
 
     urlStateStorage.set(TAB_STATE_URL_KEY, {
-      action: TabUrlAction.new,
+      tabId: 'new',
       tabLabel: 'New tab test',
     });
 
@@ -859,7 +859,7 @@ describe('TabsStorageManager', () => {
     });
 
     urlStateStorage.set(TAB_STATE_URL_KEY, {
-      action: TabUrlAction.new,
+      tabId: 'new',
       tabLabel: 'New tab test',
     });
 
