@@ -13,9 +13,9 @@ import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
-import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 /**
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
  */
@@ -67,7 +67,7 @@ export const useLoadConnectors = ({
       return getAvailableAiConnectors({
         allAiConnectors,
         settings,
-      })
+      });
     },
     {
       retry: false,
