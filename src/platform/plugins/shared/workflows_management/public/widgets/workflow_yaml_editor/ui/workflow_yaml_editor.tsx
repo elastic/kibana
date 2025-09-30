@@ -109,7 +109,6 @@ export interface WorkflowYAMLEditorProps {
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
-  activeTab?: string;
   selectedExecutionId?: string;
   originalValue?: string;
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -130,14 +129,12 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
-  activeTab,
   selectedExecutionId,
   originalValue,
   onStepActionClicked,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = useMemoCss(componentStyles);
   const {
     services: { http, notifications },
   } = useKibana<CoreStart>();
@@ -187,11 +184,6 @@ export const WorkflowYAMLEditor = ({
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const { initEditor: setEditor } = useEditorState();
   const { styles: stepOutlineStyles } = useFocusedStepOutline();
-
-  const memoizedContainerStyles = useMemo(
-    () => css(styles.container, stepOutlineStyles),
-    [styles.container, stepOutlineStyles]
-  );
 
   // Memoize the schema to avoid re-generating it on every render
   const workflowYamlSchemaLoose = useMemo(() => {
@@ -601,13 +593,13 @@ export const WorkflowYAMLEditor = ({
 
   // Force decoration refresh specifically when switching to readonly mode (executions view)
   useEffect(() => {
-    if (isEditorMounted && readOnly) {
+    if (isEditorMounted) {
       // Small delay to ensure all state is settled
       setTimeout(() => {
         changeSideEffects(false); // Mode change, not typing
       }, 50);
     }
-  }, [readOnly, isEditorMounted, changeSideEffects]);
+  }, [isEditorMounted, changeSideEffects]);
 
   // Step execution provider - managed through provider architecture
   useEffect(() => {
@@ -625,35 +617,32 @@ export const WorkflowYAMLEditor = ({
     // Add a small delay to ensure YAML document is fully updated when switching executions
     const timeoutId = setTimeout(() => {
       try {
-        if (readOnly) {
-          // Ensure yamlDocumentRef is synchronized
-          if (yamlDocument && !yamlDocumentRef.current) {
-            yamlDocumentRef.current = yamlDocument;
-          }
+        // Ensure yamlDocumentRef is synchronized
+        if (yamlDocument && !yamlDocumentRef.current) {
+          yamlDocumentRef.current = yamlDocument;
+        }
 
-          // Additional check: if we have stepExecutions but no yamlDocument,
-          // the document might not be parsed yet - skip and let next update handle it
-          if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
-            // console.warn(
-            //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
-            // );
-            return;
-          }
+        // Additional check: if we have stepExecutions but no yamlDocument,
+        // the document might not be parsed yet - skip and let next update handle it
+        if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
+          // console.warn(
+          //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
+          // );
+          return;
+        }
 
-          const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
-            getYamlDocument: () => {
-              return yamlDocumentRef.current;
-            },
-            getStepExecutions: () => {
-              return stepExecutionsRef.current || [];
-            },
-            getHighlightStep: () => highlightStep || null,
-            isReadOnly: () => readOnly,
-          });
+        const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
+          getYamlDocument: () => {
+            return yamlDocumentRef.current;
+          },
+          getStepExecutions: () => {
+            return stepExecutionsRef.current || [];
+          },
+          getHighlightStep: () => highlightStep || null,
+        });
 
-          if (unifiedProvidersRef.current) {
-            unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
-          }
+        if (unifiedProvidersRef.current) {
+          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
         }
       } catch (error) {
         // console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
@@ -661,7 +650,7 @@ export const WorkflowYAMLEditor = ({
     }, 20); // Small delay to ensure YAML document is ready
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument, readOnly]);
+  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -1335,6 +1324,8 @@ export const WorkflowYAMLEditor = ({
     [readOnly]
   );
 
+  const styles = useMemoCss(componentStyles);
+
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
     const editor = editorRef.current;
@@ -1370,7 +1361,7 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <div css={css(styles.container, stepOutlineStyles)} ref={containerRef}>
+    <div css={css([styles.container, stepOutlineStyles])} ref={containerRef}>
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
@@ -1900,5 +1891,6 @@ const componentStyles = {
   validationErrorsContainer: css({
     flexShrink: 0,
     overflow: 'hidden',
+    zIndex: 2, // to overlay the editor flying action buttons
   }),
 };
