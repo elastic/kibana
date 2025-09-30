@@ -47,6 +47,8 @@ const GraphInvestigationLazy = React.lazy(() =>
 
 export const GRAPH_ID = 'graph-visualization' as const;
 
+const MAX_DOCUMENTS_TO_LOAD = 50;
+
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
@@ -110,13 +112,15 @@ export const GraphVisualization: React.FC = memo(() => {
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
             docMode,
-            entityItems: (node.documentsData as NodeDocumentDataModel[]).map((doc) => ({
-              itemType: DOCUMENT_TYPE_ENTITY,
-              id: doc.id,
-              type: doc.entity?.type,
-              subType: doc.entity?.sub_type,
-              icon: node.icon,
-            })),
+            entityItems: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => ({
+                itemType: DOCUMENT_TYPE_ENTITY,
+                id: doc.id,
+                type: doc.entity?.type,
+                subType: doc.entity?.sub_type,
+                icon: node.icon,
+              })),
           },
         });
       } else if (docMode === 'grouped-events' && node.documentsData) {
@@ -129,9 +133,9 @@ export const GraphVisualization: React.FC = memo(() => {
             banner: GROUP_PREVIEW_BANNER,
             docMode,
             dataViewId: dataViewIndexPattern,
-            documentIds: (node.documentsData as NodeDocumentDataModel[]).map(
-              (doc) => doc.event?.id
-            ),
+            documentIds: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => doc.event?.id),
           },
         });
       } else {

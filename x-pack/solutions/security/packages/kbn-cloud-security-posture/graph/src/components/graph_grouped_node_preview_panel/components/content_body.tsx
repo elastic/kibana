@@ -6,12 +6,19 @@
  */
 
 import React, { type FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import { PanelBody, List } from '../styles';
+import { i18nNamespaceKey } from '../constants';
 import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
 import type { EntityOrEventItem } from './grouped_item/types';
 import { PaginationControls } from './pagination_controls';
+
+const maxDocumentsShownLabel = i18n.translate(`${i18nNamespaceKey}.maxDocumentsShownLabel`, {
+  defaultMessage: '(Maximum 50 document details shown)',
+});
 
 export interface ContentBodyProps {
   items: EntityOrEventItem[];
@@ -35,6 +42,7 @@ export const ContentBody: FC<ContentBodyProps> = ({
   <PanelBody>
     <Title icon={icon} text={groupedItemsType} count={totalHits} />
     <ListHeader groupedItemsType={groupedItemsType} />
+    <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
     <List>
       {items.map((item) => (
         <li key={item.id}>

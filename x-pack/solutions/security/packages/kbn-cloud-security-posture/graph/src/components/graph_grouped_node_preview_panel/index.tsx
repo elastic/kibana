@@ -126,7 +126,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
       setPagination((prevState) => ({ ...prevState, pageIndex }));
     }, []);
 
-    const { data, isLoading, isFetching, refresh } = useFetchDocumentDetails({
+    const { data, isLoading, refresh } = useFetchDocumentDetails({
       dataViewId,
       ids: documentIds,
       options: {
@@ -139,7 +139,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     const { items, totalHits } = usePaginatedData(docMode, entityItems, pagination, data);
     const { icon, groupedItemsType } = useContentMetadata(docMode, items);
 
-    if (isLoading || isFetching) {
+    if (isLoading) {
       return <LoadingBody />;
     }
 
