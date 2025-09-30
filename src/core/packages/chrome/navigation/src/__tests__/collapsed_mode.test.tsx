@@ -471,8 +471,7 @@ describe('Collapsed mode', () => {
        * - AND I should be redirected to that item’s href
        * AND I shouldn’t see a side panel
        */
-      // TODO: fix; fails in CI
-      it.skip('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
+      it('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
         render(
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );

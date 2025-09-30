@@ -394,8 +394,7 @@ describe('Expanded mode', () => {
        * - AND I should be redirected to that item’s href
        * AND I should see a side panel with that submenu
        */
-      // TODO: fix; fails in CI
-      it.skip('should open side panel when clicking submenu item inside "More" popover', async () => {
+      it('should open side panel when clicking submenu item inside "More" popover', async () => {
         render(
           <TestComponent
             isCollapsed={false}
