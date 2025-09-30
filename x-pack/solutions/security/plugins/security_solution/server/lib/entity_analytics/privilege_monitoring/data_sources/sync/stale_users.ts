@@ -42,3 +42,38 @@ export const findStaleUsersForIndexFactory =
       sourceId,
     }));
   };
+
+export const findStaleUsersForIntegrationsFactory =
+  (dataClient: PrivilegeMonitoringDataClient) =>
+  async (
+    sourceId: string,
+    userNames: string[],
+    labelsSource: 'index' | 'entity_analytics_integration'
+  ): Promise<PrivMonBulkUser[]> => {
+    const esClient = dataClient.deps.clusterClient.asCurrentUser;
+
+    const response = await esClient.search<MonitoredUserDoc>({
+      index: dataClient.index,
+      size: 10,
+      _source: ['user.name', 'labels.source_ids'],
+      query: {
+        bool: {
+          // TODO: these should be filled in when matchers PR updated to add labels
+          /* must: [
+            { term: { 'user.is_privileged': true } },
+            { term: { 'labels.sources': labelsSource } },
+            { term: { 'labels.source_ids.keyword': sourceId } },
+          ],*/
+          must_not: {
+            terms: { 'user.name': userNames },
+          },
+        },
+      },
+    });
+
+    return response.hits.hits.map((hit) => ({
+      username: hit._source?.user?.name ?? 'unknown',
+      existingUserId: hit._id,
+      sourceId,
+    }));
+  };

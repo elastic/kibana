@@ -27,21 +27,18 @@ const INDEX_SCRIPT = `
           `;
 // TODO: unify both scripts
 const INTEGRATIONS_SCRIPT = `
-    src['@timestamp'] = params.now;
-    src.event.ingested = params.now;
-
-    if (src.labels == null) { src.labels = new HashMap(); }
-    if (src.labels.sources == null) { src.labels.sources = new ArrayList(); }
-    if (src.labels.source_ids == null) { src.labels.source_ids = new ArrayList(); }
-
-    src.labels.source_ids.removeIf(l -> l == params.source_id);
-    src.labels.sources.removeIf(l -> l == params.source_type);
-
-    if (src.entity_analytics_monitoring != null && src.entity_analytics_monitoring.labels != null) {
-      src.entity_analytics_monitoring.labels.removeIf(l -> l.source == params.source_id);
+    ctx._source['@timestamp'] = params.now;
+    if (ctx._source.event == null) { ctx._source.event = new HashMap(); }
+    ctx._source.event.ingested = params.now;
+    
+    // Remove this source label (index | entity_analytics_integration)
+    if (ctx._source.labels != null && ctx._source.labels.sources != null) {
+      ctx._source.labels.sources.removeIf(s -> s == params.source_type);
     }
-    if (src.labels.sources.size() == 0) {
-      src.user.is_privileged = false;
+    
+    // If no sources remain, mark user not privileged
+    if (ctx._source.labels == null || ctx._source.labels.sources == null || ctx._source.labels.sources.isEmpty()) {
+      ctx._source.user.is_privileged = false;
     }
   `;
 
@@ -81,6 +78,7 @@ export const bulkSoftDeleteOperationsFactory =
             params: {
               source_id: user.sourceId,
               now,
+              source_type: sourceType,
             },
           },
         }

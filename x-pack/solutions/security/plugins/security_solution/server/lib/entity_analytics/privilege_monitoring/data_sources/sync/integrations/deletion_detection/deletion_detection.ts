@@ -12,7 +12,7 @@ import type { MonitoringEntitySource } from '../../../../../../../../common/api/
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
 import { buildFindUsersSearchBody } from './queries';
-import { findStaleUsersForIndexFactory } from '../../stale_users';
+import { findStaleUsersForIntegrationsFactory } from '../../stale_users';
 import { createBulkUtilsService } from '../../../bulk';
 import { getErrorFromBulkResponse } from '../../utils';
 
@@ -34,7 +34,7 @@ export const createDeletionDetectionService = (
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
   const bulkUtilsService = createBulkUtilsService(dataClient);
 
-  const findStaleUsers = findStaleUsersForIndexFactory(dataClient);
+  const findStaleUsers = findStaleUsersForIntegrationsFactory(dataClient);
 
   const deletionDetection = async (source: MonitoringEntitySource) => {
     const doFullSync = await syncMarkerService.detectNewFullSync(source);
@@ -64,32 +64,36 @@ export const createDeletionDetectionService = (
         startedEventTimeStamp,
         completedEventTimeStamp,
       });
+
+      // eslint-disable-next-line no-console
+      console.log('allIntegrationsUserNames', allIntegrationsUserNames);
       // get all users in the privileged index for this source that are not in integrations docs
-      /* const staleUsers = await findStaleUsers(
+      const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
         'entity_analytics_integration' // TODO: confirm index/type constant
-      );*/
-      // soft delete them
-      /* const ops = bulkUtilsService.bulkSoftDeleteOperations(
+      );
+      // eslint-disable-next-line no-console
+      console.log('staleUsers', staleUsers);
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(
         staleUsers,
         dataClient.index,
         'entity_analytics_integration'
       );
       try {
+        // soft delete the users
         const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
         failures.push(...getErrorFromBulkResponse(resp));
       } catch (error) {
         dataClient.log('error', `Error executing bulk operations: ${error}`);
       }
-
       if (failures.length > 0) {
         dataClient.log(
           'error',
           `${failures.length} errors upserting users with bulk operations.
           The first error is: ${JSON.stringify(failures[0])}`
         );
-      }*/
+      }
     }
   };
   const timeStampsAreValid = async (

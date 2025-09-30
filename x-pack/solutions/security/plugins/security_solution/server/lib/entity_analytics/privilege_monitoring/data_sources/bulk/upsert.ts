@@ -39,7 +39,7 @@ if (params.new_privileged_status == false) {
 ctx._source['@timestamp'] = params.now;
 ctx._source.event.ingested = params.now;  
 `;
-// TODO: will all be replaced with https://github.com/elastic/kibana/pull/236511
+// TODO: will all be replaced with https://github.com/elastic/kibana/pull/236511 this should NOT update timestamp on every run as I have above
 
 export const INDEX_SCRIPT = `
               if (ctx._source.labels == null) {
