@@ -52,10 +52,7 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
           breadcrumbStatus: 'hidden',
           children: [
-            {
-              breadcrumbStatus: 'hidden',
-              link: 'streams',
-            },
+            { link: 'streams' },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:index_management',
