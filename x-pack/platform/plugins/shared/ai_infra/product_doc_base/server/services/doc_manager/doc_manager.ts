@@ -146,7 +146,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
     const { forceUpdate, inferenceIds } = options ?? {};
     const idsToUpdate: string[] =
-      inferenceIds.length > 0
+      Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
         : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
     this.logger.info(
