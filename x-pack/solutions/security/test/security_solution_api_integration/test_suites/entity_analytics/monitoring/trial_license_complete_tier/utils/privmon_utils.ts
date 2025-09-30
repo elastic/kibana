@@ -187,12 +187,12 @@ export const PrivMonUtils = (
   const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
     if (isPrivileged) {
       expect(user?.user?.is_privileged).toEqual(true);
-      expect(user?.entity?.attributes?.Privileged).toEqual(true);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(true);
     } else {
       expect(user?.user?.is_privileged).toEqual(false);
       expect(user?.labels?.source_ids).toEqual([]);
       expect(user?.labels?.sources).toEqual([]);
-      expect(user?.entity?.attributes?.Privileged).toEqual(false);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(false);
     }
   };
 
