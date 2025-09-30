@@ -216,6 +216,81 @@ export function insertAtIndex<T>(array: T[], item: T, index: number): T[] {
   return [...array.slice(0, index), item, ...array.slice(index)];
 }
 
+/**
+ * Moves a contiguous block of steps (step + all descendants) up or down in the steps array.
+ * This means reordering around other contiguous blocks of steps.
+ * Maintains a strict index-based ordering of steps that reflects the hierarchy.
+ * @param stepRefs The flat array of StepActorRef
+ * @param stepId The customIdentifier of the root step to move
+ * @param direction 'up' or 'down'
+ * @returns A new reordered array of StepActorRef
+ */
+export function reorderSteps(
+  stepRefs: StepActorRef[],
+  stepId: string,
+  direction: 'up' | 'down'
+): StepActorRef[] {
+  // 1. Collect all descendant ids for the block to move
+  const children = collectDescendantIds(stepId, stepRefs);
+  const allBlockIds = new Set([stepId, ...children]);
+
+  // 2. Find the start and end index of the block in the original array
+  const startIndex = stepRefs.findIndex((step) => step.id === stepId);
+  const lastChildId = Array.from(children).pop();
+  const endIndex = lastChildId
+    ? stepRefs.findIndex((step) => step.id === lastChildId) + 1
+    : startIndex + 1;
+  const block = stepRefs.slice(startIndex, endIndex);
+
+  // 3. Remove the block from the array
+  const withoutBlock = [...stepRefs.slice(0, startIndex), ...stepRefs.slice(endIndex)];
+
+  // 4. Get the parentId of the block root
+  const blockRootParentId = stepRefs[startIndex].getSnapshot().context.step.parentId;
+
+  if (direction === 'up') {
+    // Find the previous block with the same parentId
+    let insertIndex = 0;
+    for (let i = startIndex - 1; i >= 0; i--) {
+      const candidate = stepRefs[i];
+      const candidateStep = candidate.getSnapshot().context.step;
+      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+        // Find the start of this previous block in withoutBlock
+        const candidateBlockStart = withoutBlock.findIndex((step) => step.id === candidate.id);
+        insertIndex = candidateBlockStart;
+        break;
+      }
+    }
+    // If not found, insert at the top among siblings
+    return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
+  } else {
+    // direction === 'down'
+    // Find the next block with the same parentId
+    let insertIndex = withoutBlock.length;
+    for (let i = endIndex; i < stepRefs.length; i++) {
+      const candidate = stepRefs[i];
+      const candidateStep = candidate.getSnapshot().context.step;
+      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+        // Find the end of this next block in withoutBlock
+        let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
+        // Find the last descendant of this block
+        const candidateDescendants = collectDescendantIds(candidate.id, stepRefs);
+        if (candidateDescendants.size > 0) {
+          const lastDescendantId = Array.from(candidateDescendants).pop();
+          const lastDescendantIdx = withoutBlock.findIndex((step) => step.id === lastDescendantId);
+          if (lastDescendantIdx !== -1) {
+            candidateBlockEnd = lastDescendantIdx;
+          }
+        }
+        insertIndex = candidateBlockEnd + 1;
+        break;
+      }
+    }
+    // If not found, insert at the end among siblings
+    return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
+  }
+}
+
 export function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
   const ids = new Set<string>();
   function collect(currentId: string) {
