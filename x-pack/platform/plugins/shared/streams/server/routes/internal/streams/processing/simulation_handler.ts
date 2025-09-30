@@ -40,6 +40,7 @@ import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -851,7 +852,11 @@ const computeDetectedFields = async (
     let description: string | undefined;
 
     const fieldMetadata = fieldMetadataMap[name];
-    if (fieldMetadata) {
+    if (
+      fieldMetadata &&
+      fieldMetadata.type &&
+      FIELD_DEFINITION_TYPES.includes(fieldMetadata.type as (typeof FIELD_DEFINITION_TYPES)[number])
+    ) {
       suggestedType = fieldMetadata.type;
       source = fieldMetadata.source;
       description = fieldMetadata.description;
