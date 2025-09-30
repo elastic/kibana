@@ -526,7 +526,7 @@ describe('Session service', () => {
     expect(toastService.addError).toHaveBeenCalledWith(
       renameError,
       expect.objectContaining({
-        title: expect.stringContaining('Failed to edit name of the search session'),
+        title: expect.stringContaining('Failed to edit name of the background search'),
       })
     );
   });
