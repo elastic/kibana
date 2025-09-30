@@ -9,3 +9,4 @@
 
 export { Tour as NavigationTour, type TourProps as NavigationTourProps } from './src/tour';
 export { TourManager as NavigationTourManager } from './src/tour_manager';
+export type { TourStepId } from './src/types';
