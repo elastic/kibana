@@ -45,19 +45,20 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       width: 100%;
     `;
 
-    const buttonProps: ComponentProps<EuiButtonIcon> = {
+    const buttonProps: ComponentProps<typeof EuiButtonIcon> & { 'data-highlighted': string } = {
       'aria-current': isCurrent ? 'page' : undefined,
       'aria-label': label,
       color: isHighlighted ? 'primary' : 'text',
-      'data-highlighted': isHighlighted ? 'true' : 'false',
       'data-test-subj': `footerMenuItem-${id}`,
+      'data-highlighted': isHighlighted ? 'true' : 'false',
       display: isHighlighted ? 'base' : 'empty',
       size: 's',
+      iconType: 'empty', // iconType is passed in Suspense below
       ...props,
     };
 
     const menuItem = (
-      <Suspense fallback={<EuiButtonIcon {...buttonProps} iconType="empty" />}>
+      <Suspense fallback={<EuiButtonIcon {...buttonProps} />}>
         <EuiButtonIcon {...buttonProps} iconType={iconType || 'empty'} />
       </Suspense>
     );
