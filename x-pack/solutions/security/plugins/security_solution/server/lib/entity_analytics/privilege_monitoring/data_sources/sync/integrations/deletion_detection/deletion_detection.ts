@@ -79,7 +79,11 @@ export const createDeletionDetectionService = (
         'entity_analytics_integration' // TODO: confirm index/type constant
       );
       dataClient.log(`debug`, `staleUsers: ${staleUsers}`);
-      const ops = bulkUtilsService.bulkSoftDeleteOperations(staleUsers, dataClient.index);
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(
+        staleUsers,
+        dataClient.index,
+        'entity_analytics_integration'
+      );
       try {
         // soft delete the users
         const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
