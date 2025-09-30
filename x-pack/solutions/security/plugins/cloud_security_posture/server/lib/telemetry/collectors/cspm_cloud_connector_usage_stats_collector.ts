@@ -67,12 +67,7 @@ export const getCspmCloudConnectorUsageStats = async (
       );
 
       // Extract integration types and packages
-      const packagePolicyIds: string[] = [];
-
-      connectorPackagePolicies.forEach((policy) => {
-        packagePolicyIds.push(policy.id);
-      });
-
+      const packagePolicyIds: string[] = connectorPackagePolicies.map((policy) => policy.id);
       return {
         id: connector.id,
         created_at: connector.created_at,
