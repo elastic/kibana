@@ -34,12 +34,15 @@ export type ExpandButtonClickCallback = (
   unToggleCallback: () => void
 ) => void;
 
+export type IpClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
 }
 
 export interface GroupNodeViewModel
@@ -55,6 +58,7 @@ export interface LabelNodeViewModel
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;

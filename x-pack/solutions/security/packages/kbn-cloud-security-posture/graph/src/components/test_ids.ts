@@ -65,9 +65,10 @@ export const GRAPH_ENTITY_NODE_DETAILS_ID =
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_PLUS_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPlusCount` as const;
-export const GRAPH_IPS_TOOLTIP_CONTENT_ID =
-  `${GRAPH_INVESTIGATION_TEST_ID}IpsTooltipContent` as const;
-export const GRAPH_IPS_TOOLTIP_IP_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsTooltipIp` as const;
+export const GRAPH_IPS_POPOVER_CONTENT_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverContent` as const;
+export const GRAPH_IPS_POPOVER_IP_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverId` as const;
+export const GRAPH_IPS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopover` as const;
 
 export const GRAPH_FLAGS_BADGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsBadge` as const;
 export const GRAPH_FLAGS_VISIBLE_FLAG_ID =
