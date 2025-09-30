@@ -100,7 +100,7 @@ export const appLocatorGetLocationCommon = async (
       ...('action' in tab ? { action: tab.action } : {}),
     };
 
-    if (tabsState && Object.keys(tabsState).length) {
+    if (Object.keys(tabsState).length) {
       path = setStateToKbnUrl(TAB_STATE_URL_KEY, tabsState, { useHash }, path);
     }
   }
