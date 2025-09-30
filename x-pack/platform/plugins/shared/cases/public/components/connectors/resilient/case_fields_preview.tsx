@@ -16,6 +16,8 @@ import * as i18n from './translations';
 import type { ResilientFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
+import { useGetFields } from './use_get_fields';
+import { ResilientFieldMetadata } from './types';
 
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
@@ -42,14 +44,34 @@ const ResilientFieldsComponent: React.FunctionComponent<
     connector,
   });
 
+  const {
+    isLoading: isLoadingFields,
+    isFetching: isFetchingFields,
+    data: fieldsData,
+  } = useGetFields({
+    http,
+    connector,
+  });
+  const fieldsMetadataRecord = useMemo(() => {
+    return (fieldsData?.data ?? []).reduce((acc, field) => {
+      acc[field.name] = field;
+      return acc;
+    }, {} as Record<string, ResilientFieldMetadata>);
+  }, [fieldsData]);
+
   const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
   const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
+  const isLoadingFieldsData = isLoadingFields || isFetchingFields;
+  const isLoading = isLoadingIncidentTypes || isLoadingSeverity || isLoadingFieldsData;
 
   const allIncidentTypes = allIncidentTypesData?.data;
   const severity = severityData?.data;
 
-  const listItems = useMemo(
-    () => [
+  const listItems = useMemo(() => {
+    const additionalFieldsParsed =
+      additionalFields && showAdditionalFields ? JSON.parse(additionalFields) : {};
+
+    return [
       ...(incidentTypes != null && incidentTypes.length > 0
         ? [
             {
@@ -72,29 +94,26 @@ const ResilientFieldsComponent: React.FunctionComponent<
           ]
         : []),
       ...(showAdditionalFields && additionalFields != null && additionalFields.length > 0
-        ? [
-            {
-              title: i18n.ADDITIONAL_FIELDS_LABEL,
-              description: additionalFields,
-              displayAsCodeBlock: true,
-            },
-          ]
+        ? Object.keys(additionalFieldsParsed).map((key) => ({
+            title: fieldsMetadataRecord[key]?.text ?? key,
+            description: `${additionalFieldsParsed[key]}`,
+          }))
         : []),
-    ],
-    [
-      incidentTypes,
-      severityCode,
-      allIncidentTypes,
-      severity,
-      showAdditionalFields,
-      additionalFields,
-    ]
-  );
+    ];
+  }, [
+    incidentTypes,
+    severityCode,
+    allIncidentTypes,
+    severity,
+    showAdditionalFields,
+    additionalFields,
+    fieldsMetadataRecord,
+  ]);
 
   return (
     <ConnectorCard
       connectorType={ConnectorTypes.resilient}
-      isLoading={isLoadingIncidentTypes || isLoadingSeverity}
+      isLoading={isLoading}
       listItems={listItems}
       title={connector.name}
     />
