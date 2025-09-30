@@ -53,12 +53,16 @@ export const getCellValueRenderer =
           >
             {
               // Only check for undefined, other falsy values might be user inputs
-              cellValue === undefined && canEditIndex ? (
+              cellValue === undefined ? (
                 <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="indexEditor.flyout.grid.cell.default"
-                    defaultMessage="Add value…"
-                  />
+                  {canEditIndex ? (
+                    <FormattedMessage
+                      id="indexEditor.flyout.grid.cell.default"
+                      defaultMessage="Add value…"
+                    />
+                  ) : (
+                    ''
+                  )}
                 </EuiText>
               ) : (
                 `${cellValue}`
