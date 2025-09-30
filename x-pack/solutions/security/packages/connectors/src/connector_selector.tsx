@@ -84,32 +84,43 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
       [connectors]
     );
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        width: '100%',
-        content: (
-          <ConnectorSelectable
-            preConfiguredConnectors={preConfiguredConnectors}
-            customConnectors={customConnectors}
-            value={selectedId}
-            onValueChange={(connectorId) => onChangeConnector(connectorId)}
-            onAddConnectorClick={onNewConnectorClicked}
-            defaultConnectorId={defaultConnectorId}
-            renderOption={(option) => (
-              <span data-test-subj={`connector-option-${option.label}`}>{option.label}</span>
-            )}
-          />
-        ),
-      },
-    ];
-
-    const defaultAIConnectorId = '';
-    const selectedOrDefaultConnectorId = selectedId ?? defaultAIConnectorId;
-    const selectedOrDefaultConnector = connectors?.find(
-      (connector) => connector.id === selectedOrDefaultConnectorId
+    const panels: EuiContextMenuPanelDescriptor[] = useMemo(
+      () => [
+        {
+          id: 0,
+          width: '100%',
+          content: (
+            <ConnectorSelectable
+              preConfiguredConnectors={preConfiguredConnectors}
+              customConnectors={customConnectors}
+              value={selectedId}
+              onValueChange={(connectorId) => onChangeConnector(connectorId)}
+              onAddConnectorClick={onNewConnectorClicked}
+              defaultConnectorId={defaultConnectorId}
+              renderOption={(option) => (
+                <span data-test-subj={`connector-option-${option.label}`}>{option.label}</span>
+              )}
+            />
+          ),
+        },
+      ], [
+      customConnectors,
+      defaultConnectorId,
+      onChangeConnector,
+      onNewConnectorClicked,
+      preConfiguredConnectors,
+      selectedId,
+    ]
     );
-    const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.CONNECTOR_SELECTOR_PLACEHOLDER;
+
+    const buttonLabel = useMemo(() => {
+      const selectedOrDefaultConnectorId = selectedId ?? defaultConnectorId;
+      const selectedOrDefaultConnector = connectors?.find(
+        (connector) => connector.id === selectedOrDefaultConnectorId
+      );
+      return selectedOrDefaultConnector?.name ?? i18n.CONNECTOR_SELECTOR_PLACEHOLDER;
+    }, [connectors, selectedId, defaultConnectorId]);
+
 
     return (
       <div css={styles?.inputContainer}>
