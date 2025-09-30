@@ -181,11 +181,7 @@ export function SchemaChangesReviewModal({
                 defaultMessage: 'Dynamic',
               }
             );
-            return (
-              <EuiBadge color="hollow" iconType="info" iconSide="right">
-                {dynamicText}
-              </EuiBadge>
-            );
+            return <EuiBadge color="hollow">{dynamicText}</EuiBadge>;
           }
           // For wired streams, don't show <dynamic> for unmanaged fields
           return null;
