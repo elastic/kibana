@@ -8,11 +8,19 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   UseField,
   useFormContext,
   useFormData,
+  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   ToggleField,
@@ -48,13 +56,12 @@ const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-const defaultConfigHeader = [{ key: '', value: '', type: 'config' }];
-
 export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
   isPfxEnabled = true,
   isOAuth2Enabled = false,
 }) => {
+  const isModified = useFormIsModified();
   const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
   const [{ config, __internal__, id: connectorId }] = useFormData({
     watch: [
@@ -67,17 +74,21 @@ export const AuthConfig: FunctionComponent<Props> = ({
       '__internal__.headers',
     ],
   });
+  const {
+    data: secretHeaderKeys = [],
+    isLoading: isLoadingHeaders,
+    isFetching: isFetchingHeaders,
+  } = useSecretHeaders(connectorId);
 
+  const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
+
+  // Default Values
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const { data: secretHeaderKeys = [], isLoading, isFetching } = useSecretHeaders(connectorId);
-
-  const didLoadSecretHeaders = !isFetching && !isLoading;
-
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
@@ -91,7 +102,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
   useEffect(() => {
-    if (!didLoadSecretHeaders) return;
+    if (loadingHeaders) return;
 
     const formData = getFormData();
 
@@ -102,18 +113,23 @@ export const AuthConfig: FunctionComponent<Props> = ({
       value: '',
       type: 'secret',
     }));
-
     let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
 
     if (mergedHeaders.length === 0 && hasHeaders) {
-      mergedHeaders = [...defaultConfigHeader];
+      mergedHeaders = [{ key: '', value: '', type: 'config' }];
     }
 
     if (!isEqual(currentHeaders, mergedHeaders)) {
       updateFieldValues({
         __internal__: {
           ...formData.__internal__,
-          hasHeaders: mergedHeaders.length > 0,
+          /*
+           * If the user modifies the form, whatever is returned from useSecretHeaders
+           * might not be up to date.
+           *
+           * Has headers can only be uptaded on first render or after the form is submitted.
+           * */
+          ...(!isModified && { hasHeaders: mergedHeaders.length > 0 }),
           headers: mergedHeaders,
         },
       });
@@ -124,7 +140,8 @@ export const AuthConfig: FunctionComponent<Props> = ({
     secretHeaderKeys,
     updateFieldValues,
     hasHeaders,
-    didLoadSecretHeaders,
+    loadingHeaders,
+    isModified,
   ]);
 
   const options = [
@@ -183,6 +200,11 @@ export const AuthConfig: FunctionComponent<Props> = ({
       />
       <EuiSpacer size="m" />
       <UseField
+        /*
+         * This has to be "hidden". Not rendering when loading headers
+         * was affecting the form value when submitting
+         * */
+        style={{ visibility: loadingHeaders ? 'hidden' : 'visible' }}
         path="__internal__.hasHeaders"
         component={ToggleField}
         config={{
@@ -196,8 +218,15 @@ export const AuthConfig: FunctionComponent<Props> = ({
           },
         }}
       />
-
-      {hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}
+      {loadingHeaders ? (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>{hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}</>
+      )}
       <EuiSpacer size="m" />
       <UseField
         path="__internal__.hasCA"
@@ -269,7 +298,12 @@ export const AuthConfig: FunctionComponent<Props> = ({
           {hasInitialCA && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                iconType="document"
+                title={i18n.EDIT_CA_CALLOUT}
+              />
             </>
           )}
         </>
