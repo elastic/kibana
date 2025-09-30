@@ -25,6 +25,7 @@ export const createCase = (newCase: TestCase) =>
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: newCase.owner,
     },

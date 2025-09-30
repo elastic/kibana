@@ -90,6 +90,7 @@ describe('MetricsExperienceGrid', () => {
       fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     } as unknown as UnifiedHistogramServices,
     input$,
+    isComponentVisible: true,
   };
 
   beforeEach(() => {
