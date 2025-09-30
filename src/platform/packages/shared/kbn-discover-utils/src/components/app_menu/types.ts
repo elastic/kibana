@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { IconType } from '@elastic/eui';
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
@@ -33,11 +33,11 @@ export type AppMenuControlProps = TopNavMenuData & {
 };
 
 export type AppMenuControlWithIconProps = AppMenuControlProps & {
-  iconType: EuiIconType;
+  iconType: IconType;
 };
 
 interface ControlWithOptionalIcon {
-  iconType?: EuiIconType;
+  iconType?: IconType;
 }
 
 export enum AppMenuActionId {
