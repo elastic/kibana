@@ -34,5 +34,5 @@ export const useBrowserFields = (
     const browserFields = buildBrowserFields(activeDataView?.fields);
 
     return browserFields;
-  }, [activeDataView, scope]);
+  }, [activeDataView]);
 };
