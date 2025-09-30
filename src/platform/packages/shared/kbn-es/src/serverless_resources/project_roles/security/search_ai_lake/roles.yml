@@ -45,11 +45,6 @@ _search_ai_lake_analyst:
       privileges:
         - "read"
         - "view_index_metadata"
-    - names:
-        - "logs-*-"
-      privileges:
-        - "view_index_metadata"
-        - "read"
   applications:
     - application: "kibana-.kibana"
       privileges:
