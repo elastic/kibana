@@ -34,7 +34,10 @@ import {
 } from '../../../../common/lib/regex';
 import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
-import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
+import {
+  generateTriggerSnippet,
+  generateRRuleTriggerSnippet,
+} from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
 import { getIndentLevel } from './get_indent_level';
 
@@ -169,6 +172,45 @@ function isInTriggersContext(path: any[]): boolean {
   // Check if the path includes 'triggers' at any level
   // Examples: ['triggers'], ['triggers', 0], ['triggers', 0, 'with'], etc.
   return path.length > 0 && path[0] === 'triggers';
+}
+
+/**
+ * Detect if we're in a scheduled trigger's with block
+ */
+function isInScheduledTriggerWithBlock(
+  yamlDocument: any,
+  path: any[],
+  model: any,
+  position: any
+): boolean {
+  // First check if we're in a triggers context
+  if (!isInTriggersContext(path)) {
+    return false;
+  }
+
+  // Check if we're in a with block
+  const isInWithBlock = detectIfInWithBlock(model, position.lineNumber);
+  if (!isInWithBlock) {
+    return false;
+  }
+
+  // Find the trigger type by looking backwards from the with block
+  const currentLineNumber = position.lineNumber;
+  for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {
+    const line = model.getLineContent(lineNumber);
+
+    // Look for type: scheduled
+    if (line.includes('type:') && line.includes('scheduled')) {
+      return true;
+    }
+
+    // Stop if we hit a trigger boundary
+    if (line.match(/^\s*-\s*type:/) || line.match(/^\s*triggers:/)) {
+      break;
+    }
+  }
+
+  return false;
 }
 
 export interface LineParseResult {
@@ -780,6 +822,65 @@ function getTriggerTypeSuggestions(
   return suggestions;
 }
 
+/**
+ * Get RRule scheduling pattern suggestions
+ */
+function getRRuleSchedulingSuggestions(range: monaco.IRange): monaco.languages.CompletionItem[] {
+  const suggestions: monaco.languages.CompletionItem[] = [];
+
+  const rrulePatterns = [
+    {
+      label: 'Daily at 9 AM',
+      description: 'Run daily at 9:00 AM UTC',
+      pattern: 'daily' as const,
+    },
+    {
+      label: 'Business hours (weekdays 8 AM & 5 PM)',
+      description: 'Run on weekdays at 8 AM and 5 PM EST',
+      pattern: 'weekly' as const,
+    },
+    {
+      label: 'Monthly on 1st and 15th',
+      description: 'Run monthly on 1st and 15th at 10:30 AM UTC',
+      pattern: 'monthly' as const,
+    },
+    {
+      label: 'Custom RRule',
+      description: 'Create a custom RRule configuration with all options',
+      pattern: 'custom' as const,
+    },
+  ];
+
+  rrulePatterns.forEach(({ label, description, pattern }) => {
+    const snippetText = generateRRuleTriggerSnippet(pattern, {
+      monacoSuggestionFormat: true,
+    });
+
+    // Extended range for multi-line insertion
+    const extendedRange = {
+      startLineNumber: range.startLineNumber,
+      endLineNumber: range.endLineNumber,
+      startColumn: range.startColumn,
+      endColumn: Math.max(range.endColumn, 1000),
+    };
+
+    suggestions.push({
+      label,
+      kind: monaco.languages.CompletionItemKind.Snippet,
+      insertText: snippetText,
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range: extendedRange,
+      documentation: description,
+      filterText: label,
+      sortText: `!rrule-${pattern}`, // Priority prefix for RRule suggestions
+      detail: 'RRule scheduling pattern',
+      preselect: false,
+    });
+  });
+
+  return suggestions;
+}
+
 export function getSuggestion(
   key: string,
   context: monaco.languages.CompletionContext,
@@ -1003,6 +1104,17 @@ export function getCompletionItemProvider(
         // First check if we're in a connector's with block (using enhanced detection)
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
         // Detected connector type
+
+        // Check if we're in a scheduled trigger's with block for RRule suggestions
+        if (isInScheduledTriggerWithBlock(yamlDocument, path, model, position)) {
+          // We're in a scheduled trigger's with block - provide RRule suggestions
+          const rruleSuggestions = getRRuleSchedulingSuggestions(range);
+
+          return {
+            suggestions: rruleSuggestions,
+            incomplete: false,
+          };
+        }
 
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {

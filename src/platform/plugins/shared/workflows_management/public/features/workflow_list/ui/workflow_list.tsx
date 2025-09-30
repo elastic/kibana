@@ -36,6 +36,7 @@ import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -200,6 +201,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           }
           return <StatusBadge status={item.history[0].status} />;
         },
+      },
+      {
+        name: 'Next execution',
+        field: 'triggers',
+        render: (value, item: WorkflowListItemDto) =>
+          item.definition?.triggers ? (
+            <NextExecutionTime triggers={item.definition.triggers} />
+          ) : (
+            <EuiText size="s" color="subdued">
+              {i18n.translate('workflows.workflowList.nextExecutionTime.none', {
+                defaultMessage: 'No scheduled triggers',
+              })}
+            </EuiText>
+          ),
       },
       {
         name: 'Valid',
