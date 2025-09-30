@@ -114,10 +114,15 @@ export const AlertDetailFlyout = ({
     [tabs, selectedTabId]
   );
 
+  if (alertIndexInPage < 0 || alertIndexInPage >= alerts.length || pageSize <= 0) {
+    onExpandedAlertIndexChange(null);
+    return null;
+  }
+
   return (
     <EuiFlyout
       onClose={() => {
-        onExpandedAlertIndexChange?.(null);
+        onExpandedAlertIndexChange(null);
       }}
       size="m"
       data-test-subj="alertFlyout"
@@ -142,7 +147,7 @@ export const AlertDetailFlyout = ({
                   pageCount={alertsCount}
                   activePage={expandedAlertIndex}
                   onPageClick={(activePage) => {
-                    onExpandedAlertIndexChange?.(activePage);
+                    onExpandedAlertIndexChange(activePage);
                   }}
                   compressed
                   data-test-subj="alertFlyoutPagination"

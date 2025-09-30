@@ -39,6 +39,7 @@ import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import deepEqual from 'fast-deep-equal';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
+import { applySetStateAction } from '../utils/apply_set_state_action';
 import { useAlertsTableQueryParams } from '../hooks/use_alerts_table_query_params';
 import { applyColumnsConfiguration } from '../utils/columns_configuration';
 import { useAlertsTableConfiguration } from '../hooks/use_alerts_table_configuration';
@@ -103,6 +104,23 @@ const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
 
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
+
+/**
+ * If an alert is expanded, returns the page where the alert is located if different
+ * from the current page index
+ */
+const getExpandedAlertPage = (
+  expandedAlertIndex: number | null,
+  pageSize: number,
+  pageIndex: number
+) => {
+  if (expandedAlertIndex !== null) {
+    const expandedAlertPage = Math.floor(expandedAlertIndex / pageSize);
+    if (expandedAlertPage >= 0 && expandedAlertPage !== pageIndex) {
+      return expandedAlertPage;
+    }
+  }
+};
 
 const getLocalStorageWrapper = () => new LocalStorageWrapper(window.localStorage);
 
@@ -235,9 +253,8 @@ const AlertsTableContent = typedForwardRef(
       }),
     });
     const updateColumns = useCallback<typeof setColumns>(
-      (setColumnsAction) => {
-        const newColumns =
-          typeof setColumnsAction === 'function' ? setColumnsAction(columns) : setColumnsAction;
+      (setStateAction) => {
+        const newColumns = applySetStateAction(setStateAction, columns);
         setColumns(newColumns);
         setConfiguration({ columns: newColumns });
       },
@@ -252,11 +269,8 @@ const AlertsTableContent = typedForwardRef(
       defaultValue: configuration?.visibleColumns ?? defaultVisibleColumns,
     });
     const updateVisibleColumns = useCallback<typeof setVisibleColumns>(
-      (setVisibleColumnsAction) => {
-        const newVisibleColumns =
-          typeof setVisibleColumnsAction === 'function'
-            ? setVisibleColumnsAction(visibleColumns)
-            : setVisibleColumnsAction;
+      (setStateAction) => {
+        const newVisibleColumns = applySetStateAction(setStateAction, visibleColumns);
         setVisibleColumns(newVisibleColumns);
         setConfiguration({ visibleColumns: newVisibleColumns });
       },
@@ -271,28 +285,43 @@ const AlertsTableContent = typedForwardRef(
       defaultValue: configuration?.sort ?? defaultSort,
     });
     const updateSort = useCallback<typeof setSort>(
-      (setSortAction) => {
-        const newSort = typeof setSortAction === 'function' ? setSortAction(sort) : setSortAction;
+      (setStateAction) => {
+        const newSort = applySetStateAction(setStateAction, sort);
         setSort(newSort);
         setConfiguration({ sort: newSort });
       },
       [setConfiguration, setSort, sort]
     );
-    const [pageIndex, setPageIndex] = useControllableState({
-      value: pageIndexProp,
-      onChange: onPageIndexChange,
-      defaultValue: pageIndexProp ?? 0,
+    const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
+      value: expandedAlertIndexProp,
+      onChange: onExpandedAlertIndexChange,
+      defaultValue: expandedAlertIndexProp ?? null,
     });
     const [pageSize, setPageSize] = useControllableState({
       value: pageSizeProp,
       onChange: onPageSizeChange,
       defaultValue: pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
     });
-    const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
-      value: expandedAlertIndexProp,
-      onChange: onExpandedAlertIndexChange,
-      defaultValue: expandedAlertIndexProp ?? null,
+    const defaultPageIndex = pageIndexProp ?? 0;
+    const [pageIndex, setPageIndex] = useControllableState({
+      value: pageIndexProp,
+      onChange: onPageIndexChange,
+      defaultValue:
+        // If an alert is expanded, make sure to show its page on first load
+        getExpandedAlertPage(expandedAlertIndex, pageSize, defaultPageIndex) ?? defaultPageIndex,
     });
+    const updateExpandedAlertIndex = useCallback<typeof setExpandedAlertIndex>(
+      (setStateAction) => {
+        const newExpandedAlertIndex = applySetStateAction(setStateAction, expandedAlertIndex);
+        // If the new expanded alert is outside the current page, update the page index
+        const expandedAlertPage = getExpandedAlertPage(newExpandedAlertIndex, pageSize, pageIndex);
+        if (expandedAlertPage != null) {
+          setPageIndex(expandedAlertPage);
+        }
+        setExpandedAlertIndex(newExpandedAlertIndex);
+      },
+      [expandedAlertIndex, setExpandedAlertIndex, pageSize, pageIndex, setPageIndex]
+    );
 
     const fieldsQuery = useFetchAlertsFieldsQuery(
       { http, ruleTypeIds },
@@ -341,16 +370,6 @@ const AlertsTableContent = typedForwardRef(
       trackScores,
       dispatchBulkAction,
     });
-
-    useEffect(() => {
-      // Automatically advance page index if the expanded alert is not on the current page
-      if (expandedAlertIndex !== null) {
-        const expandedAlertPage = Math.floor(expandedAlertIndex / pageSize);
-        if (expandedAlertPage !== pageIndex) {
-          setPageIndex(expandedAlertPage);
-        }
-      }
-    }, [expandedAlertIndex, pageIndex, pageSize, setPageIndex]);
 
     const {
       data: alertsData,
@@ -521,7 +540,7 @@ const AlertsTableContent = typedForwardRef(
           openLinksInNewTab,
           services: memoizedServices,
           expandedAlertIndex,
-          onExpandedAlertIndexChange: setExpandedAlertIndex,
+          onExpandedAlertIndexChange: updateExpandedAlertIndex,
           renderExpandedAlertView,
         } as RenderContext<AC>),
       [
@@ -554,7 +573,7 @@ const AlertsTableContent = typedForwardRef(
         openLinksInNewTab,
         memoizedServices,
         expandedAlertIndex,
-        setExpandedAlertIndex,
+        updateExpandedAlertIndex,
         renderExpandedAlertView,
       ]
     );

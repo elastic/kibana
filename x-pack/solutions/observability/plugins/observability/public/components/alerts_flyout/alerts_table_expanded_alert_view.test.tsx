@@ -130,7 +130,7 @@ describe('AlertsTableExpandedAlertView', () => {
     expandedAlertIndex: 0,
     onExpandedAlertIndexChange: onExpandedAlertIndexChangeMock,
     alerts: [activeAlert, recoveredAlert, inventoryThresholdAlertEs],
-    alertsCount: 2,
+    alertsCount: 3,
     isLoading: false,
     tableId: 'test',
     observabilityRuleTypeRegistry: observabilityRuleTypeRegistryMock,
