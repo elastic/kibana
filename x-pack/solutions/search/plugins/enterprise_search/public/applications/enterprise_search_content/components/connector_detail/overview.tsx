@@ -51,6 +51,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
             <>
               <EuiCallOut
+                announceOnMount
                 iconType="info"
                 color="warning"
                 title={i18n.translate(
@@ -76,6 +77,7 @@ export const ConnectorDetailOverview: React.FC = () => {
         <>
           {isModalVisible && <ConvertConnectorModal />}
           <EuiCallOut
+            announceOnMount
             iconType="warning"
             color="warning"
             title={i18n.translate(
@@ -128,6 +130,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {error && (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="warning"
             color="danger"
             title={i18n.translate(
@@ -146,6 +149,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector && !connector.index_name && (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="info"
             color="warning"
             title={i18n.translate(
@@ -188,6 +192,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {!!connector?.index_name && !indexData && (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="info"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.title',

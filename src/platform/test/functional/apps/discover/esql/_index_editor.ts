@@ -94,12 +94,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
           'Select column',
-          'Stringcustomer_first_name',
-          'Stringcustomer_full_name',
-          'Stringcustomer_gender',
+          'Keywordcustomer_first_name',
+          'Keywordcustomer_full_name',
+          'Keywordcustomer_gender',
           'Numbercustomer_id',
-          'Stringcustomer_last_name',
-          'Stringemail',
+          'Keywordcustomer_last_name',
+          'Keywordemail',
         ]);
         expect(gridData.rows[0]).to.eql([
           '', // toggles column

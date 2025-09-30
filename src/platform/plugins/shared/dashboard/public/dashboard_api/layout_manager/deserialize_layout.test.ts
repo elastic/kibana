@@ -14,23 +14,23 @@ describe('deserializeLayout', () => {
     const { layout, childState } = deserializeLayout(
       [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: { title: 'panel One' },
-          panelIndex: '1',
+          grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          config: { title: 'panel One' },
+          uid: '1',
           type: 'testPanelType',
         },
         {
           title: 'Section One',
           collapsed: true,
-          gridData: {
+          grid: {
             y: 6,
             i: 'section1',
           },
           panels: [
             {
-              gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: { title: 'panel Three' },
-              panelIndex: '3',
+              grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+              config: { title: 'panel Three' },
+              uid: '3',
               type: 'testPanelType',
             },
           ],
@@ -41,7 +41,7 @@ describe('deserializeLayout', () => {
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "gridData": Object {
+          "grid": Object {
             "h": 6,
             "i": "1",
             "w": 6,
@@ -51,7 +51,7 @@ describe('deserializeLayout', () => {
           "type": "testPanelType",
         },
         "3": Object {
-          "gridData": Object {
+          "grid": Object {
             "h": 6,
             "i": "3",
             "sectionId": "section1",
@@ -67,7 +67,7 @@ describe('deserializeLayout', () => {
       Object {
         "section1": Object {
           "collapsed": true,
-          "gridData": Object {
+          "grid": Object {
             "i": "section1",
             "y": 6,
           },
