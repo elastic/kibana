@@ -52,8 +52,10 @@ export const AdditionalFormFields = React.memo<{
 
   const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
     () => {
-      const a = additionalFieldsFormField.value ? JSON.parse(additionalFieldsFormField.value) : {};
-      return Object.keys(a).map((key) => ({
+      const parsed = additionalFieldsFormField.value
+        ? JSON.parse(additionalFieldsFormField.value)
+        : {};
+      return Object.keys(parsed).map((key) => ({
         label: fieldsMetadataRecord[key]?.text ?? key,
         value: key,
       }));
