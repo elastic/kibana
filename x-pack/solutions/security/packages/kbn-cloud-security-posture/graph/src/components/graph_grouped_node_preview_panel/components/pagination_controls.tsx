@@ -16,6 +16,20 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { i18nNamespaceKey } from '../constants';
+
+const rowsPerPageLabel = i18n.translate(`${i18nNamespaceKey}.rowsPerPageLabel`, {
+  defaultMessage: 'Rows per page',
+});
+
+const rowsLabel = i18n.translate(`${i18nNamespaceKey}.rowsLabel`, {
+  defaultMessage: 'rows',
+});
+
+const paginationLabel = i18n.translate(`${i18nNamespaceKey}.paginationLabel`, {
+  defaultMessage: 'Pagination controls',
+});
 
 export interface PaginationControlsProps {
   pageIndex: number;
@@ -57,45 +71,25 @@ export const PaginationControls = ({
       onClick={onButtonClick}
       aria-label="Rows per page"
     >
-      {`Rows per page: ${rowSize}`}
+      {`${rowsPerPageLabel}: ${rowSize}`}
     </EuiButtonEmpty>
   );
 
-  const items = [
-    <EuiContextMenuItem
-      key="10 rows"
-      icon={getIconType(10)}
-      onClick={() => {
-        closePopover();
-        setRowSize(10);
-        onChangeItemsPerPage(10);
-      }}
-    >
-      {'10 rows'}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="20 rows"
-      icon={getIconType(20)}
-      onClick={() => {
-        closePopover();
-        setRowSize(20);
-        onChangeItemsPerPage(20);
-      }}
-    >
-      {'20 rows'}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="50 rows"
-      icon={getIconType(50)}
-      onClick={() => {
-        closePopover();
-        setRowSize(50);
-        onChangeItemsPerPage(50);
-      }}
-    >
-      {'50 rows'}
-    </EuiContextMenuItem>,
-  ];
+  const items = [10, 20, 50].map((rowsNumber) => {
+    return (
+      <EuiContextMenuItem
+        key={`${rowsNumber} rows`}
+        icon={getIconType(rowsNumber)}
+        onClick={() => {
+          closePopover();
+          setRowSize(rowsNumber);
+          onChangeItemsPerPage(rowsNumber);
+        }}
+      >
+        {`${rowsNumber} ${rowsLabel}`}
+      </EuiContextMenuItem>
+    );
+  });
 
   return (
     <EuiFlexGroup
@@ -120,7 +114,7 @@ export const PaginationControls = ({
 
       <EuiFlexItem grow={false}>
         <EuiPagination
-          aria-label="Custom pagination example"
+          aria-label={paginationLabel}
           pageCount={pageCount}
           activePage={activePage}
           onPageClick={goToPage}

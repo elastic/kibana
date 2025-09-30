@@ -11,7 +11,7 @@ import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
 import type { EntityOrEventItem } from './grouped_item/types';
-import { PaginationControls } from './pagination/pagination';
+import { PaginationControls } from './pagination_controls';
 
 interface ContentBodyProps {
   items: EntityOrEventItem[];
