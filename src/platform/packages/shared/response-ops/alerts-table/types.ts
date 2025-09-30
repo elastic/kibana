@@ -482,6 +482,7 @@ export interface PublicAlertsDataGridProps
     owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
+    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls
