@@ -200,7 +200,7 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
+          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {
