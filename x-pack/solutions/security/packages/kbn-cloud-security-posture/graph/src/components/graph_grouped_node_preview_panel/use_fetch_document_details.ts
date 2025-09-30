@@ -91,13 +91,13 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
   const hitSource = hit._source as Record<string, any>;
   return {
     itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
-    id: hitSource.event.id,
+    id: hitSource.event?.id,
     timestamp: hitSource['@timestamp'],
-    action: hitSource.event.action,
-    actor: { id: hitSource.actor.entity.id },
-    target: { id: hitSource.target.entity.id },
-    ip: hitSource.source.ip,
-    countryCode: hitSource.source.geo.country_iso_code,
+    action: hitSource.event?.action,
+    actor: { id: hitSource.actor?.entity?.id },
+    target: { id: hitSource.target?.entity?.id },
+    ip: hitSource.source?.ip,
+    countryCode: hitSource.source?.geo?.country_iso_code,
   };
 };
 
