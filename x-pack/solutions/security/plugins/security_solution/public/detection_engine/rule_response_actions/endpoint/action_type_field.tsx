@@ -45,17 +45,10 @@ const ActionTypeFieldComponent = ({
     },
   } = useKibana().services;
 
-  const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
-    'automatedProcessActionsEnabled'
-  );
-
   const enabledActions = useMemo(
     () =>
-      [
-        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-      ] as ['isolate', 'kill-process', 'suspend-process'],
-    [automatedProcessActionsEnabled]
+      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS as ['isolate', 'kill-process', 'suspend-process'],
+    []
   );
 
   const fieldOptions = useMemo(

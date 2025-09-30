@@ -42,8 +42,6 @@ describe('ScheduleNotificationResponseActions', () => {
   (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
     return mockedResponseActionsClient;
   });
-  // @ts-expect-error assignment to readonly property
-  endpointServiceMock.experimentalFeatures.automatedProcessActionsEnabled = true;
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,

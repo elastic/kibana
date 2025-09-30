@@ -42,9 +42,8 @@ export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMAND
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
-  // TODO: TC- Uncomment these when we go GA with automated process actions
-  // 'kill-process',
-  // 'suspend-process'
+  'kill-process',
+  'suspend-process',
 ];
 
 export type EnabledAutomatedResponseActionsCommands =
