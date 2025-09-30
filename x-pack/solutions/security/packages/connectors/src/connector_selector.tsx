@@ -103,14 +103,15 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             />
           ),
         },
-      ], [
-      customConnectors,
-      defaultConnectorId,
-      onChangeConnector,
-      onNewConnectorClicked,
-      preConfiguredConnectors,
-      selectedId,
-    ]
+      ],
+      [
+        customConnectors,
+        defaultConnectorId,
+        onChangeConnector,
+        onNewConnectorClicked,
+        preConfiguredConnectors,
+        selectedId,
+      ]
     );
 
     const buttonLabel = useMemo(() => {
@@ -120,7 +121,6 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
       );
       return selectedOrDefaultConnector?.name ?? i18n.CONNECTOR_SELECTOR_PLACEHOLDER;
     }, [connectors, selectedId, defaultConnectorId]);
-
 
     return (
       <div css={styles?.inputContainer}>
