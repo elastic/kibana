@@ -102,11 +102,11 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       },
       {
         key: 'space_1',
-        doc_count: 14,
+        doc_count: 12,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'index-pattern', doc_count: 14 }],
+          buckets: [{ key: 'index-pattern', doc_count: 12 }],
         },
       },
       {
