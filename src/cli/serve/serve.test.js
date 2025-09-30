@@ -8,6 +8,7 @@
  */
 
 import { applyConfigOverrides } from './serve';
+import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
@@ -86,7 +87,7 @@ describe('applyConfigOverrides', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true }, {}, {})).toEqual({
       elasticsearch: {
         hosts: ['https://localhost:9200'],
-        serviceAccountToken: 'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+        serviceAccountToken: kibanaDevServiceAccount.token,
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },
       plugins: { paths: [] },
@@ -117,7 +118,7 @@ describe('applyConfigOverrides', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: true }, {}, {})).toEqual({
       elasticsearch: {
         hosts: ['https://localhost:9200'],
-        serviceAccountToken: 'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+        serviceAccountToken: kibanaDevServiceAccount.token,
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },
       mockIdpPlugin: { uiam: { enabled: true } },
