@@ -517,6 +517,7 @@ src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
+src/platform/packages/shared/kbn-management/autoops_promotion_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/application @elastic/kibana-management
