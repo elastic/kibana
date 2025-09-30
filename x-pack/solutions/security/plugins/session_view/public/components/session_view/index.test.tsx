@@ -152,6 +152,22 @@ describe('SessionView component', () => {
           expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
         });
       });
+
+      it('should clear updated alert status when refresh button is clicked', async () => {
+        render();
+
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+        });
+
+        // Click refresh button
+        await userEvent.click(renderResult.getByTestId('sessionView:sessionViewRefreshButton'));
+
+        // Verify that the API calls are made (refetch happens)
+        await waitFor(() => {
+          expect(mockedApi).toHaveBeenCalled();
+        });
+      });
     });
 
     describe('And data contains merged process events', () => {

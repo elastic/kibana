@@ -200,6 +200,8 @@ export const SessionView = ({
     refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
+    // Clear the cached alert status to ensure fresh data is fetched
+    setUpdatedAlertsStatus({});
     trackEvent('refresh_clicked');
   }, [refetch, refetchAlerts, refetchTotalTTYOutput, trackEvent]);
 
