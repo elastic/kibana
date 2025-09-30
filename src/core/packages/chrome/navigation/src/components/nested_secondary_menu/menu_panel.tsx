@@ -8,10 +8,11 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
 
 export interface PanelProps {
   children: ReactNode;
@@ -20,7 +21,30 @@ export interface PanelProps {
 }
 
 export const Panel: FC<PanelProps> = ({ children, id, title }) => {
-  const { currentPanel } = useNestedMenu();
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+
+  useEffect(() => {
+    if (currentPanel !== id) return;
+
+    // If we have a return focus id, we focus the trigger element
+    if (returnFocusId) {
+      const triggerElement = document.getElementById(returnFocusId);
+      if (triggerElement) return triggerElement.focus();
+    }
+
+    // If we are at the root panel, we don't need to focus anything
+    if (panelStackDepth === 0) return;
+
+    // Otherwise, we focus the first focusable element in the panel
+    if (panelRef.current) {
+      const elements = getFocusableElements(panelRef.current);
+      elements[0]?.focus();
+    }
+    // We want to focus the appropriate element when the panel becomes active
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelRef.current, currentPanel, id, returnFocusId, panelStackDepth]);
 
   if (currentPanel !== id) {
     return null;
@@ -28,11 +52,11 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
 
   if (title) {
     return (
-      <SecondaryMenu title={title} isPanel={false}>
+      <SecondaryMenu ref={panelRef} title={title} isPanel={false}>
         {children}
       </SecondaryMenu>
     );
   }
 
-  return <div>{children}</div>;
+  return <div ref={panelRef}>{children}</div>;
 };

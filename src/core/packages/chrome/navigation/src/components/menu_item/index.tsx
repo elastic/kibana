@@ -31,13 +31,13 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     {
       as = 'a',
       children,
-      isHorizontal,
       href,
       iconSize = 's',
       iconType,
       id,
-      isHighlighted,
       isCurrent = false,
+      isHighlighted,
+      isHorizontal,
       isLabelVisible = true,
       isTruncated = true,
       ...props
@@ -179,7 +179,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     if (as === 'button') {
       return (
-        <button ref={ref as ForwardedRef<HTMLButtonElement>} {...commonProps}>
+        <button id={id} ref={ref as ForwardedRef<HTMLButtonElement>} {...commonProps}>
           {content}
         </button>
       );
@@ -189,6 +189,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       <a
         aria-current={isCurrent ? 'page' : undefined}
         href={href}
+        id={id}
         ref={ref as ForwardedRef<HTMLAnchorElement>}
         {...commonProps}
       >

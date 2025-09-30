@@ -204,18 +204,17 @@ export const Navigation = ({
                   >
                     <NestedSecondaryMenu.Section>
                       {overflowMenuItems.map((item) => {
-                        const hasSubItems = getHasSubmenu(item);
+                        const hasSubmenu = getHasSubmenu(item);
                         const { sections, ...itemProps } = item;
                         return (
                           <NestedSecondaryMenu.PrimaryMenuItem
                             key={item.id}
                             isHighlighted={item.id === visuallyActivePageId}
                             isCollapsed={isCollapsed}
-                            hasSubmenu={hasSubItems}
-                            submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
+                            hasSubmenu={hasSubmenu}
                             onClick={() => {
                               onItemClick?.(item);
-                              if (!hasSubItems) {
+                              if (!hasSubmenu) {
                                 closePopover();
                                 focusMainContent();
                               }
@@ -229,7 +228,7 @@ export const Navigation = ({
                     </NestedSecondaryMenu.Section>
                   </NestedSecondaryMenu.Panel>
                   {overflowMenuItems.filter(getHasSubmenu).map((item) => (
-                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={`submenu-${item.id}`}>
+                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                       <NestedSecondaryMenu.Header title={item.label} />
                       {item.sections?.map((section) => (
                         <NestedSecondaryMenu.Section key={section.id} label={section.label}>
