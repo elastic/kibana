@@ -11,6 +11,7 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
+import type { MonitoringEntitySyncType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
@@ -23,6 +24,8 @@ interface UpsertResult {
   action: 'created' | 'updated';
   source: MonitoringEntitySource;
 }
+
+export type Processor = (source: MonitoringEntitySource) => Promise<void>;
 
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
@@ -129,10 +132,15 @@ export class MonitoringEntitySourceDescriptorClient {
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
-  public async findByIndex(): Promise<MonitoringEntitySource[]> {
+  /**
+   * entity_analytics_integration or index type
+   */
+  public async findSourcesByType(
+    type: MonitoringEntitySyncType
+  ): Promise<MonitoringEntitySource[]> {
     const result = await this.find();
     return result.saved_objects
-      .filter((so) => so.attributes.type === 'index')
+      .filter((so) => so.attributes.type === type)
       .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
@@ -160,5 +168,26 @@ export class MonitoringEntitySourceDescriptorClient {
         );
       }
     }
+  }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastUpdateProcessed: lastProcessedMarker,
+        },
+      },
+    });
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
   }
 }
