@@ -41,7 +41,7 @@ export async function generateStreamDescription({
     input: {
       name: system?.name || stream.name,
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true })
+        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped: false })
       ),
     },
     prompt: GenerateStreamDescriptionPrompt,
