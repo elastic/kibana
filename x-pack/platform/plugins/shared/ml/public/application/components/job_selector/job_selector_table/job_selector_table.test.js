@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/react'; // eslint-disable-li
 import { JobSelectorTable } from './job_selector_table';
 
 jest.mock('@kbn/ml-kibana-context/kibana_context');
-jest.mock('../../node_available_warning', () => {
+jest.mock('@kbn/ml-node-checks/node_available_warning', () => {
   return { MlNodeAvailableWarningShared: () => <div /> };
 });
 
