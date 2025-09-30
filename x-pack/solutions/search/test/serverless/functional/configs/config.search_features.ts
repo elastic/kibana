@@ -13,16 +13,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig.getAll(),
     junit: {
-      reportName: 'Serverless Search Functional Tests - v2 Solution Navigation',
+      reportName: 'Serverless Search Functional Tests - Search Features',
     },
-    kbnTestServer: {
-      ...baseConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...baseConfig.get('kbnTestServer.serverArgs'),
-        '--feature_flags.overrides.core.chrome.projectSideNav=v2',
-        `--uiSettings.overrides.agentBuilder:enabled=true`,
-      ],
-    },
-    testFiles: [require.resolve('../test_suites/navigation')],
+    testFiles: [require.resolve('./index.search_features.ts')],
   };
 }
