@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { RunStepButton } from './run_step_button';
 import { useEditorState } from '../lib/state/state';
-import type { StepInfo } from '../lib/state/index_yaml_document';
+import type { StepInfo } from '../lib/state/build_workflow_lookup';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
 export interface ElasticsearchStepActionsProps {
