@@ -16,13 +16,12 @@ import {
   getHoverItem,
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
-import { isArray } from 'lodash';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { monacoPositionToOffset } from './lib/shared/utils';
+import { getDecorationHoveredMessages, monacoPositionToOffset } from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
@@ -100,12 +99,10 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         ) {
           lastHoveredWord = hoveredWord.word;
 
-          trackDecorationHovered(
-            hoveredWord,
-            position,
-            model,
-            deps?.telemetry?.onDecorationHoverShown
-          );
+          const hoverMessages = getDecorationHoveredMessages(hoveredWord, position, model);
+          if (hoverMessages.length) {
+            deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
+          }
         }
 
         return getHoverItem(fullText, offset, deps);
@@ -163,37 +160,3 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     };
   },
 };
-
-/**
- * Gets the decorations affecting the given word, and looks for hover messages in it,
- * if found it calls the telemetry tracking method.
- */
-function trackDecorationHovered(
-  word: monaco.editor.IWordAtPosition,
-  position: monaco.Position,
-  model: monaco.editor.ITextModel,
-  onDecorationHoverShown: (hoverMessage: string) => void
-) {
-  const wordRange = new monaco.Range(
-    position.lineNumber,
-    word.startColumn,
-    position.lineNumber,
-    word.endColumn
-  );
-
-  // Get decorations at the hovered word
-  const decorations = model.getDecorationsInRange(wordRange);
-
-  // Find decorations with an hover message
-  const hoverMessage = decorations
-    .map((decoration) => {
-      return isArray(decoration.options.hoverMessage)
-        ? decoration.options.hoverMessage?.map((msg) => msg.value).join(', ')
-        : decoration.options.hoverMessage?.value ?? '';
-    })
-    .join(', ');
-
-  if (hoverMessage) {
-    onDecorationHoverShown(hoverMessage);
-  }
-}
