@@ -55,11 +55,7 @@ export class ESQLEditorTelemetryService {
     }
 
     if (commandData) {
-      const triggerAction = !commandData.doesIndexExist
-        ? 'create'
-        : commandData.canEditIndex
-        ? 'edit'
-        : 'read';
+      const triggerAction = this._determineTriggerAction(commandData);
 
       this._reportEvent(ESQL_LOOKUP_JOIN_ACTION_SHOWN, {
         trigger_source: 'esql_hover',
@@ -67,5 +63,12 @@ export class ESQLEditorTelemetryService {
         highest_privilege: commandData.highestPrivilege,
       });
     }
+  }
+
+  private _determineTriggerAction(commandData: IndexEditorCommandArgs): string {
+    if (!commandData.doesIndexExist) {
+      return 'create';
+    }
+    return commandData.canEditIndex ? 'edit' : 'read';
   }
 }
