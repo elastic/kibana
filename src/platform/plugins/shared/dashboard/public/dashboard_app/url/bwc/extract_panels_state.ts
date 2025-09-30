@@ -28,8 +28,8 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
     const panelAsObject = panel as { [key: string]: unknown };
 
     if (
-      !panelAsObject.gridData ||
-      !(panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
+      !(panelAsObject.gridData || panelAsObject.grid) ||
+      !(panelAsObject.config || panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
       (panelAsObject.version && semverSatisfies(panelAsObject.version as string, '<7.3'))
     )
       return true;
@@ -53,41 +53,54 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   }
 
   const savedObjectReferences: Reference[] = [];
-  const standardizedPanels = panels.map((legacyPanel) => {
+  const standardizedPanels: DashboardState['panels'] = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
     if (panel?.embeddableConfig) {
-      panel.panelConfig = panel.embeddableConfig;
+      panel.config = panel.embeddableConfig;
       delete panel.embeddableConfig;
     }
 
-    // <8.19 'id' (saved object id) stored as siblings to panelConfig
-    if (panel.id && panel.panelConfig && typeof panel.panelConfig === 'object') {
-      panel.panelConfig.savedObjectId = panel.id;
+    // < 9.3 panels state stored config as panelConfig
+    if (panel?.panelConfig) {
+      panel.config = panel.panelConfig;
+      delete panel.panelConfig;
+    }
+
+    // < 9.3 grid stored as gridData
+    if (panel?.gridData) {
+      panel.grid = panel.gridData;
+      delete panel.gridData;
+    }
+
+    // < 9.3 uid stored as panelIndex
+    if (panel?.panelIndex) {
+      panel.uid = panel.panelIndex;
+      delete panel.panelIndex;
+    }
+
+    // <8.19 'id' (saved object id) stored as siblings to config
+    if (panel.id && panel.config && typeof panel.config === 'object') {
+      panel.config.savedObjectId = panel.id;
       delete panel.id;
     }
 
-    // <8.19 'title' stored as siblings to panelConfig
-    if (panel.title && panel.panelConfig && typeof panel.panelConfig === 'object') {
-      panel.panelConfig.title = panel.title;
+    // <8.19 'title' stored as siblings to config
+    if (panel.title && panel.config && typeof panel.config === 'object') {
+      panel.config.title = panel.title;
       delete panel.title;
     }
 
     // < 9.2 dashboard managed saved object refs for panels
     // Add saved object ref for panels that contain savedObjectId
     // TODO remove once all panels inject references in dashboard server api
-    const { panelConfig, panelIndex, type } = panel;
-    if (
-      panelIndex &&
-      type &&
-      panelConfig?.savedObjectId &&
-      typeof panelConfig?.savedObjectId === 'string'
-    ) {
+    const { config, uid, type } = panel;
+    if (uid && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
       savedObjectReferences.push(
-        ...prefixReferencesFromPanel(panelIndex, [
+        ...prefixReferencesFromPanel(uid, [
           {
-            id: panelConfig.savedObjectId,
+            id: config.savedObjectId,
             name: SAVED_OBJECT_REF_NAME,
             type,
           },
