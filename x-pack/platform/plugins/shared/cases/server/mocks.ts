@@ -162,6 +162,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
@@ -206,6 +207,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -251,6 +253,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -300,6 +303,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -670,6 +674,7 @@ export const newCase: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
@@ -757,6 +762,11 @@ export const mockCasesContract = (): CasesServerStart => ({
       index: {
         enabled: true,
       },
+    },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
     },
   },
 });

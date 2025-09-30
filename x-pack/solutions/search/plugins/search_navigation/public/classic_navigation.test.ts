@@ -156,12 +156,6 @@ describe('classicNavigationFactory', function () {
           link: 'searchHomepage',
         },
       },
-      {
-        id: 'serverlessElasticsearch',
-        deepLink: {
-          link: 'serverlessElasticsearch',
-        },
-      },
     ];
 
     const solutionNav = classicNavigationFactory(items, core, history);
