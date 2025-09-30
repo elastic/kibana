@@ -230,6 +230,12 @@ describe('Risk Scoring Task', () => {
           after_keys: {},
           scores_written: 0,
           errors: [],
+          entities: {
+            host: [],
+            user: [],
+            service: [],
+            generic: [],
+          },
         });
       });
 
@@ -254,11 +260,23 @@ describe('Risk Scoring Task', () => {
             after_keys: { host: { 'host.name': 'value' } },
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           })
           .mockResolvedValueOnce({
             after_keys: {},
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           });
       });
 
@@ -352,16 +370,34 @@ describe('Risk Scoring Task', () => {
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             }) // second call - user entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             }) // third call - service entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             });
         });
 

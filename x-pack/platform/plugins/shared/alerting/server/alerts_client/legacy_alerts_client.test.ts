@@ -176,7 +176,32 @@ describe('Legacy Alerts Client', () => {
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
+      canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
+    });
+  });
+
+  test('initializeExecution() should set maxAlerts and pass the configured value to the alert factory if greater than the max allowed threshold', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution({ ...defaultExecutionOpts, maxAlerts: 10000 });
+
+    expect(alertsClient.getMaxAlertLimit()).toBe(5000);
+    expect(createAlertFactory).toHaveBeenCalledWith({
+      alerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      logger,
+      configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
     });

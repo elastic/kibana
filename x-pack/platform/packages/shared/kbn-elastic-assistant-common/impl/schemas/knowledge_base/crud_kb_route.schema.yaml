@@ -99,6 +99,10 @@ paths:
                     type: boolean
                     description: Indicates if Security Labs documentation exists in the KnowledgeBase.
                     example: true
+                  defend_insights_exists:
+                    type: boolean
+                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+                    example: true
                   user_data_exists:
                     type: boolean
                     description: Indicates if user data exists in the KnowledgeBase.

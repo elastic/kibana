@@ -33,7 +33,7 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
     filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
     metric: MetricField;
-    onViewDetails: (esqlQuery: string) => void;
+    onViewDetails: (esqlQuery: string, metric: MetricField) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -89,8 +89,8 @@ export const Chart = ({
   });
 
   const handleViewDetails = useCallback(() => {
-    onViewDetails(esqlQuery);
-  }, [onViewDetails, esqlQuery]);
+    onViewDetails(esqlQuery, metric);
+  }, [onViewDetails, esqlQuery, metric]);
 
   return (
     <div

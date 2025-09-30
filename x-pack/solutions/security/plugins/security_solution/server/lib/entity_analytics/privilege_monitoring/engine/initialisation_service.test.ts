@@ -83,14 +83,14 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    initService = createInitialisationService(dataClient);
+    initService = createInitialisationService(dataClient, mockSavedObjectClient);
   });
   describe('init', () => {
     it('should throw if taskManager is not available', async () => {
       const { taskManager, ...optsWithoutTaskManager } = deps;
       dataClient = new PrivilegeMonitoringDataClient(optsWithoutTaskManager);
 
-      expect(() => createInitialisationService(dataClient)).toThrow(
+      expect(() => createInitialisationService(dataClient, mockSavedObjectClient)).toThrow(
         'Task Manager is not available'
       );
     });
@@ -99,7 +99,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       mockUpsertIndex.mockResolvedValue(undefined);
       mockEngineDescriptorInit.mockResolvedValue({ status: 'success' });
 
-      const result = await initService.init(mockSavedObjectClient);
+      const result = await initService.init();
 
       expect(mockUpsertIndex).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
@@ -117,7 +117,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       dataClient.audit = mockAudit;
       dataClient.log = mockLog;
 
-      await initService.init(mockSavedObjectClient);
+      await initService.init();
 
       expect(mockLog).toHaveBeenCalledWith(
         'error',

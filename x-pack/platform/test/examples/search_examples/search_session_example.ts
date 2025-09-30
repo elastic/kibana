@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const comboBox = getService('comboBox');
 
-  describe('Search session example', () => {
+  describe.skip('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {

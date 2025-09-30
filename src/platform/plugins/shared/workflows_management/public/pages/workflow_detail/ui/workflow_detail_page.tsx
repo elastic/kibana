@@ -13,20 +13,19 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { StepContext } from '@kbn/workflows';
+import type { StepContext, WorkflowYaml } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
-import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
@@ -34,6 +33,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -60,20 +60,21 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
 
+  const showExecutionSidebar = activeTab === 'executions' || selectedExecutionId;
+
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [highlightDiff, setHighlightDiff] = useState(false);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, runIndividualStep } = useWorkflowActions();
+  const { updateWorkflow, runWorkflow, runIndividualStep, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
-  const canRunWorkflow =
-    Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
-    Boolean(workflow?.enabled);
+  const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
   const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
   const handleSave = () => {
@@ -119,23 +120,40 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
+  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
+    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+
+    if (!parsingResult.success) {
+      return null;
+    }
+    return parsingResult.data as WorkflowYaml;
+  }, [workflowYaml]);
+
   const [testStepId, setTestStepId] = useState<string | null>(null);
   const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
-  const [testSingleStepExecutionId, setTestSingleStepExecutionId] = useState<string | null>(null);
 
-  const handleRunClick = () => {
+  const handleRunClick = ({ test = false }: { test: boolean }) => {
+    const def = test ? definitionFromCurrentYaml : workflow?.definition;
     let needInput: boolean | undefined = false;
-    if (workflow?.definition?.triggers) {
+    if (def?.triggers) {
       needInput =
-        workflow.definition.triggers.some((trigger) => trigger.type === 'alert') ||
-        (workflow.definition.triggers.some((trigger) => trigger.type === 'manual') &&
-          workflow.definition.inputs &&
-          Object.keys(workflow.definition.inputs).length > 0);
+        def.triggers.some((trigger) => trigger.type === 'alert') ||
+        (def.triggers.some((trigger) => trigger.type === 'manual') &&
+          def.inputs &&
+          Object.keys(def.inputs).length > 0);
     }
     if (needInput) {
-      setWorkflowExecuteModalOpen(true);
+      if (test) {
+        setTestWorkflowModalOpen(true);
+      } else {
+        setWorkflowExecuteModalOpen(true);
+      }
     } else {
-      handleRunWorkflow({});
+      if (test) {
+        handleTestRunWorkflow({});
+      } else {
+        handleRunWorkflow({});
+      }
     }
   };
 
@@ -153,19 +171,49 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       { id, inputs: event },
       {
         onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess('Workflow run started', {
-            toastLifeTimeMs: 3000,
-          });
-          application!.navigateToUrl(
-            application!.getUrlForApp('workflows', {
-              path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
-            })
+          notifications?.toasts.addSuccess(
+            i18n.translate('workflows.workflowDetailHeader.success.workflowRunStarted', {
+              defaultMessage: 'Workflow run started',
+            }),
+            {
+              toastLifeTimeMs: 3000,
+            }
           );
+          setSelectedExecution(workflowExecutionId);
         },
         onError: (err: unknown) => {
           notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
-            title: 'Failed to run workflow',
+            title: i18n.translate('workflows.workflowDetailHeader.error.workflowRunFailed', {
+              defaultMessage: 'Failed to run workflow',
+            }),
+          });
+        },
+      }
+    );
+  };
+
+  const handleTestRunWorkflow = (event: Record<string, any>) => {
+    testWorkflow.mutate(
+      { workflowYaml, inputs: event },
+      {
+        onSuccess: ({ workflowExecutionId }) => {
+          notifications?.toasts.addSuccess(
+            i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
+              defaultMessage: 'Workflow test run started',
+            }),
+            {
+              toastLifeTimeMs: 3000,
+            }
+          );
+          setSelectedExecution(workflowExecutionId);
+        },
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
+              defaultMessage: 'Failed to test workflow',
+            }),
           });
         },
       }
@@ -239,7 +287,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       workflowYaml,
       contextOverride: mock,
     });
-    setTestSingleStepExecutionId(response.workflowExecutionId);
+    setSelectedExecution(response.workflowExecutionId);
     setTestStepId(null);
     setcontextOverride(null);
   };
@@ -260,22 +308,24 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
-        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
         canSaveWorkflow={canSaveWorkflow}
         isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
-        handleRunClick={handleRunClick}
+        handleRunClick={() => handleRunClick({ test: false })}
         handleSave={handleSave}
         handleToggleWorkflow={handleToggleWorkflow}
         canTestWorkflow={canTestWorkflow}
-        handleTestClick={() => setTestWorkflowModalOpen(true)}
+        handleTestClick={() => handleRunClick({ test: true })}
         handleTabChange={(tab) => {
           setActiveTab(tab);
         }}
         hasUnsavedChanges={hasChanges}
+        highlightDiff={highlightDiff}
+        setHighlightDiff={setHighlightDiff}
+        lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
       />
       <EuiFlexGroup gutterSize="none" css={styles.container}>
         <EuiFlexItem css={styles.main}>
@@ -292,10 +342,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
                   readOnly={activeTab === 'executions'}
-                  activeTab={activeTab}
                   selectedExecutionId={selectedExecutionId}
                   originalValue={workflow?.yaml ?? ''}
                   onStepActionClicked={handleStepRun}
+                  highlightDiff={highlightDiff}
                 />
               </React.Suspense>
             </EuiFlexItem>
@@ -318,39 +368,32 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {activeTab === 'executions' && (
+        {showExecutionSidebar && (
           <EuiFlexItem css={styles.sidebar}>
             {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
             {workflow && selectedExecutionId && (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
+                showBackButton={activeTab === 'executions'}
                 onClose={() => setSelectedExecution(null)}
               />
             )}
           </EuiFlexItem>
         )}
-        {workflow && testSingleStepExecutionId && activeTab !== 'executions' && (
-          <EuiFlexItem css={styles.sidebar}>
-            <SingleStepExecution
-              stepExecutionId={testSingleStepExecutionId}
-              workflowYaml={yamlValue}
-              onClose={() => setTestSingleStepExecutionId(null)}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
       {workflowExecuteModalOpen && workflow && (
         <WorkflowExecuteModal
-          workflow={workflow}
+          definition={workflow.definition}
           onClose={() => setWorkflowExecuteModalOpen(false)}
           onSubmit={handleRunWorkflow}
         />
       )}
-      {testWorkflowModalOpen && (
-        <TestWorkflowModal
-          workflowYaml={workflowYaml}
+      {testWorkflowModalOpen && definitionFromCurrentYaml && (
+        <WorkflowExecuteModal
+          definition={definitionFromCurrentYaml}
           onClose={() => setTestWorkflowModalOpen(false)}
+          onSubmit={handleTestRunWorkflow}
         />
       )}
       {testStepId && contextOverride && (

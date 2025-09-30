@@ -21,6 +21,7 @@ import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups
 
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -70,6 +71,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
 
+    registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
 
     return {};

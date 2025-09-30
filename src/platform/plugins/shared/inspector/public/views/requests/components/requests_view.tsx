@@ -174,7 +174,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
             >
               <FormattedMessage
                 id="inspector.requests.searchSessionId"
-                defaultMessage="Search session id: {searchSessionId}"
+                defaultMessage="Background search id: {searchSessionId}"
                 values={{ searchSessionId: this.state.request.searchSessionId }}
               />
             </p>

@@ -45,9 +45,9 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
     async navigateToIndexDetailPage(indexName: string) {
-      await solutionNavigation.sidenav.expectLinkExists({ navId: 'ingest_and_data' });
+      await solutionNavigation.sidenav.expectLinkExists({ navId: 'data_management' });
       await solutionNavigation.sidenav.clickLink({
-        navId: 'ingest_and_data',
+        navId: 'data_management',
       });
       await solutionNavigation.sidenav.clickPanelLink('management:index_management');
       const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');

@@ -29,7 +29,10 @@ import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task
 import { createInitialisationSourcesService } from './initialisation_sources_service';
 
 export type InitialisationService = ReturnType<typeof createInitialisationService>;
-export const createInitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createInitialisationService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
   const { deps } = dataClient;
   const { taskManager } = deps;
 
@@ -40,9 +43,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
   const IndexService = createPrivmonIndexService(dataClient);
   const InitSourceCreationService = createInitialisationSourcesService(dataClient);
 
-  const init = async (
-    soClient: SavedObjectsClientContract
-  ): Promise<MonitoringEngineDescriptor> => {
+  const init = async (): Promise<MonitoringEngineDescriptor> => {
     const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient,
       namespace: deps.namespace,

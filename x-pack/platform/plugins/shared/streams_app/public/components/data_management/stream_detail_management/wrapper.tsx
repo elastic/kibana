@@ -32,6 +32,7 @@ import {
   WiredStreamBadge,
 } from '../../stream_badges';
 import { GroupStreamControls } from './group_stream_controls';
+import { FeedbackButton } from '../../feedback_button';
 
 export type ManagementTabs = Record<
   string,
@@ -131,31 +132,39 @@ export function Wrapper({
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="baseline">
-            {streamId}
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  {Streams.ingest.all.GetResponse.is(definition) && (
-                    <DiscoverBadgeButton definition={definition} />
-                  )}
-                  {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                  {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
-                  {Streams.ingest.all.GetResponse.is(definition) && (
-                    <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-                  )}
-                  <DatasetQualityIndicator
-                    quality={quality}
-                    isLoading={isQualityLoading}
-                    verbose={true}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="baseline">
+              {streamId}
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+                <EuiFlexItem grow={true}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    {Streams.ingest.all.GetResponse.is(definition) && (
+                      <DiscoverBadgeButton definition={definition} />
+                    )}
+                    {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                    {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                    {Streams.ingest.all.GetResponse.is(definition) && (
+                      <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                    )}
+                    <DatasetQualityIndicator
+                      quality={quality}
+                      isLoading={isQualityLoading}
+                      verbose={true}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
-              {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
-                <GroupStreamControls />
-              )}
+                {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                  <GroupStreamControls />
+                )}
+              </EuiFlexGroup>
             </EuiFlexGroup>
+            <FeedbackButton />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({

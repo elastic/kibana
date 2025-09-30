@@ -11,9 +11,9 @@ import type { DocumentAnalysis, TruncatedDocumentAnalysis } from './document_ana
 
 export function sortAndTruncateAnalyzedFields(
   analysis: DocumentAnalysis,
-  options: { dropEmpty?: boolean } = {}
+  options: { dropEmpty?: boolean; dropUnmapped?: boolean } = {}
 ): TruncatedDocumentAnalysis {
-  const { dropEmpty = false } = options;
+  const { dropEmpty = false, dropUnmapped = false } = options;
   const { fields, ...meta } = analysis;
   const [nonEmptyFields, emptyFields] = partition(analysis.fields, (field) => !field.empty);
 
@@ -22,7 +22,15 @@ export function sortAndTruncateAnalyzedFields(
   // additionally, prefer non-empty fields over empty fields
   const sortedFields = [...shuffle(nonEmptyFields), ...shuffle(emptyFields)];
 
-  const filteredFields = dropEmpty ? sortedFields.filter((field) => !field.empty) : fields;
+  const filteredFields =
+    dropEmpty || dropUnmapped
+      ? sortedFields.filter((field) => {
+          const shouldBeDropped =
+            (dropEmpty && field.empty) || (dropUnmapped && field.types.length === 0);
+
+          return !shouldBeDropped;
+        })
+      : fields;
 
   return {
     ...meta,

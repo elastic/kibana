@@ -73,6 +73,7 @@ export interface IAlertsClient<
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
+  getMaxAlertLimit(): number;
   checkLimitUsage(): void;
   processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;

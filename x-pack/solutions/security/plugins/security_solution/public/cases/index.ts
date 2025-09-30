@@ -8,6 +8,13 @@
 import type { SecuritySubPlugin } from '../app/types';
 import { routes } from './routes';
 
+export const CASES_FEATURES = {
+  observables: {
+    enabled: true,
+    autoExtract: false,
+  },
+} as const;
+
 export class Cases {
   public setup() {}
 

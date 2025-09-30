@@ -7,13 +7,14 @@ exports[`Collapsed mode should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-atvxkx-SideNav"
+      class="side-nav css-yv8mab-SideNav"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
           class="css-18bgeak-wrapperStyles"
+          data-test-subj="side-nav-logo-wrapper"
         >
           <a
             aria-label="Solution homepage"
@@ -41,12 +42,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </span>
       <nav
-        aria-label="Main navigation"
+        aria-label="Main"
         class="css-1saqly-SideNavPrimaryMenu"
         id="primary-navigation"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -62,6 +63,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="sideNavPrimaryMenuItem-dashboards"
                 href="/dashboards"
                 label="Dashboards"
+                tabindex="0"
               >
                 <div
                   class="iconWrapper"
@@ -82,7 +84,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -98,6 +100,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="sideNavPrimaryMenuItem-discover"
                 href="/discover"
                 label="Discover"
+                tabindex="-1"
               >
                 <div
                   class="iconWrapper"
@@ -118,7 +121,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -132,6 +135,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-apps_overview"
               href="/apps_overview"
               label="Apps"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"
@@ -152,11 +156,11 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </nav>
       <footer
-        aria-label="Side navigation footer"
+        aria-label="Side navigation"
         class="css-5bzxab-SideNavFooter"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -185,7 +189,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -214,7 +218,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -244,7 +248,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -273,7 +277,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"

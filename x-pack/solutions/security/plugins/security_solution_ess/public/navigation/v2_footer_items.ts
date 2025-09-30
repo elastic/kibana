@@ -8,11 +8,11 @@
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
   {
-    id: INGEST_AND_MANAGE_DATA_NAV_ID,
+    id: DATA_MANAGEMENT_NAV_ID,
     title: i18nStrings.ingestAndManageData.title,
     iconV2: 'database',
     breadcrumbStatus: 'hidden',

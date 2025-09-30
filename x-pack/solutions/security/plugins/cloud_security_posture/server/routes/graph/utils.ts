@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EntityDocumentDataModel,
-  EntityNodeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { entityTypeMappings } from './entity_type_constants';
 
 /**
@@ -20,23 +17,21 @@ export interface EntityVisualProps {
 }
 
 /**
- * Transforms entity data to standardized icon and shape values
+ * Transforms entity type to standardized icon and shape values
  * This helps normalize different entity type representations to consistent visual properties
  *
- * @param entity The entity document data model
+ * @param entityGroupType The type of the entity group
  * @returns Object containing the icon and shape for the entity
  */
-export const transformEntityTypeToIconAndShape = (
-  entity: EntityDocumentDataModel
-): EntityVisualProps => {
-  if (!entity?.type) {
+export const transformEntityTypeToIconAndShape = (entityGroupType: string): EntityVisualProps => {
+  if (!entityGroupType) {
     return {};
   }
 
-  const entityTypeLower = entity.type.toLowerCase();
+  const entityGroupTypeLower = entityGroupType.toLowerCase();
 
   return {
-    icon: entityTypeMappings.icons[entityTypeLower],
-    shape: entityTypeMappings.shapes[entityTypeLower],
+    icon: entityTypeMappings.icons[entityGroupTypeLower],
+    shape: entityTypeMappings.shapes[entityGroupTypeLower],
   };
 };

@@ -237,10 +237,21 @@ export const RunStepCommandSchema = z.object({
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
+export const TestWorkflowCommandSchema = z.object({
+  workflowYaml: z.string(),
+  inputs: z.record(z.any()),
+});
+export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
+
 export const RunWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
+
+export const TestWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 

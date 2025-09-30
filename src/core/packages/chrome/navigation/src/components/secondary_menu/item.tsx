@@ -12,7 +12,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+// import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
@@ -44,7 +44,10 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
+
+  // TODO: the "scroll to active" behavior was disabled because it causes a scroll in the main container
+  // const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
+
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
@@ -54,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   };
 
   const styles = css`
+    font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
     padding: 6px ${euiTheme.size.s};
     width: 100%;
@@ -81,7 +85,7 @@ export const SecondaryMenuItemComponent = ({
   );
 
   return (
-    <li ref={activeItemRef}>
+    <li /* ref={activeItemRef} */>
       {isHighlighted ? (
         <EuiButton
           aria-current={isCurrent ? 'page' : undefined}

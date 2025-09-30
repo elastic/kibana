@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -42,7 +42,8 @@ function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | nu
       stepType === 'foreach' ||
       stepType === 'if-branch' ||
       stepType === 'if') &&
-    !item.children.length
+    !item.children.length &&
+    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
   ) {
     return ExecutionStatus.SKIPPED;
   }
@@ -120,6 +121,7 @@ function convertTreeToEuiTreeViewItems(
 
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
+  definition: WorkflowYaml | null;
   isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -133,6 +135,7 @@ export const WorkflowStepExecutionList = ({
   isLoading,
   error,
   execution,
+  definition,
   onStepExecutionClick,
   selectedId,
   onClose,
@@ -142,7 +145,7 @@ export const WorkflowStepExecutionList = ({
 
   let content: React.ReactNode = null;
 
-  if (isLoading && !execution) {
+  if (isLoading || !execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -173,7 +176,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution) {
+  } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -182,16 +185,40 @@ export const WorkflowStepExecutionList = ({
           <h2>
             <FormattedMessage
               id="workflows.workflowStepExecutionList.noExecutionFound"
-              defaultMessage="No step executions yet"
+              defaultMessage="No step executions found"
             />
           </h2>
         }
       />
     );
-  } else if (execution.workflowDefinition) {
+  } else if (definition) {
+    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
+      (step, index) => ({
+        stepId: step.name,
+        stepType: step.type,
+        status: ExecutionStatus.PENDING,
+        id: `${step.name}-${step.type}-${index}`,
+        scopeStack: [],
+        workflowRunId: '',
+        workflowId: '',
+        startedAt: '',
+        finishedAt: '',
+        children: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        topologicalIndex: 0,
+      })
+    );
     const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
+    const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
     for (const stepExecution of execution.stepExecutions) {
+      stepExecutionNameMap.set(stepExecution.stepId, stepExecution);
       stepExecutionMap.set(stepExecution.id, stepExecution);
+    }
+    for (const skeletonStepExecution of skeletonStepExecutions) {
+      if (!stepExecutionNameMap.has(skeletonStepExecution.stepId)) {
+        stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
+      }
     }
     const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(

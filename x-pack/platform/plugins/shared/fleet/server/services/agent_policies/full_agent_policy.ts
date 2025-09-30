@@ -54,6 +54,8 @@ import {
   getDownloadSourceSecretReferences,
 } from '../secrets';
 
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -62,7 +64,6 @@ import {
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
-import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -344,7 +345,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHost, proxies, outputs);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -410,47 +411,12 @@ export async function getFullAgentPolicy(
 }
 
 export function generateFleetConfig(
-  agentPolicy: AgentPolicy,
   fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[],
-  outputs: Output[]
+  proxies: FleetProxy[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
   };
-
-  // generating the ssl configs for checking into Fleet
-  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
-  const output =
-    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
-      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
-      : outputs.find((o) => o.is_default);
-
-  if (
-    output &&
-    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
-  ) {
-    if (output?.ssl) {
-      config.ssl = {
-        ...(output.ssl?.certificate_authorities && {
-          certificate_authorities: output.ssl.certificate_authorities,
-        }),
-        ...(output.ssl?.certificate && {
-          certificate: output.ssl.certificate,
-        }),
-        ...(output.ssl?.key &&
-          !output?.secrets?.ssl?.key && {
-            key: output.ssl.key,
-          }),
-      };
-    }
-    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-    if (output?.secrets) {
-      config.secrets = {
-        ...output?.secrets,
-      };
-    }
-  }
 
   const fleetServerHostproxy = fleetServerHost.proxy_id
     ? proxies.find((proxy) => proxy.id === fleetServerHost.proxy_id)

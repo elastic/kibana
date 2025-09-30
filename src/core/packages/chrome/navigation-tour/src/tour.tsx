@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import { EuiTourStep, EuiButton, EuiButtonEmpty, findElementBySelectorOrRef } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TourManager } from './tour_manager';
 import type { TourState } from './types';
 
@@ -21,7 +22,12 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
   const state = useObservable(tourManager.state$);
 
   if (!state) return null;
-  if (state.status !== 'active') return null;
+  if (state.status === 'idle' || state.status === 'completed' || state.status === 'skipped')
+    return null;
+
+  if (state.status === 'waiting') {
+    return <WaitingTour state={state} tourManager={tourManager} />;
+  }
 
   const currentStep = state.steps[state.currentStepIndex];
   if (!currentStep) return null;
@@ -30,10 +36,10 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
 };
 
 function ActiveTour({ state, tourManager }: { state: TourState; tourManager: TourManager }) {
-  useFinishTourIfNoAnchorFound(state, tourManager);
-
   const currentStep = state.steps[state.currentStepIndex];
   if (!currentStep) return null;
+
+  const isLastStep = state.steps.length === state.currentStepIndex + 1;
 
   const handleNext = () => {
     tourManager.nextStep();
@@ -53,52 +59,89 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
       isStepOpen={true}
       title={currentStep.title}
       anchor={currentStep.target}
-      onFinish={tourManager.isLastStep() ? handleFinish : handleNext}
+      onFinish={isLastStep ? handleFinish : handleNext}
       step={state.currentStepIndex + 1}
       stepsTotal={state.steps.length}
       content={currentStep.content}
       anchorPosition={'leftCenter'}
+      zIndex={10000 /* we want tour to be on top of other chrome popover */}
+      panelProps={{
+        'data-test-subj': `nav-tour-step-${currentStep.id}`,
+      }}
+      display="block"
       footerAction={
-        tourManager.isLastStep() ? (
-          <EuiButton size="s" color="success" onClick={handleFinish}>
-            Finish tour
+        isLastStep ? (
+          <EuiButton
+            size="s"
+            color="success"
+            onClick={handleFinish}
+            data-test-subj="nav-tour-next-button"
+          >
+            <FormattedMessage
+              id="core.chrome.navigationTour.finishTourButton"
+              defaultMessage="Finish tour"
+            />
           </EuiButton>
         ) : (
           [
             <EuiButtonEmpty size="s" color="text" onClick={handleSkip}>
-              Skip tour
+              <FormattedMessage
+                id="core.chrome.navigationTour.skipTourButton"
+                defaultMessage="Skip tour"
+              />
             </EuiButtonEmpty>,
-            <EuiButton size="s" color="success" onClick={handleNext}>
-              Next
+            <EuiButton
+              size="s"
+              color="success"
+              onClick={handleNext}
+              data-test-subj="nav-tour-next-button"
+            >
+              <FormattedMessage id="core.chrome.navigationTour.nextButton" defaultMessage="Next" />
             </EuiButton>,
           ]
         )
       }
       minWidth={300}
       maxWidth={360}
+      repositionOnScroll={true}
     />
   );
 }
 
-// in case your can't continue because the target element is missing, we should end the tour
-// this is likely an unforeseen edge case, but we want to avoid trapping the user in a broken tour
-function useFinishTourIfNoAnchorFound(state: TourState, tourManager: TourManager) {
+function WaitingTour({ state, tourManager }: { state: TourState; tourManager: TourManager }) {
   useEffect(() => {
-    if (state && state.status === 'active') {
-      const currentStep = state.steps[state.currentStepIndex];
-      if (currentStep) {
-        const timeout = setTimeout(() => {
-          const target = findElementBySelectorOrRef(currentStep.target);
-          if (!target) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `EUI Tour: Unable to find target element for step id "${currentStep.id}". Ending tour.`
-            );
-            tourManager.skipTour();
-          }
-        });
-        return () => clearTimeout(timeout);
+    const pollForVisibleSteps = () => {
+      const requiredSteps = state.steps.filter((step) => step.required);
+      const visibleSteps = state.steps.filter((step) => findElementBySelectorOrRef(step.target));
+
+      const canStart =
+        requiredSteps.length > 0
+          ? requiredSteps.every((step) => visibleSteps.includes(step)) // All required visible
+          : visibleSteps.length > 0; // At least one visible
+
+      if (canStart) {
+        const visibleStepIds = visibleSteps.map((step) => step.id);
+        tourManager.activateTour(visibleStepIds);
+        return;
       }
-    }
-  }, [state, tourManager]);
+
+      // Continue polling
+      setTimeout(pollForVisibleSteps, 100);
+    };
+
+    // Start polling with a small delay to allow DOM to settle
+    const timeout = setTimeout(pollForVisibleSteps, 0);
+
+    // Timeout after 10 seconds to prevent infinite waiting
+    const maxWaitTimeout = setTimeout(() => {
+      tourManager.skipTour();
+    }, 10000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(maxWaitTimeout);
+    };
+  }, [state.steps, tourManager]);
+
+  return null;
 }

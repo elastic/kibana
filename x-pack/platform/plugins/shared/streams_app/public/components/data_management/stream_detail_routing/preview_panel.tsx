@@ -33,6 +33,7 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -153,6 +154,11 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
     useDocumentExpansion(hits);
 
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
   let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
@@ -194,17 +200,17 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <MemoPreviewTable
-          documents={documents}
-          sorting={sorting}
-          setSorting={setSorting}
-          toolbarVisibility={true}
-          displayColumns={visibleColumns}
-          setVisibleColumns={setVisibleColumns}
-          selectedRowIndex={selectedRowIndex}
-          onRowSelected={onRowSelected}
-          cellActions={cellActions}
-        />
+        <RowSelectionContext.Provider value={rowSelectionContextValue}>
+          <MemoPreviewTable
+            documents={documents}
+            sorting={sorting}
+            setSorting={setSorting}
+            toolbarVisibility={true}
+            displayColumns={visibleColumns}
+            setVisibleColumns={setVisibleColumns}
+            cellActions={cellActions}
+          />
+        </RowSelectionContext.Provider>
         <PreviewFlyout
           currentDoc={currentDoc}
           hits={hits}

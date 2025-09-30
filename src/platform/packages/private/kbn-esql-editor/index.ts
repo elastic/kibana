@@ -13,6 +13,8 @@ export type { ESQLEditorProps } from './src/esql_editor';
 import { ESQLEditor } from './src/esql_editor';
 export type { ESQLEditorRestorableState } from './src/restorable_state';
 
+export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
+
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default ESQLEditor;

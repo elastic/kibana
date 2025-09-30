@@ -33,8 +33,14 @@ import {
   normalizeCreateCaseRequest,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  isObservable,
+  processObservables,
 } from './utils';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import type {
+  CaseCustomFields,
+  CustomFieldsConfiguration,
+  Observable,
+} from '../../../common/types/domain';
 import {
   CaseStatuses,
   CustomFieldTypes,
@@ -47,6 +53,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
+import type { ObservablePost } from '../../../common/types/api';
 
 const allComments = [
   commentObj,
@@ -1914,7 +1921,7 @@ describe('normalizeCreateCaseRequest', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
-    settings: { syncAlerts: true },
+    settings: { syncAlerts: true, extractObservables: true },
     severity: CaseSeverity.LOW,
     owner: SECURITY_SOLUTION_OWNER,
     assignees: [{ uid: '1' }],
@@ -1993,5 +2000,85 @@ describe('normalizeCreateCaseRequest', () => {
       ...theCase,
       customFields: [],
     });
+  });
+});
+
+describe('isObservable', () => {
+  it('should return true if the observable is an Observable', () => {
+    expect(
+      isObservable({
+        id: '1',
+        typeKey: 'ip',
+        value: '127.0.0.1',
+        description: null,
+        createdAt: '2021-01-01',
+        updatedAt: '2021-01-01',
+      })
+    ).toBe(true);
+  });
+
+  it('should return false if the observable is not an Observable', () => {
+    expect(isObservable({ typeKey: 'ip', value: '127.0.0.1', description: null })).toBe(false);
+  });
+});
+
+describe('processObservables', () => {
+  const mockObservablePost: ObservablePost = {
+    typeKey: 'ip',
+    value: '127.0.0.1',
+    description: null,
+  };
+
+  const mockObservable: Observable = {
+    ...mockObservablePost,
+    id: '1',
+    createdAt: '2021-01-01',
+    updatedAt: '2021-01-01',
+  };
+
+  it('should process the current observable', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should process the new observable post', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should not add the observable if it already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(1);
+
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.size).toBe(1);
+  });
+
+  it('should add a new observable if the key-value pair does not exist', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    processObservables(observablesMap, { ...mockObservablePost, typeKey: 'ip2' });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip2-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(2);
+  });
+
+  it('should not override the existing observable if the key-value pair already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, {
+      ...mockObservable,
+      id: '2',
+      createdAt: '2021-01-02',
+      updatedAt: '2021-01-02',
+    });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
+    expect(observablesMap.size).toBe(1);
   });
 });

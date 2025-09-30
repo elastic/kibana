@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { useEuiTheme, EuiHighlight, euiTextTruncate } from '@elastic/eui';
+import { useEuiTheme, EuiHighlight, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highlight_colors';
 import React, { useMemo } from 'react';
@@ -40,8 +40,6 @@ export const ChartTitle = ({
         pointer-events: none;
       `,
       chartTitleCss: css`
-        ${euiTextTruncate()};
-
         font-weight: ${euiTheme.font.weight.bold};
       `,
     };
@@ -72,7 +70,7 @@ export const ChartTitle = ({
             {title}
           </EuiHighlight>
         ) : (
-          title
+          <EuiTextTruncate text={title} />
         )}
       </span>
     </div>
