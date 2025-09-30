@@ -47,13 +47,13 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
  */
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
-  timeGte: string = 'now-10y',
+  timeGte: string,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
   size: 0,
   query: {
-    range: { '@timestamp': { gte: timeGte } },
+    range: { '@timestamp': { gte: timeGte, lte: 'now' } },
   },
   aggs: {
     privileged_user_status_since_last_run: {
