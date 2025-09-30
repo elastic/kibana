@@ -849,7 +849,7 @@ export const mapProcessorTypeToDescriptor = () => {
         }
 
         return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
-          defaultMessage: 'Sets value of "{field}" to "{value}"',
+          defaultMessage: 'Sets value of "{field}" to {value}',
           values: {
             field,
             value: stringifyValueDescription(value),
