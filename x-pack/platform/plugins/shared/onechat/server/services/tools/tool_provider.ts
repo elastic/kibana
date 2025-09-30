@@ -11,7 +11,6 @@ import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { ToolHandlerFn, LlmDescriptionHandler } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-// TODO: rewrite this shit
 export interface InternalToolDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},

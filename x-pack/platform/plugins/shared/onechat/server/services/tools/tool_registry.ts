@@ -58,20 +58,12 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
   private readonly request: KibanaRequest;
-  private readonly space: string;
   private readonly getRunner: () => Runner;
 
-  constructor({
-    persistedProvider,
-    builtinProvider,
-    request,
-    space,
-    getRunner,
-  }: CreateToolClientParams) {
+  constructor({ persistedProvider, builtinProvider, request, getRunner }: CreateToolClientParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.request = request;
-    this.space = space;
     this.getRunner = getRunner;
   }
 

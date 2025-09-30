@@ -13,7 +13,6 @@ import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolEventEmitter } from '../src/events';
 import type { ModelProvider } from '../src/model_provider';
 import type { ScopedRunner } from '../src/runner';
-import type { ToolProvider } from '../src/tools';
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
@@ -50,10 +49,6 @@ export interface ToolHandlerContext {
    * Can be used to access the inference APIs or chatModel.
    */
   modelProvider: ModelProvider;
-  /**
-   * Tool provider that can be used to list or execute tools.
-   */
-  toolProvider: ToolProvider;
   /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
