@@ -83,7 +83,6 @@ export async function identifySystems({
       initial_clustering: JSON.stringify(initialClustering),
       condition_schema: conditionSchemaText,
     },
-    power: 'low',
     prompt: IdentifySystemsPrompt,
     inferenceClient,
     finalToolChoice: {
