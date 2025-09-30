@@ -16,7 +16,7 @@ import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
-import { findStaleUsersForIndexFactory } from './stale_users';
+import { findStaleUsersFactory } from './stale_users';
 import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
@@ -26,7 +26,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
   const esClient = deps.clusterClient.asCurrentUser;
 
   const bulkUtilsService = createBulkUtilsService(dataClient);
-  const findStaleUsers = findStaleUsersForIndexFactory(dataClient);
+  const findStaleUsers = findStaleUsersFactory(dataClient);
 
   const searchService = createSearchService(dataClient);
 
