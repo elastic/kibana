@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import YAML from 'yaml';
 import type { StepInfo, WorkflowLookup } from './build_workflow_lookup';
 import { buildWorkflowLookup } from './build_workflow_lookup';
@@ -17,26 +17,27 @@ import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
 
 export interface EditorState {
-  yamlString: string | null;
-  yamlDocument: YAML.Document | null;
-  workflowLookup: WorkflowLookup | null;
-  workflowGraph: WorkflowGraph | null;
-  focusedStepInfo: StepInfo | null;
-  hoveredStepInfo?: StepInfo | null;
-  editor: monaco.editor.IStandaloneCodeEditor | null;
+  yamlString?: string;
+  yamlDocument?: YAML.Document;
+  workflowLookup?: WorkflowLookup;
+  workflowGraph?: WorkflowGraph;
+  focusedStepInfo?: StepInfo;
+  hoveredStepInfo?: StepInfo;
+  editor?: monaco.editor.IStandaloneCodeEditor;
+  initEditor: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 function findStepByLine(
   lineNumber: number,
-  workflowMetadata: WorkflowLookup | null
-): StepInfo | null {
-  if (!workflowMetadata) return null;
+  workflowMetadata: WorkflowLookup
+): StepInfo | undefined {
+  if (!workflowMetadata) return undefined;
   return (
     Object.values(workflowMetadata.steps!).find((stepIfo) => {
       if (stepIfo.lineStart <= lineNumber && lineNumber <= stepIfo.lineEnd) {
         return stepIfo;
       }
-    }) || null
+    }) || undefined
   );
 }
 const EditorStateContext = createContext<EditorState | null>(null);
@@ -47,99 +48,94 @@ export function useEditorState() {
   return ctx;
 }
 
-export function EditorStateProvider({
-  editor,
-  onEditorStateChange,
-  children,
-}: {
-  editor: monaco.editor.IStandaloneCodeEditor | null;
-  onEditorStateChange?: (state: EditorState) => void;
-  children: React.ReactNode;
-}) {
-  const [yamlString, setYamlString] = useState<string | null>(null);
-  const [editorState, setEditorState] = useState<EditorState>({
-    yamlString: null,
-    yamlDocument: null,
-    workflowLookup: null,
-    workflowGraph: null,
-    editor: null,
-    focusedStepInfo: null,
-  });
-  const cursorPosition = editor?.getPosition();
-  const { workflowLookup: workflowMetadata } = editorState;
+export function EditorStateProvider({ children }: { children: React.ReactNode }) {
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const [yamlStringBeforeDebounce, setYamlStringBeforeDebounce] = useState<string | undefined>(
+    undefined
+  );
+  const [yamlString, setYamlString] = useState<string | undefined>(undefined);
+  const [yamlDocument, setYamlDocument] = useState<YAML.Document | undefined>(undefined);
+  const [workflowLookup, setWorkflowLookup] = useState<WorkflowLookup | undefined>(undefined);
+  const [workflowGraph, setWorkflowGraph] = useState<WorkflowGraph | undefined>(undefined);
+  const [focusedStepInfo, setFocusedStepInfo] = useState<StepInfo | undefined>(undefined);
+  const [hoveredStepInfo, setHoveredStepInfo] = useState<StepInfo | undefined>(undefined);
+
+  function initEditor(editor: monaco.editor.IStandaloneCodeEditor) {
+    editorRef.current = editor;
+    setIsInitialized(true);
+  }
 
   useEffect(() => {
-    if (!editor) return;
-    const model = editor.getModel()!;
+    if (!isInitialized) {
+      return;
+    }
+
+    const model = editorRef.current!.getModel()!;
 
     const disposable = model.onDidChangeContent(() => {
-      setYamlString(model.getValue());
+      setYamlStringBeforeDebounce(model.getValue());
     });
 
+    // To instantly init other dependencies
     setYamlString(model.getValue());
+    setYamlStringBeforeDebounce(model.getValue());
     return () => {
       disposable.dispose();
     };
-  }, [editor, setYamlString]);
+  }, [isInitialized, setYamlString]);
 
   useEffect(() => {
-    if (yamlString === null) {
-      setEditorState({
-        yamlString: null,
-        yamlDocument: null,
-        workflowLookup: null,
-        workflowGraph: null,
-        focusedStepInfo: null,
-        editor: null,
-      });
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      try {
-        const yamlDocument = YAML.parseDocument(yamlString);
-        const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
-        const workflowLookup = buildWorkflowLookup(yamlDocument, editor?.getModel()!);
-        const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
-        const workflowGraph = parsedWorkflow
-          ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow)
-          : null;
-
-        setEditorState({
-          yamlString,
-          yamlDocument,
-          workflowLookup,
-          workflowGraph,
-          editor,
-          focusedStepInfo: null,
-        });
-      } catch (e) {
-        setEditorState({
-          yamlString: null,
-          yamlDocument: null,
-          workflowLookup: null,
-          workflowGraph: null,
-          focusedStepInfo: null,
-          editor: null,
-        });
-      }
-    }, 500); // debounce parsing to avoid excessive work on each keystroke
+    const timeoutId = setTimeout(() => setYamlString(yamlStringBeforeDebounce), 500);
     return () => clearTimeout(timeoutId);
-  }, [editor, yamlString]);
+  }, [yamlStringBeforeDebounce]);
 
   useEffect(() => {
-    if (!cursorPosition || !workflowMetadata) {
+    if (!yamlString) {
+      setYamlDocument(undefined);
+      setWorkflowLookup(undefined);
+      setWorkflowGraph(undefined);
       return;
     }
 
-    const focusedStepInfo = findStepByLine(cursorPosition.lineNumber, workflowMetadata);
-    setEditorState((prev) => ({ ...prev, focusedStepInfo }));
-  }, [workflowMetadata, cursorPosition, setEditorState]);
+    try {
+      const yamlDoc = YAML.parseDocument(yamlString);
+      const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
+      const lookup = buildWorkflowLookup(yamlDoc, editorRef.current?.getModel()!);
+      const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
+      const graph = parsedWorkflow
+        ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow)
+        : undefined;
+
+      setYamlDocument(yamlDoc);
+      setWorkflowLookup(lookup);
+      setWorkflowGraph(graph);
+    } catch (e) {
+      setYamlDocument(undefined);
+      setWorkflowLookup(undefined);
+      setWorkflowGraph(undefined);
+    }
+  }, [yamlString]);
 
   useEffect(() => {
-    if (!editor) return;
+    if (!workflowLookup) {
+      return;
+    }
 
-    const disposable = editor.onMouseMove((e) => {
+    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+      const foundStepInfo = findStepByLine(event.position.lineNumber, workflowLookup);
+      setFocusedStepInfo(foundStepInfo);
+    });
+
+    return () => disposable.dispose();
+  }, [isInitialized, workflowLookup, setFocusedStepInfo]);
+
+  useEffect(() => {
+    if (!isInitialized || !workflowLookup) {
+      return;
+    }
+
+    const disposable = editorRef.current!.onMouseMove((e) => {
       const { position, type } = e.target;
       // Most useful targets (text, empty content area, line numbers, glyph margin)
       const usefulTargets = new Set([
@@ -151,30 +147,44 @@ export function EditorStateProvider({
       ]);
 
       if (position && usefulTargets.has(type)) {
-        setEditorState((prev) => ({
-          ...prev,
-          hoveredStepInfo: findStepByLine(position.lineNumber, prev.workflowLookup),
-        }));
+        const foundStepInfo = findStepByLine(position.lineNumber, workflowLookup);
+        setHoveredStepInfo(foundStepInfo);
       } else {
-        setEditorState((prev) => ({ ...prev, hoveredStepInfo: null }));
+        setHoveredStepInfo(undefined);
       }
     });
 
     return () => disposable.dispose();
-  }, [editor, setEditorState]);
+  }, [isInitialized, workflowLookup, setHoveredStepInfo]);
 
   useEffect(() => {
-    if (!editor) return;
-    const disposable = editor.onMouseLeave(() => {
-      setEditorState((prev) => ({ ...prev, hoveredStepInfo: null }));
-    });
+    if (!isInitialized) {
+      return;
+    }
+
+    const disposable = editorRef.current!.onMouseLeave(() => setHoveredStepInfo(undefined));
 
     return () => disposable.dispose();
-  }, [editor, setEditorState]);
+  }, [isInitialized, setHoveredStepInfo]);
 
-  useEffect(() => {
-    onEditorStateChange?.(editorState);
-  }, [editorState, onEditorStateChange]);
-
-  return <EditorStateContext.Provider value={editorState}>{children}</EditorStateContext.Provider>;
+  return (
+    <EditorStateContext.Provider
+      value={
+        isInitialized
+          ? {
+              yamlString,
+              yamlDocument,
+              workflowLookup,
+              workflowGraph,
+              focusedStepInfo,
+              hoveredStepInfo,
+              initEditor,
+              editor: editorRef.current!,
+            }
+          : ({ initEditor } as EditorState)
+      }
+    >
+      {children}
+    </EditorStateContext.Provider>
+  );
 }

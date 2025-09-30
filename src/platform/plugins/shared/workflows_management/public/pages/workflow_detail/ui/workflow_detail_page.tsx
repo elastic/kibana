@@ -34,6 +34,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
+import { EditorStateProvider } from '../../../widgets/workflow_yaml_editor/lib/state';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -257,113 +258,115 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <div css={styles.pageContainer}>
-      <WorkflowDetailHeader
-        name={workflow?.name}
-        yaml={yamlValue}
-        isLoading={isLoadingWorkflow}
-        activeTab={activeTab}
-        canRunWorkflow={canRunWorkflow}
-        canSaveWorkflow={canSaveWorkflow}
-        isValid={workflow?.valid ?? true}
-        isEnabled={workflow?.enabled ?? false}
-        handleRunClick={handleRunClick}
-        handleSave={handleSave}
-        handleToggleWorkflow={handleToggleWorkflow}
-        canTestWorkflow={canTestWorkflow}
-        handleTestClick={() => setTestWorkflowModalOpen(true)}
-        handleTabChange={(tab) => {
-          setActiveTab(tab);
-        }}
-        hasUnsavedChanges={hasChanges}
-      />
-      <EuiFlexGroup gutterSize="none" css={styles.container}>
-        <EuiFlexItem css={styles.main}>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem css={styles.yamlEditor}>
-              <React.Suspense fallback={<EuiLoadingSpinner />}>
-                <WorkflowYAMLEditor
-                  workflowId={workflow?.id ?? 'unknown'}
-                  filename={`${workflow?.id ?? 'unknown'}.yaml`}
-                  value={yamlValue}
-                  onChange={(v) => handleChange(v ?? '')}
-                  lastUpdatedAt={workflow?.lastUpdatedAt}
-                  hasChanges={hasChanges}
-                  highlightStep={selectedStepId}
-                  stepExecutions={execution?.stepExecutions}
-                  readOnly={activeTab === 'executions'}
-                  activeTab={activeTab}
-                  selectedExecutionId={selectedExecutionId}
-                  originalValue={workflow?.yaml ?? ''}
-                  onStepActionClicked={handleStepRun}
-                />
-              </React.Suspense>
-            </EuiFlexItem>
-            {isVisualEditorEnabled && workflow && (
-              <EuiFlexItem css={styles.visualEditor}>
+    <EditorStateProvider>
+      <div css={styles.pageContainer}>
+        <WorkflowDetailHeader
+          name={workflow?.name}
+          yaml={yamlValue}
+          isLoading={isLoadingWorkflow}
+          activeTab={activeTab}
+          canRunWorkflow={canRunWorkflow}
+          canSaveWorkflow={canSaveWorkflow}
+          isValid={workflow?.valid ?? true}
+          isEnabled={workflow?.enabled ?? false}
+          handleRunClick={handleRunClick}
+          handleSave={handleSave}
+          handleToggleWorkflow={handleToggleWorkflow}
+          canTestWorkflow={canTestWorkflow}
+          handleTestClick={() => setTestWorkflowModalOpen(true)}
+          handleTabChange={(tab) => {
+            setActiveTab(tab);
+          }}
+          hasUnsavedChanges={hasChanges}
+        />
+        <EuiFlexGroup gutterSize="none" css={styles.container}>
+          <EuiFlexItem css={styles.main}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem css={styles.yamlEditor}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
-                  <WorkflowVisualEditor
-                    workflowYaml={yamlValue}
-                    workflowExecutionId={selectedExecutionId}
+                  <WorkflowYAMLEditor
+                    workflowId={workflow?.id ?? 'unknown'}
+                    filename={`${workflow?.id ?? 'unknown'}.yaml`}
+                    value={yamlValue}
+                    onChange={(v) => handleChange(v ?? '')}
+                    lastUpdatedAt={workflow?.lastUpdatedAt}
+                    hasChanges={hasChanges}
+                    highlightStep={selectedStepId}
+                    stepExecutions={execution?.stepExecutions}
+                    readOnly={activeTab === 'executions'}
+                    activeTab={activeTab}
+                    selectedExecutionId={selectedExecutionId}
+                    originalValue={workflow?.yaml ?? ''}
+                    onStepActionClicked={handleStepRun}
                   />
                 </React.Suspense>
               </EuiFlexItem>
-            )}
-            {isExecutionGraphEnabled && workflow && (
-              <EuiFlexItem css={styles.visualEditor}>
-                <React.Suspense fallback={<EuiLoadingSpinner />}>
-                  <ExecutionGraph workflowYaml={yamlValue} />
-                </React.Suspense>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {activeTab === 'executions' && (
-          <EuiFlexItem css={styles.sidebar}>
-            {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
-            {workflow && selectedExecutionId && (
-              <WorkflowExecutionDetail
-                workflowExecutionId={selectedExecutionId}
+              {isVisualEditorEnabled && workflow && (
+                <EuiFlexItem css={styles.visualEditor}>
+                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                    <WorkflowVisualEditor
+                      workflowYaml={yamlValue}
+                      workflowExecutionId={selectedExecutionId}
+                    />
+                  </React.Suspense>
+                </EuiFlexItem>
+              )}
+              {isExecutionGraphEnabled && workflow && (
+                <EuiFlexItem css={styles.visualEditor}>
+                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                    <ExecutionGraph workflowYaml={yamlValue} />
+                  </React.Suspense>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {activeTab === 'executions' && (
+            <EuiFlexItem css={styles.sidebar}>
+              {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
+              {workflow && selectedExecutionId && (
+                <WorkflowExecutionDetail
+                  workflowExecutionId={selectedExecutionId}
+                  workflowYaml={yamlValue}
+                  onClose={() => setSelectedExecution(null)}
+                />
+              )}
+            </EuiFlexItem>
+          )}
+          {workflow && testSingleStepExecutionId && activeTab !== 'executions' && (
+            <EuiFlexItem css={styles.sidebar}>
+              <SingleStepExecution
+                stepExecutionId={testSingleStepExecutionId}
                 workflowYaml={yamlValue}
-                onClose={() => setSelectedExecution(null)}
+                onClose={() => setTestSingleStepExecutionId(null)}
               />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        {workflowExecuteModalOpen && workflow && (
+          <WorkflowExecuteModal
+            workflow={workflow}
+            onClose={() => setWorkflowExecuteModalOpen(false)}
+            onSubmit={handleRunWorkflow}
+          />
         )}
-        {workflow && testSingleStepExecutionId && activeTab !== 'executions' && (
-          <EuiFlexItem css={styles.sidebar}>
-            <SingleStepExecution
-              stepExecutionId={testSingleStepExecutionId}
-              workflowYaml={yamlValue}
-              onClose={() => setTestSingleStepExecutionId(null)}
-            />
-          </EuiFlexItem>
+        {testWorkflowModalOpen && (
+          <TestWorkflowModal
+            workflowYaml={workflowYaml}
+            onClose={() => setTestWorkflowModalOpen(false)}
+          />
         )}
-      </EuiFlexGroup>
-      {workflowExecuteModalOpen && workflow && (
-        <WorkflowExecuteModal
-          workflow={workflow}
-          onClose={() => setWorkflowExecuteModalOpen(false)}
-          onSubmit={handleRunWorkflow}
-        />
-      )}
-      {testWorkflowModalOpen && (
-        <TestWorkflowModal
-          workflowYaml={workflowYaml}
-          onClose={() => setTestWorkflowModalOpen(false)}
-        />
-      )}
-      {testStepId && contextOverride && (
-        <TestStepModal
-          initialcontextOverride={contextOverride}
-          onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
-          onClose={() => {
-            setTestStepId(null);
-            setcontextOverride(null);
-          }}
-        />
-      )}
-    </div>
+        {testStepId && contextOverride && (
+          <TestStepModal
+            initialcontextOverride={contextOverride}
+            onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
+            onClose={() => {
+              setTestStepId(null);
+              setcontextOverride(null);
+            }}
+          />
+        )}
+      </div>
+    </EditorStateProvider>
   );
 }
 

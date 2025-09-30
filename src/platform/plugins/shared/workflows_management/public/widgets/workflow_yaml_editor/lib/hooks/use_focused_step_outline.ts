@@ -10,10 +10,10 @@
 import { monaco } from '@kbn/monaco';
 import { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { EditorState } from '../state/state';
+import { useEditorState } from '../state/state';
 
-export const useFocusedStepOutline = (editorState: EditorState | null) => {
-  const { focusedStepInfo, editor } = editorState || {};
+export const useFocusedStepOutline = () => {
+  const { focusedStepInfo, editor } = useEditorState();
 
   const styles = useMemo(
     () =>
