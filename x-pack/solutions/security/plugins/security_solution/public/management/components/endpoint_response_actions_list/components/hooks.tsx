@@ -177,9 +177,6 @@ const useTypesFilterInitialState = ({
   const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsMSDefenderEndpointEnabled'
   );
-  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
 
   const getFilterOptions = useCallback(
     ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({

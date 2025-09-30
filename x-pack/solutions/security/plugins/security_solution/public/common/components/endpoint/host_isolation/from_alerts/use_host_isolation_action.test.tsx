@@ -61,7 +61,6 @@ describe('useHostIsolationAction', () => {
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
     appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
     authMockSetter.set({

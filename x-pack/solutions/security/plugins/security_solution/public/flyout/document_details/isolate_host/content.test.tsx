@@ -19,7 +19,6 @@ describe('<IsolateHostPanelContent />', () => {
     appContextMock = createAppRootMockRenderer();
 
     appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
   });
