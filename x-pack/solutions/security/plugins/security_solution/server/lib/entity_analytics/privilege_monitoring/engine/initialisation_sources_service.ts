@@ -31,7 +31,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
   });
 
   const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
-    // When using AD, will use the users index:
+    // When using AD, will use the users index: TODO in: https://github.com/elastic/security-team/issues/13990
     /* if (integration === 'ad') {
       return getStreamPatternFor(integration, namespace);
     }*/
@@ -45,6 +45,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     indexPattern: getStreamPatternFor(integration, namespace),
     name: integrationsSourceIndex(namespace, integration),
     matchers: getMatchersFor(integration),
+    integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
     integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
   });
 
