@@ -294,7 +294,7 @@ export function SchemaChangesReviewModal({
             'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
             {
               defaultMessage:
-                'Some fields below will be updated. Any error from validation will also appear here',
+                'Some fields below will be updated. Any error from validation will also appear here.',
             }
           )}
         </EuiText>
