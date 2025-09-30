@@ -167,6 +167,7 @@ export const useTopNavLinks = ({
       if (!defaultMenu?.openItem?.disabled) {
         const openSearchMenuItem = getOpenSearchAppMenuItem({
           onOpenSavedSearch: state.actions.onOpenSavedSearch,
+          services,
         });
         items.push(openSearchMenuItem);
       }
