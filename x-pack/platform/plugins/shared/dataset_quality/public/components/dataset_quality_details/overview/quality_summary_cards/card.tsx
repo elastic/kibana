@@ -40,7 +40,7 @@ export function Card({
     height: 100%;
     min-width: 300px;
     border: ${isSelected
-      ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`
+      ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
       : 'none'};
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
   `;
@@ -81,6 +81,7 @@ export function Card({
         `,
       }}
       data-test-subj={dataTestSubject}
+      color={isSelected ? 'primary' : 'text'}
     >
       {content}
     </EuiButtonEmpty>

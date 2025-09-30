@@ -40,7 +40,7 @@ export default function OverviewHeader({
         alignItems="center"
         gutterSize="xs"
       >
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <span>{overviewHeaderTitle}</span>
         </EuiTitle>
       </EuiFlexGroup>
