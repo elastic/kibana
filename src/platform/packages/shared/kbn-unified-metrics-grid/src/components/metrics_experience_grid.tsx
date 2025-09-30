@@ -48,6 +48,7 @@ export const MetricsExperienceGrid = ({
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
+  abortController,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -172,6 +173,7 @@ export const MetricsExperienceGrid = ({
             onFilter={onFilter}
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
+            abortController={abortController}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
