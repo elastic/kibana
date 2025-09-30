@@ -23,7 +23,7 @@ describe('Streams Usage Collector', () => {
   });
 
   it('registers a streams collector', () => {
-    registerStreamsUsageCollector(usageCollectionMock);
+    registerStreamsUsageCollector(usageCollectionMock, mockLogger);
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'streams',
@@ -42,9 +42,9 @@ describe('Streams Usage Collector', () => {
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       } as any);
 
-      registerStreamsUsageCollector(usageCollectionMock);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient, logger: mockLogger });
+      const result = await collector.fetch({ esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -68,46 +68,19 @@ describe('Streams Usage Collector', () => {
       });
     });
 
-    it('returns default values on client error', async () => {
+    it('throws error on client error and logs it', async () => {
       esClient.search.mockRejectedValue(new Error('ES error'));
 
-      // Set NODE_ENV to production to avoid error throwing
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
-
-      registerStreamsUsageCollector(usageCollectionMock);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient, logger: mockLogger });
 
-      // Restore original NODE_ENV
-      process.env.NODE_ENV = originalEnv;
+      await expect(collector.fetch({ esClient })).rejects.toThrow('ES error');
 
-      // Verify that logger.error was called
+      // Verify that logger.error was called with the correct message
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to list streams or compute stream metrics',
+        'Failed to collect Streams telemetry data',
         expect.any(Error)
       );
-
-      expect(result).toEqual({
-        classic_streams: {
-          changed_count: 0,
-          with_processing_count: 0,
-          with_fields_count: 0,
-          with_changed_retention_count: 0,
-        },
-        wired_streams: {
-          count: 0,
-        },
-        significant_events: {
-          rules_count: 0,
-          stored_count: 0,
-          unique_wired_streams_count: 0,
-          unique_classic_streams_count: 0,
-          rule_execution_ms_avg_24h: null,
-          rule_execution_ms_p95_24h: null,
-          executions_count_24h: 0,
-        },
-      });
     });
     it('returns computed metrics when data is available', async () => {
       // Mock search calls - for streams, rules, significant events, and event log
@@ -163,9 +136,9 @@ describe('Streams Usage Collector', () => {
         } as any;
       });
 
-      registerStreamsUsageCollector(usageCollectionMock);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient, logger: mockLogger });
+      const result = await collector.fetch({ esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -189,106 +162,60 @@ describe('Streams Usage Collector', () => {
       });
     });
 
-    it('handles circuit_breaking_exception gracefully', async () => {
+    it('handles circuit_breaking_exception by throwing error and logging', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
-      // Mock circuit breaker error
-      esClientMock.search.mockRejectedValue({
-        meta: {
-          body: {
-            error: {
-              type: 'circuit_breaking_exception',
-            },
+      // Mock circuit breaker error - create proper Error object
+      const circuitBreakerError = new Error('Circuit breaker error');
+      (circuitBreakerError as any).meta = {
+        body: {
+          error: {
+            type: 'circuit_breaking_exception',
           },
         },
-        message: 'Circuit breaker error',
-      });
+      };
+      esClientMock.search.mockRejectedValue(circuitBreakerError);
 
-      // Set production environment to prevent re-throwing
-      process.env.NODE_ENV = 'production';
-
-      registerStreamsUsageCollector(usageCollectionMock);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient: esClientMock, logger: mockLogger });
+
+      await expect(collector.fetch({ esClient: esClientMock })).rejects.toThrow(
+        'Circuit breaker error'
+      );
 
       // Verify that logger.error was called instead of console.error
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to list streams or compute stream metrics',
-        expect.any(Object)
+        'Failed to collect Streams telemetry data',
+        expect.any(Error)
       );
-
-      // Should return default values when ES calls fail
-      expect(result).toEqual({
-        classic_streams: {
-          changed_count: 0,
-          with_processing_count: 0,
-          with_fields_count: 0,
-          with_changed_retention_count: 0,
-        },
-        wired_streams: {
-          count: 0,
-        },
-        significant_events: {
-          rules_count: 0,
-          stored_count: 0,
-          unique_wired_streams_count: 0,
-          unique_classic_streams_count: 0,
-          rule_execution_ms_avg_24h: null,
-          rule_execution_ms_p95_24h: null,
-          executions_count_24h: 0,
-        },
-      });
     });
 
-    it('handles too_long_http_line_exception gracefully', async () => {
+    it('handles too_long_http_line_exception by throwing error and logging', async () => {
       const esClientMock2 = elasticsearchServiceMock.createElasticsearchClient();
 
-      // Mock too long HTTP line error
-      esClientMock2.search.mockRejectedValue({
-        meta: {
-          body: {
-            error: {
-              type: 'too_long_http_line_exception',
-            },
+      // Mock too long HTTP line error - create proper Error object
+      const httpLineError = new Error('HTTP line too long');
+      (httpLineError as any).meta = {
+        body: {
+          error: {
+            type: 'too_long_http_line_exception',
           },
         },
-        message: 'HTTP line too long',
-      });
+      };
+      esClientMock2.search.mockRejectedValue(httpLineError);
 
-      // Set production environment to prevent re-throwing
-      process.env.NODE_ENV = 'production';
-
-      registerStreamsUsageCollector(usageCollectionMock);
+      registerStreamsUsageCollector(usageCollectionMock, mockLogger);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient: esClientMock2, logger: mockLogger });
+
+      await expect(collector.fetch({ esClient: esClientMock2 })).rejects.toThrow(
+        'HTTP line too long'
+      );
 
       // Verify that logger.error was called instead of console.error
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to list streams or compute stream metrics',
-        expect.any(Object)
+        'Failed to collect Streams telemetry data',
+        expect.any(Error)
       );
-
-      // Should return default values when ES calls fail
-      expect(result).toEqual({
-        classic_streams: {
-          changed_count: 0,
-          with_processing_count: 0,
-          with_fields_count: 0,
-          with_changed_retention_count: 0,
-        },
-        wired_streams: {
-          count: 0,
-        },
-        significant_events: {
-          rules_count: 0,
-          stored_count: 0,
-          unique_wired_streams_count: 0,
-          unique_classic_streams_count: 0,
-          rule_execution_ms_avg_24h: null,
-          rule_execution_ms_p95_24h: null,
-          executions_count_24h: 0,
-        },
-      });
     });
   });
 });
