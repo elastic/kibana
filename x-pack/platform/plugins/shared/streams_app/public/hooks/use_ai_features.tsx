@@ -13,9 +13,19 @@ import {
   getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
+import type { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
+import { useKibana } from './use_kibana';
 
-export function useAIFeatures() {
+export interface AIFeatures {
+  enabled: boolean;
+  couldBeEnabled: boolean;
+  genAiConnectors: UseGenAIConnectorsResult;
+  isManagedAIConnector: boolean;
+  hasAcknowledgedAdditionalCharges: boolean;
+  acknowledgeAdditionalCharges: (isDismissed: boolean) => void;
+}
+
+export function useAIFeatures(): AIFeatures | null {
   const {
     dependencies: {
       start: { observabilityAIAssistant, licensing },
@@ -61,5 +71,3 @@ export function useAIFeatures() {
     acknowledgeAdditionalCharges: setTourCalloutDismissed,
   };
 }
-
-export type AIFeatures = NonNullable<ReturnType<typeof useAIFeatures>>;
