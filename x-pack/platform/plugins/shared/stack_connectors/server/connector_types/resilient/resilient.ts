@@ -378,7 +378,6 @@ export class ResilientConnector extends CaseConnector<
           read_only: field.read_only,
           required: field.required,
           text: field.text,
-          internal: field.internal,
           prefix: field.prefix,
           values: field.values,
         };

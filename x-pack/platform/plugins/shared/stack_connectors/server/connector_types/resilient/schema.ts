@@ -135,7 +135,6 @@ export const ExternalServiceFieldsSchema = schema.object(
     read_only: schema.boolean(),
     required: schema.nullable(schema.string()),
     text: schema.string(),
-    internal: schema.boolean(),
     prefix: schema.nullable(schema.string()),
     values: schema.nullable(schema.arrayOf(ValuesItemSchema)),
   },

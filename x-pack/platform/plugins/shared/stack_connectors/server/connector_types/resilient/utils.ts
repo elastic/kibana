@@ -143,10 +143,9 @@ export const formatUpdateRequest = ({
       }
 
       let oldValue = oldIncident[name] ? oldIncident[name] : oldIncident[key];
-      // Non-internal fields are stored under `properties` in the old incident
-      if (!fieldMeta.internal) {
-        oldValue = oldIncident.properties
-          ? (oldIncident.properties as Record<string, unknown>)[key]
+      if (fieldMeta.prefix) {
+        oldValue = oldIncident[fieldMeta.prefix]
+          ? (oldIncident[fieldMeta.prefix] as Record<string, unknown>)[key]
           : null;
       }
 
@@ -180,7 +179,6 @@ export function transformFieldMetadataToRecord(
       read_only: field.read_only,
       required: field.required,
       text: field.text,
-      internal: field.internal,
       prefix: field.prefix,
       values: field.values,
     };
