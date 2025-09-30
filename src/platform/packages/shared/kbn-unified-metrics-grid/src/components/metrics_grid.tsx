@@ -59,7 +59,7 @@ export const MetricsGrid = ({
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
-        rowIndex: number;
+        metric: MetricField;
         esqlQuery: string;
       }
     | undefined
@@ -88,13 +88,10 @@ export const MetricsGrid = ({
     gridRef,
   });
 
-  const handleViewDetails = useCallback(
-    (index: number) => (esqlQuery: string) => {
-      setExpandedMetric({ rowIndex: index, esqlQuery });
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-    },
-    []
-  );
+  const handleViewDetails = useCallback((esqlQuery: string, metric: MetricField) => {
+    setExpandedMetric({ metric, esqlQuery });
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
@@ -167,7 +164,7 @@ export const MetricsGrid = ({
                     filters={filters}
                     onBrushEnd={onBrushEnd}
                     onFilter={onFilter}
-                    onViewDetails={handleViewDetails(index)}
+                    onViewDetails={handleViewDetails}
                   />
                 </div>
               </EuiFlexItem>
@@ -175,9 +172,9 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </div>
-      {expandedMetric && expandedMetric.rowIndex < rows.length && (
+      {expandedMetric && (
         <MetricInsightsFlyout
-          metric={rows[expandedMetric.rowIndex].metric}
+          metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
           isOpen
           onClose={handleCloseFlyout}

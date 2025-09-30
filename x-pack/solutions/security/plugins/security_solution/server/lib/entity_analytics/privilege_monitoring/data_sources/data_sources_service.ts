@@ -12,11 +12,14 @@ import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elastic
 import { createIndexSyncService } from './sync/index_sync';
 import { createIntegrationsSyncService } from './sync/integrations/integrations_sync';
 
-export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createDataSourcesService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
   const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const indexSyncService = createIndexSyncService(dataClient);
-  const integrationsSyncService = createIntegrationsSyncService(dataClient);
+  const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
   const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
   /**
@@ -59,9 +62,9 @@ export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClie
     );
   };
 
-  const syncAllSources = async (soClient: SavedObjectsClientContract) => {
+  const syncAllSources = async () => {
     const jobs = [indexSyncService.plainIndexSync(soClient)];
-    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync(soClient));
+    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);
     settled
@@ -74,6 +77,6 @@ export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClie
     searchPrivilegesIndices,
     syncAllSources,
     ...createIndexSyncService(dataClient),
-    ...createIntegrationsSyncService(dataClient),
+    ...createIntegrationsSyncService(dataClient, soClient),
   };
 };

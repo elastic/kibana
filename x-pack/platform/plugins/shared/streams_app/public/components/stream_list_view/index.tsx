@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiBetaBadge,
-  EuiLink,
   useEuiTheme,
   EuiButton,
   EuiFlexItem,
@@ -36,6 +35,7 @@ import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { FeedbackButton } from '../feedback_button';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -111,31 +111,33 @@ export function StreamListView() {
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
                   defaultMessage: 'Streams',
                 })}
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                    defaultMessage: 'Technical Preview',
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.streams.streamsListView.betaBadgeDescription',
-                    {
-                      defaultMessage:
-                        'This functionality is experimental and not supported. It may change or be removed at any time.',
-                    }
-                  )}
-                  alignment="middle"
-                  size="s"
-                />
+                {isServerless && (
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                      defaultMessage: 'Technical Preview',
+                    })}
+                    tooltipContent={i18n.translate(
+                      'xpack.streams.streamsListView.betaBadgeDescription',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    )}
+                    alignment="middle"
+                    size="s"
+                  />
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             {groupStreams?.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={openGroupStreamModificationFlyout}>
+                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
                     defaultMessage: 'Create Group stream',
                   })}
@@ -144,27 +146,22 @@ export function StreamListView() {
             )}
             {showSettingsFlyoutButton && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                <EuiButtonEmpty
+                  iconType="gear"
+                  size="s"
+                  onClick={() => setIsSettingsFlyoutOpen(true)}
+                  aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                    defaultMessage: 'Settings',
+                  })}
+                >
                   {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
                     defaultMessage: 'Settings',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
+            <FeedbackButton />
           </EuiFlexGroup>
-        }
-        description={
-          <>
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
-              defaultMessage:
-                'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-            })}{' '}
-            <EuiLink target="_blank" href={core.docLinks.links.observability.logsStreams}>
-              {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
-                defaultMessage: 'See docs',
-              })}
-            </EuiLink>
-          </>
         }
       />
       <StreamsAppPageTemplate.Body grow>
