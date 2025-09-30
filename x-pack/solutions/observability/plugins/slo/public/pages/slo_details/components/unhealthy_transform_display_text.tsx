@@ -29,9 +29,7 @@ export function TransformDisplayText({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size={textSize} color="danger">
-          {transformId}
-        </EuiText>
+        <EuiText size={textSize}>{transformId}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
