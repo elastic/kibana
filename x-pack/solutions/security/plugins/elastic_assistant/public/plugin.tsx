@@ -11,9 +11,11 @@ import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { AssistantNavDevSingletonProvider } from './src/context/assistant_nav_dev_singleton';
+import { ControlledAssistantNavLink } from './src/components/controlled_assistant_nav_link';
+import { DevBarGearButton } from './src/components/dev_bar_gear_button';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -69,6 +71,16 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
+    // Register gear button for dev controls (appears to the left)
+    coreStart.chrome.navControls.registerRight({
+      order: 1000,
+      mount: (target) => {
+        const startService = startServices();
+        return this.mountDevGearButton(target, coreStart, startService);
+      },
+    });
+
+    // Register AI Assistant button (appears to the right)
     coreStart.chrome.navControls.registerRight({
       order: 1001,
       mount: (target) => {
@@ -78,6 +90,42 @@ export class ElasticAssistantPublicPlugin
     });
 
     return {};
+  }
+
+  private mountDevGearButton(
+    targetDomElement: HTMLElement,
+    coreStart: CoreStart,
+    services: StartServices
+  ) {
+    ReactDOM.render(
+      <I18nProvider>
+        <KibanaContextProvider
+          services={{
+            appName: 'securitySolution',
+            ...services,
+          }}
+        >
+          <KibanaThemeProvider {...coreStart}>
+            <NavigationProvider core={services}>
+              <ReactQueryClientProvider>
+                <AssistantSpaceIdProvider>
+                  <AssistantProvider>
+                    <AssistantNavDevSingletonProvider>
+                      <Suspense fallback={null}>
+                        <DevBarGearButton />
+                      </Suspense>
+                    </AssistantNavDevSingletonProvider>
+                  </AssistantProvider>
+                </AssistantSpaceIdProvider>
+              </ReactQueryClientProvider>
+            </NavigationProvider>
+          </KibanaThemeProvider>
+        </KibanaContextProvider>
+      </I18nProvider>,
+      targetDomElement
+    );
+
+    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
   }
 
   private mountAIAssistantButton(
@@ -98,10 +146,12 @@ export class ElasticAssistantPublicPlugin
               <ReactQueryClientProvider>
                 <AssistantSpaceIdProvider>
                   <AssistantProvider>
-                    <Suspense fallback={null}>
-                      <AssistantNavLink iconOnly={true} variant="secondary" />
-                      <AssistantOverlay />
-                    </Suspense>
+                    <AssistantNavDevSingletonProvider>
+                      <Suspense fallback={null}>
+                        <ControlledAssistantNavLink />
+                        <AssistantOverlay />
+                      </Suspense>
+                    </AssistantNavDevSingletonProvider>
                   </AssistantProvider>
                 </AssistantSpaceIdProvider>
               </ReactQueryClientProvider>
