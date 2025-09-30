@@ -11,11 +11,15 @@ import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client'
 import { createSourcesSyncService } from '../sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 
-export const createIntegrationsSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const updateDetectionService = createUpdateDetectionService(dataClient);
+export type IntegrationsSyncService = ReturnType<typeof createIntegrationsSyncService>;
+export const createIntegrationsSyncService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
+  const updateDetectionService = createUpdateDetectionService(dataClient, soClient);
   const sourcesSyncService = createSourcesSyncService(dataClient);
 
-  const integrationsSync = async (soClient: SavedObjectsClientContract) => {
+  const integrationsSync = async () => {
     await sourcesSyncService.syncBySourceType({
       soClient,
       sourceType: 'entity_analytics_integration',
