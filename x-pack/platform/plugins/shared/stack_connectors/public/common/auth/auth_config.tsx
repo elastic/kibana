@@ -75,8 +75,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
   const { data: secretHeaderKeys = [], isSuccess } = useSecretHeaders(connectorId);
 
-  // const didLoadSecretHeaders = useRef<boolean>(false);
-
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
@@ -123,14 +121,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         headers: mergedHeaders,
       },
     });
-  }, [
-    getFormData,
-    secretHeaderKeys,
-    updateFieldValues,
-    // didLoadSecretHeaders,
-    hasHeaders,
-    isSuccess,
-  ]);
+  }, [getFormData, secretHeaderKeys, updateFieldValues, hasHeaders, isSuccess]);
 
   const options = [
     {
