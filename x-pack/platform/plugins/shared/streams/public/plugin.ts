@@ -14,7 +14,8 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, from } from 'rxjs';
+import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
 import type {
@@ -33,10 +34,12 @@ export class Plugin implements StreamsPluginClass {
   public logger: Logger;
 
   private repositoryClient!: StreamsRepositoryClient;
+  private isServerless: boolean;
   private wiredStatusSubject = new BehaviorSubject<WiredStreamsStatus>(UNKNOWN_STATUS);
 
   constructor(context: PluginInitializerContext<{}>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
     this.logger = context.logger.get();
   }
 
@@ -50,7 +53,11 @@ export class Plugin implements StreamsPluginClass {
 
     return {
       streamsRepositoryClient: this.repositoryClient,
-      navigationStatus$: createStreamsNavigationStatusObservable(pluginsStart, core.application),
+      navigationStatus$: createStreamsNavigationStatusObservable(
+        pluginsStart,
+        core.application,
+        this.isServerless
+      ),
       wiredStatus$: this.wiredStatusSubject.asObservable(),
       enableWiredMode: async (signal: AbortSignal) => {
         const response = await this.repositoryClient.fetch('POST /api/streams/_enable 2023-10-31', {
@@ -96,25 +103,39 @@ const UNKNOWN_STATUS: WiredStreamsStatus = { enabled: 'unknown', can_manage: fal
 
 const createStreamsNavigationStatusObservable = once(
   (
-    deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
-    application: ApplicationStart
+    deps: StreamsPluginStartDependencies,
+    application: ApplicationStart,
+    isServerless: boolean
   ): Observable<StreamsNavigationStatus> => {
     const hasCapabilities = application.capabilities?.streams?.show;
-    const isServerless = deps.cloud?.isServerlessEnabled;
-    const isObservability = deps.cloud?.serverless.projectType === 'observability';
+    const isServerlessObservability = deps.cloud?.serverless.projectType === 'observability';
 
     if (!hasCapabilities) {
       return of({ status: 'disabled' });
     }
 
-    if (!isServerless) {
+    if (isServerless) {
+      // For serverless, only check cloud project type
+      return of({
+        status: isServerlessObservability ? 'enabled' : 'disabled',
+      });
+    }
+
+    // For non-serverless, check the active space solution
+    if (!deps.spaces?.getActiveSpace) {
       return of({ status: 'enabled' });
     }
 
-    if (isServerless && isObservability) {
-      return of({ status: 'enabled' });
-    }
-
-    return of({ status: 'disabled' });
+    return from(deps.spaces.getActiveSpace()).pipe(
+      map((space) => {
+        const spaceSolution = space?.solution;
+        const isValidSolution =
+          !spaceSolution || spaceSolution === 'classic' || spaceSolution === 'oblt';
+        return { status: isValidSolution ? 'enabled' : 'disabled' } as const;
+      }),
+      catchError(() => {
+        return of({ status: 'enabled' } as const);
+      })
+    );
   }
 );
