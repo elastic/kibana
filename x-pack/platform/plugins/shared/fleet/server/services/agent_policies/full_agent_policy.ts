@@ -53,8 +53,6 @@ import {
   getDownloadSourceSecretReferences,
 } from '../secrets';
 
-import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
-
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
