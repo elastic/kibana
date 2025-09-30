@@ -21,7 +21,9 @@
     "@kbn/doc-links",
     "@kbn/core-ui-settings-common",
     "@kbn/cloud-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }
