@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import path from 'path';
-import fs from 'fs';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
+import dashboardTemplate from './dashboard.json';
 
 interface DashboardData {
   attributes: {
@@ -21,18 +20,23 @@ interface DashboardData {
 
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
-    let dashboardData: DashboardData;
-    try {
-      dashboardData = readDashboardTemplate();
-    } catch (error) {
-      throw new Error(`Error loading dashboard template: ${error}`); // The dashboard migration status will be set to 'failed' and the error stored in the document
+    if (!state.translated_panels?.length) {
+      throw new Error('No panels found'); // The dashboard migration status will be set to 'failed' and the error stored in the document.
     }
 
     // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
-    const panels = state.translated_panels
-      .filter((panel) => panel.data) // Filter out any panels that failed to translate
-      .sort((a, b) => a.index - b.index);
+    const panels = state.translated_panels.sort((a, b) => a.index - b.index);
 
+    const allErrors = panels.every((panel) => panel.error);
+    if (allErrors) {
+      // The dashboard migration status will be set to 'failed' and the error stored in the document.
+      throw new Error(
+        `All panels failed to translate. Aborting dashboard generation. First error: ${panels[0].error}` // Only show the first error to avoid overly long error messages
+      );
+    }
+
+    // Create the dashboard object
+    const dashboardData: DashboardData = structuredClone(dashboardTemplate);
     const title = state.original_dashboard.title || 'Untitled Dashboard';
     const description = state.description || '';
 
@@ -40,21 +44,22 @@ export const getAggregateDashboardNode = (): GraphNode => {
     dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
 
-    let translationResult;
-    if (panels.length > 0) {
-      if (panels.length === state.parsed_original_dashboard.panels.length) {
-        // Set to FULL only if all panels are fully translated
-        const allFull = panels.every(
-          (panel) => panel.translation_result === MigrationTranslationResult.FULL
-        );
-        translationResult = allFull
-          ? MigrationTranslationResult.FULL
-          : MigrationTranslationResult.PARTIAL;
+    let translationResult: MigrationTranslationResult;
+
+    const allTranslated = panels.every(
+      (panel) => panel.translation_result === MigrationTranslationResult.FULL
+    );
+    if (allTranslated) {
+      translationResult = MigrationTranslationResult.FULL;
+    } else {
+      const allUntranslatable = panels.every(
+        (panel) => panel.translation_result === MigrationTranslationResult.UNTRANSLATABLE
+      );
+      if (allUntranslatable) {
+        translationResult = MigrationTranslationResult.UNTRANSLATABLE;
       } else {
         translationResult = MigrationTranslationResult.PARTIAL;
       }
-    } else {
-      translationResult = MigrationTranslationResult.UNTRANSLATABLE;
     }
 
     // Aggregate all comments from the individual panel translations, with a header for each panel
@@ -76,12 +81,3 @@ export const getAggregateDashboardNode = (): GraphNode => {
     };
   };
 };
-
-function readDashboardTemplate() {
-  const templatePath = path.join(__dirname, `./dashboard.json`);
-  const template = fs.readFileSync(templatePath, 'utf-8');
-  if (!template) {
-    throw new Error(`Dashboard template not found`);
-  }
-  return JSON.parse(template);
-}

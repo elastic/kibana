@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookActionConnectorFields from './webhook_connectors';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 
@@ -32,7 +31,7 @@ describe('WebhookActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <WebhookActionConnectorFields
           readOnly={false}
@@ -42,14 +41,42 @@ describe('WebhookActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await waitForComponentToUpdate();
+    await screen.findByTestId('webhookViewHeadersSwitch');
+    userEvent.click(screen.getByTestId('webhookViewHeadersSwitch'));
+    expect(screen.getByTestId('webhookMethodSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookUrlText')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookUserInput')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookPasswordInput')).toBeInTheDocument();
+  });
 
-    expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
-    wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
+  it('renders OAuth2 option and fields', () => {
+    const actionConnector = {
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'https://test.com',
+        headers: [{ key: 'content-type', value: 'text' }],
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+      },
+      secrets: {},
+      isDeprecated: false,
+    };
+
+    const { getByTestId } = render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <WebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(getByTestId('authOAuth2')).toBeInTheDocument();
+    expect(getByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
+    expect(getByTestId('clientIdOAuth2')).toBeInTheDocument();
   });
 
   describe('Validation', () => {

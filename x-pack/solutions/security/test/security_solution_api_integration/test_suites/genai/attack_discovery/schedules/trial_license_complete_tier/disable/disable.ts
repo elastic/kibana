@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
         await apis.disable({ id: createdSchedule.id });
 
         // Check that schedule is disabled
-        checkIfScheduleDisabled({ getService, id: createdSchedule.id });
+        await checkIfScheduleDisabled({ getService, id: createdSchedule.id });
       });
     });
 

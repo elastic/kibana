@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  HeatmapVisualizationState,
-} from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, HeatmapVisualizationState } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';
@@ -68,11 +64,10 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
 function buildFormulaLayer(
   layer: LensHeatmapConfig,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   const defaultLayer = {
-    ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+    ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
   };
 
   if (layer.xAxis) {
@@ -112,11 +107,11 @@ function getValueColumns(layer: LensHeatmapConfig) {
 
 export async function buildHeatmap(
   config: LensHeatmapConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensHeatmapConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensHeatmapConfig, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

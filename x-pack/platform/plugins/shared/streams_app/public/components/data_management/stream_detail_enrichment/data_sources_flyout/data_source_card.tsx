@@ -27,7 +27,7 @@ import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
 import { AssetImage } from '../../../asset_image';
-import { PreviewTable } from '../../preview_table';
+import { PreviewTable } from '../../shared/preview_table';
 import { DATA_SOURCES_I18N } from './translations';
 
 interface DataSourceCardProps {

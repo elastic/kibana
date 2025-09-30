@@ -21,6 +21,7 @@ import type { EmbeddableStateTransfer } from './state_transfer';
 import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 import type { EmbeddableTransforms } from '../common';
 import type { EnhancementsRegistry } from '../common/enhancements/registry';
+import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -69,6 +70,11 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
+  /**
+   * Use registerTransforms to register transforms for an embeddable type.
+   * Public transforms registry uses transformOut to convert StoredEmbeddableState from URL into EmbeddableState.
+   * transformIn is not used.
+   */
   registerTransforms: (
     type: string,
     getTransforms: () => Promise<EmbeddableTransforms<any, any> | undefined>
@@ -84,6 +90,7 @@ export interface EmbeddableSetup {
 }
 
 export interface EmbeddableStart {
+  getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
   hasTransforms: (type: string) => boolean;

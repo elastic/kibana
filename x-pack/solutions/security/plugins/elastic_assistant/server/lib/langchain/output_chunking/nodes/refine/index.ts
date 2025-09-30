@@ -118,7 +118,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       // LOCAL MUTATION:
       combinedResponse = getCombined({ combinedGenerations: combinedRefinements, partialResponse }); // combine the new response with the previous ones
 
-      const attackDiscoveries = parseCombinedOrThrow({
+      const insights = parseCombinedOrThrow({
         combinedResponse,
         generationAttempts,
         llmType,
@@ -129,7 +129,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        insights: attackDiscoveries, // the final, refined answer
+        insights, // the final, refined answer
         generationAttempts: generationAttempts + 1,
         combinedRefinements: combinedResponse,
         refinements: [...refinements, partialResponse],

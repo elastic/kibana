@@ -18,8 +18,7 @@ export const validateCommandArguments = (
   command: ESQLCommand,
   ast: ESQLAst,
   context: ICommandContext = {
-    userDefinedColumns: new Map(), // Ensure context is always defined
-    fields: new Map(),
+    columns: new Map(), // Ensure context is always defined
   },
   callbacks: ICommandCallbacks = {}
 ) => {
@@ -39,7 +38,7 @@ export const validateCommandArguments = (
       } else if (isOptionNode(arg)) {
         messages.push(...validateOption(arg, command, ast, context, callbacks));
       } else if (isColumn(arg) || isIdentifier(arg)) {
-        if (command.name === 'stats' || command.name === 'inlinestats') {
+        if (command.name === 'stats' || command.name === 'inline stats') {
           messages.push(errors.unknownAggFunction(arg));
         } else {
           messages.push(...validateColumnForCommand(arg, command.name, context));

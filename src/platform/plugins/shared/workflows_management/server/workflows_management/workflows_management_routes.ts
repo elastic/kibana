@@ -416,7 +416,12 @@ export function defineRoutes(
           definition: workflow.definition,
           yaml: workflow.yaml,
         };
-        const workflowExecutionId = await api.runWorkflow(workflowForExecution, spaceId, inputs);
+        const workflowExecutionId = await api.runWorkflow(
+          workflowForExecution,
+          spaceId,
+          inputs,
+          request
+        );
         return response.ok({
           body: {
             workflowExecutionId,
@@ -498,7 +503,8 @@ export function defineRoutes(
         const workflowExecutionId = await api.testWorkflow(
           request.body.workflowYaml,
           request.body.inputs,
-          spaceId
+          spaceId,
+          request
         );
 
         return response.ok({
@@ -517,6 +523,58 @@ export function defineRoutes(
         if (isWorkflowValidationError(error)) {
           return response.badRequest({
             body: error.toJSON(),
+          });
+        }
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.post(
+    {
+      path: '/api/workflows/testStep',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        body: schema.object({
+          stepId: schema.string(),
+          contextOverride: schema.recordOf(schema.string(), schema.any()),
+          workflowYaml: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const spaceId = spaces.getSpaceId(request);
+
+        const workflowExecutionId = await api.testStep(
+          request.body.workflowYaml,
+          request.body.stepId,
+          request.body.contextOverride,
+          spaceId
+        );
+
+        return response.ok({
+          body: {
+            workflowExecutionId,
+          },
+        });
+      } catch (error) {
+        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
+          return response.badRequest({
+            body: {
+              message: `Invalid workflow yaml: ${error.message}`,
+            },
           });
         }
         return response.customError({

@@ -87,7 +87,7 @@
             "label": "getLogGenerators",
             "description": [],
             "signature": [
-              "({ rpm, distribution, }: { rpm?: number | undefined; distribution?: \"relative\" | \"uniform\" | undefined; }) => Promise<",
+              "({ rpm, distribution, systems, }: { rpm?: number | undefined; distribution?: \"relative\" | \"uniform\" | undefined; systems?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/sample-log-parser",
                 "scope": "common",
@@ -106,7 +106,7 @@
                 "id": "def-common.SampleParserClient.getLogGenerators.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rpm = 10000,\n    distribution = 'uniform',\n  }",
+                "label": "{\n    rpm = 10000,\n    distribution = 'uniform',\n    systems = [],\n  }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/client/index.ts",
                 "deprecated": false,
@@ -135,6 +135,20 @@
                     "description": [],
                     "signature": [
                       "\"relative\" | \"uniform\" | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-sample-parser/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/sample-log-parser",
+                    "id": "def-common.SampleParserClient.getLogGenerators.$1.systems",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "systems",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/client/index.ts",
                     "deprecated": false,

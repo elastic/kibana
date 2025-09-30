@@ -6,3 +6,4 @@
  */
 
 export { formatOnechatErrorMessage } from './base/errors';
+export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';

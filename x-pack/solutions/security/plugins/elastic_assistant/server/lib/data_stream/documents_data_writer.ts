@@ -22,11 +22,11 @@ export interface BulkOperationError {
   };
 }
 
-export interface WriterBulkResponse {
+export interface WriterBulkResponse<TUpdated = unknown> {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
-  docs_updated: unknown[];
+  docs_updated: TUpdated[];
   took: number;
 }
 
@@ -44,7 +44,7 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
 export interface DocumentsDataWriter {
   bulk: <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
-  ) => Promise<WriterBulkResponse>;
+  ) => Promise<WriterBulkResponse<TUpdateParams>>;
 }
 
 interface DocumentsDataWriterOptions {
@@ -60,14 +60,20 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
   public bulk = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
-  ) => {
+  ): Promise<WriterBulkResponse<TUpdateParams>> => {
     try {
       if (
         !params.documentsToCreate?.length &&
         !params.documentsToUpdate?.length &&
         !params.documentsToDelete?.length
       ) {
-        return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
+        return {
+          errors: [],
+          docs_created: [],
+          docs_deleted: [],
+          docs_updated: [],
+          took: 0,
+        } as WriterBulkResponse<TUpdateParams>;
       }
 
       const { errors, items, took } = await this.options.esClient.bulk(
@@ -91,9 +97,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           .map((item) => item.delete?._id),
         docs_updated: items
           .filter((item) => item.update?.status === 201 || item.update?.status === 200)
-          .map((item) => item.update?.get?._source),
+          .map((item) => item.update?.get?._source) as TUpdateParams[],
         took,
-      } as WriterBulkResponse;
+      } as WriterBulkResponse<TUpdateParams>;
     } catch (e) {
       this.options.logger.error(`Error bulk actions for documents: ${e.message}`);
       return {
@@ -109,7 +115,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         docs_deleted: [],
         docs_updated: [],
         took: 0,
-      } as WriterBulkResponse;
+      } as WriterBulkResponse<TUpdateParams>;
     }
   };
   getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({

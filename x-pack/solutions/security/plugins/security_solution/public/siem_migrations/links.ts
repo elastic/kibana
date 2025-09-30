@@ -53,6 +53,12 @@ const subLinks: LinkItem[] = [
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
+    isBeta: true,
+    betaOptions: {
+      text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsDashboards.badge', {
+        defaultMessage: 'Technical Preview',
+      }),
+    },
   },
 ];
 

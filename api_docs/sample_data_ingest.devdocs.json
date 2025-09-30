@@ -176,6 +176,20 @@
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.InstallResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -211,6 +225,20 @@
             "type": "string",
             "tags": [],
             "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.StatusResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
             "description": [],
             "signature": [
               "string | undefined"

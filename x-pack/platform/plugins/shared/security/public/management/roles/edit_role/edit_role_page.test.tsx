@@ -287,7 +287,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender(wrapper);
 
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
+      expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
@@ -508,7 +508,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender(wrapper);
 
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
+      expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);

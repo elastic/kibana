@@ -26,7 +26,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-executi
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE, getWorkflowZodSchemaLoose } from '../../common/schema';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
   SearchWorkflowExecutionsParams,
@@ -38,7 +38,7 @@ export interface GetWorkflowsParams {
   limit: number;
   page: number;
   createdBy?: string[];
-  enabled?: boolean;
+  enabled?: boolean[];
   query?: string;
   _full?: boolean;
 }
@@ -165,7 +165,8 @@ export class WorkflowsManagementApi {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    request: KibanaRequest
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
@@ -174,16 +175,21 @@ export class WorkflowsManagementApi {
       inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
     return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<string> {
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -216,7 +222,38 @@ export class WorkflowsManagementApi {
         yaml: workflowYaml,
         isTestRun: true,
       },
-      context
+      context,
+      request
+    );
+    return executeResponse.workflowExecutionId;
+  }
+
+  public async testStep(
+    workflowYaml: string,
+    stepId: string,
+    contextOverride: Record<string, any>,
+    spaceId: string
+  ): Promise<string> {
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
+      {
+        id: 'test-workflow',
+        name: workflowToCreate.name,
+        enabled: workflowToCreate.enabled,
+        definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
+        spaceId,
+      },
+      stepId,
+      contextOverride
     );
     return executeResponse.workflowExecutionId;
   }

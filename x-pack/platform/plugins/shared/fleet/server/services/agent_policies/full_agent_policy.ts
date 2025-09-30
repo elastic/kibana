@@ -26,7 +26,6 @@ import type {
   FleetProxy,
   FleetServerHost,
   AgentPolicy,
-  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
@@ -34,13 +33,11 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
-  OTelCollectorConfig,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import {
   dataTypes,
-  DEFAULT_OUTPUT,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
@@ -64,6 +61,8 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { generateOtelcolConfig } from './otel_collector';
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -162,7 +161,7 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
   }
 
   const inputs = agentInputs
@@ -822,17 +821,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/**
- * Get id used in full agent policy (sent to the agents)
- * we use "default" for the default policy to avoid breaking changes
- */
-function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
-  if (output.is_default && output.type === outputType.Elasticsearch) {
-    return DEFAULT_OUTPUT.name;
-  }
-  return output.id;
-}
-
 /* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
@@ -890,26 +878,4 @@ export function getBinarySourceSettings(
     };
   }
   return config;
-}
-
-// Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]) {
-  const otelConfig = inputs.flatMap((input) => {
-    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
-        return {
-          ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
-          ...(inputStream?.service ? { service: inputStream.service } : {}),
-          ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
-          ...(inputStream?.processors ? { service: inputStream.processors } : {}),
-          ...(inputStream?.connectors ? { service: inputStream.connectors } : {}),
-          ...(inputStream?.exporters ? { service: inputStream.exporters } : {}),
-        };
-      });
-
-      return otelInputs;
-    }
-  });
-
-  return otelConfig.length > 0 ? otelConfig[0] : {};
 }

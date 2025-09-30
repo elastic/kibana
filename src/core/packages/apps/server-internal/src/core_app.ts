@@ -58,6 +58,7 @@ interface CommonRoutesParams {
     req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
   ) => Promise<IKibanaResponse>;
+  skipBundleRegistration: boolean;
 }
 
 const DYNAMIC_CONFIG_OVERRIDES_SO_TYPE = 'dynamic-config-overrides';
@@ -81,12 +82,17 @@ export class CoreAppsService {
       .pipe(map((rawCfg) => new CoreAppConfig(rawCfg)));
   }
 
-  preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+  async preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
     this.logger.debug('Prebooting core app.');
 
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
-      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      const config = await firstValueFrom(this.config$);
+      this.registerPrebootDefaultRoutes(
+        corePreboot,
+        uiPlugins,
+        config.skipBundleRoutesIfCdnEnabled && corePreboot.http.staticAssets.isUsingCdn()
+      );
       this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
@@ -94,7 +100,11 @@ export class CoreAppsService {
   async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
     const config = await firstValueFrom(this.config$);
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
+    this.registerDefaultRoutes(
+      coreSetup,
+      uiPlugins,
+      config.skipBundleRoutesIfCdnEnabled && coreSetup.http.staticAssets.isUsingCdn()
+    );
     this.registerStaticDirs(coreSetup, uiPlugins);
     this.maybeRegisterDynamicConfigurationFeature({
       config,
@@ -111,7 +121,11 @@ export class CoreAppsService {
     this.stop$.next();
   }
 
-  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+  private registerPrebootDefaultRoutes(
+    corePreboot: InternalCorePreboot,
+    uiPlugins: UiPlugins,
+    skipBundleRegistration: boolean
+  ) {
     corePreboot.http.registerRoutes('', (router) => {
       this.registerCommonDefaultRoutes({
         basePath: corePreboot.http.basePath,
@@ -133,11 +147,16 @@ export class CoreAppsService {
                 bypassErrorFormat: true,
               })
             : res.renderCoreApp(),
+        skipBundleRegistration,
       });
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(
+    coreSetup: InternalCoreSetup,
+    uiPlugins: UiPlugins,
+    skipBundleRegistration: boolean
+  ) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
@@ -178,6 +197,7 @@ export class CoreAppsService {
       router,
       uiPlugins,
       onResourceNotFound: async (req, res) => res.notFound(),
+      skipBundleRegistration,
     });
 
     resources.register(
@@ -358,6 +378,7 @@ export class CoreAppsService {
     uiPlugins,
     onResourceNotFound,
     httpResources,
+    skipBundleRegistration,
   }: CommonRoutesParams) {
     // catch-all route
     httpResources.register(
@@ -417,12 +438,14 @@ export class CoreAppsService {
       async (context, req, res) => res.ok({ body: { version: '0.0.1' } })
     );
 
-    registerBundleRoutes({
-      router,
-      uiPlugins,
-      staticAssets,
-      packageInfo: this.env.packageInfo,
-    });
+    if (!skipBundleRegistration) {
+      registerBundleRoutes({
+        router,
+        uiPlugins,
+        staticAssets,
+        packageInfo: this.env.packageInfo,
+      });
+    }
   }
 
   // After the package is built and bootstrap extracts files to target/build,

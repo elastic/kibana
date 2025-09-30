@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -22,8 +22,12 @@ const duplicateWarning = i18n.translate(
 
 export function DuplicateWarning() {
   return (
-    <EuiToolTip position="bottom" content={duplicateWarning}>
-      <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-    </EuiToolTip>
+    <EuiIconTip
+      position="bottom"
+      content={duplicateWarning}
+      type="warning"
+      size="s"
+      color={euiThemeVars.euiColorWarningText}
+    />
   );
 }

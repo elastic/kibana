@@ -19,16 +19,15 @@ describe('EnterConditionBranchNodeImpl', () => {
   } as any;
 
   beforeEach(() => {
-    wfExecutionRuntimeManagerMock = {
-      goToNextStep: jest.fn(),
-      enterScope: jest.fn(),
-    } as any;
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
+    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
     impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 
-  it('should go to next step', async () => {
+  it('should go to next node', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 
   it('should enter true scope for enter-then-branch', async () => {

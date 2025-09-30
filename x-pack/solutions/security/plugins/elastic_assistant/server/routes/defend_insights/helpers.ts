@@ -68,24 +68,6 @@ function addGenerationInterval(
   return newGenerationIntervals;
 }
 
-export function isDefendInsightsEnabled({
-  request,
-  logger,
-  assistantContext,
-}: {
-  request: KibanaRequest;
-  logger: Logger;
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-}): boolean {
-  const pluginName = getPluginNameFromRequest({
-    request,
-    logger,
-    defaultPluginName: DEFAULT_PLUGIN_NAME,
-  });
-
-  return assistantContext.getRegisteredFeatures(pluginName).defendInsights;
-}
-
 export function isDefendInsightsPolicyResponseFailureEnabled({
   request,
   logger,
@@ -512,7 +494,7 @@ export const invokeDefendInsightsGraph = async ({
     savedObjectsClient,
   });
 
-  const graph = await getDefaultDefendInsightsGraph({
+  const graph = getDefaultDefendInsightsGraph({
     insightType,
     endpointIds,
     anonymizationFields,

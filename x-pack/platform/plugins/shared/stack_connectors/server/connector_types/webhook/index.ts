@@ -7,11 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AxiosError, AxiosResponse } from 'axios';
-import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
-import { map, getOrElse } from 'fp-ts/Option';
-
+import { getOrElse, map } from 'fp-ts/Option';
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -20,30 +18,31 @@ import type {
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
-  WebhookConnectorType,
   ActionParamsType,
   ConnectorTypeConfigType,
+  WebhookConnectorType,
   WebhookConnectorTypeExecutorOptions,
-  ConnectorTypeSecretsType,
 } from './types';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
-import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
+import { AuthType } from '../../../common/auth/constants';
+import { getAxiosConfig } from './get_axios_config';
+import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 export const ConnectorTypeId = '.webhook';
+const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
@@ -86,12 +85,7 @@ function renderParameterTemplates(
   };
 }
 
-function validateConnectorTypeConfig(
-  configObject: ConnectorTypeConfigType,
-  validatorServices: ValidatorServices
-) {
-  const { configurationUtilities } = validatorServices;
-  const configuredUrl = configObject.url;
+function validateUrl(configuredUrl: string) {
   try {
     new URL(configuredUrl);
   } catch (err) {
@@ -104,7 +98,12 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function ensureUriAllowed(
+  configuredUrl: string,
+  configurationUtilities: ActionsConfigurationUtilities
+) {
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
@@ -117,7 +116,9 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function validateAuthType(configObject: ConnectorTypeConfigType) {
   if (Boolean(configObject.authType) && !configObject.hasAuth) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
@@ -126,7 +127,12 @@ function validateConnectorTypeConfig(
       })
     );
   }
+}
 
+function validateCertType(
+  configObject: ConnectorTypeConfigType,
+  configurationUtilities: ActionsConfigurationUtilities
+) {
   if (configObject.certType === SSLCertType.PFX) {
     const webhookSettings = configurationUtilities.getWebhookSettings();
     if (!webhookSettings.ssl.pfx.enabled) {
@@ -143,39 +149,109 @@ function validateConnectorTypeConfig(
   }
 }
 
+function validateAdditionalFields(configObject: ConnectorTypeConfigType) {
+  if (configObject.additionalFields) {
+    try {
+      const parsedAdditionalFields = JSON.parse(configObject.additionalFields);
+
+      if (
+        typeof parsedAdditionalFields !== 'object' ||
+        Array.isArray(parsedAdditionalFields) ||
+        Object.keys(parsedAdditionalFields).length === 0
+      ) {
+        throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
+      }
+    } catch (e) {
+      throw new Error(ADDITIONAL_FIELD_CONFIG_ERROR);
+    }
+  }
+}
+
+function validateOAuth2(configObject: ConnectorTypeConfigType) {
+  if (
+    configObject.authType === AuthType.OAuth2ClientCredentials &&
+    (!configObject.accessTokenUrl || !configObject.clientId)
+  ) {
+    const missingFields = [];
+    if (!configObject.accessTokenUrl) {
+      missingFields.push('Access Token URL (accessTokenUrl)');
+    }
+    if (!configObject.clientId) {
+      missingFields.push('Client ID (clientId)');
+    }
+
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.webhook.oauth2ConfigurationError', {
+        defaultMessage: `error validation webhook action config: missing {missingItems} fields`,
+        values: {
+          missingItems: missingFields.join(', '),
+        },
+      })
+    );
+  }
+}
+
+function validateConnectorTypeConfig(
+  configObject: ConnectorTypeConfigType,
+  validatorServices: ValidatorServices
+) {
+  const { configurationUtilities } = validatorServices;
+  const configuredUrl = configObject.url;
+
+  validateUrl(configuredUrl);
+  ensureUriAllowed(configuredUrl, configurationUtilities);
+  validateAuthType(configObject);
+  validateCertType(configObject, configurationUtilities);
+  validateAdditionalFields(configObject);
+  validateOAuth2(configObject);
+}
+
 // action executor
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, params, configurationUtilities, logger, connectorUsageCollector } =
-    execOptions;
-  const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
+  const {
+    actionId,
+    config,
+    params,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+    services,
+  } = execOptions;
+
+  const { method, url } = config;
   const { body: data } = params;
 
-  const secrets: ConnectorTypeSecretsType = execOptions.secrets;
-  const { basicAuth, sslOverrides } = buildConnectorAuth({
-    hasAuth,
-    authType,
-    secrets,
-    verificationMode,
-    ca,
+  const [axiosConfig, axiosConfigError] = await getAxiosConfig({
+    connectorId: actionId,
+    services,
+    config,
+    secrets: execOptions.secrets,
+    configurationUtilities,
+    logger,
   });
 
-  const axiosInstance = axios.create();
+  if (axiosConfigError) {
+    logger.error(
+      `ConnectorId "${actionId}": error "${
+        axiosConfigError.message ?? 'unknown error - couldnt load axios config'
+      }"`
+    );
+    return errorResultRequestFailed(
+      actionId,
+      axiosConfigError.message ?? 'unknown error - couldnt load axios config'
+    );
+  }
 
-  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
-    username: basicAuth.auth?.username,
-    password: basicAuth.auth?.password,
-    headers,
-  });
-
+  const { axiosInstance, headers, sslOverrides } = axiosConfig;
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
-      headers: headersWithBasicAuth,
+      headers,
       data,
       configurationUtilities,
       sslOverrides,
@@ -222,11 +298,13 @@ export async function executor(
         );
       }
 
-      if (status === 404) {
-        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
+      const errorResult = errorResultInvalid(actionId, message);
+
+      if (userErrorCodes.includes(status)) {
+        errorResult.errorSource = TaskErrorSource.USER;
       }
 
-      return errorResultInvalid(actionId, message);
+      return errorResult;
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
@@ -249,8 +327,7 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string,
-  errorSource?: TaskErrorSource
+  serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -260,13 +337,13 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
-    errorSource,
   };
 }
 
 function errorResultRequestFailed(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.requestFailedErrorMessage', {
     defaultMessage: 'error calling webhook, request failed',
@@ -276,6 +353,7 @@ function errorResultRequestFailed(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

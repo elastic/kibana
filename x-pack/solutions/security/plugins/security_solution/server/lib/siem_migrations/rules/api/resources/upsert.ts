@@ -69,7 +69,10 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             }
 
             const [lookups, macros] = partition(resources, { type: 'lookup' });
-            const processedLookups = await processLookups(lookups, ruleMigrationsClient);
+            const processedLookups = await processLookups(
+              lookups,
+              ruleMigrationsClient.data.lookups
+            );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
               ...resource,
               migration_id: migrationId,

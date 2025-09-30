@@ -82,10 +82,10 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.collectorMock.createProcessMetricsCollector",
+            "id": "def-server.collectorMock.createMockWithRegisterMetrics",
             "type": "Function",
             "tags": [],
-            "label": "createProcessMetricsCollector",
+            "label": "createMockWithRegisterMetrics",
             "description": [],
             "signature": [
               "() => { registerMetrics: jest.Mock<any, any, any>; collect: jest.MockInstance<any, [], unknown> & (() => any); reset: jest.MockInstance<void, [], unknown> & (() => void); }"
@@ -183,7 +183,7 @@
                 "label": "overwrites",
                 "description": [],
                 "signature": [
-                  "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 95: number; 99: number; } | undefined; }"
+                  "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 90: number; 95: number; 99: number; } | undefined; }"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
                 "deprecated": false,

@@ -82,6 +82,16 @@ export const parseRecords = (
   };
 };
 
+const getEntityDocuments = (
+  entityId: string,
+  nodesDataArray: NodeDocumentDataModel[]
+): NodeDocumentDataModel[] => {
+  // Filter documents that match this entity ID
+  const matchingDocs = nodesDataArray.filter((doc) => doc.id === entityId);
+
+  return matchingDocs;
+};
+
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
@@ -101,6 +111,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       actorIds,
       action,
       targetIds,
+      isOrigin,
       isOriginAlert,
       actorsDocData,
       targetsDocData,
@@ -136,14 +147,28 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       }
     });
 
-    // Create entity nodes
-    [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
+    // Create entity nodes for actors
+    actorIdsArray.forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
+          documentsData: getEntityDocuments(id, actorsDocDataArray),
+          id,
+          label: undefined,
+          color: 'primary',
+          ...determineEntityNodeVisualProps(id, actorsDocDataArray),
+        };
+      }
+    });
+
+    // Create entity nodes for targets
+    targetIdsArraySafe.forEach((id) => {
+      if (nodesMap[id] === undefined) {
+        nodesMap[id] = {
+          documentsData: getEntityDocuments(id, targetsDocDataArray),
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
+          ...determineEntityNodeVisualProps(id, targetsDocDataArray),
         };
       }
     });
@@ -158,7 +183,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         }
 
         const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})`,
+          id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
           label: action,
           color: isOriginAlert || isAlert ? 'danger' : 'primary',
           shape: 'label',

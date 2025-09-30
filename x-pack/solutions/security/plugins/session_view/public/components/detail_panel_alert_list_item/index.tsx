@@ -10,13 +10,12 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
-  EuiIcon,
+  EuiIconTip,
   EuiText,
   EuiAccordion,
   EuiPanel,
   EuiHorizontalRule,
   formatDate,
-  EuiToolTip,
 } from '@elastic/eui';
 import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 import { ALERT_ICONS } from '../../../common/constants';
@@ -113,13 +112,13 @@ export const DetailPanelAlertListItem = ({
       buttonContent={
         <EuiText css={styles.alertTitleContainer} size="s">
           <p css={styles.alertTitle}>
-            <EuiToolTip position="top" content={alertIconTooltipContent}>
-              <EuiIcon
-                color="danger"
-                type={ALERT_ICONS[processEventAlertCategory]}
-                css={styles.alertIcon}
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              position="top"
+              content={alertIconTooltipContent}
+              type={ALERT_ICONS[processEventAlertCategory]}
+              color="danger"
+              css={styles.alertIcon}
+            />
 
             {dataOrDash(name)}
           </p>

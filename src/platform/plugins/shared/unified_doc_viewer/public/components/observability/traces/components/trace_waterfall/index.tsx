@@ -11,9 +11,11 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
+import { EuiDelayRender } from '@elastic/eui';
+import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
+import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 
 interface Props {
   traceId: string;
@@ -22,15 +24,22 @@ interface Props {
   dataView: DocViewRenderProps['dataView'];
 }
 
-const fullScreenButtonLabel = i18n.translate(
+export const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
   { defaultMessage: 'Expand trace timeline' }
 );
 
+const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
+  defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
+});
+
+const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
+  defaultMessage: 'Trace',
+});
+
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
-
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
   const getParentApi = useCallback(
     () => ({
@@ -47,9 +56,11 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     [docId, rangeFrom, rangeTo, traceId]
   );
 
+  const actionId = 'traceWaterfallFullScreenAction';
+
   return (
     <>
-      {showFullScreenWaterfall && serviceName ? (
+      {showFullScreenWaterfall ? (
         <FullScreenWaterfall
           traceId={traceId}
           rangeFrom={rangeFrom}
@@ -63,15 +74,15 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
       ) : null}
       <ContentFrameworkSection
         id="trace-waterfall"
-        title={i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-          defaultMessage: 'Trace',
-        })}
+        title={sectionTitle}
+        description={sectionTip}
         actions={[
           {
             icon: 'fullScreen',
             onClick: () => setShowFullScreenWaterfall(true),
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
+            id: actionId,
           },
         ]}
       >
@@ -80,6 +91,13 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           getParentApi={getParentApi}
           hidePanelChrome
         />
+        <EuiDelayRender delay={500}>
+          <TraceWaterfallTourStep
+            actionId={actionId}
+            fullScreenButtonLabel={fullScreenButtonLabel}
+            onFullScreenLinkClick={() => setShowFullScreenWaterfall(true)}
+          />
+        </EuiDelayRender>
       </ContentFrameworkSection>
     </>
   );

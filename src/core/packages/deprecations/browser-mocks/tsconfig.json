@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-deprecations-browser",
-    "@kbn/core-deprecations-browser-internal"
+    "@kbn/core-deprecations-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

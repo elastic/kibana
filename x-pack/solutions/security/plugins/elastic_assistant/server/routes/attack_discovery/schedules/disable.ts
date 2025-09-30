@@ -28,7 +28,10 @@ export const disableAttackDiscoverySchedulesRoute = (
       path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: [
+            'elasticAssistant',
+            'securitySolution-updateAttackDiscoverySchedule',
+          ],
         },
       },
     })

@@ -1131,10 +1131,6 @@
                 "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
               },

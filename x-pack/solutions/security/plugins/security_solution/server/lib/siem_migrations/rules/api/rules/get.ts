@@ -18,7 +18,7 @@ import type { RuleMigrationGetRulesOptions } from '../../data/rule_migrations_da
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingMigration } from '../util/with_existing_migration_id';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsGetRulesRoute = (
   router: SecuritySolutionPluginRouter,
