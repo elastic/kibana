@@ -21,7 +21,7 @@ export const registerApp = ({
   getServices,
 }: {
   core: CoreSetup<OnechatStartDependencies>;
-  getServices: () => Promise<OnechatInternalService>;
+  getServices: () => OnechatInternalService;
 }) => {
   core.application.register({
     id: ONECHAT_APP_ID,

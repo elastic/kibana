@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
+import type React from 'react';
+import { type ReactNode } from 'react';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 
 export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const {
-    access: { hasRequiredLicense, hasLlmConnector },
-  } = useOnechatServices();
+  const { accessChecker } = useOnechatServices();
+  const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
 
   if (!hasRequiredLicense) {
     // TODO: Render "upgrade your license" prompt

@@ -39,7 +39,7 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
-  private internalServices?: Promise<OnechatInternalService>;
+  private internalServices?: OnechatInternalService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -93,18 +93,14 @@ export class OnechatPlugin
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
-    const getInternalServices = async () => {
-      return {
-        agentService,
-        chatService,
-        conversationsService,
-        toolsService,
-        startDependencies,
-        access: await accessChecker.checkAccess(),
-      };
+    this.internalServices = {
+      agentService,
+      chatService,
+      conversationsService,
+      toolsService,
+      startDependencies,
+      accessChecker,
     };
-
-    this.internalServices = getInternalServices();
 
     return {
       tools: createPublicToolContract({ toolsService }),

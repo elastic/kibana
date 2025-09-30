@@ -28,6 +28,7 @@ const resolveValues = async <T>(promiseObject: PromiseValues<T>): Promise<T> => 
 export class AgentBuilderAccessChecker {
   private readonly licensing: LicensingPluginStart;
   private readonly inference: InferencePublicStart;
+  private access: AgentBuilderAccess | null = null;
 
   constructor({
     licensing,
@@ -50,14 +51,27 @@ export class AgentBuilderAccessChecker {
     return connectors.length > 0;
   }
 
-  public async checkAccess(): Promise<AgentBuilderAccess> {
+  public async initAccess() {
+    if (this.access !== null) {
+      return;
+    }
+
     const accessPromise: PromiseValues<AgentBuilderAccess> = {
       hasRequiredLicense: this.hasRequiredLicense(),
       hasLlmConnector: this.hasLlmConnector(),
     };
 
-    const access = await resolveValues(accessPromise);
+    try {
+      this.access = await resolveValues(accessPromise);
+    } catch (error) {
+      throw new Error('Unable to determine Agent Builder access', { cause: error });
+    }
+  }
 
-    return access;
+  public getAccess() {
+    if (!this.access) {
+      throw new Error('Agent Builder access was not initialized');
+    }
+    return this.access;
   }
 }
