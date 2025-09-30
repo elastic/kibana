@@ -147,7 +147,7 @@ function createFetchFunction(logger: Logger) {
 
   async function fetchSignificantEventsData(esClient: any) {
     const significantEventsResponse = await esClient.search({
-      index: '.alerts-streams.alerts-*', // Changed from .alerts-streams.alerts-default to capture all spaces
+      index: '.alerts-streams.alerts-*',
       size: 0,
       query: {
         bool: {
