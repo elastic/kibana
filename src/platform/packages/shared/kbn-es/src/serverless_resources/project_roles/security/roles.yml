@@ -35,6 +35,8 @@ viewer:
         - 'risk-score.risk-score-*'
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.updates.security_*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -107,6 +109,9 @@ editor:
     - names:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset.*'
+        - '.entities.v1.updates.security_*'
       privileges:
         - 'read'
         - 'write'
@@ -179,6 +184,8 @@ t1_analyst:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -234,6 +241,8 @@ t2_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -305,6 +314,8 @@ t3_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -387,6 +398,8 @@ threat_intelligence_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -455,6 +468,8 @@ rule_author:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -533,6 +548,8 @@ soc_manager:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -617,6 +634,8 @@ detections_admin:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
@@ -672,6 +691,9 @@ platform_engineer:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.reset.*
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
@@ -738,6 +760,8 @@ endpoint_operations_analyst:
         - .items*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -818,6 +842,8 @@ endpoint_policy_manager:
         - logstash-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read

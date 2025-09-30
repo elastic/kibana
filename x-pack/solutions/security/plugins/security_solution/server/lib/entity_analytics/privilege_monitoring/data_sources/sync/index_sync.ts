@@ -50,8 +50,8 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       soClient,
       namespace: deps.namespace,
     });
-    // get all monitoring index source saved objects of type 'index'
-    const indexSources = await monitoringIndexSourceClient.findByIndex();
+    // get all monitoring index source saved objects of type 'index_sync'
+    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index');
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
@@ -162,19 +162,13 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
       );
 
-      const existingUserRes = await searchService.getMonitoredUsers(batchUsernames);
-
-      const existingUserMap = new Map<string, string | undefined>();
-      for (const hit of existingUserRes.hits.hits) {
-        const username = hit._source?.user?.name;
-        dataClient.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
-        if (username) existingUserMap.set(username, hit._id);
-      }
+      const existingUserMap = await searchService.getExistingUsersMap(batchUsernames);
 
       const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
         sourceId,
         existingUserId: existingUserMap.get(username),
+        isPrivileged: true,
       }));
 
       if (usersToWrite.length === 0) return batchUsernames;

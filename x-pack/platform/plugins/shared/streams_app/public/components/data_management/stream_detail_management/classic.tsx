@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
@@ -15,10 +15,11 @@ import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDescription } from './stream_description';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -72,6 +73,7 @@ export function ClassicStreamDetailManagement({
               })}
               <EuiBadgeGroup gutterSize="s">
                 {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                {Streams.WiredStream.Definition.is(definition.stream) && <WiredStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
@@ -146,10 +148,18 @@ export function ClassicStreamDetailManagement({
   if (definition.privileges.manage) {
     tabs.advanced = {
       content: (
-        <UnmanagedElasticsearchAssets
-          definition={definition}
-          refreshDefinition={refreshDefinition}
-        />
+        <>
+          {otherTabs.significantEvents ? (
+            <>
+              <StreamDescription definition={definition} />
+              <EuiSpacer />
+            </>
+          ) : null}
+          <UnmanagedElasticsearchAssets
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+          />
+        </>
       ),
       label: (
         <EuiToolTip

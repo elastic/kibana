@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { ContentFrameworkSectionProps } from '.';
-import { ContentFrameworkSection } from '.';
+import userEvent from '@testing-library/user-event';
+import { ContentFrameworkSection, type ContentFrameworkSectionProps } from './section';
 
 const defaultProps: ContentFrameworkSectionProps = {
   title: 'Test Section',
@@ -32,12 +32,19 @@ const defaultProps: ContentFrameworkSectionProps = {
   ],
   children: <div>Section children</div>,
   id: 'testSection',
+  'data-test-subj': 'testSection',
 };
 
 describe('ContentFrameworkSection', () => {
   it('renders the title', () => {
     render(<ContentFrameworkSection {...defaultProps} />);
     expect(screen.getByText('Test Section')).toBeInTheDocument();
+  });
+
+  it('renders EuiBetaBadge when isTechPreview is true', () => {
+    const props = { ...defaultProps, isTechPreview: true };
+    render(<ContentFrameworkSection {...props} />);
+    expect(screen.getByTestId('ContentFrameworkSectionEuiBetaBadge')).toBeInTheDocument();
   });
 
   it('renders the description as EuiIconTip', () => {
@@ -47,6 +54,7 @@ describe('ContentFrameworkSection', () => {
 
   it('renders actions as buttons', () => {
     render(<ContentFrameworkSection {...defaultProps} />);
+
     expect(screen.getByTestId('unifiedDocViewerSectionActionButton-expand')).toBeInTheDocument();
     expect(
       screen.getByTestId('unifiedDocViewerSectionActionButton-fullScreen')
@@ -83,5 +91,13 @@ describe('ContentFrameworkSection', () => {
     expect(
       screen.queryByTestId('unifiedDocViewerSectionActionButton-fullScreen')
     ).not.toBeInTheDocument();
+  });
+
+  it('calls onToggle when the accordion is toggled', async () => {
+    const onToggle = jest.fn();
+    render(<ContentFrameworkSection {...defaultProps} onToggle={onToggle} forceState="open" />);
+    const toggleBtn = screen.getByText('Test Section');
+    await userEvent.click(toggleBtn);
+    expect(onToggle).toHaveBeenCalled();
   });
 });

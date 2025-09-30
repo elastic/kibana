@@ -12,21 +12,23 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import { toastsServiceMock } from './toasts_service.mock';
 import { createNotificationCoordinatorMock } from './notification_coordinator.mock';
 
+import { lazyObject } from '@kbn/lazy-object';
+
 const createSetupContractMock = () => {
-  const setupContract: DeeplyMockedKeys<NotificationsSetup> = {
+  const setupContract: DeeplyMockedKeys<NotificationsSetup> = lazyObject({
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createSetupContract(),
     coordinator: createNotificationCoordinatorMock(),
-  };
+  });
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: DeeplyMockedKeys<NotificationsStart> = {
+  const startContract: DeeplyMockedKeys<NotificationsStart> = lazyObject({
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
     showErrorDialog: jest.fn(),
-  };
+  });
   return startContract;
 };
 
@@ -40,12 +42,12 @@ export interface NotificationsServiceContract {
 }
 
 const createMock = () => {
-  const mocked: jest.Mocked<NotificationsServiceContract> = {
-    setup: jest.fn(),
+  const mocked: jest.Mocked<NotificationsServiceContract> = lazyObject({
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn(),
     stop: jest.fn(),
-  };
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  });
+
   return mocked;
 };
 

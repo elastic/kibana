@@ -168,6 +168,46 @@ describe('Agent migration', () => {
         migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
       ).rejects.toThrowError('Agent is protected and cannot be migrated');
     });
+
+    it('should throw an error if the agent is a fleet server', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          { ...mockedAgent, components: [{ type: 'fleet-server' } as any] },
+          options
+        )
+      ).rejects.toThrowError('Fleet server agents cannot be migrated');
+    });
+
+    it('should throw an error if the agent has a not supported version', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          { ...mockedAgent, agent: { version: '9.1.0' } as any },
+          options
+        )
+      ).rejects.toThrowError(
+        'Agent cannot be migrated. Migrate action is supported from version 9.2.0.'
+      );
+    });
   });
 
   // Bulk migrate
@@ -252,6 +292,52 @@ describe('Agent migration', () => {
         {
           'agent-123': new FleetError(
             'Agent agent-123 cannot be migrated because it is protected.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+    });
+
+    it('should record error result if the agent is fleet-server', async () => {
+      const agent = { ...mockedAgent, components: [{ type: 'fleet-server' } as any] };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is a fleet-server.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+    });
+
+    it('should record error result if the agent is on unsupported version', async () => {
+      const agent = { ...mockedAgent, agent: { version: '9.1.0' } as any };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated. Migrate action is supported from version 9.2.0.'
           ),
         },
         'agent does not support migration action'
