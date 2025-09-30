@@ -10742,7 +10742,7 @@ Object {
           },
           "defaultModel": Object {
             "flags": Object {
-              "default": "gpt-4.1",
+              "default": "gpt-5-chat",
               "error": [Function],
               "presence": "optional",
             },
