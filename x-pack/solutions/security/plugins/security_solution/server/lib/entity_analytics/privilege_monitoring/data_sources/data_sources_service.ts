@@ -14,12 +14,13 @@ import { createIntegrationsSyncService } from './sync/integrations/integrations_
 
 export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract,
   maxUsersAllowed: number
 ) => {
   const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
-  const integrationsSyncService = createIntegrationsSyncService(dataClient);
+  const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
   const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
   /**
@@ -61,9 +62,9 @@ export const createDataSourcesService = (
       (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
     );
   };
-  const syncAllSources = async (soClient: SavedObjectsClientContract) => {
+  const syncAllSources = async () => {
     const jobs = [indexSyncService.plainIndexSync(soClient)];
-    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync(soClient));
+    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);
     settled
@@ -76,6 +77,6 @@ export const createDataSourcesService = (
     searchPrivilegesIndices,
     syncAllSources,
     ...createIndexSyncService(dataClient, maxUsersAllowed),
-    ...createIntegrationsSyncService(dataClient),
+    ...createIntegrationsSyncService(dataClient, soClient),
   };
 };

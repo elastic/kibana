@@ -177,6 +177,7 @@ export const createIndexSyncService = (
         username,
         sourceId,
         existingUserId: existingUserMap.get(username),
+        isPrivileged: true,
       }));
 
       if (usersToWrite.length === 0) return batchUsernames;

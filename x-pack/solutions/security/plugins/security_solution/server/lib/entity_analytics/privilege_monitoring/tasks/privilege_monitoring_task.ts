@@ -236,7 +236,6 @@ const runPrivilegeMonitoringTask = async ({
     }
     const maxUsersAllowed =
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-    const dataSourcesService = createDataSourcesService(dataClient, maxUsersAllowed);
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,
@@ -245,7 +244,8 @@ const runPrivilegeMonitoringTask = async ({
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
-    await dataSourcesService.syncAllSources(soClient);
+    const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
+    await dataSourcesService.syncAllSources();
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
