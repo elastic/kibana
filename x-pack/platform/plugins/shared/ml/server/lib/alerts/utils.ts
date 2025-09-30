@@ -53,20 +53,3 @@ const isRealUrl = (str: string): boolean => {
     return false;
   }
 };
-
-/**
- * Prevents auto-linkification in email clients by inserting zero-width spaces
- * after dots. Real URLs (http/https) are preserved intact.
- */
-export const escapeLinkLike = (text: string): string => {
-  if (!text) return text;
-
-  // For non-URL values, find and escape all dot-containing substrings
-  return text.replace(/\S+\.\S+/g, (match) => {
-    // Keep real URLs intact
-    if (isRealUrl(match)) return match;
-
-    // Add zero-width space after each dot
-    return match.replace(/\./g, '.\u200B');
-  });
-};

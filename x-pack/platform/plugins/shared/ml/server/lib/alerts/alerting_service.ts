@@ -55,7 +55,7 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
-import { escapeLinkLike, assertUserError } from './utils';
+import { assertUserError } from './utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -556,22 +556,6 @@ export function alertingServiceProvider(
   };
 
   /**
-   * Process string fields with escapeLinkLike to prevent auto-linkification in email clients
-   * @param source - The source object to process
-   * @returns A new object with string fields processed with escapeLinkLike
-   */
-  const processSourceWithEscapeLinkLike = <T extends Record<string, unknown>>(source: T): T => {
-    const processed = { ...source };
-    // Process only the string fields
-    Object.entries(source).forEach(([key, value]) => {
-      if (typeof value === 'string') {
-        (processed as Record<string, unknown>)[key] = escapeLinkLike(value);
-      }
-    });
-    return processed;
-  };
-
-  /**
    * Returns a callback for formatting elasticsearch aggregation response
    * to the alert context.
    * @param resultType
@@ -592,7 +576,7 @@ export function alertingServiceProvider(
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
       const timestamp = topAnomaly._source.timestamp;
       const bucketSpanInSeconds = topAnomaly._source.bucket_span;
-      const message = escapeLinkLike(getAlertMessage(resultType, topAnomaly._source));
+      const message = getAlertMessage(resultType, topAnomaly._source);
 
       return {
         count: aggTypeResults.doc_count,
@@ -617,10 +601,8 @@ export function alertingServiceProvider(
           const formatter =
             formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
 
-          const escapedRecordSource = processSourceWithEscapeLinkLike(h._source);
-
           return {
-            ...escapedRecordSource,
+            ...h._source,
             typical: typical?.map((t) => formatter(t)),
             actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
@@ -630,10 +612,8 @@ export function alertingServiceProvider(
           };
         }) as RecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
-          const escapedInfluencerSource = processSourceWithEscapeLinkLike(h._source);
-
           return {
-            ...escapedInfluencerSource,
+            ...h._source,
             score: Math.floor(
               h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
             ),
