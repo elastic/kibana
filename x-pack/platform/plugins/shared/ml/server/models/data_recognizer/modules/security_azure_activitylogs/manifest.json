@@ -1,6 +1,6 @@
 {
   "id": "security_azure_activitylogs",
-  "title": "Security: Azure Activity",
+  "title": "Security: Azure Activity Logs",
   "description": "Detect suspicious activity recorded in Azure Activity Logs.",
   "type": "Azure Activity Logs data",
   "logoFile": "logo.json",

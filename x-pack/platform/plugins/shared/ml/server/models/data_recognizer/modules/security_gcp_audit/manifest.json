@@ -50,7 +50,7 @@
       "job_id": "gcp_audit_rare_method_for_a_client_user_email"
     },
     {
-      "id": "datafeed-gcp_audit_high_distinct_count_error_messagee",
+      "id": "datafeed-gcp_audit_high_distinct_count_error_message",
       "file": "datafeed_gcp_audit_high_distinct_count_error_message.json",
       "job_id": "gcp_audit_high_distinct_count_error_message"
     },
