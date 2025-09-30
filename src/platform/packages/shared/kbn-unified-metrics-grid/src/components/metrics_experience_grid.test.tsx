@@ -9,7 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
@@ -21,6 +21,7 @@ import type {
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 jest.mock('../store/hooks');
 jest.mock('../hooks');
@@ -51,10 +52,9 @@ const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
 const input$ = new Subject<UnifiedHistogramInputMessage>();
 
 const dimensions: Dimension[] = [
-  { name: 'foo', type: 'keyword', description: 'some description' },
-  { name: 'qux', type: 'keyword', description: 'some description' },
+  { name: 'foo', type: 'keyword' },
+  { name: 'qux', type: 'keyword' },
 ];
-const dimensionNames = dimensions.map((d) => d.name);
 const allFields: MetricField[] = [
   {
     name: 'field1',
@@ -85,8 +85,11 @@ describe('MetricsExperienceGrid', () => {
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       updateTimeRange: () => {},
     },
-    services: {} as UnifiedHistogramServices,
+    services: {
+      fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+    } as unknown as UnifiedHistogramServices,
     input$,
+    isComponentVisible: true,
   };
 
   beforeEach(() => {
@@ -110,10 +113,8 @@ describe('MetricsExperienceGrid', () => {
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 1,
-      allFields,
       filteredFieldsBySearch: [allFields[0]],
       currentPageFields: [allFields[0]],
-      dimensions: dimensionNames,
     });
 
     useDimensionsQueryMock.mockReturnValue({
@@ -188,10 +189,8 @@ describe('MetricsExperienceGrid', () => {
   it('renders the no data state covering only the grid section when paginated fields returns no fields', async () => {
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 0,
-      allFields: [],
       currentPageFields: [],
       filteredFieldsBySearch: [],
-      dimensions: dimensionNames,
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -266,15 +265,27 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
+    await waitFor(() => {
+      expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+    });
+
     const inputButton = getByTestId('metricsExperienceToolbarSearch');
-    expect(inputButton).toBeInTheDocument();
-    await inputButton.click();
+
+    await act(async () => {
+      inputButton.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
 
     const input = getByTestId('metricsExperienceGridToolbarSearch');
     expect(input).toBeInTheDocument();
 
-    input.focus();
-    fireEvent.change(input, { target: { value: 'cpu' } });
+    act(() => {
+      input.focus();
+    });
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'cpu' } });
+    });
 
     expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
   });
@@ -303,9 +314,15 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
+    await waitFor(() => {
+      expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
+    });
+
     const fullscreenButton = getByTestId('metricsExperienceToolbarFullScreen');
-    expect(fullscreenButton).toBeInTheDocument();
-    fireEvent.click(fullscreenButton);
+
+    act(() => {
+      fullscreenButton.click();
+    });
 
     expect(onToggleFullscreen).toHaveBeenCalled();
   });
@@ -340,10 +357,8 @@ describe('MetricsExperienceGrid', () => {
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 2,
-      allFields: allFieldsSomeWithCpu,
       filteredFieldsBySearch: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')),
       currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
-      dimensions: dimensionNames,
     });
 
     const { getByText } = render(<MetricsExperienceGrid {...defaultProps} />, {
