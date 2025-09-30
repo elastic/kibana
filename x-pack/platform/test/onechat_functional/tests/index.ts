@@ -8,8 +8,8 @@
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('onechat', function () {
-    describe('tools', function () {
+  describe('Agent Builder', function () {
+    describe('converse', function () {
       loadTestFile(require.resolve('./converse/simple_conversation.ts'));
     });
   });

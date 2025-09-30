@@ -10,37 +10,8 @@ import { last } from 'lodash';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { toolCallMock } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
+import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
-
-// Basic auth connector functions
-async function createConnector(proxy: LlmProxy, supertest: any) {
-  await supertest
-    .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'foo',
-      config: {
-        apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxy.getPort()}`,
-        defaultModel: 'gpt-4',
-      },
-      secrets: { apiKey: 'myApiKey' },
-      connector_type_id: '.gen-ai',
-    })
-    .expect(200);
-}
-
-async function deleteConnectors(supertest: any) {
-  const connectors = await supertest.get('/api/actions/connectors').expect(200);
-  const promises = connectors.body.map((connector: { id: string }) => {
-    return supertest
-      .delete(`/api/actions/connector/${connector.id}`)
-      .set('kbn-xsrf', 'foo')
-      .expect(204);
-  });
-
-  return Promise.all(promises);
-}
 
 const APP_ID = 'agent_builder';
 
@@ -52,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Agent Builder Simple Conversation', function () {
+  describe('Simple Conversation Flow', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
@@ -96,48 +67,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(agentText).to.contain('Elastic AI Agent');
     });
 
-    // Helper function to create a conversation
-    async function createConversation(
-      input: string,
-      title: string,
-      response: string,
-      withToolCall = false
-    ) {
+    it('sends a message with tool call and receives response with thinking', async () => {
+      const MOCKED_INPUT = 'search for test data';
+      const MOCKED_RESPONSE = 'I found test data using the search tool';
+      const MOCKED_TITLE = 'Test Search Conversation';
+
       await common.navigateToApp(APP_ID, { path: 'conversations/new' });
 
       const inputField = await testSubjects.find('onechatAppConversationInputFormTextArea');
       await inputField.click();
-      await inputField.type(input);
+      await inputField.type(MOCKED_INPUT);
 
+      // Set up title tool call
       void llmProxy.interceptors.toolChoice({
         name: 'set_title',
-        response: toolCallMock('set_title', { title }),
+        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
       });
 
-      if (withToolCall) {
-        // First interceptor: respond to user message with tool call
-        void llmProxy.interceptors.userMessage({
-          when: ({ messages }) => {
-            const lastMessage = last(messages)?.content as string;
-            return lastMessage.includes(input);
-          },
-          response: toolCallMock('platform_core_search', {
-            query: 'test data',
-          }),
-        });
+      // First interceptor: respond to user message with tool call
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = last(messages)?.content as string;
+          return lastMessage.includes(MOCKED_INPUT);
+        },
+        response: toolCallMock('platform_core_search', {
+          query: 'test data',
+        }),
+      });
 
-        // Second interceptor: respond to tool message with final response
-        void llmProxy.interceptors.toolMessage({
-          when: ({ messages }) => {
-            const lastMessage = last(messages);
-            const contentParsed = JSON.parse(lastMessage?.content as string);
-            return contentParsed?.results;
-          },
-          response,
-        });
-      } else {
-        void llmProxy.interceptors.userMessage({ response });
-      }
+      // Second interceptor: respond to tool message with final response
+      void llmProxy.interceptors.toolMessage({
+        when: ({ messages }) => {
+          const lastMessage = last(messages);
+          const contentParsed = JSON.parse(lastMessage?.content as string);
+          return contentParsed?.results;
+        },
+        response: MOCKED_RESPONSE,
+      });
 
       const submitTextButton = await testSubjects.find(
         'onechatAppConversationInputFormSubmitButton'
@@ -146,37 +112,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      return { title, response };
-    }
-
-    it('sends a message with tool call and receives response with thinking', async () => {
-      const MOCKED_INPUT = 'search for test data';
-      const MOCKED_RESPONSE = 'I found test data using the search tool';
-      const MOCKED_TITLE = 'Test Search Conversation';
-
-      const { title, response } = await createConversation(
-        MOCKED_INPUT,
-        MOCKED_TITLE,
-        MOCKED_RESPONSE,
-        true
-      );
-
-      // Wait for response with thinking to appear
+      // Wait for UI to include the response, title, and updated conversation list
       await retry.try(async () => {
         const responseElement = await testSubjects.find('agentBuilderRoundResponse');
         const responseText = await responseElement.getVisibleText();
-        expect(responseText).to.contain(response);
+        expect(responseText).to.contain(MOCKED_RESPONSE);
 
         const titleElement = await testSubjects.find('agentBuilderConversationTitle');
         const titleText = await titleElement.getVisibleText();
-        expect(titleText).to.contain(title);
+        expect(titleText).to.contain(MOCKED_TITLE);
 
         const conversationList = await testSubjects.find('agentBuilderConversationList');
         const conversationText = await conversationList.getVisibleText();
-        expect(conversationText).to.contain(title);
+        expect(conversationText).to.contain(MOCKED_TITLE);
       });
 
-      // Click on "Thinking completed" to expand the thinking details
+      // Click on "Thinking completed" accordion to expand the thinking details
       const thinkingToggle = await testSubjects.find('agentBuilderThinkingToggle');
       await thinkingToggle.click();
 
@@ -199,7 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // The conversation list should still contain our previous conversation
         const conversationList = await testSubjects.find('agentBuilderConversationList');
         const conversationText = await conversationList.getVisibleText();
-        expect(conversationText).to.contain(title);
+        expect(conversationText).to.contain(MOCKED_TITLE);
 
         // Assert the welcome page is displayed
         await testSubjects.existOrFail('agentBuilderWelcomePage');
