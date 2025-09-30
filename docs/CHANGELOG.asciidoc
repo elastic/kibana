@@ -115,7 +115,7 @@ IMPORTANT: The 7.17.29 release contains fixes for potential security vulnerabili
 .Dashboard Copy link doesn't work when sharing from a space other than the default space
 [%collapsible]
 ====
-**This issue is resolved in version 7.17.30** ({kibana-pull}227625[#227625]).
+**This issue is resolved in versions 8 and 9 of {kib}** ({kibana-pull}227625[#227625]).
 
 *Details* +
 When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
