@@ -139,7 +139,29 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION:
           return responseActionsClientMock.createConnectorActionExecuteResponse({
-            data: createMicrosoftMachineActionMock({ type: 'LiveResponse' }),
+            data: createMicrosoftMachineActionMock({
+              type: 'LiveResponse',
+              status: 'Cancelled',
+              cancellationRequestor: 'Analyst@TestPrd.onmicrosoft.com',
+              cancellationComment: 'Cancelled via API',
+              cancellationDateTimeUtc: '2025-01-02T15:00:00.0000000Z',
+              commands: [
+                {
+                  index: 0,
+                  startTime: '2025-07-07T18:50:10.186354Z',
+                  endTime: '', // No end time since it's being cancelled
+                  commandStatus: 'InProgress', // Not completed
+                  errors: [],
+                  command: {
+                    type: 'RunScript',
+                    params: [
+                      { key: 'ScriptName', value: 'hello.sh' },
+                      { key: 'Args', value: '--noargs' },
+                    ],
+                  },
+                },
+              ],
+            }),
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS:
@@ -298,6 +320,218 @@ const createMicrosoftRunScriptOptionsMock = (
   return merge(options, overrides);
 };
 
+// ============================================================================
+// Enhanced Cancel Action Mock Utilities
+// ============================================================================
+
+/**
+ * Creates a machine action with specific cancel-related scenarios
+ */
+const createCancelScenarioMachineActionMock = (
+  scenario: 'successful-cancel' | 'partial-cancel' | 'already-completed' | 'already-failed',
+  overrides: Partial<MicrosoftDefenderEndpointMachineAction> = {}
+): MicrosoftDefenderEndpointMachineAction => {
+  const baseAction = createMicrosoftMachineActionMock();
+
+  switch (scenario) {
+    case 'successful-cancel':
+      return {
+        ...baseAction,
+        status: 'Cancelled',
+        cancellationRequestor: 'admin@example.com',
+        cancellationComment: 'Action cancelled by administrator',
+        cancellationDateTimeUtc: '2025-01-02T15:00:00.0000000Z',
+        commands: [
+          {
+            index: 0,
+            startTime: '2025-07-07T18:50:10.186354Z',
+            endTime: '', // No end time - action was interrupted
+            commandStatus: 'InProgress',
+            errors: [],
+            command: {
+              type: 'RunScript',
+              params: [
+                { key: 'ScriptName', value: 'test-script.ps1' },
+                { key: 'Args', value: '--test' },
+              ],
+            },
+          },
+        ],
+        ...overrides,
+      };
+
+    case 'partial-cancel':
+      return {
+        ...baseAction,
+        status: 'Cancelled',
+        cancellationRequestor: 'admin@example.com',
+        cancellationComment: 'Attempted to cancel but action completed',
+        cancellationDateTimeUtc: '2025-01-02T15:00:00.0000000Z',
+        commands: [
+          {
+            index: 0,
+            startTime: '2025-07-07T18:50:10.186354Z',
+            endTime: '2025-07-07T18:50:21.811356Z', // Has end time - action completed
+            commandStatus: 'Completed', // Action completed despite cancel
+            errors: [],
+            command: {
+              type: 'RunScript',
+              params: [
+                { key: 'ScriptName', value: 'test-script.ps1' },
+                { key: 'Args', value: '--test' },
+              ],
+            },
+          },
+        ],
+        ...overrides,
+      };
+
+    case 'already-completed':
+      return {
+        ...baseAction,
+        status: 'Succeeded',
+        commands: [
+          {
+            index: 0,
+            startTime: '2025-07-07T18:50:10.186354Z',
+            endTime: '2025-07-07T18:50:21.811356Z',
+            commandStatus: 'Completed',
+            errors: [],
+            command: {
+              type: 'RunScript',
+              params: [
+                { key: 'ScriptName', value: 'test-script.ps1' },
+                { key: 'Args', value: '--test' },
+              ],
+            },
+          },
+        ],
+        ...overrides,
+      };
+
+    case 'already-failed':
+      return {
+        ...baseAction,
+        status: 'Failed',
+        commands: [
+          {
+            index: 0,
+            startTime: '2025-07-07T18:50:10.186354Z',
+            endTime: '2025-07-07T18:50:21.811356Z',
+            commandStatus: 'Failed',
+            errors: ['Script execution failed'],
+            command: {
+              type: 'RunScript',
+              params: [
+                { key: 'ScriptName', value: 'test-script.ps1' },
+                { key: 'Args', value: '--test' },
+              ],
+            },
+          },
+        ],
+        ...overrides,
+      };
+
+    default:
+      return { ...baseAction, ...overrides };
+  }
+};
+
+/**
+ * Creates multiple machine actions for testing race conditions and ordering
+ */
+const createMultipleActionScenarioMock = (
+  scenario: 'original-and-cancel' | 'multiple-cancels' | 'mixed-actions',
+  baseActionId: string = '5382f7ea-7557-4ab7-9782-d50480024a4e'
+): MicrosoftDefenderEndpointMachineAction[] => {
+  switch (scenario) {
+    case 'original-and-cancel':
+      return [
+        // Original action that gets cancelled
+        createCancelScenarioMachineActionMock('successful-cancel', {
+          id: baseActionId,
+          type: 'Isolate',
+        }),
+      ];
+
+    case 'multiple-cancels':
+      return [
+        // Multiple cancel attempts on same action
+        createCancelScenarioMachineActionMock('successful-cancel', {
+          id: baseActionId,
+          type: 'LiveResponse',
+        }),
+      ];
+
+    case 'mixed-actions':
+      return [
+        // Different action types with various statuses
+        createCancelScenarioMachineActionMock('successful-cancel', {
+          id: baseActionId,
+          type: 'LiveResponse',
+        }),
+        createCancelScenarioMachineActionMock('already-completed', {
+          id: 'different-action-id',
+          type: 'Isolate',
+        }),
+      ];
+
+    default:
+      return [createMicrosoftMachineActionMock()];
+  }
+};
+
+/**
+ * Creates a cancel action request options mock
+ */
+const createCancelActionOptionsMock = (
+  targetActionId: string,
+  overrides: Partial<{ endpoint_ids: string[]; comment: string }> = {}
+) => {
+  return {
+    endpoint_ids: ['1-2-3'],
+    comment: 'Cancel action test',
+    parameters: { id: targetActionId },
+    agent_type: 'microsoft_defender_endpoint' as const,
+    ...overrides,
+  };
+};
+
+/**
+ * Creates mock connector response for cancel action with various scenarios
+ */
+const createCancelConnectorResponseMock = (
+  scenario: 'success' | 'already-completed' | 'error' | 'missing-id',
+  actionId: string = '5382f7ea-7557-4ab7-9782-d50480024a4e'
+) => {
+  switch (scenario) {
+    case 'success':
+      return responseActionsClientMock.createConnectorActionExecuteResponse({
+        data: createCancelScenarioMachineActionMock('successful-cancel', { id: actionId }),
+      });
+
+    case 'already-completed':
+      return responseActionsClientMock.createConnectorActionExecuteResponse({
+        data: createCancelScenarioMachineActionMock('already-completed', { id: actionId }),
+      });
+
+    case 'missing-id':
+      return responseActionsClientMock.createConnectorActionExecuteResponse({
+        data: {
+          /* missing id field */
+        },
+      });
+
+    case 'error':
+    default:
+      return responseActionsClientMock.createConnectorActionExecuteResponse({
+        status: 'error',
+        message: 'Cancel operation failed',
+        serviceMessage: 'Microsoft Defender API error: Action cannot be cancelled',
+      });
+  }
+};
+
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
   createMsConnectorActionsClient: createMsConnectorActionsClientMock,
@@ -308,4 +542,9 @@ export const microsoftDefenderMock = {
   createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
   createGetLibraryFilesApiResponse: createMicrosoftGetLibraryFilesApiResponseMock,
   createRunScriptOptions: createMicrosoftRunScriptOptionsMock,
+  // Enhanced cancel action testing utilities
+  createCancelScenarioMachineAction: createCancelScenarioMachineActionMock,
+  createMultipleActionScenario: createMultipleActionScenarioMock,
+  createCancelActionOptions: createCancelActionOptionsMock,
+  createCancelConnectorResponse: createCancelConnectorResponseMock,
 };

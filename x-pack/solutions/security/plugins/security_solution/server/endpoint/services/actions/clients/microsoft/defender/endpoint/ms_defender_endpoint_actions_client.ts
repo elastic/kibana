@@ -26,6 +26,7 @@ import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import { calculateMachineActionState, sortActionRequests, processCancelAction } from './utils';
 import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
@@ -460,6 +461,14 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             ),
           };
         }
+
+        // Check if we're trying to cancel a cancel action (business rule validation)
+        if (originalAction.command === 'cancel') {
+          return {
+            isValid: false,
+            error: new ResponseActionsClientError(`Cannot cancel a cancel action.`, 400),
+          };
+        }
       } catch (error) {
         // If we can't fetch the action details (e.g., action not found),
         // return a validation error
@@ -750,7 +759,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
-          case 'cancel':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
                 typePendingActions as Array<
@@ -760,6 +768,21 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                     MicrosoftDefenderEndpointActionRequestCommonMeta
                   >
                 >
+              )
+            );
+            break;
+
+          case 'cancel':
+            addResponsesToQueueIfAny(
+              await this.checkPendingActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    undefined,
+                    {},
+                    MicrosoftDefenderEndpointActionRequestCommonMeta
+                  >
+                >,
+                { isCancel: true }
               )
             );
             break;
@@ -782,6 +805,15 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
   }
 
+  /**
+   * Check pending actions with support for both standard actions and cancel actions.
+   *
+   * @param actionRequests - Array of pending action requests to check
+   * @param options - Configuration options for the check
+   * @param options.downloadResult - Whether to include file download metadata (default: false)
+   * @param options.isCancel - Whether these are cancel actions requiring specialized processing (default: false)
+   * @returns Promise resolving to array of completed action responses
+   */
   private async checkPendingActions(
     actionRequests: Array<
       ResponseActionsClientPendingAction<
@@ -790,7 +822,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         MicrosoftDefenderEndpointActionRequestCommonMeta
       >
     >,
-    options: { downloadResult?: boolean } = { downloadResult: false }
+    options: { downloadResult?: boolean; isCancel?: boolean } = {
+      downloadResult: false,
+      isCancel: false,
+    }
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const warnings: string[] = [];
@@ -841,51 +876,54 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     if (machineActions?.value) {
       for (const machineAction of machineActions.value) {
-        const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
+        const { isPending, isError, message } = calculateMachineActionState(machineAction);
 
         const commandErrors: string = machineAction.commands?.[0]?.errors?.join('\n') ?? '';
 
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
-          for (const actionRequest of pendingActionRequests) {
-            let additionalData = {};
-            // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
-            if (options.downloadResult) {
-              additionalData = {
-                meta: {
-                  machineActionId: machineAction.id,
-                  filename: `runscript-output-${machineAction.id}.json`,
-                  createdAt: new Date().toISOString(),
-                },
-              };
-            }
 
-            // Special handling for cancelled actions:
-            // Cancel actions that successfully cancel something should show as success
-            // Actions that were cancelled by another action should show as failed
-            let finalIsError = isError;
-            if (
-              machineAction.status === 'Cancelled' &&
-              actionRequest.EndpointActions.data.command === 'cancel'
-            ) {
-              finalIsError = false; // Cancel action succeeded
-            }
-
-            completedResponses.push(
-              this.buildActionResponseEsDoc({
-                actionId: actionRequest.EndpointActions.action_id,
-                agentId: Array.isArray(actionRequest.agent.id)
-                  ? actionRequest.agent.id[0]
-                  : actionRequest.agent.id,
-                data: { command: actionRequest.EndpointActions.data.command },
-                error: finalIsError
-                  ? {
-                      message: commandErrors || message,
-                    }
-                  : undefined,
-                ...additionalData,
-              })
+          if (options.isCancel) {
+            /**
+             * Specialized processing for cancel actions (handles MDE architecture quirks)
+             * Known MDE API Limitations:
+             * 1. Machine action IDs are reused for cancel operations
+             * 2. Status can be "Cancelled" even when action completed
+             * 3. Race conditions between cancel and completion
+             */
+            const processedResponses = this.processCancelActionRequests(
+              pendingActionRequests,
+              machineAction
             );
+            completedResponses.push(...processedResponses);
+          } else {
+            // Standard processing for other actions (isolate, unisolate, runscript)
+            for (const actionRequest of pendingActionRequests) {
+              let additionalData = {};
+
+              // Add file download metadata for runscript action
+              if (options.downloadResult) {
+                additionalData = {
+                  meta: {
+                    machineActionId: machineAction.id,
+                    filename: `runscript-output-${machineAction.id}.json`,
+                    createdAt: new Date().toISOString(),
+                  },
+                };
+              }
+
+              completedResponses.push(
+                this.buildActionResponseEsDoc({
+                  actionId: actionRequest.EndpointActions.action_id,
+                  agentId: Array.isArray(actionRequest.agent.id)
+                    ? actionRequest.agent.id[0]
+                    : actionRequest.agent.id,
+                  data: { command: actionRequest.EndpointActions.data.command },
+                  error: isError ? { message: commandErrors || message } : undefined,
+                  ...additionalData,
+                })
+              );
+            }
           }
         }
       }
@@ -903,45 +941,57 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return completedResponses;
   }
 
-  private calculateMachineActionState(machineAction: MicrosoftDefenderEndpointMachineAction): {
-    isPending: boolean;
-    isError: boolean;
-    message: string;
-  } {
-    let isPending = true;
-    let isError = false;
-    let message = '';
+  /**
+   * Process cancel action requests with specialized logic for Microsoft Defender's architecture.
+   * Handles complex scenarios like cancel-cancel attempts, partial cancels, and duplicate processing.
+   */
+  private processCancelActionRequests(
+    pendingActionRequests: Array<
+      LogsEndpointAction<undefined, {}, MicrosoftDefenderEndpointActionRequestCommonMeta>
+    >,
+    machineAction: MicrosoftDefenderEndpointMachineAction
+  ): LogsEndpointActionResponse[] {
+    const completedResponses: LogsEndpointActionResponse[] = [];
 
-    switch (machineAction.status) {
-      case 'Failed':
-      case 'TimeOut':
-        isPending = false;
-        isError = true;
-        message = `Response action ${machineAction.status} (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})`;
-        break;
+    // Sort actions to process original actions before cancel actions to make sure we return correct response
+    const sortedActionRequests = sortActionRequests(pendingActionRequests);
 
-      case 'Cancelled':
-        isPending = false;
-        isError = true;
-        message = `Response action was canceled by [${
-          machineAction.cancellationRequestor
-        }] (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})${
-          machineAction.cancellationComment ? `: ${machineAction.cancellationComment}` : ''
-        }`;
-        break;
+    // Track whether we've already processed a cancel for this machine action
+    let cancelAlreadyProcessed = false;
 
-      case 'Succeeded':
-        isPending = false;
-        isError = false;
-        break;
+    for (const actionRequest of sortedActionRequests) {
+      const cancelResult = processCancelAction(machineAction, cancelAlreadyProcessed);
+      const actionError = cancelResult.actionError;
+      cancelAlreadyProcessed = cancelResult.cancelProcessed || cancelAlreadyProcessed;
 
-      default:
-        // covers 'Pending' | 'InProgress'
-        isPending = true;
-        isError = false;
+      const response = this.createCancelActionResponse(actionRequest, 'cancel', actionError);
+      completedResponses.push(response);
     }
 
-    return { isPending, isError, message };
+    return completedResponses;
+  }
+
+  /**
+   * Create the action response document specifically for cancel actions.
+   * Cancel actions don't need file download metadata.
+   */
+  private createCancelActionResponse(
+    actionRequest: LogsEndpointAction<
+      undefined,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    >,
+    actionCommand: ResponseActionsApiCommandNames,
+    actionError: { message: string } | undefined
+  ): LogsEndpointActionResponse {
+    return this.buildActionResponseEsDoc({
+      actionId: actionRequest.EndpointActions.action_id,
+      agentId: Array.isArray(actionRequest.agent.id)
+        ? actionRequest.agent.id[0]
+        : actionRequest.agent.id,
+      data: { command: actionCommand },
+      error: actionError,
+    });
   }
 
   async getCustomScripts(): Promise<ResponseActionScriptsApiResponse> {
