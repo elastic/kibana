@@ -30,8 +30,8 @@ interface FormTestProviderProps {
   defaultValue?: Record<string, unknown>;
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
   connectorServices?: ConnectorServices;
-  serializer?: (formData: InternalConnectorForm) => InternalConnectorForm;
-  deserializer?: (formData: InternalConnectorForm) => InternalConnectorForm;
+  serializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
+  deserializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
 }
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {

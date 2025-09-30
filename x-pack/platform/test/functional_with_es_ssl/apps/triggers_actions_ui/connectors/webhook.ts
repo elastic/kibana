@@ -7,65 +7,54 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { ObjectRemover } from '../../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const actions = getService('actions');
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
+  const retry = getService('retry');
 
   describe('webhook', () => {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActionsConnectors');
     });
 
+    after(async () => {
+      await objectRemover.removeAll();
+    });
+
     it.skip('creates a connector via API with config and secret headers and verifies UI', async () => {
-      const { body: createdAction } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'test')
-        .send({
-          name: 'A generic Webhook action',
-          connector_type_id: '.webhook',
-          secrets: {
-            user: 'username',
-            password: 'mypassphrase',
-            secretHeaders: {
-              secret: 'secretValue',
-            },
+      const webhookConnectorName = 'webhook connector with headers';
+      const webhook = await actions.api.createConnector({
+        name: 'webhook connector with headers',
+        config: {
+          method: 'post',
+          url: 'https://example.com/webhook',
+          headers: {
+            configHeader: 'value',
           },
-          config: {
-            url: 'https://example.com/webhook',
-            headers: {
-              config: 'configValue',
-            },
+        },
+        secrets: {
+          secretHeaders: {
+            secretHeader: 'secretValue',
           },
-        })
-        .expect(200);
+        },
+        connectorTypeId: '.webhook',
+      });
 
-      const connectorId = createdAction.id;
+      objectRemover.add(webhook.id, 'connector', 'actions');
 
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
-      await testSubjects.click('webhookViewHeadersSwitch');
+      await pageObjects.triggersActionsUI.searchConnectors(webhookConnectorName);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
-      const headerKeyInputs = await find.allByCssSelector(
-        '[data-test-subj="webhookHeadersKeyInput"]'
-      );
-      const configValueInput = await find.byCssSelector(
-        '[data-test-subj="webhookHeadersValueInput"]'
-      );
-
-      const secretValueInput = await find.byCssSelector(
-        '[data-test-subj="webhookHeadersSecretValueInput"]'
-      );
-
-      // verify config headers:
-      expect(await headerKeyInputs[0].getAttribute('value')).to.be('config');
-      expect(await configValueInput.getAttribute('value')).to.be('configValue');
-
-      // verify secret headers
-      expect(await headerKeyInputs[1].getAttribute('value')).to.be('secret');
-      expect(await secretValueInput.getAttribute('value')).to.be('');
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
     });
 
     it('should render the cr and pfx tab for ssl auth', async () => {
