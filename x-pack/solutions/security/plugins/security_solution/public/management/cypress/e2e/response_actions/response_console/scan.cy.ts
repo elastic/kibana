@@ -20,7 +20,8 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/227166
+describe.skip(
   'Response console',
   {
     env: {
@@ -41,7 +42,8 @@ describe(
       login();
     });
 
-    describe('Scan operation:', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/212175
+    describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';

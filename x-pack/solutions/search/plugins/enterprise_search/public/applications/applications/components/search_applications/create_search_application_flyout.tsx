@@ -121,6 +121,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
           <>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.createError.title',

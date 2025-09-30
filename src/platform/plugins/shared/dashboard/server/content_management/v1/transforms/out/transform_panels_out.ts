@@ -70,7 +70,7 @@ function transformPanelProperties(
 
   const transforms = embeddableService?.getTransforms(panelType);
 
-  const panelConfig = {
+  const config = {
     ...embeddableConfig,
     // <8.19 savedObjectId and title stored as siblings to embeddableConfig
     ...(savedObjectId !== undefined && { savedObjectId }),
@@ -80,7 +80,7 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(panelConfig, references);
+      transformedPanelConfig = transforms.transformOut(config, references);
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
@@ -90,9 +90,9 @@ function transformPanelProperties(
   }
 
   return {
-    gridData: rest,
-    panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
-    panelIndex,
+    grid: rest,
+    config: transformedPanelConfig ? transformedPanelConfig : config,
+    uid: panelIndex,
     type: panelType,
     version,
   };
