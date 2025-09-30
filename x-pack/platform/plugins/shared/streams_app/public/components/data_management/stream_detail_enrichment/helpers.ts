@@ -109,7 +109,7 @@ export const buildProcessorInsertText = (
 
   if (template) {
     const json = typeof template === 'string' ? template : JSON.stringify(template, null, 2);
-    insertText += `: ${json.split('\n').join('\n')}`;
+    insertText += `: ${json}`;
   } else {
     insertText += ': {}';
   }
