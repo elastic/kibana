@@ -52,7 +52,7 @@ export async function loadDashboardFile(filename: string) {
     case 'otel_native-otel_other-nodejs': {
       return import(
         /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
-        './opentelemetry_nodejs.json'
+        './otel_native-otel_other-nodejs.json'
       );
     }
     case 'otel_native-edot-nodejs': {
