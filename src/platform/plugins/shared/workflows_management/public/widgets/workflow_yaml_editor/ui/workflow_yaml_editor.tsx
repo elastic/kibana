@@ -33,6 +33,7 @@ import {
   getTriggerNodes,
   getTriggerNodesWithType,
 } from '../../../../common/lib/yaml_utils';
+import { formatValidationError, getCurrentPath } from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -107,7 +108,6 @@ export interface WorkflowYAMLEditorProps {
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
-  activeTab?: string;
   selectedExecutionId?: string;
   originalValue?: string;
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -127,7 +127,6 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
-  activeTab,
   selectedExecutionId,
   originalValue,
   onStepActionClicked,
@@ -137,6 +136,9 @@ export const WorkflowYAMLEditor = ({
   const {
     services: { http, notifications },
   } = useKibana<CoreStart>();
+
+  // Only show debug features in development
+  const isDevelopment = process.env.NODE_ENV !== 'production';
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -432,7 +434,109 @@ export const WorkflowYAMLEditor = ({
         },
       };
 
-      // Register hover provider with Monaco
+      // Intercept and modify markers at the source to fix connector validation messages
+      // This prevents Monaco from ever seeing the problematic numeric enum messages
+      const originalSetModelMarkers = monaco.editor.setModelMarkers;
+      const markerInterceptor = function (editorModel: any, owner: string, markers: any[]) {
+        // Only process YAML validation markers
+
+        // Only modify YAML validation markers
+        if (owner === 'yaml') {
+          const fixedMarkers = markers.map((marker) => {
+            // Check if this is a validation error that could benefit from dynamic formatting
+            const hasNumericEnumPattern =
+              // Patterns with quotes: Expected "0 | 1 | 2"
+              /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+              /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+              // Patterns with escaped quotes: Expected \"0 | 1\"
+              /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(marker.message || '') ||
+              // Patterns without quotes: Expected 0 | 1
+              /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(marker.message || '') ||
+              // Additional patterns for different Monaco YAML error formats
+              /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(marker.message || '') ||
+              /Value must be one of: \d+(\s*,\s*\d+)*/.test(marker.message || '');
+
+            // Check for field type errors (like "Expected settings", "Expected connector", etc.)
+            const hasFieldTypeError =
+              /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '') ||
+              /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '');
+
+            // Also check for the current message pattern we're seeing
+            const hasConnectorEnumPattern = marker.message?.includes(
+              'Expected ".none" | ".cases-webhook"'
+            );
+
+            // Process markers that match our patterns
+
+            if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
+              try {
+                // Get the YAML path at this marker position to determine context
+                const currentYamlDocument = yamlDocumentRef.current;
+                let yamlPath: (string | number)[] = [];
+
+                if (currentYamlDocument) {
+                  const markerPosition = editorModel.getOffsetAt({
+                    lineNumber: marker.startLineNumber,
+                    column: marker.startColumn,
+                  });
+                  yamlPath = getCurrentPath(currentYamlDocument, markerPosition);
+                }
+
+                // Create a mock Zod error with the path information
+                const mockZodError = {
+                  issues: [
+                    {
+                      code: 'unknown' as const,
+                      path: yamlPath,
+                      message: marker.message,
+                      received: 'unknown',
+                    },
+                  ],
+                };
+
+                // Use the dynamic formatValidationError with schema and YAML document
+                const { message: formattedMessage } = formatValidationError(
+                  mockZodError as any,
+                  workflowYamlSchemaLoose,
+                  currentYamlDocument
+                );
+
+                // Return the marker with the improved message
+
+                return {
+                  ...marker,
+                  message: formattedMessage,
+                };
+              } catch (error) {
+                // Fallback to original message if dynamic formatting fails
+                return marker;
+              }
+            }
+            return marker;
+          });
+
+          // Call the original function with fixed markers
+          return originalSetModelMarkers.call(monaco.editor, editorModel, owner, fixedMarkers);
+        }
+
+        // For non-YAML markers, call original function unchanged
+        return originalSetModelMarkers.call(monaco.editor, editorModel, owner, markers);
+      };
+
+      // Override Monaco's setModelMarkers function
+      monaco.editor.setModelMarkers = markerInterceptor;
+
+      // Store cleanup function to restore original behavior
+      disposablesRef.current.push({
+        dispose: () => {
+          monaco.editor.setModelMarkers = originalSetModelMarkers;
+        },
+      });
+
+      // Monaco YAML hover is now disabled via configuration (hover: false)
+      // The unified hover provider will handle all hover content including validation errors
+
+      // Register the unified hover provider for API documentation and other content
       const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
       disposablesRef.current.push(hoverDisposable);
 
@@ -512,13 +616,13 @@ export const WorkflowYAMLEditor = ({
 
   // Force decoration refresh specifically when switching to readonly mode (executions view)
   useEffect(() => {
-    if (isEditorMounted && readOnly) {
+    if (isEditorMounted) {
       // Small delay to ensure all state is settled
       setTimeout(() => {
         changeSideEffects(false); // Mode change, not typing
       }, 50);
     }
-  }, [readOnly, isEditorMounted, changeSideEffects]);
+  }, [isEditorMounted, changeSideEffects]);
 
   // Step execution provider - managed through provider architecture
   useEffect(() => {
@@ -536,35 +640,32 @@ export const WorkflowYAMLEditor = ({
     // Add a small delay to ensure YAML document is fully updated when switching executions
     const timeoutId = setTimeout(() => {
       try {
-        if (readOnly) {
-          // Ensure yamlDocumentRef is synchronized
-          if (yamlDocument && !yamlDocumentRef.current) {
-            yamlDocumentRef.current = yamlDocument;
-          }
+        // Ensure yamlDocumentRef is synchronized
+        if (yamlDocument && !yamlDocumentRef.current) {
+          yamlDocumentRef.current = yamlDocument;
+        }
 
-          // Additional check: if we have stepExecutions but no yamlDocument,
-          // the document might not be parsed yet - skip and let next update handle it
-          if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
-            // console.warn(
-            //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
-            // );
-            return;
-          }
+        // Additional check: if we have stepExecutions but no yamlDocument,
+        // the document might not be parsed yet - skip and let next update handle it
+        if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
+          // console.warn(
+          //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
+          // );
+          return;
+        }
 
-          const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
-            getYamlDocument: () => {
-              return yamlDocumentRef.current;
-            },
-            getStepExecutions: () => {
-              return stepExecutionsRef.current || [];
-            },
-            getHighlightStep: () => highlightStep || null,
-            isReadOnly: () => readOnly,
-          });
+        const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
+          getYamlDocument: () => {
+            return yamlDocumentRef.current;
+          },
+          getStepExecutions: () => {
+            return stepExecutionsRef.current || [];
+          },
+          getHighlightStep: () => highlightStep || null,
+        });
 
-          if (unifiedProvidersRef.current) {
-            unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
-          }
+        if (unifiedProvidersRef.current) {
+          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
         }
       } catch (error) {
         // console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
@@ -572,7 +673,7 @@ export const WorkflowYAMLEditor = ({
     }, 20); // Small delay to ensure YAML document is ready
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument, readOnly]);
+  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -1321,68 +1422,129 @@ export const WorkflowYAMLEditor = ({
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
-        {hasChanges ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.accent,
-              cursor: 'pointer',
-              borderRadius: euiTheme.border.radius.small,
-              '&:hover': {
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              },
-            }}
-            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={showDiffHighlight}
-            aria-label={
-              showDiffHighlight
-                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
-                    defaultMessage: 'Hide diff highlighting',
-                  })
-                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
-                    defaultMessage: 'Show diff highlighting',
-                  })
-            }
-            onKeyDown={() => {}}
-            title={
-              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
-            }
-          >
-            <EuiIcon type="dot" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                defaultMessage="Unsaved changes"
-              />
-            </span>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.textSubdued,
-            }}
-          >
-            <EuiIcon type="check" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.saved"
-                defaultMessage="Saved"
-              />{' '}
-              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-            </span>
-          </div>
-        )}
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {/* Debug: Download Schema Button - Only show in development */}
+          {isDevelopment && (
+            <EuiFlexItem grow={false}>
+              <div
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.textSubdued,
+                  cursor: 'pointer',
+                  borderRadius: euiTheme.border.radius.small,
+                  fontSize: '12px',
+                  '&:hover': {
+                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    color: euiTheme.colors.primaryText,
+                  },
+                }}
+                onClick={() => {
+                  try {
+                    const zodSchema = getWorkflowZodSchema();
+                    const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
+
+                    const blob = new Blob([JSON.stringify(jsonSchema, null, 2)], {
+                      type: 'application/json',
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'workflow-schema.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  } catch (error) {
+                    // to download schema:', error);
+                    notifications?.toasts.addError(error as Error, {
+                      title: 'Failed to download schema',
+                    });
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                title="Download JSON schema for debugging"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                <EuiIcon type="download" size="s" />
+                <span>Schema</span>
+              </div>
+            </EuiFlexItem>
+          )}
+
+          {/* Status indicator */}
+          <EuiFlexItem grow={false}>
+            {hasChanges ? (
+              <div
+                css={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.accent,
+                  cursor: 'pointer',
+                  borderRadius: euiTheme.border.radius.small,
+                  '&:hover': {
+                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  },
+                }}
+                onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+                role="button"
+                tabIndex={0}
+                aria-pressed={showDiffHighlight}
+                aria-label={
+                  showDiffHighlight
+                    ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                        defaultMessage: 'Hide diff highlighting',
+                      })
+                    : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                        defaultMessage: 'Show diff highlighting',
+                      })
+                }
+                onKeyDown={() => {}}
+                title={
+                  showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+                }
+              >
+                <EuiIcon type="dot" />
+                <span>
+                  <FormattedMessage
+                    id="workflows.workflowDetail.yamlEditor.unsavedChanges"
+                    defaultMessage="Unsaved changes"
+                  />
+                </span>
+              </div>
+            ) : (
+              <div
+                css={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.textSubdued,
+                }}
+              >
+                <EuiIcon type="check" />
+                <span>
+                  <FormattedMessage
+                    id="workflows.workflowDetail.yamlEditor.saved"
+                    defaultMessage="Saved"
+                  />{' '}
+                  {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
+                </span>
+              </div>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       <div css={styles.editorContainer}>
         <YamlEditor
@@ -1728,6 +1890,8 @@ const componentStyles = {
         display: 'block',
       },
 
+      // Keep the red underlines for validation errors - they're important visual indicators
+
       // Console
       '.codicon-symbol-variable:before': {
         content: '" "',
@@ -1869,5 +2033,6 @@ const componentStyles = {
   validationErrorsContainer: css({
     flexShrink: 0,
     overflow: 'hidden',
+    zIndex: 2, // to overlay the editor flying action buttons
   }),
 };
