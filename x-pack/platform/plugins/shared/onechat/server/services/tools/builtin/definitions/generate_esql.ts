@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, esqlQueryReference } from '@kbn/onechat-common';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
@@ -31,7 +31,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     id: platformCoreTools.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
-    handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
+    handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider, contentReferencesStore }) => {
       const model = await modelProvider.getDefaultModel();
       const esqlResponse = await generateEsql({
         nlQuery,
@@ -45,6 +45,11 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         type: ToolResultType.query,
         data: {
           esql: esqlQuery,
+          citation: contentReferencesStore.add((p: { id: string }) => esqlQueryReference({
+            id: p.id,
+            query: esqlQuery,
+            label: `ESQL Query: ${esqlQuery.substring(0, 50)}...`
+          }))
         },
       }));
 

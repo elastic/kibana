@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep, ContentReferences } from '@kbn/onechat-common';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import {
@@ -32,17 +32,24 @@ import {
   visualizationTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
+import { contentReferenceParser } from '../content_reference/content_reference_parser';
+import { ContentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
+  contentReferences?: ContentReferences | null;
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props) {
+export function ChatMessageText({
+  content,
+  steps: stepsFromCurrentRound,
+  contentReferences,
+}: Props) {
   const { euiTheme } = useEuiTheme();
 
   const containerClassName = css`
@@ -75,6 +82,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
+      contentReference: (props: any) => (
+        <ContentReferenceComponentFactory contentReferenceNode={props} />
+      ),
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -131,10 +141,11 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         esqlLanguagePlugin,
         visualizationTagParser,
         ...parsingPlugins,
+        ...(contentReferences ? [contentReferenceParser({ contentReferences })] : []),
       ],
       processingPluginList: processingPlugins,
     };
-  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds, contentReferences]);
 
   return (
     <EuiText size="s" className={containerClassName}>

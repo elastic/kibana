@@ -11,6 +11,7 @@ import {
   type RoundInput,
   type ChatAgentEvent,
   type AgentCapabilities,
+  type ContentReferencesStore,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -70,6 +71,10 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Content references store for managing citations
+   */
+  contentReferencesStore: ContentReferencesStore;
 }
 
 /**

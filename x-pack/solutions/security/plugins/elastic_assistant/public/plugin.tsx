@@ -25,6 +25,9 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { SecurityAlertReference } from './src/components/get_comments/content_reference/components/security_alert_reference';
+import { SecurityAlertsPageReference } from './src/components/get_comments/content_reference/components/security_alerts_page_reference';
+import { KnowledgeBaseEntryReference } from './src/components/get_comments/content_reference/components/knowledge_base_entry_reference';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -55,6 +58,17 @@ export class ElasticAssistantPublicPlugin
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
+    // Register security-specific content reference components
+    dependencies.onechat.contentReferenceRegistry.register('SecurityAlert', SecurityAlertReference);
+    dependencies.onechat.contentReferenceRegistry.register(
+      'SecurityAlertsPage',
+      SecurityAlertsPageReference
+    );
+    dependencies.onechat.contentReferenceRegistry.register(
+      'KnowledgeBaseEntry',
+      KnowledgeBaseEntryReference
+    );
+
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
@@ -73,6 +87,7 @@ export class ElasticAssistantPublicPlugin
         spaces: dependencies.spaces,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
         aiAssistantManagementSelection: dependencies.aiAssistantManagementSelection,
+        onechat: dependencies.onechat,
       };
       return services;
     };

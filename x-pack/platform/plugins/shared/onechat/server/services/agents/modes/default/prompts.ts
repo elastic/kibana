@@ -135,6 +135,12 @@ export const getActPrompt = ({
         - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
         - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
+        CITATIONS
+        - Annotate your answer with the provided citations. Here are some example responses with citations: 
+        1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" 
+        2. "The alert has a risk score of 72. {reference(OdRs2)}"
+        - Only use the citations returned by tools
+
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 

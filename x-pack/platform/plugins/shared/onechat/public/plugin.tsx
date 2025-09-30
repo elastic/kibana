@@ -28,6 +28,7 @@ import type {
 import { createPublicToolContract } from './services/tools';
 
 import { registerLocators } from './locator/register_locators';
+import { contentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
 
 export class OnechatPlugin
   implements
@@ -101,6 +102,7 @@ export class OnechatPlugin
 
     return {
       tools: createPublicToolContract({ toolsService }),
+      contentReferenceRegistry,
     };
   }
 }
