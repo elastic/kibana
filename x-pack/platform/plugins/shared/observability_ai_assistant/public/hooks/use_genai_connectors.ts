@@ -109,6 +109,10 @@ export function useGenAIConnectorsWithoutContext(
             return result;
           }, Promise.resolve([]))
           .then((c) => {
+            if (isConnectorSelectionRestricted) {
+              const defaultC = c.find((con) => con.id === defaultConnector);
+              c = defaultC ? [defaultC] : [];
+            }
             setConnectors(c);
             setLastUsedConnector((connectorId) => {
               if (connectorId && c.findIndex((result) => result.id === connectorId) === -1) {
@@ -127,7 +131,8 @@ export function useGenAIConnectorsWithoutContext(
       .finally(() => {
         setLoading(false);
       });
-  }, [assistant, controller.signal, http, setLastUsedConnector]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assistant, controller.signal, defaultConnector, isConnectorSelectionRestricted]);
 
   useEffect(() => {
     fetchConnectors();
@@ -135,7 +140,7 @@ export function useGenAIConnectorsWithoutContext(
     return () => {
       controller.abort();
     };
-  }, [assistant, controller, fetchConnectors, setLastUsedConnector]);
+  }, [controller, fetchConnectors]);
 
   const getConnector = (id: string) => {
     const connector = connectors?.find((_connector) => _connector.id === id);
