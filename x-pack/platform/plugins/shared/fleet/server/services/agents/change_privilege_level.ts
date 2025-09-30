@@ -87,7 +87,10 @@ export async function bulkChangeAgentsPrivilegeLevel(
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, options);
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, {
+      ...options,
+      spaceId: currentSpaceId,
+    });
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -100,7 +103,10 @@ export async function bulkChangeAgentsPrivilegeLevel(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, options);
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, {
+      ...options,
+      spaceId: currentSpaceId,
+    });
   } else {
     return await new ChangePrivilegeActionRunner(
       esClient,

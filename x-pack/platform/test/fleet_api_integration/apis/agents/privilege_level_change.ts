@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { disableActionSecrets, enableActionSecrets } from '../../helpers';
+import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -126,6 +127,14 @@ export default function (providerContext: FtrProviderContext) {
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         id: 'agent3',
+        document: {
+          policy_id: policy1.id,
+        },
+      });
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent4',
         document: {
           policy_id: policy1.id,
         },
@@ -309,7 +318,7 @@ export default function (providerContext: FtrProviderContext) {
         await verifyActionResult(2);
       });
 
-      it('TESTME should return 200 with errors if one of the agents has integrations that require root access', async () => {
+      it('should return 200 with errors if one of the agents has integrations that require root access', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')
@@ -349,27 +358,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionId = body.actionId;
 
-        await new Promise((resolve, reject) => {
-          let attempts = 0;
-          const intervalId = setInterval(async () => {
-            if (attempts > 5) {
-              clearInterval(intervalId);
-              reject(new Error('action timed out'));
-            }
-            ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-
-            const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
-              clearInterval(intervalId);
-              resolve({});
-            }
-          }, 3000);
-        }).catch((e) => {
-          throw e;
-        });
+        await checkBulkAgentAction(supertest, actionId);
       });
     });
   });

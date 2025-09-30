@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
+import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -104,28 +105,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const actionId = body.actionId;
-
-      await new Promise((resolve, reject) => {
-        let attempts = 0;
-        const intervalId = setInterval(async () => {
-          if (attempts > 5) {
-            clearInterval(intervalId);
-            reject(new Error('action timed out'));
-          }
-          ++attempts;
-          const {
-            body: { items: actionStatuses },
-          } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-
-          const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-          if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
-            clearInterval(intervalId);
-            resolve({});
-          }
-        }, 3000);
-      }).catch((e) => {
-        throw e;
-      });
+      await checkBulkAgentAction(supertest, actionId);
     });
 
     it('should create action with additional_metrics when api contains CPU option', async () => {
