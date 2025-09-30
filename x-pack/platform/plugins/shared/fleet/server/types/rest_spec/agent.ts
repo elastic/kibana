@@ -259,7 +259,11 @@ export const AgentResponseSchema = schema.object({
           schema.arrayOf(
             schema.object({
               id: schema.string(),
-              type: schema.oneOf([schema.literal('input'), schema.literal('output')]),
+              type: schema.oneOf([
+                schema.literal('input'),
+                schema.literal('output'),
+                schema.literal(''),
+              ]),
               status: AgentComponentStateSchema,
               message: schema.string(),
               payload: schema.maybe(schema.recordOf(schema.string(), schema.any())),
