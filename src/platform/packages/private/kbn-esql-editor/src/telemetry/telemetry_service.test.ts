@@ -38,7 +38,7 @@ describe('ESQLEditorTelemetryService', () => {
       doesIndexExist: boolean;
       canEditIndex: boolean;
       triggerSource?: string;
-      higherPrivilege?: string;
+      highestPrivilege?: string;
     }) => {
       const commandArgs = encodeURIComponent(JSON.stringify(args));
       return `[Create index](command:esql.lookup_index.create?${commandArgs})`;
@@ -51,7 +51,7 @@ describe('ESQLEditorTelemetryService', () => {
           doesIndexExist: false,
           canEditIndex: false,
           triggerSource: 'esql_hover',
-          higherPrivilege: 'create',
+          highestPrivilege: 'create',
         });
 
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage);
@@ -69,7 +69,7 @@ describe('ESQLEditorTelemetryService', () => {
           doesIndexExist: true,
           canEditIndex: true,
           triggerSource: 'esql_hover',
-          higherPrivilege: 'edit',
+          highestPrivilege: 'edit',
         });
 
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage);
@@ -87,7 +87,7 @@ describe('ESQLEditorTelemetryService', () => {
           doesIndexExist: true,
           canEditIndex: false,
           triggerSource: 'esql_hover',
-          higherPrivilege: 'read',
+          highestPrivilege: 'read',
         });
 
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage);

@@ -27,6 +27,7 @@ import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
+import type { LookupIndexPrivileges } from './use_lookup_index_privileges';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 
 /**
@@ -39,7 +40,7 @@ export interface IndexEditorCommandArgs {
   doesIndexExist?: boolean;
   canEditIndex?: boolean;
   triggerSource?: string;
-  higherPrivilege?: string;
+  highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
 }
 
 async function isCurrentAppSupported(
@@ -55,7 +56,7 @@ async function isCurrentAppSupported(
 export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
-  indexPrivileges: any
+  indexPrivileges: LookupIndexPrivileges
 ): string | undefined {
   const { canEditIndex, canReadIndex, canCreateIndex } = indexPrivileges;
 
@@ -82,13 +83,7 @@ export function getMonacoCommandString(
     return;
   }
 
-  const higherPrivilege = canCreateIndex
-    ? 'create'
-    : canEditIndex
-    ? 'edit'
-    : canReadIndex
-    ? 'read'
-    : '';
+  const highestPrivilege = getHighestPrivilegeLevel(indexPrivileges);
 
   return `[${actionLabel}](command:${COMMAND_ID}?${encodeURIComponent(
     JSON.stringify({
@@ -96,7 +91,7 @@ export function getMonacoCommandString(
       doesIndexExist: isExistingIndex,
       canEditIndex,
       triggerSource: 'esql_hover',
-      higherPrivilege,
+      highestPrivilege,
     })
   )})`;
 }
@@ -314,3 +309,15 @@ export const useLookupIndexCommand = (
     lookupIndexBadgeStyle,
   };
 };
+
+/**
+ * Determines the highest privilege level.
+ */
+function getHighestPrivilegeLevel(indexPrivileges: LookupIndexPrivileges): string {
+  const { canCreateIndex, canEditIndex, canReadIndex } = indexPrivileges;
+
+  if (canCreateIndex) return 'create';
+  if (canEditIndex) return 'edit';
+  if (canReadIndex) return 'read';
+  return '';
+}
