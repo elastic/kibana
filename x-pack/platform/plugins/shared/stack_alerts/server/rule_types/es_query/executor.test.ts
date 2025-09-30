@@ -127,11 +127,15 @@ describe('es_query executor', () => {
 
     it('should throw error for invalid comparator', async () => {
       await expect(() =>
-        executor(coreMock, {
-          ...defaultExecutorOptions,
-          // @ts-expect-error
-          params: { ...defaultProps, thresholdComparator: '?' },
-        })
+        executor(
+          coreMock,
+          {
+            ...defaultExecutorOptions,
+            // @ts-expect-error
+            params: { ...defaultProps, thresholdComparator: '?' },
+          },
+          []
+        )
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid thresholdComparator specified: ?"`);
     });
 
@@ -148,7 +152,7 @@ describe('es_query executor', () => {
           truncated: false,
         },
       });
-      await executor(coreMock, defaultExecutorOptions);
+      await executor(coreMock, defaultExecutorOptions, []);
       expect(mockFetchEsQuery).toHaveBeenCalledWith({
         ruleId: 'test-rule-id',
         name: 'test-rule-name',
@@ -162,6 +166,7 @@ describe('es_query executor', () => {
         },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
     });
@@ -179,10 +184,14 @@ describe('es_query executor', () => {
           truncated: false,
         },
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        params: { ...defaultProps, searchType: 'searchSource' },
-      });
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: { ...defaultProps, searchType: 'searchSource' },
+        },
+        []
+      );
       expect(mockFetchSearchSourceQuery).toHaveBeenCalledWith({
         ruleId: 'test-rule-id',
         alertLimit: 1000,
@@ -197,6 +206,7 @@ describe('es_query executor', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
     });
@@ -214,10 +224,14 @@ describe('es_query executor', () => {
           truncated: false,
         },
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        params: { ...defaultProps, searchType: 'esqlQuery' },
-      });
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: { ...defaultProps, searchType: 'esqlQuery' },
+        },
+        []
+      );
       expect(mockFetchEsqlQuery).toHaveBeenCalledWith({
         ruleId: 'test-rule-id',
         alertLimit: 1000,
@@ -230,6 +244,7 @@ describe('es_query executor', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
@@ -248,11 +263,15 @@ describe('es_query executor', () => {
           truncated: false,
         },
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
-      });
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
+        },
+        []
+      );
 
       expect(mockReport).not.toHaveBeenCalled();
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -273,11 +292,15 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: { ...defaultProps, threshold: [200], thresholdComparator: '>=' as Comparator },
-      });
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: { ...defaultProps, threshold: [200], thresholdComparator: '>=' as Comparator },
+        },
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(1);
       expect(mockReport).toHaveBeenNthCalledWith(1, {
@@ -327,15 +350,19 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: {
-          ...defaultProps,
-          threshold: [200, 500],
-          thresholdComparator: 'between' as Comparator,
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: {
+            ...defaultProps,
+            threshold: [200, 500],
+            thresholdComparator: 'between' as Comparator,
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(1);
       expect(mockReport).toHaveBeenNthCalledWith(1, {
@@ -407,18 +434,22 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: {
-          ...defaultProps,
-          threshold: [200],
-          thresholdComparator: '>=' as Comparator,
-          groupBy: 'top',
-          termSize: 10,
-          termField: 'host.name',
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: {
+            ...defaultProps,
+            threshold: [200],
+            thresholdComparator: '>=' as Comparator,
+            groupBy: 'top',
+            termSize: 10,
+            termField: 'host.name',
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(3);
       expect(mockReport).toHaveBeenNthCalledWith(1, {
@@ -553,15 +584,19 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        params: {
-          ...defaultProps,
-          searchType: 'esqlQuery',
-          threshold: [0],
-          thresholdComparator: '>=' as Comparator,
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: {
+            ...defaultProps,
+            searchType: 'esqlQuery',
+            threshold: [0],
+            thresholdComparator: '>=' as Comparator,
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(1);
       expect(mockReport).toHaveBeenNthCalledWith(1, {
@@ -619,18 +654,22 @@ describe('es_query executor', () => {
           truncated: true,
         },
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: {
-          ...defaultProps,
-          threshold: [200],
-          thresholdComparator: '>=' as Comparator,
-          groupBy: 'top',
-          termSize: 10,
-          termField: 'host.name',
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: {
+            ...defaultProps,
+            threshold: [200],
+            thresholdComparator: '>=' as Comparator,
+            groupBy: 'top',
+            termSize: 10,
+            termField: 'host.name',
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(3);
       expect(mockReport).toHaveBeenNthCalledWith(1, expect.objectContaining({ id: 'host-1' }));
@@ -661,11 +700,15 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
-      });
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: { ...defaultProps, threshold: [500], thresholdComparator: '>=' as Comparator },
+        },
+        []
+      );
 
       expect(mockReport).not.toHaveBeenCalled();
       expect(mockSetAlertData).toHaveBeenCalledTimes(1);
@@ -728,18 +771,22 @@ describe('es_query executor', () => {
         parsedResults: { results: [], truncated: false },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: {
-          ...defaultProps,
-          threshold: [200],
-          thresholdComparator: '>=' as Comparator,
-          groupBy: 'top',
-          termSize: 10,
-          termField: 'host.name',
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: {
+            ...defaultProps,
+            threshold: [200],
+            thresholdComparator: '>=' as Comparator,
+            groupBy: 'top',
+            termSize: 10,
+            termField: 'host.name',
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).not.toHaveBeenCalled();
       expect(mockSetAlertData).toHaveBeenCalledTimes(2);
@@ -822,15 +869,19 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        params: {
-          ...defaultProps,
-          searchType: 'esqlQuery',
-          threshold: [0],
-          thresholdComparator: '>' as Comparator,
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: {
+            ...defaultProps,
+            searchType: 'esqlQuery',
+            threshold: [0],
+            thresholdComparator: '>' as Comparator,
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).not.toHaveBeenCalled();
       expect(mockSetAlertData).toHaveBeenCalledTimes(1);
@@ -884,23 +935,22 @@ describe('es_query executor', () => {
         },
         link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
-      await executor(coreMock, {
-        ...defaultExecutorOptions,
-        // @ts-expect-error
-        params: {
-          ...defaultProps,
-          threshold: [200],
-          thresholdComparator: '>=' as Comparator,
-          groupBy: 'top',
-          termSize: 10,
-          termField: 'host.name',
-          sourceFields: [
-            { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-            { label: 'host.id', searchPath: 'host.id.keyword' },
-            { label: 'host.name', searchPath: 'host.name.keyword' },
-          ],
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          // @ts-expect-error
+          params: {
+            ...defaultProps,
+            threshold: [200],
+            thresholdComparator: '>=' as Comparator,
+            groupBy: 'top',
+            termSize: 10,
+            termField: 'host.name',
+          },
         },
-      });
+        []
+      );
 
       expect(mockReport).toHaveBeenCalledTimes(1);
       expect(mockReport).toHaveBeenNthCalledWith(1, {
