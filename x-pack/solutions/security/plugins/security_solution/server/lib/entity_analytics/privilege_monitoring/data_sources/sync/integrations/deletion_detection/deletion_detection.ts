@@ -8,8 +8,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ErrorCause } from 'elasticsearch-8.x/lib/api/types';
-import { data } from 'jquery';
-import { debug } from 'console';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
