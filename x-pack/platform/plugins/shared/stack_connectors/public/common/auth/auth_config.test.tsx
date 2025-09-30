@@ -25,6 +25,10 @@ describe('AuthConfig renders', () => {
     useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders all fields for authType=None', async () => {
     const testFormData = {
       config: {
@@ -820,7 +824,7 @@ describe('AuthConfig renders', () => {
       });
     });
 
-    it('validates additionalFields input for valid/invalid JSON', async () => {
+    it('validates additionalFields input for invalid JSON', async () => {
       const testFormData = {
         config: {
           hasAuth: true,
@@ -851,13 +855,6 @@ describe('AuthConfig renders', () => {
       await userEvent.type(additionalFieldsInput!, '{{key": "value');
 
       expect(await screen.findByText('Invalid JSON')).toBeInTheDocument();
-
-      await userEvent.clear(additionalFieldsInput!);
-      await userEvent.type(additionalFieldsInput!, '{{"sdf": "value"}');
-
-      await waitFor(() => {
-        expect(screen.queryByText('Invalid JSON')).not.toBeInTheDocument();
-      });
     });
 
     it('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {

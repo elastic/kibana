@@ -13,10 +13,11 @@ import { AuthType } from '../../../common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
-jest.mock('../../common/auth/use_secret_headers', () => ({
-  useSecretHeaders: jest.fn().mockReturnValue({ data: [] }),
-}));
+jest.mock('../../common/auth/use_secret_headers');
+
+const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
@@ -77,7 +78,16 @@ const actionConnector = {
 };
 
 describe('CasesWebhookActionConnectorFields renders', () => {
+  beforeEach(() => {
+    useSecretHeadersMock.mockReturnValue({ isLoading: true, isFetching: false, data: [] });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('All inputs are properly rendered', async () => {
+    useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
     render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <CasesWebhookActionConnectorFields
