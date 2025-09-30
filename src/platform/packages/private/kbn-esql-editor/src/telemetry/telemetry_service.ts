@@ -12,11 +12,7 @@ import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
 
 export class ESQLEditorTelemetryService {
-  private _analytics: AnalyticsServiceStart;
-
-  constructor(analytics: AnalyticsServiceStart) {
-    this._analytics = analytics;
-  }
+  constructor(private readonly _analytics: AnalyticsServiceStart) {}
 
   private _reportEvent(eventType: string, eventData: Record<string, unknown>) {
     try {
