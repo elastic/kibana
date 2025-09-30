@@ -474,10 +474,10 @@ export const queryToLensState = (query: LensApiFilterType): Query => {
 
 export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
   return {
-    filters: filtersToApiFormat(state.state.filters),
-    query: isOfAggregateQueryType(state.state.query)
-      ? undefined
-      : queryToApiFormat(state.state.query as Query),
+    ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
+    ...(state.state.query && !isOfAggregateQueryType(state.state.query)
+      ? { query: queryToApiFormat(state.state.query) }
+      : {}),
   };
 };
 
