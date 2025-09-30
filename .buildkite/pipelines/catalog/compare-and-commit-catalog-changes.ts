@@ -23,11 +23,11 @@ const title = 'Update Kibana packages';
 
 async function main() {
   const cwd = process.cwd();
-  const repoDir = process.env.CATALOG_INFO_DIR || path.resolve(cwd, '..', 'catalog-info');
+  const repoDir = process.env.CATALOG_INFO_DIR || path.resolve(cwd, '..', 'kibana-package-catalog');
 
   if (!fs.existsSync(repoDir) || !fs.existsSync(path.join(repoDir, '.git'))) {
     console.error(
-      `catalog-info repository not found at ${repoDir}. Clone it or set CATALOG_INFO_DIR.`
+      `kibana-package-catalog repository not found at ${repoDir}. Clone it or set CATALOG_INFO_DIR.`
     );
     return;
   }
