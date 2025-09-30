@@ -167,12 +167,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-      asyncDeploy?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;

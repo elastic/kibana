@@ -132,6 +132,8 @@ import {
 } from './package_policies';
 import type {
   PackagePolicyClient,
+  PackagePolicyClientBulkUpdateOptions,
+  PackagePolicyClientDeleteOptions,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyService,
   RunExternalCallbacksPackagePolicyArgument,
@@ -1401,11 +1403,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
@@ -1422,8 +1420,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
-    if (!packagePolicies) {
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+      spaceIds: options?.spaceIds,
+    });
+    if (!packagePolicies || packagePolicies.length === 0) {
       return [];
     }
 
