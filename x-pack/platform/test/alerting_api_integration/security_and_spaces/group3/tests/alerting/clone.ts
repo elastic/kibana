@@ -10,6 +10,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
@@ -393,6 +394,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           .post(`/internal/alerting/rule/${createdRule.id}/_clone`)
           .set('kbn-xsrf', 'foo')
           .expect(400);
+
+        await deleteRuleById(es, createdRule.id);
       });
     });
   });
