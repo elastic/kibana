@@ -55,6 +55,7 @@ import type {
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
 import type { DashboardLayout } from './layout_manager/types';
+import { ControlsGroupState } from '@kbn/controls-schemas';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -164,8 +165,12 @@ export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
+  serializeControls: () => {
+    controlGroupInput: ControlsGroupState | undefined;
+    controlGroupReferences: Reference[];
+  };
 }

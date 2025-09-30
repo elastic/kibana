@@ -59,7 +59,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     state,
     {
       ...defaultControlDefaultValues,
-      dataViewId: state.dataViewId ?? '',
+      dataViewId: '',
       fieldName: '',
       title: undefined,
     },

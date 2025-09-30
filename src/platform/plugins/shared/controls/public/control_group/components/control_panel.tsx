@@ -87,7 +87,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   );
   const isTwoLine = labelPosition === 'twoLine';
   const controlType = api ? api.type : undefined;
-
+  console.log(api);
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
     setInitialLoadComplete(true);

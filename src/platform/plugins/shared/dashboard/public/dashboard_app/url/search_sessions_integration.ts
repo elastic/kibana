@@ -16,9 +16,10 @@ import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-pl
 import type { History } from 'history';
 import { map } from 'rxjs';
 import { SEARCH_SESSION_ID } from '../../../common/constants';
-import type { DashboardLocatorParams } from '../../../common/types';
+import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -80,9 +81,17 @@ function getLocatorParams({
   const panels = savedObjectId
     ? (dashboardInternalApi.serializeLayout() as Pick<
         DashboardLocatorParams,
-        'panels' | 'references'
+        'panels' | 'references' | 'controlGroupInput'
       >)
     : undefined;
+
+  const controls = dashboardInternalApi.serializeControls();
+
+  const combinedReferences = [
+    ...(panels?.references ?? []),
+    ...(controls.controlGroupReferences ?? []),
+  ] as unknown as DashboardState['references'] & SerializableRecord;
+
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -102,6 +111,8 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    ...panels,
+    panels: panels?.panels,
+    controlGroupInput: controls.controlGroupInput,
+    references: combinedReferences,
   };
 }
