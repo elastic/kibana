@@ -15,7 +15,6 @@ actions:
         description: Maintenance window documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
       x-displayName: 'Maintenance windows'
-  # A
   - target: '$.tags[?(@.name=="alerting")]'
     description: Change tag description and displayName
     update:
@@ -27,7 +26,6 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
       x-displayName: 'Alerting'
-  # C
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
     update:
