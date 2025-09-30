@@ -133,7 +133,8 @@
     "@kbn/page-attachment-schema",
     "@kbn/licensing-types",
     "@kbn/metrics-experience-plugin",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/deeplinks-management"
   ],
   "exclude": ["target/**/*"]
 }

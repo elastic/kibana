@@ -11,12 +11,14 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 
 export interface OnechatSetupDependencies {
-  inference: InferenceServerSetup;
   cloud?: CloudSetup;
+  workflowsManagement?: WorkflowsPluginSetup;
+  inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
 }

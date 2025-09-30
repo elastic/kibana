@@ -47,6 +47,7 @@ describe('Bulk rollback task', () => {
         taskParams: {
           type: 'bulk_rollback',
           packages: [{ name: 'test_valid' }],
+          packagePolicyIdsForCurrentUser: {},
         },
       });
 
@@ -67,6 +68,7 @@ describe('Bulk rollback task', () => {
             { name: 'test_valid_2' },
             { name: 'test_invalid_2' },
           ],
+          packagePolicyIdsForCurrentUser: {},
         },
       });
 
@@ -102,6 +104,7 @@ describe('Bulk rollback task', () => {
               { name: 'test_valid_2' },
               { name: 'test_invalid_2' },
             ],
+            packagePolicyIdsForCurrentUser: {},
           },
         })
       ).rejects.toThrow(/Task was aborted/);
