@@ -86,6 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'filesManagement',
           'objects',
           'tags',
+          'search_sessions',
           'spaces',
           'settings',
         ]);
