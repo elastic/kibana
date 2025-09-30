@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
@@ -21,12 +19,7 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-  const allAiConnectors = await loadAiConnectors(http);
-
-  const aiConnectors = getAvailableAiConnectors({
-    allAiConnectors,
-    settings,
-  });
+  const aiConnectors = await loadAiConnectors({http, settings});
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {

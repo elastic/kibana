@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from './authz';
@@ -27,12 +26,7 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
     return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
-  const allAiConnectors = await loadAiConnectors(http);
-
-  const aiConnectors = getAvailableAiConnectors({
-    allAiConnectors,
-    settings,
-  });
+  const aiConnectors = await loadAiConnectors({http, settings});
 
   return {
     isComplete: aiConnectors.length > 0,

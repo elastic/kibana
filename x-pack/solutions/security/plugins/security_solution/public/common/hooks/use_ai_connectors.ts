@@ -7,7 +7,6 @@
 
 import { useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
 import * as i18n from './translations';
@@ -24,11 +23,7 @@ export const useAIConnectors = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: async () => {
-      const allAiConnectors = await loadAiConnectors(http);
-
-      return getAvailableAiConnectors({ allAiConnectors, settings });
-    },
+    queryFn: async () => loadAiConnectors({http, settings}),
     onError: (err) => {
       addError(err, {
         title: i18n.ERROR_FETCH_AI_CONNECTORS,

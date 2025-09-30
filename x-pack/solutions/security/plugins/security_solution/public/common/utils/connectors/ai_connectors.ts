@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import {
   loadAllActions,
@@ -61,15 +63,23 @@ const isValidAiConnector = async (
  * @param http - The HTTP client to use for making requests.
  * @returns A promise that resolves to an array of valid AI connectors.
  */
-export const loadAiConnectors = async (http: HttpSetup) => {
+export const loadAiConnectors = async ({ http, settings }: { http: HttpSetup, settings: SettingsStart }) => {
   const allConnectors = await loadAllActions({ http });
 
-  const aiConnectors: ActionConnector[] = [];
-  for (const connector of allConnectors) {
+  const validConnectors = await Promise.all(allConnectors.map(async (connector) => {
     const isValid = await isValidAiConnector(connector, { http });
     if (isValid) {
-      aiConnectors.push(connector);
+      return [connector]
     }
-  }
+    return [];
+  }));
+
+  const allAiConnectors = validConnectors.flat();
+
+  const aiConnectors = getAvailableAiConnectors({
+    allAiConnectors,
+    settings,
+  });
+
   return aiConnectors;
 };

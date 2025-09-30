@@ -32,6 +32,7 @@ import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { AddConnectorModal } from '../add_connector_modal';
+import { useOptimisticSelection } from './use_optimistic_selection';
 interface Props {
   fullWidth?: boolean;
   isDisabled?: boolean;
@@ -67,7 +68,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       settings,
       navigateToApp,
     } = useAssistantContext();
-
+    
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const [modalForceOpen, setModalForceOpen] = useState(isOpen);
     const { data: actionTypes } = useLoadActionTypes({ http });
@@ -80,20 +81,27 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       settings,
     });
 
+    // Use optimistic selection hook for immediate UI feedback
+    const { effectiveValue: effectiveSelectedConnectorId, setOptimisticValue: setOptimisticConnectorId } = 
+      useOptimisticSelection(selectedConnectorId);
+
     const connectorExists = useMemo(
-      () => some(aiConnectors, ['id', selectedConnectorId]),
-      [aiConnectors, selectedConnectorId]
+      () => some(aiConnectors, ['id', effectiveSelectedConnectorId]),
+      [aiConnectors, effectiveSelectedConnectorId]
     );
 
     const onChange = useCallback(
       (connectorId: string) => {
         const connector = (aiConnectors ?? []).find((c) => c.id === connectorId);
         if (connector) {
+          // Set optimistic value immediately for instant UI feedback
+          setOptimisticConnectorId(connectorId);
+          
           onConnectorSelectionChange(connector);
           setModalForceOpen(false);
         }
       },
-      [aiConnectors, onConnectorSelectionChange, setModalForceOpen]
+      [aiConnectors, onConnectorSelectionChange, setModalForceOpen, setOptimisticConnectorId]
     );
 
     const cleanupAndCloseModal = useCallback(() => {
@@ -118,7 +126,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       undefined
     );
 
-    const selectedOrDefaultConnectorId = selectedConnectorId ?? defaultAIConnectorId;
+    // Use effective value (optimistic or actual) or fall back to default
+    const selectedOrDefaultConnectorId = effectiveSelectedConnectorId ?? defaultAIConnectorId;
     const selectedOrDefaultConnector = aiConnectors?.find(
       (connector) => connector.id === selectedOrDefaultConnectorId
     );
