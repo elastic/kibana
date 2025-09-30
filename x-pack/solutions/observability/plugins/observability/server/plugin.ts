@@ -21,16 +21,16 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
