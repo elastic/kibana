@@ -30,6 +30,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
 import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
@@ -253,6 +254,19 @@ export interface ChartSectionProps {
    * Flag indicating that the chart is currently loading
    */
   isChartLoading?: boolean;
+
+  /**
+   * The current tab ID
+   */
+  currentTabId: string;
+
+  /**
+   * The state of the tabs
+   */
+  tabsState: {
+    getTabById: (tabId: string) => TabItem;
+    allIds: string[];
+  };
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

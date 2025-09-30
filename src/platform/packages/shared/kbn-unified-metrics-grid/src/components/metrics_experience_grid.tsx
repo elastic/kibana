@@ -47,7 +47,7 @@ export const MetricsExperienceGrid = ({
   services,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
-}: ChartSectionProps) => {
+}: Omit<ChartSectionProps, 'tabsState'>) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 

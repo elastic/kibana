@@ -7,17 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext } from 'react';
-import { MetricsExperienceContext } from '../context/metrics_experience_provider';
+export interface MetricsExperienceTabState {
+  // Pagination state
+  currentPage: number;
 
-export function useMetricsExperience() {
-  const services = useContext(MetricsExperienceContext);
+  // Search state
+  searchTerm: string;
 
-  if (!services) {
-    throw new Error(
-      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
-    );
-  }
+  // UI state
+  isFullscreen: boolean;
 
-  return services;
+  // Dimension state
+  dimensions: string[];
+
+  // Values state
+  valueFilters: string[];
+}
+
+export interface MetricsExperienceState {
+  // Pagination state
+  tabs: {
+    byId: Record<string, MetricsExperienceTabState>;
+    allIds: string[];
+    initializing: boolean;
+  };
 }

@@ -88,6 +88,8 @@ describe('MetricsExperienceGrid', () => {
     services: {
       fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     } as unknown as UnifiedHistogramServices,
+    currentTabId: 'test-tab-id',
+    allTabIds: ['test-tab-id'],
     input$,
   };
 
@@ -105,9 +107,9 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onClearSearchTerm: () => {},
-      onSearchTermChange: () => {},
-      onToggleFullscreen: () => {},
+      onClearSearchTerm: jest.fn(),
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen: jest.fn(),
     });
 
     usePaginatedFieldsMock.mockReturnValue({
@@ -227,9 +229,9 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onClearSearchTerm: () => {},
-      onSearchTermChange: () => {},
-      onToggleFullscreen: () => {},
+      onClearSearchTerm: jest.fn(),
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
