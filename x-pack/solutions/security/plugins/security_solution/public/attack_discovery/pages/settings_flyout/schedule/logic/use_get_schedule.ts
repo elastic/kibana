@@ -8,15 +8,22 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+  transformAttackDiscoveryScheduleFromApi,
+} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
 import { getAttackDiscoverySchedule } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
+import { toAttackDiscoverySchedule } from './schedule_type_guards';
 
 export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
   const { addError } = useAppToasts();
+  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const { id } = params;
   const SPECIFIC_PATH = replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id });
@@ -24,9 +31,19 @@ export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
   return useQuery(
     ['GET', SPECIFIC_PATH, params],
     async ({ signal }) => {
-      const response = await getAttackDiscoverySchedule({ signal, ...params });
+      const response = await getAttackDiscoverySchedule({
+        attackDiscoveryPublicApiEnabled,
+        signal,
+        ...params,
+      });
 
-      return { schedule: response };
+      // Public API returns snake_case and needs transformation to camelCase
+      // Internal API returns camelCase
+      const normalizedSchedule: AttackDiscoverySchedule = attackDiscoveryPublicApiEnabled
+        ? transformAttackDiscoveryScheduleFromApi(response)
+        : toAttackDiscoverySchedule(response);
+
+      return { schedule: normalizedSchedule };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

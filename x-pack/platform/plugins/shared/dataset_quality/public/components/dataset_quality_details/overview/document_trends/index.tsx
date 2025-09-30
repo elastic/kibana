@@ -62,9 +62,9 @@ export default function DocumentTrends({
 
   const onTimeRangeChange = useCallback(
     ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
-      updateTimeRange({ start, end, refreshInterval: timeRange.refresh.value });
+      updateTimeRange({ start, end });
     },
-    [updateTimeRange, timeRange.refresh]
+    [updateTimeRange]
   );
 
   const {

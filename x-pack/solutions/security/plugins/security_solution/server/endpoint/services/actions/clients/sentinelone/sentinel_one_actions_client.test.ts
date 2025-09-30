@@ -2029,6 +2029,29 @@ describe('SentinelOneActionsClient class', () => {
       );
     });
 
+    it('should throw an error if script does not support OS of agent', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
+
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].osTypes = ['windows'];
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].scriptName = 'terminate something';
+
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: scriptsApiResponse,
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
+        'Script [terminate something] not supported for OS type [linux]'
+      );
+    });
+
     it('should send execute script to SentinelOne', async () => {
       await s1ActionsClient.runscript(runScriptRequest);
 

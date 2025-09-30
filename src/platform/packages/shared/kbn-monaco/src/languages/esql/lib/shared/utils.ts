@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '../../../../monaco_imports';
+import { isArray } from 'lodash';
+import { monaco } from '../../../../monaco_imports';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -75,4 +76,42 @@ export const offsetRangeToMonacoRange = (
     startColumn,
     endColumn,
   };
+};
+
+export const getDecorationHoveredMessages = (
+  word: monaco.editor.IWordAtPosition,
+  position: monaco.Position,
+  model: monaco.editor.ITextModel
+): string[] => {
+  try {
+    const wordRange = new monaco.Range(
+      position.lineNumber,
+      word.startColumn,
+      position.lineNumber,
+      word.endColumn
+    );
+
+    const decorations = model.getDecorationsInRange(wordRange);
+
+    return decorations
+      .map((decoration) => {
+        const hoverMessage = decoration.options.hoverMessage;
+        if (!hoverMessage) return '';
+
+        if (isArray(hoverMessage)) {
+          return hoverMessage
+            .map((msg) => msg.value || '')
+            .filter(Boolean)
+            .join(', ');
+        }
+
+        return hoverMessage.value || '';
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Silently fail to avoid breaking the hover functionality
+    // eslint-disable-next-line no-console
+    console.error('Error extracting decoration hover messages:', error);
+    return [];
+  }
 };

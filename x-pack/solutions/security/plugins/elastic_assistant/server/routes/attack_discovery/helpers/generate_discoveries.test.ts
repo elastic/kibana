@@ -12,12 +12,12 @@ import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-com
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { generateAttackDiscoveries } from './generate_discoveries';
-import { invokeAttackDiscoveryGraph } from '../post/helpers/invoke_attack_discovery_graph';
+import { invokeAttackDiscoveryGraph } from '../public/post/helpers/invoke_attack_discovery_graph';
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 
-jest.mock('../post/helpers/invoke_attack_discovery_graph', () => ({
-  ...jest.requireActual('../post/helpers/invoke_attack_discovery_graph'),
+jest.mock('../public/post/helpers/invoke_attack_discovery_graph', () => ({
+  ...jest.requireActual('../public/post/helpers/invoke_attack_discovery_graph'),
   invokeAttackDiscoveryGraph: jest.fn(),
 }));
 

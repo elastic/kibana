@@ -142,8 +142,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
     {
-      defaultMessage:
-        'Allows management of trusted USB and external devices that bypass device control protections.',
+      defaultMessage: 'Manage security exceptions for USB and external devices.',
     }
   ),
   privilegeGroups: [

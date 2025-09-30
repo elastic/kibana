@@ -57,7 +57,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/licensing-types",
-    "@kbn/core-elasticsearch-server-mocks"
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/autoops-promotion-callout"
   ],
   "exclude": ["target/**/*"]
 }

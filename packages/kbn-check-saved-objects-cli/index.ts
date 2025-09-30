@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { runCheckSavedObjectsCli } from './src/commands/run_check_saved_objects_cli';
 export { runCheckMappingsUpdateCli } from './src/commands/run_check_mappings_update_cli';

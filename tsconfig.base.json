@@ -122,6 +122,8 @@
       "@kbn/audit-log-plugin/*": ["x-pack/platform/test/security_api_integration/plugins/audit_log/*"],
       "@kbn/automatic-import-plugin": ["x-pack/platform/plugins/shared/automatic_import"],
       "@kbn/automatic-import-plugin/*": ["x-pack/platform/plugins/shared/automatic_import/*"],
+      "@kbn/autoops-promotion-callout": ["src/platform/packages/shared/kbn-management/autoops_promotion_callout"],
+      "@kbn/autoops-promotion-callout/*": ["src/platform/packages/shared/kbn-management/autoops_promotion_callout/*"],
       "@kbn/avc-banner": ["src/platform/packages/shared/kbn-avc-banner"],
       "@kbn/avc-banner/*": ["src/platform/packages/shared/kbn-avc-banner/*"],
       "@kbn/axe-config": ["src/platform/packages/shared/kbn-axe-config"],

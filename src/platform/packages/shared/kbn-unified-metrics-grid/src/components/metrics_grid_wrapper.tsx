@@ -23,7 +23,7 @@ import { RightSideActions } from './toolbar/right_side_actions/right_side_action
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 
 export interface MetricsGridWrapperProps
-  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
+  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions' | 'isComponentVisible'> {
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
   fields: MetricField[];
@@ -37,6 +37,7 @@ export const MetricsGridWrapper = ({
   requestParams,
   fields,
   children,
+  isComponentVisible,
 }: MetricsGridWrapperProps) => {
   const { leftSideActions, onExitFullscreen } = useToolbarActions({
     fields,
@@ -104,7 +105,8 @@ export const MetricsGridWrapper = ({
           [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
         },
         css`
-          height: 100%;
+          height: ${isComponentVisible ? '100%' : 0};
+          visibility: ${isComponentVisible ? 'visible' : 'hidden'};
         `
       )}
       ref={setMetricsGridWrapper}
