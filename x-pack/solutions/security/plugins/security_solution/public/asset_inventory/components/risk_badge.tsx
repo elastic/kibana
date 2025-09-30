@@ -44,7 +44,7 @@ export const RiskBadge = ({ risk, ...props }: RiskBadgeProps) => {
 
   return (
     <EuiToolTip content={tooltips[riskLevel]}>
-      <EuiBadge tabIndex={0} color={color}>
+      <EuiBadge {...props} tabIndex={0} color={color}>
         {risk}
       </EuiBadge>
     </EuiToolTip>
