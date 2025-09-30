@@ -107,7 +107,7 @@ export interface CreateIncidentData extends Record<string, unknown> {
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
   severity_code?: { id: number };
-  properties?: Record<string, unknown>;
+  [unknown: string]: unknown;
 }
 
 export type ResilientConfig = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;

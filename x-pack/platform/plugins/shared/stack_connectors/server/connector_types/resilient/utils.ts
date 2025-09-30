@@ -201,12 +201,12 @@ export function prepareAdditionalFieldsForCreation(
       validateValues(fieldMeta, Array.isArray(value) ? value : [value]);
     }
 
-    // Custom fields need to be prefixed with 'properties.'
-    if (fieldMeta.prefix === 'properties') {
-      if (!data.properties) {
-        data.properties = {};
+    // Some fields need to be prefixed
+    if (fieldMeta.prefix) {
+      if (!data[fieldMeta.prefix]) {
+        data[fieldMeta.prefix] = {};
       }
-      data.properties[key] = value;
+      (data[fieldMeta.prefix] as Record<string, unknown>)[key] = value;
     } else {
       data[key] = value;
     }
