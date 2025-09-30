@@ -555,10 +555,10 @@ If this rule is already installed, it should be updated. Its `is_customized` fie
 **Automation**: 1 API integration test.
 
 ```Gherkin
-Given the import payload contains a non-customized prebuilt rule
+Given the import payload contains a prebuilt rule
 And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
-And this rule is already installed and marked as non-customized
+And this rule is already installed and marked as <customization_state>
 And the installed rule is NOT equal to the import payload
 When the user imports the rule
 Then the rule should be updated
@@ -567,6 +567,10 @@ And the updated rule should be marked as customized
 And the updated rule's version should match the import payload
 And the updated rule's parameters should match the import payload
 ```
+
+**Examples:**
+
+`<customization_state>` = `customized` | `non-customized`
 
 #### **Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload**
 

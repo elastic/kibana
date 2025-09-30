@@ -63,7 +63,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
 
   const button = (
     <EuiButtonIcon
-      size="m"
+      size="s"
       iconType="filter"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="kqlQueryBar__languageSwitcherButton"

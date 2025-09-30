@@ -60,6 +60,7 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
         background: ${colors.backgroundBaseSubdued};
         width: 100%;
         min-height: 100%;
+        border-radius: 8px;
       `}
     >
       <ExecutiveSummary
@@ -73,7 +74,13 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
         valueMetrics={valueMetrics}
         valueMetricsCompare={valueMetricsCompare}
       />
-      <EuiHorizontalRule />
+      <div
+        css={css`
+          padding: 0 16px;
+        `}
+      >
+        <EuiHorizontalRule />
+      </div>
       {(isLoading || hasAttackDiscoveries) && (
         <>
           <AlertProcessing
@@ -83,7 +90,13 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
             from={from}
             to={to}
           />
-          <EuiHorizontalRule />
+          <div
+            css={css`
+              padding: 0 16px;
+            `}
+          >
+            <EuiHorizontalRule />
+          </div>
         </>
       )}
       {(isLoading || hasAttackDiscoveries) && (
@@ -95,7 +108,13 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
             to={to}
             isLoading={isLoading}
           />
-          <EuiHorizontalRule />
+          <div
+            css={css`
+              padding: 0 16px;
+            `}
+          >
+            <EuiHorizontalRule />
+          </div>
         </>
       )}
       <ValueReportSettings

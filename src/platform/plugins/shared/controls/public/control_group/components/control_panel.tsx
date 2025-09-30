@@ -32,7 +32,6 @@ import { FloatingActions } from './floating_actions';
 
 import type { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
-import { isCompressed } from '../utils/is_compressed';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 
@@ -175,7 +174,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 )}
               </>
             }
-            compressed={isCompressed(api)}
+            compressed
           >
             <>
               {blockingError && <ControlError error={blockingError} />}

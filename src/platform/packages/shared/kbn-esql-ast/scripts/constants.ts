@@ -30,6 +30,7 @@ export const defaultScalarFunctionLocations: Location[] = [
   Location.STATS_WHERE,
   Location.STATS_TIMESERIES,
   Location.COMPLETION,
+  Location.RERANK,
 ];
 
 export const defaultAggFunctionLocations: Location[] = [Location.STATS];

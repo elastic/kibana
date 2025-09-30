@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -35,6 +35,7 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  EventAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -57,7 +58,8 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
-  observables?: { enabled: boolean };
+  observables?: { enabled: boolean; autoExtract?: boolean };
+  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -77,6 +79,9 @@ export interface CasesUiConfigType {
   };
   unsafe?: {
     enableCaseSummary: boolean;
+  };
+  incrementalId: {
+    enabled: boolean;
   };
 }
 
@@ -105,6 +110,7 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
   latestAttachments: AttachmentUI[];
@@ -352,10 +358,6 @@ export interface CasesCapabilities {
   [ASSIGN_CASE_CAPABILITY]: boolean;
 }
 
-export type CaseViewAlertsTableProps = Pick<
-  AlertsTableProps,
-  'id' | 'ruleTypeIds' | 'consumers' | 'query' | 'showAlertStatusWithFlapping' | 'onLoaded'
-> & {
-  services?: AlertsTableProps['services'];
-  caseData: CaseUI;
-};
+export interface CaseViewEventsTableProps {
+  events: { eventId: string | string[]; index: string | string[] }[];
+}

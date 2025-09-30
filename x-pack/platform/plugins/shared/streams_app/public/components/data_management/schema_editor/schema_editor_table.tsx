@@ -10,6 +10,7 @@ import type {
   EuiDataGridColumnSortingConfig,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
   EuiSearchBar,
@@ -17,6 +18,7 @@ import {
   EuiDataGrid,
   EuiIconTip,
   EuiFlexGroup,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -38,6 +40,8 @@ export function FieldsTable({
   stream,
   withTableActions,
   withToolbar,
+  selectedFields,
+  onFieldSelection,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -45,7 +49,9 @@ export function FieldsTable({
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
-  withToolbar: boolean;
+  withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
+  selectedFields: string[];
+  onFieldSelection: (names: string[], checked: boolean) => void;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -56,6 +62,19 @@ export function FieldsTable({
     () => filterFieldsByControls(fields, controls),
     [fields, controls]
   );
+
+  const leadingColumns = useMemo(() => {
+    if (!withTableActions) return undefined;
+
+    return [
+      createFieldSelectionCellRenderer(
+        filteredFields,
+        selectedFields,
+        onFieldSelection,
+        stream.name
+      ),
+    ];
+  }, [withTableActions, filteredFields, selectedFields, onFieldSelection, stream.name]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -92,10 +111,11 @@ export function FieldsTable({
       toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
+      leadingControlColumns={leadingColumns}
       trailingControlColumns={trailingColumns}
       gridStyle={{
         border: 'none',
-        rowHover: 'none',
+        rowHover: 'highlight',
         header: 'underline',
       }}
       inMemory={{ level: 'sorting' }}
@@ -169,6 +189,52 @@ const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridContr
   },
 });
 
+const createFieldSelectionCellRenderer = (
+  fields: SchemaField[],
+  selectedFields: string[],
+  onChange: (names: string[], checked: boolean) => void,
+  streamName: string
+): EuiDataGridControlColumn => ({
+  id: 'field-selection',
+  width: 40,
+  headerCellRender: () => {
+    const selectableFields = fields.filter((field) => isSelectableField(streamName, field));
+    if (selectableFields.length === 0) {
+      return;
+    }
+
+    return (
+      <EuiCheckbox
+        id="selectAllFields"
+        onChange={(e) => {
+          onChange(
+            selectableFields.map((field) => field.name),
+            e.target.checked
+          );
+        }}
+        checked={selectableFields.every((field) => selectedFields.includes(field.name))}
+        indeterminate={
+          selectedFields.length > 0 &&
+          !selectableFields.every((field) => selectedFields.includes(field.name))
+        }
+      />
+    );
+  },
+  rowCellRender: ({ rowIndex }) => {
+    const field = fields[rowIndex];
+
+    if (!isSelectableField(streamName, field)) return null;
+
+    return (
+      <EuiCheckbox
+        id={field.name}
+        onChange={(e) => onChange([field.name], e.target.checked)}
+        checked={selectedFields.includes(field.name)}
+      />
+    );
+  },
+});
+
 const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   if (!controls.query && isEmpty(controls.type) && isEmpty(controls.status)) {
     return fields;
@@ -186,4 +252,13 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   });
 
   return filteredByGroupsFields;
+};
+
+export const isSelectableField = (streamName: string, field: SchemaField) => {
+  return (
+    field.status !== 'inherited' &&
+    field.parent === streamName &&
+    !field.alias_for &&
+    field.type !== 'system'
+  );
 };

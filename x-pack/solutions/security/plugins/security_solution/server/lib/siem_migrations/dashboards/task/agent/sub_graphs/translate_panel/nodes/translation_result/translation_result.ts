@@ -13,6 +13,7 @@ import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/c
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
+import { createMarkdownPanel } from '../../../../helpers/markdown_panel/create_markdown_panel';
 
 interface GetTranslationResultNodeParams {
   logger: Logger;
@@ -22,7 +23,12 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
   return async (state) => {
     const query = state.esql_query;
     if (!query) {
-      return { translation_result: MigrationTranslationResult.UNTRANSLATABLE };
+      const message = 'SPL query unsupported or missing, cannot translate panel';
+      const panelJSON = createMarkdownPanel(message, state.parsed_panel);
+      return {
+        elastic_panel: panelJSON,
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      };
     }
 
     let translationResult;

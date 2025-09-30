@@ -6,11 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
+import {
+  platformCoreTools,
+  ToolResultType,
+  type ResolvedAgentCapabilities,
+} from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
+import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
-import { toolReasoningOpeningTag, toolReasoningClosingTag } from './consts';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -20,11 +24,15 @@ const tools = {
 
 export const getActPrompt = ({
   customInstructions,
+  capabilities,
   messages,
 }: {
   customInstructions?: string;
+  capabilities: ResolvedAgentCapabilities;
   messages: BaseMessageLike[];
 }): BaseMessageLike[] => {
+  const visEnabled = capabilities.visualizations;
+
   return [
     [
       'system',
@@ -47,8 +55,9 @@ export const getActPrompt = ({
         3) Scope discipline: Answer ONLY what was asked. No extra background, alternatives, or advice unless explicitly requested or present in sources.
         4) No speculation or capability disclaimers. Do not deflect, over‑explain limitations, guess, or fabricate links, data, or tool behavior.
         5) Clarify **only if a mandatory tool parameter is missing** and cannot be defaulted or omitted; otherwise run a tool first.
-        6) Use only currently available tools. Never invent tool names or capabilities.
-        7) Bias to action: When uncertain, default to calling tools to gather information.
+        6) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+        7) Use only currently available tools. Never invent tool names or capabilities.
+        8) Bias to action: When uncertain, default to calling tools to gather information.
 
         DECISION GATEWAY (when you MAY skip tools)
         - Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
@@ -104,15 +113,13 @@ export const getActPrompt = ({
               2) Ask the user to enable/authorize a needed tool.
           - Do NOT provide ungrounded general knowledge answers.
 
-        CRITICAL OUTPUT FORMATTING
-        Your response for each turn MUST follow one of these two formats. Do not deviate.
+        TOOL USAGE PROTOCOL
 
-        1. Final Answer Format (No Tool Required):
-          - If you are providing a final answer directly to the user without calling a tool, your response should be plain text.
-        2. Tool Use Format (Tool calling):
-          - When calling a tool, you should generally include a brief reasoning message to keep the user informed.
-          - This message MUST start with the "${toolReasoningOpeningTag}" and end with "${toolReasoningClosingTag}".
-          - You may omit the reasoning message only when the user's request is very direct, simple, and transactional.
+        1.  **Exclusive Tool Call Output:** When you decide to call a tool, your entire response **must** be the tool call. Do not include any text, greetings, or explanations before or after this block.
+
+        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`_reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
+
+        This protocol is critical for the automated parsing of your responses.
 
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
@@ -121,7 +128,7 @@ export const getActPrompt = ({
         - [ ] The answer stays within the user's requested scope.
         - [ ] I addressed every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
         - [ ] No internal tool process or names revealed (unless user asked).
-       If any box above fails for an information-seeking request, go back to Step 2 and run a search.
+        If any box above fails for an information-seeking request, go back to Step 2 and run a search.
 
         OUTPUT STYLE
         - Clear, direct, and scoped. No extraneous commentary.
@@ -131,23 +138,13 @@ export const getActPrompt = ({
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
-        ${renderVisualizationPrompt()}
+        ${visEnabled ? renderVisualizationPrompt() : ''}
 
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
         - Current date: ${formatDate()}
-
-        ## EXAMPLES
-
-        ### Example of a Tool Call with Reasoning
-        User query: "How many 404 errors did our web server log in the last hour?"
-
-        Your complete output for this turn MUST be structured like this:
-        - Text Component: "${toolReasoningOpeningTag}Of course, I'll search the web server logs for 404 errors from the last hour.${toolReasoningClosingTag}"
-        - Tool Call Component: [The actual tool call to the '${
-          tools.search
-        }' tool with the correct parameters]`,
+`,
     ],
     ...messages,
   ];
@@ -156,6 +153,9 @@ export const getActPrompt = ({
 function renderVisualizationPrompt() {
   const { tabularData } = ToolResultType;
   const { tagName, attributes } = visualizationElement;
+  const chartTypeNames = Object.values(ChartType)
+    .map((chartType) => `\`${chartType}\``)
+    .join(', ');
 
   return `#### Rendering Visualizations with the <${tagName}> Element
       When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
@@ -164,9 +164,11 @@ function renderVisualizationPrompt() {
 
       **Rules**
       * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
+      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}.
+      * If the user does not specify a chart type, do NOT assume any. The system will choose an appropriate default visualization.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
-      * You must not include any other attributes or content within the \`<${tagName}>\` element.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.      
 
       **Example Usage:**
 
@@ -182,5 +184,8 @@ function renderVisualizationPrompt() {
       }
 
       To visualize this response your reply should be:
-      <${tagName} ${attributes.toolResultId}="LiDo" />`;
+      <${tagName} ${attributes.toolResultId}="LiDo"/>
+            
+      To visualize this response as a bar chart your reply should be:
+      <${tagName} ${attributes.toolResultId}="LiDo" ${attributes.chartType}="${ChartType.Bar}"/>`;
 }

@@ -16,17 +16,22 @@ import { MenuItem } from '../menu_item';
 import type { SideNavLogo } from '../../../types';
 import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface SideNavLogoProps extends HTMLAttributes<HTMLAnchorElement>, SideNavLogo {
+export interface SideNavLogoProps
+  extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>,
+    SideNavLogo {
   id: string;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isCollapsed: boolean;
+  onClick?: () => void;
 }
 
 /**
  * It's used to communicate what solution the user is currently in.
  */
 export const SideNavLogoComponent = ({
-  isActive,
+  isHighlighted,
+  isCurrent,
   isCollapsed,
   label,
   ...props
@@ -54,11 +59,13 @@ export const SideNavLogoComponent = ({
   `;
 
   const menuItem = (
-    <div css={wrapperStyles}>
+    <div data-test-subj="side-nav-logo-wrapper" css={wrapperStyles}>
       <MenuItem
         aria-label={`${label} homepage`}
+        // TODO: Change to `side-nav-logo`, might affect tests
         data-test-subj="sideNavLogo"
-        isActive={isActive}
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
         isLabelVisible={!isCollapsed}
         isTruncated={false}
         {...props}

@@ -139,6 +139,44 @@ export class ESQLExtensionsRegistry {
     );
   }
 
+  unsetRecommendedQueries(
+    recommendedQueries: RecommendedQuery[],
+    activeSolutionId: SolutionId
+  ): void {
+    if (!Array.isArray(recommendedQueries)) {
+      throw new Error(`Recommended queries must be an array`);
+    }
+
+    for (const item of recommendedQueries) {
+      if (typeof item.name !== 'string' || typeof item.query !== 'string') {
+        continue; // Skip if the recommended item is malformed (missing name or query)
+      }
+
+      const indexPattern = getIndexPatternFromESQLQuery(item.query);
+      if (!indexPattern) {
+        // No index pattern found, possibly malformed or not valid for registration
+        continue;
+      }
+
+      const registryId = `${activeSolutionId}>${indexPattern}`;
+      const map = this.recommendedQueries;
+
+      if (map.has(registryId)) {
+        const existingItems = map.get(registryId)!;
+        const filteredItems = existingItems.filter(
+          (existingItem) => existingItem.name !== item.name
+        );
+        if (filteredItems.length === 0) {
+          // If no items left for this index pattern, remove the entry from the map
+          map.delete(registryId);
+        } else {
+          // Otherwise, update the map with the filtered items
+          map.set(registryId, filteredItems);
+        }
+      }
+    }
+  }
+
   setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {
     this.setRecommendedItems(
       this.recommendedFields,

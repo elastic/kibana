@@ -39,14 +39,20 @@ export const AlertProcessing: React.FC<Props> = ({
   return (
     <div
       css={css`
-        padding: ${size.base};
+        padding: ${size.base} ${size.xl};
       `}
     >
-      <EuiTitle size="s">
-        <h3>{i18n.ALERT_PROCESSING_TITLE}</h3>
+      <EuiTitle size="m">
+        <h2>{i18n.ALERT_PROCESSING_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup
+        gutterSize="xl"
+        data-test-subj="alertProcessingGroup"
+        css={css`
+          gap: 48px;
+        `}
+      >
         <EuiFlexItem
           grow={false}
           css={css`

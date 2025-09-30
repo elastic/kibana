@@ -7,7 +7,7 @@
 
 import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
 import { createDocument, createIndex, deleteIndex } from '../../../tasks/api_calls/elasticsearch';
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
+import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/privmon';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';

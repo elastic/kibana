@@ -17,7 +17,7 @@ import {
   ConversationSharedState,
 } from '@kbn/elastic-assistant-common';
 import { ShareSelect } from '../../share_conversation/share_select';
-import type { Conversation } from '../../../..';
+import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -33,9 +33,9 @@ import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 export interface ConversationSettingsEditorProps {
   allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
+  currentUser?: User;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
-  isAssistantSharingEnabled?: boolean;
   isDisabled?: boolean;
   selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -51,14 +51,16 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
   ({
     allSystemPrompts,
     conversationsSettingsBulkActions,
+    currentUser,
     http,
-    isAssistantSharingEnabled = false,
     isDisabled = false,
     selectedConversation,
     setConversationsSettingsBulkActions,
   }) => {
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      settings,
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);
@@ -310,8 +312,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             />
           </EuiFormRow>
         )}
-
-        {isAssistantSharingEnabled && (
+        {currentUser && (
           <EuiFormRow
             data-test-subj="shared-field"
             display="rowCompressed"

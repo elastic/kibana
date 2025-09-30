@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiText, EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiLink, EuiIcon, useEuiTheme, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -27,14 +27,17 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
     [navigateTo]
   );
   return (
-    <EuiText
-      size="xs"
+    <div
       css={css`
-        padding: ${size.base};
+        padding: ${size.base} ${size.xl};
       `}
+      className="valueReportSettings"
     >
-      <span className="valueReportSettings">
-        <h3>{i18n.COST_CALCULATIONS}</h3>
+      <EuiTitle size="m">
+        <h2>{i18n.COST_CALCULATIONS}</h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiText size="xs">
         <p>
           {i18n.COST_CALCULATION({ minutesPerAlert, analystHourlyRate })}{' '}
           <EuiLink onClick={goToKibanaSettings}>
@@ -48,9 +51,9 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
             />
           </EuiLink>
         </p>
-      </span>
-      <p>{i18n.LEGAL_DISCLAIMER}</p>
-    </EuiText>
+        <p>{i18n.LEGAL_DISCLAIMER}</p>
+      </EuiText>
+    </div>
   );
 };
 

@@ -228,7 +228,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
     traceCustomIdentifiers: true,
   }).processors;
 
-  const formattedProcessors = transpiledIngestPipelineProcessors.map((processor) => {
+  return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
     const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
 
@@ -251,32 +251,6 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
       },
     };
   });
-
-  const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
-    {
-      dot_expander: {
-        field: '*',
-        ignore_failure: true,
-        override: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'resource.attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-  ];
-
-  return [...dotExpanderProcessors, ...formattedProcessors];
 };
 
 const prepareSimulationData = (
@@ -303,7 +277,8 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    pipeline: { processors },
+    // @ts-expect-error field_access_pattern not supported by typing yet
+    pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
 };
@@ -327,6 +302,8 @@ const prepareIngestSimulationBody = (
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
+      // @ts-expect-error field_access_pattern not supported by typing yet
+      field_access_pattern: 'flexible',
     };
   }
   if (Streams.WiredStream.Definition.is(stream)) {
@@ -477,7 +454,12 @@ const computePipelineSimulationResult = (
       ingestDocErrors
     );
 
-    const diff = computeSimulationDocDiff(pipelineDocResult, isWiredStream, forbiddenFields);
+    const diff = computeSimulationDocDiff(
+      sampleDocs[id]._source,
+      pipelineDocResult,
+      isWiredStream,
+      forbiddenFields
+    );
 
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
@@ -583,8 +565,7 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expanders
-  const processorResults = doc.processor_results.slice(3);
+  const processorResults = doc.processor_results;
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -608,10 +589,8 @@ const getLastDoc = (
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
-    docResult.processor_results
-      .slice(3) // Remove the always present base processors for dot expander
-      .filter((proc) => !isSkippedProcessor(proc))
-      .at(-1)?.doc?._source ?? sample;
+    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
+    sample;
 
   if (status === 'parsed') {
     return {
@@ -630,6 +609,7 @@ const getLastDoc = (
  * this function computes the detected fields and the errors for each processor.
  */
 const computeSimulationDocDiff = (
+  base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
   forbiddenFields: string[]
@@ -638,7 +618,7 @@ const computeSimulationDocDiff = (
   const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
-    { processor_id: 'base', value: docResult.processor_results[0]!.doc!._source },
+    { processor_id: 'base', value: base },
     ...successfulProcessors.map((proc) => ({
       processor_id: proc.tag,
       value: omit(proc.doc._source, ['_errors']),
@@ -806,6 +786,10 @@ const getStreamFields = async (
 
   if (Streams.WiredStream.Definition.is(stream)) {
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
+  }
+
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return { ...stream.ingest.classic.field_overrides };
   }
 
   return {};
