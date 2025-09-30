@@ -255,7 +255,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsightsPolicyResponseFailure: false,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
