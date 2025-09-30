@@ -141,7 +141,7 @@ export async function runJestAll() {
     }
   }
 
-  log.info('--- Combined Jest run summary');
+  log.write('--- Combined Jest run summary');
 
   for (const r of results) {
     const sec = Math.round(r.durationMs / 1000);
