@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Measures the actual height of menu items by querying existing DOM elements
- * @param menuElement - The menu element containing the items
- */
-export const getActualItemHeights = (menuElement: HTMLElement): number[] => {
-  const menuItems = menuElement.querySelectorAll('[data-menu-item]');
-  const heights: number[] = [];
+import { PRIMARY_NAVIGATION_ID } from '../constants';
 
-  menuItems.forEach((item) => {
-    const rect = item.getBoundingClientRect();
-    heights.push(rect.height);
+const PRIMARY_NAVIGATION_HEIGHT = 603;
+
+export const mockClientHeight = (menuItemHeight: number) =>
+  Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+    configurable: true,
+    get() {
+      return this.id.includes(PRIMARY_NAVIGATION_ID)
+        ? PRIMARY_NAVIGATION_HEIGHT
+        : this['data-menu-item'] === 'true'
+        ? menuItemHeight
+        : 0;
+    },
   });
-
-  return heights;
-};
