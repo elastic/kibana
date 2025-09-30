@@ -44,7 +44,7 @@ _search_ai_lake_analyst:
         - "logs-*"
       privileges:
         - "read"
-        - "view_index_matadata"
+        - "view_index_metadata"
     - names:
         - "logs-*-"
       privileges:
@@ -96,7 +96,7 @@ _search_ai_lake_soc_manager:
         - "logs-*"
       privileges:
         - "read"
-        - "view_index_matadata"
+        - "view_index_metadata"
         - "write
     - names:
         - ".alerts-security*"
