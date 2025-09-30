@@ -18,6 +18,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     timeRangeAbsolute: undefined,
     timeRangeRelative: undefined,
     searchSessionId: undefined,
+    isSearchSessionRestored: false,
   },
   overriddenVisContextAfterInvalidation: undefined,
   controlGroupState: undefined,
