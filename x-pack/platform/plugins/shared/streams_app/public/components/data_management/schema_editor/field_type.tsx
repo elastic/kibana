@@ -9,8 +9,8 @@ import React from 'react';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
-import { FIELD_TYPE_MAP } from './constants';
 import { EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
+import { FIELD_TYPE_MAP } from './constants';
 
 export const FieldType = ({
   type,
@@ -23,7 +23,7 @@ export const FieldType = ({
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToken iconType="tokenAlias" aria-label='alias' />
+          <EuiToken iconType="tokenAlias" aria-label="alias" />
         </EuiFlexItem>
         <EuiFlexItem>
           {i18n.translate('xpack.streams.fieldType.aliasFor', {
@@ -31,8 +31,8 @@ export const FieldType = ({
             values: { aliasFor },
           })}
         </EuiFlexItem>
-        </EuiFlexGroup>
-  );
+      </EuiFlexGroup>
+    );
   }
   return (
     <FieldNameWithIcon

@@ -110,9 +110,10 @@ export function StreamDeleteModal({
         <EuiFormRow
           fullWidth
           label={i18n.translate(
-            'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel', {
-            defaultMessage: 'To confirm, type {stream}',
-            values: { stream: name },
+            'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
+            {
+              defaultMessage: 'To confirm, type {stream}',
+              values: { stream: name },
             }
           )}
         >

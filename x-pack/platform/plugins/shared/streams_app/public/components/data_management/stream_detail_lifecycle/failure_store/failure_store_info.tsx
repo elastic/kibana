@@ -32,7 +32,7 @@ export const FailureStoreInfo = ({
 }) => {
   return (
     <>
-      <EuiTitle size='xs'>
+      <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.title', {
             defaultMessage: 'Failure store ',

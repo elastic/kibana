@@ -116,7 +116,7 @@ export function FieldsTable({
       gridStyle={{
         border: 'all',
         rowHover: 'highlight',
-        header: 'shade'
+        header: 'shade',
       }}
       inMemory={{ level: 'sorting' }}
     />

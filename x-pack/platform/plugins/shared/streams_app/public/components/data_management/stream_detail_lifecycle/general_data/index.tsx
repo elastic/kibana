@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';

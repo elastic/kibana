@@ -96,15 +96,14 @@ const SamplePreviewTableContent = ({
   ) {
     return (
       <EuiCallOut
-        size='s'
+        size="s"
         color="warning"
         iconType="warning"
         title={i18n.translate('xpack.streams.samplePreviewTable.unknownStatus', {
           defaultMessage:
             "Couldn't simulate changes due to a lack of indexed documents with this field",
         })}
-        >
-      </EuiCallOut>
+      />
     );
   }
 
