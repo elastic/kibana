@@ -46,7 +46,12 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
     <FormProvider {...reviewSuggestionsForm}>
       <EuiCallOut
         announceOnMount
-        title="Review partitioning suggestions"
+        title={i18n.translate(
+          'xpack.streams.streamDetailRouting.childStreamList.suggestPartitionsTitle',
+          {
+            defaultMessage: 'Review partitioning suggestions',
+          }
+        )}
         onDismiss={resetForm}
         className={css`
           min-block-size: auto; /* Prevent background clipping */
