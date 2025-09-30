@@ -53,7 +53,11 @@ export const createPrivilegedUsersCrudService = ({
             refresh: 'wait_for',
             doc: {
               ...user,
-              user: { ...user.user, is_privileged: true },
+              user: {
+                ...user.user,
+                is_privileged: true,
+                entity: { attributes: { Privileged: true } },
+              },
               labels: { sources: updatedSources },
             },
           });
@@ -86,6 +90,7 @@ export const createPrivilegedUsersCrudService = ({
       '@timestamp': new Date().toISOString(),
       user: {
         is_privileged: true,
+        entity: { attributes: { Privileged: true } },
       },
       labels: {
         sources: [source],
