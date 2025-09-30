@@ -57,9 +57,11 @@ interface DocPoint {
 export function clusterSampleDocs({
   hits,
   fieldCaps,
+  dropUnmapped = false,
 }: {
   hits: SearchHit[];
   fieldCaps: FieldCapsResponse;
+  dropUnmapped?: boolean;
 }): ClusterDocsResponse {
   if (hits.length === 0) {
     return { sampled: 0, noise: [], clusters: [] };
@@ -74,7 +76,10 @@ export function clusterSampleDocs({
 
   for (const hit of hits) {
     // flatten object into key-value pairs so it can be converted into integers
-    const src = getFlattenedObject(hit._source ?? {});
+    const src = getFlattenedObject({
+      ...(hit.fields ?? {}),
+      ...(hit._source ?? {}),
+    });
 
     const fields = Object.keys(src);
 
@@ -161,7 +166,7 @@ export function clusterSampleDocs({
             hits: samples,
             fieldCaps,
           }),
-          { dropEmpty: true }
+          { dropEmpty: true, dropUnmapped }
         ),
       };
     }),
