@@ -37,7 +37,16 @@ export const ChartTitle = ({
         line-height: ${euiTheme.size.l};
         padding: 0px ${euiTheme.size.s};
 
+        display: flex;
+        flex-wrap: nowrap;
+
         pointer-events: none;
+
+        > * {
+          min-width: 0;
+          flex: 1 !important;
+          max-width: fit-content !important;
+        }
       `,
       chartTitleCss: css`
         ${euiTextTruncate()};
