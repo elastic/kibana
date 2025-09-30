@@ -8,6 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ErrorCause } from 'elasticsearch-8.x/lib/api/types';
+import { data } from 'jquery';
+import { debug } from 'console';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
@@ -71,16 +73,14 @@ export const createDeletionDetectionService = (
         completedEventTimeStamp,
       });
 
-      // eslint-disable-next-line no-console
-      console.log('allIntegrationsUserNames', allIntegrationsUserNames);
+      dataClient.log(`debug`, `allIntegrationsUserNames: ${allIntegrationsUserNames}`);
       // get all users in the privileged index for this source that are not in integrations docs
       const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
         'entity_analytics_integration' // TODO: confirm index/type constant
       );
-      // eslint-disable-next-line no-console
-      console.log('staleUsers', staleUsers);
+      dataClient.log(`debug`, `staleUsers: ${staleUsers}`);
       const ops = bulkUtilsService.bulkSoftDeleteOperations(staleUsers, dataClient.index);
       try {
         // soft delete the users
