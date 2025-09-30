@@ -538,7 +538,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const lsState = {
           filterOptions: {
             search: '',
-            searchFields: ['title', 'description'],
+            searchFields: ['title', 'description', 'incremental_id.text'],
             severity: [],
             assignees: [],
             reporters: [],
@@ -692,7 +692,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
           filterOptions: {
             search: theCase.title,
-            searchFields: ['title', 'description'],
+            searchFields: ['title', 'description', 'incremental_id.text'],
             severity: [theCase.severity],
             assignees: [profiles[0].uid],
             reporters: [],
