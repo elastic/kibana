@@ -33,9 +33,12 @@ import {
   ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
   ExitFallbackPathNodeSchema,
+  WorkflowLevelOnFailureNodeSchema,
+  StepLevelOnFailureNodeSchema,
+  OnFailureNodeSchema,
 } from './on_failure_nodes';
 
-const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
+const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   AtomicGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
@@ -57,6 +60,9 @@ const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
   ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
   ExitFallbackPathNodeSchema,
+  OnFailureNodeSchema,
+  StepLevelOnFailureNodeSchema,
+  WorkflowLevelOnFailureNodeSchema,
 ]);
 
-export type UnionExecutionGraphNode = z.infer<typeof UnionExecutionGraphNodeSchema>;
+export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;
