@@ -83,8 +83,9 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
 
   const canManage = useStreamEnrichmentSelector(
@@ -93,6 +94,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
+
+  const hasChanges = canUpdate && !isSimulating;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
