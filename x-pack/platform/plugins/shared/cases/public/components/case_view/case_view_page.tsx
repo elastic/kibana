@@ -141,7 +141,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
           {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
-            <CaseViewObservables isLoading={isLoading} caseData={caseData} />
+            <CaseViewObservables
+              isLoading={false}
+              caseData={caseData}
+              onUpdateField={onUpdateField}
+            />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseData} />
