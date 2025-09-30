@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { ToolHandlerFn } from '@kbn/onechat-server';
 import { interpolateEsqlQuery } from '@kbn/onechat-genai-utils/tools/utils';
-import { ToolResultType } from '@kbn/onechat-common';
+import { type EsqlToolConfig, ToolResultType } from '@kbn/onechat-common';
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
 
-export const createHandler = (): ToolHandlerFn<z.infer<ZodObject<any>>> => {
+export const createHandler = (
+  configuration: EsqlToolConfig
+): ToolHandlerFn<z.infer<ZodObject<any>>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
     const paramArray = Object.keys(configuration.params).map((param) => ({

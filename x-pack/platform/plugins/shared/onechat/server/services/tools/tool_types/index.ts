@@ -10,6 +10,6 @@ export type {
   DisabledToolTypeDefinition,
   AnyToolTypeDefinition,
   ToolHandlerSchemaTuple,
-  ToolHandlerSchemaTupleProvider,
+  ToolHandlerDynamicPropsFn,
 } from './definitions';
 export { getToolTypeDefinitions } from './get_tool_types';

@@ -8,7 +8,7 @@
 import type { ToolTypeDefinition } from '../tool_types';
 import type { InternalToolDefinition } from '../tool_provider';
 import type { ToolPersistedDefinition } from './client';
-import type { ToolTypeConversionContext } from './tool_types/types';
+import type { ToolTypeConversionContext } from '../tool_types/definitions';
 
 export const convertPersistedDefinition = ({
   tool,
@@ -23,7 +23,6 @@ export const convertPersistedDefinition = ({
   const { request, spaceId } = context;
 
   const getDynamicProps = () => {
-    // TODO: only call once
     return definition.getDynamicProps(configuration, { request, spaceId });
   };
 

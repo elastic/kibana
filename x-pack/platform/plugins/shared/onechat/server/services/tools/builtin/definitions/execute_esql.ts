@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
@@ -19,6 +19,7 @@ const executeEsqlToolSchema = z.object({
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
+    type: ToolType.builtin,
     description: `Execute an ES|QL query and return the results in a tabular format.
 
 **IMPORTANT**: This tool only **runs** queries; it does not write them.

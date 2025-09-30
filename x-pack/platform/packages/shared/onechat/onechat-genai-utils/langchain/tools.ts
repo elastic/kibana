@@ -111,7 +111,7 @@ export const toolToLangchain = async ({
     ? tool.llmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;
 
-  const schema = await tool.schema();
+  const schema = await tool.getSchema();
 
   return toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {

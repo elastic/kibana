@@ -23,7 +23,7 @@ export const getEsqlToolType = (): ToolTypeDefinition<
     toolType: ToolType.esql,
     getDynamicProps: (config) => {
       return {
-        getHandler: () => createHandler(),
+        getHandler: () => createHandler(config),
         getSchema: () => createSchemaFromParams(config.params),
       };
     },

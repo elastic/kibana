@@ -14,7 +14,10 @@ import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 import { isEnabledDefinition } from '../tool_types/definitions';
 import { createClient } from './client';
-import type { ToolTypeValidatorContext, ToolTypeConversionContext } from './tool_types/types';
+import type {
+  ToolTypeValidatorContext,
+  ToolTypeConversionContext,
+} from '../tool_types/definitions';
 import { convertPersistedDefinition } from './converter';
 
 export const createPersistedProviderFn =

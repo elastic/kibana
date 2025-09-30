@@ -6,7 +6,7 @@
  */
 
 import type { z, ZodObject } from '@kbn/zod';
-import { ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { EsqlToolDefinition } from '@kbn/onechat-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/onechat-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools/types/workflow';
@@ -42,4 +42,3 @@ export type StaticToolRegistration<RunInput extends ZodObject<any> = ZodObject<a
   | StaticEsqlTool
   | StaticIndexSearchTool
   | StaticWorkflowTool;
-
