@@ -39,7 +39,10 @@ const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreCo
     start: riskEngineSettings?.range?.start ?? 'now-30d',
     end: riskEngineSettings?.range?.end ?? 'now',
   },
-  enableResetToZero: riskEngineSettings?.enableResetToZero ?? true,
+  enableResetToZero:
+    riskEngineSettings?.enableResetToZero === undefined
+      ? true
+      : riskEngineSettings.enableResetToZero,
 });
 
 const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
@@ -103,6 +106,7 @@ export const useConfigurableRiskEngineSettings = () => {
             start: selectedRiskEngineSettings.range.start,
             end: selectedRiskEngineSettings.range.end,
           },
+          enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
         },
         {
           onSuccess: () => {
@@ -138,7 +142,7 @@ export const useConfigurableRiskEngineSettings = () => {
   const toggleScoreRetainment = () => {
     setSelectedRiskEngineSettings((prevState) => {
       if (!prevState) return undefined;
-      return { ...prevState, ...{ resetToZero: !prevState.enableResetToZero } };
+      return { ...prevState, ...{ enableResetToZero: !prevState.enableResetToZero } };
     });
   };
 

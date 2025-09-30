@@ -32,7 +32,7 @@ export const RiskScoreGeneralSection = (props: RiskScoreGeneralSectionProps) => 
         <h2>{i18n.RISK_SCORE_GENERAL_SECTION}</h2>
       </EuiTitle>
       <EuiSpacer />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={'riskScoreRetainCheckbox'}
