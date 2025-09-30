@@ -34,6 +34,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RawRule } from '../../../types';
 import { RecoveredActionGroup, type BulkEditSkipReason } from '../../../types';
 import type { SavedObject } from '@kbn/core/server';
+import { toKqlExpression } from '@kbn/es-query';
 
 jest.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -524,6 +525,34 @@ describe('bulkEditRules', () => {
         { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
       ],
       total: 1,
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(
+        // @ts-expect-error: not all args are required for this test
+        new Map([
+          ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+        ])
+      );
+    });
+
+    it('should ignore updates to internally managed rule types by default', async () => {
+      await bulkEditRules(rulesClientContext, {
+        filter: 'alert.attributes.tags: "APM"',
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+        shouldInvalidateApiKeys: false,
+      });
+
+      const filter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      expect(toKqlExpression(filter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND NOT alert.attributes.alertTypeId: test.internal-rule-type)"`
+      );
     });
   });
 });

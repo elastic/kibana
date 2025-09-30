@@ -55,4 +55,26 @@ describe('validateInternalRuleTypesByQuery', () => {
       validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule types not found: non-internal"`);
   });
+
+  it('should not throw an error if the ids and filter are undefined', async () => {
+    await expect(
+      validateInternalRuleTypesByQuery({
+        req: { ids: undefined, filter: undefined },
+        rulesClient,
+        ruleTypes,
+        operationText,
+      })
+    ).resolves.not.toThrow();
+  });
+
+  it('should not throw an error if the ids is empty and the filter is undefined', async () => {
+    await expect(
+      validateInternalRuleTypesByQuery({
+        req: { ids: [], filter: undefined },
+        rulesClient,
+        ruleTypes,
+        operationText,
+      })
+    ).resolves.not.toThrow();
+  });
 });

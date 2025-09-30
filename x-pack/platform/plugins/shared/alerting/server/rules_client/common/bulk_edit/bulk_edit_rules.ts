@@ -217,6 +217,10 @@ const constructInternalRuleTypesFilter = ({
 }) => {
   const internalRuleTypes = Array.from(ruleTypes.values()).filter((type) => type.internallyManaged);
 
+  if (internalRuleTypes.length === 0) {
+    return null;
+  }
+
   const internalRuleTypeNode = nodeBuilder.or(
     internalRuleTypes.map((type) =>
       nodeBuilder.is(`${RULE_SAVED_OBJECT_TYPE}.attributes.alertTypeId`, type.id)
