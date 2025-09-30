@@ -317,7 +317,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             'machine_learning',
             // footer:
             'dev_tools',
-            'ingest_and_data',
+            'data_management',
             'admin_and_settings',
           ],
           { checkOrder: false }

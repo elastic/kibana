@@ -111,7 +111,7 @@ export default function searchSolutionNavigation({
           'searchPlayground',
           'machine_learning',
           'dev_tools',
-          'ingest_and_data',
+          'data_management',
           'stack_management',
         ],
         { checkOrder: false }
