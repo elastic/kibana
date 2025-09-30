@@ -17,7 +17,8 @@ import { visit } from '../../../tasks/navigation';
 import { deletePrivMonEngine } from '../../../tasks/privileged_user_monitoring';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/236985
+describe.skip(
   'Privileged User Monitoring - Integrations onboarding',
   {
     tags: ['@ess'],
