@@ -16,10 +16,9 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
@@ -32,6 +31,7 @@ interface Props {
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
   systems: Omit<System, 'description'>[];
+  dataViews: DataView[];
 }
 
 export function ManualFlowForm({
@@ -41,19 +41,9 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
   systems,
+  dataViews,
 }: Props) {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
   const [touched, setTouched] = useState({ title: false, system: false, kql: false });
-
-  const dataViewsFetch = useStreamsAppFetch(() => {
-    return data.dataViews.create({ title: definition.name }).then((value) => {
-      return [value];
-    });
-  }, [data.dataViews, definition.name]);
 
   const validation = validateQuery(query);
 
@@ -180,7 +170,7 @@ export function ManualFlowForm({
                 'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
                 { defaultMessage: 'Enter query' }
               )}
-              indexPatterns={dataViewsFetch.value}
+              indexPatterns={dataViews}
               submitOnBlur
             />
           </EuiFormRow>
