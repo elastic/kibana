@@ -7,10 +7,11 @@
 
 import { registerStreamsUsageCollector } from './streams_usage_collector';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
+const mockLogger = loggingSystemMock.createLogger();
 
 describe('Streams Usage Collector', () => {
   let usageCollectionMock: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
@@ -18,6 +19,7 @@ describe('Streams Usage Collector', () => {
   beforeEach(() => {
     usageCollectionMock = usageCollectionPluginMock.createSetupContract();
     esClient.search.mockClear();
+    mockLogger.error.mockClear();
   });
 
   it('registers a streams collector', () => {
@@ -42,7 +44,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient });
+      const result = await collector.fetch({ esClient, logger: mockLogger });
 
       expect(result).toEqual({
         classic_streams: {
@@ -75,10 +77,16 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient });
+      const result = await collector.fetch({ esClient, logger: mockLogger });
 
       // Restore original NODE_ENV
       process.env.NODE_ENV = originalEnv;
+
+      // Verify that logger.error was called
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to list streams or compute stream metrics',
+        expect.any(Error)
+      );
 
       expect(result).toEqual({
         classic_streams: {
@@ -157,7 +165,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient });
+      const result = await collector.fetch({ esClient, logger: mockLogger });
 
       expect(result).toEqual({
         classic_streams: {
@@ -201,7 +209,13 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient: esClientMock });
+      const result = await collector.fetch({ esClient: esClientMock, logger: mockLogger });
+
+      // Verify that logger.error was called instead of console.error
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to list streams or compute stream metrics',
+        expect.any(Object)
+      );
 
       // Should return default values when ES calls fail
       expect(result).toEqual({
@@ -246,7 +260,13 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ esClient: esClientMock2 });
+      const result = await collector.fetch({ esClient: esClientMock2, logger: mockLogger });
+
+      // Verify that logger.error was called instead of console.error
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to list streams or compute stream metrics',
+        expect.any(Object)
+      );
 
       // Should return default values when ES calls fail
       expect(result).toEqual({

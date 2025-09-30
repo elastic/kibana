@@ -7,6 +7,7 @@
 
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import {
   hasChangedRetention,
   isDevMode,
@@ -23,8 +24,10 @@ import { registerStreamsUsageCollector as registerCollector } from './register_c
  */
 export async function fetchStreamsUsageStats({
   esClient,
+  logger,
 }: {
   esClient: any;
+  logger: Logger;
 }): Promise<StreamsStatsTelemetry> {
   const result: StreamsStatsTelemetry = {
     classic_streams: {
@@ -85,11 +88,7 @@ export async function fetchStreamsUsageStats({
       }
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(
-      '[Streams Stats Telemetry] Failed to list streams or compute stream metrics',
-      err
-    );
+    logger.error('Failed to list streams or compute stream metrics', err);
     if (isDevMode()) {
       throw err;
     }
@@ -113,8 +112,7 @@ export async function fetchStreamsUsageStats({
 
     result.significant_events.rules_count = (rulesCountResponse.hits?.total as any)?.value ?? 0;
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[Streams Stats Telemetry] Failed to count significant event rules', err);
+    logger.error('Failed to count significant event rules', err);
     if (isDevMode()) {
       throw err;
     }
@@ -200,17 +198,12 @@ export async function fetchStreamsUsageStats({
         result.significant_events.unique_wired_streams_count = wiredCount;
         result.significant_events.unique_classic_streams_count = classicCount;
       } catch (streamTypeErr) {
-        // eslint-disable-next-line no-console
-        console.error(
-          '[Streams Stats Telemetry] Failed to determine stream types for events',
-          streamTypeErr
-        );
+        logger.error('Failed to determine stream types for events', streamTypeErr);
         // Leave unique_wired_streams_count and unique_classic_streams_count at 0
       }
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[Streams Stats Telemetry] Failed to count significant events', err);
+    logger.error('Failed to count significant events', err);
     if (isDevMode()) {
       throw err;
     }
@@ -249,8 +242,7 @@ export async function fetchStreamsUsageStats({
         Math.round(percentiles(durationsMs, [95])[0] * 1000) / 1000;
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[Streams Stats Telemetry] Failed to fetch event log execution metrics', {
+    logger.error('Failed to fetch event log execution metrics', {
       error: err,
       message: (err as any)?.message,
       statusCode: (err as any)?.meta?.statusCode,

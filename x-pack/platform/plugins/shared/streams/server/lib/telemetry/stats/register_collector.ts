@@ -6,6 +6,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { StreamsStatsTelemetry } from './types';
 import { streamsStatsSchema } from './schema';
 
@@ -17,7 +18,13 @@ export function registerStreamsUsageCollector(
   usageCollection: UsageCollectionSetup,
   collectorOptions: {
     isReady: () => boolean;
-    fetch: ({ esClient }: { esClient: any }) => Promise<StreamsStatsTelemetry>;
+    fetch: ({
+      esClient,
+      logger,
+    }: {
+      esClient: any;
+      logger: Logger;
+    }) => Promise<StreamsStatsTelemetry>;
   }
 ) {
   const streamsUsageCollector = usageCollection.makeUsageCollector<StreamsStatsTelemetry>({
