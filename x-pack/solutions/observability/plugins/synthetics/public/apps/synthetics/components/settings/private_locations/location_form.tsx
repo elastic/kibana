@@ -110,7 +110,7 @@ const LOCATION_HELP_TEXT = i18n.translate(
   'xpack.synthetics.privateLocation.locationSpacesHelpText',
   {
     defaultMessage:
-      'Available spaces are filtered based on the selected agent policy. You can select from the spaces that the agent policy has access to. If no spaces is selected it will automatically use agent policy spaces.',
+      'Available spaces are filtered based on the selected agent policy. You can select from the spaces that the agent policy has access to. If no space is selected, the private location will automatically use all spaces that the agent policy has access to.',
   }
 );
 
