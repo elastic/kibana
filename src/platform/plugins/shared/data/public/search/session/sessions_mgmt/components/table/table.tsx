@@ -76,7 +76,7 @@ export function SearchSessionsMgmtTable({
     [config.management.refreshInterval]
   );
   const enableOpeningInNewTab = useMemo(
-    () => core.featureFlags.getBooleanValue('discover.tabsEnabled', false),
+    () => core.featureFlags.getBooleanValue('discover.tabsEnabled', true),
     [core.featureFlags]
   );
 

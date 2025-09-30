@@ -86,7 +86,7 @@ export const WorkflowDetailHeader = ({
   );
 
   const runWorkflowTooltipContent = useMemo(() => {
-    return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled);
+    return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled, false);
   }, [isValid, canRunWorkflow, isEnabled]);
 
   const handleRunClickWithUnsavedCheck = () => {
@@ -170,22 +170,6 @@ export const WorkflowDetailHeader = ({
                 />
               </EuiToolTip>
               <EuiFlexItem grow={false} css={styles.separator} />
-              <EuiToolTip content={runWorkflowTooltipContent}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="beaker"
-                  size="s"
-                  disabled={isLoading || !canTestWorkflow || !isValid}
-                  onClick={handleTestClick}
-                  title={runWorkflowTooltipContent ?? undefined}
-                  aria-label={i18n.translate(
-                    'workflows.workflowDetailHeader.testWorkflow.ariaLabel',
-                    {
-                      defaultMessage: 'Test workflow',
-                    }
-                  )}
-                />
-              </EuiToolTip>
               <EuiToolTip content={runWorkflowTooltipContent}>
                 <EuiButtonIcon
                   color="success"

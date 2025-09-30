@@ -195,6 +195,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": false,
               },
             },
+            "brush": Object {
+              "fill": "#0B64DD",
+              "opacity": 0.1,
+              "stroke": "#0B64DD",
+              "strokeWidth": 1,
+            },
             "bubbleSeriesStyle": Object {
               "point": Object {
                 "dimmed": Object {
@@ -257,7 +263,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -266,7 +272,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -672,6 +678,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div
@@ -827,6 +834,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div

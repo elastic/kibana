@@ -63,10 +63,10 @@ export const initPrivilegeMonitoringEngineRoute = (
             monitoringEntitySourceType.name,
           ],
         });
-        const service = createInitialisationService(dataClient);
+        const service = createInitialisationService(dataClient, soClient);
 
         try {
-          const initResult = await service.init(soClient);
+          const initResult = await service.init();
 
           if (initResult.status === PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR) {
             return siemResponse.error({ statusCode: 500, body: initResult });

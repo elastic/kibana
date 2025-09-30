@@ -71,6 +71,7 @@ export const casesMutationsKeys = {
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
+  bulkPostObservables: ['bulk-post-observables'] as const,
 };
 
 export const inferenceKeys = {

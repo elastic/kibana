@@ -487,6 +487,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionEngineOverview: `${ELASTIC_DOCS}solutions/security/detect-and-alert`,
       aiAssistant: {
         home: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
+        knowledgeBaseHome: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base`,
         knowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
       },
       signalsMigrationApi: isServerless

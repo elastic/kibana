@@ -18,20 +18,20 @@ import {
 } from '@elastic/eui';
 import { ExecutionStatus } from '@kbn/workflows';
 import React, { useMemo } from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { getStatusLabel } from '../../../shared/translations';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { formatDuration } from '../../../shared/lib/format_duration';
+
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
-  startedAt: Date;
+  startedAt: Date | null;
   duration: number | null;
   selected: boolean;
-  onClick: () => void;
-  // TODO: add duration, triggeredBy, finishedAt, etc.?
+  onClick: null | (() => void);
 }
 
 export const WorkflowExecutionListItem = ({
@@ -43,7 +43,8 @@ export const WorkflowExecutionListItem = ({
 }: WorkflowExecutionListItemProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
-  const formattedDate = useFormattedDateTime(startedAt);
+  const getFormattedDate = useGetFormattedDateTime();
+  const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
   const formattedDuration = useMemo(() => {
     if (duration) {
       return formatDuration(duration);
@@ -57,11 +58,11 @@ export const WorkflowExecutionListItem = ({
       css={[
         styles.baseContainer,
         selected && styles.selectedContainer,
-        !selected && styles.selectableContainer,
+        !selected && onClick && styles.selectableContainer,
       ]}
       alignItems="center"
       justifyContent="flexStart"
-      onClick={onClick}
+      onClick={onClick ?? undefined}
       responsive={false}
     >
       <EuiFlexItem css={styles.iconContainer}>
@@ -82,9 +83,16 @@ export const WorkflowExecutionListItem = ({
             </p>
           </EuiFlexItem>
           <EuiFlexItem css={styles.timestamp}>
-            <EuiToolTip position="right" content={formattedDate}>
-              <FormattedRelative value={startedAt} />
-            </EuiToolTip>
+            {startedAt ? (
+              <EuiToolTip position="right" content={formattedDate}>
+                <FormattedRelative value={startedAt} />
+              </EuiToolTip>
+            ) : (
+              <FormattedMessage
+                id="workflows.workflowExecutionListItem.notStarted"
+                defaultMessage="Not started"
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -98,9 +106,11 @@ export const WorkflowExecutionListItem = ({
           <EuiFlexItem grow={false}>
             <span css={styles.duration}>{formattedDuration}</span>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" color={euiTheme.colors.backgroundFilledText} />
-          </EuiFlexItem>
+          {onClick ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="arrowRight" color={euiTheme.colors.backgroundFilledText} />
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

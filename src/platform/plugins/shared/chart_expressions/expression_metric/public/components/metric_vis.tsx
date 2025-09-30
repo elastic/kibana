@@ -100,6 +100,7 @@ export const MetricVis = ({
   const grid = useRef<MetricSpec['data']>([[]]);
   const {
     euiTheme: { colors },
+    highContrastMode,
   } = useEuiTheme();
   const defaultColor = colors.emptyShade;
 
@@ -204,6 +205,7 @@ export const MetricVis = ({
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
         labelPosition: config.metric.secondaryLabelPosition,
+        badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
       };
     }
 

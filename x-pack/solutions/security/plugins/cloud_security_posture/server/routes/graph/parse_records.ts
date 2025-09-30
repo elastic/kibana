@@ -82,157 +82,212 @@ export const parseRecords = (
   };
 };
 
-const getEntityDocuments = (
-  entityId: string,
-  nodesDataArray: NodeDocumentDataModel[]
-): NodeDocumentDataModel[] => {
-  // Filter documents that match this entity ID
-  const matchingDocs = nodesDataArray.filter((doc) => doc.id === entityId);
-
-  return matchingDocs;
-};
-
-const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
-
-  for (const record of records) {
-    if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
-      context.logger.debug(
-        `Reached nodes limit [limit: ${context.nodesLimit}] [current: ${
-          Object.keys(nodesMap).length
-        }]`
-      );
-      context.messages.push(ApiMessageCode.ReachedNodesLimit);
-      break;
-    }
-
-    const {
-      docs,
-      actorIds,
-      action,
-      targetIds,
-      isOrigin,
-      isOriginAlert,
-      actorsDocData,
-      targetsDocData,
-      isAlert,
-    } = record;
-
-    const actorIdsArray = castArray(actorIds);
-    const targetIdsArray = castArray(targetIds);
-
-    const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
-      ? castArray(actorsDocData)
-          .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
-          .map((actorData) => JSON.parse(actorData))
-      : [];
-    const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
-      ? castArray(targetsDocData)
-          .filter(
-            (targetData): targetData is string => targetData !== null && targetData !== undefined
-          )
-          .map((targetData) => JSON.parse(targetData))
-      : [];
-
-    const targetIdsArraySafe: string[] = [];
-    const unknownTargets: string[] = [];
-    // Ensure all targets has an id (target can return null from the query)
-    targetIdsArray.forEach((id, idx) => {
-      if (!id) {
-        const generatedTargetId = `unknown ${uuidv4()}`;
-        targetIdsArraySafe.push(generatedTargetId);
-        unknownTargets.push(generatedTargetId);
-      } else {
-        targetIdsArraySafe.push(id);
-      }
-    });
-
-    // Create entity nodes for actors
-    actorIdsArray.forEach((id) => {
-      if (nodesMap[id] === undefined) {
-        nodesMap[id] = {
-          documentsData: getEntityDocuments(id, actorsDocDataArray),
-          id,
-          label: undefined,
-          color: 'primary',
-          ...determineEntityNodeVisualProps(id, actorsDocDataArray),
-        };
-      }
-    });
-
-    // Create entity nodes for targets
-    targetIdsArraySafe.forEach((id) => {
-      if (nodesMap[id] === undefined) {
-        nodesMap[id] = {
-          documentsData: getEntityDocuments(id, targetsDocDataArray),
-          id,
-          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: 'primary',
-          ...determineEntityNodeVisualProps(id, targetsDocDataArray),
-        };
-      }
-    });
-
-    // Create label nodes
-    for (const actorId of actorIdsArray) {
-      for (const targetId of targetIdsArraySafe) {
-        const edgeId = `a(${actorId})-b(${targetId})`;
-
-        if (edgeLabelsNodes[edgeId] === undefined) {
-          edgeLabelsNodes[edgeId] = [];
-        }
-
-        const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`,
-          label: action,
-          color: isOriginAlert || isAlert ? 'danger' : 'primary',
-          shape: 'label',
-          documentsData: parseDocumentsData(docs),
-        };
-
-        nodesMap[labelNode.id] = labelNode;
-        edgeLabelsNodes[edgeId].push(labelNode.id);
-        labelEdges[labelNode.id] = {
-          source: actorId,
-          target: targetId,
-          edgeType: 'solid',
-        };
-      }
-    }
-  }
-};
-
-const determineEntityNodeVisualProps = (
-  actorId: string,
-  entitiesData: NodeDocumentDataModel[] = []
-): NodeVisualProps => {
-  // try to find an exact match by entity id
-  const matchingEntity = entitiesData.find((entity) => entity.id === actorId);
-
-  // Extract entity data from the matching entity's documentsData if available
-  const entityDetailsData = matchingEntity?.entity ?? {};
-
-  let mappedProps: Partial<NodeVisualProps> = {
+const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProps => {
+  const mappedProps: Partial<NodeVisualProps> = {
     shape: 'rectangle',
   };
 
-  if (entityDetailsData.name) {
-    mappedProps.label = entityDetailsData.name;
-  }
-
-  if (entityDetailsData.type) {
-    mappedProps.tag = entityDetailsData.type;
-
-    const { icon, shape } = transformEntityTypeToIconAndShape(entityDetailsData);
-
-    mappedProps = {
-      ...mappedProps,
-      ...(icon && { icon }),
-      ...(shape && { shape }),
-    };
+  if (entityGroupType) {
+    const { icon, shape } = transformEntityTypeToIconAndShape(entityGroupType);
+    if (icon) {
+      mappedProps.icon = icon;
+    }
+    if (shape) {
+      mappedProps.shape = shape;
+    }
+    mappedProps.tag = entityGroupType;
   }
 
   return mappedProps as NodeVisualProps;
+};
+
+const createGroupedActorAndTargetNodes = (
+  record: GraphEdge,
+  context: ParseContext
+): {
+  actorId: string;
+  targetId: string;
+} => {
+  const { nodesMap } = context;
+  const {
+    // actor attributes
+    actorIds,
+    actorIdsCount,
+    actorsDocData,
+    actorEntityGroup,
+    actorEntityType,
+    actorLabel,
+    actorHostIps,
+    // target attributes
+    targetIds,
+    targetIdsCount,
+    targetsDocData,
+    targetEntityType,
+    targetLabel,
+    targetHostIps,
+  } = record;
+
+  const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
+  const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
+
+  const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
+    ? castArray(actorsDocData)
+        .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
+        .map((actorData) => JSON.parse(actorData))
+    : [];
+
+  const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
+    ? castArray(targetsDocData)
+        .filter(
+          (targetData): targetData is string => targetData !== null && targetData !== undefined
+        )
+        .map((targetData) => JSON.parse(targetData))
+    : [];
+
+  const actorIdsArray = castArray(actorIds);
+  const targetIdsArray = castArray(targetIds);
+
+  const actorGroup = {
+    id: actorIdsCount > 0 ? actorIdsArray[0] : `${actorEntityGroup} ${uuidv4()}`,
+    type: actorEntityType,
+    label: actorLabel,
+    count: actorIdsCount,
+    docData: actorsDocDataArray,
+    hostIps: actorHostIpsArray,
+  };
+
+  const targetGroup =
+    targetIdsCount > 0
+      ? {
+          id: targetIdsArray[0]!, // by definition, it can't be null
+          type: targetEntityType,
+          label: targetLabel,
+          count: targetIdsCount,
+          docData: targetsDocDataArray,
+          hostIps: targetHostIpsArray,
+        }
+      : {
+          // Unknown target
+          id: `unknown ${uuidv4()}`,
+          type: '',
+          label: 'Unknown',
+          count: 0,
+          docData: [],
+          hostIps: [],
+        };
+
+  [actorGroup, targetGroup].forEach(({ id, label, type, count, docData, hostIps }) => {
+    if (nodesMap[id] === undefined) {
+      nodesMap[id] = {
+        id,
+        color: 'primary' as const,
+        label,
+        documentsData: docData,
+        ...deriveEntityAttributesFromType(type),
+        ...(count > 1 ? { count } : {}),
+        ...(hostIps.length > 0 ? { ips: hostIps } : {}),
+      };
+    }
+  });
+
+  return {
+    actorId: actorGroup.id,
+    targetId: targetGroup.id,
+  };
+};
+
+const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel => {
+  const {
+    action,
+    docs,
+    isAlert,
+    isOrigin,
+    isOriginAlert,
+    badge,
+    uniqueEventsCount,
+    uniqueAlertsCount,
+    sourceIps,
+    sourceCountryCodes,
+  } = record;
+
+  const labelId = edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`;
+  const color =
+    uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
+      ? 'danger'
+      : 'primary';
+  const sourceIpsArray = sourceIps ? castArray(sourceIps) : [];
+  const sourceCountryCodesArray = sourceCountryCodes ? castArray(sourceCountryCodes) : [];
+
+  return {
+    id: labelId,
+    label: action,
+    color,
+    shape: 'label',
+    documentsData: parseDocumentsData(docs),
+    count: badge,
+    ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
+    ...(uniqueAlertsCount > 0 ? { uniqueAlertsCount } : {}),
+    ...(sourceIpsArray.length > 0 ? { ips: sourceIpsArray } : {}),
+    ...(sourceCountryCodesArray.length > 0 ? { countryCodes: sourceCountryCodesArray } : {}),
+  };
+};
+
+const processLabelNodes = (
+  context: ParseContext,
+  nodeData: {
+    edgeId: string;
+    sourceId: string;
+    targetId: string;
+    labelNode: LabelNodeDataModel;
+  }
+) => {
+  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
+  const { edgeId, sourceId, targetId, labelNode } = nodeData;
+  if (edgeLabelsNodes[edgeId] === undefined) {
+    edgeLabelsNodes[edgeId] = [];
+  }
+
+  nodesMap[labelNode.id] = labelNode;
+  edgeLabelsNodes[edgeId].push(labelNode.id);
+  labelEdges[labelNode.id] = {
+    source: sourceId,
+    target: targetId,
+    edgeType: 'solid',
+  };
+};
+
+const isAboveAPINodesLimit = (context: ParseContext) => {
+  const { nodesMap, nodesLimit } = context;
+  return nodesLimit !== undefined && Object.keys(nodesMap).length >= nodesLimit;
+};
+
+const emitAPINodesLimitMessage = (context: ParseContext) => {
+  const { nodesMap, nodesLimit, logger, messages } = context;
+  logger.debug(
+    `Reached nodes limit [limit: ${nodesLimit}] [current: ${Object.keys(nodesMap).length}]`
+  );
+  messages.push(ApiMessageCode.ReachedNodesLimit);
+};
+
+const createNodes = (records: GraphEdge[], context: ParseContext) => {
+  for (const record of records) {
+    if (isAboveAPINodesLimit(context)) {
+      emitAPINodesLimitMessage(context);
+      break;
+    }
+
+    const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+
+    const edgeId = `a(${actorId})-b(${targetId})`;
+    const labelNode = createLabelNode(record, edgeId);
+
+    processLabelNodes(context, {
+      edgeId,
+      sourceId: actorId,
+      targetId,
+      labelNode,
+    });
+  }
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {

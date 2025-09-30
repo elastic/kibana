@@ -358,7 +358,10 @@ describe('CaseViewTabs', () => {
     renderWithTestingProviders(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
       {
-        wrapperProps: { license: basicLicense, features: { observables: { enabled: false } } },
+        wrapperProps: {
+          license: basicLicense,
+          features: { observables: { enabled: false, autoExtract: false } },
+        },
       }
     );
 

@@ -7,7 +7,7 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { lazy } from 'react';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
@@ -407,9 +407,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             icon: 'editorCodeBlock',
           },
           {
-            id: INGEST_AND_MANAGE_DATA_NAV_ID,
-            title: i18n.translate('xpack.observability.obltNav.ingestAndManageData', {
-              defaultMessage: 'Ingest and manage data',
+            id: DATA_MANAGEMENT_NAV_ID,
+            title: i18n.translate('xpack.observability.obltNav.dataManagement', {
+              defaultMessage: 'Data management',
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
