@@ -131,8 +131,8 @@ function createFetchFunction(logger: Logger) {
     return {
       rules_count: rulesCount,
       stored_count: eventsData.stored_count,
-      unique_wired_streams_count: eventsData.unique_wired_streams_count,
-      unique_classic_streams_count: eventsData.unique_classic_streams_count,
+      unique_wired_streams_with_stored_count: eventsData.unique_wired_streams_with_stored_count,
+      unique_classic_streams_with_stored_count: eventsData.unique_classic_streams_with_stored_count,
     };
   }
 
@@ -192,8 +192,8 @@ function createFetchFunction(logger: Logger) {
     if (streamTags.length === 0) {
       return {
         stored_count: storedCount,
-        unique_wired_streams_count: 0,
-        unique_classic_streams_count: 0,
+        unique_wired_streams_with_stored_count: 0,
+        unique_classic_streams_with_stored_count: 0,
       };
     }
 
@@ -204,8 +204,8 @@ function createFetchFunction(logger: Logger) {
 
     return {
       stored_count: storedCount,
-      unique_wired_streams_count: uniqueWiredStreamsCount,
-      unique_classic_streams_count: uniqueClassicStreamsCount,
+      unique_wired_streams_with_stored_count: uniqueWiredStreamsCount,
+      unique_classic_streams_with_stored_count: uniqueClassicStreamsCount,
     };
   }
 

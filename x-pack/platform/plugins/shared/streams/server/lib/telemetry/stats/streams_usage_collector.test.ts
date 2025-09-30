@@ -59,8 +59,8 @@ describe('Streams Usage Collector', () => {
         significant_events: {
           rules_count: 0,
           stored_count: 0,
-          unique_wired_streams_count: 0,
-          unique_classic_streams_count: 0,
+          unique_wired_streams_with_stored_count: 0,
+          unique_classic_streams_with_stored_count: 0,
           rule_execution_ms_avg_24h: null,
           rule_execution_ms_p95_24h: null,
           executions_count_24h: 0,
@@ -153,8 +153,8 @@ describe('Streams Usage Collector', () => {
         significant_events: {
           rules_count: 5,
           stored_count: 123,
-          unique_wired_streams_count: 0, // Mock doesn't have stream definitions
-          unique_classic_streams_count: 0,
+          unique_wired_streams_with_stored_count: 0, // Mock doesn't have stream definitions
+          unique_classic_streams_with_stored_count: 0,
           rule_execution_ms_avg_24h: 2,
           rule_execution_ms_p95_24h: 2.9,
           executions_count_24h: 2,

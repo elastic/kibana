@@ -66,18 +66,18 @@ export const streamsStatsSchema: MakeSchemaFrom<StreamsStatsTelemetry> = {
           'Total number of significant events detected and stored. Calculated by querying .alerts-streams.alerts-default index for alerts with kibana.alert.rule.category matching significant event rule types.',
       },
     },
-    unique_wired_streams_count: {
+    unique_wired_streams_with_stored_count: {
       type: 'long',
       _meta: {
         description:
-          'Number of unique wired streams that have significant events detected. Calculated by aggregating unique stream names from alert rule tags and filtering by stream type.',
+          'Number of unique wired streams that have significant events stored in the alerts index. Calculated by aggregating unique stream names from stored alert documents and filtering by stream type.',
       },
     },
-    unique_classic_streams_count: {
+    unique_classic_streams_with_stored_count: {
       type: 'long',
       _meta: {
         description:
-          'Number of unique classic streams that have significant events detected. Calculated by aggregating unique stream names from alert rule tags and filtering by stream type.',
+          'Number of unique classic streams that have significant events stored in the alerts index. Calculated by aggregating unique stream names from stored alert documents and filtering by stream type.',
       },
     },
     rule_execution_ms_avg_24h: {
