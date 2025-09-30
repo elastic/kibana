@@ -17,6 +17,7 @@ steps:
       - mkdir -p ../kibana-package-catalog/packages # ensure dir exists
       - ts-node .buildkite/pipelines/catalog/generate_kibana_catalog_components.ts # generate new entries in ../kibana-packages-catalog/packages
       - ts-node .buildkite/pipelines/catalog/compare-and-commit-catalog-changes.ts # compare, commit, and create/update PR in kibana-package-catalog repo
+    soft_fail: true # Allowed to fail
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

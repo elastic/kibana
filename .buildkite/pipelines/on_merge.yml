@@ -694,7 +694,6 @@ steps:
       provider: gcp
       machineType: n2-standard-2
 
-  - label: ':rocket: Create entries in Catalog Info'
+  - label: ':rocket: Create entries in Kibana Package Catalog'
     command: buildkite-agent pipeline upload .buildkite/pipelines/catalog/backstage_catalog_sync.yml
     async: true
-    if: build.branch == "main" && build.pull_request.id == null
