@@ -563,7 +563,7 @@ export const getEndpointConsoleCommands = ({
                 SelectorComponent: PendingActionsSelector,
               },
             }
-          : []),
+          : {}),
         comment: {
           required: false,
           allowMultiples: false,
