@@ -23,18 +23,14 @@ import {
 import type {
   CasePatchRequest,
   CaseResolveResponse,
-  CaseSummaryResponse,
   CaseUserActionStatsResponse,
   FindCasesContainingAllAlertsResponse,
-  InferenceConnectorsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
-  CaseSummaryResponseRt,
   CaseUserActionStatsResponseRt,
   FindCasesContainingAllAlertsResponseRt,
-  InferenceConnectorsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
 import type {
@@ -97,18 +93,6 @@ export const decodeCaseUserActionStatsResponse = (
 ) =>
   pipe(
     CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeCaseSummaryResponse = (respCase?: CaseSummaryResponse) =>
-  pipe(
-    CaseSummaryResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeInferenceConnectorsResponse = (respCase?: InferenceConnectorsResponse) =>
-  pipe(
-    InferenceConnectorsResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 

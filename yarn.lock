@@ -4264,10 +4264,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-ai@link:x-pack/platform/packages/shared/cases-ai":
-  version "0.0.0"
-  uid ""
-
 "@kbn/cases-api-integration-test-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/cases":
   version "0.0.0"
   uid ""
