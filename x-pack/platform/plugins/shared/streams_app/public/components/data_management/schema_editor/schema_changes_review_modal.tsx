@@ -275,6 +275,7 @@ export function SchemaChangesReviewModal({
       <EuiModalBody>
         {Streams.WiredStream.GetResponse.is(definition) ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
               {
@@ -289,8 +290,7 @@ export function SchemaChangesReviewModal({
           {i18n.translate(
             'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
             {
-              defaultMessage:
-                'Some fields below will be updated. Any error from validation will also appear here.',
+              defaultMessage: 'Some fields below will be updated.',
             }
           )}
         </EuiText>
