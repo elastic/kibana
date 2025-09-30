@@ -27,7 +27,7 @@ node --require ./src/setup_node_env/index.js \
 | Flag           | Type      | Description                                                                                           |
 | -------------- | --------- | ----------------------------------------------------------------------------------------------------- |
 | `--datasets`   | `string`  | Comma-separated list of dataset **names** to load. Omit the flag to load **all** predefined datasets. |
-| `--limit`      | `number`  | Max docs per dataset (handy while testing). Defaults to 1k.                                           |
+| `--limit`      | `number`  | Max docs per dataset (handy while testing). When omitted, all rows will be loaded.                    |
 | `--clear`      | `boolean` | Delete the target index **before** indexing. Defaults to `false`.                                     |
 | `--kibana-url` | `string`  | Kibana URL to connect to (bypasses auto-discovery when provided).                                     |
 

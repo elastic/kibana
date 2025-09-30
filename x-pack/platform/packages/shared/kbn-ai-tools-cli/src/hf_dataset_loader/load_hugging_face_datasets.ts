@@ -37,7 +37,7 @@ export async function loadHuggingFaceDatasets({
   logger,
   accessToken,
   datasets = PREDEFINED_HUGGING_FACE_DATASETS,
-  limit = 1000,
+  limit,
   clear = false,
 }: {
   esClient: ElasticsearchClient;
