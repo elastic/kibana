@@ -91,7 +91,7 @@ export function registerCspmUsageCollector(
         awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
         awaitPromiseSafe(
           'CSPM Cloud Connector Usage',
-          getCspmCloudConnectorUsageStats(soClient, logger)
+          getCspmCloudConnectorUsageStats(soClient, coreServices, logger)
         ),
       ]);
       return {

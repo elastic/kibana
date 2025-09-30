@@ -148,8 +148,8 @@ export interface CloudSecurityInstallationStats {
   is_agentless: boolean;
   account_type?: 'single-account' | 'organization-account';
   setup_access_option: SetupAccessOption;
-  supports_cloud_connector?: boolean | null;
-  cloud_connector_id?: string | null;
+  supports_cloud_connector: boolean;
+  cloud_connector_id: string | null;
 }
 
 export interface CloudSecurityAlertsStats {

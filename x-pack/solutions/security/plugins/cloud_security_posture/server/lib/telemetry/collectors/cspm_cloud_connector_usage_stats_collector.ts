@@ -5,95 +5,89 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common';
 import type { CloudSecurityCSPMCloudConnectorUsageStats } from './types';
+import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 
-const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'fleet-cloud-connector';
-const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
-
-interface CloudConnectorSOAttributes {
-  name: string;
-  cloudProvider: string;
-  vars: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
-
-const hasCredentials = (cloudProvider: string, vars: Record<string, any>): boolean => {
-  if (cloudProvider === 'aws') {
-    // Check for AWS credentials: role_arn and external_id
-    const hasRoleArn = !!vars?.role_arn?.value;
-    const hasExternalId = !!vars?.external_id?.value;
-    return hasRoleArn && hasExternalId;
-  } else if (cloudProvider === 'azure') {
-    // Check for Azure credentials: client_id, tenant_id, and azure_connector_id
-    const hasClientId = !!vars?.client_id?.value;
-    const hasTenantId = !!vars?.tenant_id?.value;
-    const hasAzureConnectorId = !!vars?.azure_connector_id?.value;
-    return hasClientId && hasTenantId && hasAzureConnectorId;
+/**
+ * Checks if the cloud connector has valid credentials based on cloud provider
+ */
+const hasValidCredentials = (cloudProvider: string, vars: Record<string, any>): boolean => {
+  switch (cloudProvider) {
+    case 'aws':
+      return !!(vars.role_arn?.value && vars.external_id?.value);
+    case 'azure':
+      return !!(
+        vars.client_id?.value &&
+        vars.tenant_id?.value &&
+        vars.azure_cloud_connector_id?.value
+      );
+    case 'gcp':
+      return !!(vars.credentials?.value || vars.credentials_file?.value);
+    default:
+      return false;
   }
-  return false;
 };
 
 export const getCspmCloudConnectorUsageStats = async (
   soClient: SavedObjectsClientContract,
+  coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ): Promise<CloudSecurityCSPMCloudConnectorUsageStats[]> => {
   try {
-    // Fetch all cloud connectors
-    const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>({
-      type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-      perPage: 10000,
-    });
+    const [, cspServerPluginStartDeps] = await coreServices;
 
-    if (!cloudConnectors.saved_objects.length) {
+    // Get cloud connector service
+    const cloudConnectorService = cspServerPluginStartDeps.fleet.cloudConnectorService;
+    if (!cloudConnectorService) {
+      logger.debug('Cloud connector service not available');
       return [];
     }
 
-    // Fetch all package policies to count usage per connector
-    const packagePolicies = await soClient.find({
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 10000,
-      filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`,
+    // Get all cloud connectors
+    const cloudConnectors = await cloudConnectorService.getList(soClient);
+    if (!cloudConnectors.length) {
+      logger.debug('No cloud connectors found');
+      return [];
+    }
+
+    // Get package policies that use cloud connectors
+    const packagePolicyService = cspServerPluginStartDeps.fleet.packagePolicyService;
+    const packagePolicies = await packagePolicyService.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.cloud_connector_id:*`,
     });
 
-    // Build a map of cloud connector ID to package policy IDs
-    const connectorToPackagePolicies = new Map<string, string[]>();
+    const stats: CloudSecurityCSPMCloudConnectorUsageStats[] = cloudConnectors.map((connector) => {
+      // Filter package policies for this cloud connector
+      const connectorPackagePolicies = packagePolicies.items.filter(
+        (policy) => policy.cloud_connector_id === connector.id
+      );
 
-    packagePolicies.saved_objects.forEach((pp) => {
-      const cloudConnectorId = pp.attributes.cloud_connector_id;
-      if (cloudConnectorId) {
-        if (!connectorToPackagePolicies.has(cloudConnectorId)) {
-          connectorToPackagePolicies.set(cloudConnectorId, []);
-        }
-        connectorToPackagePolicies.get(cloudConnectorId)!.push(pp.id);
-      }
+      // Extract integration types and packages
+      const packagePolicyIds: string[] = [];
+
+      connectorPackagePolicies.forEach((policy) => {
+        packagePolicyIds.push(policy.id);
+      });
+
+      return {
+        id: connector.id,
+        created_at: connector.created_at,
+        updated_at: connector.updated_at,
+        hasCredentials: hasValidCredentials(connector.cloudProvider, connector.vars || {}),
+        cloud_provider: connector.cloudProvider,
+        packagePolicyIds,
+        packagePolicyCount: connectorPackagePolicies.length,
+      };
     });
 
-    // Map cloud connectors to usage stats
-    const stats: CloudSecurityCSPMCloudConnectorUsageStats[] = cloudConnectors.saved_objects.map(
-      (connector) => {
-        const packagePolicyIds = connectorToPackagePolicies.get(connector.id) || [];
-
-        return {
-          id: connector.id,
-          created_at: connector.attributes.created_at,
-          updated_at: connector.attributes.updated_at,
-          hasCredentials: hasCredentials(
-            connector.attributes.cloudProvider,
-            connector.attributes.vars
-          ),
-          cloud_provider: connector.attributes.cloudProvider,
-          packagePolicyIds,
-          packagePolicyCount: packagePolicyIds.length,
-        };
-      }
-    );
-
+    logger.info(`Collected CSPM cloud connector usage stats for ${stats.length} connectors`);
     return stats;
   } catch (error) {
-    logger.error(`Failed to get CSPM cloud connector usage stats: ${error.message}`);
-    logger.error(error.stack);
+    logger.error(`Failed to collect CSPM cloud connector usage stats: ${error.message}`);
     return [];
   }
 };
