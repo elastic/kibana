@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
-import {
-  hasChangedRetention,
-  percentiles,
-  isClassicStream,
-  isWiredStream,
-  isGroupStream,
-} from './utils';
+import { hasChangedRetention, percentiles } from './utils';
 
 describe('telemetry utils', () => {
   describe('hasChangedRetention', () => {
@@ -49,103 +42,6 @@ describe('telemetry utils', () => {
     it('handles single value', () => {
       const result = percentiles([5], [50, 95]);
       expect(result).toEqual([5, 5]);
-    });
-  });
-
-  describe('lightweight stream type detection', () => {
-    // Test data representing different stream types
-    const classicStreamDef = {
-      name: 'test-classic',
-      description: '',
-      ingest: {
-        classic: { field_overrides: {} },
-        lifecycle: { inherit: {} },
-        processing: { steps: [] },
-        settings: {},
-      },
-    };
-
-    const wiredStreamDef = {
-      name: 'test-wired',
-      description: '',
-      ingest: {
-        wired: { fields: {}, routing: [] },
-        lifecycle: { inherit: {} },
-        processing: { steps: [] },
-        settings: {},
-      },
-    };
-
-    const groupStreamDef = {
-      name: 'test-group',
-      description: '',
-      group: {
-        metadata: {},
-        tags: [],
-        members: [],
-      },
-    };
-
-    describe('compatibility with official schema type guards', () => {
-      it('isClassicStream matches Streams.ClassicStream.Definition.is()', () => {
-        // Test classic stream
-        expect(isClassicStream(classicStreamDef)).toBe(
-          Streams.ClassicStream.Definition.is(classicStreamDef)
-        );
-
-        // Test non-classic streams
-        expect(isClassicStream(wiredStreamDef)).toBe(
-          Streams.ClassicStream.Definition.is(wiredStreamDef)
-        );
-        expect(isClassicStream(groupStreamDef)).toBe(
-          Streams.ClassicStream.Definition.is(groupStreamDef)
-        );
-
-        // Test invalid/empty objects
-        expect(isClassicStream({} as any)).toBe(Streams.ClassicStream.Definition.is({} as any));
-        expect(isClassicStream(null)).toBe(false); // Our function handles null safely
-        expect(isClassicStream(undefined)).toBe(false); // Our function handles undefined safely
-      });
-
-      it('isWiredStream matches Streams.WiredStream.Definition.is()', () => {
-        // Test wired stream
-        expect(isWiredStream(wiredStreamDef)).toBe(
-          Streams.WiredStream.Definition.is(wiredStreamDef)
-        );
-
-        // Test non-wired streams
-        expect(isWiredStream(classicStreamDef)).toBe(
-          Streams.WiredStream.Definition.is(classicStreamDef)
-        );
-        expect(isWiredStream(groupStreamDef)).toBe(
-          Streams.WiredStream.Definition.is(groupStreamDef)
-        );
-
-        // Test invalid/empty objects
-        expect(isWiredStream({} as any)).toBe(Streams.WiredStream.Definition.is({} as any));
-        expect(isWiredStream(null)).toBe(false); // Our function handles null safely
-        expect(isWiredStream(undefined)).toBe(false); // Our function handles undefined safely
-      });
-
-      it('isGroupStream matches Streams.GroupStream.Definition.is()', () => {
-        // Test group stream
-        expect(isGroupStream(groupStreamDef)).toBe(
-          Streams.GroupStream.Definition.is(groupStreamDef)
-        );
-
-        // Test non-group streams
-        expect(isGroupStream(classicStreamDef)).toBe(
-          Streams.GroupStream.Definition.is(classicStreamDef)
-        );
-        expect(isGroupStream(wiredStreamDef)).toBe(
-          Streams.GroupStream.Definition.is(wiredStreamDef)
-        );
-
-        // Test invalid/empty objects
-        expect(isGroupStream({} as any)).toBe(Streams.GroupStream.Definition.is({} as any));
-        expect(isGroupStream(null)).toBe(false); // Our function handles null safely
-        expect(isGroupStream(undefined)).toBe(false); // Our function handles undefined safely
-      });
     });
   });
 });

@@ -6,15 +6,10 @@
  */
 
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { Streams } from '@kbn/streams-schema';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import {
-  hasChangedRetention,
-  percentiles,
-  isClassicStream,
-  isWiredStream,
-  isGroupStream,
-} from './utils';
+import { hasChangedRetention, percentiles } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
 
@@ -82,7 +77,7 @@ function createFetchFunction(logger: Logger) {
     for (const hit of hits) {
       const definition = hit._source ?? {};
 
-      if (isClassicStream(definition)) {
+      if (Streams.ClassicStream.Definition.is(definition)) {
         // Presence of a classic stream in `.kibana_streams` implies it has been stored/changed
         changedCount++;
 
@@ -99,7 +94,7 @@ function createFetchFunction(logger: Logger) {
         }
       }
 
-      if (isWiredStream(definition) && !isGroupStream(definition)) {
+      if (Streams.WiredStream.Definition.is(definition)) {
         wiredCount++;
       }
 
@@ -231,9 +226,12 @@ function createFetchFunction(logger: Logger) {
         continue;
       }
 
-      if (isWiredStream(definition) && !isGroupStream(definition)) {
+      if (Streams.WiredStream.Definition.is(definition)) {
         wiredCount++;
-      } else if (isClassicStream(definition) && !isGroupStream(definition)) {
+      } else if (
+        Streams.ClassicStream.Definition.is(definition) &&
+        !Streams.GroupStream.Definition.is(definition)
+      ) {
         classicCount++;
       }
     }
