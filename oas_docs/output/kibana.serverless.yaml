@@ -27267,6 +27267,8 @@ paths:
                             previous_version:
                               nullable: true
                               type: string
+                            rolled_back:
+                              type: boolean
                             type:
                               type: string
                             updated_at:
@@ -28498,6 +28500,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
@@ -29158,6 +29162,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
@@ -46714,6 +46720,10 @@ paths:
               schema:
                 type: object
                 properties:
+                  defend_insights_exists:
+                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+                    example: true
+                    type: boolean
                   elser_exists:
                     description: Indicates if the ELSER model exists for the KnowledgeBase.
                     example: true
