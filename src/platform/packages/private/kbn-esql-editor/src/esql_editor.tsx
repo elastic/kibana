@@ -27,6 +27,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
@@ -489,7 +490,7 @@ const ESQLEditorInternal = function ESQLEditor({
     [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
-  const telemetryCallbacks = useMemo(
+  const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),

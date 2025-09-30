@@ -16,6 +16,7 @@ import {
   getHoverItem,
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -34,10 +35,7 @@ export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
-    telemetry: {
-      // Callback fired when the user hovers over a decoration with a hover message.
-      onDecorationHoverShown?: (hoverMessage: string) => void;
-    };
+    telemetry: ESQLTelemetryCallbacks;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
