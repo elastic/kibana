@@ -9,7 +9,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NjEsMV0="
+  "version": "WzU3LDFd"
 }
 
 {
@@ -23,7 +23,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NjAsMV0="
+  "version": "WzU2LDFd"
 }
 
 {
@@ -37,7 +37,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NTksMV0="
+  "version": "WzU1LDFd"
 }
 
 {
@@ -52,7 +52,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NjMsMV0="
+  "version": "WzU5LDFd"
 }
 
 {
@@ -67,7 +67,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NjYsMV0="
+  "version": "WzYyLDFd"
 }
 
 {
@@ -81,7 +81,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NjgsMV0="
+  "version": "WzY0LDFd"
 }
 
 {
@@ -96,7 +96,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NzMsMV0="
+  "version": "WzY5LDFd"
 }
 
 {
@@ -111,7 +111,131 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NzEsMV0="
+  "version": "WzY3LDFd"
+}
+
+{
+  "attributes": {
+    "title": "Copy to Space index pattern 1 from space_1 space"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "cts_ip_1_space_1",
+  "originId": "cts_ip_1",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE5LDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 1 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "cts_vis_1_space_1",
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE1LDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 2 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "cts_vis_2_space_1",
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE2LDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 3 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "cts_vis_3_space_1",
+  "originId": "cts_vis_3",
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE3LDFd"
+}
+
+{
+  "attributes": {
+    "description": "Copy to Space Dashboard from space_1 space",
+    "title": "This is the space_1 test space CTS dashboard"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "cts_dashboard_space_1",
+  "originId": "cts_dashboard",
+  "references": [
+    {
+      "id": "cts_vis_1_space_1",
+      "name": "CTS Vis 1",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_2_space_1",
+      "name": "CTS Vis 2",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_3_space_1",
+      "name": "CTS Vis 3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ1LDFd"
 }
 
 {
@@ -125,7 +249,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NTUsMV0="
+  "version": "WzUxLDFd"
 }
 
 {
@@ -139,7 +263,7 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NTcsMV0="
+  "version": "WzUzLDFd"
 }
 
 {
@@ -154,5 +278,5 @@
   "type": "index-pattern",
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzE0NTQsMV0="
+  "version": "WzUwLDFd"
 }

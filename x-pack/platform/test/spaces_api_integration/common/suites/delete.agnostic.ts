@@ -14,7 +14,6 @@ import type {
 } from '../../deployment_agnostic/ftr_provider_context';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
-import { SPACE_2 } from '../lib/spaces';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
@@ -38,8 +37,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
   const es = getService('es');
   const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
-  const kbnClient = getService('kibanaServer');
-  const spacesService = getService('spaces');
   const log = getService('log');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
@@ -102,11 +99,15 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       },
       {
         key: 'space_1',
-        doc_count: 12,
+        doc_count: 16,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'index-pattern', doc_count: 12 }],
+          buckets: [
+            { key: 'index-pattern', doc_count: 12 },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 1 },
+          ],
         },
       },
       {
@@ -178,24 +179,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     });
   };
 
-  const loadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.load(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
-
-  const unloadSavedObjects = async () => {
-    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
-      await kbnClient.importExport.unload(
-        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
-        { space }
-      );
-    }
-  };
-
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
@@ -204,21 +187,10 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
-          await loadSavedObjects();
         });
 
         after(async () => {
           await supertest.destroy();
-          await unloadSavedObjects();
-          await kbnClient.savedObjects.cleanStandardList();
-        });
-
-        afterEach(async () => {
-          try {
-            await spacesService.create(SPACE_2);
-          } catch (error) {
-            // Ignore
-          }
         });
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
