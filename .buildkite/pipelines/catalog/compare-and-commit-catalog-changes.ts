@@ -205,4 +205,6 @@ function getPRMessage(rawBody: string) {
       `\n\n> Note: output truncated (${truncatedChars} chars omitted) to fit GitHub 64k body limit.\n`
     );
   }
+
+  return rawBody;
 }
