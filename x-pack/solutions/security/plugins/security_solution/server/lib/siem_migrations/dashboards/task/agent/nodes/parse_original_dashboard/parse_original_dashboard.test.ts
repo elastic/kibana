@@ -9,7 +9,6 @@ import { getParseOriginalDashboardNode } from './parse_original_dashboard';
 import type { MigrateDashboardState } from '../../types';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
-import { generateAssistantComment } from '../../../../../common/task/util/comments';
 
 // Mock the SplunkXmlDashboardParser
 jest.mock('../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml');
