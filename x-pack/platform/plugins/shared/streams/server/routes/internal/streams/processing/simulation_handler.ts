@@ -39,6 +39,7 @@ import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -824,42 +825,47 @@ const computeDetectedFields = async (
 
   const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
-  return Promise.all(
-    uniqueFields.map(async (name) => {
-      const existingField = streamFields[name];
-      if (existingField) {
-        return { name, ...existingField };
-      }
+  let fieldMetadataMap: Record<string, FieldMetadataPlain>;
+  try {
+    fieldMetadataMap = (
+      await fieldsMetadataClient.find({
+        fieldNames: uniqueFields,
+      })
+    ).toPlain();
+  } catch (error) {
+    // Gracefully handle metadata service failures
+    fieldMetadataMap = {};
+  }
 
-      const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
-      const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
+  return uniqueFields.map((name) => {
+    const existingField = streamFields[name];
+    if (existingField) {
+      return { name, ...existingField };
+    }
 
-      let suggestedType: string | undefined;
-      let source: string | undefined;
-      let description: string | undefined;
+    const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
+    const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
 
-      try {
-        const fieldMetadata = await fieldsMetadataClient.getByName(name);
-        if (fieldMetadata) {
-          suggestedType = fieldMetadata.type;
-          source = fieldMetadata.source;
-          description = fieldMetadata.description;
-        }
-      } catch (error) {
-        // Gracefully handle metadata service failures
-        // Field will remain unmapped if service is unavailable
-      }
+    let suggestedType: string | undefined;
+    let source: string | undefined;
+    let description: string | undefined;
 
-      return {
-        name,
-        type: confirmedValidDetectedFields[name]?.type,
-        esType,
-        suggestedType,
-        source,
-        description,
-      };
-    })
-  );
+    const fieldMetadata = fieldMetadataMap[name];
+    if (fieldMetadata) {
+      suggestedType = fieldMetadata.type;
+      source = fieldMetadata.source;
+      description = fieldMetadata.description;
+    }
+
+    return {
+      name,
+      type: confirmedValidDetectedFields[name]?.type,
+      esType,
+      suggestedType,
+      source,
+      description,
+    };
+  });
 };
 
 const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSimulationStatus) => {
