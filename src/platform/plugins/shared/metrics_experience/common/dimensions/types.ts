@@ -10,5 +10,4 @@
 export interface Dimension {
   name: string;
   type: string;
-  description?: string;
 }

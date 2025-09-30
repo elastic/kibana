@@ -56,8 +56,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
       type: panelToCopy.type,
       serializedState: panelToCopy.serializedState,
       size: {
-        width: panelToCopy.gridData.w,
-        height: panelToCopy.gridData.h,
+        width: panelToCopy.grid.w,
+        height: panelToCopy.grid.h,
       },
     };
 
