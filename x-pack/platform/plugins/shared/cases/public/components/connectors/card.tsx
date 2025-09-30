@@ -56,8 +56,8 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
           {listItems.length > 0 &&
             listItems.map((item, i) =>
               item.displayAsCodeBlock ? (
-                <>
-                  <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
+                <React.Fragment key={`${item.title}-${i}`}>
+                  <EuiText size="xs" data-test-subj="card-list-item">
                     <strong>{`${item.title}:`}</strong>
                   </EuiText>
                   <EuiCodeBlock
@@ -68,7 +68,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
                   >
                     {`${item.description}`}
                   </EuiCodeBlock>
-                </>
+                </React.Fragment>
               ) : (
                 <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
                   <strong>{`${item.title}: `}</strong>
