@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import type { TourStep } from './types';
 
 const newNavBlogPost = 'https://ela.st/new-nav';
@@ -84,6 +84,6 @@ export const tourSteps: TourStep[] = [
         </p>
       </EuiText>
     ),
-    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${INGEST_AND_MANAGE_DATA_NAV_ID}"]`,
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${DATA_MANAGEMENT_NAV_ID}"]`,
   },
 ];
