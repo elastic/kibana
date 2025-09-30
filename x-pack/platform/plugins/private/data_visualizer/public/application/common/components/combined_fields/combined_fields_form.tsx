@@ -10,74 +10,93 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
-  EuiFormRow,
   EuiPopover,
-  EuiContextMenu,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
+import type { IngestPipeline } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { FileAnalysis } from '@kbn/file-upload';
+import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
-import { SemanticTextForm } from './semantic_text';
 import { CombinedFieldLabel } from './combined_field_label';
-import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
+import {
+  isLatLonCompatible,
+  removeCombinedFieldsFromMappings,
+  removeCombinedFieldsFromPipeline,
+} from './utils';
+import { SemanticTextForm } from './semantic_text';
 
 interface Props {
-  mappingsString: string;
-  pipelineString: string;
-  onMappingsStringChange(mappings: string): void;
-  onPipelineStringChange(pipeline: string): void;
+  mappings: MappingTypeMapping;
+  pipelines: IngestPipeline[];
+  onMappingsChange(mappings: string): void;
+  onPipelinesChange(pipeline: IngestPipeline[]): void;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: FindFileStructureResponse;
   isDisabled: boolean;
+  filesStatus: FileAnalysis[];
 }
 
 interface State {
-  isPopoverOpen: boolean;
+  isGeoPopoverOpen: boolean;
+  isSemanticPopoverOpen: boolean;
 }
 
 export type AddCombinedField = (
   combinedField: CombinedField,
   addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
-  addToPipeline: (pipeline: IngestPipeline) => IngestPipeline
+  addToPipelines: (pipelines: IngestPipeline[]) => IngestPipeline[]
 ) => void;
 
 export class CombinedFieldsForm extends Component<Props, State> {
   state: State = {
-    isPopoverOpen: false,
+    isGeoPopoverOpen: false,
+    isSemanticPopoverOpen: false,
   };
 
-  togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
+  togglePopover = (popover: 'geo' | 'semantic') => {
+    if (popover === 'geo') {
+      this.setState((prevState) => ({
+        isGeoPopoverOpen: !prevState.isGeoPopoverOpen,
+        isSemanticPopoverOpen: false,
+      }));
+    } else {
+      this.setState((prevState) => ({
+        isSemanticPopoverOpen: !prevState.isSemanticPopoverOpen,
+        isGeoPopoverOpen: false,
+      }));
+    }
   };
 
   closePopover = () => {
     this.setState({
-      isPopoverOpen: false,
+      isGeoPopoverOpen: false,
+      isSemanticPopoverOpen: false,
     });
   };
 
   addCombinedField = (
     combinedField: CombinedField,
-    addToMappings: (mappings: MappingTypeMapping) => {},
-    addToPipeline: (pipeline: IngestPipeline) => {}
+    addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
+    addToPipelines: (pipelines: IngestPipeline[]) => IngestPipeline[]
   ) => {
-    const mappings = this.parseMappings();
-    const pipeline = this.parsePipeline();
+    const mappings = this.props.mappings;
+    const pipelines = this.props.pipelines;
+
+    const newPipelines = addToPipelines(pipelines);
+    this.props.onPipelinesChange(newPipelines);
 
     const newMappings = addToMappings(mappings);
-    const newPipeline = addToPipeline(pipeline);
-
-    this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
-    this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
+    this.props.onMappingsChange(JSON.stringify(newMappings, null, 2));
 
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
@@ -85,62 +104,25 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   removeCombinedField = (index: number) => {
-    let mappings;
-    let pipeline;
-    try {
-      mappings = this.parseMappings();
-      pipeline = this.parsePipeline();
-    } catch (error) {
-      // how should remove error be surfaced?
-      return;
-    }
-
     const updatedCombinedFields = [...this.props.combinedFields];
     const removedCombinedFields = updatedCombinedFields.splice(index, 1);
 
-    this.props.onMappingsStringChange(
-      JSON.stringify(removeCombinedFieldsFromMappings(mappings, removedCombinedFields), null, 2)
+    this.props.onPipelinesChange(
+      this.props.pipelines.map((pipeline) =>
+        removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields)
+      )
     );
-    this.props.onPipelineStringChange(
-      JSON.stringify(removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields), null, 2)
+    this.props.onMappingsChange(
+      JSON.stringify(removeCombinedFieldsFromMappings(this.props.mappings, removedCombinedFields))
     );
     this.props.onCombinedFieldsChange(updatedCombinedFields);
   };
 
-  parseMappings() {
-    try {
-      return JSON.parse(this.props.mappingsString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.dataVisualizer.combinedFieldsForm.mappingsParseError', {
-          defaultMessage: 'Error parsing mappings: {error}',
-          values: { error: error.message },
-        })
-      );
-    }
-  }
-
-  parsePipeline() {
-    try {
-      if (this.props.pipelineString === '') {
-        return {
-          description: '',
-          processors: [],
-        };
-      }
-      return JSON.parse(this.props.pipelineString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.dataVisualizer.combinedFieldsForm.pipelineParseError', {
-          defaultMessage: 'Error parsing pipeline: {error}',
-          values: { error: error.message },
-        })
-      );
-    }
-  }
-
   hasNameCollision = (name: string) => {
-    if (this.props.results.column_names?.includes(name)) {
+    const fieldExists = getFieldsFromMappings(this.props.mappings).some(
+      (field) => field.name === name
+    );
+    if (fieldExists) {
       // collision with column name
       return true;
     }
@@ -152,74 +134,123 @@ export class CombinedFieldsForm extends Component<Props, State> {
       return true;
     }
 
-    const mappings = this.parseMappings();
-    return Object.hasOwn(mappings.properties, name);
+    return Object.hasOwn(this.props.mappings?.properties ?? {}, name);
+  };
+
+  isLatLonCompatible = () => {
+    return isLatLonCompatible(
+      this.props.filesStatus ? this.props.filesStatus[0].results! : undefined
+    );
+  };
+
+  isSemanticTextCompatible = () => {
+    return (
+      getFieldsFromMappings(this.props.mappings, [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD])
+        .length > 0
+    );
   };
 
   render() {
-    const geoPointLabel = i18n.translate(
-      'xpack.dataVisualizer.file.geoPointForm.combinedFieldLabel',
-      {
-        defaultMessage: 'Add geo point field',
-      }
-    );
-
-    const semanticTextLabel = i18n.translate(
-      'xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel',
-      {
-        defaultMessage: 'Add semantic text field',
-      }
-    );
-    const panels = [
-      {
-        id: 0,
-        items: [
-          {
-            name: geoPointLabel,
-            panel: 1,
-          },
-          {
-            name: semanticTextLabel,
-            panel: 2,
-          },
-        ],
-      },
-      {
-        id: 1,
-        title: geoPointLabel,
-        content: (
-          <GeoPointForm
-            addCombinedField={this.addCombinedField}
-            hasNameCollision={this.hasNameCollision}
-            results={this.props.results}
-          />
-        ),
-      },
-      {
-        id: 2,
-        title: semanticTextLabel,
-        content: (
-          <SemanticTextForm
-            addCombinedField={this.addCombinedField}
-            hasNameCollision={this.hasNameCollision}
-            results={this.props.results}
-          />
-        ),
-      },
-    ];
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.combinedFieldsLabel', {
-          defaultMessage: 'Automatically created fields',
-        })}
-      >
-        <div>
-          {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
-            <EuiFlexGroup key={idx} gutterSize="s">
-              <EuiFlexItem>
-                <CombinedFieldLabel combinedField={combinedField} />
-              </EuiFlexItem>
-              {!this.props.isDisabled && (
+      <>
+        <EuiTitle size="xxs">
+          <h4>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+              defaultMessage="Add Smarter search fields to the mappings"
+            />
+          </h4>
+        </EuiTitle>
+
+        <EuiSpacer size="s" />
+
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.combinedFieldsForm.description"
+              defaultMessage="Add a Geo Point field for map-based searches, or a Semantic Text field for meaning-based searches to find related content — not just exact matches."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButton
+                  onClick={this.togglePopover.bind(null, 'semantic')}
+                  size="s"
+                  color="text"
+                  iconType="plusInCircleFilled"
+                  isDisabled={this.isSemanticTextCompatible() === false}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel"
+                    defaultMessage="Semantic text field"
+                  />
+                </EuiButton>
+              }
+              isOpen={this.state.isSemanticPopoverOpen}
+              closePopover={this.closePopover}
+            >
+              <SemanticTextForm
+                addCombinedField={this.addCombinedField}
+                hasNameCollision={this.hasNameCollision}
+                mappings={this.props.mappings}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButton
+                  onClick={this.togglePopover.bind(null, 'geo')}
+                  size="s"
+                  color="text"
+                  iconType="plusInCircleFilled"
+                  isDisabled={this.isLatLonCompatible() === false}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.geoFieldLabel"
+                    defaultMessage="Geo point field"
+                  />
+                </EuiButton>
+              }
+              isOpen={this.state.isGeoPopoverOpen}
+              closePopover={this.closePopover}
+            >
+              <GeoPointForm
+                addCombinedField={this.addCombinedField}
+                hasNameCollision={this.hasNameCollision}
+                results={this.props.filesStatus ? this.props.filesStatus[0].results! : undefined}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {this.props.combinedFields.length ? (
+          <>
+            <EuiSpacer size="m" />
+
+            <EuiTitle size="xxs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.combinedFieldsForm.title"
+                  defaultMessage="Already added fields"
+                />
+              </h4>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
+              <EuiFlexGroup key={idx} gutterSize="s" css={{ maxWidth: '350px' }}>
+                <EuiFlexItem>
+                  <CombinedFieldLabel combinedField={combinedField} />
+                </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="trash"
@@ -233,32 +264,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
                     })}
                   />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          ))}
-          <EuiPopover
-            id="combineFieldsPopover"
-            button={
-              <EuiButtonEmpty
-                onClick={this.togglePopover}
-                size="xs"
-                iconType="plusInCircleFilled"
-                isDisabled={this.props.isDisabled}
-              >
-                <FormattedMessage
-                  id="xpack.dataVisualizer.addCombinedFieldsLabel"
-                  defaultMessage="Add additional field"
-                />
-              </EuiButtonEmpty>
-            }
-            isOpen={this.state.isPopoverOpen}
-            closePopover={this.closePopover}
-            anchorPosition="rightCenter"
-          >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
-          </EuiPopover>
-        </div>
-      </EuiFormRow>
+              </EuiFlexGroup>
+            ))}
+          </>
+        ) : null}
+      </>
     );
   }
 }

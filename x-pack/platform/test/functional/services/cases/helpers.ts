@@ -22,6 +22,7 @@ export function generateRandomCaseWithoutConnector(owner = 'cases'): CasePostReq
     } as CaseConnector,
     settings: {
       syncAlerts: false,
+      extractObservables: false,
     },
     owner,
   };

@@ -13,6 +13,7 @@ describe('normalizeErrors', () => {
     it('should normalize a single apm error with exception array', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
+          id: 'error-1',
           error: {
             grouping_key: 'error-1',
             exception: [{ type: 'Error', message: 'First error' }],
@@ -44,6 +45,7 @@ describe('normalizeErrors', () => {
     it('should handle apm error with no exception', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
+          id: 'error-3',
           error: {
             grouping_key: 'error-3',
             exception: undefined,
@@ -88,6 +90,7 @@ describe('normalizeErrors', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
           id: 'span-1',
+          spanId: 'span-1',
           timestamp: {
             us: 5555555555,
           },
@@ -121,6 +124,7 @@ describe('normalizeErrors', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
           id: 'span-2',
+          spanId: 'span-2',
           timestamp: undefined,
           error: {
             exception: {
