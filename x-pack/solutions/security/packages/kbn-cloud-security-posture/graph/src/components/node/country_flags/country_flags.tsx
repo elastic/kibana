@@ -6,51 +6,78 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiLink, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  useNodeDetailsPopover,
+  type UseNodeDetailsPopoverReturn,
+} from '../../graph_investigation/use_node_details_popover';
+import {
   GRAPH_FLAGS_BADGE_ID,
-  GRAPH_FLAGS_VISIBLE_FLAG_ID,
   GRAPH_FLAGS_PLUS_COUNT_ID,
-  GRAPH_FLAGS_TOOLTIP_CONTENT_ID,
-  GRAPH_FLAGS_TOOLTIP_COUNTRY_ID,
+  GRAPH_FLAGS_VISIBLE_FLAG_ID,
+  GRAPH_FLAGS_POPOVER_CONTENT_ID,
+  GRAPH_FLAGS_POPOVER_COUNTRY_ID,
+  GRAPH_FLAGS_POPOVER_ID,
+  GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID,
 } from '../../test_ids';
-import { RoundedBadge, ToolTipButton } from '../styles';
+import { RoundedBadge } from '../styles';
 import { getCountryFlag, getCountryName } from './country_codes';
 
-export const MAX_COUNTRY_FLAGS_IN_TOOLTIP = 10;
+export const MAX_COUNTRY_FLAGS_IN_POPOVER = 10;
 const VISIBLE_FLAGS_LIMIT = 2;
 
-const toolTipAriaLabel = i18n.translate(
-  'securitySolutionPackages.csp.graph.countryFlags.toolTipAriaLabel',
+const popoverAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.countryFlags.popoverAriaLabel',
   {
-    defaultMessage: 'Show geolocation details',
+    defaultMessage: 'Country flags popover',
   }
 );
 
+export type UseCountryFlagsPopoverReturn = UseNodeDetailsPopoverReturn & {
+  onCountryClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+export const useCountryFlagsPopover = (countryCodes: string[]): UseCountryFlagsPopoverReturn => {
+  const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
+
+  const items = validCodes.map((countryCode, index) => ({
+    key: `${index}-${countryCode}`,
+    label: `${getCountryFlag(countryCode)} ${getCountryName(countryCode)}`,
+  }));
+
+  const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
+    popoverId: 'country-flags-popover',
+    items,
+    contentTestSubj: GRAPH_FLAGS_POPOVER_CONTENT_ID,
+    itemTestSubj: GRAPH_FLAGS_POPOVER_COUNTRY_ID,
+    popoverTestSubj: GRAPH_FLAGS_POPOVER_ID,
+    visibleLimit: VISIBLE_FLAGS_LIMIT,
+  });
+
+  return {
+    id,
+    onCountryClick: onClick,
+    PopoverComponent,
+    actions,
+    state,
+    onClick,
+  };
+};
+
 export interface CountryFlagsProps {
   countryCodes: string[];
+  onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
+export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlagsProps) => {
   const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
+  const xsFontSize = useEuiFontSize('xs');
 
   if (validCodes.length === 0) {
     return null;
   }
-
-  const toolTipContent = (
-    <ul data-test-subj={GRAPH_FLAGS_TOOLTIP_CONTENT_ID}>
-      {validCodes.slice(0, MAX_COUNTRY_FLAGS_IN_TOOLTIP).map((countryCode, index) => (
-        <li data-test-subj={GRAPH_FLAGS_TOOLTIP_COUNTRY_ID} key={`${index}-${countryCode}`}>
-          <EuiText size="m">
-            {getCountryFlag(countryCode)} {getCountryName(countryCode)}
-          </EuiText>
-        </li>
-      ))}
-    </ul>
-  );
 
   const visibleFlags = validCodes.slice(0, VISIBLE_FLAGS_LIMIT).map((countryCode) => {
     const flag = getCountryFlag(countryCode);
@@ -63,29 +90,45 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
 
   const counter =
     validCodes.length > VISIBLE_FLAGS_LIMIT ? (
-      <EuiText
-        data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}
-        size="xs"
-        color="default"
-        css={css`
-          font-weight: medium;
-        `}
-      >
-        {'+'}
-        {validCodes.length - VISIBLE_FLAGS_LIMIT}
-      </EuiText>
+      onCountryClick ? (
+        <EuiLink
+          color="subdued"
+          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
+          onClick={onCountryClick}
+          aria-label={popoverAriaLabel}
+        >
+          <EuiText
+            aria-label={popoverAriaLabel}
+            css={css`
+              font-weight: medium;
+            `}
+            size="xs"
+          >
+            {'+'}
+            {validCodes.length - VISIBLE_FLAGS_LIMIT}
+          </EuiText>
+        </EuiLink>
+      ) : (
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}
+          css={css`
+            font-weight: medium;
+            ${xsFontSize};
+          `}
+        >
+          {'+'}
+          {validCodes.length - VISIBLE_FLAGS_LIMIT}
+        </EuiText>
+      )
     ) : null;
 
   return (
-    <EuiToolTip position="right" content={toolTipContent}>
-      {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton aria-label={toolTipAriaLabel}>
-        <RoundedBadge data-test-subj={GRAPH_FLAGS_BADGE_ID}>
-          {visibleFlags}
-          {counter}
-        </RoundedBadge>
-      </ToolTipButton>
-    </EuiToolTip>
+    <RoundedBadge data-test-subj={GRAPH_FLAGS_BADGE_ID}>
+      {visibleFlags}
+      {counter}
+    </RoundedBadge>
   );
 });
 

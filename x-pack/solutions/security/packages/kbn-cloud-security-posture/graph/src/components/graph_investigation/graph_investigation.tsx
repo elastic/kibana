@@ -21,6 +21,7 @@ import { Graph, isEntityNode, type NodeProps } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
+import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
@@ -42,6 +43,7 @@ const useGraphPopovers = ({
   nodeDetailsClickHandler?: (node: NodeProps) => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
+  const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
   const nodeExpandPopover = useEntityNodeExpandPopover(
     setSearchFilters,
     dataViewId,
@@ -55,17 +57,18 @@ const useGraphPopovers = ({
     nodeDetailsClickHandler
   );
   const ipPopover = useIpPopover(currentIps);
+  const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover, ipPopover].forEach(
+      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover].forEach(
         ({ actions: { closePopover } }) => {
           closePopover();
         }
       );
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover, ipPopover]
+    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover]
   );
 
   const createIpClickHandler = useCallback(
@@ -76,12 +79,22 @@ const useGraphPopovers = ({
     [setCurrentIps, openPopoverCallback, ipPopover.onIpClick]
   );
 
+  const createCountryClickHandler = useCallback(
+    (countryCodes: string[]) => (e: React.MouseEvent<HTMLButtonElement>) => {
+      setCurrentCountryCodes(countryCodes);
+      openPopoverCallback(countryFlagsPopover.onCountryClick, e);
+    },
+    [setCurrentCountryCodes, openPopoverCallback, countryFlagsPopover.onCountryClick]
+  );
+
   return {
     nodeExpandPopover,
     labelExpandPopover,
     ipPopover,
+    countryFlagsPopover,
     openPopoverCallback,
     createIpClickHandler,
+    createCountryClickHandler,
   };
 };
 
@@ -266,8 +279,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       nodeExpandPopover,
       labelExpandPopover,
       ipPopover,
+      countryFlagsPopover,
       openPopoverCallback,
       createIpClickHandler,
+      createCountryClickHandler,
     } = useGraphPopovers({
       dataViewId: dataView?.id ?? '',
       searchFilters,
@@ -279,9 +294,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover, ipPopover].some(
-      ({ state: { isOpen } }) => isOpen
-    );
+    const isPopoverOpen = [
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+    ].some(({ state: { isOpen } }) => isOpen);
 
     const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
@@ -306,13 +324,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
             return {
               ...node,
               expandButtonClick: nodeExpandButtonClickHandler,
               ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
           } else if (isLabelNode(node)) {
             const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
             const docEventIds: string[] =
               'documentsData' in node && Array.isArray(node.documentsData)
                 ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
@@ -323,6 +344,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
               ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
           }
 
@@ -441,6 +463,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         <nodeExpandPopover.PopoverComponent />
         <labelExpandPopover.PopoverComponent />
         <ipPopover.PopoverComponent />
+        <countryFlagsPopover.PopoverComponent />
       </>
     );
   }

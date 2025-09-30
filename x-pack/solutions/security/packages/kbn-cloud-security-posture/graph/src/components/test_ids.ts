@@ -65,6 +65,9 @@ export const GRAPH_ENTITY_NODE_DETAILS_ID =
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_PLUS_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPlusCount` as const;
+export const GRAPH_IPS_PLUS_COUNT_BUTTON_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}IpsPlusCountButton` as const;
+
 export const GRAPH_IPS_POPOVER_CONTENT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverContent` as const;
 export const GRAPH_IPS_POPOVER_IP_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPopoverId` as const;
@@ -75,10 +78,17 @@ export const GRAPH_FLAGS_VISIBLE_FLAG_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsVisibleFlag` as const;
 export const GRAPH_FLAGS_PLUS_COUNT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPlusCount` as const;
+export const GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPlusCountButton` as const;
 export const GRAPH_FLAGS_TOOLTIP_CONTENT_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsTooltipContent` as const;
 export const GRAPH_FLAGS_TOOLTIP_COUNTRY_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsTooltipCountry` as const;
+export const GRAPH_FLAGS_POPOVER_CONTENT_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPopoverContent` as const;
+export const GRAPH_FLAGS_POPOVER_COUNTRY_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPopoverCountry` as const;
+export const GRAPH_FLAGS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPopover` as const;
 
 export const GRAPH_TAG_WRAPPER_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagWrapper` as const;
 export const GRAPH_TAG_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagCount` as const;

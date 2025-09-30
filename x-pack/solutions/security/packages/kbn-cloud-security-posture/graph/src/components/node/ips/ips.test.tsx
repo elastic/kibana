@@ -8,7 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GRAPH_IPS_TEXT_ID, GRAPH_IPS_PLUS_COUNT_ID } from '../../test_ids';
+import {
+  GRAPH_IPS_TEXT_ID,
+  GRAPH_IPS_PLUS_COUNT_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
+} from '../../test_ids';
 import { Ips } from './ips';
 
 describe('Ips', () => {
@@ -29,6 +33,7 @@ describe('Ips', () => {
 
     expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIp}`);
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
   });
 
   test('renders multiple IPs with a counter', () => {
@@ -37,6 +42,7 @@ describe('Ips', () => {
 
     expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
     expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
   });
 
   test('renders aria-label in focusable button', () => {
@@ -52,7 +58,7 @@ describe('Ips', () => {
       const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
       render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-      const counterButton = screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID);
+      const counterButton = screen.getByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID);
       await userEvent.click(counterButton);
 
       expect(mockOnIpClick).toHaveBeenCalledTimes(1);
@@ -62,18 +68,15 @@ describe('Ips', () => {
       const testIps = ['192.168.1.1'];
       render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-      expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
     });
 
     test('does not call onIpClick when onIpClick is not provided', async () => {
       const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
       render(<Ips ips={testIps} />);
 
-      const counterButton = screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID);
-      await userEvent.click(counterButton);
-
-      // Should not throw any errors
-      expect(mockOnIpClick).not.toHaveBeenCalled();
+      const counterButton = screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID);
+      expect(counterButton).not.toBeInTheDocument();
     });
   });
 });

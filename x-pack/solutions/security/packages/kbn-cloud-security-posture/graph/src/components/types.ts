@@ -36,6 +36,8 @@ export type ExpandButtonClickCallback = (
 
 export type IpClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
+export type CountryClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
@@ -43,6 +45,7 @@ export interface EntityNodeViewModel
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
   ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
 }
 
 export interface GroupNodeViewModel
@@ -59,6 +62,7 @@ export interface LabelNodeViewModel
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
   ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;

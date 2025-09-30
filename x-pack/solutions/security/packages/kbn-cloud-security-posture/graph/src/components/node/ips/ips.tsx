@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
-import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiListGroup } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiText, EuiLink, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import type { PopoverActions, PopoverState } from '../../graph/use_graph_popover';
-import { useGraphPopover } from '../../graph/use_graph_popover';
-import { GraphPopover } from '../../graph/graph_popover';
-import { ExpandPopoverListItem } from '../../styles';
+import {
+  useNodeDetailsPopover,
+  type UseNodeDetailsPopoverReturn,
+} from '../../graph_investigation/use_node_details_popover';
 import {
   GRAPH_IPS_TEXT_ID,
   GRAPH_IPS_PLUS_COUNT_ID,
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
   GRAPH_IPS_POPOVER_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
 } from '../../test_ids';
 
 export const VISIBLE_IPS_LIMIT = 1;
@@ -28,89 +29,33 @@ const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.
   defaultMessage: 'Show IP address details',
 });
 
-export interface UseIpPopoverReturn {
-  /**
-   * The ID of the popover.
-   */
-  id: string;
-
-  /**
-   * Handler to open the popover when the IP button is clicked.
-   */
+export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
   onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-
-  /**
-   * The component that renders the popover.
-   */
-  PopoverComponent: React.FC;
-
-  /**
-   * The popover actions and state.
-   */
-  actions: PopoverActions;
-
-  /**
-   * The popover state.
-   */
-  state: PopoverState;
-}
+};
 
 export const useIpPopover = (ips: string[]): UseIpPopoverReturn => {
-  const { id, state, actions } = useGraphPopover('ips-popover');
+  const items = ips.map((ip, index) => ({
+    key: `${index}-${ip}`,
+    label: ip,
+  }));
 
-  const popoverContent = useMemo(
-    () => (
-      <EuiListGroup
-        gutterSize="none"
-        bordered={false}
-        size="m"
-        flush={true}
-        color="primary"
-        data-test-subj={GRAPH_IPS_POPOVER_CONTENT_ID}
-      >
-        {ips.map((ip, index) => (
-          <ExpandPopoverListItem
-            key={index}
-            label={ip}
-            data-test-subj={GRAPH_IPS_POPOVER_IP_ID}
-            showToolTip={false}
-          />
-        ))}
-      </EuiListGroup>
-    ),
-    [ips]
-  );
+  const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
+    popoverId: 'ips-popover',
+    items,
+    contentTestSubj: GRAPH_IPS_POPOVER_CONTENT_ID,
+    itemTestSubj: GRAPH_IPS_POPOVER_IP_ID,
+    popoverTestSubj: GRAPH_IPS_POPOVER_ID,
+    visibleLimit: VISIBLE_IPS_LIMIT,
+  });
 
-  // eslint-disable-next-line react/display-name
-  const PopoverComponent = memo(() => (
-    <GraphPopover
-      panelPaddingSize="s"
-      anchorPosition="rightCenter"
-      isOpen={state.isOpen}
-      anchorElement={state.anchorElement}
-      closePopover={actions.closePopover}
-      panelStyle={{ maxHeight: '336px', overflowY: 'auto' }}
-      data-test-subj={GRAPH_IPS_POPOVER_ID}
-    >
-      {ips.length > VISIBLE_IPS_LIMIT ? popoverContent : null}
-    </GraphPopover>
-  ));
-
-  const onIpClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => actions.openPopover(e.currentTarget),
-    [actions]
-  );
-
-  return useMemo(
-    () => ({
-      id,
-      onIpClick,
-      PopoverComponent,
-      actions,
-      state,
-    }),
-    [PopoverComponent, actions, id, state, onIpClick]
-  );
+  return {
+    id,
+    onIpClick: onClick,
+    PopoverComponent,
+    actions,
+    state,
+    onClick,
+  };
 };
 
 export interface IpsProps {
@@ -141,19 +86,34 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
 
   const counter =
     ips.length > VISIBLE_IPS_LIMIT ? (
-      <EuiButtonEmpty
-        size="xs"
-        color="text"
-        data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
-        onClick={onIpClick}
-        aria-label={toolTipAriaLabel}
-        css={css`
-          font-weight: medium;
-          ${xsFontSize};
-        `}
-      >
-        {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-      </EuiButtonEmpty>
+      onIpClick ? (
+        <EuiLink
+          color="subdued"
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
+          onClick={onIpClick}
+          aria-label={toolTipAriaLabel}
+        >
+          <EuiText
+            css={css`
+              font-weight: medium;
+            `}
+            size="xs"
+          >{`+${ips.length - VISIBLE_IPS_LIMIT}`}</EuiText>
+        </EuiLink>
+      ) : (
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={toolTipAriaLabel}
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
+          css={css`
+            font-weight: medium;
+            ${xsFontSize};
+          `}
+        >
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiText>
+      )
     ) : null;
 
   return (
