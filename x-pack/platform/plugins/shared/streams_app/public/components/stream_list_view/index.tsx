@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiBetaBadge,
-  EuiLink,
   useEuiTheme,
   EuiButton,
   EuiFlexItem,
@@ -152,19 +151,6 @@ export function StreamListView() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-        }
-        description={
-          <>
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
-              defaultMessage:
-                'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-            })}{' '}
-            <EuiLink target="_blank" href={core.docLinks.links.observability.logsStreams}>
-              {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
-                defaultMessage: 'See docs',
-              })}
-            </EuiLink>
-          </>
         }
       />
       <StreamsAppPageTemplate.Body grow>
