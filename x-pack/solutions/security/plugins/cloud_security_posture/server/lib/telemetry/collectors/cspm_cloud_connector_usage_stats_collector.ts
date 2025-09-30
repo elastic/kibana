@@ -59,7 +59,7 @@ export const getCspmCloudConnectorUsageStats = async (
 
     // Build a map of cloud connector ID to package policy IDs
     const connectorToPackagePolicies = new Map<string, string[]>();
-    
+
     packagePolicies.saved_objects.forEach((pp) => {
       const cloudConnectorId = pp.attributes.cloud_connector_id;
       if (cloudConnectorId) {
@@ -74,7 +74,7 @@ export const getCspmCloudConnectorUsageStats = async (
     const stats: CloudSecurityCSPMCloudConnectorUsageStats[] = cloudConnectors.saved_objects.map(
       (connector) => {
         const packagePolicyIds = connectorToPackagePolicies.get(connector.id) || [];
-        
+
         return {
           id: connector.id,
           created_at: connector.attributes.created_at,
@@ -84,7 +84,7 @@ export const getCspmCloudConnectorUsageStats = async (
             connector.attributes.vars
           ),
           cloud_provider: connector.attributes.cloudProvider,
-          packagePolicyIds: packagePolicyIds,
+          packagePolicyIds,
           packagePolicyCount: packagePolicyIds.length,
         };
       }
