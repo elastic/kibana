@@ -38,6 +38,7 @@ import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/w
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
+import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -229,7 +230,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         name: 'Trigger',
         width: '16%',
         render: (value: any, item: WorkflowListItemDto) => (
-          <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+            <NextExecutionTime triggers={item.definition?.triggers ?? []} />
+          </EuiFlexGroup>
         ),
       },
       {

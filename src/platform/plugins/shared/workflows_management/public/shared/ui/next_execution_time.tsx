@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -22,13 +22,7 @@ export function NextExecutionTime({ triggers }: NextExecutionTimeProps) {
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers);
 
   if (!nextExecutionTime) {
-    return (
-      <EuiText size="s" color="subdued">
-        {i18n.translate('workflows.workflowList.nextExecutionTime.none', {
-          defaultMessage: 'No scheduled triggers',
-        })}
-      </EuiText>
-    );
+    return null;
   }
 
   return (
@@ -40,9 +34,12 @@ export function NextExecutionTime({ triggers }: NextExecutionTimeProps) {
         },
       })}
     >
-      <EuiText size="s">
+      <EuiBadge color="hollow">
+        {i18n.translate('workflows.workflowList.nextExecutionTime.nextExecutionTimeText', {
+          defaultMessage: 'Next execution: ',
+        })}
         <FormattedRelative value={nextExecutionTime} />
-      </EuiText>
+      </EuiBadge>
     </EuiToolTip>
   );
 }
