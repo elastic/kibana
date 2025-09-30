@@ -59,7 +59,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
 
           try {
             await validateInternalRuleTypesBulkEdit({
-              req: bulkEditData,
+              ids: bulkEditData.ids,
               ruleTypes,
               rulesClient,
             });
@@ -126,22 +126,16 @@ const validateRequiredGroupInDefaultActionsInOperations = (
 };
 
 const validateInternalRuleTypesBulkEdit = async ({
-  req,
+  ids,
   ruleTypes,
   rulesClient,
 }: {
-  req: BulkEditRulesRequestBodyV1;
+  ids?: BulkEditRulesRequestBodyV1['ids'];
   ruleTypes: Map<string, RegistryRuleType>;
   rulesClient: RulesClient;
 }) => {
-  const { filter, operations, ids } = req;
-
-  if (operations.every((op) => op.field === 'apiKey')) {
-    return;
-  }
-
   await validateInternalRuleTypesByQuery({
-    req: { filter, ids },
+    req: { ids },
     ruleTypes,
     rulesClient,
     operationText: 'update',

@@ -38,7 +38,7 @@ describe('validateInternalRuleTypesByQuery', () => {
     await expect(
       validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot edit rule of type \\"internal\\" because it is internally managed."`
+      `"Cannot edit rules of type \\"internal\\" because they are internally managed."`
     );
   });
 
@@ -53,6 +53,6 @@ describe('validateInternalRuleTypesByQuery', () => {
 
     await expect(
       validateInternalRuleTypesByQuery({ req, rulesClient, ruleTypes, operationText })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule type not found"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Rule types not found: non-internal"`);
   });
 });

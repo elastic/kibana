@@ -22,20 +22,38 @@ export const validateInternalRuleTypesByQuery = async ({
 }) => {
   const { filter, ids } = req;
 
+  if (!filter && (!ids || ids.length === 0)) {
+    return;
+  }
+
   const ruleTypesByQuery = await rulesClient.getRuleTypesByQuery({ filter, ids });
   const ruleTypeIds = new Set(ruleTypesByQuery.ruleTypes);
+  const notFoundRuleTypeIds = new Set<string>();
+  const internalRuleTypeIds = new Set<string>();
+
+  const constructMessage = (idsToFormat: Set<string>) => Array.from(idsToFormat).join(', ');
 
   for (const ruleTypeId of ruleTypeIds) {
     const ruleType = ruleTypes.get(ruleTypeId);
 
     if (!ruleType) {
-      throw Boom.badRequest('Rule type not found');
+      notFoundRuleTypeIds.add(ruleTypeId);
     }
 
-    if (ruleType.internallyManaged) {
-      throw Boom.badRequest(
-        `Cannot ${operationText} rule of type "${ruleType.id}" because it is internally managed.`
-      );
+    if (ruleType?.internallyManaged) {
+      internalRuleTypeIds.add(ruleTypeId);
     }
+  }
+
+  if (notFoundRuleTypeIds.size) {
+    throw Boom.badRequest(`Rule types not found: ${constructMessage(notFoundRuleTypeIds)}`);
+  }
+
+  if (internalRuleTypeIds.size) {
+    throw Boom.badRequest(
+      `Cannot ${operationText} rules of type "${constructMessage(
+        internalRuleTypeIds
+      )}" because they are internally managed.`
+    );
   }
 };

@@ -91,13 +91,13 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
              * ruleType will always exist here because ruleTypes.get will throw a 400
              * error if the rule type is not registered.
              */
-            if (ruleType?.internallyManaged) {
-              return res.badRequest({
-                body: {
-                  message: `Cannot create rule of type "${createRuleData.rule_type_id}" because it is internally managed.`,
-                },
-              });
-            }
+            // if (ruleType?.internallyManaged) {
+            //   return res.badRequest({
+            //     body: {
+            //       message: `Cannot create rule of type "${createRuleData.rule_type_id}" because it is internally managed.`,
+            //     },
+            //   });
+            // }
 
             /**
              * Throws an error if the group is not defined in default actions

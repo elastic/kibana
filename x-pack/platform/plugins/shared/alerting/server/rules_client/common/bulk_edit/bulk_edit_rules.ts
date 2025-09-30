@@ -8,7 +8,9 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import type { RegistryRuleType } from '../../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleParams } from '../../../application/rule/types';
 import type { RuleBulkOperationAggregation, RulesClientContext } from '../../types';
 import { ruleAuditEvent, type RuleAuditAction } from '../audit_events';
@@ -53,6 +55,7 @@ export interface BulkEditOptions<Params extends RuleParams> {
   requiredAuthOperation: ReadOperations | WriteOperations;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  ignoreInternalRuleTypes?: boolean;
 }
 
 export async function bulkEditRules<Params extends RuleParams>(
@@ -61,6 +64,8 @@ export async function bulkEditRules<Params extends RuleParams>(
 ): Promise<BulkEditResult<Params>> {
   const queryFilter = options.filter;
   const ids = options.ids;
+  const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
+
   const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
@@ -70,9 +75,13 @@ export async function bulkEditRules<Params extends RuleParams>(
   }
 
   const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
-
   const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
+  const internalRuleTypeFilter = constructInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
   let authorizationTuple;
+
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter({
       authorizationEntity: AlertingAuthorizationEntity.Rule,
@@ -83,15 +92,23 @@ export async function bulkEditRules<Params extends RuleParams>(
     throw error;
   }
   const { filter: authorizationFilter } = authorizationTuple;
+
   const qNodeFilterWithAuth =
     authorizationFilter && qNodeFilter
       ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
       : qNodeFilter;
 
+  const finalFilter = ignoreInternalRuleTypes
+    ? combineFiltersWithInternalRuleTypeFilter({
+        filter: qNodeFilterWithAuth,
+        internalRuleTypeFilter,
+      })
+    : qNodeFilterWithAuth;
+
   const { aggregations, total } = await findRulesSo<RuleBulkOperationAggregation>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
-      filter: qNodeFilterWithAuth,
+      filter: finalFilter,
       page: 1,
       perPage: 0,
       aggs: {
@@ -192,3 +209,44 @@ export async function bulkEditRules<Params extends RuleParams>(
 
   return { rules: publicRules, skipped, errors, total };
 }
+
+const constructInternalRuleTypesFilter = ({
+  ruleTypes,
+}: {
+  ruleTypes: Map<string, RegistryRuleType>;
+}) => {
+  const internalRuleTypes = Array.from(ruleTypes.values()).filter((type) => type.internallyManaged);
+
+  const internalRuleTypeNode = nodeBuilder.or(
+    internalRuleTypes.map((type) =>
+      nodeBuilder.is(`${RULE_SAVED_OBJECT_TYPE}.attributes.alertTypeId`, type.id)
+    )
+  );
+
+  const internalRuleTypeNodesAsExpression = toKqlExpression(internalRuleTypeNode);
+  const ignoreInternalRuleTypes = `not ${internalRuleTypeNodesAsExpression}`;
+
+  return fromKueryExpression(ignoreInternalRuleTypes);
+};
+
+const combineFiltersWithInternalRuleTypeFilter = ({
+  filter,
+  internalRuleTypeFilter,
+}: {
+  filter: KueryNode | null;
+  internalRuleTypeFilter: KueryNode | null;
+}) => {
+  if (!filter && !internalRuleTypeFilter) {
+    return null;
+  }
+
+  if (!filter) {
+    return internalRuleTypeFilter;
+  }
+
+  if (!internalRuleTypeFilter) {
+    return filter;
+  }
+
+  return nodeBuilder.and([filter, internalRuleTypeFilter]);
+};
