@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { EbtTelemetryService } from './service';
-export { EbtTelemetryClient } from './client';
+export type { EbtTelemetryService } from './service';
+export type { EbtTelemetryClient } from './client';
 export * from './constants';
 export * from './events';
-export * from './types';
+export type * from './types';
