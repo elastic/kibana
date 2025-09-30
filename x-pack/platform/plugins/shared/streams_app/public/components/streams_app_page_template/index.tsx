@@ -28,14 +28,15 @@ StreamsAppPageTemplate.Body = ({
     grow
     css={css`
       overflow-y: auto;
-      ${noPadding ? 'padding: 0px;' : ''}
+      padding-inline: ${noPadding ? '0px' : '24px'};
     `}
     contentProps={{
       css: css`
+        max-height: calc(83vh - var(--euiFixedHeadersOffset, 0));
         display: flex;
         flex-direction: column;
-        height: 100%;
-        ${noPadding ? 'padding: 0px;' : ''}
+        flex-grow: 1;
+        padding-block: ${noPadding ? '0px' : '24px'};
       `,
     }}
     {...props}
