@@ -14,12 +14,7 @@ import { useLink } from '../../../../../../../hooks';
 import { useGetDiscoverLogsLinkForAgents } from '../hooks';
 import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 
-const CenteredRoundedBottomBar = styled(EuiBottomBar)`
-  max-width: 820px;
-  margin: 0 auto !important; /* !important is needed for serverless */
-  border-radius: 8px 8px 0px 0px;
-`;
-const NoAnimationCenteredRoundedBottomBar = styled(CenteredRoundedBottomBar)`
+const NoAnimationBottomBar = styled(EuiBottomBar)`
   animation-delay: -99s; #stop bottom bar flying in on step change
 `;
 
@@ -48,7 +43,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   isDisabled = false,
   noAnimation = false,
 }) => {
-  const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
+  const Bar = noAnimation ? NoAnimationBottomBar : EuiBottomBar;
   return (
     <Bar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
