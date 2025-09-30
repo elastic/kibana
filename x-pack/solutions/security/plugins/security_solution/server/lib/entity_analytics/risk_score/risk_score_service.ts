@@ -72,6 +72,7 @@ export const riskScoreServiceFactory = ({
       esClient,
       logger,
       experimentalFeatures,
+      filters: params.filters || [],
     });
   },
   calculateAndPersistScores: (params) =>

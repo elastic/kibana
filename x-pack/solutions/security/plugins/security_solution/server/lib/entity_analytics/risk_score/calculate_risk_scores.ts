@@ -16,6 +16,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -27,6 +28,7 @@ import type {
   AfterKeys,
   EntityRiskScoreRecord,
   RiskScoreWeights,
+  RiskScoreWeight,
 } from '../../../../common/api/entity_analytics/common';
 import {
   getRiskLevel,
@@ -102,6 +104,55 @@ const formatForResponse = ({
 export const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
+
+/**
+ * Builds filters for a specific entity type, including entity-specific custom filters
+ */
+export const buildFiltersForEntityType = (
+  entityType: EntityType,
+  userFilter: QueryDslQueryContainer,
+  customFilters: Array<{ entity_types: string[]; filter: string }> = [],
+  excludeAlertStatuses: string[] = [],
+  excludeAlertTags: string[] = []
+): QueryDslQueryContainer[] => {
+  const filters: QueryDslQueryContainer[] = [{ exists: { field: ALERT_RISK_SCORE } }];
+
+  // Add existing user filter (backward compatibility)
+  if (!isEmpty(userFilter)) {
+    filters.push(userFilter);
+  }
+
+  // Add alert status exclusions
+  if (excludeAlertStatuses.length > 0) {
+    filters.push({
+      bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
+    });
+  }
+
+  // Add alert tag exclusions
+  if (excludeAlertTags.length > 0) {
+    filters.push({
+      bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
+    });
+  }
+
+  // Add entity-specific custom filters (EXCLUSIVE - exclude matching alerts)
+  customFilters
+    .filter((f) => f.entity_types.includes(entityType))
+    .forEach((f) => {
+      try {
+        const esQuery = toElasticsearchQuery(fromKueryExpression(f.filter));
+        filters.push({
+          bool: { must_not: esQuery },
+        });
+      } catch (error) {
+        // Log warning but don't fail the entire query
+        // Note: Invalid KQL filters are silently ignored to prevent query failures
+      }
+    });
+
+  return filters;
+};
 
 const buildIdentifierTypeAggregation = ({
   afterKeys,
@@ -205,7 +256,9 @@ export const getGlobalWeightForIdentifierType = (
   identifierType: EntityType,
   weights?: RiskScoreWeights
 ): number | undefined =>
-  weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
+  weights?.find((weight: RiskScoreWeight) => weight.type === RiskWeightTypes.global)?.[
+    identifierType
+  ];
 
 export const calculateRiskScores = async ({
   afterKeys: userAfterKeys,
@@ -224,99 +277,128 @@ export const calculateRiskScores = async ({
   excludeAlertStatuses = [],
   experimentalFeatures,
   excludeAlertTags = [],
+  filters: customFilters = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
-} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
+} & CalculateScoresParams & {
+    filters?: Array<{ entity_types: string[]; filter: string }>;
+  }): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
-    const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
-    if (excludeAlertStatuses.length > 0) {
-      filter.push({
-        bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
-      });
-    }
-    if (!isEmpty(userFilter)) {
-      filter.push(userFilter as QueryDslQueryContainer);
-    }
-    if (excludeAlertTags.length > 0) {
-      filter.push({
-        bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
-      });
-    }
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
       : getEntityAnalyticsEntityTypes();
 
-    const request = {
-      size: 0,
-      _source: false,
-      index,
-      ignore_unavailable: true,
-      runtime_mappings: runtimeMappings,
-      query: {
-        function_score: {
+    // Build base filters that apply to all entity types
+    const baseFilters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+
+    // Create separate queries for each entity type with entity-specific filters
+    const entityQueries = identifierTypes.map((_identifierType) => {
+      // Build entity-specific filters
+      const entityFilters = buildFiltersForEntityType(
+        _identifierType,
+        userFilter as QueryDslQueryContainer,
+        customFilters,
+        excludeAlertStatuses,
+        excludeAlertTags
+      );
+
+      // Combine base filters with entity-specific filters
+      const allFilters = [...baseFilters, ...entityFilters];
+
+      return {
+        entityType: _identifierType,
+        request: {
+          size: 0,
+          _source: false,
+          index,
+          ignore_unavailable: true,
+          runtime_mappings: runtimeMappings,
           query: {
-            bool: {
-              filter,
-              should: [
-                {
-                  match_all: {}, // This forces ES to calculate score
+            function_score: {
+              query: {
+                bool: {
+                  filter: allFilters,
+                  should: [
+                    {
+                      match_all: {}, // This forces ES to calculate score
+                    },
+                  ],
                 },
-              ],
+              },
+              field_value_factor: {
+                field: ALERT_RISK_SCORE, // sort by risk score
+              },
             },
           },
-          field_value_factor: {
-            field: ALERT_RISK_SCORE, // sort by risk score
+          aggs: {
+            [_identifierType]: buildIdentifierTypeAggregation({
+              afterKeys: userAfterKeys,
+              identifierType: _identifierType,
+              pageSize,
+              weights,
+              alertSampleSizePerShard,
+              scriptedMetricPainless,
+            }),
           },
         },
-      },
-      aggs: identifierTypes.reduce((aggs, _identifierType) => {
-        aggs[_identifierType] = buildIdentifierTypeAggregation({
-          afterKeys: userAfterKeys,
-          identifierType: _identifierType,
-          pageSize,
-          weights,
-          alertSampleSizePerShard,
-          scriptedMetricPainless,
-        });
-        return aggs;
-      }, {} as Record<string, AggregationsAggregationContainer>),
-    };
-
-    if (debug) {
-      logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
-    }
-
-    const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
-
-    if (debug) {
-      logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
-    }
-
-    if (response.aggregations == null) {
-      return {
-        ...(debug ? { request, response } : {}),
-        after_keys: {},
-        scores: {
-          host: [],
-          user: [],
-          service: [],
-        },
       };
-    }
+    });
 
-    const userBuckets = response.aggregations.user?.buckets ?? [];
-    const hostBuckets = response.aggregations.host?.buckets ?? [];
-    const serviceBuckets = response.aggregations.service?.buckets ?? [];
+    // Execute queries for each entity type
+    const responses = await Promise.all(
+      entityQueries.map(async ({ entityType, request: entityRequest }) => {
+        if (debug) {
+          logger.info(
+            `Executing Risk Score query for ${entityType}:\n${JSON.stringify(entityRequest)}`
+          );
+        }
+
+        const response = await esClient.search<never, CalculateRiskScoreAggregations>(
+          entityRequest
+        );
+
+        if (debug) {
+          logger.info(
+            `Received Risk Score response for ${entityType}:\n${JSON.stringify(response)}`
+          );
+        }
+
+        return {
+          entityType,
+          response,
+          request: entityRequest,
+        };
+      })
+    );
+
+    // Combine results from all entity queries
+    const combinedAggregations: Partial<CalculateRiskScoreAggregations> = {};
+    const combinedAfterKeys: Partial<AfterKeys> = {};
+
+    responses.forEach(({ entityType, response }) => {
+      if (response.aggregations && (response.aggregations as Record<string, unknown>)[entityType]) {
+        (combinedAggregations as Record<string, unknown>)[entityType] = (
+          response.aggregations as Record<string, unknown>
+        )[entityType];
+        (combinedAfterKeys as Record<string, unknown>)[entityType] = (
+          response.aggregations as Record<string, { after_key?: Record<string, string> }>
+        )[entityType]?.after_key;
+      }
+    });
+
+    const userBuckets = combinedAggregations.user?.buckets ?? [];
+    const hostBuckets = combinedAggregations.host?.buckets ?? [];
+    const serviceBuckets = combinedAggregations.service?.buckets ?? [];
 
     const afterKeys = {
-      host: response.aggregations.host?.after_key,
-      user: response.aggregations.user?.after_key,
-      service: experimentalFeatures ? response.aggregations.service?.after_key : undefined,
+      host: combinedAfterKeys.host,
+      user: combinedAfterKeys.user,
+      service: experimentalFeatures ? combinedAfterKeys.service : undefined,
     };
 
     const hostScores = await processScores({
@@ -342,7 +424,15 @@ export const calculateRiskScores = async ({
     });
 
     return {
-      ...(debug ? { request, response } : {}),
+      ...(debug
+        ? {
+            requests: responses.map(({ entityType, request, response }) => ({
+              entityType,
+              request,
+              response,
+            })),
+          }
+        : {}),
       after_keys: afterKeys,
       scores: {
         host: hostScores,
