@@ -30185,6 +30185,16 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agent_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
                                 es_key:
                                   anyOf:
                                     - additionalProperties: false
@@ -30210,6 +30220,14 @@ paths:
                           nullable: true
                           type: object
                           properties:
+                            agent_certificate:
+                              type: string
+                            agent_certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            agent_key:
+                              type: string
                             certificate:
                               type: string
                             certificate_authorities:
@@ -30320,6 +30338,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        agent_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -30345,6 +30373,14 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    agent_certificate:
+                      type: string
+                    agent_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    agent_key:
+                      type: string
                     certificate:
                       type: string
                     certificate_authorities:
@@ -30410,6 +30446,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -30435,6 +30481,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
@@ -30593,6 +30647,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -30618,6 +30682,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
@@ -30717,6 +30789,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        agent_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -30742,6 +30824,14 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    agent_certificate:
+                      type: string
+                    agent_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    agent_key:
+                      type: string
                     certificate:
                       type: string
                     certificate_authorities:
@@ -30806,6 +30896,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -30831,6 +30931,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
