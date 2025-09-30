@@ -12,9 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
   kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
