@@ -7,7 +7,7 @@
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
