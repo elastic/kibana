@@ -51,10 +51,18 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
       'POST',
       `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
       (req) => {
-        const response =
-          req.body.params.subAction === 'incidentTypes'
-            ? getExecuteResponses().resilient.incidentTypes
-            : getExecuteResponses().resilient.severity;
+        let response = {};
+        switch (req.body.params.subAction) {
+          case 'incidentTypes':
+            response = getExecuteResponses().resilient.incidentTypes;
+            break;
+          case 'severity':
+            response = getExecuteResponses().resilient.severity;
+            break;
+          case 'getFields':
+            response = getExecuteResponses().resilient.getFields;
+            break;
+        }
 
         req.reply(response);
       }
