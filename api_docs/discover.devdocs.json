@@ -2347,7 +2347,15 @@
               "TabState",
               "[]; selectedTabId: string; recentlyClosedTabs: ",
               "RecentlyClosedTabState",
-              "[]; }], void>; updateTabs: ",
+              "[]; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }], void>; updateTabs: ",
               "InternalStateThunkActionCreator",
               "<[{ items: ",
               "TabState",
@@ -2369,7 +2377,15 @@
                 "section": "def-public.TabItem",
                 "text": "TabItem"
               },
-              " | null; }], Promise<void>>; disconnectTab: ",
+              " | null; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }, void], Promise<void>>; disconnectTab: ",
               "InternalStateThunkActionCreator",
               "<[{ tabId: string; }], void>; setDataView: ",
               "InternalStateThunkActionCreator",
@@ -2453,7 +2469,7 @@
               },
               " | undefined; globalState?: ",
               "TabStateGlobalState",
-              " | undefined; searchSessionId?: string | undefined; }], void>; clearAllTabs: ",
+              " | undefined; searchSessionId?: string | undefined; }], void>; clearRecentlyClosedTabs: ",
               "InternalStateThunkActionCreator",
               "<[], void>; initializeTabs: ",
               "AsyncThunk",
@@ -2527,7 +2543,7 @@
                 "section": "def-common.DiscoverSession",
                 "text": "DiscoverSession"
               },
-              " | undefined; } | undefined, { state: ",
+              " | undefined; nextSelectedTabId?: string | undefined; } | undefined, { state: ",
               "DiscoverInternalState",
               "; dispatch: ((action: ",
               "Action",
