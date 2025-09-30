@@ -79,7 +79,21 @@ describe('Resilient Fields: Preview', () => {
   const fields = {
     incidentTypes: ['19', '21'],
     severityCode: '5',
-    additionalFields: '{"test_text":"testValue"}',
+    additionalFields: `{
+      "customField1": "customValue1",
+      "test_text": "some text",
+      "test_text_area": "some textarea",
+      "test_boolean": false,
+      "test_number": 1234,
+      "test_select": 110,
+      "test_multi_select": [
+        120,
+        130
+      ],
+      "test_date_picker": 1234567890123,
+      "test_date_time_picker": 1234567890123,
+      "resolution_summary": "some resolution summary"
+    }`,
   };
 
   beforeEach(() => {
@@ -103,7 +117,17 @@ describe('Resilient Fields: Preview', () => {
 
     expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
     expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test text: testValue')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test text: some text')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test textarea: some textarea')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test boolean: false')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test number: 1234')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test select: Option 2')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test multiselect: Option 3, Option 4')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test datepicker: February 13, 2009')).toBeInTheDocument();
+    expect(
+      getByTextWithMarkup('Test datetimepicker: February 13, 2009 @ 23:31:30')
+    ).toBeInTheDocument();
+    expect(getByTextWithMarkup('Resolution summary: some resolution summary')).toBeInTheDocument();
   });
 
   it('hides the additional fields when it is disabled', async () => {
