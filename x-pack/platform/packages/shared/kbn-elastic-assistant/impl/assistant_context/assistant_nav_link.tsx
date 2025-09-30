@@ -33,7 +33,7 @@ const TOOLTIP_CONTENT = i18n.translate(
 );
 
 const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assistantNavLink', {
-  defaultMessage: 'Elastic Agent',
+  defaultMessage: 'Ask AI',
 });
 
 interface AssistantNavLinkProps {

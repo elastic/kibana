@@ -88,7 +88,7 @@ export const DevBarGearButton: React.FC = () => {
       panelStyle={{ width: '300px' }}
     >
       <EuiTitle size="xs">
-        <h3>Agent button settings</h3>
+        <h3>Ask AI button settings</h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
@@ -121,8 +121,7 @@ export const DevBarGearButton: React.FC = () => {
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             <p>
-              Current: variant="{variant}" iconOnly={iconOnly ? 'true' : 'false'}
-            <br />Controls the Elastic Agent button →</p>
+              Current: variant="{variant}" iconOnly={iconOnly ? 'true' : 'false'}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
