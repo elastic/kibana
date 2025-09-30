@@ -26,6 +26,7 @@ import {
   ElasticLlmCalloutKey,
   useElasticLlmCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -57,6 +58,7 @@ export function ChatHeader({
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -69,6 +71,7 @@ export function ChatHeader({
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -218,6 +221,7 @@ export function ChatHeader({
                     conversationId={conversationId}
                     disabled={licenseInvalid}
                     onCopyConversationClick={onCopyConversation}
+                    navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
                   />
                 </ElasticLlmTourCallout>
               ) : (
@@ -226,6 +230,7 @@ export function ChatHeader({
                   conversationId={conversationId}
                   disabled={licenseInvalid}
                   onCopyConversationClick={onCopyConversation}
+                  navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
                 />
               )}
             </EuiFlexItem>
