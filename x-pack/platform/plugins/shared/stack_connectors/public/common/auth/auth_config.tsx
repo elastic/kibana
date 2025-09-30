@@ -23,6 +23,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { isEqual } from 'lodash';
 import { useSecretHeaders } from './use_secret_headers';
 import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
@@ -73,7 +74,9 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const { data: secretHeaderKeys = [], isSuccess } = useSecretHeaders(connectorId);
+  const { data: secretHeaderKeys = [], isLoading, isFetching } = useSecretHeaders(connectorId);
+
+  const didLoadSecretHeaders = !isFetching && !isLoading;
 
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
@@ -88,40 +91,41 @@ export const AuthConfig: FunctionComponent<Props> = ({
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
   useEffect(() => {
+    if (!didLoadSecretHeaders) return;
+
     const formData = getFormData();
-    if (!isSuccess || !hasHeaders) {
-      return;
-    }
 
     const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
-
-    if (secretHeaderKeys.length === 0 && configHeaders.length === 0) {
-      updateFieldValues({
-        __internal__: {
-          ...formData.__internal__,
-          headers: [...defaultConfigHeader],
-        },
-      });
-      return;
-    }
-
     const secretHeaders = secretHeaderKeys.map((key) => ({
       key,
       value: '',
       type: 'secret',
     }));
 
-    const mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
+    let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
 
-    updateFieldValues({
-      __internal__: {
-        ...formData.__internal__,
-        hasHeaders: mergedHeaders.length > 0,
-        headers: mergedHeaders,
-      },
-    });
-  }, [getFormData, secretHeaderKeys, updateFieldValues, hasHeaders, isSuccess]);
+    if (mergedHeaders.length === 0 && hasHeaders) {
+      mergedHeaders = [...defaultConfigHeader];
+    }
+
+    if (!isEqual(currentHeaders, mergedHeaders)) {
+      updateFieldValues({
+        __internal__: {
+          ...formData.__internal__,
+          hasHeaders: mergedHeaders.length > 0,
+          headers: mergedHeaders,
+        },
+      });
+    }
+  }, [
+    connectorId,
+    getFormData,
+    secretHeaderKeys,
+    updateFieldValues,
+    hasHeaders,
+    didLoadSecretHeaders,
+  ]);
 
   const options = [
     {
