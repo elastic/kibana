@@ -15,11 +15,11 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { map } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { SEARCH_SESSION_ID } from '../../../common/constants';
 import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
-import { SerializableRecord } from '@kbn/utility-types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -85,11 +85,11 @@ function getLocatorParams({
       >)
     : undefined;
 
-  const controls = dashboardInternalApi.serializeControls();
+  const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
 
   const combinedReferences = [
     ...(panels?.references ?? []),
-    ...(controls.controlGroupReferences ?? []),
+    ...(controlGroupReferences ?? []),
   ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
@@ -111,8 +111,8 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
+    controlGroupInput,
     panels: panels?.panels,
-    controlGroupInput: controls.controlGroupInput,
     references: combinedReferences,
   };
 }
