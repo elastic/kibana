@@ -71,6 +71,7 @@ export const getComments: GetComments =
     setIsStreaming,
     showAnonymizedValues,
     systemPromptContent,
+    resumeGraph,
   }) => {
     if (!currentConversation) return [];
 
@@ -97,6 +98,8 @@ export const getComments: GetComments =
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                resumeGraph={resumeGraph}
+                isLastInConversation={true}
                 contentReferences={null}
                 messageRole="assistant"
                 isFetching
@@ -125,10 +128,12 @@ export const getComments: GetComments =
                   refetchCurrentConversation={refetchCurrentConversation}
                   regenerateMessage={regenerateMessageOfConversation}
                   setIsStreaming={setIsStreaming}
+                  resumeGraph={resumeGraph}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
                   transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                   messageRole={'assistant'}
+                  isLastInConversation={currentConversation.messages.length === 0}
                   // we never need to append to a code block in the system comment, which is what this index is used for
                   index={999}
                 />
@@ -136,8 +141,8 @@ export const getComments: GetComments =
             },
           ]
         : []),
-      ...currentConversation.messages.map((message, index) => {
-        const isLastComment = index === currentConversation.messages.length - 1;
+      ...currentConversation.messages.map((message, index, total) => {
+        const isLastInConversation = index === total.length - 1 && extraLoadingComment.length === 0;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
         const user = isUser
@@ -158,7 +163,7 @@ export const getComments: GetComments =
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 
-        const isControlsEnabled = isLastComment && !isUser && isConversationOwner;
+        const isControlsEnabled = isLastInConversation && !isUser && isConversationOwner;
 
         const transformMessage = (content: string) =>
           transformMessageWithReplacements({
@@ -178,6 +183,8 @@ export const getComments: GetComments =
                 contentReferences={null}
                 contentReferencesVisible={contentReferencesVisible}
                 index={index}
+                resumeGraph={resumeGraph}
+                isLastInConversation={isLastInConversation}
                 isControlsEnabled={isControlsEnabled}
                 isError={message.isError}
                 reader={message.reader}
@@ -203,7 +210,11 @@ export const getComments: GetComments =
               content={transformedMessage.content}
               contentReferences={message.metadata?.contentReferences}
               contentReferencesVisible={contentReferencesVisible}
+              interruptValue={message.metadata?.interruptValue}
+              interruptResumeValue={message.metadata?.interruptResumeValue}
               index={index}
+              resumeGraph={resumeGraph}
+              isLastInConversation={isLastInConversation}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
               // reader is used to determine if streaming controls are shown

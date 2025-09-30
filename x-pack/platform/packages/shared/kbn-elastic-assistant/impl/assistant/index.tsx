@@ -299,6 +299,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
+    handleResumeGraph,
   } = useChatSend({
     currentConversation,
     http,
@@ -388,6 +389,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
+            resumeGraph: handleResumeGraph,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -418,6 +420,7 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       euiTheme.size.l,
       selectedPromptContextsCount,
+      handleResumeGraph,
     ]
   );
 
@@ -613,6 +616,7 @@ const AssistantComponent: React.FC<Props> = ({
                               isLoading={isLoadingChatSend}
                               shouldRefocusPrompt={shouldRefocusPrompt}
                               userPrompt={userPrompt}
+                              handleResumeGraph={handleResumeGraph}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>

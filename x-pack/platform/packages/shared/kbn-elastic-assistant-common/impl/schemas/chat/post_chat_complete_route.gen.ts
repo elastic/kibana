@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../common_attributes.gen';
+import { InterruptResumeValue } from '../conversations/common_attributes.gen';
 
 /**
  * The operational context for the assistant.
@@ -95,6 +96,14 @@ export const ChatCompleteProps = z.object({
    * Required connector identifier to route the request.
    */
   connectorId: z.string(),
+  /**
+   * Thread ID of a graph execution. Only required when resuming graph execution for a particular thread ID.
+   */
+  threadId: z.string().optional(),
+  /**
+   * Value that should be used when resuming graph execution following an intterupt.
+   */
+  interruptResumeValue: InterruptResumeValue.optional(),
   /**
    * Model ID or name to use for the response.
    */

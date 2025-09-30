@@ -156,6 +156,12 @@ components:
           type: string
           description: Required connector identifier to route the request.
           example: "conn-001"
+        threadId:
+          description: Thread ID of a graph execution. Only required when resuming graph execution for a particular thread ID.
+          type: string
+        interruptResumeValue:
+          description: Value that should be used when resuming graph execution following an intterupt.
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/InterruptResumeValue'
         model:
           type: string
           description: Model ID or name to use for the response.

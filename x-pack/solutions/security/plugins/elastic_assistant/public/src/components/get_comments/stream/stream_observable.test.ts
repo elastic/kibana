@@ -9,6 +9,7 @@ import { API_ERROR } from '../translations';
 
 import type { PromptObservableState } from './types';
 import { Subject } from 'rxjs';
+import type { SelectOptionInterruptValue } from '@kbn/elastic-assistant-common';
 describe('getStreamObservable', () => {
   const mockReader = {
     read: jest.fn(),
@@ -27,10 +28,24 @@ describe('getStreamObservable', () => {
     jest.clearAllMocks();
   });
   it('should emit loading state and chunks for LangChain', (done) => {
+    const interruptValue: SelectOptionInterruptValue = {
+      type: 'SELECT_OPTION',
+      id: 'test-interrupt-1',
+      threadId: 'thread-1',
+      description: 'Choose an option',
+      options: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+      ],
+    };
     const chunk1 = `{"payload":"","type":"content"}
 {"payload":"My","type":"content"}
 {"payload":" ","type":"content"}
 {"payload":"new","type":"content"}
+${JSON.stringify({
+  payload: JSON.stringify(interruptValue),
+  type: 'interruptValue',
+})}
 `;
     const chunk2 = `{"payload":" mes","type":"content"}
 {"payload":"sage","type":"content"}
@@ -40,36 +55,49 @@ describe('getStreamObservable', () => {
       {
         chunks: [],
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My',
         loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My ',
         loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new',
         loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new',
+        loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new mes',
         loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new message',
         loading: true,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new message',
         loading: false,
+        interruptValues: expect.arrayContaining([expect.objectContaining(interruptValue)]),
       },
     ];
 
@@ -112,6 +140,7 @@ describe('getStreamObservable', () => {
       error: (err) => done(err),
     });
   });
+
   it('should emit loading state and chunks for partial response LangChain', (done) => {
     const chunk1 = `{"payload":"","type":"content"}
 {"payload":"My","type":"content"}
@@ -122,31 +151,36 @@ describe('getStreamObservable', () => {
 {"payload":"sage","type":"content"}`;
     const completeSubject = new Subject<void>();
     const expectedStates: PromptObservableState[] = [
-      { chunks: [], loading: true },
+      { chunks: [], loading: true, interruptValues: [] },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My',
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My ',
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new',
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new mes',
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: ['My', ' ', 'new', ' mes', 'sage'],
         message: 'My new message',
         loading: false,
+        interruptValues: [],
       },
     ];
 
@@ -193,16 +227,18 @@ describe('getStreamObservable', () => {
   it('should stream errors when reader contains errors', (done) => {
     const completeSubject = new Subject<void>();
     const expectedStates: PromptObservableState[] = [
-      { chunks: [], loading: true },
+      { chunks: [], loading: true, interruptValues: [] },
       {
         chunks: [`${API_ERROR}\n\nis an error`],
         message: `${API_ERROR}\n\nis an error`,
         loading: true,
+        interruptValues: [],
       },
       {
         chunks: [`${API_ERROR}\n\nis an error`],
         message: `${API_ERROR}\n\nis an error`,
         loading: false,
+        interruptValues: [],
       },
     ];
 

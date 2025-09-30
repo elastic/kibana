@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { InterruptResumeValue, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { _isMessageFieldWithRole } from '@langchain/core/messages';
@@ -19,6 +19,7 @@ interface Params {
   conversationId?: string;
   replacements?: Replacements;
   newMessages: BaseMessage[];
+  interruptResumeValue?: InterruptResumeValue;
 }
 
 /**
@@ -42,35 +43,89 @@ export const getConversationWithNewMessage = async (params: Params) => {
     params.logger.debug(`No conversation found for id: ${conversationId}`);
     return params.newMessages;
   }
-  const updatedConversation = await conversationsDataClient.appendConversationMessages({
-    existingConversation,
-    messages: params.newMessages.map((newMessage) => {
-      const role = _isMessageFieldWithRole(newMessage)
-        ? (newMessage.role as 'assistant' | 'user')
-        : 'user';
+
+  /**
+   * Modified past messages in the conversation to ensure interrups are aligned.
+   * 1. Addes the interruptResumeValue to the corresponding message if needed
+   * 2. Expires messages with interrupts that have not been resumed
+   */
+
+  const modifiedConversation = existingConversation.messages?.map((message, i, arr): Message => {
+    if (
+      params.interruptResumeValue &&
+      message.metadata?.interruptValue &&
+      message.metadata.interruptValue.id === params.interruptResumeValue.interruptId &&
+      i === arr.length - 1
+    ) {
+      // The graph is being resumed and this is the message that triggered the interrupt.
       return {
-        content: replaceAnonymizedValuesWithOriginalValues({
-          messageContent: newMessage.text,
-          replacements: params.replacements,
-        }),
-        role,
-        user:
-          existingConversation.createdBy ??
-          (existingConversation.users?.length === 1
-            ? // no createdBy indicates legacy conversation, assign the sole user in the user list
-              existingConversation.users?.[0]
-            : undefined),
-        timestamp: new Date().toISOString(),
+        ...message,
+        metadata: {
+          ...message.metadata,
+          interruptResumeValue: params.interruptResumeValue,
+        },
       };
-    }),
+    }
+
+    if (
+      message.metadata?.interruptValue !== undefined &&
+      message.metadata.interruptResumeValue == null &&
+      (params.interruptResumeValue == null ||
+        message.metadata.interruptValue.id !== params.interruptResumeValue.interruptId ||
+        i !== arr.length - 1)
+    ) {
+      // This is an old interrupt. It should be expired
+      return {
+        ...message,
+        metadata: {
+          ...message.metadata,
+          interruptValue: {
+            ...message.metadata.interruptValue,
+            expired: true,
+          },
+        },
+      };
+    }
+    return message;
+  });
+
+  const newMessages = params.newMessages.map((newMessage) => {
+    const role = _isMessageFieldWithRole(newMessage)
+      ? (newMessage.role as 'assistant' | 'user')
+      : 'user';
+    return {
+      content: replaceAnonymizedValuesWithOriginalValues({
+        messageContent: newMessage.text,
+        replacements: params.replacements,
+      }),
+      role,
+      user:
+        existingConversation.createdBy ??
+        (existingConversation.users?.length === 1
+          ? // no createdBy indicates legacy conversation, assign the sole user in the user list
+            existingConversation.users?.[0]
+          : undefined),
+      timestamp: new Date().toISOString(),
+    };
+  });
+
+  const updatedConversation = conversationsDataClient.updateConversation({
+    conversationUpdateProps: {
+      ...existingConversation,
+      messages: [...(modifiedConversation ?? []), ...newMessages],
+    },
   });
 
   if (!updatedConversation) {
     params.logger.debug('Conversation was not updated with new messages');
   }
 
+  const filtered = existingConversation.messages?.filter((message) => {
+    return message.metadata?.interruptValue === undefined;
+  });
+
   // Anonymized conversation
-  const conversationLangChainMessages = getLangChainMessages(existingConversation.messages ?? []);
+  const conversationLangChainMessages = getLangChainMessages(filtered ?? []);
   // Anonymized new messages
   const newLangChainMessages = params.newMessages;
 

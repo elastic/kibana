@@ -24,6 +24,8 @@ import type {
   ContentReferences,
   MessageMetadata,
   ScreenContext,
+  InterruptValue,
+  InterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -49,6 +51,7 @@ import { buildResponse, getLlmType } from './utils';
 import type {
   AgentExecutorParams,
   AssistantDataClients,
+  OnLlmResponse,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
@@ -182,6 +185,7 @@ export interface AppendAssistantMessageToConversationParams {
   contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
+  interruptValue?: InterruptValue;
 }
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
@@ -191,6 +195,7 @@ export const appendAssistantMessageToConversation = async ({
   contentReferences,
   isError = false,
   traceData = {},
+  interruptValue = undefined,
 }: AppendAssistantMessageToConversationParams) => {
   const conversation = await conversationsDataClient.getConversation({ id: conversationId });
   if (!conversation) {
@@ -199,6 +204,7 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    interruptValue,
   };
 
   await conversationsDataClient.appendConversationMessages({
@@ -235,6 +241,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   threadId: string;
+  interruptResumeValue?: InterruptResumeValue;
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -248,11 +255,7 @@ export interface LangChainExecuteParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any>;
   logger: Logger;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -269,6 +272,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   threadId,
+  interruptResumeValue,
   contentReferencesStore,
   inferenceChatModelDisabled,
   isOssModel,
@@ -335,6 +339,7 @@ export const langChainExecute = async ({
     assistantTools,
     conversationId,
     threadId,
+    interruptResumeValue,
     connectorId,
     contentReferencesStore,
     esClient,

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import type { DataStreamApis } from '../use_data_stream_apis';
-import type { ClientMessage } from '../../assistant_context/types';
+import type { ClientMessage, ResumeGraphFunction } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
@@ -38,6 +38,7 @@ export interface UseChatSend {
   handleOnChatCleared: () => Promise<void>;
   handleRegenerateResponse: () => void;
   handleChatSend: (promptText: string) => Promise<void>;
+  handleResumeGraph: ResumeGraphFunction;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
   isLoading: boolean;
   userPrompt: string | null;
@@ -72,6 +73,70 @@ export const useChatSend = ({
 
   // Local loading state that persists until the entire message flow is complete
   const [isLoadingChatSend, setIsLoadingChatSend] = useState(false);
+
+  const handleResumeGraph: ResumeGraphFunction = useCallback(
+    async (threadId, interruptResumeValue) => {
+      if (!currentConversation?.apiConfig) {
+        toasts?.addError(
+          new Error('The conversation needs a connector configured in order to send a message.'),
+          {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+              defaultMessage: 'Error setting up Knowledge Base',
+            }),
+          }
+        );
+        return;
+      }
+
+      setIsLoadingChatSend(true);
+      try {
+        const apiConfig = currentConversation.apiConfig;
+
+        const rawResponse = await sendMessage({
+          apiConfig,
+          http,
+          conversationId: currentConversation.id,
+          replacements: currentConversation.replacements,
+          threadId,
+          interruptResumeValue,
+        });
+
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: 'user',
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
+
+        const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+
+        setCurrentConversation({
+          ...currentConversation,
+          messages: [...currentConversation.messages, responseMessage],
+        });
+
+        assistantTelemetry?.reportAssistantMessageSent({
+          role: responseMessage.role,
+          actionTypeId: apiConfig.actionTypeId,
+          model: apiConfig.model,
+          provider: apiConfig.provider,
+          isEnabledKnowledgeBase: isSetupComplete ?? false,
+        });
+      } finally {
+        setIsLoadingChatSend(false);
+      }
+    },
+    [
+      assistantTelemetry,
+      currentConversation,
+      http,
+      isSetupComplete,
+      sendMessage,
+      setCurrentConversation,
+      toasts,
+    ]
+  );
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -275,5 +340,6 @@ export const useChatSend = ({
     isLoading: isLoadingChatSend,
     userPrompt,
     setUserPrompt,
+    handleResumeGraph,
   };
 };

@@ -7,6 +7,7 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
+import { InterruptValue } from '@kbn/elastic-assistant-common';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
 const MIN_DELAY = 10;
@@ -17,6 +18,15 @@ interface StreamObservable {
   setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
+interface ContentPayload {
+  type: 'content';
+  payload: string;
+}
+interface InterruptPayload {
+  type: 'interruptValue';
+  payload: InterruptValue;
+}
+type Payload = ContentPayload | InterruptPayload;
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
@@ -31,9 +41,10 @@ export const getStreamObservable = ({
   setLoading,
 }: StreamObservable): Observable<PromptObservableState> =>
   new Observable<PromptObservableState>((observer) => {
-    observer.next({ chunks: [], loading: true });
+    observer.next({ chunks: [], loading: true, interruptValues: [] });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
+    const interruptValues: InterruptValue[] = [];
     // Initialize an empty string to store the LangChain buffer.
     let langChainBuffer: string = '';
 
@@ -45,12 +56,17 @@ export const getStreamObservable = ({
           try {
             if (done) {
               if (langChainBuffer) {
-                const finalChunk = getLangChainChunks([langChainBuffer])[0];
-                if (finalChunk && finalChunk.length > 0) chunks.push(finalChunk);
+                const finalPayloads = getLangChainChunks([langChainBuffer]);
+                finalPayloads.forEach((payload: Payload) => {
+                  if (payload.type === 'content') {
+                    chunks.push(payload.payload);
+                  }
+                });
               }
               observer.next({
                 chunks,
                 message: chunks.join(''),
+                interruptValues,
                 loading: false,
               });
               observer.complete();
@@ -66,6 +82,7 @@ export const getStreamObservable = ({
                   chunks,
                   message: chunks.join(''),
                   loading: true,
+                  interruptValues,
                 });
               });
             } else {
@@ -75,11 +92,16 @@ export const getStreamObservable = ({
               langChainBuffer = lines.pop() || '';
 
               nextChunks = getLangChainChunks(lines);
-              nextChunks.forEach((chunk: string) => {
-                chunks.push(chunk);
+              nextChunks.forEach((chunk: Payload) => {
+                if (chunk.type === 'content') {
+                  chunks.push(chunk.payload);
+                } else if (chunk.type === 'interruptValue') {
+                  interruptValues.push(chunk.payload);
+                }
                 observer.next({
                   chunks,
                   message: chunks.join(''),
+                  interruptValues,
                   loading: true,
                 });
               });
@@ -135,13 +157,19 @@ export const getStreamObservable = ({
  * @param lines
  * @returns {string[]} - Parsed string array from the LangChain response.
  */
-const getLangChainChunks = (lines: string[]): string[] =>
-  lines.reduce((acc: string[], b: string) => {
+const getLangChainChunks = (lines: string[]): Payload[] =>
+  lines.reduce<Payload[]>((acc, b) => {
     if (b.length) {
       try {
         const obj = JSON.parse(b);
         if (obj.type === 'content' && obj.payload.length > 0) {
-          return [...acc, obj.payload];
+          return [...acc, { type: 'content', payload: obj.payload as string }];
+        }
+        if (obj.type === 'interruptValue' && obj.payload.length > 0) {
+          const parsedInterruptValue = InterruptValue.safeParse(JSON.parse(obj.payload));
+          if (parsedInterruptValue.success) {
+            return [...acc, { type: 'interruptValue', payload: parsedInterruptValue.data }];
+          }
         }
         return acc;
       } catch (e) {
