@@ -20,20 +20,20 @@ export const STATUS_LABELS = {
   [ExecutionStatus.WAITING_FOR_INPUT]: i18n.translate(
     'workflowsManagement.executionStatus.waitingForInput',
     {
-      defaultMessage: 'Waiting for input',
+      defaultMessage: 'Waiting',
     }
   ),
   [ExecutionStatus.RUNNING]: i18n.translate('workflowsManagement.executionStatus.running', {
     defaultMessage: 'Running',
   }),
   [ExecutionStatus.COMPLETED]: i18n.translate('workflowsManagement.executionStatus.completed', {
-    defaultMessage: 'Completed',
+    defaultMessage: 'Success',
   }),
   [ExecutionStatus.FAILED]: i18n.translate('workflowsManagement.executionStatus.failed', {
-    defaultMessage: 'Failed',
+    defaultMessage: 'Error',
   }),
   [ExecutionStatus.CANCELLED]: i18n.translate('workflowsManagement.executionStatus.cancelled', {
-    defaultMessage: 'Cancelled',
+    defaultMessage: 'Canceled',
   }),
   [ExecutionStatus.SKIPPED]: i18n.translate('workflowsManagement.executionStatus.skipped', {
     defaultMessage: 'Skipped',

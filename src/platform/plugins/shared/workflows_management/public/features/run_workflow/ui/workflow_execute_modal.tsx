@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import type { WorkflowDetailDto, WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
@@ -33,17 +33,17 @@ import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 type TriggerType = 'manual' | 'alert' | 'scheduled';
 
 export function WorkflowExecuteModal({
-  workflow,
+  definition,
   onClose,
   onSubmit,
 }: {
-  workflow: WorkflowDetailDto | WorkflowListItemDto;
+  definition: WorkflowYaml | null;
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers =
-    workflow?.definition!.triggers.filter((t: any) => t.enabled).map((t: any) => t.type) || [];
+    definition?.triggers.filter((t: any) => t.enabled).map((t: any) => t.type) || [];
 
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(enabledTriggers[0]);
 
@@ -129,7 +129,7 @@ export function WorkflowExecuteModal({
         )}
         {selectedTrigger === 'manual' && (
           <WorkflowExecuteManualForm
-            workflow={workflow}
+            definition={definition}
             value={executionInput}
             errors={executionInputErrors}
             setErrors={setExecutionInputErrors}

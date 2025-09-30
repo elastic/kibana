@@ -27,6 +27,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
@@ -56,6 +57,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
@@ -140,6 +142,11 @@ const ESQLEditorInternal = function ESQLEditor({
     kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -484,6 +491,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
+  const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
+    () => ({
+      onDecorationHoverShown: (hoverMessage: string) =>
+        telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+    }),
+    [telemetryService]
+  );
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -779,7 +794,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks]
   );
 
-  const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
+  const hoverProvider = useMemo(
+    () =>
+      ESQLLang.getHoverProvider?.({
+        ...esqlCallbacks,
+        telemetry: telemetryCallbacks,
+      }),
+    [esqlCallbacks, telemetryCallbacks]
+  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
