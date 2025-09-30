@@ -129,4 +129,12 @@ export const TABLE_COLUMNS = {
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;
 
+export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
+  'name',
+  'type',
+  'format',
+  'parent',
+  'status',
+];
+
 export const SUPPORTED_TABLE_COLUMN_NAMES = Object.keys(TABLE_COLUMNS) as TableColumnName[];

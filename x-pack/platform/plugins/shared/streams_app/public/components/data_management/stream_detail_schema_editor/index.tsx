@@ -15,7 +15,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
-import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
+import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
@@ -26,8 +26,8 @@ interface SchemaEditorProps {
   refreshDefinition: () => void;
 }
 
-const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
-const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
+const wiredDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES;
+const classicDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
