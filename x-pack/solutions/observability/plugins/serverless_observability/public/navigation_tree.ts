@@ -5,8 +5,27 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { icon } from '@elastic/eui/src/components/icon/assets';
+
+const LazyIconBriefcase = lazy(() =>
+  import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+const LazyIconMl = lazy(() =>
+  import('./v2_icons/product_ml').then(({ iconProductMl }) => ({ default: iconProductMl }))
+);
+const LazyIconProductStreamsWired = lazy(() =>
+  import('./v2_icons/product_streams_wired').then(({ iconProductStreamsWired }) => ({
+    default: iconProductStreamsWired,
+  }))
+);
+const LazyIconProductCloudInfra = lazy(() =>
+  import('./v2_icons/product_cloud_infra').then(({ iconProductCloudInfra }) => ({
+    default: iconProductCloudInfra,
+  }))
+);
 
 export const createNavigationTree = ({
   streamsAvailable,
@@ -74,7 +93,7 @@ export const createNavigationTree = ({
                 {
                   link: 'observability-overview:cases' as const,
                   renderAs: 'item' as const,
-                  iconV2: 'casesApp',
+                  iconV2: LazyIconBriefcase,
                   children: [
                     {
                       link: 'observability-overview:cases_configure' as const,
@@ -98,6 +117,7 @@ export const createNavigationTree = ({
                 {
                   link: 'streams' as const,
                   withBadge: true,
+                  iconV2: LazyIconProductStreamsWired,
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate(
@@ -180,7 +200,7 @@ export const createNavigationTree = ({
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
-            iconV2: 'storage',
+            iconV2: LazyIconProductCloudInfra,
             spaceBefore: null,
             children: [
               {
@@ -205,6 +225,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
+            iconV2: 'sparkles',
           },
           {
             id: 'machine_learning-landing',
@@ -213,7 +234,7 @@ export const createNavigationTree = ({
               defaultMessage: 'Machine Learning',
             }),
             spaceBefore: null,
-            iconV2: 'info',
+            iconV2: LazyIconMl,
             children: [
               {
                 id: 'category-ml_overview',
@@ -302,6 +323,7 @@ export const createNavigationTree = ({
             }),
             spaceBefore: null,
             renderAs: 'panelOpener',
+            iconV2: 'wrench',
             children: [
               {
                 link: 'logs:anomalies',
@@ -336,7 +358,7 @@ export const createNavigationTree = ({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
-            icon: 'launch',
+            icon: 'plusInCircle',
           },
           {
             id: 'devTools',
@@ -344,7 +366,7 @@ export const createNavigationTree = ({
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
-            icon: 'editorCodeBlock',
+            icon: 'code',
           },
           {
             id: 'ingest_and_manage_data',
@@ -354,6 +376,7 @@ export const createNavigationTree = ({
             renderAs: 'panelOpener',
             spaceBefore: null,
             icon: 'info',
+            iconV2: 'database',
             breadcrumbStatus: 'hidden',
             children: [
               {
