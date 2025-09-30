@@ -7,6 +7,14 @@
 
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 
+export type AfterKey = Record<string, string> | undefined;
+export interface StaleUsersAggregations {
+  users?: {
+    after_key?: AfterKey;
+    buckets: Array<{ key: { username: string }; doc_count: number }>;
+  };
+}
+
 export const createDeletionDetectionService = (dataClient: PrivilegeMonitoringDataClient) => {
   const bulkCompositeQueryOperations = undefined; // bulkQueryOperationsFactory(dataClient); // similar to csv
   return {
