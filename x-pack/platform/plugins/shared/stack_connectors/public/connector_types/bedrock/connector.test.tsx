@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import deepmerge from 'deepmerge';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -142,7 +143,9 @@ describe('BedrockConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: bedrockConnector,
+        data: deepmerge(bedrockConnector, {
+          config: { extendedThinking: false, budgetTokens: 1024 },
+        }),
         isValid: true,
       });
     });

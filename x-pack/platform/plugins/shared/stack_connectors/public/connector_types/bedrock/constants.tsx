@@ -9,6 +9,7 @@ import React from 'react';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
@@ -77,14 +78,14 @@ export const bedrockConfig: ConfigFieldSchema[] = [
   {
     id: 'extendedThinking',
     label: i18n.EXTENDED_THINKING_LABEL,
-    type: 'TOGGLE',
+    type: FIELD_TYPES.TOGGLE as keyof typeof FIELD_TYPES,
     helpText: i18n.EXTENDED_THINKING_DESCRIPTION,
     defaultValue: false,
   },
   {
     id: 'budgetTokens',
     label: i18n.EXTENDED_THINKING_BUDGET_TOKENS_LABEL,
-    type: 'NUMBER',
+    type: FIELD_TYPES.NUMBER as keyof typeof FIELD_TYPES,
     helpText: i18n.EXTENDED_THINKING_BUDGET_TOKENS_DESCRIPTION,
     defaultValue: MIN_EXTENDED_THINKING_BUDGET_TOKENS,
   },
