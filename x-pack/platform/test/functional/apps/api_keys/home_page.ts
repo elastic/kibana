@@ -539,7 +539,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
       });
 
-      it.skip('search bar works as expected', async () => {
+      it('search bar works as expected', async () => {
         await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
 
         await ensureApiKeysExist(['test_user_api_key']);

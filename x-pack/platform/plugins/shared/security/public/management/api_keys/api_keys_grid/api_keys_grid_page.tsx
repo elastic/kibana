@@ -43,6 +43,8 @@ interface ApiKeysTableState {
   filters: QueryFilters;
 }
 
+type KueryNode = any;
+
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
@@ -70,9 +72,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
     // Enhance the query to support partial matches for name field
     if (queryContainer.bool?.must) {
-      queryContainer.bool.must = queryContainer.bool.must.map((clause: any) => {
+      queryContainer.bool.must = queryContainer.bool.must.map((clause: KueryNode) => {
         if (clause.simple_query_string) {
           // Add wildcard to support partial matches
+          const rawQuery = String(clause.simple_query_string.query ?? '');
+          const wildCardQuery = rawQuery.replace(/[+]/g, '');
           return {
             bool: {
               should: [
@@ -80,7 +84,15 @@ export const APIKeysGridPage: FunctionComponent = () => {
                 {
                   wildcard: {
                     name: {
-                      value: `*${clause.simple_query_string.query.replace(/[+]/g, '')}*`,
+                      value: `*${wildCardQuery}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+                {
+                  wildcard: {
+                    username: {
+                      value: `*${wildCardQuery}*`,
                       case_insensitive: true,
                     },
                   },
