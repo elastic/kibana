@@ -23,6 +23,10 @@ import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import type {
+  IgnoredField,
+  DocumentWithIgnoredFields,
+} from '@kbn/streams-schema/src/shared/record_types';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -35,6 +39,12 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enri
 const emptyCell = <>&nbsp;</>;
 
 export const MemoPreviewTable = React.memo(PreviewTable);
+
+function isDocumentWithIgnoredFields(
+  doc: SampleDocument | DocumentWithIgnoredFields
+): doc is DocumentWithIgnoredFields {
+  return 'ignored_fields' in doc && Array.isArray(doc.ignored_fields);
+}
 
 export function PreviewTable({
   documents,
@@ -49,14 +59,19 @@ export function PreviewTable({
   columnOrderHint = [],
   selectedRowIndex,
   showRowSourceAvatars = false,
+  showLeadingControlColumns = true,
   originalSamples,
   onRowSelected,
   cellActions,
 }: {
-  documents: SampleDocument[];
+  documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
   height?: EuiDataGridProps['height'];
-  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  renderCellValue?: (
+    doc: SampleDocument,
+    columnId: string,
+    ignoredFields?: IgnoredField[]
+  ) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   toolbarVisibility?: boolean;
   setVisibleColumns?: (visibleColumns: string[]) => void;
@@ -65,6 +80,7 @@ export function PreviewTable({
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
   selectedRowIndex?: number;
   showRowSourceAvatars?: boolean;
+  showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   onRowSelected?: (rowIndex: number) => void;
   cellActions?: EuiDataGridColumnCellAction[];
@@ -74,10 +90,12 @@ export function PreviewTable({
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
-      if (!doc || typeof doc !== 'object') {
+      const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+
+      if (!document || typeof document !== 'object') {
         return;
       }
-      Object.keys(doc).forEach((key) => {
+      Object.keys(document).forEach((key) => {
         cols.add(key);
       });
     });
@@ -223,7 +241,9 @@ export function PreviewTable({
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
-      leadingControlColumns={visibleColumns.length > 0 ? leadingControlColumns : undefined}
+      leadingControlColumns={
+        showLeadingControlColumns && visibleColumns.length > 0 ? leadingControlColumns : undefined
+      }
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
@@ -250,18 +270,21 @@ export function PreviewTable({
       onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
-        if (!doc || typeof doc !== 'object') {
+        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
+
+        if (!document || typeof document !== 'object') {
           return emptyCell;
         }
 
         if (renderCellValue) {
-          const renderedValue = renderCellValue(doc, columnId);
+          const renderedValue = renderCellValue(document, columnId, ignoredFields);
           if (renderedValue !== undefined) {
             return renderedValue;
           }
         }
 
-        const value = doc[columnId];
+        const value = document[columnId];
         if (value === undefined || value === null) {
           return emptyCell;
         }

@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -36,25 +35,18 @@ const ORPHAN_CONTENT = i18n.translate(
   }
 );
 
-export function BarDetails({
-  item,
-  left,
-  onErrorClick,
-}: {
-  item: TraceWaterfallItem;
-  left: number;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-}) {
+export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
+  const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
-      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
-        count: item.errorCount,
+        count: errorCount,
       },
     }
   );
@@ -109,34 +101,25 @@ export function BarDetails({
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {item.errorCount > 0 ? (
+        {errorCount > 0 ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
-                  defaultMessage: 'View error details',
-                })}
-                data-test-subj="apmBarDetailsErrorButton"
-                color="danger"
-                iconType="errorFilled"
-                iconSize="s"
-                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
-                onClick={(e: React.MouseEvent) => {
-                  if (onErrorClick) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onErrorClick({ traceId: item.traceId, docId: item.id });
-                  }
-                }}
-              />
-            ) : getRelatedErrorsHref ? (
+            {getRelatedErrorsHref || onErrorClick ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
                 iconType="arrowRight"
-                href={getRelatedErrorsHref(item.id) as any}
+                href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
-                  e.stopPropagation();
+                  if (onErrorClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onErrorClick({
+                      traceId: item.traceId,
+                      docId: item.id,
+                      errorCount,
+                      errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                    });
+                  }
                 }}
                 tabIndex={0}
                 role="button"

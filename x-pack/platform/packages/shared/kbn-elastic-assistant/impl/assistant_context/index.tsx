@@ -10,6 +10,8 @@ import { omit } from 'lodash/fp';
 import type { User, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import type { Observable } from 'rxjs';
+import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -95,6 +97,8 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat?: () => void;
 }
 
 export interface UserAvatar {
@@ -154,6 +158,8 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat?: () => void;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -191,6 +197,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     currentAppId,
     userProfileService,
     chrome,
+    openChatTrigger$,
+    completeOpenChat,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -359,6 +367,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      openChatTrigger$,
+      completeOpenChat,
     }),
     [
       actionTypeRegistry,
@@ -400,6 +410,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      openChatTrigger$,
+      completeOpenChat,
     ]
   );
 
