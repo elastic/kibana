@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
-import { useQuickTimeRanges } from '../../../utils/use_quick_time_ranges';
+import { useKibanaContextForPlugin } from '../../../utils';
 import { FilterBar } from './filter_bar';
 import { IntegrationsSelector } from './integrations_selector';
 import { NamespacesSelector } from './namespaces_selector';
@@ -57,7 +57,7 @@ export default function Filters() {
     isDatasetQualityAllSignalsAvailable,
   } = useDatasetQualityFilters();
 
-  const commonlyUsedRanges = useQuickTimeRanges();
+  const { unifiedSearch } = useKibanaContextForPlugin().services;
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s" wrap>
@@ -93,16 +93,27 @@ export default function Filters() {
         />
       </EuiFilterGroup>
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={timeRange.from}
-          end={timeRange.to}
-          onTimeChange={onTimeChange}
+        <unifiedSearch.ui.SearchBar
+          appName="datasetQuality"
+          showDatePicker={true}
+          showFilterBar={false}
+          showQueryMenu={false}
+          showQueryInput={false}
+          submitButtonStyle="iconOnly"
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
+          query={undefined}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          onQuerySubmit={(payload) =>
+            onTimeChange({ start: payload.dateRange.from, end: payload.dateRange.to })
+          }
           onRefresh={onRefresh}
-          onRefreshChange={onRefreshChange}
-          commonlyUsedRanges={commonlyUsedRanges}
-          showUpdateButton={true}
-          isPaused={timeRange.refresh.pause}
+          onRefreshChange={({ refreshInterval, isPaused }) =>
+            onRefreshChange({ refreshInterval, isPaused })
+          }
           refreshInterval={timeRange.refresh.value}
+          isRefreshPaused={timeRange.refresh.pause}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

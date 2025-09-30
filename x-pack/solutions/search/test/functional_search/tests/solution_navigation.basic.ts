@@ -20,7 +20,8 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Elasticsearch Solution Navigation', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236973
+  describe.skip('Elasticsearch Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 

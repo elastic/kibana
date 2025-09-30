@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Attack discovery bulk API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/_bulk:
+    post:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/_bulk' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data-raw '{
+               "update": {
+                 "ids": [
+                   "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f",
+                   "5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7"
+                 ],
+                 "kibana_alert_workflow_status": "acknowledged"
+               }
+             }'
+      x-labels: [ess, serverless]
+      operationId: PostAttackDiscoveryBulk
+      summary: Bulk update Attack discovery alerts
+      description: Performs bulk updates on multiple Attack discovery alerts, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert.
+      tags:
+        - Attack discovery API
+      requestBody:
+        description: Bulk update parameters for Attack discovery alerts
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - update
+              properties:
+                update:
+                  type: object
+                  description: Configuration object containing all parameters for the bulk update operation
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      type: array
+                      description: Array of Attack discovery IDs to update
+                      items:
+                        type: string
+                      example: ["c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f", "5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7"]
+                    kibana_alert_workflow_status:
+                      type: string
+                      description: When provided, update the kibana.alert.workflow_status of the attack discovery alerts
+                      enum:
+                        - open
+                        - acknowledged
+                        - closed
+                      example: "acknowledged"
+                    visibility:
+                      type: string
+                      description: When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
+                      enum:
+                        - not_shared
+                        - shared
+                      example: "shared"
+                    with_replacements:
+                      type: boolean
+                      default: true
+                      description: When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
+                      example: true
+                    enable_field_rendering:
+                      type: boolean
+                      default: false
+                      description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+                      example: false
+      responses:
+        200:
+          description: Successful response containing the updated Attack discovery alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    description: Array of updated Attack discovery alert objects. Each item includes the applied modifications from the bulk update request.
+                    items:
+                      $ref: '../../../attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
+
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message describing what went wrong with the bulk update request
+                    example: "Invalid request parameters"
+                required:
+                  - status_code
+                  - error
+                  - message

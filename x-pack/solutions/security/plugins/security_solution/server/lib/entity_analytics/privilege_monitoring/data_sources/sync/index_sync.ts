@@ -168,6 +168,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         username,
         sourceId,
         existingUserId: existingUserMap.get(username),
+        isPrivileged: true,
       }));
 
       if (usersToWrite.length === 0) return batchUsernames;

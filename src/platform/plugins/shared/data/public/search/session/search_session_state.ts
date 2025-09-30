@@ -300,11 +300,11 @@ export const sessionPureTransitions: SessionPureTransitions = {
   setSearchSessionSavedObject: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
     if (!state.sessionId)
       throw new Error(
-        "Can't add search session saved object session into the state. Missing sessionId"
+        "Can't add background search saved object session into the state. Missing sessionId"
       );
     if (state.sessionId !== searchSessionSavedObject.attributes.sessionId)
       throw new Error(
-        "Can't add search session saved object session into the state. SessionIds don't match."
+        "Can't add background search saved object session into the state. SessionIds don't match."
       );
     return {
       ...state,

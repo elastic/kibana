@@ -243,7 +243,7 @@ const getConfigService = (
       ],
     },
     plugins: {},
-    migrations: { skip: false },
+    migrations: { skip: false, useCumulativeLogger: false },
   };
 
   const rawConfigProvider = {

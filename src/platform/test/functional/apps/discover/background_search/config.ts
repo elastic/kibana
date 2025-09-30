@@ -20,7 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--data.search.sessions.enabled=true',
-        '--feature_flags.overrides.search.backgroundSearchEnabled=true',
       ],
     },
   };

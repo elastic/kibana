@@ -531,11 +531,12 @@ export const getEndpointConsoleCommands = ({
   }
 
   if (microsoftDefenderEndpointCancelEnabled) {
+    const isSupported = canCancelForCurrentContext();
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported: canCancelForCurrentContext(),
+        isSupported,
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -546,25 +547,35 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        action: {
-          required: true,
-          allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-            {
-              defaultMessage: 'The response action to cancel',
+        ...(isSupported
+          ? {
+              action: {
+                required: true,
+                allowMultiples: false,
+                about: i18n.translate(
+                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+                  {
+                    defaultMessage: 'The response action to cancel',
+                  }
+                ),
+                mustHaveValue: 'truthy',
+                selectorShowTextValue: true,
+                SelectorComponent: PendingActionsSelector,
+              },
             }
-          ),
-          mustHaveValue: 'truthy',
-          selectorShowTextValue: true,
-          SelectorComponent: PendingActionsSelector,
+          : {}),
+        comment: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: COMMENT_ARG_ABOUT,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !canCancelForCurrentContext(),
-      helpHidden: !canCancelForCurrentContext(),
+      helpDisabled: !isSupported,
+      helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });
   }
