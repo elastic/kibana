@@ -97,7 +97,6 @@ export const appLocatorGetLocationCommon = async (
     const tabsState: TabsUrlState = {
       tabId: tab.id,
       ...('label' in tab ? { tabLabel: tab.label } : {}),
-      ...('action' in tab ? { action: tab.action } : {}),
     };
 
     if (Object.keys(tabsState).length) {

@@ -419,7 +419,7 @@ export const createTabsStorageManager = ({
         // append a new tab if requested via URL
         selectedTabId === NEW_TAB_ID ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
-        (selectedTabId && persistedDiscoverSession)
+        (selectedTabId && tabsStateFromURL?.tabLabel && persistedDiscoverSession)
       ) {
         const newTab = {
           ...defaultTabState,
