@@ -448,6 +448,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.populate_file_data',
     first_supported_version: '9.2.0',
     documentation: i18n.translate(
@@ -927,6 +938,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
         defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
       }
     ),
   },
@@ -2309,6 +2331,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.firewall_anti_tamper',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
+      {
+        defaultMessage:
+          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
       }
     ),
   },
