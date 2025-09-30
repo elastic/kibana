@@ -71,12 +71,12 @@ export const RetentionCard = ({
     } else {
       const formattedRetention =
         isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
-      const isForeverRetention = formattedRetention === undefined;
+      const isIndefiniteRetention = formattedRetention === undefined;
 
       baseSubtitles.push(
-        isForeverRetention
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.forever', {
-              defaultMessage: 'Forever',
+        isIndefiniteRetention
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.indefinite', {
+              defaultMessage: 'Indefinite',
             })
           : i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
               defaultMessage: 'Custom period',
