@@ -44,6 +44,7 @@ const PROVIDER_SCHEMA: Record<ServiceProviderKeys, { type: 'long' }> = {
   watsonxai: { type: 'long' },
   ai21: { type: 'long' },
   llama: { type: 'long' },
+  contextualai: { type: 'long' },
 };
 
 export function registerInferenceConnectorsUsageCollector(
