@@ -113,7 +113,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
 
     async assertImportButtonEnabled(expectedValue: boolean) {
       await retry.tryForTime(60 * 1000, async () => {
-        const isEnabled = await testSubjects.isEnabled('dataVisualizerImportButton');
+        const isEnabled = await testSubjects.isEnabled('fileUploadImportButton');
         expect(isEnabled).to.eql(
           expectedValue,
           `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -161,11 +161,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     async setCreateIndexPatternCheckboxState(newState: boolean) {
       const isChecked = await testSubjects.isEuiSwitchChecked('dataVisualizerCreateDataViewSwitch');
       if (isChecked !== newState) {
-        // this checkbox can't be clicked directly, instead click the corresponding label
         await testSubjects.click('dataVisualizerCreateDataViewSwitch');
-        // const panel = await testSubjects.find('dataVisualizerFileImportSettingsPanel');
-        // const label = await panel.findByCssSelector('[for="createDataView"]');
-        // await label.click();
       }
       await this.assertCreateIndexPatternCheckboxValue(newState);
     },
