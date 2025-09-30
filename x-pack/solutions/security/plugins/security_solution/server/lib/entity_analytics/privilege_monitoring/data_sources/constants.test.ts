@@ -70,7 +70,7 @@ describe('constants', () => {
 
   it('should generate integrationsSourceIndex', () => {
     expect(integrationsSourceIndex('default', 'entityanalytics_okta')).toBe(
-      `${baseMonitoringUsersIndex}.sources.okta-default`
+      `${baseMonitoringUsersIndex}.sources.entityanalytics_okta-default`
     );
     /* expect(integrationsSourceIndex('space1', 'ad')).toBe(
       `${baseMonitoringUsersIndex}.sources.ad-space1`
