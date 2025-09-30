@@ -21,7 +21,7 @@ export const registerApp = ({
   getServices,
 }: {
   core: CoreSetup<OnechatStartDependencies>;
-  getServices: () => OnechatInternalService;
+  getServices: () => Promise<OnechatInternalService>;
 }) => {
   core.application.register({
     id: ONECHAT_APP_ID,
@@ -54,7 +54,7 @@ export const registerApp = ({
       const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(ONECHAT_TITLE);
-      const services = getServices();
+      const services = await getServices();
 
       return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
     },

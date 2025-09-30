@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderAccess } from '../access';
 import type { OnechatStartDependencies } from '../types';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
@@ -17,4 +18,5 @@ export interface OnechatInternalService {
   conversationsService: ConversationsService;
   toolsService: ToolsService;
   startDependencies: OnechatStartDependencies;
+  access: AgentBuilderAccess;
 }
