@@ -59,7 +59,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     setIsOpen,
     stats = null,
   }) => {
-    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled, settings } =
+    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled, settings, navigateToApp } =
       useAssistantContext();
 
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -182,7 +182,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             }
             onManageConnectorsClick={
               assistantAvailability.hasConnectorsReadPrivilege
-                ? () => alert('Take to manage connectors')
+                ? () => navigateToApp('management', { path: '/insightsAndAlerting/triggersActionsConnectors/connectors' })
                 : undefined
             }
             preConfiguredConnectors={preConfiguredConnectors}
