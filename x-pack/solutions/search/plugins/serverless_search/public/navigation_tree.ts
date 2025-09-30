@@ -299,11 +299,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               },
             ],
             iconV2: 'database',
-            id: 'ingest_and_data',
+            id: 'data_management',
             sideNavVersion: 'v2',
             renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessSearch.nav.ingestAndData', {
-              defaultMessage: 'Ingest and manage data',
+            title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
+              defaultMessage: 'Data management',
             }),
           },
           {
