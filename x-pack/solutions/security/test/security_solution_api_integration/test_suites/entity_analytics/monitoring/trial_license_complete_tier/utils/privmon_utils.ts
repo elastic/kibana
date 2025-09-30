@@ -299,28 +299,29 @@ export const PrivMonUtils = (
       throw new Error(`No monitoring source found for integration ${integrationName}`);
     }
     return source;
-  const updateIntegrationsUsersWithRelativeTimestamps = async ({
-    indexPattern,
-    relativeTimeStamp,
-  }: {
-    indexPattern: string;
-    relativeTimeStamp?: string;
-  }) => {
-    if (!relativeTimeStamp) {
-      // Default to 3.5 weeks ago (within 1M range, e.g. onboarding)
-      relativeTimeStamp = DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP;
-    }
-    await es.updateByQuery({
-      index: indexPattern,
-      refresh: true,
-      conflicts: 'proceed',
-      query: { match_all: {} },
-      script: {
-        lang: 'painless',
-        source: "ctx._source['@timestamp'] = params.newTimestamp",
-        params: { newTimestamp: relativeTimeStamp },
-      },
-    });
+    const updateIntegrationsUsersWithRelativeTimestamps = async ({
+      indexPattern,
+      relativeTimeStamp,
+    }: {
+      indexPattern: string;
+      relativeTimeStamp?: string;
+    }) => {
+      if (!relativeTimeStamp) {
+        // Default to 3.5 weeks ago (within 1M range, e.g. onboarding)
+        relativeTimeStamp = DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP;
+      }
+      await es.updateByQuery({
+        index: indexPattern,
+        refresh: true,
+        conflicts: 'proceed',
+        query: { match_all: {} },
+        script: {
+          lang: 'painless',
+          source: "ctx._source['@timestamp'] = params.newTimestamp",
+          params: { newTimestamp: relativeTimeStamp },
+        },
+      });
+    };
   };
 
   const updateIntegrationsUserTimeStamp = async ({
