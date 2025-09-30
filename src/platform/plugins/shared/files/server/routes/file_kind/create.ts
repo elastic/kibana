@@ -13,7 +13,8 @@ import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
-import { CreateHandler } from './types';
+import { validateMimeType } from './helpers';
+import type { CreateHandler } from './types';
 
 export const method = 'post' as const;
 
@@ -32,25 +33,33 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
   FilesClient['create']
 >;
 
-export const handler: CreateHandler<Endpoint> = async ({ core, fileKind, files }, req, res) => {
-  const [{ security }, { fileService }] = await Promise.all([core, files]);
-  const {
-    body: { name, alt, meta, mimeType },
-  } = req;
-  const user = security.authc.getCurrentUser();
-  const file = await fileService.asCurrentUser().create({
-    fileKind,
-    name,
-    alt,
-    meta,
-    user: user ? { name: user.username, id: user.profile_uid } : undefined,
-    mime: mimeType,
-  });
-  const body: Endpoint['output'] = {
-    file: file.toJSON(),
+const createHandler =
+  (fileKindDefinition: FileKind): CreateHandler<Endpoint> =>
+  async ({ core, fileKind, files }, req, res) => {
+    const [{ security }, { fileService }] = await Promise.all([core, files]);
+    const {
+      body: { name, alt, meta, mimeType },
+    } = req;
+    const user = security.authc.getCurrentUser();
+
+    const invalidResponse = validateMimeType(mimeType, fileKindDefinition);
+    if (invalidResponse) {
+      return invalidResponse;
+    }
+
+    const file = await fileService.asCurrentUser().create({
+      fileKind,
+      name,
+      alt,
+      meta,
+      user: user ? { name: user.username, id: user.profile_uid } : undefined,
+      mime: mimeType,
+    });
+    const body: Endpoint['output'] = {
+      file: file.toJSON(),
+    };
+    return res.ok({ body });
   };
-  return res.ok({ body });
-};
 
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
@@ -66,7 +75,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
           },
         },
       },
-      handler
+      createHandler(fileKind)
     );
   }
 }

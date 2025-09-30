@@ -17,7 +17,7 @@ export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
