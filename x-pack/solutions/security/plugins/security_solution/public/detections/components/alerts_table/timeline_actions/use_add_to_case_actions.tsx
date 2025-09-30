@@ -91,20 +91,27 @@ export const useAddToCaseActions = ({
   }, [onMenuItemClick, onCaseSuccess]);
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
-
+  const observables = useMemo(
+    () => (ecsData ? casesUi.helpers.getObservablesFromEcs(ecsData) : undefined),
+    [ecsData, casesUi.helpers]
+  );
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
+      observables,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, observables]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({
+      getAttachments: () => caseAttachments,
+      getObservables: observables ? () => observables : undefined,
+    });
+  }, [caseAttachments, onMenuItemClick, observables, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (userCasesPermissions.createComment && userCasesPermissions.read) {
