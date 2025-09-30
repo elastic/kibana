@@ -67,6 +67,7 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
       panelProps={{
         'data-test-subj': `nav-tour-step-${currentStep.id}`,
       }}
+      display="block"
       footerAction={
         isLastStep ? (
           <EuiButton
