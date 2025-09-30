@@ -17,6 +17,9 @@ import {
   EuiLoadingElastic,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
@@ -36,6 +39,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
+import { AssetImage } from '../asset_image';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -180,6 +184,62 @@ export function StreamListView() {
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <>
+         
+            <EuiPanel hasBorder={true} paddingSize="m" color='subdued' grow={false} borderRadius='m' >
+              <EuiFlexGroup>  
+                <EuiFlexItem grow={false}>
+                  <AssetImage type="yourPreviewWillAppearHere" size='s' />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                <EuiFlexGroup alignItems="flexStart" direction='column' gutterSize='xs'>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
+                          defaultMessage: 'Welcome to Streams',
+                        })}
+                      </h4>
+                    </EuiTitle> 
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" color="subdued">
+                    {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
+                          defaultMessage: 'Use Streams to organize and process your data into clear structured  flows, and simplify routing, field extraction, and retention management.',
+                        })} 
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup direction='row' gutterSize='xs'>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          color='primary'
+                          size="s"
+                          href="https://www.elastic.co/docs/solutions/observability/streams/streams"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                            defaultMessage: 'Go to docs',
+                          })}
+                        </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiButtonEmpty
+                            color='text'
+                            size="s"                                                
+                          >
+                            {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                              defaultMessage: 'Hide this',
+                            })}
+                          </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer size="l" />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
@@ -189,6 +249,7 @@ export function StreamListView() {
               <>
                 <EuiSpacer size="l" />
                 <GroupStreamsCards streams={streamsListFetch.value?.streams} />
+   
               </>
             )}
           </>
