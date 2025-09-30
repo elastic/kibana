@@ -10,6 +10,7 @@
 import dagre from '@dagrejs/dagre';
 import type { Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { openScopeNodes, closeScopeNodes } from './nodes/types';
 
 /**
@@ -18,8 +19,8 @@ import { openScopeNodes, closeScopeNodes } from './nodes/types';
  * @param graph - The dagre graph representation of the workflow
  * @returns Object containing positioned nodes and edges for ReactFlow
  */
-export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
-  const topologySort = dagre.graphlib.alg.topsort(graph);
+export function convertWorkflowGraphToReactFlow(graph: WorkflowGraph) {
+  const topologySort = graph.topologicalOrder;
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setGraph({});
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -39,7 +40,7 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
   let maxDepth = 0;
 
   topologySort
-    .map((nodeId) => graph.node(nodeId))
+    .map((nodeId) => graph.getNode(nodeId))
     .forEach((node: any) => {
       if (closeScopeNodes.includes(node.type)) {
         stack.pop();
@@ -71,7 +72,7 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
       })
     );
 
-  graph.edges().forEach((edge) => {
+  graph.getEdges().forEach((edge) => {
     // Reverse source and destination for BT layout
     dagreGraph.setEdge(edge.w, edge.v, {
       type: 'workflowEdge',
@@ -80,16 +81,16 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
 
   dagre.layout(dagreGraph);
 
-  const nodes = graph.nodes().map((id) => {
-    const dagreNode = dagreGraph.node(id);
-    const graphNode = graph.node(id) as any;
+  const nodes = graph.getAllNodes().map((graphNode) => {
+    const dagreNode = dagreGraph.node(graphNode.id);
+
     return {
-      id,
+      id: graphNode.id,
       data: {
         ...dagreNode,
         stepType: graphNode?.type,
-        step: graphNode?.configuration,
-        label: graphNode?.label || id,
+        step: (graphNode as any)?.configuration,
+        label: graphNode?.id,
       },
       // See this: https://github.com/dagrejs/dagre/issues/287
       targetPosition: Position.Bottom, // Reversed due to BT layout
@@ -103,11 +104,11 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
     } as Node;
   });
 
-  const edges = graph.edges().map((e) => ({
+  const edges = graph.getEdges().map((e) => ({
     id: `${e.v} -> ${e.w}`,
     source: e.v,
     target: e.w,
-    label: graph.edge(e)?.label,
+    label: graph.getEdge(e)?.label,
   }));
 
   return { nodes, edges };

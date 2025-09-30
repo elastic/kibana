@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
+import { GraphEdge, graphlib } from '@dagrejs/dagre';
 import type { GraphNodeUnion } from '../types';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import { createTypedGraph } from './create_typed_graph';
@@ -72,6 +72,10 @@ export class WorkflowGraph {
 
   public getEdges(): Array<{ v: string; w: string }> {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
+  }
+
+  public getEdge(edgeMetadata: { v: string; w: string }): GraphEdge {
+    return this.graph.edge(edgeMetadata);
   }
 
   public hasStep(stepId: string): boolean {
