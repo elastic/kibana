@@ -96,6 +96,6 @@ function transformPanelProperties(
     config: transformedPanelConfig ? transformedPanelConfig : config,
     uid: panelIndex,
     type: panelType,
-    version,
+    ...(version && { version }),
   };
 }
