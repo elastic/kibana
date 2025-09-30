@@ -48,11 +48,13 @@ export const INTEGRATION_KNOWLEDGE_TOOL: AssistantTool = {
     const { assistantContext, contentReferencesStore } = params as IntegrationKnowledgeToolParams;
 
     // Check if the .integration_knowledge index exists before registering the tool
+    // This has to be done with `.search` since `.exists` and `.get` can't be performed
+    // with the internal system user (lack of permissions)
     try {
-      const indexExists =
-        await assistantContext.core.elasticsearch.client.asInternalUser.indices.exists({
-          index: INTEGRATION_KNOWLEDGE_INDEX,
-        });
+      const indexExists = await assistantContext.core.elasticsearch.client.asInternalUser.search({
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        size: 0,
+      });
       if (!indexExists) {
         return null;
       }

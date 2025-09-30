@@ -16,16 +16,12 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
 const mockSearch = jest.fn();
-const mockIndicesExists = jest.fn();
 const mockAssistantContext = {
   core: {
     elasticsearch: {
       client: {
         asInternalUser: {
           search: mockSearch,
-          indices: {
-            exists: mockIndicesExists,
-          },
         },
       },
     },
@@ -42,8 +38,8 @@ describe('IntegrationKnowledgeTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default to index existing
-    mockIndicesExists.mockResolvedValue(true);
+    // Default to index existing - mock search call with size: 0 for index existence check
+    mockSearch.mockResolvedValue({ hits: { total: { value: 0 } } });
   });
 
   describe('isSupported', () => {
@@ -68,19 +64,20 @@ describe('IntegrationKnowledgeTool', () => {
       const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
       expect(tool).toBeDefined();
       expect(tool?.name).toBe('IntegrationKnowledgeTool');
-      expect(mockIndicesExists).toHaveBeenCalledWith({
+      expect(mockSearch).toHaveBeenCalledWith({
         index: '.integration_knowledge',
+        size: 0,
       });
     });
 
     it('returns null when index does not exist', async () => {
-      mockIndicesExists.mockResolvedValue(false);
+      mockSearch.mockRejectedValue(new Error('index_not_found_exception'));
       const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
       expect(tool).toBeNull();
     });
 
     it('returns null when index existence check throws error', async () => {
-      mockIndicesExists.mockRejectedValue(new Error('Index check failed'));
+      mockSearch.mockRejectedValue(new Error('Index check failed'));
       const tool = await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs);
       expect(tool).toBeNull();
     });
@@ -88,7 +85,8 @@ describe('IntegrationKnowledgeTool', () => {
 
   describe('DynamicStructuredTool', () => {
     it('includes href citations for integration packages', async () => {
-      mockSearch.mockResolvedValue({
+      // First call is for index existence check
+      mockSearch.mockResolvedValueOnce({ hits: { total: { value: 0 } } }).mockResolvedValueOnce({
         hits: {
           hits: [
             {
@@ -141,7 +139,8 @@ describe('IntegrationKnowledgeTool', () => {
     });
 
     it('includes knowledge base citations as fallback', async () => {
-      mockSearch.mockResolvedValue({
+      // First call is for index existence check
+      mockSearch.mockResolvedValueOnce({ hits: { total: { value: 0 } } }).mockResolvedValueOnce({
         hits: {
           hits: [
             {
@@ -183,7 +182,8 @@ describe('IntegrationKnowledgeTool', () => {
     });
 
     it('handles package without version', async () => {
-      mockSearch.mockResolvedValue({
+      // First call is for index existence check
+      mockSearch.mockResolvedValueOnce({ hits: { total: { value: 0 } } }).mockResolvedValueOnce({
         hits: {
           hits: [
             {
@@ -214,7 +214,8 @@ describe('IntegrationKnowledgeTool', () => {
     });
 
     it('returns appropriate message when no results found', async () => {
-      mockSearch.mockResolvedValue({
+      // First call is for index existence check
+      mockSearch.mockResolvedValueOnce({ hits: { total: { value: 0 } } }).mockResolvedValueOnce({
         hits: {
           hits: [],
         },
@@ -230,7 +231,10 @@ describe('IntegrationKnowledgeTool', () => {
     });
 
     it('handles search errors gracefully', async () => {
-      mockSearch.mockRejectedValue(new Error('Elasticsearch connection failed'));
+      // First call is for index existence check, second call throws error
+      mockSearch
+        .mockResolvedValueOnce({ hits: { total: { value: 0 } } })
+        .mockRejectedValueOnce(new Error('Elasticsearch connection failed'));
 
       const tool = (await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
@@ -243,7 +247,8 @@ describe('IntegrationKnowledgeTool', () => {
 
     it('truncates long results to 20000 characters', async () => {
       const longContent = 'A'.repeat(25000);
-      mockSearch.mockResolvedValue({
+      // First call is for index existence check
+      mockSearch.mockResolvedValueOnce({ hits: { total: { value: 0 } } }).mockResolvedValueOnce({
         hits: {
           hits: [
             {
