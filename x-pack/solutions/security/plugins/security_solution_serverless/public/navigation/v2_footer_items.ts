@@ -53,9 +53,8 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           breadcrumbStatus: 'hidden',
           children: [
             {
-              // TODO : update Steams link
               breadcrumbStatus: 'hidden',
-              link: 'streams:overview',
+              link: 'streams',
             },
             {
               breadcrumbStatus: 'hidden',
