@@ -305,6 +305,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
           techPreview={tableSearchBar.techPreview}
+          isLoading={isLoading}
         />
       ) : null}
 
