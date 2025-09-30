@@ -46,12 +46,7 @@ function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
-  const {
-    name: metricField,
-    index = 'metrics-*',
-    instrument,
-    dimensions: metricDimensions,
-  } = metric;
+  const { name: metricField, index, instrument, dimensions: metricDimensions } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];

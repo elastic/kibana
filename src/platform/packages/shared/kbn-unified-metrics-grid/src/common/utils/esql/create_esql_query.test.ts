@@ -152,18 +152,6 @@ TS metrics-*
     );
   });
 
-  it('should apply default index if none is provided in metric', () => {
-    const query = createESQLQuery({
-      metric: { ...mockMetric, index: undefined as any },
-    });
-    expect(query).toBe(
-      `
-TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
-`.trim()
-    );
-  });
-
   it('should override index if provided in metric', () => {
     const query = createESQLQuery({
       metric: { ...mockMetric, index: 'custom-metrics-*' },
