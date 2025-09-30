@@ -8,11 +8,11 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type {
+  BuiltinToolDefinition,
   ExecutableTool,
   ExecutableToolHandlerFn,
-  BuiltinToolDefinition,
-  ToolProvider,
   ToolHandlerFn,
+  ToolProvider,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
@@ -68,6 +68,7 @@ export const createMockedBuiltinTool = (
 ): MockedBuiltinTool => {
   return {
     id: 'test-tool',
+    type: ToolType.builtin,
     description: 'test description',
     schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
