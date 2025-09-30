@@ -15,12 +15,12 @@ import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   savedObjectsClientMock,
-  loggingSystemMock,
-  httpServiceMock,
   savedObjectsRepositoryMock,
-  analyticsServiceMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+} from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsAuthorizationMock } from '../mocks';

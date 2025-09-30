@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider, toKibanaSearchResponse } from './es_search_strategy';
 import type { SearchStrategyDependencies } from '../../types';
@@ -32,10 +32,10 @@ describe('ES search strategy', () => {
     debug: () => {},
   };
 
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   function getMockedDeps(err?: Record<string, any>) {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     if (err) {
       esClient.search.mockImplementation(() => Promise.reject(err));

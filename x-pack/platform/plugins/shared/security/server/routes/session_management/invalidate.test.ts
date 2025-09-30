@@ -8,8 +8,8 @@
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineInvalidateSessionsRoutes } from './invalidate';

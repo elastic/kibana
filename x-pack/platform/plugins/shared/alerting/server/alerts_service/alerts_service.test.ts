@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   IndicesGetDataStreamResponse,
@@ -33,7 +33,7 @@ const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const fakeRequest = {
   headers: {},

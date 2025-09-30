@@ -6,7 +6,8 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildDataViewResponseMock } from './get_risk_inputs_index.mock';
 

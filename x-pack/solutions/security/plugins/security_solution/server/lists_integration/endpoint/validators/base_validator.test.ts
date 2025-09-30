@@ -17,7 +17,7 @@ import {
   createExceptionListItemMock,
 } from './mocks';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';

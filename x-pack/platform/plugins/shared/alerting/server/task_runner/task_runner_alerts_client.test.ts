@@ -25,15 +25,14 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import {
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  httpServiceMock,
-  executionContextServiceMock,
-  savedObjectsServiceMock,
-  elasticsearchServiceMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '../mocks';
@@ -133,7 +132,7 @@ const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] })
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {

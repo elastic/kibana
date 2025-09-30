@@ -10,13 +10,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';

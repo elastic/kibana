@@ -6,7 +6,7 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineAnonymousAccessGetStateRoutes } from './get_state';
 import type { AnonymousAccessServiceStart } from '../../anonymous_access';

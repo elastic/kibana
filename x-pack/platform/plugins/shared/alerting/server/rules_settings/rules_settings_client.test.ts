@@ -8,7 +8,8 @@
 import type { RulesSettingsClientConstructorOptions } from './rules_settings_client';
 import { RulesSettingsClient } from './rules_settings_client';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 
 const savedObjectsClient = savedObjectsClientMock.create();

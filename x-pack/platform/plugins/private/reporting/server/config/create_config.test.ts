@@ -6,7 +6,8 @@
  */
 
 import type { CoreSetup, HttpServerInfo, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createConfig } from './create_config';
 

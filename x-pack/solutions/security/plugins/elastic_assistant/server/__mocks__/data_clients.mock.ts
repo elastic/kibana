@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
@@ -83,7 +83,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     },
     options: {
       elasticsearchClientPromise: Promise.resolve(
-        elasticsearchServiceMock.createElasticsearchClient()
+        elasticsearchClientMock.createElasticsearchClient()
       ),
       kibanaVersion: '8.0.0',
       spaceId: 'default',

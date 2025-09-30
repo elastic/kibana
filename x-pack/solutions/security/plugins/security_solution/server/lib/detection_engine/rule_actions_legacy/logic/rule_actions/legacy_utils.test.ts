@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 

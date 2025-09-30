@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
@@ -12,7 +13,6 @@ import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import type { SLORepository } from './slo_repository';
 import type { SummaryClient } from './summary_client';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SloDefinitionClient } from './slo_definition_client';
 
@@ -27,7 +27,7 @@ describe('GetSLO', () => {
     mockSummaryClient = createSummaryClientMock();
     defintionClient = new SloDefinitionClient(
       mockRepository,
-      elasticsearchServiceMock.createElasticsearchClient(),
+      elasticsearchClientMock.createElasticsearchClient(),
       loggerMock.create()
     );
     getSLO = new GetSLO(defintionClient, mockSummaryClient);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { Installation } from '../../../../common';
 
@@ -30,7 +31,7 @@ describe('reinstallPackageForInstallation', () => {
   });
   it('should throw an error for uploaded package', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await expect(
       reinstallPackageForInstallation({
         soClient,
@@ -44,7 +45,7 @@ describe('reinstallPackageForInstallation', () => {
 
   it('should install registry package', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await expect(
       reinstallPackageForInstallation({
         soClient,
@@ -68,7 +69,7 @@ describe('reinstallPackageForInstallation', () => {
 
   it('should install bundled package', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await expect(
       reinstallPackageForInstallation({
         soClient,
@@ -93,7 +94,7 @@ describe('reinstallPackageForInstallation', () => {
   // Pre 8.12.0 bundled package install where saved with install_source_upload
   it('should install bundled package saved with install_source:upload ', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await expect(
       reinstallPackageForInstallation({
         soClient,

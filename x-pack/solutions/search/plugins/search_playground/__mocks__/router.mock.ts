@@ -12,7 +12,7 @@ import type {
   RequestHandlerContext,
   RouteValidatorConfig,
 } from '@kbn/core/server';
-import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)

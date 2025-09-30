@@ -8,11 +8,13 @@
 import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from '@kbn/core/server';
@@ -39,12 +41,12 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchClientMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -85,7 +87,7 @@ describe('healthRoute', () => {
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -240,7 +242,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -317,7 +319,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -409,7 +411,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -488,7 +490,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -579,7 +581,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -658,7 +660,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -755,7 +757,7 @@ describe('healthRoute', () => {
       }),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: false,
       docLinks,
@@ -811,7 +813,7 @@ describe('healthRoute', () => {
       config,
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,

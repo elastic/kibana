@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RuleAction } from '../../../types';
 import {
   generateActionHash,

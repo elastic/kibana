@@ -7,7 +7,8 @@
 /* eslint-disable max-classes-per-file */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -32,7 +33,7 @@ describe('TransformManager', () => {
   const spaceId = 'default';
 
   beforeEach(() => {
-    scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+    scopedClusterClientMock = elasticsearchClientMock.createScopedClusterClient();
     loggerMock = loggingSystemMock.createLogger();
   });
 

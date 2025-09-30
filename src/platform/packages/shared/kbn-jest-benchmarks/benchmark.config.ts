@@ -30,10 +30,21 @@ const config: InitialBenchConfig = {
   name: 'jest',
   benchmarks: [
     createBenchmark('cases-partial', 'x-pack/platform/plugins/shared/cases/jest.config.js', 32),
+    createBenchmark('slo-full', 'x-pack/solutions/observability/plugins/slo/jest.config.js', 1),
     createBenchmark(
-      'security-lib-partial',
+      'security-lib',
       'x-pack/solutions/security/plugins/security_solution/server/lib/jest.config.js',
-      16
+      1
+    ),
+    createBenchmark(
+      'security-lib-full',
+      'x-pack/solutions/security/plugins/security_solution/server/lib/jest.config.js',
+      1
+    ),
+    createBenchmark(
+      'security-endpoint-full',
+      'x-pack/solutions/security/plugins/security_solution/server/endpoint/jest.config.js',
+      1
     ),
     createBenchmark(
       'alerting-plugin-test',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { ErrorCode } from '../../../../../common/types/error_codes';
 
@@ -14,7 +14,7 @@ import { updateMlInferenceMappings } from './update_ml_inference_mappings';
 describe('updateMlInferenceMappings', () => {
   const indexName = 'my-index';
   const modelId = 'my-model-id';
-  const mockClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockClient = elasticsearchClientMock.createScopedClusterClient();
 
   beforeEach(() => {
     jest.clearAllMocks();

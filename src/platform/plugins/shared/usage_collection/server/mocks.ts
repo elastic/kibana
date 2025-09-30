@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  elasticsearchServiceMock,
-  executionContextServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { lazyObject } from '@kbn/lazy-object';
 import { type CollectorOptions, CollectorSet } from './collector';
@@ -49,7 +47,7 @@ export const createUsageCollectionSetupMock = () => {
 
 export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext> {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext> = lazyObject({
-    esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+    esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
     soClient: savedObjectsClientMock.create(),
   });
   return collectorFetchClientsMock;

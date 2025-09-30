@@ -12,7 +12,8 @@ import {
   serializeSavedObjectId,
   deleteHistogramSavedObjects,
 } from './saved_objects';
-import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('serializeSavedObjectId', () => {

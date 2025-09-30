@@ -12,7 +12,7 @@ import { getESQueryHostMetadataByID, buildUnitedIndexQuery } from './query_build
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EndpointSortableField } from '../../../../common/endpoint/types';
 

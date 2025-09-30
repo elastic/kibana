@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { renderMustacheString } from './mustache_renderer';
 
 const logger = loggingSystemMock.create().get();

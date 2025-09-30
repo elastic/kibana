@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { transformHealthServiceProvider } from './transform_health_service';
@@ -24,7 +24,7 @@ describe('transformHealthServiceProvider', () => {
   let fieldFormatsRegistry: jest.Mocked<FieldFormatsRegistry>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     (esClient.transform.getTransform as jest.Mock).mockImplementation(
       async ({ transform_id: transformId }) => {

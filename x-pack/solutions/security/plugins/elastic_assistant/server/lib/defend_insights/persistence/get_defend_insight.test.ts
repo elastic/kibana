@@ -6,13 +6,13 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { getDefendInsightsSearchEsMock } from '../../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsight } from './get_defend_insight';
 
-const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 
 const mockResponse = getDefendInsightsSearchEsMock();

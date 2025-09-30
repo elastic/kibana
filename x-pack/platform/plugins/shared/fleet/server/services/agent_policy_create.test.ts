@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 
@@ -58,7 +59,7 @@ function getPackagePolicy(name: string, policyId = '') {
 }
 
 describe('createAgentPolicyWithPackages', () => {
-  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient();
   const soClientMock = savedObjectsClientMock.create();
 
   beforeEach(() => {

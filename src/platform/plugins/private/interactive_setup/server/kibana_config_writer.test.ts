@@ -11,7 +11,7 @@ jest.mock('fs/promises');
 jest.mock('crypto');
 import { constants } from 'fs';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { KibanaConfigWriter } from './kibana_config_writer';
 

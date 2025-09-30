@@ -8,7 +8,8 @@
  */
 
 import { rollDailyData } from './daily';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('rollDailyData', () => {

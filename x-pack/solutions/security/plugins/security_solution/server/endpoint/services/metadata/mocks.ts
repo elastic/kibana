@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
-import { coreMock, type ElasticsearchClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, type ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import type { Agent, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';

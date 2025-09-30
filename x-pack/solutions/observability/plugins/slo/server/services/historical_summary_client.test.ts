@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import type { DateRange, SLODefinition } from '../domain/models';
@@ -154,7 +154,7 @@ describe('FetchHistoricalSummary', () => {
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2023-01-18T15:00:00.000Z'));
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
   });
 
   afterAll(() => {

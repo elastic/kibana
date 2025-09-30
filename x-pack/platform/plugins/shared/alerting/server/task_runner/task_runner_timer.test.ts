@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

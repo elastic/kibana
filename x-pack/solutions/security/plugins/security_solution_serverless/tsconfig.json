@@ -48,5 +48,8 @@
     "@kbn/inference-common",
     "@kbn/ai-assistant-icon",
     "@kbn/core-application-browser",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
   ]
 }

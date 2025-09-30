@@ -9,7 +9,7 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
@@ -89,7 +89,7 @@ describe('postDefendInsightsRoute', () => {
     const tools = requestContextMock.createTools();
     context = tools.context;
     server = serverMock.create();
-    tools.clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+    tools.clients.core.elasticsearch.client = elasticsearchClientMock.createScopedClusterClient();
 
     mockCurrentInsight = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock())[0];
     mockCurrentInsight.status = DefendInsightStatus.Enum.running;

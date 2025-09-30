@@ -146,7 +146,6 @@ const createCapabilities = (
 };
 
 export const elasticsearchServiceMock = {
-  ...elasticsearchClientMock,
   create: createMock,
   createInternalPreboot: createInternalPrebootContractMock,
   createPreboot: createPrebootContractMock,

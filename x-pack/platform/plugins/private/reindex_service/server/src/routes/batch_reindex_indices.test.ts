@@ -6,7 +6,7 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { MockRouter } from '../__mocks__/routes.mock';

@@ -8,7 +8,7 @@
  */
 
 import { Readable } from 'stream';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 

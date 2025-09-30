@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';

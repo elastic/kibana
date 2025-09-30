@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ReportingCore } from '../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../core';

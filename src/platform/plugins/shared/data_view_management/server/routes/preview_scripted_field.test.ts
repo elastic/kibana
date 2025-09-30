@@ -9,7 +9,8 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { registerPreviewScriptedFieldRoute } from './preview_scripted_field';
 
 describe('preview_scripted_field route', () => {

@@ -7,7 +7,7 @@
 
 import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
 import { getRequestValidation } from '@kbn/core-http-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { RacRequestHandlerContext } from '../../types';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './response_adapters';

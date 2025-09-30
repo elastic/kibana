@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -201,7 +199,7 @@ describe('Cloud Security Posture Plugin', () => {
 
     it('should not initialize when other package is created', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
         async (): Promise<Installation | undefined> => {
@@ -313,7 +311,7 @@ describe('Cloud Security Posture Plugin', () => {
       expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
 
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       for (const cb of packagePolicyPostCreateCallbacks) {
         const updatedPackagePolicy = await cb(
@@ -336,7 +334,7 @@ describe('Cloud Security Posture Plugin', () => {
       'should uninstall resources when package is removed',
       async (total, items, expectedNumberOfCallsToUninstallResources) => {
         const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         fleetMock.packagePolicyService.list.mockImplementationOnce(
           async (): Promise<ListResult<PackagePolicy>> => {

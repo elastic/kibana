@@ -8,7 +8,7 @@
 import { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory, ReservedPrivilegesSet } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { routeDefinitionParamsMock } from './index.mock';
 import { defineKeyRotationRoutes } from './key_rotation';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { createConfigRoute } from './config';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';

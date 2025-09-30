@@ -10,7 +10,8 @@ import supertest from 'supertest';
 
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';

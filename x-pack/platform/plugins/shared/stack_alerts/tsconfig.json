@@ -27,7 +27,6 @@
     "@kbn/i18n-react",
     "@kbn/charts-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
@@ -54,6 +53,7 @@
     "@kbn/object-utils",
     "@kbn/expressions-plugin",
     "@kbn/esql-ast",
+    "@kbn/config-mocks",
   ],
   "exclude": ["target/**/*"]
 }

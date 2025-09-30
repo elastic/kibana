@@ -7,7 +7,7 @@
 
 import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/core/server/mocks';
+import { configDeprecationsMock } from '@kbn/config-mocks';
 
 const CONFIG_PATH = 'xpack.task_manager';
 

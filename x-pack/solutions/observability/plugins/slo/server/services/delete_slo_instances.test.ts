@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DeleteSLOInstances } from './delete_slo_instances';
 
 describe('DeleteSLOInstances', () => {
@@ -14,7 +14,7 @@ describe('DeleteSLOInstances', () => {
   let deleteSLOInstances: DeleteSLOInstances;
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient = elasticsearchClientMock.createElasticsearchClient();
     deleteSLOInstances = new DeleteSLOInstances(mockEsClient);
   });
 

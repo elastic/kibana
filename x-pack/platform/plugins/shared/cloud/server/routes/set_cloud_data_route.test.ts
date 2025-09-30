@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';

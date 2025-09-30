@@ -6,7 +6,7 @@
  */
 
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client/actions_client.mock';

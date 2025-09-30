@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -56,7 +57,7 @@ describe('enrollment api keys', () => {
   describe('generateEnrollmentAPIKey', () => {
     it('should call audit logger', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.create.mockResolvedValue({
         _id: 'test-enrollment-api-key-id',
@@ -86,7 +87,7 @@ describe('enrollment api keys', () => {
 
     it('should set namespaces if agent policy specify a space ID', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.create.mockResolvedValue({
         _id: 'test-enrollment-api-key-id',
@@ -120,7 +121,7 @@ describe('enrollment api keys', () => {
 
     it('should set namespaces if agent policy specify mulitple space IDs', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.create.mockResolvedValue({
         _id: 'test-enrollment-api-key-id',
@@ -155,7 +156,7 @@ describe('enrollment api keys', () => {
 
   describe('deleteEnrollmentApiKey', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.update.mockResolvedValue({} as any);
 
@@ -189,7 +190,7 @@ describe('enrollment api keys', () => {
 
   describe('getEnrollementApiKey', () => {
     it('should not allow to retrieve a key in the current space', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.get.mockResolvedValue({
         _id: 'test-id',
@@ -211,7 +212,7 @@ describe('enrollment api keys', () => {
       expect(enrollmentKey).toBeDefined();
     });
     it('should not allow to retrieve a key in a different space', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.get.mockResolvedValue({
         _id: 'test-id',

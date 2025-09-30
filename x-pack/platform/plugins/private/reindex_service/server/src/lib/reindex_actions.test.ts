@@ -6,7 +6,8 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
@@ -47,7 +48,7 @@ describe('ReindexActions', () => {
         Promise.resolve({ id, attributes } as ReindexSavedObject)
       ) as any,
     };
-    clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    clusterClient = elasticsearchClientMock.createScopedClusterClient();
     actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
   });
 

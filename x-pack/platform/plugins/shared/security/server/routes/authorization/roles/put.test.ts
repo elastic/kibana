@@ -7,8 +7,9 @@
 
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicenseCheck } from '@kbn/licensing-types';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { until } from '../event_stream/tests/util';
 import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';

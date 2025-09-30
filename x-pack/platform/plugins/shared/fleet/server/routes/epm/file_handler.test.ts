@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { Headers } from 'node-fetch';
 
@@ -34,7 +34,7 @@ const mockedGetAsset = jest.mocked(getAsset);
 
 function mockContext() {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const mockElasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   return {
     fleet: {
       internalSOClient: async () => mockSavedObjectsClient,

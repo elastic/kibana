@@ -9,7 +9,7 @@ import { getInferenceExecutorMock, getInferenceAdapterMock } from './api.test.mo
 
 import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,

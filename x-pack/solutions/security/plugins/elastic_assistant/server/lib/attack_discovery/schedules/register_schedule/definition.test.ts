@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,

@@ -21,7 +21,7 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import { metricsServiceMock } from '@kbn/core/server/mocks';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 
 import type { EventLoopDelaysDaily } from '../../saved_objects';
 import { SAVED_OBJECTS_DAILY_TYPE, serializeSavedObjectId } from '../../saved_objects';

@@ -6,8 +6,10 @@
  */
 
 import { updateRiskScoreMappings } from './update_risk_score_mappings';
-import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
 const mockCreateOrUpdateComponentTemplate = jest.fn();
@@ -41,7 +43,7 @@ describe('updateRiskScoreMappings', () => {
   const mockAuditLogger = auditLoggerMock.create();
   const coreStart = coreMock.createStart();
   const soClient = savedObjectsClientMock.create();
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
 
   const getStartServicesMock = jest.fn().mockReturnValue([
     {

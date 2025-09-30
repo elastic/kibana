@@ -7,7 +7,8 @@
 
 import { EntityStoreCrudClient } from './entity_store_crud_client';
 import { entityStoreDataClientMock } from './entity_store_data_client.mock';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   BadCRUDRequestError,
   EngineNotRunningError,
@@ -19,7 +20,7 @@ import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
 
 describe('EntityStoreCrudClient', () => {
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const clusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClientMock = entityStoreDataClientMock.create();

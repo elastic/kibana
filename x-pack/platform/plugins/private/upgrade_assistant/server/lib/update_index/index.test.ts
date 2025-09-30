@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { updateIndex } from '.';
 import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
@@ -29,7 +30,7 @@ const ackResponseMock = {
 describe('updateIndex', () => {
   const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
   const mockLogger = loggingSystemMock.create().get();
-  const mockClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const mockClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   mockClient.rollup.getRollupIndexCaps.mockResponse({
     testIndex: {
       rollup_jobs: [

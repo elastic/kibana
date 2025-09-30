@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { dataStreamService } from '../../data_streams';
 
@@ -110,7 +110,7 @@ jest.mock('../../data_streams', () => {
 
 describe('getDataStreams', () => {
   it('Passes the correct parameters to the DataStreamService', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
     await getDataStreams({
       esClient: esClientMock,
       type: 'logs',
@@ -125,7 +125,7 @@ describe('getDataStreams', () => {
   });
   describe('uncategorisedOnly option', () => {
     it('Returns the correct number of results when true', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         type: 'logs',
@@ -136,7 +136,7 @@ describe('getDataStreams', () => {
       expect(results.items.length).toBe(1);
     });
     it('Returns the correct number of results when false', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         type: 'logs',
@@ -149,7 +149,7 @@ describe('getDataStreams', () => {
   });
   describe('Can be sorted', () => {
     it('Ascending', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         type: 'logs',
@@ -160,7 +160,7 @@ describe('getDataStreams', () => {
       expect(results.items[0].name).toBe('logs-elastic_agent-default');
     });
     it('Descending', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         type: 'logs',
@@ -172,7 +172,7 @@ describe('getDataStreams', () => {
     });
   });
   it('Formats the items correctly', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
     const results = await getDataStreams({
       esClient: esClientMock,
       type: 'logs',

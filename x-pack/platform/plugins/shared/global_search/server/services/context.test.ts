@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getContextFactory } from './context';
 
 describe('getContextFactory', () => {

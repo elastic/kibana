@@ -7,7 +7,7 @@
 
 import { KibanaMcpHttpTransport } from './kibana_mcp_http_transport';
 import type { KibanaRequest, KibanaResponseFactory, RouteMethod } from '@kbn/core-http-server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { CallToolResult, JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'node:crypto';

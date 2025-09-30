@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   ALERT_CASE_IDS,
   ALERT_STATUS,
@@ -24,7 +24,7 @@ import type {
 import { resolveAlertConflicts } from './alert_conflict_resolver';
 
 const logger = loggingSystemMock.create().get();
-const esClient = elasticsearchServiceMock.createElasticsearchClient();
+const esClient = elasticsearchClientMock.createElasticsearchClient();
 const ruleId = 'rule-id';
 const ruleName = 'name of rule';
 const ruleType = 'rule-type';

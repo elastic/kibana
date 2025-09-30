@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { BackfillTaskRunner } from './backfill_task_runner';
@@ -38,7 +39,7 @@ describe('BackfillTaskRunner', () => {
   });
 
   it('reindexes as expected', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
     const painlessScriptId = 'painlessScriptId';
     const painlessScript = {
       lang: 'painless',
@@ -96,7 +97,7 @@ describe('BackfillTaskRunner', () => {
 
   describe('Error handling', () => {
     it('calls throwRetryableError if the esClient throws a retryable error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.cluster.health.mockRejectedValueOnce(
         new esErrors.ConnectionError('My retryable error')
       );
@@ -129,7 +130,7 @@ describe('BackfillTaskRunner', () => {
     });
 
     it('calls throwUnrecoverableError if execution throws a non-retryable error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.cluster.health.mockRejectedValueOnce(new Error('My unrecoverable error'));
 
       const getESClient = async () => esClient;
@@ -162,7 +163,7 @@ describe('BackfillTaskRunner', () => {
     };
 
     it('does not call the reindex API if analytics is disabled', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       const getESClient = async () => esClient;
 
       taskRunner = new BackfillTaskRunner({

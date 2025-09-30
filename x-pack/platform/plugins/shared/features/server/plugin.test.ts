@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { coreMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { ConfigSchema } from './config';
 import { FeaturesPlugin } from './plugin';
 

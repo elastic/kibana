@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { times } from 'lodash';
 
 import { appContextService } from '../..';
@@ -27,7 +28,7 @@ jest.mock('../registry', () => {
 describe('bulkInstallPackages', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   const mockSoClient = savedObjectsClientMock.create();
-  const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();

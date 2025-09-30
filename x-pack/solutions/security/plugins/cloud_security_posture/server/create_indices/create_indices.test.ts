@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createBenchmarkScoreIndex } from './create_indices';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,

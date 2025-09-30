@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { BannersConfigType } from './config';
 import { registerSettings } from './ui_settings';
 

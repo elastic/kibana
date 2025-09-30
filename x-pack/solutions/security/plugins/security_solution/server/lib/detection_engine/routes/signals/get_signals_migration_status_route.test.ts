@@ -12,7 +12,7 @@ import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { getSignalsMigrationStatusRoute } from './get_signals_migration_status_route';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
-import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 jest.mock('../../migrations/get_signals_indices_in_range');
 jest.mock('../../migrations/get_signal_versions_by_index');

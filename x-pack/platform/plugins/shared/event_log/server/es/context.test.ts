@@ -7,7 +7,8 @@
 
 import { createEsContext } from './context';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createReadySignal } from '../lib/ready_signal';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -42,11 +43,11 @@ jest.mock('../lib/ready_signal', () => {
 const mockCreateReadySignal = createReadySignal as jest.MockedFunction<typeof createReadySignal>;
 
 let logger: Logger;
-let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+let elasticsearchClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+  elasticsearchClient = elasticsearchClientMock.createElasticsearchClient();
 });
 
 describe('createEsContext', () => {

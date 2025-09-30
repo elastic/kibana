@@ -7,7 +7,7 @@
 
 import { createChatModel } from './create_chat_model';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('./create_client');

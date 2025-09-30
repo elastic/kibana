@@ -8,7 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import type { MockAuthenticationProviderOptions } from './base.mock';
@@ -29,9 +30,7 @@ describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   let mockUser: ReturnType<typeof mockAuthenticatedUser>;
-  let mockScopedClusterClient: ReturnType<
-    typeof elasticsearchServiceMock.createScopedClusterClient
-  >;
+  let mockScopedClusterClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
 
   const mockSAMLSet1 = mockSamlResponses.set1;
 
@@ -39,7 +38,7 @@ describe('SAMLAuthenticationProvider', () => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
 
     mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'saml', name: 'saml' } });
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(mockUser);
     mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

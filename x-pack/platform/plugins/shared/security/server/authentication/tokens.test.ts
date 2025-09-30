@@ -7,7 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { Tokens } from './tokens';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -16,11 +17,9 @@ import { securityMock } from '../mocks';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockElasticsearchClient: ReturnType<
-    typeof elasticsearchServiceMock.createElasticsearchClient
-  >;
+  let mockElasticsearchClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   beforeEach(() => {
-    mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockElasticsearchClient = elasticsearchClientMock.createElasticsearchClient();
 
     const tokensOptions = {
       client: mockElasticsearchClient,

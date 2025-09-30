@@ -84,7 +84,6 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-io-ts-utils",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/datemath",
     "@kbn/presentation-containers",
     "@kbn/dashboard-plugin",
@@ -111,5 +110,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }

@@ -8,7 +8,7 @@
 import type { CasesClientMock } from '../../mocks';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';

@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 
 import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, ServiceStatusLevels } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { nextTick } from '@kbn/test-jest-helpers';

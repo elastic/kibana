@@ -7,7 +7,9 @@
 
 import { Subject } from 'rxjs';
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerStartContract,
@@ -105,7 +107,7 @@ describe('SessionManagementService', () => {
       expect(
         service.start({
           audit: auditSetupMock,
-          elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+          elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
           kibanaIndexName: '.kibana',
           online$: mockStatusSubject.asObservable(),
           taskManager: mockTaskManager,
@@ -117,7 +119,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -137,7 +139,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -175,7 +177,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -211,7 +213,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -238,7 +240,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -275,7 +277,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -328,7 +330,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,

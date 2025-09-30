@@ -8,7 +8,8 @@
 import { cloneDeep } from 'lodash';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   FLEET_ENDPOINT_PACKAGE,
@@ -44,7 +45,7 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
   }
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
     soClientMock = savedObjectsClientMock.create();
     packagePolicyServiceMock = createPackagePolicyServiceMock();
   });

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
 import { newJobCapsProvider } from '.';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
 import cloudwatchFieldCaps from './__mocks__/responses/cloudwatch_field_caps.json';
@@ -23,7 +24,7 @@ describe('job_service - job_caps', () => {
   let dataViews: any;
 
   beforeEach(() => {
-    const asNonRollupMock = elasticsearchServiceMock.createElasticsearchClient();
+    const asNonRollupMock = elasticsearchClientMock.createElasticsearchClient();
     asNonRollupMock.fieldCaps.mockResponse(farequoteFieldCaps);
 
     mlClusterClientNonRollupMock = {
@@ -31,7 +32,7 @@ describe('job_service - job_caps', () => {
       asInternalUser: asNonRollupMock,
     };
 
-    const callAsRollupMock = elasticsearchServiceMock.createElasticsearchClient();
+    const callAsRollupMock = elasticsearchClientMock.createElasticsearchClient();
     callAsRollupMock.fieldCaps.mockResponse(cloudwatchFieldCaps);
     // @ts-expect-error incomplete type type
     callAsRollupMock.rollup.getRollupIndexCaps.mockResponse(rollupCaps);

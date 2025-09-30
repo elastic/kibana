@@ -101,7 +101,9 @@
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
     "@kbn/cases-ai",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-saved-objects-server-mocks"
   ],
   "exclude": [
     "target/**/*"

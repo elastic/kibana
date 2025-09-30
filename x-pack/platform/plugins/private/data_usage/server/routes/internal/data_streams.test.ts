@@ -9,7 +9,7 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 import { registerDataStreamsRoute } from './data_streams';
 import { coreMock } from '@kbn/core/server/mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   DataUsageRequestHandlerContext,
   DataUsageRouter,

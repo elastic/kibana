@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { reinstallPackageForInstallation } from '../epm/packages';
 
@@ -26,7 +24,7 @@ describe('upgradePackageInstallVersion', () => {
   });
   it('should upgrade outdated package version', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
 
     soClient.find.mockResolvedValue({
@@ -65,7 +63,7 @@ describe('upgradePackageInstallVersion', () => {
 
   it('should log at error level when an error happens while reinstalling package', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
 
     mockedReinstallPackageForInstallation.mockRejectedValue(new Error('test error'));
@@ -89,7 +87,7 @@ describe('upgradePackageInstallVersion', () => {
 
   it('should log a warn level when an error happens while reinstalling an uploaded package', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
 
     mockedReinstallPackageForInstallation.mockRejectedValue(new Error('test error'));

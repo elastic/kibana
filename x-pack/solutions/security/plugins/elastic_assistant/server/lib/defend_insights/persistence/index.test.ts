@@ -14,7 +14,7 @@ import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsResponse,
 } from '@kbn/elastic-assistant-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 
@@ -38,7 +38,7 @@ jest.mock('./helpers', () => {
 });
 
 describe('DefendInsightsDataClient', () => {
-  const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const mockLogger = loggerMock.create();
   const mockGetDefendInsight = jest.mocked(getDefendInsight);
   let user: AuthenticatedUser;

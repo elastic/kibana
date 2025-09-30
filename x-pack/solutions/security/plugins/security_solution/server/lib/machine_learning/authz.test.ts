@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
 import { mlServicesMock } from './mocks';
 import { hasMlLicense, isMlAdmin, buildMlAuthz } from './authz';

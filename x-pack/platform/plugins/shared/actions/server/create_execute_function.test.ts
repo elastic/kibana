@@ -9,7 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asHttpRequestExecutionSource,

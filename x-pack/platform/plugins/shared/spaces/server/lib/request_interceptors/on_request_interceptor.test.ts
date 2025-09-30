@@ -14,7 +14,7 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { type createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';

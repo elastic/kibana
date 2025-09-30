@@ -6,7 +6,7 @@
  */
 
 import * as uuid from 'uuid';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskStatus } from '../task';
 import type { TaskManagerStats } from '../task_events';

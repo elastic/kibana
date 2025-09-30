@@ -8,7 +8,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { ServerlessSecurityConfig } from '../../config';
 import type { MeteringCallbackInput } from '../../types';
@@ -41,7 +41,7 @@ describe('Ai4SocMeteringService', () => {
           projectId: 'test-project-id',
         },
       } as CloudSetup,
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      esClient: elasticsearchClientMock.createElasticsearchClient(),
       abortController: new AbortController(),
       lastSuccessfulReport: new Date(),
       config: getDefaultConfig(),

@@ -15,7 +15,9 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { coreMock, loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 import {

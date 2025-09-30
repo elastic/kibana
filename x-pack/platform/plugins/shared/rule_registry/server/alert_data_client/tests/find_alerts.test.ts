@@ -13,7 +13,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ConstructorOptions } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';

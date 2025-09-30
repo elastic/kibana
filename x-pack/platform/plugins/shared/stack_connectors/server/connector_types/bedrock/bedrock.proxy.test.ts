@@ -9,7 +9,7 @@ import { DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { BedrockConnector } from './bedrock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const logger = loggingSystemMock.createLogger();
 

@@ -6,7 +6,7 @@
  */
 
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';

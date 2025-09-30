@@ -48,6 +48,7 @@
     "@kbn/share-plugin",
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

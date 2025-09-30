@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { AuditLogger } from '@kbn/core/server';
 import { PrivilegeMonitoringDataClient } from './data_client';
 import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
@@ -59,7 +58,7 @@ jest.mock('../saved_objects', () => {
 });
 describe('Privileged User Monitoring: Index Sync Service', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const clusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();

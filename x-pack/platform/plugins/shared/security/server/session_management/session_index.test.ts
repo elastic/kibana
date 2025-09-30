@@ -15,7 +15,8 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { type RunContext, TaskStatus } from '@kbn/task-manager-plugin/server';
 
@@ -31,9 +32,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 
 describe('Session index', () => {
-  let mockElasticsearchClient: ReturnType<
-    typeof elasticsearchServiceMock.createElasticsearchClient
-  >;
+  let mockElasticsearchClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let sessionIndex: SessionIndex;
   let auditLogger: AuditLogger;
   const indexName = '.kibana_some_tenant_security_session_1';
@@ -70,7 +69,7 @@ describe('Session index', () => {
   });
 
   beforeEach(() => {
-    mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockElasticsearchClient = elasticsearchClientMock.createElasticsearchClient();
     auditLogger = auditLoggerMock.create();
     sessionIndex = new SessionIndex(createSessionIndexOptions());
   });

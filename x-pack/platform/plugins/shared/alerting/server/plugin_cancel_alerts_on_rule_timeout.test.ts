@@ -7,11 +7,8 @@
 
 import type { AlertingServerSetup } from './plugin';
 import { AlertingPlugin } from './plugin';
-import {
-  type PluginInitializerContextMock,
-  coreMock,
-  statusServiceMock,
-} from '@kbn/core/server/mocks';
+import { type PluginInitializerContextMock, coreMock } from '@kbn/core/server/mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

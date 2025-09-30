@@ -11,6 +11,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/utility-types-jest",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

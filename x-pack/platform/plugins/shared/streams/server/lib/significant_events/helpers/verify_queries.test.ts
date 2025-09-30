@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { verifyQueries } from './verify_queries';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
@@ -31,7 +32,7 @@ describe('verifyQueries', () => {
 
   beforeEach(() => {
     loggerMock = loggingSystemMock.createLogger();
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('filters out the invalid queries', async () => {

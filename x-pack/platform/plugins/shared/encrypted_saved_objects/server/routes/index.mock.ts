@@ -6,7 +6,8 @@
  */
 
 import type { BuildFlavor } from '@kbn/config';
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';

@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KnowledgeBaseDataClientParams } from '.';
 import { AIAssistantKnowledgeBaseDataClient } from '.';
 import {
@@ -39,7 +41,7 @@ jest.mock('../../lib/langchain/content_loaders/defend_insights_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
-const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const mockUser1 = authenticatedUser;
 

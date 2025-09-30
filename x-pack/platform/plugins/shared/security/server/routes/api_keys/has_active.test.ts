@@ -8,7 +8,8 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 import type { CustomRequestHandlerMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 

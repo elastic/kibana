@@ -6,11 +6,9 @@
  */
 
 import { mockLogger } from '../test_utils';
-import {
-  coreMock,
-  savedObjectsRepositoryMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { CLEANUP_INTERVAL, taskRunner } from './delete_inactive_nodes_task';
 import type { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import type {

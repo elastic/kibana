@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CheckPrivilegesOptions } from '@kbn/security-plugin-types-server';
 
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';

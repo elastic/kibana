@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
 import { ENTRIES } from '../../../../../common/constants.mock';

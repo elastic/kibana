@@ -6,14 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getSignalsIndicesInRange } from './get_signals_indices_in_range';
 
 describe('getSignalsIndicesInRange', () => {
   let esClient: ElasticsearchClient;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('returns empty array if provided index is empty', async () => {

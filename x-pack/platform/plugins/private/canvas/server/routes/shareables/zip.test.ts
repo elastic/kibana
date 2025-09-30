@@ -11,7 +11,7 @@ jest.mock('archiver');
 const archiver = require('archiver') as jest.Mock;
 import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { initializeZipShareableWorkpadRoute } from './zip';
 import { getMockedRouterDeps } from '../test_helpers';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../common/lib';

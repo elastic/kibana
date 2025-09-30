@@ -8,11 +8,9 @@
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
 import { archiveMaintenanceWindow } from './archive_maintenance_window';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';

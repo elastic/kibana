@@ -11,7 +11,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';

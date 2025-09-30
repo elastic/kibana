@@ -10,7 +10,8 @@ import { fromExpression } from '@kbn/interpreter';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { createWorkpadRouteContext } from './workpad_route_context';
 import type { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
-import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { CanvasWorkpad } from '../types';
 import { CANVAS_TYPE } from '../common/lib/constants';
 

@@ -7,7 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -353,7 +354,7 @@ describe('policy preconfiguration', () => {
 
     it('should perform a no-op when passed no policies or packages', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -373,7 +374,7 @@ describe('policy preconfiguration', () => {
 
     it('should install packages successfully', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -393,7 +394,7 @@ describe('policy preconfiguration', () => {
 
     it('should install packages and configure agent policies successfully', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -426,7 +427,7 @@ describe('policy preconfiguration', () => {
 
     it('should install packages and configure agent policies successfully if using simplified package policy', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -496,7 +497,7 @@ describe('policy preconfiguration', () => {
 
     it('should install prerelease packages if needed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -516,7 +517,7 @@ describe('policy preconfiguration', () => {
 
     it('should pass skipDatastreamRollover flag if configured', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -541,7 +542,7 @@ describe('policy preconfiguration', () => {
 
     it('should not add new package policy to existing non managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
@@ -592,7 +593,7 @@ describe('policy preconfiguration', () => {
 
     it('should add new package policy to existing managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
@@ -652,7 +653,7 @@ describe('policy preconfiguration', () => {
 
     it('should update keep_monitoring_enabled for existing managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
@@ -715,7 +716,7 @@ describe('policy preconfiguration', () => {
 
     it('should update keep_monitoring_enabled for existing managed policies (even is the SO is out-of-sync)', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
@@ -778,7 +779,7 @@ describe('policy preconfiguration', () => {
 
     it('should not try to recreate preconfigure package policy that has been renamed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'Renamed package policy', id: 'test_package1' } as PackagePolicy,
@@ -828,7 +829,7 @@ describe('policy preconfiguration', () => {
 
     it('should throw an error when trying to install duplicate packages', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       await expect(
@@ -851,7 +852,7 @@ describe('policy preconfiguration', () => {
 
     it('should not create a policy and throw an error if install fails for required package', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       const policies: PreconfiguredAgentPolicy[] = [
         {
@@ -885,7 +886,7 @@ describe('policy preconfiguration', () => {
 
     it('should not create a policy and throw an error if package is not installed for an unknown reason', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const policies: PreconfiguredAgentPolicy[] = [
@@ -920,7 +921,7 @@ describe('policy preconfiguration', () => {
 
     it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies: policiesA, nonFatalErrors: nonFatalErrorsA } =
@@ -976,7 +977,7 @@ describe('policy preconfiguration', () => {
 
     it('should update a managed policy if top level fields are changed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       mockConfiguredPolicies.set('test-id', {
@@ -1030,7 +1031,7 @@ describe('policy preconfiguration', () => {
 
     it('should not update a managed policy if a top level field has not changed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       const policy: PreconfiguredAgentPolicy = {
         name: 'Test policy',
@@ -1061,7 +1062,7 @@ describe('policy preconfiguration', () => {
       const TEST_NAMESPACE = 'test';
       const namespacedSOClient = getPutPreconfiguredPackagesMock();
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       jest
         .mocked(appContextService)
@@ -1139,7 +1140,7 @@ describe('policy preconfiguration', () => {
       ]);
 
       const soClient = getPutPreconfiguredPackagesMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
@@ -1178,7 +1179,7 @@ describe('policy preconfiguration', () => {
           ]);
 
           const soClient = getPutPreconfiguredPackagesMock();
-          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
           jest
             .mocked(appContextService)
             .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
@@ -1269,7 +1270,7 @@ describe('policy preconfiguration', () => {
           ]);
 
           const soClient = getPutPreconfiguredPackagesMock();
-          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
           // Install an newer version of a test package
           mockInstalledPackages.set('test_package', {

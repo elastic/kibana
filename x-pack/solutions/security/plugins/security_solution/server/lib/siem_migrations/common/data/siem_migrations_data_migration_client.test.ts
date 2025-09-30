@@ -7,7 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { SiemMigrationsDataMigrationClient } from './siem_migrations_data_migration_client';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
@@ -17,7 +18,7 @@ import type { SiemMigrationsClientDependencies } from '../types';
 describe('SiemMigrationsDataMigrationClient', () => {
   let siemMigrationsDataMigrationClient: SiemMigrationsDataMigrationClient;
   const esClient =
-    elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
+    elasticsearchClientMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
   const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');

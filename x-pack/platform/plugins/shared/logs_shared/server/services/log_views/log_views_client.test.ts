@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
 import type { LogView, LogViewAttributes, LogViewsStaticConfig } from '../../../common/log_views';

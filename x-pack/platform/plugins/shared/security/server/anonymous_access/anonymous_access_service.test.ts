@@ -8,12 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 
 import type { Logger } from '@kbn/core/server';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { AnonymousAccessService } from './anonymous_access_service';
@@ -50,7 +48,7 @@ describe('AnonymousAccessService', () => {
         spaces: spacesMock.createStart().spacesService,
         basePath: mockCoreStart.http.basePath,
         capabilities: mockCoreStart.capabilities,
-        clusterClient: elasticsearchServiceMock.createClusterClient(),
+        clusterClient: elasticsearchClientMock.createClusterClient(),
       };
     };
 
@@ -177,7 +175,7 @@ describe('AnonymousAccessService', () => {
         const startParams = getStartParams();
         startParams.capabilities.resolveCapabilities.mockResolvedValue(defaultCapabilities);
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
         mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
           new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
         );

@@ -39,6 +39,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",

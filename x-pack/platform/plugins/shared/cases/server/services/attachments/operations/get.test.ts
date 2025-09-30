@@ -7,7 +7,7 @@
 
 import { unset } from 'lodash';
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';

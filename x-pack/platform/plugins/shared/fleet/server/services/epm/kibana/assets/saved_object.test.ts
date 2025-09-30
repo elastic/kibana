@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 import { appContextService } from '../../../app_context';
 

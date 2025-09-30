@@ -12,14 +12,11 @@ import type {
   RequestHandlerContext,
   RouteConfig,
 } from '@kbn/core/server';
-import {
-  coreMock,
-  httpResourcesMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { ViewRouteDeps } from '.';

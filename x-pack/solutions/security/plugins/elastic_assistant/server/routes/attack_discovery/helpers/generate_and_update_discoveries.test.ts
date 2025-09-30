@@ -6,7 +6,9 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
@@ -58,7 +60,7 @@ const mockDataClient = {
 } as unknown as AttackDiscoveryDataClient;
 
 const mockActionsClient = actionsClientMock.create();
-const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 const mockSavedObjectsClient = savedObjectsClientMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;

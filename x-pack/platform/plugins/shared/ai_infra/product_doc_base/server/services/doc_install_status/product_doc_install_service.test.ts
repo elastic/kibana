@@ -8,7 +8,7 @@
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { ProductDocInstallClient } from './product_doc_install_service';
 import { loggingSystemMock } from '@kbn/core/public/mocks';
 

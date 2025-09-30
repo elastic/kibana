@@ -10,7 +10,7 @@
 import { join, sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KibanaRequest } from '@kbn/core/server';
-import { httpResourcesMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { loggingSystemMock } from '@kbn/core/public/mocks';
 import { getComponentData } from './get_component_data';
 import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeowners';

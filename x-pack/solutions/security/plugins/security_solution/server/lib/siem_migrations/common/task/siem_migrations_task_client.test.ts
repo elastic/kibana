@@ -21,7 +21,7 @@ import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { SiemMigrationDataStats } from '../data/types';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import type { SiemMigrationsClientDependencies, StoredSiemMigration } from '../types';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { StoredRuleMigration } from '../../rules/types';
 
 jest.mock('./siem_migrations_task_runner');

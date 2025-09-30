@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';

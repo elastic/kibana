@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
 import {
@@ -36,7 +37,7 @@ export const getManifestClientMock = (
  * @param esClient
  */
 export const createEndpointArtifactClientMock = (
-  esClient: ElasticsearchClientMock = elasticsearchServiceMock.createScopedClusterClient()
+  esClient: ElasticsearchClientMock = elasticsearchClientMock.createScopedClusterClient()
     .asInternalUser
 ): jest.Mocked<EndpointArtifactClientInterface> & {
   _esClient: ElasticsearchClientMock;

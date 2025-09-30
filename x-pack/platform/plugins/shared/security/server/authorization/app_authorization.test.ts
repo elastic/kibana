@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
   FeaturesPluginSetup as FeaturesSetupContract,
   KibanaFeature,

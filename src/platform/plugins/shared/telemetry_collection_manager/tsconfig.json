@@ -10,7 +10,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": [
     "target/**/*",

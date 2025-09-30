@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
@@ -54,7 +54,7 @@ describe('getDefendInsightRoute', () => {
     const tools = requestContextMock.createTools();
     context = tools.context;
     server = serverMock.create();
-    tools.clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+    tools.clients.core.elasticsearch.client = elasticsearchClientMock.createScopedClusterClient();
 
     mockUser = getDefaultUser();
     mockDataClient = getDefaultDataClient();

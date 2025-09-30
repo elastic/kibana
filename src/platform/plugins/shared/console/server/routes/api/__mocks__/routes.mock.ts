@@ -9,17 +9,15 @@
 
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  deprecationsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
 export const savedObjectsClient = savedObjectsClientMock.create();
 export const routeHandlerContextMock = {
   core: {
     elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+      client: elasticsearchClientMock.createScopedClusterClient(),
     },
     savedObjects: { getClient: () => savedObjectsClient },
     deprecations: { client: deprecationsServiceMock.createClient() },

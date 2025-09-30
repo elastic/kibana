@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { License } from './license';
 import type { LicenseCheckState, LicenseType } from './shared_imports';
 import { licensingMock } from './shared_imports';

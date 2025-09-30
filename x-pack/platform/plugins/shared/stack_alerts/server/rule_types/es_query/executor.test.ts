@@ -10,7 +10,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { executor, getValidTimefieldSort, tryToParseAsDate } from './executor';
 import type { ExecutorOptions } from './types';
 import type { Comparator } from '../../../common/comparator_types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
@@ -21,7 +21,7 @@ import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const logger = loggerMock.create();
-const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+const scopedClusterClientMock = elasticsearchClientMock.createScopedClusterClient();
 const createSearchSourceClientMock = () => {
   const searchSourceMock = createSearchSourceMock();
   searchSourceMock.fetch$ = jest.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));

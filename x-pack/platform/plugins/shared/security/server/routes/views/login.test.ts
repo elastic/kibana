@@ -15,7 +15,9 @@ import type {
   RouteConfig,
 } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineLoginRoutes } from './login';
 import type { SecurityLicense } from '../../../common';

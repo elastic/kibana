@@ -12,7 +12,7 @@ import type {
   IndicesResolveIndexResolveIndexDataStreamsItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import { EsResourceType } from '@kbn/onechat-common';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { listSearchSources } from './list_search_sources';
 
 const indexItem = (
@@ -34,10 +34,10 @@ const datastreamItem = (
 };
 
 describe('listSearchSources', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     esClient.indices.resolveIndex.mockResolvedValue({
       indices: [],
       aliases: [],

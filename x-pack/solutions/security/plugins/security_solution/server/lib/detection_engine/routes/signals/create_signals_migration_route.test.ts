@@ -16,7 +16,7 @@ import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 import type { AlertsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
-import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 jest.mock('../index/check_template_version');
 jest.mock('@kbn/securitysolution-es-utils', () => {

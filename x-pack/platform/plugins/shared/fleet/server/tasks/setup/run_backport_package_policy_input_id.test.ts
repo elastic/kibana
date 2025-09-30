@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { packagePolicyService } from '../../services';
 
@@ -43,7 +41,7 @@ describe('_runBackportPackagePolicyInputId', () => {
     );
     await _runBackportPackagePolicyInputId(
       soClient,
-      elasticsearchServiceMock.createClusterClient().asInternalUser,
+      elasticsearchClientMock.createClusterClient().asInternalUser,
       logger
     );
 
@@ -67,7 +65,7 @@ describe('_runBackportPackagePolicyInputId', () => {
     );
     await _runBackportPackagePolicyInputId(
       soClient,
-      elasticsearchServiceMock.createClusterClient().asInternalUser,
+      elasticsearchClientMock.createClusterClient().asInternalUser,
       logger
     );
 
@@ -105,7 +103,7 @@ describe('_runBackportPackagePolicyInputId', () => {
     await expect(
       _runBackportPackagePolicyInputId(
         soClient,
-        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        elasticsearchClientMock.createClusterClient().asInternalUser,
         logger,
         abortController
       )

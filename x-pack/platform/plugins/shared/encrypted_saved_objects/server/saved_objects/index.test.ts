@@ -10,13 +10,10 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObject,
 } from '@kbn/core/server';
-import {
-  coreMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { ClientInstanciator } from '.';

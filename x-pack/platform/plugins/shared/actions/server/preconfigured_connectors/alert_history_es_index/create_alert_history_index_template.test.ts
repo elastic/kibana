@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   createAlertHistoryIndexTemplate,
   getAlertHistoryIndexTemplate,
@@ -15,11 +16,11 @@ type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 describe('createAlertHistoryIndexTemplate', () => {
   let logger: MockedLogger;
-  let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let clusterClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    clusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    clusterClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   test(`should create index template if it doesn't exist`, async () => {

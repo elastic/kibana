@@ -12,7 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ObjectType } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineEnrollRoutes } from './enroll';
 import { routeDefinitionParamsMock } from './index.mock';

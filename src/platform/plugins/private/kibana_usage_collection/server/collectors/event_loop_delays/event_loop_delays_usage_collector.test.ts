@@ -14,7 +14,8 @@ import {
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();

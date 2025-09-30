@@ -6,7 +6,7 @@
  */
 
 import { createMockEndpointAppContextService } from '../../mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
@@ -28,12 +28,12 @@ const fetchSpaceIdsWithMaybePendingActionsMock =
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClientMock: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let runnerInstance: CompleteExternalActionsTaskRunner;
 
   beforeEach(() => {
     endpointContextServicesMock = createMockEndpointAppContextService();
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     runnerInstance = new CompleteExternalActionsTaskRunner(
       endpointContextServicesMock,
       esClientMock,

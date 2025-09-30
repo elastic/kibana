@@ -14,7 +14,8 @@ jest.mock('../../../../lib/proxy_request', () => ({
 }));
 
 import { duration } from 'moment';
-import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { MAJOR_VERSION } from '../../../../../common/constants';
 import { ProxyConfigCollection } from '../../../../lib';
 import type { RouteDependencies, ProxyDependencies } from '../../..';

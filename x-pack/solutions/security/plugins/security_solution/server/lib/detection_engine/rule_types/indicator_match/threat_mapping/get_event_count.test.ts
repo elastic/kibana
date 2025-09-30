@@ -5,11 +5,11 @@
  * 2.0.
  */
 import moment from 'moment';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getEventCount } from './get_event_count';
 
 describe('getEventCount', () => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
@@ -39,7 +39,7 @@ describe('SummaryClient', () => {
   let burnRatesClientMock: jest.Mocked<BurnRatesClient>;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     burnRatesClientMock = createBurnRatesClientMock();
 
     burnRatesClientMock.calculate.mockResolvedValueOnce([

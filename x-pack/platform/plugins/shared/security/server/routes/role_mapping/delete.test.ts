@@ -6,7 +6,8 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineRoleMappingDeleteRoutes } from './delete';
 import { routeDefinitionParamsMock } from '../index.mock';

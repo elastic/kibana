@@ -12,13 +12,10 @@ import type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 

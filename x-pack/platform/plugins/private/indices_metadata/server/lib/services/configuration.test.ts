@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ArtifactService } from './artifact';
 import { ConfigurationService, REFRESH_CONFIG_INTERVAL_MS } from './configuration';
 import type { IndicesMetadataConfiguration } from './indices_metadata.types';

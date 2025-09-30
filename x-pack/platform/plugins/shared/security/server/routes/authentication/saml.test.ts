@@ -7,7 +7,7 @@
 
 import { Type } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineSAMLRoutes } from './saml';

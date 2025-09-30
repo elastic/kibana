@@ -15,7 +15,8 @@ import type { PeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
 
 import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
@@ -86,7 +87,7 @@ function getMockSocket({
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -540,7 +541,7 @@ describe('PKIAuthenticationProvider', () => {
     it('gets a new access token even if existing token is expired.', async () => {
       const user = mockAuthenticatedUser({ authentication_provider: { type: 'pki', name: 'pki' } });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
@@ -645,7 +646,7 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ socket });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
@@ -667,7 +668,7 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -695,7 +696,7 @@ describe('PKIAuthenticationProvider', () => {
         'unavailable',
         securityMock.createApiResponse({ statusCode: 503, body: {} })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

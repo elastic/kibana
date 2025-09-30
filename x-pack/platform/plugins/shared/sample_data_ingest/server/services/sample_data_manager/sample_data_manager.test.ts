@@ -24,7 +24,8 @@ jest.mock('../saved_objects_manager', () => {
 });
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { DatasetSampleType } from '../../../common';
 import type { ISavedObjectsImporter } from '@kbn/core/server';
@@ -42,7 +43,7 @@ const MockedSavedObjectsManager = SavedObjectsManager as jest.MockedClass<
 
 describe('SampleDataManager', () => {
   let logger: MockedLogger;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let soImporter: jest.Mocked<ISavedObjectsImporter>;
   let sampleDataManager: SampleDataManager;
@@ -77,7 +78,7 @@ describe('SampleDataManager', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
     soImporter = {
       import: jest.fn(),

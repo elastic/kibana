@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { of, BehaviorSubject } from 'rxjs';
 import { none } from 'fp-ts/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {

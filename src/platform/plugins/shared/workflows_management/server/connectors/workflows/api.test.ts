@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { api } from './api';
 import type { ExternalService } from './types';
 

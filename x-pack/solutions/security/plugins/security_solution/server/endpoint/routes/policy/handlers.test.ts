@@ -13,11 +13,9 @@ import {
 } from '../../mocks';
 import { getHostPolicyResponseHandler } from './handlers';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -35,7 +33,7 @@ describe('test policy response handler', () => {
 
   describe('test policy response handler', () => {
     beforeEach(() => {
-      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClient = elasticsearchClientMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();

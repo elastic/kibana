@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { PrometheusExporter } from '@kbn/metrics';
 import { registerV1PrometheusRoute } from '.';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { PackagePolicy } from '../../../common';
@@ -17,7 +17,7 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
   let packagePolicies: PackagePolicy[];
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
     esClientMock.search.mockImplementation(async () => {
       return {
         took: 3,

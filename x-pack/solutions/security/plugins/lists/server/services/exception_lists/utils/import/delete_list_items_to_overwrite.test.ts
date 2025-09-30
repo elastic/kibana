@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 

@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { renderParameterTemplates } from './render';
 
 const params = {

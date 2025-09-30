@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -154,7 +155,7 @@ describe('Download Service', () => {
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
-  const esClient = elasticsearchServiceMock.createInternalClient();
+  const esClient = elasticsearchClientMock.createInternalClient();
 
   describe('create', () => {
     it('work with a predefined id', async () => {

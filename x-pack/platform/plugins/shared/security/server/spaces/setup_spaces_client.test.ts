@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { setupSpacesClient } from './setup_spaces_client';

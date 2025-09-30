@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createAuthorizationMock } from '../../../authorization/mock';
 import { createCaseServiceMock } from '../../../services/mocks';
 import { createCasesClientMock } from '../../mocks';

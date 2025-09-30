@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errors as EsErrors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

@@ -13,7 +13,7 @@ jest.mock('../../saved_objects/saved_objects', () => {
 });
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ISavedObjectsImporter,

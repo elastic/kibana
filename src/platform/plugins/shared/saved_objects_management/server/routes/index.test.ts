@@ -9,7 +9,8 @@
 
 import { registerRoutes } from '.';
 import type { ISavedObjectsManagement } from '../services';
-import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 describe('registerRoutes', () => {
   it('registers the management routes', () => {

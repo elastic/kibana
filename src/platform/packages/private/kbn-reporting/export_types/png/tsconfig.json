@@ -23,5 +23,7 @@
     "@kbn/core",
     "@kbn/reporting-mocks-server",
     "@kbn/licensing-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ]
 }

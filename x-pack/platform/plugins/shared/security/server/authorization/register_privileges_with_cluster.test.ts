@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import type { RawKibanaPrivileges } from '../../common';
@@ -35,7 +36,7 @@ const registerPrivilegesWithClusterTest = (
   }
 ) => {
   const createExpectUpdatedPrivileges = (
-    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+    mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>,
     mockLogger: jest.Mocked<Logger>,
     error: Error
   ) => {
@@ -74,7 +75,7 @@ const registerPrivilegesWithClusterTest = (
   };
 
   const createExpectDidntUpdatePrivileges = (
-    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+    mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>,
     mockLogger: Logger,
     error: Error
   ) => {
@@ -107,7 +108,7 @@ const registerPrivilegesWithClusterTest = (
   };
 
   test(description, async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchClientMock.createClusterClient();
     mockClusterClient.asInternalUser.security.getPrivileges.mockImplementation((async () => {
       if (throwErrorWhenGettingPrivileges) {
         throw throwErrorWhenGettingPrivileges;

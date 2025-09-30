@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getConversationSearchEsMock } from './conversations_schema.mock';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';

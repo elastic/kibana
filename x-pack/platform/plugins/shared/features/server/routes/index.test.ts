@@ -8,7 +8,8 @@
 import { FeatureRegistry } from '../feature_registry';
 import { defineRoutes } from '.';
 
-import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { LicenseType } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';

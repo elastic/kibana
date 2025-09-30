@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createTelemetryCustomResponseActionRulesTaskConfig } from './custom_response_actions_rule';
 import {
   createMockTelemetryEventsSender,

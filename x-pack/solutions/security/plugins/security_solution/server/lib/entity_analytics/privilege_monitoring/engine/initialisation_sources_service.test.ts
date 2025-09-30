@@ -12,12 +12,10 @@ import {
   createInitialisationSourcesService,
   type InitialisationSourcesService,
 } from './initialisation_sources_service';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 import { allowedExperimentalValues } from '../../../../../common';
@@ -46,7 +44,7 @@ jest.mock('../saved_objects', () => {
 });
 
 describe('createInitialisationSourcesService', () => {
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const clusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();

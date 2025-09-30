@@ -7,11 +7,9 @@
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CreateScopedRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderFactoryMock } from './model_provider';

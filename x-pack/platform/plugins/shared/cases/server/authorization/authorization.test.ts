@@ -6,7 +6,8 @@
  */
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { Authorization, Operations } from '.';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';

@@ -7,7 +7,7 @@
 
 import { omit, pick } from 'lodash';
 import { createRuleRoute } from './create_rule_route';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
@@ -18,7 +18,7 @@ import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../ty
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
 

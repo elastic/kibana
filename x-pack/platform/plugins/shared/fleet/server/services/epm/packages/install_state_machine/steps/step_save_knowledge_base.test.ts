@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/types/models/epm';
 
@@ -51,7 +52,7 @@ let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
 describe('stepSaveKnowledgeBase', () => {
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     savedObjectsClient = savedObjectsClientMock.create();
     jest.clearAllMocks();
 
@@ -604,7 +605,7 @@ describe('stepSaveKnowledgeBase', () => {
 
 describe('cleanupKnowledgeBaseStep', () => {
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     savedObjectsClient = savedObjectsClientMock.create();
     jest.clearAllMocks();
   });

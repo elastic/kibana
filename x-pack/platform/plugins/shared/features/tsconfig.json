@@ -17,6 +17,8 @@
     "@kbn/i18n",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

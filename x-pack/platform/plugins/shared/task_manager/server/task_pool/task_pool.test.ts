@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { resolvable, sleep } from '../test_utils';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import { asOk } from '../lib/result_type';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';

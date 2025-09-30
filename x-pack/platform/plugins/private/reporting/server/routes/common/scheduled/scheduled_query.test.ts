@@ -14,8 +14,9 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
 import type { CreatedAtSearchResponse } from './scheduled_query';
@@ -221,7 +222,7 @@ const nextRunResponse: BulkGetResult = [
 const mockLogger = loggingSystemMock.createLogger();
 
 describe('scheduledQueryFactory', () => {
-  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let core: ReportingCore;
   let auditLogger: AuditLogger;
   let soClient: SavedObjectsClientContract;

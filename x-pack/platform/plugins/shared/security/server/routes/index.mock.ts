@@ -7,12 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  coreMock,
-  httpResourcesMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getDocLinks } from '@kbn/doc-links';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';

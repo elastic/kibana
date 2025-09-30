@@ -6,7 +6,8 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { initGetActiveSpaceApi } from './get_active_space';
 import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';

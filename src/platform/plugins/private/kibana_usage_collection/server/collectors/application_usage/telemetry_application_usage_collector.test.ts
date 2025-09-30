@@ -8,7 +8,8 @@
  */
 
 import { Subject } from 'rxjs';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,

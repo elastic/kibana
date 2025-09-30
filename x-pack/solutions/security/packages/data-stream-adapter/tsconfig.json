@@ -11,6 +11,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/index-adapter",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*"

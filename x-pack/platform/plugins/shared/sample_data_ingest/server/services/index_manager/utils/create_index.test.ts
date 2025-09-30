@@ -8,7 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createIndex } from './create_index';
 import { internalElserInferenceId } from '../../../../common';
 
@@ -18,7 +18,7 @@ describe('createIndex', () => {
 
   beforeEach(() => {
     log = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('calls esClient.indices.create with the right parameters for the current manifest version', async () => {

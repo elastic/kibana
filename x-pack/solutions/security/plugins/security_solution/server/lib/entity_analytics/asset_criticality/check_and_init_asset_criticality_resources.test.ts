@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { requestContextMock } from '../../detection_engine/routes/__mocks__';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_criticality_resources';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { bulkEditInternalRulesRoute } from './bulk_edit_rules_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';

@@ -123,6 +123,8 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-di",
     "@kbn/licensing-types",
+    "@kbn/config-mocks",
+    "@kbn/core-saved-objects-server-mocks",
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
   ]

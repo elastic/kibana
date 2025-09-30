@@ -10,11 +10,9 @@ import type {
   ElasticsearchClient,
   SavedObject,
 } from '@kbn/core/server';
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import {
@@ -69,7 +67,7 @@ describe('stepCreateRestartInstallation', () => {
 
     beforeEach(async () => {
       soClient = savedObjectsClientMock.create();
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       appContextService.start(createAppContextStartContractMock());
     });
     afterEach(() => {

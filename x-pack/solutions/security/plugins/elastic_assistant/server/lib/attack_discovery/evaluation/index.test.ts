@@ -6,7 +6,7 @@
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -56,8 +56,8 @@ const evaluatorConnectorId = 'test-evaluator-connector-id';
 const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
 const logger = loggerMock.create();
-const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-const mockEsClientInternalUser = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
+const mockEsClientInternalUser = elasticsearchClientMock.createElasticsearchClient();
 const runName = 'test-run-name';
 
 const connectors = [

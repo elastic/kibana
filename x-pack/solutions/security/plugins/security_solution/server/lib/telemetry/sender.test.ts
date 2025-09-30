@@ -8,7 +8,7 @@
 /* eslint-disable dot-notation */
 import type { ExperimentalFeatures } from '../../../common';
 import { TelemetryEventsSender } from './sender';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { of } from 'rxjs';
 import { URL } from 'url';

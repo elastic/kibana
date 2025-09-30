@@ -8,7 +8,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -50,7 +51,7 @@ describe('Fleet proxies service', () => {
   });
 
   const soClientMock = savedObjectsClientMock.create();
-  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 
   beforeEach(() => {
     mockedDownloadSourceService.listAllForProxyId.mockReset();

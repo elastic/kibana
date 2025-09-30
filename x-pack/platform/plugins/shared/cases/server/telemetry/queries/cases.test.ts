@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasePersistedStatus } from '../../common/types/case';
 import type {
   AttachmentAggregationResult,

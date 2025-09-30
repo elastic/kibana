@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CleanUpTempSummary } from './clean_up_temp_summary';
 
 const commonEsResponse = {
@@ -29,7 +30,7 @@ describe('CleanUpTempSummary', () => {
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-02-10T15:00:00.000Z'));
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     service = new CleanUpTempSummary(
       esClientMock,
       loggingSystemMock.createLogger(),

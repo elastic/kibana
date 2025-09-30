@@ -20,7 +20,7 @@ import type {
 } from '../../..';
 import { StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';

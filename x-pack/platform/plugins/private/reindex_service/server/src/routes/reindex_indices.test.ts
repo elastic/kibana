@@ -6,11 +6,9 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { MockRouter } from '../__mocks__/routes.mock';
@@ -76,7 +74,7 @@ describe('reindex API', () => {
         return new ReindexServiceWrapper({
           soClient: savedObjectsClientMock.create(),
           credentialStore,
-          clusterClient: elasticsearchServiceMock.createClusterClient(),
+          clusterClient: elasticsearchClientMock.createClusterClient(),
           logger: logMock,
           licensing: licensingMockInstance,
           security: securityMockInstance,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
@@ -20,7 +20,7 @@ import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
   it('installs the common resources when there is a version mismatch', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
         {
@@ -84,7 +84,7 @@ describe('resourceInstaller', () => {
   });
 
   it('does not install the common resources when there is a version match', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
         {

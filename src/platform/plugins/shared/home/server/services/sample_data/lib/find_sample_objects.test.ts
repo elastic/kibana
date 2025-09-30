@@ -10,7 +10,8 @@
 import { mockBuildNode } from './find_sample_objects.test.mock';
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { findSampleObjects } from './find_sample_objects';
 
 describe('findSampleObjects', () => {

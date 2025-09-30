@@ -9,7 +9,8 @@ import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/c
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PartiallyUpdateableRuleAttributes } from './partially_update_rule';
 import { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -17,7 +18,7 @@ import type { RuleExecutionStatuses } from '@kbn/alerting-types';
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
   MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
-const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 describe('partiallyUpdateRule', () => {
   beforeEach(() => {

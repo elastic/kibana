@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { packagePolicyService } from '../package_policy';
 
@@ -22,7 +23,7 @@ const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof 
 const mockedGetAgentById = getAgentById as jest.MockedFunction<typeof getAgentById>;
 
 describe('changeAgentPrivilegeLevel', () => {
-  const esClientMock = elasticsearchServiceMock.createInternalClient();
+  const esClientMock = elasticsearchClientMock.createInternalClient();
   const soClientMock = savedObjectsClientMock.create();
   const agentId = 'agent-id';
   const policyId = 'policy-id';

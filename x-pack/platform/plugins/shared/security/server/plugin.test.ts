@@ -10,7 +10,8 @@ import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

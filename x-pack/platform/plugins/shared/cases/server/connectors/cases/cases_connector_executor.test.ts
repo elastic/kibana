@@ -42,7 +42,7 @@ import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
   expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping,
 } from './test_helpers';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';

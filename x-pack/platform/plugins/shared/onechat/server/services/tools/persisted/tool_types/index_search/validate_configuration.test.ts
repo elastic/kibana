@@ -6,7 +6,7 @@
  */
 
 import { EsResourceType } from '@kbn/onechat-common';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
 import { validateConfig } from './validate_configuration';
 import { listSearchSources as _listSearchSources } from '@kbn/onechat-genai-utils';
@@ -16,10 +16,10 @@ jest.mock('@kbn/onechat-genai-utils');
 const listSearchSourcesMock = _listSearchSources as jest.MockedFunction<typeof _listSearchSources>;
 
 describe('validateConfig', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   afterEach(() => {

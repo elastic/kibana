@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -29,7 +30,7 @@ const scheduleCAIBackfillTaskMock = scheduleCAIBackfillTask as jest.Mock;
 
 describe('AnalyticsIndex', () => {
   const logger = loggingSystemMock.createLogger();
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
   const taskManager = taskManagerMock.createStart();
   const isServerless = false;
   const indexName = '.test-index-name';

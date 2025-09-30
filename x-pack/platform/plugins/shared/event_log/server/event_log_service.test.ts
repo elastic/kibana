@@ -8,7 +8,7 @@
 import type { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
 import { contextMock } from './es/context.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 const loggingService = loggingSystemMock.create();

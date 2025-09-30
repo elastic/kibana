@@ -6,8 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { FilesClientFactory } from './types';
 import { FleetFromHostFilesClient } from './client_from_host';
@@ -22,7 +21,7 @@ describe('getFilesClientFactory()', () => {
 
   beforeEach(() => {
     clientFactory = getFilesClientFactory({
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      esClient: elasticsearchClientMock.createElasticsearchClient(),
       logger: loggingSystemMock.create().asLoggerFactory(),
     });
   });

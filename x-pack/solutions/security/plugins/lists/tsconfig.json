@@ -44,7 +44,10 @@
     "@kbn/zod-helpers",
     "@kbn/core-security-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

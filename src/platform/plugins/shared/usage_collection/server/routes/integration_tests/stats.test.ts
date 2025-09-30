@@ -11,11 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { ServiceStatus } from '@kbn/core/server';
 import { type MetricsServiceSetup, ServiceStatusLevels } from '@kbn/core/server';
-import {
-  loggingSystemMock,
-  metricsServiceMock,
-  executionContextServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { HttpIntegrationServiceSetupContractMock } from '@kbn/core-http-server-mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';

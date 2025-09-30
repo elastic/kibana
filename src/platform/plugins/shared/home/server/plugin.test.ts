@@ -10,7 +10,8 @@
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import type { HomeServerPluginSetupDependencies } from './plugin';
 import { HomeServerPlugin } from './plugin';
-import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 describe('HomeServerPlugin', () => {

@@ -17,11 +17,9 @@ jest.mock('../app_context', () => ({
 }));
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -93,7 +91,7 @@ describe('AgentService', () => {
           })
         );
         agentClient = new AgentServiceImpl(
-          elasticsearchServiceMock.createElasticsearchClient(),
+          elasticsearchClientMock.createElasticsearchClient(),
           savedObjectsClientMock.create()
         ).asScoped(httpServerMock.createKibanaRequest());
       });
@@ -142,7 +140,7 @@ describe('AgentService', () => {
     });
 
     describe('with required privilege', () => {
-      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
 
       beforeEach(() =>
@@ -160,7 +158,7 @@ describe('AgentService', () => {
     });
 
     describe('with required privilege in a non default space', () => {
-      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
 
       beforeEach(() => {
@@ -180,7 +178,7 @@ describe('AgentService', () => {
   });
 
   describe('asInternalUser', () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
     const mockSoClient = savedObjectsClientMock.create();
     expectApisToCallServicesSuccessfully(
       mockEsClient,
@@ -192,7 +190,7 @@ describe('AgentService', () => {
   describe('asInternalScopedUser', () => {
     it('should throw error if no space id is passed', () => {
       const agentService = new AgentServiceImpl(
-        elasticsearchServiceMock.createElasticsearchClient(),
+        elasticsearchClientMock.createElasticsearchClient(),
         savedObjectsClientMock.create()
       );
 
@@ -200,7 +198,7 @@ describe('AgentService', () => {
     });
 
     {
-      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
       expectApisToCallServicesSuccessfully(
         mockEsClient,

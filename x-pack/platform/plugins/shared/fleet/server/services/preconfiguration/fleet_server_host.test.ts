@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
@@ -233,7 +234,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
   });
   it('should do nothing if there is no cloud fleet server hosts', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
@@ -242,7 +243,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 
   it('should do nothing if there is already an host configured', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
@@ -267,7 +268,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 
   it('should create a new fleet server hosts if there is no host configured', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
@@ -344,7 +345,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should create a preconfigured fleet server host that does not exist', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -369,7 +370,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should create a preconfigured fleet server host with secrets that does not exist', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -406,7 +407,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -433,7 +434,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should update preconfigured fleet server hosts if host_urls change', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -460,7 +461,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should update preconfigured fleet server hosts if proxy_id change', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -488,7 +489,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have ssl', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -522,7 +523,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have secrets', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -559,7 +560,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
   });
   it('should update preconfigured fleet server hosts if preconfigured host with secrets exists and changes', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -597,7 +598,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should not update preconfigured fleet server hosts if no fields changed', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {
@@ -615,7 +616,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
   it('should not update preconfigured fleet server hosts with secrets if no fields changed', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
       {

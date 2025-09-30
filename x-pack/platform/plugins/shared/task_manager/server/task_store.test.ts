@@ -13,16 +13,14 @@ import { first } from 'rxjs';
 import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -124,7 +122,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -252,7 +250,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -400,7 +398,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -514,10 +512,10 @@ describe('TaskStore', () => {
 
   describe('fetch', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -601,7 +599,7 @@ describe('TaskStore', () => {
 
   describe('msearch', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     const mockTask = {
       taskType: 'taskWithApiKey',
@@ -642,7 +640,7 @@ describe('TaskStore', () => {
         },
       }));
 
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -826,10 +824,10 @@ describe('TaskStore', () => {
 
   describe('aggregate', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -953,10 +951,10 @@ describe('TaskStore', () => {
 
   describe('update', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -1161,7 +1159,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -1383,7 +1381,7 @@ describe('TaskStore', () => {
     const logger = mockLogger();
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger,
         index: 'tasky',
@@ -1939,7 +1937,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2060,7 +2058,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2132,7 +2130,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2198,7 +2196,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2299,7 +2297,7 @@ describe('TaskStore', () => {
             index: 'tasky',
             taskManagerId: '',
             serializer,
-            esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+            esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
@@ -2327,7 +2325,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2353,7 +2351,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2380,7 +2378,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2651,7 +2649,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2685,7 +2683,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2943,7 +2941,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -2994,7 +2992,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        esClient: elasticsearchClientMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -3032,10 +3030,10 @@ describe('TaskStore', () => {
 
   describe('updateByQuery', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -3068,10 +3066,10 @@ describe('TaskStore', () => {
 
   describe('bulkGetVersions', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -3184,10 +3182,10 @@ describe('TaskStore', () => {
 
   describe('getDocVersions', () => {
     let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',

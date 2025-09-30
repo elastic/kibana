@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,

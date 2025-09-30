@@ -6,7 +6,7 @@
  */
 
 import { UNIFIED_MANIFEST_ALL_NAMESPACES, UnifiedManifestClient } from './unified_manifest_client';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { ManifestConstants } from '../../lib/artifacts';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalUnifiedManifestSchema } from '../../schemas';

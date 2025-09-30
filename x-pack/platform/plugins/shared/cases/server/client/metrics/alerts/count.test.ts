@@ -7,7 +7,7 @@
 
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { AlertsCount } from './count';

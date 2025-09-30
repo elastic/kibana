@@ -6,11 +6,11 @@
  */
 
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -102,7 +102,7 @@ const mockContext = {
         getBooleanValue: jest.fn().mockResolvedValue(false),
       },
       elasticsearch: {
-        client: elasticsearchServiceMock.createScopedClusterClient(),
+        client: elasticsearchClientMock.createScopedClusterClient(),
       },
       savedObjects: coreMock.createRequestHandlerContext().savedObjects,
     },

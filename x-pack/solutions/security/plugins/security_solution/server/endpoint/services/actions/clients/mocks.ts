@@ -15,7 +15,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { merge } from 'lodash';
 import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
@@ -90,7 +90,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
 };
 
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
 
   // TODO:PT refactor mock to instead use Mocked endpoint context and not the real class with mocked dependencies

@@ -19,7 +19,7 @@ import {
 } from './actions_config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import moment from 'moment';
 

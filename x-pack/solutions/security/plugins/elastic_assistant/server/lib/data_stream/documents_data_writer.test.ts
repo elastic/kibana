@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger, AuthenticatedUser } from '@kbn/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
@@ -176,7 +177,7 @@ describe('DocumentsDataWriter', () => {
     let loggerMock: Logger;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       loggerMock = loggingSystemMock.createLogger();
       writer = new DocumentsDataWriter({
         esClient: esClientMock,

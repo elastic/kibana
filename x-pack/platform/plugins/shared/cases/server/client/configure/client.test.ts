@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 import type { CasesClientArgs } from '../types';

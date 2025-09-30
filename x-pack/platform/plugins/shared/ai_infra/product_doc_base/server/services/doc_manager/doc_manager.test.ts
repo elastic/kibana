@@ -7,7 +7,8 @@
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { securityServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ProductDocInstallClient } from '../doc_install_status';

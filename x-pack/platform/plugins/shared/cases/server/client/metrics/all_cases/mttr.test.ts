@@ -9,7 +9,7 @@ import type { Case } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createCaseServiceMock } from '../../../services/mocks';
 
 import { MTTR } from './mttr';

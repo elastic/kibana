@@ -6,7 +6,8 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -508,7 +509,7 @@ describe('Agents CRUD test', () => {
 
   describe('update', () => {
     it('should write to audit log', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.update.mockResolvedValueOnce({} as any);
 
@@ -522,7 +523,7 @@ describe('Agents CRUD test', () => {
 
   describe('openPointInTime', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
 
       await openPointInTime(esClient);
@@ -535,7 +536,7 @@ describe('Agents CRUD test', () => {
 
   describe('closePointInTime', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       esClient.closePointInTime.mockResolvedValueOnce({} as any);
 
       await closePointInTime(esClient, 'test-pit');

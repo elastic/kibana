@@ -10,7 +10,8 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PluginStart as DataPluginStart } from '../..';
 import { dataPluginMock } from '../../mocks';
 

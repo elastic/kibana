@@ -9,7 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { ElasticsearchService } from './elasticsearch_service';

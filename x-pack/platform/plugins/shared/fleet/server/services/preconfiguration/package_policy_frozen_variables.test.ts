@@ -6,7 +6,8 @@
  */
 
 import { clone } from 'lodash';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { packagePolicyService } from '../package_policy';
 
@@ -77,7 +78,7 @@ describe('updateFrozenInputs', () => {
     jest.mocked(packagePolicyService.update).mockReset();
   });
   it('should update only frozen variables', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
     const soClient = savedObjectsClientMock.create();
     await updateFrozenInputs(esClient, soClient, clone(basePolicy), [
       {
@@ -107,7 +108,7 @@ describe('updateFrozenInputs', () => {
   });
 
   it('should update variables that are newly frozen', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
     const soClient = savedObjectsClientMock.create();
     await updateFrozenInputs(esClient, soClient, clone(basePolicy), [
       {

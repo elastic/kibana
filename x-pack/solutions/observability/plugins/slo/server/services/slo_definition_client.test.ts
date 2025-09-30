@@ -6,11 +6,9 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
@@ -27,7 +25,7 @@ describe('SLODefinitionClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
 

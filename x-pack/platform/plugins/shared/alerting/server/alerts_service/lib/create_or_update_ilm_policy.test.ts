@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIlmPolicy } from './create_or_update_ilm_policy';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
 
 const IlmPolicy = {

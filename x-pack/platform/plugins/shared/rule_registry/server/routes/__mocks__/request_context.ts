@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { alertsClientMock } from '../../alert_data_client/alerts_client.mock';
 import type { RacRequestHandlerContext } from '../../types';
 
 const createMockClients = () => ({
   rac: alertsClientMock.create(),
-  newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+  newClusterClient: elasticsearchClientMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
 });
 

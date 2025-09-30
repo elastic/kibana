@@ -17,12 +17,10 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { actionsAuthorizationMock } from '../../../../mocks';
 import { inMemoryMetricsMock } from '../../../../monitoring/in_memory_metrics.mock';
 import { schema } from '@kbn/config-schema';
-import {
-  httpServerMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
@@ -63,7 +61,7 @@ describe('listTypes()', () => {
     actionsClient = new ActionsClient({
       logger: loggingSystemMock.create().get(),
       kibanaIndices: ['.kibana'],
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
       actionTypeRegistry,
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],

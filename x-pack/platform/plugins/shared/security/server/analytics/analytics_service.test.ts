@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { CSPViolationEvent, PermissionsPolicyViolationEvent } from './analytics_service';
 import {

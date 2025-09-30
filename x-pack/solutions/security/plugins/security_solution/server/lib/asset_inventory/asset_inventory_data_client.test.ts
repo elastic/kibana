@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 import { AssetInventoryDataClient } from './asset_inventory_data_client';
@@ -58,7 +56,7 @@ const mockCoreServicesTuple: [
 
 describe('AssetInventoryDataClient', () => {
   const loggerMock = loggingSystemMock.createLogger();
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const clusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const uiSettingsClientMock = uiSettingsServiceMock.createClient();
 
   const mockUsageCollection = {

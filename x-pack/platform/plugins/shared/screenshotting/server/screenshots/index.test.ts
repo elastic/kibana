@@ -7,7 +7,8 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import type { ScreenshotOptions } from '.';

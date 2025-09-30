@@ -7,7 +7,7 @@
 
 import { times } from 'lodash';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import { internalElserInferenceId } from '../../../../common/consts';
 import type { ZipArchive } from '../utils/zip_archive';
@@ -32,11 +32,11 @@ const createContentFile = (count: number, offset: number = 0): string => {
 
 describe('populateIndex', () => {
   let log: MockedLogger;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
     log = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('calls `esClient.bulk` once per content file', async () => {

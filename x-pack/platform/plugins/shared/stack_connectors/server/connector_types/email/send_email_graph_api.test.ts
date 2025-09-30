@@ -11,7 +11,7 @@ jest.mock('axios', () => ({
 
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import type { ProxySettings } from '@kbn/actions-plugin/server/types';

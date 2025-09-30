@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { deduplicateAttackDiscoveries } from '.';
@@ -18,7 +18,7 @@ jest.mock('../transforms/transform_to_alert_documents', () => ({
   generateAttackDiscoveryAlertHash: jest.fn(),
 }));
 
-const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 
 describe('deduplicateAttackDiscoveries', () => {

@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const fakeRequest = {
   headers: {},

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
@@ -175,7 +173,7 @@ const createRuleExecutorServicesMock = <
     getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
     search: createAbortableSearchServiceMock(),
     share: createShareStartMock(),
     shouldStopExecution: () => true as boolean,

@@ -11,7 +11,7 @@ import { createExternalService } from './service';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ExternalServiceITOM } from '../lib/servicenow/types';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { itomEventParams, serviceNowChoices } from '../lib/servicenow/mocks';

@@ -7,7 +7,8 @@
 
 import { Type } from '@kbn/config-schema';
 import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from '@kbn/core/server';
-import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineCaptureURLRoutes } from './capture_url';
 import type { SecurityRequestHandlerContext } from '../../types';

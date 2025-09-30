@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskStoreMock } from '../task_store.mock';
 import { TaskManagerMetricsCollector } from './task_metrics_collector';
 

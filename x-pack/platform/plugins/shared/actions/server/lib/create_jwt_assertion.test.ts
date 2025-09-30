@@ -11,7 +11,7 @@ jest.mock('jsonwebtoken', () => ({
 
 import jwt from 'jsonwebtoken';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createJWTAssertion } from './create_jwt_assertion';
 
 const jwtSign = jwt.sign as jest.Mock;

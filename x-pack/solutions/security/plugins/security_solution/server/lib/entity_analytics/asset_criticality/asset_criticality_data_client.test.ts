@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Readable } from 'stream';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
@@ -14,14 +15,14 @@ import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 type MockInternalEsClient = ReturnType<
-  typeof elasticsearchServiceMock.createScopedClusterClient
+  typeof elasticsearchClientMock.createScopedClusterClient
 >['asInternalUser'];
 jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
 
 describe('AssetCriticalityDataClient', () => {
-  const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const esClientInternal = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
   const logger = loggingSystemMock.createLogger();
   const mockAuditLogger = auditLoggerMock.create();
 
@@ -149,7 +150,7 @@ describe('AssetCriticalityDataClient', () => {
     let subject: AssetCriticalityDataClient;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      esClientMock = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
       loggerMock = loggingSystemMock.createLogger();
       subject = new AssetCriticalityDataClient({
         esClient: esClientMock,
@@ -227,7 +228,7 @@ describe('AssetCriticalityDataClient', () => {
     let subject: AssetCriticalityDataClient;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      esClientMock = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
       loggerMock = loggingSystemMock.createLogger();
       subject = new AssetCriticalityDataClient({
         esClient: esClientMock,
@@ -310,7 +311,7 @@ describe('AssetCriticalityDataClient', () => {
     let subject: AssetCriticalityDataClient;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      esClientMock = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
 
       esClientMock.helpers.bulk = mockEsBulk();
       loggerMock = loggingSystemMock.createLogger();

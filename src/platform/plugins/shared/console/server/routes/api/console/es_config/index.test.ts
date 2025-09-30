@@ -8,7 +8,8 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { SemVer } from 'semver';
 import { duration } from 'moment';
 import { MAJOR_VERSION } from '../../../../../common/constants';

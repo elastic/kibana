@@ -7,7 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 

@@ -11,7 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 

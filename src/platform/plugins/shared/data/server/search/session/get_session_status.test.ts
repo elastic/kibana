@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getSessionStatus } from './get_session_status';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 import { SearchSessionStatus } from '../../../common';
@@ -44,7 +44,7 @@ describe('getSessionStatus', () => {
 
   const mockConfig = {} as unknown as SearchSessionsConfigSchema;
   const deps = {
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    esClient: elasticsearchClientMock.createElasticsearchClient(),
   };
   test("returns an in_progress status if there's nothing inside the session", async () => {
     const session: any = {

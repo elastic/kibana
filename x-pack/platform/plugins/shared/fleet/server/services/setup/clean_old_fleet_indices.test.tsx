@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -14,7 +14,7 @@ import { cleanUpOldFileIndices } from './clean_old_fleet_indices';
 describe('cleanUpOldFileIndices', () => {
   it('should clean old indices and old index templates', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     esClient.indices.get.mockResolvedValueOnce({
       '.fleet-files-agent': {},
       '.fleet-files-test': {},
@@ -49,7 +49,7 @@ describe('cleanUpOldFileIndices', () => {
 
   it('should log a warning and not throw if an unexpected error happen', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     esClient.indices.get.mockRejectedValue(new Error('test error'));
 
     await cleanUpOldFileIndices(esClient, logger);
@@ -59,7 +59,7 @@ describe('cleanUpOldFileIndices', () => {
 
   it('should handle 404 while deleting index template', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     esClient.indices.get.mockResolvedValue({});
     esClient.indices.deleteIndexTemplate.mockRejectedValue({
       meta: {
@@ -75,7 +75,7 @@ describe('cleanUpOldFileIndices', () => {
 
   it('should handle 404 when deleting old index', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     esClient.indices.get.mockResolvedValueOnce({
       '.fleet-files-agent': {},
       '.fleet-files-test': {},

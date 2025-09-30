@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import {
@@ -31,11 +32,11 @@ const getIndexAliasPerSpaceMock = getIndexAliasPerSpace as jest.Mock;
 const TEMPLATE_VERSION = 77;
 
 describe('getNonMigratedSignalsInfo', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     getLatestIndexTemplateVersionMock.mockReturnValue(TEMPLATE_VERSION);
     getIndexVersionsByIndexMock.mockReturnValue({

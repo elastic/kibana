@@ -15,12 +15,10 @@ jest.mock('../security', () => {
 import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';
@@ -240,7 +238,7 @@ describe('PackageService', () => {
   let mockLogger: MockedLogger;
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient = elasticsearchClientMock.createElasticsearchClient();
     mockSoClient = savedObjectsClientMock.create();
     mockLogger = loggingSystemMock.createLogger();
     mockPackageService = new PackageServiceImpl(mockEsClient, mockSoClient, mockLogger);

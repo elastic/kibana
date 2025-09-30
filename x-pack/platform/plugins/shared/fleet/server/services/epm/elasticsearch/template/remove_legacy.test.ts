@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
 

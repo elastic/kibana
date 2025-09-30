@@ -6,7 +6,8 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RulesSettings } from '../../../common';
 import {
   RULES_SETTINGS_FEATURE_ID,

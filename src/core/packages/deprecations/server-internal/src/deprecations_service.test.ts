@@ -17,7 +17,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { DeprecationsSetupDeps } from './deprecations_service';
@@ -123,7 +123,7 @@ describe('DeprecationsService', () => {
   describe('#start', () => {
     describe('#asScopedToClient', () => {
       it('returns client with #getAllDeprecations method', async () => {
-        const esClient = elasticsearchServiceMock.createScopedClusterClient();
+        const esClient = elasticsearchClientMock.createScopedClusterClient();
         const savedObjectsClient = savedObjectsClientMock.create();
         const request = httpServerMock.createKibanaRequest();
         const deprecationsService = new DeprecationsService(coreContext);

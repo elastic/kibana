@@ -24,6 +24,8 @@
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

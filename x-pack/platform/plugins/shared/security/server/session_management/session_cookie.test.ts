@@ -6,12 +6,8 @@
  */
 
 import type { SessionStorage } from '@kbn/core/server';
-import {
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  sessionStorageMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock, sessionStorageMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { SessionCookieOptions } from './session_cookie';
 import { SessionCookie } from './session_cookie';

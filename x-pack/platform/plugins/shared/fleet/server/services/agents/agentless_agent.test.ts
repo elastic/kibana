@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -105,7 +106,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -209,7 +210,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -314,7 +315,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -433,7 +434,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -560,7 +561,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -760,7 +761,7 @@ describe('Agentless Agent service', () => {
       mockAgentlessDeploymentResponse
     );
     const soClient = getAgentPolicyCreateMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
@@ -825,7 +826,7 @@ describe('Agentless Agent service', () => {
       mockAgentlessDeploymentResponse
     );
     const soClient = getAgentPolicyCreateMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
@@ -877,7 +878,7 @@ describe('Agentless Agent service', () => {
 
   it('should redact sensitive information from error logs', async () => {
     const soClient = getAgentPolicyCreateMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
@@ -943,7 +944,7 @@ describe('Agentless Agent service', () => {
     );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -1005,7 +1006,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if agentless policy does not support_agentless', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
@@ -1043,7 +1044,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if cloud and serverless is not enabled', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
@@ -1082,7 +1083,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if agentless configuration is not found', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({} as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
@@ -1103,7 +1104,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if fleet hosts are not found', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1147,7 +1148,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if enrollment tokens are not found', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1190,7 +1191,7 @@ describe('Agentless Agent service', () => {
     it('should throw AgentlessAgentConfigError if agent policy is missing fleet_server_host_id', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1231,7 +1232,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns a status not handled and not in the 2xx series', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1293,7 +1294,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 500', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1355,7 +1356,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 429', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1417,7 +1418,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 408', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1479,7 +1480,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 404', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1541,7 +1542,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 403', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1603,7 +1604,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 401', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1665,7 +1666,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 400', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1727,7 +1728,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 400 with code FLEET_UNREACHABLE', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,
@@ -1792,7 +1793,7 @@ describe('Agentless Agent service', () => {
 
     it('should throw an error and log and error when the Agentless API returns status 429 with code OVER_PROVISIONED', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,

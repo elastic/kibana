@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
@@ -19,7 +20,7 @@ import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/ent
 import type { PrivMonUserSource } from '../types';
 
 describe('createPrivilegedUsersCrudService', () => {
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  let mockEsClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
   let crudService: ReturnType<typeof createPrivilegedUsersCrudService>;
 
   const TEST_INDEX = '.entity_analytics.monitoring.users-default';
@@ -46,7 +47,7 @@ describe('createPrivilegedUsersCrudService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockEsClient = elasticsearchClientMock.createScopedClusterClient();
     const deps: PrivilegeMonitoringGlobalDependencies = {
       logger: loggingSystemMock.createLogger(),
       clusterClient: mockEsClient,

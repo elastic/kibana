@@ -18,7 +18,7 @@ import getPort from 'get-port';
 import { request } from '../lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import type { ActionsConfig } from '../config';
 import type { ActionsConfigurationUtilities } from '../actions_config';

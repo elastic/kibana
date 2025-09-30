@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
@@ -53,7 +54,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
 
   it('should do nothing with policies already deployed', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
     mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
       if (agentPolicyId === 'policy1') {
@@ -83,7 +84,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
 
   it('should do deploy policies out of sync', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
     mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
       if (agentPolicyId === 'policy1') {
@@ -115,7 +116,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
 
   it('should do deploy policies never deployed', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
     mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
       if (agentPolicyId === 'policy1') {

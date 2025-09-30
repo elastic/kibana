@@ -18,6 +18,12 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-usage-data-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-usage-data-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-metrics-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
   ],
   "exclude": [
     "target/**/*",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 import { getDataStreams } from '.';
@@ -46,7 +46,7 @@ describe('getDataStreams', () => {
   });
 
   it('Passes the correct parameters to the DataStreamService', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
       types: ['logs', 'metrics'],
@@ -62,7 +62,7 @@ describe('getDataStreams', () => {
   });
 
   it('Passes datasetQuery parameter to the DataStreamService', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
       datasetQuery: 'logs-nginx-*',
@@ -78,7 +78,7 @@ describe('getDataStreams', () => {
 
   describe('uncategorized only option', () => {
     it('Returns the correct number of results when true', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         types: ['logs'],
@@ -87,7 +87,7 @@ describe('getDataStreams', () => {
       expect(results.dataStreams.length).toBe(1);
     });
     it('Returns the correct number of results when false', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const esClientMock = elasticsearchClientMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         types: ['logs'],

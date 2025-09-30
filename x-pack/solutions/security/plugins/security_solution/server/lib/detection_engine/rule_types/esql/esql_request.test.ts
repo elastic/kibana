@@ -6,7 +6,7 @@
  */
 
 import { performEsqlRequest } from './esql_request';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const columns = [
   { name: '_id', type: 'keyword' as const },
@@ -46,7 +46,7 @@ const requestBody = {
 const requestQueryParams = { drop_null_columns: true };
 
 describe('performEsqlRequest', () => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
   const shouldStopExecution: jest.Mock = jest.fn();
   shouldStopExecution.mockReturnValue(false);
 

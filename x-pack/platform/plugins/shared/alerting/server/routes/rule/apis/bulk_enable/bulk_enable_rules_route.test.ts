@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { bulkEnableRulesRoute } from './bulk_enable_rules_route';
 import type { BulkEnableRulesResult } from '../../../../application/rule/methods/bulk_enable';

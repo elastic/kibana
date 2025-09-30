@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerNodeCollector } from './register_node_collector';
 import type { NodeRulesMetric } from './types';

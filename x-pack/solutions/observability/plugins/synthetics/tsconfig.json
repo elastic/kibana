@@ -119,7 +119,10 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

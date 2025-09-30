@@ -91,6 +91,7 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
+    "@kbn/core-saved-objects-server-mocks",
     "@kbn/background-search"
   ],
   "exclude": ["target/**/*"]

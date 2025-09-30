@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import axios from 'axios';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import { generateKeyPairSync, createSign } from 'crypto';

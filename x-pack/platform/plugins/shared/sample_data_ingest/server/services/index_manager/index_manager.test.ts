@@ -17,7 +17,7 @@ jest.mock('./utils', () => {
 });
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexManager } from './index_manager';
 import type { ZipArchive } from '../types';
@@ -39,7 +39,7 @@ const isLegacySemanticTextVersionMock = isLegacySemanticTextVersion as jest.Mock
 
 describe('IndexManager', () => {
   let logger: MockedLogger;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let indexManager: IndexManager;
 
   const mockArchive = {
@@ -64,7 +64,7 @@ describe('IndexManager', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     indexManager = new IndexManager({
       elserInferenceId,

@@ -8,7 +8,7 @@
 import { ConnectorUsageCollector } from '../types';
 import type { AxiosResponse } from 'axios';
 import { AxiosHeaders } from 'axios';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('ConnectorUsageCollector', () => {
   const logger = loggingSystemMock.createLogger();

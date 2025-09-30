@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertsFilter, RuleAlertData } from '../types';
@@ -85,7 +86,7 @@ const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -2970,7 +2971,7 @@ describe('Alerts Client', () => {
             [ALERT_STATUS]: 'active',
             [ALERT_UUID]: 'abc',
           } as InnerHit;
-          const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          const newClusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
           newClusterClient.search.mockResolvedValue({
             took: 10,

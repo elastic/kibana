@@ -8,7 +8,8 @@
  */
 
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';

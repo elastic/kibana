@@ -18,7 +18,9 @@ import {
 import type { Client } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { privilegesFactory } from '@kbn/security-authorization-core';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -62,7 +64,7 @@ afterEach(() => {
 });
 
 it(`#setup returns exposed services`, () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchClientMock.createClusterClient();
   mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
     mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
   );
@@ -132,7 +134,7 @@ describe('#start', () => {
   beforeEach(() => {
     statusSubject = new Subject<OnlineStatusRetryScheduler>();
 
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchClientMock.createClusterClient();
     mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
       mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
     );
@@ -203,7 +205,7 @@ describe('#start', () => {
 });
 
 it('#stop unsubscribes from license and ES updates.', async () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchClientMock.createClusterClient();
   mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
     mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
   );

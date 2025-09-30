@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { appContextService } from '../app_context';
 import type { PreconfiguredOutput } from '../../../common/types';
@@ -309,7 +310,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured ES output that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-es-output-1',
@@ -333,7 +334,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured ES output with secrets that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-es-output-1',
@@ -357,7 +358,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured ES output with ca_trusted_fingerprint that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-es-output-1',
@@ -385,7 +386,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured ES output with default hosts if the output does not exist and hosts is not set', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-es-output-1',
@@ -402,7 +403,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured logstash output that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-logstash-output-1',
@@ -422,7 +423,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured logstash output with secrets that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-logstash-output-with-secrets-1',
@@ -457,7 +458,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create preconfigured kafka output that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-kafka-output-1',
@@ -476,7 +477,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured kafka output with secrets that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-kafka-output-with-secrets-1',
@@ -500,7 +501,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured remote ES output that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-remote-es-output-1',
@@ -528,7 +529,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should create a preconfigured remote ES output with secrets that does not exist', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'non-existing-remote-es-output-with-secrets-1',
@@ -554,7 +555,7 @@ describe('Outputs preconfiguration', () => {
   describe('update', () => {
     it('should update output if non preconfigured ES output with the same id exists', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedOutputService.bulkGet.mockResolvedValue([
         {
           id: 'existing-es-output-1',
@@ -594,7 +595,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if preconfigured ES output exists and changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-es-output-1',
@@ -613,7 +614,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if preconfigured output exists and changed to is_internal: true', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-es-output-1',
@@ -633,7 +634,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if preconfigured ES output with secrets exists and changed to is_internal: true', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-es-output-1-with-secrets-1',
@@ -654,7 +655,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured logstash ouput exists and has changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-1',
@@ -677,7 +678,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured logstash output with secrets exists and has changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-with-secrets-1',
@@ -700,7 +701,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if preconfigured kafka output exists and changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-kafka-output-1',
@@ -719,7 +720,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update ouput if a preconfigured kafka with secrets exists and has changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-kafka-output-with-secrets-1',
@@ -743,7 +744,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if preconfigured remote ES output exists and changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-remote-es-output-1',
@@ -763,7 +764,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update ouput if a preconfigured remote ES with secrets exists and has changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-remote-es-output-with-secrets-1',
@@ -785,7 +786,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured logstash output with plain value secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-with-secrets-2',
@@ -809,7 +810,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured logstash output with secrets exists and hash algorithm changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-with-secrets-3-outdatded-hash',
@@ -834,7 +835,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if a preconfigured logstash output with secrets exists and hash algorithm did not changed', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-with-secrets-4-hash',
@@ -859,7 +860,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-kafka-output-with-secrets-2',
@@ -884,7 +885,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should update output if a preconfigured remote ES output with plain value secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-remote-es-output-with-secrets-2',
@@ -908,7 +909,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if preconfigured ES output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-es-output-1',
@@ -927,7 +928,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-1',
@@ -950,7 +951,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if preconfigured kafka output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-kafka-output-1',
@@ -973,7 +974,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if preconfigured remote ES output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-remote-es-output-1',
@@ -995,7 +996,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if a preconfigured logstash output with secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-logstash-output-with-secrets-1',
@@ -1019,7 +1020,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if a preconfigured kafka output with secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-kafka-output-with-secrets-1',
@@ -1042,7 +1043,7 @@ describe('Outputs preconfiguration', () => {
 
     it('should not update output if a preconfigured remote ES output with secrets exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
         {
           id: 'existing-remote-es-output-with-secrets-1',
@@ -1092,7 +1093,7 @@ describe('Outputs preconfiguration', () => {
       const { data, name } = scenario;
       it(`should do nothing if preconfigured output exists and did not changed (${name})`, async () => {
         const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [data]);
 
         expect(mockedOutputService.create).not.toBeCalled();
@@ -1103,7 +1104,7 @@ describe('Outputs preconfiguration', () => {
     describe('cleanPreconfiguredOutputs', () => {
       it('should not delete non deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         mockedOutputService.list.mockResolvedValue({
           items: [
@@ -1138,7 +1139,7 @@ describe('Outputs preconfiguration', () => {
 
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
         mockedOutputService.list.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
@@ -1166,7 +1167,7 @@ describe('Outputs preconfiguration', () => {
 
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
         mockedOutputService.list.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,

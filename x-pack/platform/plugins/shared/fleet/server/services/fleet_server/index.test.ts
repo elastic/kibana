@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { PackagePolicy } from '../../../common';
 
@@ -49,7 +49,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
     jest.restoreAllMocks();
   });
 
-  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient();
   const soClientMock = savedObjectsClientMock.create();
 
   it('should return true if all fleet server versions are at least the specified version and there are no managed policies', async () => {
@@ -212,7 +212,7 @@ describe('getFleetServerPolicies', () => {
 
 describe('hasActiveFleetServersForPolicies', () => {
   const mockSoClient = savedObjectsClientMock.create();
-  const mockEsClient = elasticsearchServiceMock.createInternalClient();
+  const mockEsClient = elasticsearchClientMock.createInternalClient();
 
   it('returns false when no agent IDs are provided', async () => {
     const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, []);

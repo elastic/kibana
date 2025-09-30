@@ -8,7 +8,7 @@
  */
 
 import { Readable } from 'stream';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TestEnvironmentUtils } from '../../test_utils';
 import { setupIntegrationEnvironment } from '../../test_utils';
 import { createEsFileClient } from '../create_es_file_client';

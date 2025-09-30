@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './tests/es_sample_response.json';
 import sampleShapesJsonResponse from './tests/es_sample_response_shapes.json';
@@ -65,7 +65,7 @@ describe('executor', () => {
   // Boundary test mocks
   const boundaryCall = jest.fn();
   const esAggCall = jest.fn();
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
   // @ts-ignore incomplete return type
   esClient.search.mockResponseImplementation(({ index }) => {
     if (index === geoContainmentParams.boundaryIndexTitle) {

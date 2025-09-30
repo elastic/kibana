@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rulesSettingsClientMock } from './rules_settings_client.mock';
 import { RulesSettingsService } from './rules_settings_service';

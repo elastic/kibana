@@ -7,7 +7,7 @@
 
 import { of, isObservable, firstValueFrom, toArray } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createRegexWorkerServiceMock } from '../test_utils';
 import type { Message } from '@kbn/inference-common';

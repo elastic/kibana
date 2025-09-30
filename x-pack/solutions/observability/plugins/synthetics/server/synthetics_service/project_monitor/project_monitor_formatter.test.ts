@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { ProjectMonitorFormatter } from './project_monitor_formatter';
 import type { Locations, PrivateLocation } from '../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum, LocationStatus } from '../../../common/runtime_types';

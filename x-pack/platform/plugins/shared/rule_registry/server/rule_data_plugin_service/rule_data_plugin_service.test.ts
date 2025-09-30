@@ -8,7 +8,7 @@
 import { type Subject, ReplaySubject, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Dataset } from './index_options';
 import { RuleDataClient } from '../rule_data_client/rule_data_client';
@@ -44,7 +44,7 @@ describe('ruleDataPluginService', () => {
 
   describe('isRegistrationContextDisabled', () => {
     it('should return true', async () => {
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
@@ -63,7 +63,7 @@ describe('ruleDataPluginService', () => {
     });
 
     it('should return false', async () => {
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
@@ -84,7 +84,7 @@ describe('ruleDataPluginService', () => {
 
   describe('isWriteEnabled', () => {
     it('should return true', async () => {
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
@@ -106,7 +106,7 @@ describe('ruleDataPluginService', () => {
 
   describe('initializeIndex', () => {
     it('calls RuleDataClient', async () => {
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({

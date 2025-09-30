@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getOpenAndAcknowledgedAlertsQuery } from '@kbn/elastic-assistant-common';
 
 const MIN_SIZE = 10;
@@ -44,7 +44,7 @@ describe('getAnonymizedAlerts', () => {
       namespace: 'default',
     },
   ];
-  const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const mockReplacements = {
     replacement1: 'SRVMAC08',
     replacement2: 'SRVWIN01',

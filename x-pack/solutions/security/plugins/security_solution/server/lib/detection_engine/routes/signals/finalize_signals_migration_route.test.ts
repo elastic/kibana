@@ -12,7 +12,7 @@ import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objec
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
-import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 jest.mock('../../migrations/get_migration_saved_objects_by_id');
 

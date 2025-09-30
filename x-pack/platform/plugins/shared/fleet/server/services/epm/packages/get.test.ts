@@ -8,11 +8,9 @@
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -726,7 +724,7 @@ owner: elastic`,
       });
 
       await getInstalledPackages({
-        esClient: elasticsearchServiceMock.createInternalClient(),
+        esClient: elasticsearchClientMock.createInternalClient(),
         savedObjectsClient: soClient,
         dataStreamType: 'logs',
         nameQuery: 'nginx',
@@ -869,7 +867,7 @@ owner: elastic`,
       });
 
       const results = await getInstalledPackages({
-        esClient: elasticsearchServiceMock.createInternalClient(),
+        esClient: elasticsearchClientMock.createInternalClient(),
         savedObjectsClient: soClient,
         dataStreamType: 'logs',
         nameQuery: 'nginx',
@@ -962,7 +960,7 @@ owner: elastic`,
 
       const results = await getInstalledPackages({
         savedObjectsClient: soClient,
-        esClient: elasticsearchServiceMock.createInternalClient(),
+        esClient: elasticsearchClientMock.createInternalClient(),
         perPage: 10,
         sortOrder: 'asc',
         showOnlyActiveDataStreams: true,
@@ -1664,10 +1662,10 @@ owner: elastic`,
   });
 
   describe('getPackageKnowledgeBase', () => {
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+    let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createInternalClient();
+      esClient = elasticsearchClientMock.createInternalClient();
       jest.clearAllMocks();
     });
 

@@ -7,7 +7,8 @@
 
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { JOB_STATUS, KibanaShuttingDownError } from '@kbn/reporting-common';
 import type { ReportDocument } from '@kbn/reporting-common/types';

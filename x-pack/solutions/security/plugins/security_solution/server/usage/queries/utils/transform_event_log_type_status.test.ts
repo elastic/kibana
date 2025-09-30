@@ -6,7 +6,7 @@
  */
 
 import type { SingleEventLogStatusMetric } from '../../detections/rules/types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   getElasticLogCustomRules,
   getEventLogAllRules,

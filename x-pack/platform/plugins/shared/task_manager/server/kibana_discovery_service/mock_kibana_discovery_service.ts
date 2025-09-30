@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 import type { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
