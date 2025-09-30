@@ -44,12 +44,6 @@ import {
 
 export type PackageCardProps = IntegrationCardItem;
 
-const badgeContainerStyles = css`
-  text-overflow: ellipsis;
-  max-width: 100%;
-  overflow: hidden;
-`;
-
 export function PackageCard({
   description,
   name,
@@ -87,7 +81,7 @@ export function PackageCard({
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
-      <EuiFlexItem grow={false} css={badgeContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
           <InlineReleaseBadge release={release} />
@@ -99,7 +93,7 @@ export function PackageCard({
   let verifiedBadge: React.ReactNode | null = null;
   if (isUnverified && showLabels) {
     verifiedBadge = (
-      <EuiFlexItem grow={false} css={badgeContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="warning">
@@ -116,7 +110,7 @@ export function PackageCard({
   let hasDeferredInstallationsBadge: React.ReactNode | null = null;
   if (isReauthorizationRequired && showLabels) {
     hasDeferredInstallationsBadge = (
-      <EuiFlexItem grow={false} css={badgeContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
           <EuiToolTip
@@ -137,7 +131,7 @@ export function PackageCard({
   let updateAvailableBadge: React.ReactNode | null = null;
   if (isUpdateAvailable && showLabels) {
     updateAvailableBadge = (
-      <EuiFlexItem grow={false} css={badgeContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="hollow" iconType="sortUp">
@@ -172,7 +166,7 @@ export function PackageCard({
   let contentBadge: React.ReactNode | null = null;
   if (type === 'content') {
     contentBadge = (
-      <EuiFlexItem grow={false} css={badgeContainerStyles}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="hollow">
@@ -220,6 +214,7 @@ export function PackageCard({
             display: flex;
             flex-direction: column;
             block-size: 100%;
+            overflow: hidden;
           }
 
           [class*='euiCard__description'] {
@@ -270,6 +265,16 @@ export function PackageCard({
               : '100%'};
             overflow-x: hidden;
             text-overflow: ellipsis;
+
+            & > .euiFlexItem {
+              min-width: 0;
+            }
+
+            ${isCollectionCard
+              ? `& > .euiFlexItem:last-child {
+              min-width: auto;
+            }`
+              : ''}
           `}
         >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
