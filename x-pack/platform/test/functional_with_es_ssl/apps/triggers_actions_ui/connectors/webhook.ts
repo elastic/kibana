@@ -12,10 +12,60 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const supertest = getService('supertest');
 
   describe('webhook', () => {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActionsConnectors');
+    });
+
+    it.skip('creates a connector via API with config and secret headers and verifies UI', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+            secretHeaders: {
+              secret: 'secretValue',
+            },
+          },
+          config: {
+            url: 'https://example.com/webhook',
+            headers: {
+              config: 'configValue',
+            },
+          },
+        })
+        .expect(200);
+
+      const connectorId = createdAction.id;
+
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+      await testSubjects.click('.webhook-card');
+      await testSubjects.click('webhookViewHeadersSwitch');
+
+      const headerKeyInputs = await find.allByCssSelector(
+        '[data-test-subj="webhookHeadersKeyInput"]'
+      );
+      const configValueInput = await find.byCssSelector(
+        '[data-test-subj="webhookHeadersValueInput"]'
+      );
+
+      const secretValueInput = await find.byCssSelector(
+        '[data-test-subj="webhookHeadersSecretValueInput"]'
+      );
+
+      // verify config headers:
+      expect(await headerKeyInputs[0].getAttribute('value')).to.be('config');
+      expect(await configValueInput.getAttribute('value')).to.be('configValue');
+
+      // verify secret headers
+      expect(await headerKeyInputs[1].getAttribute('value')).to.be('secret');
+      expect(await secretValueInput.getAttribute('value')).to.be('');
     });
 
     it('should render the cr and pfx tab for ssl auth', async () => {
@@ -53,6 +103,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await headerValue.isDisplayed()).to.be(true);
       expect(headerValueInputType).to.be('text');
       expect(await typeSelector.isDisplayed()).to.be(true);
+
+      await headerKey.type('config-key');
+      await headerValue.type('config-value');
+
+      expect(await headerKey.getAttribute('value')).to.be('config-key');
+      expect(await headerValue.getAttribute('value')).to.be('config-value');
     });
 
     it('should render the secret headers correctly', async () => {
@@ -72,13 +128,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '[data-test-subj="webhookHeadersSecretValueInput"]'
       );
       const headerValueInputType = await headerValue.getAttribute('type');
-      const encryptedHeaderBadge = await find.byCssSelector(
-        '[data-test-subj="encryptedHeadersBadge"]'
-      );
 
       expect(await headerKey.isDisplayed()).to.be(true);
       expect(await headerValue.isDisplayed()).to.be(true);
       expect(headerValueInputType).to.be('password');
+
+      await headerKey.type('secret-key');
+      await headerValue.type('secret-value');
+
+      expect(await headerKey.getAttribute('value')).to.be('secret-key');
+      expect(await headerValue.getAttribute('value')).to.be('secret-value');
+
+      const encryptedHeaderBadge = await find.byCssSelector(
+        '[data-test-subj="encryptedHeadersBadge"]'
+      );
       expect(await encryptedHeaderBadge.isDisplayed()).to.be(true);
     });
   });
