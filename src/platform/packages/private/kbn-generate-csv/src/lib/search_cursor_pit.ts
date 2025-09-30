@@ -126,18 +126,27 @@ export class SearchCursorPit extends SearchCursor {
 
     this.logger.debug(() => `Executing search with body: ${JSON.stringify(searchBody)}`);
 
-    const response = await this.searchWithPit(searchBody);
+    // Log the search body parameters to help debug parameter conflicts
+    this.logger.debug(() => `Search body parameters: ${Object.keys(searchBody).join(', ')}`);
 
-    if (!response) {
-      throw new Error(`Response could not be retrieved!`);
+    try {
+      const response = await this.searchWithPit(searchBody);
+
+      if (!response) {
+        throw new Error(`Response could not be retrieved!`);
+      }
+
+      const { rawResponse, ...rawDetails } = response;
+
+      this.logSearchResults(rawDetails, rawResponse);
+      this.logger.debug(`Received PIT ID: [${this.formatCursorId(rawResponse.pit_id)}]`);
+
+      return rawResponse;
+    } catch (error) {
+      this.logger.error(`Search error: ${error.message}`);
+      this.logger.debug(() => `Failed search body: ${JSON.stringify(searchBody)}`);
+      throw error;
     }
-
-    const { rawResponse, ...rawDetails } = response;
-
-    this.logSearchResults(rawDetails, rawResponse);
-    this.logger.debug(`Received PIT ID: [${this.formatCursorId(rawResponse.pit_id)}]`);
-
-    return rawResponse;
   }
 
   public updateIdFromResults(results: Pick<estypes.SearchResponse<unknown>, 'pit_id' | 'hits'>) {

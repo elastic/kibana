@@ -30,6 +30,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -75,6 +76,7 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   screenshotting?: ScreenshottingStart;
+  fleet?: FleetStartContract;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

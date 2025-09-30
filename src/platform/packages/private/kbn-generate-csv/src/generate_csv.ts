@@ -331,7 +331,10 @@ export class CsvGenerator {
       );
       logger.debug('Using search strategy: pit');
     }
+
+    logger.debug('CSV Generation: Initializing cursor...');
     await cursor.initialize();
+    logger.debug('CSV Generation: Cursor initialized successfully');
 
     // apply timezone from the job to all date field formatters
     try {
@@ -403,6 +406,10 @@ export class CsvGenerator {
         }
 
         if (!table) {
+          break;
+        }
+
+        if (table.rows.length === 0) {
           break;
         }
 
