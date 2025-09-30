@@ -1,8 +1,8 @@
 # ==============================================================
 # Backstage Catalog Sync Pipeline
 # ==============================================================
-# Pipeline: Sync Kibana packages to elastic/catalog-info (Backstage)
-# Description: Scans Kibana packages and updates catalog-info repo with Backstage component YAMLs.
+# Pipeline: Generate Backstage entries for Kibana packages in elastic/kibana-package-catalog
+# Description: Scans Kibana packages and generates Backstage component YAMLs in kibana-package-catalog repo.
 # Trigger: when PR merged to main branch
 # ==============================================================
 #
