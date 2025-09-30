@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiBeacon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -126,9 +125,7 @@ export function StatusBadge({
   ...props
 }: { status: ExecutionStatus | undefined; textProps?: EuiTextProps } & EuiFlexGroupProps) {
   const { euiTheme } = useEuiTheme();
-  if (!status) {
-    return <EuiBadge color="subdued">-</EuiBadge>;
-  }
+  if (!status) return;
 
   const statusLabel = getStatusLabel(status);
   const icon = getExecutionStatusIcon(euiTheme, status);
