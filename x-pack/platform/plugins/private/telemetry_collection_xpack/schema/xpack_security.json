@@ -356,6 +356,18 @@
               },
               "setup_access_option": {
                 "type": "keyword"
+              },
+              "supports_cloud_connector": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the installation supports cloud connector functionality"
+                }
+              },
+              "cloud_connector_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The unique identifier of the cloud connector associated with this installation"
+                }
               }
             }
           }
@@ -499,6 +511,25 @@
                 "type": "keyword"
               }
             }
+          }
+        },
+        "cspm_cloud_connector_usage_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "connector_id": {
+                "type": "keyword"
+              },
+              "usage_count": {
+                "type": "long"
+              },
+              "last_used": {
+                "type": "date"
+              }
+            }
+          },
+          "_meta": {
+            "description": "Statistics about CSPM cloud connector usage"
           }
         }
       }
