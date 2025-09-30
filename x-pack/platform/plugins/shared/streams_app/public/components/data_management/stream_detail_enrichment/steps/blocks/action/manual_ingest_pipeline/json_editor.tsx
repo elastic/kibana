@@ -124,9 +124,9 @@ export const JsonEditor = () => {
             insertText,
             range,
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          } as monaco.languages.CompletionItem;
+          };
         });
-        return { suggestions } as monaco.languages.CompletionList;
+        return { suggestions };
       },
     };
   }, [http]);
@@ -139,7 +139,7 @@ export const JsonEditor = () => {
   const editorOptions = React.useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
     () => ({
       automaticLayout: true,
-      wordWrap: 'on' as 'on',
+      wordWrap: 'on',
       quickSuggestions: { strings: true, other: true, comments: false },
       suggestOnTriggerCharacters: true,
     }),
