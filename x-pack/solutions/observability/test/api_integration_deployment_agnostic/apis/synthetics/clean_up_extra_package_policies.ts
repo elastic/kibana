@@ -77,15 +77,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await monitorTestService.testNowMonitor(secondMonitorId, editorUser);
 
-      // trigger manual test run to run the task manager
-      await monitorTestService.triggerSyntheticsTaskManually(
-        'syncPrivateLocationMonitors',
-        editorUser
-      );
+      // trigger cleanup endpoint
+      await monitorTestService.triggerCleanup(editorUser);
 
       await retry.try(async () => {
         const items = await testPrivateLocations.getPackagePolicies();
-        // 2 is for the temporary policy
+        // 2 is for the temporary policy, which is created by the test now run
         expect((await testPrivateLocations.getPackagePolicies()).length).eql(2);
         const names = items.map((item) => item.name);
         expect(names.includes('LIGHTWEIGHT_SYNTHETICS_TEST_NOW_RUN')).eql(true);

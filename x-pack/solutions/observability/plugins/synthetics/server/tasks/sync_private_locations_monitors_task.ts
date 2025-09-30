@@ -488,7 +488,7 @@ export class SyncPrivateLocationMonitorsTask {
         logger.info(
           ` [PrivateLocationCleanUpTask] Found ${
             packagePoliciesToDelete.length
-          } package policies to delete: ${packagePoliciesToDelete.join(', ')}`
+          } duplicate package policies to delete: ${packagePoliciesToDelete.join(', ')}`
         );
         await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
           force: true,

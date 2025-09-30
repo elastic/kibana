@@ -124,6 +124,14 @@ export class SyntheticsMonitorTestService {
       .expect(200);
   }
 
+  async triggerCleanup(user: RoleCredentials) {
+    await this.supertest
+      .put(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP)
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
+  }
+
   async testNowMonitor(id: string, user: RoleCredentials) {
     await this.supertest
       .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${id}`)
