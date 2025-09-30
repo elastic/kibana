@@ -127,6 +127,7 @@ describe('rule_actions_popover', () => {
       expect(screen.queryByText('Disable')).not.toBeInTheDocument();
     });
   });
+
   it('enables the rule', async () => {
     const rule = mockRule({ enabled: false });
     render(
@@ -233,6 +234,7 @@ describe('rule_actions_popover', () => {
     userEvent.click(actionButton);
 
     expect(await screen.findByTestId('updateAPIKeyButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
     expect(screen.queryByTestId('disableButton')).toBeNull();
     expect(screen.queryByTestId('runRuleButton')).toBeNull();
     expect(screen.queryByTestId('deleteRuleButton')).toBeNull();

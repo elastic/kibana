@@ -130,6 +130,7 @@ describe('CollapsedItemActions', () => {
       await userEvent.click(screen.getByTestId('selectActionButton'));
 
       expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
+      expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
       expect(screen.queryByTestId('snoozeButton')).toBeNull();
       expect(screen.queryByTestId('disableButton')).toBeNull();
       expect(screen.queryByTestId('editRule')).toBeNull();
