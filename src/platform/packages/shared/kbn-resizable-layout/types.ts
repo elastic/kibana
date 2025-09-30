@@ -32,3 +32,14 @@ export enum ResizableLayoutDirection {
    */
   Vertical = 'vertical',
 }
+
+export enum ResizableLayoutSide {
+  /**
+   * Left side for horizontal layout, top side for vertical layout
+   */
+  Left = 'left',
+  /**
+   * Right side for horizontal layout, bottom side for vertical layout
+   */
+  Right = 'right',
+}

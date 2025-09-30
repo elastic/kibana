@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiResizableContainer } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -29,14 +27,16 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { WorkflowEditor } from './workflow_editor';
+import { WorkflowEditorLayout } from './workflow_detail_layout';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
-  const { application, chrome, notifications } = useKibana().services;
+  const { application, notifications } = useKibana().services;
   const {
     data: workflow,
     isLoading: isLoadingWorkflow,
     error: workflowError,
   } = useWorkflowDetail(id);
+  useWorkflowsBreadcrumbs(workflow?.name);
 
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
@@ -48,20 +48,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  chrome!.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-      href: application!.getUrlForApp('workflows', { path: '/' }),
-    },
-    { text: workflow?.name ?? 'Workflow Detail' },
-  ]);
-
-  chrome!.docTitle.change([
-    workflow?.name ?? 'Workflow Detail',
-    i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-  ]);
-
   const { updateWorkflow, runWorkflow, runIndividualStep } = useWorkflowActions();
+
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow =
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
@@ -222,16 +210,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setcontextOverride(null);
   };
 
-  const visibleSidebar: 'executions' | 'single_execution' | null = useMemo(() => {
-    if (activeTab === 'executions') {
-      return 'executions';
-    }
-    if (workflow && testSingleStepExecutionId) {
-      return 'single_execution';
-    }
-    return null;
-  }, [activeTab, testSingleStepExecutionId, workflow]);
-
   if (workflowError) {
     const error = workflowError as Error;
     return (
@@ -266,74 +244,41 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           }}
           hasUnsavedChanges={hasChanges}
         />
-        {visibleSidebar ? (
-          <EuiResizableContainer
-            data-test-subj="workflowEditorContainer"
-            style={{ height: '100%' }}
-          >
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={50}
-                  minSize="300px"
-                  tabIndex={0}
-                  paddingSize="none"
-                  color="plain"
-                >
-                  <WorkflowEditor
-                    workflow={workflow}
-                    execution={execution}
-                    activeTab={activeTab}
-                    selectedExecutionId={selectedExecutionId}
-                    selectedStepId={selectedStepId}
-                    handleStepRun={handleStepRun}
-                  />
-                </EuiResizablePanel>
-
-                <EuiResizableButton indicator="border" />
-
-                <EuiResizablePanel
-                  initialSize={50}
-                  minSize="300px"
-                  tabIndex={0}
-                  paddingSize="none"
-                  color="plain"
-                >
-                  {visibleSidebar === 'executions' ? (
-                    <>
-                      {!selectedExecutionId && (
-                        <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-                      )}
-                      {workflow && selectedExecutionId && (
-                        <WorkflowExecutionDetail
-                          workflowExecutionId={selectedExecutionId}
-                          workflowYaml={yamlValue}
-                          onClose={() => setSelectedExecution(null)}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <SingleStepExecution
-                      stepExecutionId={testSingleStepExecutionId!}
-                      workflowYaml={yamlValue}
-                      onClose={() => setTestSingleStepExecutionId(null)}
-                    />
-                  )}
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        ) : (
-          // only the editor, no resizable container
-          <WorkflowEditor
-            workflow={workflow}
-            execution={execution}
-            activeTab={activeTab}
-            selectedExecutionId={selectedExecutionId}
-            selectedStepId={selectedStepId}
-            handleStepRun={handleStepRun}
-          />
-        )}
+        <WorkflowEditorLayout
+          editor={
+            <WorkflowEditor
+              workflow={workflow}
+              execution={execution}
+              activeTab={activeTab}
+              selectedExecutionId={selectedExecutionId}
+              selectedStepId={selectedStepId}
+              handleStepRun={handleStepRun}
+            />
+          }
+          executionList={
+            activeTab === 'executions' && workflow && !selectedExecutionId ? (
+              <WorkflowExecutionList workflowId={workflow?.id ?? null} />
+            ) : null
+          }
+          executionDetail={
+            activeTab === 'executions' && workflow && selectedExecutionId ? (
+              <WorkflowExecutionDetail
+                workflowExecutionId={selectedExecutionId}
+                workflowYaml={yamlValue}
+                onClose={() => setSelectedExecution(null)}
+              />
+            ) : null
+          }
+          singleStepExecutionDetail={
+            activeTab === 'workflow' && workflow && testSingleStepExecutionId ? (
+              <SingleStepExecution
+                stepExecutionId={testSingleStepExecutionId!}
+                workflowYaml={yamlValue}
+                onClose={() => setTestSingleStepExecutionId(null)}
+              />
+            ) : null
+          }
+        />
       </EuiFlexItem>
 
       {workflowExecuteModalOpen && workflow && (

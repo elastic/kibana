@@ -185,6 +185,7 @@
     "observables.value",
     "owner",
     "settings",
+    "settings.extractObservables",
     "settings.syncAlerts",
     "severity",
     "status",
@@ -619,8 +620,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",

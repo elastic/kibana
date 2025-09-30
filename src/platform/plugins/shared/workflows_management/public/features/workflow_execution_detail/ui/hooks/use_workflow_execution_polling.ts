@@ -11,6 +11,13 @@ import { useEffect } from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 
+const TerminalStates: readonly ExecutionStatus[] = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.SKIPPED,
+];
+
 export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
   const {
     data: workflowExecution,
@@ -24,24 +31,18 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
       return;
     }
 
-    const timeoutId = setTimeout(() => {
-      if (
-        ![
-          ExecutionStatus.COMPLETED,
-          ExecutionStatus.FAILED,
-          ExecutionStatus.CANCELLED,
-          ExecutionStatus.SKIPPED,
-        ].includes(workflowExecution.status)
-      ) {
-        refetch();
-        return;
-      }
+    // Check if the execution is in a terminal state
+    if (TerminalStates.includes(workflowExecution.status)) {
+      return;
+    }
 
-      clearTimeout(timeoutId);
+    // Use setInterval for continuous polling
+    const intervalId = setInterval(() => {
+      refetch();
     }, 500); // Refresh every 500ms
 
-    return () => clearTimeout(timeoutId);
-  }, [workflowExecution, refetch]);
+    return () => clearInterval(intervalId);
+  }, [refetch, workflowExecution]);
 
   return { workflowExecution, isLoading, error };
 };

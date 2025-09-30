@@ -27,46 +27,29 @@ const createMockQueryResult = <TData = unknown, TError = unknown>(
   ({
     data: undefined,
     error: null,
-    isError: false,
     isLoading: false,
-    isLoadingError: false,
-    isRefetchError: false,
-    isSuccess: true,
-    status: 'success',
-    dataUpdatedAt: 0,
-    errorUpdatedAt: 0,
-    failureCount: 0,
-    errorUpdateCount: 0,
-    isFetched: true,
-    isFetchedAfterMount: true,
-    isFetching: false,
-    isPaused: false,
-    isPlaceholderData: false,
-    isPreviousData: false,
-    isRefetching: false,
-    isStale: false,
     refetch: jest.fn(),
-    remove: jest.fn(),
-    fetchStatus: 'idle' as const,
     ...overrides,
   } as UseQueryResult<TData, TError>);
-
-// Mock timers
-jest.useFakeTimers();
 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';
   const mockRefetch = jest.fn();
+  let hookResult: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.clearAllTimers();
+    jest.useFakeTimers();
+    hookResult = null;
   });
 
   afterEach(() => {
+    // Clean up any rendered hooks
+    if (hookResult && hookResult.unmount) {
+      hookResult.unmount();
+    }
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    jest.useFakeTimers();
   });
 
   const createMockWorkflowDefinition = (): WorkflowYaml => ({
@@ -116,10 +99,11 @@ describe('useWorkflowExecutionPolling', () => {
       })
     );
 
-    const { result } = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    const { result } = hookResult;
 
     expect(result.current.workflowExecution).toBe(mockWorkflowExecution);
-    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(mockError);
   });
 
@@ -133,7 +117,7 @@ describe('useWorkflowExecutionPolling', () => {
       })
     );
 
-    renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
     // Fast forward time to check if polling would occur
     jest.advanceTimersByTime(1000);
@@ -162,12 +146,12 @@ describe('useWorkflowExecutionPolling', () => {
           })
         );
 
-        renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
-        // Should not call refetch immediately
+        // Should not call refetch immediately (interval starts but first call is after 500ms)
         expect(mockRefetch).not.toHaveBeenCalled();
 
-        // After 500ms, should call refetch
+        // After 500ms, should call refetch for the first time
         jest.advanceTimersByTime(500);
         expect(mockRefetch).toHaveBeenCalledTimes(1);
 
@@ -204,7 +188,8 @@ describe('useWorkflowExecutionPolling', () => {
           })
         );
 
-        const { rerender } = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        const { rerender } = hookResult;
 
         // Verify polling starts
         jest.advanceTimersByTime(500);
@@ -243,7 +228,7 @@ describe('useWorkflowExecutionPolling', () => {
           })
         );
 
-        renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
         // Fast forward time to check if polling would occur
         jest.advanceTimersByTime(2000);
@@ -265,7 +250,8 @@ describe('useWorkflowExecutionPolling', () => {
       })
     );
 
-    const { unmount } = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    const { unmount } = hookResult;
 
     // Verify polling starts
     jest.advanceTimersByTime(500);
@@ -293,7 +279,8 @@ describe('useWorkflowExecutionPolling', () => {
       })
     );
 
-    const { rerender } = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    const { rerender } = hookResult;
 
     // Should not poll yet
     jest.advanceTimersByTime(1000);
@@ -319,42 +306,56 @@ describe('useWorkflowExecutionPolling', () => {
 
   it('should handle status transitions during polling', () => {
     // Start with running status
-    let currentStatus = ExecutionStatus.RUNNING;
-    const mockWorkflowExecution = createMockWorkflowExecution(currentStatus);
+    const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
 
     mockUseWorkflowExecution.mockReturnValue(
       createMockQueryResult<WorkflowExecutionDto, Error>({
-        data: mockWorkflowExecution,
+        data: runningExecution,
         isLoading: false,
         error: null,
         refetch: mockRefetch,
       })
     );
 
-    const { rerender } = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    const { rerender } = hookResult;
 
-    // Verify initial polling
+    // Verify initial polling starts
     jest.advanceTimersByTime(500);
     expect(mockRefetch).toHaveBeenCalledTimes(1);
 
     // Change to another non-terminal status
-    currentStatus = ExecutionStatus.WAITING;
-    mockWorkflowExecution.status = currentStatus;
+    const waitingExecution = createMockWorkflowExecution(ExecutionStatus.WAITING);
+    mockUseWorkflowExecution.mockReturnValue(
+      createMockQueryResult<WorkflowExecutionDto, Error>({
+        data: waitingExecution,
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      })
+    );
     rerender();
 
     // Should continue polling
     jest.advanceTimersByTime(500);
     expect(mockRefetch).toHaveBeenCalledTimes(2);
 
-    // Change to terminal status
-    currentStatus = ExecutionStatus.COMPLETED;
-    mockWorkflowExecution.status = currentStatus;
+    // Change to terminal status - create a new execution object
+    const completedExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
+    mockUseWorkflowExecution.mockReturnValue(
+      createMockQueryResult<WorkflowExecutionDto, Error>({
+        data: completedExecution,
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      })
+    );
     rerender();
 
-    // Clear previous calls
+    // Clear previous calls to isolate the terminal status behavior
     mockRefetch.mockClear();
 
-    // Should stop polling
+    // Should stop polling after status change to terminal
     jest.advanceTimersByTime(2000);
     expect(mockRefetch).not.toHaveBeenCalled();
   });
