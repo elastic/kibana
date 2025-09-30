@@ -49,10 +49,7 @@ export const IngestionCard = ({
       data: (
         <PrivilegesWarningIconWrapper
           hasPrivileges={definition.privileges.monitor}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
-            { defaultMessage: 'ingestion rate daily' }
-          )}
+          title="ingestionRate"
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes(stats.bytesPerDay || 0) : '-'}
         </PrivilegesWarningIconWrapper>
@@ -69,10 +66,7 @@ export const IngestionCard = ({
       data: (
         <PrivilegesWarningIconWrapper
           hasPrivileges={definition.privileges.monitor}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
-            { defaultMessage: 'ingestion rate monthly' }
-          )}
+          title="ingestionRate"
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes((stats.bytesPerDay || 0) * 30) : '-'}
         </PrivilegesWarningIconWrapper>
