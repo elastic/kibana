@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type {
   ExecutableTool,
   ExecutableToolHandlerFn,
+  BuiltinToolDefinition,
   ToolProvider,
   ToolHandlerFn,
 } from '@kbn/onechat-server';
@@ -56,6 +57,23 @@ export type MockedTool = Omit<InternalToolDefinition, 'getHandler' | 'getSchema'
 
 export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
   execute: jest.MockedFunction<ExecutableToolHandlerFn>;
+};
+
+export type MockedBuiltinTool = Omit<BuiltinToolDefinition, 'handler'> & {
+  handler: jest.MockedFunction<ToolHandlerFn>;
+};
+
+export const createMockedBuiltinTool = (
+  parts: Partial<MockedBuiltinTool> = {}
+): MockedBuiltinTool => {
+  return {
+    id: 'test-tool',
+    description: 'test description',
+    schema: z.object({}),
+    tags: ['tag-1', 'tag-2'],
+    handler: jest.fn(parts.handler),
+    ...parts,
+  };
 };
 
 export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool => {

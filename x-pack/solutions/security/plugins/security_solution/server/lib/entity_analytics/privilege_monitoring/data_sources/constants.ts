@@ -55,3 +55,6 @@ export const STREAM_INDEX_PATTERNS: Record<IntegrationType, (namespace: string) 
 
 export const getStreamPatternFor = (integration: IntegrationType, namespace: string): string =>
   STREAM_INDEX_PATTERNS[integration](namespace);
+
+export const oktaLastFullSyncMarkersIndex = (namespace: string) =>
+  `logs-entityanalytics_okta.entity-${namespace}`;
