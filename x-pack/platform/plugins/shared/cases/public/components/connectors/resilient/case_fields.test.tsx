@@ -83,7 +83,7 @@ describe('ResilientParamsFields renders', () => {
 
     expect(screen.getByText('Malware')).toBeInTheDocument();
     expect(screen.getByTestId('severitySelect')).toHaveValue('6');
-    expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('resilientAdditionalFieldsComboBox')).toBeInTheDocument();
   });
 
   it('does not render the additional fields when it is disabled', () => {
