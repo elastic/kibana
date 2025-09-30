@@ -40,6 +40,7 @@ import {
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
+  OTEL_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -674,6 +675,7 @@ export function prepareTemplate({
   const defaultSettings = buildDefaultSettings({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
+    isOtelInputType,
   });
 
   const componentTemplates = buildComponentTemplates({
@@ -746,6 +748,8 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       )
       // Filter stack component templates shared between integrations
       .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
+      // Filter OTEL component templates shared between integrations
+      .filter((componentTemplateId) => !OTEL_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
