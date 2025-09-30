@@ -25,7 +25,7 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { normalizeRuleSource } from '../converters/normalize_rule_params';
+import { normalizeRuleSource } from '../converters/normalize_rule_source';
 
 export const RULE_DEFAULTS = {
   enabled: false,
