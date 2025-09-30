@@ -66,9 +66,9 @@ const formatXJsonString = (input: string) => {
 
 export type ProcessorSuggestion = { name: string; template?: JsonValue };
 
+  let processorsCache: ProcessorSuggestion[] | null = null;
 
 export const loadProcessorSuggestions = async (http: HttpStart): Promise<ProcessorSuggestion[]> => {
-  let processorsCache: ProcessorSuggestion[] | null = null;
 
   if (processorsCache) {
     return processorsCache;
