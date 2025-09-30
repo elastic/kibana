@@ -204,7 +204,12 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
             readOnly={isGenerating || isUpdating}
             toolbarProps={{
               right: (
-                <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="s"
+                  justifyContent="flexEnd"
+                  alignItems="center"
+                >
                   <EuiFlexItem grow={false}>
                     <ConnectorListButton
                       buttonProps={{
