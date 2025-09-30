@@ -90,7 +90,7 @@ export const AgentStandaloneBottomBar: React.FC<{
   onNext: () => void;
   noAnimation?: boolean;
 }> = ({ onNext, cancelClickHandler, cancelUrl, noAnimation = false }) => {
-  const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
+  const Bar = noAnimation ? NoAnimationBottomBar : EuiBottomBar;
   return (
     <Bar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -125,7 +125,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
   return (
-    <CenteredRoundedBottomBar>
+    <EuiBottomBar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
@@ -172,7 +172,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </CenteredRoundedBottomBar>
+    </EuiBottomBar>
   );
 };
 
@@ -184,7 +184,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
   const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
 
   return (
-    <CenteredRoundedBottomBar>
+    <EuiBottomBar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -212,6 +212,6 @@ export const AgentDataTimedOutBottomBar: React.FC<{
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </CenteredRoundedBottomBar>
+    </EuiBottomBar>
   );
 };
