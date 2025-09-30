@@ -44,6 +44,14 @@ servers:
 security:
   - apiKeyAuth: []
 tags:
+  - name: agent builder
+    description: |
+      Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+    externalDocs:
+      description: Learn about working with Agent Builder programmatically
+      url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+    x-displayName: Agent Builder
   - name: alerting
     description: |
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
@@ -79,8 +87,6 @@ tags:
     x-displayName: Data views
   - name: Elastic Agent actions
   - name: Elastic Agent binary download sources
-  - name: elastic agent builder
-    x-displayName: Elastic Agent Builder
   - name: Elastic Agent policies
   - name: Elastic Agent status
   - name: Elastic Agents
@@ -778,7 +784,7 @@ paths:
           name: product_name
   /api/agent_builder/a2a/{agentId}:
     post:
-      description: 'Elastic A2A Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Handle A2A (Agent-to-Agent) task requests. Use this endpoint to process inter-agent communication using JSON-RPC 2.0 protocol.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-a2a-agentid
       parameters:
         - description: The unique identifier of the agent to send the A2A task to.
@@ -818,16 +824,16 @@ paths:
                         message: Hello! How can I help you today?
                       type: response
           description: Indicates a successful response
-      summary: A2A Task Endpoint
+      summary: Send A2A task
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/a2a/{agentId}.json:
     get:
-      description: 'Provides agent discovery metadata for A2A protocol<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-a2a-agentid.json
       parameters:
         - description: The unique identifier of the agent to get A2A metadata for.
@@ -881,16 +887,16 @@ paths:
                     url: http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent
                     version: 0.1.0
           description: Indicates a successful response
-      summary: A2A Agent Card
+      summary: Get A2A agent card
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/agents:
     get:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-agents
       parameters: []
       responses:
@@ -933,13 +939,13 @@ paths:
           description: Indicates a successful response
       summary: List agents
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Create a new agent. Use this endpoint to define the agent''s behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: post-agent-builder-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1055,14 +1061,14 @@ paths:
           description: Indicates a successful response
       summary: Create an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/agents/{id}:
     delete:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: delete-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1090,13 +1096,13 @@ paths:
           description: Indicates a successful response
       summary: Delete an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-agents-id
       parameters:
         - description: The unique identifier of the agent to retrieve.
@@ -1131,15 +1137,15 @@ paths:
                     name: Search Index Helper
                     type: chat
           description: Indicates a successful response
-      summary: Get an agent
+      summary: Get an agent by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: 'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Update an existing agent configuration. Use this endpoint to modify any aspect of the agent''s behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: put-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1253,14 +1259,14 @@ paths:
           description: Indicates a successful response
       summary: Update an agent
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/conversations:
     get:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-conversations
       parameters:
         - description: Optional agent ID to filter conversations by a specific agent.
@@ -1288,14 +1294,14 @@ paths:
           description: Indicates a successful response
       summary: List conversations
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/conversations/{conversation_id}:
     delete:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: delete-agent-builder-conversations-conversation-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1323,13 +1329,13 @@ paths:
           description: Indicates a successful response
       summary: Delete conversation by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-conversations-conversation-id
       parameters:
         - description: The unique identifier of the conversation to retrieve.
@@ -1366,14 +1372,14 @@ paths:
           description: Indicates a successful response
       summary: Get conversation by ID
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/converse:
     post:
-      description: 'Elastic Chat API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1399,13 +1405,15 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
+                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
                   type: object
                   properties:
                     visualizations:
+                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
@@ -1444,16 +1452,16 @@ paths:
                         tool_id: platform.core.search
                         type: tool_call
           description: Indicates a successful response
-      summary: Converse with an agent
+      summary: Send chat message
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/converse/async:
     post:
-      description: 'Elastic Chat API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent''s thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1479,13 +1487,15 @@ paths:
               properties:
                 agent_id:
                   default: elastic-ai-agent
-                  description: The ID of the agent to converse with. Defaults to the default Elastic AI agent.
+                  description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 capabilities:
                   additionalProperties: false
+                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
                   type: object
                   properties:
                     visualizations:
+                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
@@ -1539,66 +1549,16 @@ paths:
                               message: Hello! How can I help you today?
                       event: round_complete
           description: Indicates a successful response
-      summary: Converse with an agent and stream events
+      summary: Send chat message (streaming)
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/mcp:
-    delete:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
-      operationId: delete-agent-builder-mcp
-      parameters: []
-      responses:
-        '405':
-          content:
-            application/json:
-              examples:
-                mcpMethodNotAllowedExample:
-                  description: Example response showing that the method to list MCP tools is not allowed
-                  value:
-                    attributes:
-                      code: -32000
-                    error: Method Not Allowed
-                    message: Method not allowed
-                    statusCode: 405
-          description: Indicates a Method Not Allowed response
-      summary: MCP server
-      tags:
-        - elastic agent builder
-      x-state: Technical Preview
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-    get:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
-      operationId: get-agent-builder-mcp
-      parameters: []
-      responses:
-        '405':
-          content:
-            application/json:
-              examples:
-                mcpMethodNotAllowedExample:
-                  description: Example response showing that the method to list MCP tools is not allowed
-                  value:
-                    attributes:
-                      code: -32000
-                    error: Method Not Allowed
-                    message: Method not allowed
-                    statusCode: 405
-          description: Indicates a Method Not Allowed response
-      summary: MCP server
-      tags:
-        - elastic agent builder
-      x-state: Technical Preview
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
     post:
-      description: 'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-mcp
       parameters: []
       requestBody:
@@ -1639,14 +1599,14 @@ paths:
           description: Indicates a successful response
       summary: MCP server
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools:
     get:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-tools
       parameters: []
       responses:
@@ -1796,13 +1756,13 @@ paths:
           description: Indicates a successful response
       summary: List tools
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: post-agent-builder-tools
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1943,14 +1903,14 @@ paths:
           description: Indicates a successful response
       summary: Create a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/_execute:
     post:
-      description: '[Required authorization] Route required privileges: read_onechat.'
+      description: 'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2143,14 +2103,14 @@ paths:
           description: Indicates a successful response
       summary: Execute a Tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/{id}:
     delete:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: delete-agent-builder-tools-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2178,13 +2138,13 @@ paths:
           description: Indicates a successful response
       summary: Delete a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
+      description: 'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.'
       operationId: get-agent-builder-tools-id
       parameters:
         - description: The unique identifier of the tool to retrieve.
@@ -2298,14 +2258,14 @@ paths:
           description: Indicates a successful response
       summary: Get a tool by id
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/agent_builder/tools/{toolId}:
     put:
-      description: 'Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
+      description: 'Update an existing tool. Use this endpoint to modify any aspect of the tool''s configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.'
       operationId: put-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2446,7 +2406,7 @@ paths:
           description: Indicates a successful response
       summary: Update a tool
       tags:
-        - elastic agent builder
+        - agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -8131,6 +8091,1222 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/_bulk:
+    post:
+      description: Performs bulk updates on multiple Attack discovery alerts, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert.
+      operationId: PostAttackDiscoveryBulk
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                update:
+                  description: Configuration object containing all parameters for the bulk update operation
+                  type: object
+                  properties:
+                    enable_field_rendering:
+                      default: false
+                      description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+                      example: false
+                      type: boolean
+                    ids:
+                      description: Array of Attack discovery IDs to update
+                      example:
+                        - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                        - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                      items:
+                        type: string
+                      type: array
+                    kibana_alert_workflow_status:
+                      description: When provided, update the kibana.alert.workflow_status of the attack discovery alerts
+                      enum:
+                        - open
+                        - acknowledged
+                        - closed
+                      example: acknowledged
+                      type: string
+                    visibility:
+                      description: When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
+                      enum:
+                        - not_shared
+                        - shared
+                      example: shared
+                      type: string
+                    with_replacements:
+                      default: true
+                      description: When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
+                      example: true
+                      type: boolean
+                  required:
+                    - ids
+              required:
+                - update
+        description: Bulk update parameters for Attack discovery alerts
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    description: Array of updated Attack discovery alert objects. Each item includes the applied modifications from the bulk update request.
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                    type: array
+                required:
+                  - data
+          description: Successful response containing the updated Attack discovery alerts
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message describing what went wrong with the bulk update request
+                    example: Invalid request parameters
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+                required:
+                  - status_code
+                  - error
+                  - message
+          description: Generic Error
+      summary: Bulk update Attack discovery alerts
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/_bulk' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data-raw '{
+               "update": {
+                 "ids": [
+                   "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f",
+                   "5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7"
+                 ],
+                 "kibana_alert_workflow_status": "acknowledged"
+               }
+             }'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/_find:
+    get:
+      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting.
+      operationId: AttackDiscoveryFind
+      parameters:
+        - description: Filter results to Attack discoveries that include any of the provided alert IDs
+          in: query
+          name: alert_ids
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.
+          in: query
+          name: connector_names
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          example: false
+          in: query
+          name: enable_field_rendering
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: End of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
+          example: now
+          in: query
+          name: end
+          required: false
+          schema:
+            type: string
+        - description: Filter results to the Attack discoveries with the specified IDs
+          in: query
+          name: ids
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: If `true`, the response will include `unique_alert_ids` and `unique_alert_ids_count` aggregated across the matched Attack discoveries
+          example: false
+          in: query
+          name: include_unique_alert_ids
+          required: false
+          schema:
+            type: boolean
+        - description: Page number to return (used for pagination). Defaults to 1.
+          example: 1
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Number of Attack discoveries to return per page (used for pagination). Defaults to 10.
+          example: 10
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 10
+            minimum: 1
+            type: integer
+        - description: Free-text search query applied to relevant text fields of Attack discoveries (title, description, tags, etc.)
+          example: ''
+          in: query
+          name: search
+          required: false
+          schema:
+            type: string
+        - description: Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
+          in: query
+          name: shared
+          required: false
+          schema:
+            type: boolean
+        - description: Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
+          example: '@timestamp'
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryFindSortField'
+            default: '@timestamp'
+        - description: Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.
+          example: desc
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
+            default: desc
+        - description: Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
+          example: now-24h
+          in: query
+          name: start
+          required: false
+          schema:
+            type: string
+        - description: Filter by alert workflow status. Provide one or more of the allowed workflow states.
+          example:
+            - open
+            - acknowledged
+          in: query
+          name: status
+          required: false
+          schema:
+            items:
+              enum:
+                - acknowledged
+                - closed
+                - open
+              type: string
+            type: array
+        - description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
+          example: true
+          in: query
+          name: with_replacements
+          required: false
+          schema:
+            default: true
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connector_names:
+                    description: List of human readable connector names that are present in the matched Attack discoveries. Useful for building client filters or summaries.
+                    items:
+                      type: string
+                    type: array
+                  data:
+                    description: Array of matched Attack discovery objects. Each item follows the `AttackDiscoveryApiAlert` schema.
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                    type: array
+                  page:
+                    description: Current page number of the paginated result set.
+                    type: integer
+                  per_page:
+                    description: Number of items requested per page.
+                    type: integer
+                  total:
+                    description: Total number of Attack discoveries matching the query (across all pages).
+                    type: integer
+                  unique_alert_ids:
+                    description: List of unique alert IDs aggregated from the matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
+                    items:
+                      type: string
+                    type: array
+                  unique_alert_ids_count:
+                    description: Number of unique alert IDs across all matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
+                    type: integer
+                required:
+                  - connector_names
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - unique_alert_ids_count
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message
+                    example: Invalid request payload.
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+          description: Generic Error
+      summary: Finds Attack discoveries that match the search criteria
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/_generate:
+    post:
+      description: Initiates the generation of attack discoveries by analyzing security alerts using AI. Returns an execution UUID that can be used to track the generation progress and retrieve results. Results may also be retrieved via the find endpoint.
+      operationId: PostAttackDiscoveryGenerate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenerationConfig'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  execution_uuid:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    description: The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.
+                    example: edd26039-0990-4d9f-9829-2a1fcacb77b5
+                required:
+                  - execution_uuid
+          description: Attack discovery generation initiated successfully
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message describing what went wrong
+                    example: Invalid request parameters
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+                required:
+                  - status_code
+                  - error
+                  - message
+          description: Bad request - Invalid input parameters or configuration
+      summary: Generate attack discoveries from alerts
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --header "elastic-api-version: 2023-10-31" \
+             --data '{
+               "alertsIndexPattern": ".alerts-security.alerts-default",
+               "anonymizationFields": [
+                 {
+                   "field": "host.name",
+                   "allowed": true,
+                   "anonymized": true
+                 },
+                 {
+                   "field": "user.name",
+                   "allowed": true,
+                   "anonymized": true
+                 },
+                 {
+                   "field": "_id",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "source.ip",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "destination.ip",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "rule.name",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "kibana.alert.risk_score",
+                   "allowed": true,
+                   "anonymized": false
+                 }
+               ],
+               "apiConfig": {
+                 "connectorId": "my-connector-id",
+                 "actionTypeId": ".gen-ai"
+               },
+               "connectorName": "GPT-4 Chat",
+               "size": 100,
+               "subAction": "invokeAI",
+               "start": "now-24h",
+               "end": "now"
+             }'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/generations:
+    get:
+      description: Get the latest attack discovery generations (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations.
+      operationId: GetAttackDiscoveryGenerations
+      parameters:
+        - description: End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
+          example: now
+          in: query
+          name: end
+          required: false
+          schema:
+            type: string
+        - description: The maximum number of generations to retrieve
+          example: 50
+          in: query
+          name: size
+          required: true
+          schema:
+            minimum: 1
+            type: number
+        - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
+          example: now-24h
+          in: query
+          name: start
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generations:
+                    description: List of attack discovery generations
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGeneration'
+                    type: array
+                required:
+                  - generations
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message
+                    example: Invalid size parameter. Must be a positive number.
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+          description: Bad request
+      summary: Get the latest attack discovery generations (that are not dismissed) for the current user
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/generations/{execution_uuid}:
+    get:
+      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
+      operationId: GetAttackDiscoveryGeneration
+      parameters:
+        - description: The unique identifier for the Attack discovery generation execution. This UUID is returned at the start of an Attack discovery generation.
+          example: 2e13f386-46cf-4d65-9e2b-68609e132ba5
+          in: path
+          name: execution_uuid
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+        - description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          example: false
+          in: query
+          name: enable_field_rendering
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
+          example: true
+          in: query
+          name: with_replacements
+          required: false
+          schema:
+            default: true
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    description: Array of Attack discoveries generated during this execution.
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                    type: array
+                  generation:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGeneration'
+                    description: Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
+                required:
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message describing what went wrong with the request
+                    example: Invalid request parameters
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+                required:
+                  - status_code
+                  - error
+                  - message
+          description: Generic Error
+      summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/generations/{execution_uuid}/_dismiss:
+    post:
+      description: Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries.
+      operationId: PostAttackDiscoveryGenerationsDismiss
+      parameters:
+        - description: The unique identifier for the Attack discovery generation execution. This UUID is returned when an attack discovery generation is created and can be found in generation responses.
+          example: 46b218d5-535d-4329-be56-d0f6af6986b7
+          in: path
+          name: execution_uuid
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts_context_count:
+                    description: The number of alerts that were sent as context to the LLM for this generation.
+                    example: 75
+                    type: number
+                  connector_id:
+                    description: The unique identifier of the connector used to generate the attack discoveries.
+                    example: chatGpt5_0ChatAzure
+                    type: string
+                  connector_stats:
+                    description: Statistical information about the connector's performance for this user, providing insights into usage patterns and success rates.
+                    type: object
+                    properties:
+                      average_successful_duration_nanoseconds:
+                        description: The average duration in nanoseconds for successful generations using this connector by the current user.
+                        example: 47958500000
+                        type: number
+                      successful_generations:
+                        description: The total number of Attack discoveries successfully created for this generation
+                        example: 2
+                        type: number
+                  discoveries:
+                    description: The number of attack discoveries that were generated during this execution.
+                    example: 3
+                    type: number
+                  end:
+                    description: The timestamp when the generation process completed, in ISO 8601 format. This field may be absent for generations that haven't finished.
+                    example: '2025-09-29T06:42:44.810Z'
+                    type: string
+                  execution_uuid:
+                    description: The unique identifier for this attack discovery generation execution. This UUID can be used to reference this specific generation in other API calls.
+                    example: 46b218d5-535d-4329-be56-d0f6af6986b7
+                    type: string
+                  loading_message:
+                    description: A human-readable message describing the current state or progress of the generation process. Provides context about what the AI is analyzing.
+                    example: AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.
+                    type: string
+                  reason:
+                    description: Additional context or reasoning provided when a generation fails or encounters issues. This field helps diagnose problems with the generation process.
+                    example: Connection timeout to AI service
+                    type: string
+                  start:
+                    description: The timestamp when the generation process began, in ISO 8601 format. This marks the beginning of the AI analysis.
+                    example: '2025-09-29T06:42:08.962Z'
+                    type: string
+                  status:
+                    description: The current status of the attack discovery generation. After dismissing, this will be set to "dismissed".
+                    enum:
+                      - canceled
+                      - dismissed
+                      - failed
+                      - started
+                      - succeeded
+                    example: dismissed
+                    type: string
+                required:
+                  - connector_id
+                  - discoveries
+                  - execution_uuid
+                  - loading_message
+                  - start
+                  - status
+          description: Successful response - The attack discovery generation has been dismissed
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type or category
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message describing what went wrong with the request.
+                    example: Invalid request parameters
+                    type: string
+                  status_code:
+                    description: HTTP status code indicating the type of client error
+                    example: 400
+                    type: number
+                required:
+                  - status_code
+                  - error
+                  - message
+          description: Generic Error
+      summary: Dismiss an attack discovery generation
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/generations/46b218d5-535d-4329-be56-d0f6af6986b7/_dismiss' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/schedules:
+    post:
+      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found.
+      operationId: CreateAttackDiscoverySchedules
+      requestBody:
+        content:
+          application/json:
+            example:
+              actions: []
+              enabled: true
+              name: Daily Security Analysis
+              params:
+                alerts_index_pattern: .alerts-security.alerts-*
+                api_config:
+                  actionTypeId: bedrock
+                  connectorId: my-bedrock-connector
+                  name: Claude 3.5 Sonnet
+                end: now
+                size: 100
+                start: now-24h
+              schedule:
+                interval: 24h
+            schema:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleCreateProps'
+        description: Attack discovery schedule configuration including name, parameters, schedule interval, and actions
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                actions: []
+                created_at: '2023-10-31T10:00:00.000Z'
+                created_by: elastic
+                enabled: true
+                id: 12345678-1234-1234-1234-123456789012
+                name: Daily Security Analysis
+                params:
+                  alerts_index_pattern: .alerts-security.alerts-*
+                  api_config:
+                    actionTypeId: bedrock
+                    connectorId: my-bedrock-connector
+                    name: Claude 3.5 Sonnet
+                  end: now
+                  size: 100
+                  start: now-24h
+                schedule:
+                  interval: 24h
+                updated_at: '2023-10-31T10:00:00.000Z'
+                updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+          description: Successfully created Attack discovery schedule
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Create Attack discovery schedule
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Create an Attack discovery schedule
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "name": "Daily Security Analysis",
+               "enabled": true,
+               "params": {
+                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "api_config": {
+                   "actionTypeId": "bedrock",
+                   "connectorId": "my-bedrock-connector",
+                   "name": "Claude 3.5 Sonnet"
+                 },
+                 "size": 100,
+                 "start": "now-24h",
+                 "end": "now"
+               },
+               "schedule": {
+                 "interval": "24h"
+               },
+               "actions": []
+             }'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/schedules/_find:
+    get:
+      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
+      operationId: FindAttackDiscoverySchedules
+      parameters:
+        - description: Page number to return (used for pagination). Defaults to 1.
+          example: 1
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+        - description: Number of Attack discovery schedules to return per page (used for pagination). Defaults to 10.
+          example: 10
+          in: query
+          name: per_page
+          required: false
+          schema:
+            type: number
+        - description: Field used to sort results. Common fields include 'name', 'created_at', 'updated_at', and 'enabled'.
+          example: name
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+        - description: Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'.
+          example: asc
+          in: query
+          name: sort_direction
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    description: Array of matched Attack discovery schedule objects.
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+                    type: array
+                  page:
+                    description: Current page number of the paginated result set.
+                    type: number
+                  per_page:
+                    description: Number of items requested per page.
+                    type: number
+                  total:
+                    description: Total number of Attack discovery schedules matching the query (across all pages).
+                    type: number
+                required:
+                  - page
+                  - per_page
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    description: Error type
+                    example: Bad Request
+                    type: string
+                  message:
+                    description: Human-readable error message
+                    example: Invalid request payload
+                    type: string
+                  status_code:
+                    description: HTTP status code
+                    example: 400
+                    type: number
+          description: Generic Error
+      summary: Finds Attack discovery schedules that match the search criteria
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/schedules/{id}:
+    delete:
+      description: Permanently deletes an Attack discovery schedule and all associated configuration.
+      operationId: DeleteAttackDiscoverySchedules
+      parameters:
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to delete. This ID is returned when creating a schedule and can be found in schedule listings.
+          example: 12345678-1234-1234-1234-123456789012
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                id: 12345678-1234-1234-1234-123456789012
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    description: The unique identifier of the deleted Attack Discovery schedule
+                required:
+                  - id
+          description: Successfully deleted Attack Discovery schedule, returning the ID of the deleted schedule for confirmation
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Delete Attack discovery schedule
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Delete an Attack discovery schedule
+          lang: curl
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
+      operationId: GetAttackDiscoverySchedules
+      parameters:
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to retrieve. This ID is returned when creating a schedule and can be found in schedule listings.
+          example: 12345678-1234-1234-1234-123456789012
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                actions: []
+                created_at: '2023-10-31T10:00:00.000Z'
+                created_by: elastic
+                enabled: true
+                id: 12345678-1234-1234-1234-123456789012
+                last_execution:
+                  date: '2023-10-31T10:00:00.000Z'
+                  last_duration: 45.2
+                  status: ok
+                name: Daily Security Analysis
+                params:
+                  alerts_index_pattern: .alerts-security.alerts-*
+                  api_config:
+                    actionTypeId: bedrock
+                    connectorId: my-bedrock-connector
+                    name: Claude 3.5 Sonnet
+                  end: now
+                  size: 100
+                  start: now-24h
+                schedule:
+                  interval: 24h
+                updated_at: '2023-10-31T10:00:00.000Z'
+                updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+          description: Successfully retrieved Attack Discovery schedule with complete configuration and metadata
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Get Attack discovery schedule by ID
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Get an Attack discovery schedule by ID
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values.
+      operationId: UpdateAttackDiscoverySchedules
+      parameters:
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to update. This ID is returned when creating a schedule and can be found in schedule listings.
+          example: 12345678-1234-1234-1234-123456789012
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      requestBody:
+        content:
+          application/json:
+            example:
+              actions: []
+              name: Updated Daily Security Analysis
+              params:
+                alerts_index_pattern: .alerts-security.alerts-*
+                api_config:
+                  actionTypeId: bedrock
+                  connectorId: my-bedrock-connector
+                  name: Claude 3.5 Sonnet
+                end: now
+                size: 200
+                start: now-48h
+              schedule:
+                interval: 12h
+            schema:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleUpdateProps'
+        description: Updated Attack discovery schedule configuration. All fields are required as this replaces the entire schedule configuration.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                actions: []
+                created_at: '2023-10-31T10:00:00.000Z'
+                created_by: elastic
+                enabled: true
+                id: 12345678-1234-1234-1234-123456789012
+                name: Updated Daily Security Analysis
+                params:
+                  alerts_index_pattern: .alerts-security.alerts-*
+                  api_config:
+                    actionTypeId: bedrock
+                    connectorId: my-bedrock-connector
+                    name: Claude 3.5 Sonnet
+                  end: now
+                  size: 200
+                  start: now-48h
+                schedule:
+                  interval: 12h
+                updated_at: '2023-10-31T12:00:00.000Z'
+                updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+          description: Successfully updated Attack Discovery schedule with the new configuration and metadata
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Update Attack discovery schedule
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Update an Attack discovery schedule
+          lang: curl
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "name": "Updated Daily Security Analysis",
+               "params": {
+                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "api_config": {
+                   "actionTypeId": "bedrock",
+                   "connectorId": "my-bedrock-connector",
+                   "name": "Claude 3.5 Sonnet"
+                 },
+                 "size": 200,
+                 "start": "now-48h",
+                 "end": "now"
+               },
+               "schedule": {
+                 "interval": "12h"
+               },
+               "actions": []
+             }'
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/schedules/{id}/_disable:
+    put:
+      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started.
+      operationId: DisableAttackDiscoverySchedules
+      parameters:
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to disable. This ID is returned when creating a schedule and can be found in schedule listings.
+          example: 12345678-1234-1234-1234-123456789012
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                id: 12345678-1234-1234-1234-123456789012
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    description: The unique identifier of the disabled Attack Discovery schedule
+                required:
+                  - id
+          description: Successfully disabled Attack Discovery schedule, returning the schedule ID for confirmation
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Disable Attack discovery schedule
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Disable an Attack discovery schedule
+          lang: curl
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/attack_discovery/schedules/{id}/_enable:
+    put:
+      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration.
+      operationId: EnableAttackDiscoverySchedules
+      parameters:
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to enable. This ID is returned when creating a schedule and can be found in schedule listings.
+          example: 12345678-1234-1234-1234-123456789012
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                id: 12345678-1234-1234-1234-123456789012
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    description: The unique identifier of the enabled Attack Discovery schedule
+                required:
+                  - id
+          description: Successfully enabled Attack Discovery schedule, returning the schedule ID for confirmation
+        '400':
+          content:
+            application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                status_code: 400
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+          description: Generic Error
+      summary: Enable Attack discovery schedule
+      tags:
+        - Security AI Assistant API
+      x-code-samples:
+        - label: Enable an Attack discovery schedule
+          lang: curl
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -22994,6 +24170,7 @@ paths:
                                       enum:
                                         - input
                                         - output
+                                        - ''
                                       type: string
                                   required:
                                     - id
@@ -23476,6 +24653,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id
@@ -23834,6 +25012,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id
@@ -25601,36 +26780,42 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    cloudProvider:
-                      type: string
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    namespace:
-                      type: string
-                    packagePolicyCount:
-                      type: number
-                    updated_at:
-                      type: string
-                    vars:
-                      additionalProperties: {}
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
                       type: object
-                  required:
-                    - id
-                    - name
-                    - cloudProvider
-                    - vars
-                    - packagePolicyCount
-                    - created_at
-                    - updated_at
-                type: array
+                      properties:
+                        cloudProvider:
+                          type: string
+                        created_at:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespace:
+                          type: string
+                        packagePolicyCount:
+                          type: number
+                        updated_at:
+                          type: string
+                        vars:
+                          additionalProperties: {}
+                          type: object
+                      required:
+                        - id
+                        - name
+                        - cloudProvider
+                        - vars
+                        - packagePolicyCount
+                        - created_at
+                        - updated_at
+                    type: array
+                required:
+                  - items
           description: Indicates a successful call.
         '400':
           content:
@@ -25656,6 +26841,7 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -25733,31 +26919,37 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  cloudProvider:
-                    type: string
-                  created_at:
-                    type: string
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                  packagePolicyCount:
-                    type: number
-                  updated_at:
-                    type: string
-                  vars:
-                    additionalProperties: {}
+                  item:
+                    additionalProperties: false
                     type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
                 required:
-                  - id
-                  - name
-                  - cloudProvider
-                  - vars
-                  - packagePolicyCount
-                  - created_at
-                  - updated_at
+                  - item
           description: Indicates a successful call.
         '400':
           content:
@@ -25783,6 +26975,276 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/cloud_connectors/{cloudConnectorId}:
+    delete:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: delete-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Delete cloud connector (supports force deletion)
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.'
+      operationId: get-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.'
+      operationId: put-fleet-cloud-connectors-cloudconnectorid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: cloudConnectorId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      cloudProvider:
+                        type: string
+                      created_at:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      packagePolicyCount:
+                        type: number
+                      updated_at:
+                        type: string
+                      vars:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - id
+                      - name
+                      - cloudProvider
+                      - vars
+                      - packagePolicyCount
+                      - created_at
+                      - updated_at
+                required:
+                  - item
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Update cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -26495,6 +27957,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -26844,6 +28308,8 @@ paths:
                                   additionalProperties: true
                                   type: object
                                   properties:
+                                    deferred:
+                                      type: boolean
                                     id:
                                       type: string
                                     originId:
@@ -26942,6 +28408,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -27015,6 +28483,8 @@ paths:
                             previous_version:
                               nullable: true
                               type: string
+                            rolled_back:
+                              type: boolean
                             type:
                               type: string
                             updated_at:
@@ -27195,6 +28665,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -27346,6 +28818,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          deferred:
+                                            type: boolean
                                           id:
                                             type: string
                                           originId:
@@ -27432,6 +28906,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: OK
         '400':
           content:
             application/json:
@@ -27452,6 +28927,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27508,6 +28984,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -27528,6 +29005,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27585,6 +29063,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -27605,6 +29084,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -27665,6 +29145,7 @@ paths:
                     type: string
                 required:
                   - taskId
+          description: OK
         '400':
           content:
             application/json:
@@ -27685,6 +29166,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -27742,6 +29224,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: OK
         '400':
           content:
             application/json:
@@ -27762,6 +29245,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -27809,6 +29293,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -28055,6 +29541,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -28153,6 +29641,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -28226,6 +29716,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
@@ -28462,6 +29954,8 @@ paths:
                         - additionalProperties: false
                           type: object
                           properties:
+                            deferred:
+                              type: boolean
                             id:
                               type: string
                             originId:
@@ -28514,6 +30008,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: OK
         '400':
           content:
             application/json:
@@ -28534,6 +30029,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -28707,6 +30203,8 @@ paths:
                                 additionalProperties: true
                                 type: object
                                 properties:
+                                  deferred:
+                                    type: boolean
                                   id:
                                     type: string
                                   originId:
@@ -28805,6 +30303,8 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                deferred:
+                                  type: boolean
                                 id:
                                   type: string
                                 originId:
@@ -28878,6 +30378,8 @@ paths:
                           previous_version:
                             nullable: true
                             type: string
+                          rolled_back:
+                            type: boolean
                           type:
                             type: string
                           updated_at:
@@ -29179,6 +30681,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -29199,6 +30702,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -29254,6 +30758,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: OK
         '400':
           content:
             application/json:
@@ -29274,7 +30779,80 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Install Kibana assets for a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets:
+    post:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: post-fleet-epm-packages-pkgname-pkgversion-rule-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                force:
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
@@ -46358,6 +47936,10 @@ paths:
               schema:
                 type: object
                 properties:
+                  defend_insights_exists:
+                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+                    example: true
+                    type: boolean
                   elser_exists:
                     description: Indicates if the ELSER model exists for the KnowledgeBase.
                     example: true
@@ -49014,9 +50596,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -50889,9 +52469,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -52562,9 +54140,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -54287,9 +55863,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -56298,9 +57872,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:
@@ -57946,9 +59518,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:
@@ -65485,6 +67055,438 @@ components:
       required:
         - connectorId
         - actionTypeId
+    Security_AI_Assistant_API_AttackDiscoveryApiAlert:
+      description: An attack discovery that's also an alert (Public API with snake_case)
+      type: object
+      properties:
+        alert_ids:
+          description: The alert IDs that the attack discovery is based on
+          items:
+            type: string
+          type: array
+        alert_rule_uuid:
+          description: The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
+          type: string
+        alert_start:
+          description: The optional time the attack discovery alert was created
+          type: string
+        alert_updated_at:
+          description: The optional time the attack discovery alert was last updated
+          type: string
+        alert_updated_by_user_id:
+          description: The optional id of the user who last updated the attack discovery alert
+          type: string
+        alert_updated_by_user_name:
+          description: The optional username of the user who updated the attack discovery alert
+          type: string
+        alert_workflow_status:
+          description: The optional kibana.alert.workflow_status of this attack discovery
+          type: string
+        alert_workflow_status_updated_at:
+          description: The optional time the attack discovery alert workflow status was last updated
+          type: string
+        connector_id:
+          description: The ID of the connector that generated the attack discovery
+          type: string
+        connector_name:
+          description: The (human readable) name of the connector that generated the attack discovery
+          type: string
+        details_markdown:
+          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+          type: string
+        entity_summary_markdown:
+          description: An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+          type: string
+        generation_uuid:
+          description: The generation ID of the run that created the attack discovery
+          type: string
+        id:
+          description: The unique ID of the attack discovery
+          type: string
+        mitre_attack_tactics:
+          description: An optional array of MITRE ATT&CK tactic for the attack discovery
+          items:
+            type: string
+          type: array
+        replacements:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
+          description: Key-value pairs that are used to replace placeholders in the markdown fields
+        risk_score:
+          description: The optional, (but typically populated after generation) risk score of the alert
+          type: integer
+        summary_markdown:
+          description: A markdown summary of attack discovery, using the same syntax
+          type: string
+        timestamp:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
+          description: The time the attack discovery was generated
+        title:
+          description: A title for the attack discovery, in plain text
+          type: string
+        user_id:
+          description: The optional id of the user who generated the attack discovery
+          type: string
+        user_name:
+          description: The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)
+          type: string
+        users:
+          description: The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
+      required:
+        - alert_ids
+        - connector_id
+        - connector_name
+        - details_markdown
+        - generation_uuid
+        - id
+        - summary_markdown
+        - timestamp
+        - title
+    Security_AI_Assistant_API_AttackDiscoveryApiSchedule:
+      description: An attack discovery schedule
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        created_at:
+          description: The date the schedule was created
+          format: date-time
+          type: string
+        created_by:
+          description: The name of the user that created the schedule
+          type: string
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        id:
+          description: UUID of attack discovery schedule
+          type: string
+        last_execution:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecution'
+          description: The attack discovery schedule last execution summary
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+        updated_at:
+          description: The date the schedule was updated
+          format: date-time
+          type: string
+        updated_by:
+          description: The name of the user that updated the schedule
+          type: string
+      required:
+        - id
+        - name
+        - created_by
+        - updated_by
+        - created_at
+        - updated_at
+        - enabled
+        - params
+        - schedule
+        - actions
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionAlertsFilter:
+      additionalProperties: true
+      type: object
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionFrequency:
+      description: The action frequency defines when the action runs (for example, only on schedule execution or at specific time intervals).
+      type: object
+      properties:
+        notify_when:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionNotifyWhen'
+        summary:
+          description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+          type: boolean
+        throttle:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionThrottle'
+          nullable: true
+      required:
+        - summary
+        - notify_when
+        - throttle
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionGroup:
+      description: Groups actions by use cases. Use `default` for alert notifications.
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionId:
+      description: The connector ID.
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionNotifyWhen:
+      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
+      enum:
+        - onActiveAlert
+        - onThrottleInterval
+        - onActionGroupChange
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionParams:
+      additionalProperties: true
+      description: Object containing the allowed connector fields, which varies according to the connector type.
+      type: object
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionThrottle:
+      description: Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
+      example: 1h
+      pattern: ^[1-9]\d*[smhd]$
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleCreateProps:
+      description: An attack discovery schedule create properties
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+      required:
+        - name
+        - params
+        - schedule
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecution:
+      description: An attack discovery schedule execution information
+      type: object
+      properties:
+        date:
+          description: Date of the execution
+          format: date-time
+          type: string
+        duration:
+          description: Duration of the execution
+          type: number
+        message:
+          type: string
+        status:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecutionStatus'
+          description: Status of the execution
+      required:
+        - date
+        - status
+        - last_duration
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecutionStatus:
+      description: An attack discovery schedule execution status
+      enum:
+        - ok
+        - active
+        - error
+        - unknown
+        - warning
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams:
+      description: An attack discovery schedule params
+      type: object
+      properties:
+        alerts_index_pattern:
+          description: The index pattern to get alerts from
+          type: string
+        api_config:
+          allOf:
+            - $ref: '#/components/schemas/Security_AI_Assistant_API_ApiConfig'
+            - type: object
+              properties:
+                name:
+                  description: The name of the connector
+                  type: string
+              required:
+                - name
+          description: LLM API configuration.
+        combined_filter:
+          additionalProperties: true
+          type: object
+        end:
+          type: string
+        filters:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_Filters'
+        query:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_Query'
+        size:
+          type: number
+        start:
+          type: string
+      required:
+        - alerts_index_pattern
+        - api_config
+        - size
+    Security_AI_Assistant_API_AttackDiscoveryApiScheduleUpdateProps:
+      description: An attack discovery schedule update properties
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+      required:
+        - name
+        - params
+        - schedule
+        - actions
+    Security_AI_Assistant_API_AttackDiscoveryFindSortField:
+      description: Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
+      enum:
+        - '@timestamp'
+      type: string
+    Security_AI_Assistant_API_AttackDiscoveryGeneration:
+      type: object
+      properties:
+        alerts_context_count:
+          description: The number of alerts sent as context (max kibana.alert.rule.execution.metrics.alert_counts.active) to the LLM for the generation
+          type: number
+        connector_id:
+          description: The connector id (event.dataset) for this generation
+          type: string
+        connector_stats:
+          description: Stats applicable to the connector for this generation
+          type: object
+          properties:
+            average_successful_duration_nanoseconds:
+              description: The average duration (avg event.duration) in nanoseconds of successful generations for the same connector id, for the current user
+              type: number
+            successful_generations:
+              description: The number of successful generations for the same connector id, for the current user
+              type: number
+        discoveries:
+          description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
+          type: number
+        end:
+          description: When generation ended (max event.end)
+          type: string
+        execution_uuid:
+          description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
+          type: string
+        loading_message:
+          description: Generation loading message (kibana.alert.rule.execution.status)
+          type: string
+        reason:
+          description: Reason for failed generations (event.reason)
+          type: string
+        start:
+          description: When generation started (min event.start)
+          type: string
+        status:
+          description: The status of the attack discovery generation
+          enum:
+            - canceled
+            - dismissed
+            - failed
+            - started
+            - succeeded
+          type: string
+      required:
+        - connector_id
+        - discoveries
+        - execution_uuid
+        - loading_message
+        - start
+        - status
+    Security_AI_Assistant_API_AttackDiscoveryGenerationConfig:
+      type: object
+      properties:
+        alertsIndexPattern:
+          type: string
+        anonymizationFields:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
+          type: array
+        apiConfig:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_ApiConfig'
+          description: LLM API configuration.
+        connectorName:
+          type: string
+        end:
+          type: string
+        filter:
+          additionalProperties: true
+          type: object
+        langSmithApiKey:
+          type: string
+        langSmithProject:
+          type: string
+        model:
+          type: string
+        replacements:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
+        size:
+          type: number
+        start:
+          type: string
+        subAction:
+          enum:
+            - invokeAI
+            - invokeStream
+          type: string
+      required:
+        - apiConfig
+        - alertsIndexPattern
+        - anonymizationFields
+        - size
+        - subAction
+    Security_AI_Assistant_API_AttackDiscoveryGenericError:
+      description: Generic error response for Attack discovery schedule operations
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Bad Request
+          type: string
+        message:
+          description: Human-readable error message describing what went wrong
+          example: Invalid request parameters
+          type: string
+        status_code:
+          description: HTTP status code
+          example: 400
+          type: number
     Security_AI_Assistant_API_BaseContentReference:
       description: The basis of a content reference
       type: object
@@ -65917,6 +67919,10 @@ components:
             - query
             - label
       description: References an ESQL query
+    Security_AI_Assistant_API_Filters:
+      description: The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+      items: {}
+      type: array
     Security_AI_Assistant_API_FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -66119,6 +68125,14 @@ components:
           - fieldType
           - description
       type: array
+    Security_AI_Assistant_API_IntervalApiSchedule:
+      type: object
+      properties:
+        interval:
+          description: The schedule interval
+          type: string
+      required:
+        - interval
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -66756,6 +68770,20 @@ components:
         - Other
       example: OpenAI
       type: string
+    Security_AI_Assistant_API_Query:
+      description: An query condition to filter alerts
+      type: object
+      properties:
+        language:
+          type: string
+        query:
+          oneOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+      required:
+        - query
+        - language
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
       type: object
@@ -75479,14 +77507,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
           type: string
@@ -75529,6 +77550,19 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - status
+    Security_Entity_Analytics_API_MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:

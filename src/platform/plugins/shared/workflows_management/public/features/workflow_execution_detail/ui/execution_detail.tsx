@@ -9,11 +9,14 @@
 
 import React, { useEffect, useCallback, useMemo } from 'react';
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
 import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
 
 export interface ExecutionProps {
   workflowExecutionId: string;
@@ -27,6 +30,7 @@ export interface ExecutionProps {
 
 export const ExecutionDetail: React.FC<ExecutionProps> = ({
   workflowExecutionId,
+  workflowYaml,
   setSelectedStepExecution,
   selectedStepExecutionId,
   setSelectedStep,
@@ -38,6 +42,17 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
+
+  const workflowDefinition = useMemo(() => {
+    if (workflowExecution) {
+      return workflowExecution.workflowDefinition;
+    }
+    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    if (!parsingResult.success) {
+      return null;
+    }
+    return parsingResult.data as WorkflowYaml;
+  }, [workflowYaml, workflowExecution]);
 
   const closeFlyout = useCallback(() => {
     setSelectedStepExecution(null);
@@ -128,7 +143,15 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
   return (
     <>
       {selectedStepExecutionFlyout}
+      <WorkflowExecutionListItem
+        status={workflowExecution?.status ?? ExecutionStatus.PENDING}
+        startedAt={workflowExecution?.startedAt ? new Date(workflowExecution.startedAt) : null}
+        duration={workflowExecution?.duration ?? null}
+        selected={false}
+        onClick={null}
+      />
       <WorkflowStepExecutionList
+        definition={workflowDefinition}
         execution={workflowExecution ?? null}
         isLoading={isLoading}
         error={error as Error | null}

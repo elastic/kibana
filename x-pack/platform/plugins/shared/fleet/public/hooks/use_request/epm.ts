@@ -412,11 +412,20 @@ export const sendRequestReauthorizeTransforms = (
   pkgVersion: string,
   transforms: Array<{ transformId: string }>
 ) => {
-  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: { transforms },
+  });
+};
+
+export const sendRequestInstallRuleAssets = (pkgName: string, pkgVersion: string) => {
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getInstallRuleAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {},
   });
 };
 

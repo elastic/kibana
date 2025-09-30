@@ -132,7 +132,7 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/page-attachment-schema",
     "@kbn/licensing-types",
-    "@kbn/metrics-experience-plugin",
+    "@kbn/core-http-browser-mocks",
     "@kbn/deeplinks-management"
   ],
   "exclude": ["target/**/*"]
