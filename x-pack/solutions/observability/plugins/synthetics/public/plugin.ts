@@ -62,9 +62,8 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -89,7 +88,6 @@ export interface ClientPluginsSetup {
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
-  security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
   embeddable: EmbeddableSetup;
@@ -111,7 +109,6 @@ export interface ClientPluginsStart {
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
-  security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases?: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;

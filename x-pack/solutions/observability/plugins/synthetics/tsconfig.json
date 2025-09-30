@@ -117,9 +117,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/shared-ux-error-boundary",
     "@kbn/field-formats-plugin",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }

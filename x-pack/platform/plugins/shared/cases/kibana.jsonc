@@ -49,8 +49,7 @@
       "savedObjectsFinder"
     ],
     "extraPublicDirs": [
-      "common",
-      "public/client/attachment_framework/types"
+      "common"
     ]
   }
 }
