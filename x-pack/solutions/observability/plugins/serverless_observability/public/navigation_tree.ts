@@ -6,9 +6,8 @@
  */
 
 import { lazy } from 'react';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { icon } from '@elastic/eui/src/components/icon/assets';
 
 const LazyIconBriefcase = lazy(() =>
   import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -47,15 +46,25 @@ export const createNavigationTree = ({
         isCollapsible: false,
         breadcrumbStatus: 'hidden',
         children: [
+          {
+            title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+              defaultMessage: 'Overview',
+            }),
+            link: 'observability-overview' as const,
+            renderAs: 'home',
+            icon: 'logoObservability',
+            sideNavVersion: 'v2',
+          },
           ...(overviewAvailable
-            ? [
+            ? ([
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.overview', {
                     defaultMessage: 'Overview',
                   }),
                   link: 'observability-overview' as const,
+                  sideNavVersion: 'v1',
                 },
-              ]
+              ] as NodeDefinition[])
             : []),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
@@ -112,6 +121,12 @@ export const createNavigationTree = ({
             link: 'slo',
             iconV2: 'visGauge',
           },
+          {
+            link: 'observabilityAIAssistant',
+            title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+              defaultMessage: 'AI Assistant',
+            }),
+          },
           ...(streamsAvailable
             ? [
                 {
@@ -138,7 +153,6 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: 'spaces',
-            spaceBefore: null,
             children: [
               {
                 id: 'apm',
@@ -201,7 +215,6 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             iconV2: LazyIconProductCloudInfra,
-            spaceBefore: null,
             children: [
               {
                 children: [
@@ -226,6 +239,7 @@ export const createNavigationTree = ({
               defaultMessage: 'AI Assistant',
             }),
             iconV2: 'sparkles',
+            sideNavVersion: 'v2',
           },
           {
             id: 'machine_learning-landing',
@@ -233,7 +247,6 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
-            spaceBefore: null,
             iconV2: LazyIconMl,
             children: [
               {
@@ -321,7 +334,6 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
-            spaceBefore: null,
             renderAs: 'panelOpener',
             iconV2: 'wrench',
             children: [
@@ -358,7 +370,8 @@ export const createNavigationTree = ({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
-            icon: 'plusInCircle',
+            icon: 'launch',
+            iconV2: 'plusInCircle',
           },
           {
             id: 'devTools',
@@ -375,8 +388,8 @@ export const createNavigationTree = ({
             }),
             renderAs: 'panelOpener',
             spaceBefore: null,
-            icon: 'info',
             iconV2: 'database',
+            sideNavVersion: 'v2',
             breadcrumbStatus: 'hidden',
             children: [
               {
@@ -412,7 +425,7 @@ export const createNavigationTree = ({
             ],
           },
           {
-            id: 'project_settings_project_nav',
+            id: 'admin_and_settings_project_nav',
             title: i18n.translate('xpack.serverlessObservability.nav.adminAndSettings', {
               defaultMessage: 'Admin and Settings',
             }),
@@ -420,6 +433,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             renderAs: 'panelOpener',
             spaceBefore: null,
+            sideNavVersion: 'v2',
             children: [
               {
                 id: 'cloud_link_org_settings',
@@ -511,6 +525,129 @@ export const createNavigationTree = ({
                   { link: 'management:settings' },
                   { link: 'management:observabilityAiAssistantManagement' },
                 ],
+              },
+            ],
+          },
+          {
+            id: 'project_settings_project_nav',
+            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
+              defaultMessage: 'Project settings',
+            }),
+            icon: 'gear',
+            breadcrumbStatus: 'hidden',
+            renderAs: 'accordion',
+            spaceBefore: null,
+            sideNavVersion: 'v1',
+            children: [
+              {
+                id: 'management',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                  defaultMessage: 'Management',
+                }),
+                spaceBefore: null,
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
+                      defaultMessage: 'Data',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+                      { link: 'management:transform', breadcrumbStatus: 'hidden' },
+                      { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+                      { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
+                      { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
+                      { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+                      { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+                      { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                      { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
+                      defaultMessage: 'Access',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+                      { link: 'management:roles', breadcrumbStatus: 'hidden' },
+                      {
+                        cloudLink: 'userAndRoles',
+                        title: i18n.translate(
+                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
+                          { defaultMessage: 'Manage organization members' }
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    title: i18n.translate(
+                      'xpack.serverlessObservability.nav.mngt.alertsAndInsights',
+                      {
+                        defaultMessage: 'Alerts and insights',
+                      }
+                    ),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                      { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: 'Machine Learning',
+                    children: [
+                      { link: 'management:overview' },
+                      { link: 'management:anomaly_detection' },
+                      { link: 'management:analytics' },
+                      { link: 'management:trained_models' },
+                      { link: 'management:supplied_configurations' },
+                    ],
+                  },
+                  {
+                    title: 'AI',
+                    children: [
+                      {
+                        link: 'management:genAiSettings',
+                        breadcrumbStatus: 'hidden',
+                      },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
+                      defaultMessage: 'Content',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                      { link: 'management:objects', breadcrumbStatus: 'hidden' },
+                      { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
+                      { link: 'management:reporting', breadcrumbStatus: 'hidden' },
+                      { link: 'management:tags', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
+                      defaultMessage: 'Other',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
+                  },
+                ],
+              },
+              {
+                link: 'integrations',
+              },
+              {
+                link: 'fleet',
+              },
+              {
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
               },
             ],
           },
