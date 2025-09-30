@@ -20,6 +20,8 @@ import type { ResilientActionParams } from './types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
+import { AdditionalFields } from '../../common/components/additional_fields';
+import { ConfigService } from '../../common/config_service';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,
@@ -33,6 +35,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const showAdditionalFields = ConfigService.get().resilient.additionalFields.enabled;
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
@@ -122,6 +125,12 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editSubActionProperty('incidentTypes', []);
     }
   }, [editSubActionProperty, incident.incidentTypes]);
+  const additionalFieldsOnChange = useCallback(
+    (value: string | null) => {
+      editSubActionProperty('additionalFields', value);
+    },
+    [editSubActionProperty]
+  );
 
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
@@ -246,6 +255,22 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         isOptionalField
       />
+
+      {showAdditionalFields && (
+        <AdditionalFields
+          value={actionParams.subActionParams?.incident.additionalFields}
+          messageVariables={messageVariables}
+          errors={errors['subActionParams.incident.additionalFields'] as string[]}
+          onChange={additionalFieldsOnChange}
+          isOptionalField
+          helpText={i18n.translate(
+            'xpack.stackConnectors.components.resilient.additionalFieldsHelpTooltipText',
+            {
+              defaultMessage: 'Additional fields in JSON format',
+            }
+          )}
+        />
+      )}
     </>
   );
 };

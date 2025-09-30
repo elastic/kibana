@@ -21,6 +21,8 @@ export const connectorsQueriesKeys = {
     [...connectorsQueriesKeys.resilient, connectorId, 'getIncidentTypes'] as const,
   resilientGetSeverity: (connectorId: string) =>
     [...connectorsQueriesKeys.resilient, connectorId, 'getSeverity'] as const,
+  resilientGetFields: (connectorId: string) =>
+    [...connectorsQueriesKeys.resilient, connectorId, 'getFields'] as const,
   servicenowGetChoices: (connectorId: string, fields: string[]) =>
     [...connectorsQueriesKeys.servicenow, connectorId, 'getChoices', fields] as const,
 };

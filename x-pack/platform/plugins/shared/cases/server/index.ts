@@ -17,6 +17,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     files: { maxSize: true, allowedMimeTypes: true },
     stack: { enabled: true },
     unsafe: { enableCaseSummary: true },
+    resilient: true,
     incrementalId: {
       enabled: true,
     },

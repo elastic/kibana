@@ -23,9 +23,22 @@ import type { ReturnUsePushToService } from '../use_push_to_service';
 import { usePushToService } from '../use_push_to_service';
 import { ConnectorTypes } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaServices } from '../../common/lib/kibana';
+
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...original,
+    KibanaServices: {
+      ...original.KibanaServices,
+      getConfig: jest.fn(),
+    },
+  };
+});
 
 const onSubmit = jest.fn();
 const caseConnectors = getCaseConnectorsMockResponse();
+const getConfigMock = KibanaServices.getConfig as jest.Mock;
 
 const defaultProps: EditConnectorProps = {
   caseData: basicCase,
@@ -58,6 +71,13 @@ describe('EditConnector ', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
+    getConfigMock.mockReturnValue({
+      resilient: {
+        additionalFields: {
+          enabled: true,
+        },
+      },
+    });
   });
 
   afterAll(() => {
@@ -103,6 +123,7 @@ describe('EditConnector ', () => {
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
         fields: {
+          additionalFields: null,
           incidentTypes: null,
           severityCode: null,
         },

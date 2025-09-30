@@ -392,5 +392,21 @@ export const getExecuteResponses = () => ({
       ],
       actionId: getConnectorIds().resilient,
     },
+    getFields: {
+      status: 'ok',
+      data: [
+        {
+          name: 'resolution_summary',
+          input_type: 'textarea',
+          read_only: false,
+          values: [],
+          required: null,
+          text: 'Resolution summary',
+          internal: true,
+          prefix: null,
+        },
+      ],
+      actionId: getConnectorIds().resilient,
+    },
   },
 });
