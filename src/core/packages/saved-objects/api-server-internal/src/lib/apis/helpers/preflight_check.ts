@@ -335,6 +335,14 @@ export interface PreflightCheckNamespacesResult {
 /**
  * @internal
  */
+export interface PreflightAccessControlResult {
+  /** The source of the raw document, if the object already exists */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+/**
+ * @internal
+ */
 export interface PreflightDocParams {
   /** The object type to fetch */
   type: string;
