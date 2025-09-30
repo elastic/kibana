@@ -154,11 +154,21 @@ export const createUpdateSuccessToaster = (
     className: 'eui-textBreakWord',
   };
 
-  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
-    return {
-      ...toast,
-      title: i18n.SYNC_CASE(caseAfterUpdate.title),
-    };
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    ((value?.syncAlerts && caseHasAlerts) || value?.extractObservables)
+  ) {
+    if (value?.extractObservables !== caseBeforeUpdate.settings.extractObservables) {
+      return {
+        ...toast,
+        title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
+      };
+    } else {
+      return {
+        ...toast,
+        title: i18n.SYNC_CASE(caseAfterUpdate.title),
+      };
+    }
   }
 
   if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {
@@ -233,4 +243,23 @@ export const constructCustomFieldsFilter = (
         customFields: valuesByCustomFieldKey,
       }
     : {};
+};
+
+export const getIncrementalIdSearchOverrides = (search: string) => {
+  const incrementalIdRegEx = /^#(\d{1,50})\s*$/;
+  // overrides for incremental_id search
+  let overrides: Partial<FilterOptions> = {};
+  let trimmedSearch = search?.trim();
+  const isIncrementalIdSearch = incrementalIdRegEx.test(trimmedSearch ?? '');
+  if (trimmedSearch && isIncrementalIdSearch) {
+    // extract the number portion of the inc id search: #123 -> 123
+    trimmedSearch = incrementalIdRegEx.exec(trimmedSearch)?.[1] ?? trimmedSearch;
+    // search only in `incremental_id` since types with `title`
+    // and `description` don't overlap
+    overrides = {
+      searchFields: ['incremental_id.text'],
+      search: trimmedSearch,
+    };
+  }
+  return overrides;
 };
