@@ -56,6 +56,8 @@ const DEFAULT_TABLE_STATE = {
   filters: {},
 };
 
+const PLUS_SIGN_REGEX = /[+]/g;
+
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
@@ -76,7 +78,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
         if (clause.simple_query_string) {
           // Add wildcard to support partial matches
           const rawQuery = String(clause.simple_query_string.query ?? '');
-          const wildCardQuery = rawQuery.replace(/[+]/g, '');
+          const wildCardQuery = rawQuery.replace(PLUS_SIGN_REGEX, '');
           return {
             bool: {
               should: [
