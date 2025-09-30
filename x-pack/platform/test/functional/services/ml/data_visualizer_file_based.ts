@@ -34,20 +34,26 @@ export function MachineLearningDataVisualizerFileBasedProvider(
         await testSubjects.existOrFail('~dataVisualizerFileUploadErrorCallout');
       } else {
         await testSubjects.missingOrFail('~dataVisualizerFileUploadErrorCallout');
-        await testSubjects.existOrFail('dataVisualizerPageFileResults');
+        await testSubjects.existOrFail('dataVisualizerPageAdvancedSettings');
       }
     },
 
-    async assertFileTitle(expectedTitle: string) {
-      const actualTitle = await testSubjects.getVisibleText('dataVisualizerFileResultsTitle');
+    async assertFileTitle(expectedTitle: string, index: number) {
+      const actualTitle = await testSubjects.getVisibleText(
+        `dataVisualizerFileResultsTitle_${index}`
+      );
       expect(actualTitle).to.eql(
         expectedTitle,
         `Expected file title to be '${expectedTitle}' (got '${actualTitle}')`
       );
     },
 
-    async assertFileContentPanelExists() {
-      await testSubjects.existOrFail('dataVisualizerFileFileContentPanel');
+    async assertFilePreviewPanelExists(index: number) {
+      await testSubjects.existOrFail(`dataVisualizerFilePreviewPanel_${index}`);
+    },
+
+    async assertFileContentsPanelExists(index: number) {
+      await testSubjects.existOrFail(`dataVisualizerFileContentsPanel_${index}`);
     },
 
     async assertFileContentHighlightingSwitchExists(exist: boolean) {
@@ -93,13 +99,15 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertImportButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('dataVisualizerFileOpenImportPageButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(60 * 1000, async () => {
+        const isEnabled = await testSubjects.isEnabled('dataVisualizerImportButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+      });
     },
 
     async navigateToFileImport() {

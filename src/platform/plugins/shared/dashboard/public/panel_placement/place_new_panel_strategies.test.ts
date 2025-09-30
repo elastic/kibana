@@ -41,12 +41,12 @@ describe('new panel placement strategies', () => {
       });
       expect(otherPanels).toEqual(
         Object.keys(panels).reduce((prev, panelId) => {
-          const originalGridData = panels[panelId].gridData;
+          const originalGridData = panels[panelId].grid;
           return {
             ...prev,
             [panelId]: {
               ...panels[panelId],
-              gridData: {
+              grid: {
                 ...originalGridData,
                 y: originalGridData.y + 6, // panel was pushed down by height of new panel
               },
@@ -70,12 +70,12 @@ describe('new panel placement strategies', () => {
       });
       expect(otherPanels).toEqual(
         Object.keys(panels).reduce((prev, panelId) => {
-          const originalGridData = panels[panelId].gridData;
+          const originalGridData = panels[panelId].grid;
           return {
             ...prev,
             [panelId]: {
               ...panels[panelId],
-              gridData: {
+              grid: {
                 ...originalGridData,
                 // only panels in the targetted section should get pushed down
                 ...(originalGridData.sectionId === 'section1' && {
@@ -108,7 +108,7 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayout().panels,
         '1': {
-          gridData: { x: 6, y: 0, w: 6, h: 6, i: '1' },
+          grid: { x: 6, y: 0, w: 6, h: 6, i: '1' },
           type: 'lens',
         },
       };
@@ -130,7 +130,7 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayoutWithSections().panels,
         '5': {
-          gridData: { x: 6, y: 0, w: 42, h: 6, i: '5' },
+          grid: { x: 6, y: 0, w: 42, h: 6, i: '5' },
           type: 'lens',
         },
       };
@@ -151,19 +151,19 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayoutWithSections().panels,
         '1': {
-          gridData: { x: 0, y: 0, w: 6, h: 100, i: '1' },
+          grid: { x: 0, y: 0, w: 6, h: 100, i: '1' },
           type: 'lens',
         },
         '2': {
-          gridData: { x: 6, y: 6, w: 42, h: 100, i: '2' },
+          grid: { x: 6, y: 6, w: 42, h: 100, i: '2' },
           type: 'lens',
         },
         '6': {
-          gridData: { x: 0, y: 6, w: 6, h: 6, i: '6', sectionId: 'section1' },
+          grid: { x: 0, y: 6, w: 6, h: 6, i: '6', sectionId: 'section1' },
           type: 'lens',
         },
         '7': {
-          gridData: { x: 6, y: 0, w: 42, h: 12, i: '7', sectionId: 'section1' },
+          grid: { x: 6, y: 0, w: 42, h: 12, i: '7', sectionId: 'section1' },
           type: 'lens',
         },
       };
