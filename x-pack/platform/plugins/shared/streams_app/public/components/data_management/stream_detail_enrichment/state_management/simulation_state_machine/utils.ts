@@ -148,29 +148,33 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
       }
 
       // Field Mapping Decision Tree:
-      // ┌─────────────────────────────────────────────────────────────────────────┐
-      // │ Field Processing Priority (top to bottom):                             │
-      // │                                                                         │
-      // │ 1. Inherited Fields (field.from exists)                               │
-      // │    └► status: 'inherited', parent: field.from                        │
-      // │                                                                         │
-      // │ 2. ES Fields (field.esType exists)                                    │
-      // │    └► status: 'mapped', retain esType, streamSource by stream type   │
-      // │                                                                         │
-      // │ 3. Metadata Fields (suggestedType + source exists)                    │
-      // │    ├► Classic Stream:                                                 │
-      // │    │   ├► ECS fields → status: 'mapped', streamSource: 'template'    │
-      // │    │   └► All others → ignored (unmapped)                            │
-      // │    ├► Wired Stream:                                                  │
-      // │    │   ├► OTEL fields → status: 'mapped', streamSource: 'stream'    │
-      // │    │   └► All others → ignored (unmapped)                            │
-      // │    └► Unknown Stream → ECS fields only                               │
-      // │                                                                         │
-      // │ 4. User-Defined Fields (field.type exists)                           │
-      // │    └► status: 'mapped', use provided type                            │
-      // │                                                                         │
-      // │ 5. Fallback → status: 'unmapped' (unmanaged/dynamic)                 │
-      // └─────────────────────────────────────────────────────────────────────────┘
+      // ┌─────────────────────────────────────────────────────────────────────────────────┐
+      // │ Field Processing Priority (top to bottom):                                     │
+      // │                                                                                 │
+      // │ 1. Inherited Fields (field.from exists)                                       │
+      // │    └► status: 'inherited', parent: field.from                                │
+      // │                                                                                 │
+      // │ 2. ES Fields (field.esType exists)                                            │
+      // │    └► status: 'mapped', retain esType, streamSource by stream type           │
+      // │                                                                                 │
+      // │ 3. Metadata Fields (suggestedType + source exists)                            │
+      // │    ├► Classic Stream:                                                         │
+      // │    │   ├► OTEL Classic Stream (name matches /^logs-.*\.otel-/):              │
+      // │    │   │   ├► OTEL fields → status: 'mapped', streamSource: 'template'      │
+      // │    │   │   └► All others → ignored (unmapped)                                │
+      // │    │   ├► Regular Classic Stream:                                            │
+      // │    │   │   ├► ECS fields → status: 'mapped', streamSource: 'template'       │
+      // │    │   │   └► All others → ignored (unmapped)                                │
+      // │    ├► Wired Stream:                                                          │
+      // │    │   ├► OTEL fields → status: 'mapped', streamSource: 'stream'            │
+      // │    │   └► All others → ignored (unmapped)                                    │
+      // │    └► Unknown Stream → ECS fields only                                       │
+      // │                                                                                 │
+      // │ 4. User-Defined Fields (field.type exists)                                   │
+      // │    └► status: 'mapped', use provided type                                    │
+      // │                                                                                 │
+      // │ 5. Fallback → status: 'unmapped' (unmanaged/dynamic)                         │
+      // └─────────────────────────────────────────────────────────────────────────────────┘
       // Detected field already inherited
       if ('from' in field) {
         fieldSchema = {
@@ -183,6 +187,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
         const isEcsField = 'source' in field && field.source === 'ecs';
         const hasMetadataSuggestion =
           'suggestedType' in field && field.suggestedType && 'source' in field && field.source;
+        const isOtelClassicStream = streamType === 'classic' && streamName.match(/^logs-.*\.otel-/);
 
         // Field has ES type (already mapped in Elasticsearch)
         if (Boolean(field.esType)) {
@@ -214,9 +219,12 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
         // Field has metadata suggestion but no ES type - only handle ECS and OTEL fields
         else if (hasMetadataSuggestion) {
           if (streamType === 'classic') {
-            // Classic streams: Only handle ECS fields
-            // All other metadata fields (including OTEL) are ignored for classic streams
-            if (isEcsField) {
+            // Classic streams: Handle ECS fields by default, but OTEL fields for OTEL-specific streams
+            // Check if this is an OTEL-specific classic stream (e.g., logs-*.otel-*)
+            const shouldMapField =
+              (isOtelClassicStream && isOtelField) || (!isOtelClassicStream && isEcsField);
+
+            if (shouldMapField) {
               fieldSchema = {
                 ...fieldSchema,
                 status: 'mapped',
@@ -226,6 +234,7 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
                 esType: undefined,
               } as MappedSchemaField;
             }
+            // All other metadata fields are ignored for classic streams
           } else if (streamType === 'wired') {
             // Wired streams: Only handle OTEL fields, ignore everything else
             if (isOtelField) {
