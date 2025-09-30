@@ -99,6 +99,12 @@ export const streamRoutingMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => ({
       definition: params.definition,
     })),
+    storeSuggestedRuleId: assign((_, params: { id: StreamRoutingContext['suggestedRuleId'] }) => ({
+      suggestedRuleId: params.id,
+    })),
+    resetSuggestedRuleId: assign(() => ({
+      suggestedRuleId: null,
+    })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting']),
@@ -119,6 +125,7 @@ export const streamRoutingMachine = setup({
     definition: input.definition,
     initialRouting: [],
     routing: [],
+    suggestedRuleId: null,
   }),
   initial: 'initializing',
   states: {
@@ -156,10 +163,6 @@ export const streamRoutingMachine = setup({
             });
           }),
         },
-        'suggestion.append': {
-          target: '#idle',
-          actions: [{ type: 'appendRoutingRules', params: ({ event }) => event }],
-        },
       },
       invoke: {
         id: 'routingSamplesMachine',
@@ -189,6 +192,7 @@ export const streamRoutingMachine = setup({
             },
             'routingRule.reviewSuggested': {
               target: 'reviewSuggestedRule',
+              actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
             },
           },
         },
@@ -414,12 +418,16 @@ export const streamRoutingMachine = setup({
         reviewSuggestedRule: {
           id: 'reviewSuggestedRule',
           initial: 'reviewing',
+          exit: [{ type: 'resetSuggestedRuleId' }],
           states: {
             reviewing: {
               on: {
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
+                },
+                'routingRule.cancel': {
+                  target: '#idle',
                 },
               },
             },

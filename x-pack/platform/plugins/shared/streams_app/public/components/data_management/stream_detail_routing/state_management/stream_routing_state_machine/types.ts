@@ -36,6 +36,7 @@ export interface StreamRoutingContext {
   definition: Streams.WiredStream.GetResponse;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
+  suggestedRuleId: string | null;
 }
 
 export type StreamRoutingEvent =
@@ -57,5 +58,4 @@ export type StreamRoutingEvent =
       index: number;
       toggle?: boolean;
     }
-  | { type: 'suggestion.append'; definitions: RoutingDefinition[] }
-  | { type: 'routingRule.reviewSuggested' };
+  | { type: 'routingRule.reviewSuggested'; id: string };

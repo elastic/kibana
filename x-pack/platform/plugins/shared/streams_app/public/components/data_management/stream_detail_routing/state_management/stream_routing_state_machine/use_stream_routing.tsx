@@ -55,9 +55,8 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: async (routingRule?: RoutingDefinition) => {
+      forkStream: (routingRule?: RoutingDefinition) => {
         service.send({ type: 'routingRule.fork', routingRule });
-        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
@@ -65,8 +64,8 @@ export const useStreamRoutingEvents = () => {
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
       },
-      reviewSuggestedRule: () => {
-        service.send({ type: 'routingRule.reviewSuggested' });
+      reviewSuggestedRule: (id: string) => {
+        service.send({ type: 'routingRule.reviewSuggested', id });
       },
     }),
     [service]

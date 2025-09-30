@@ -28,6 +28,7 @@ import { useMatchRate } from './use_match_rate';
 import {
   useStreamRoutingEvents,
   useStreamSamplesSelector,
+  useStreamsRoutingSelector,
 } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel } from '../../shared';
@@ -47,10 +48,11 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   onSuccess(): void;
 }) {
-  const [isModalOpen, toggleModal] = useToggle(false);
   const { timeState } = useTimefilter();
   const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
+  const isUnderReview =
+    useStreamsRoutingSelector((snapshot) => snapshot.context.suggestedRuleId) === partition.name;
   const isSelected = Boolean(
     selectedPreview &&
       selectedPreview.type === 'suggestion' &&
@@ -60,16 +62,8 @@ export function SuggestedStreamPanel({
 
   return (
     <>
-      {isModalOpen && (
-        <CreateStreamConfirmationModal
-          definition={definition}
-          partition={partition}
-          onSuccess={() => {
-            toggleModal(false);
-            onSuccess();
-          }}
-          onClose={() => toggleModal(false)}
-        />
+      {isUnderReview && (
+        <CreateStreamConfirmationModal definition={definition} partition={partition} />
       )}
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -127,10 +121,7 @@ export function SuggestedStreamPanel({
                 <EuiButton
                   iconType="check"
                   size="s"
-                  onClick={() => {
-                    reviewSuggestedRule();
-                    toggleModal(true);
-                  }}
+                  onClick={() => reviewSuggestedRule(partition.name)}
                   fill
                 >
                   {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {

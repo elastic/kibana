@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,10 +21,8 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
-import { useForkStream } from './use_fork_stream';
 import { ConditionPanel } from '../../shared';
 import {
   useStreamRoutingEvents,
@@ -32,21 +31,18 @@ import {
 
 export function CreateStreamConfirmationModal({
   partition,
-  onClose,
 }: {
   definition: Streams.WiredStream.GetResponse;
   partition: ReviewSuggestionsInputs['suggestions'][number];
-  onClose: () => void;
-  onSuccess: () => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { forkStream } = useStreamRoutingEvents();
+  const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
   const isForking = routingSnapshot.matches({ ready: { reviewSuggestedRule: 'forking' } });
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
+    <EuiModal onClose={cancelChanges} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmTitle', {
@@ -77,20 +73,19 @@ export function CreateStreamConfirmationModal({
         <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} isDisabled={isForking}>
+        <EuiButtonEmpty onClick={cancelChanges} isDisabled={isForking}>
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
         <EuiButton
           isLoading={isForking}
-          onClick={async () => {
-            await forkStream({
+          onClick={() =>
+            forkStream({
               destination: partition.name,
               where: partition.condition,
-            });
-            onClose();
-          }}
+            })
+          }
           fill
         >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirm', {
