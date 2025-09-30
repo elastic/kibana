@@ -193,6 +193,7 @@ export function AddSignificantEventFlyout({
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
+      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -278,7 +279,7 @@ export function AddSignificantEventFlyout({
               </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
