@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { i18nNamespaceKey } from '../constants';
 
 export interface ListHeaderProps {
-  artifactType: string;
+  groupedItemsType: string;
 }
 
-export const ListHeader = ({ artifactType }: ListHeaderProps) => {
+export const ListHeader = ({ groupedItemsType }: ListHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -34,7 +34,7 @@ export const ListHeader = ({ artifactType }: ListHeaderProps) => {
       >
         {i18n.translate(`${i18nNamespaceKey}.groupedTypes`, {
           defaultMessage: 'Grouped {types}',
-          values: { types: artifactType.toLowerCase() },
+          values: { types: groupedItemsType.toLowerCase() },
         })}
       </EuiText>
     </div>

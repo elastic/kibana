@@ -5,41 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, type FC } from 'react';
+import React, { memo, useCallback, useMemo, useState, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { GroupedItem } from './components/grouped_item/grouped_item';
-import type { EntityItem } from './components/grouped_item/types';
-import { Title } from './components/title';
-import { ListHeader } from './components/list_header';
-import { PanelBody, List } from './styles';
-import { i18nNamespaceKey } from './constants';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
-import { PaginationControls } from './components/pagination/pagination';
-
-const loadingItems = i18n.translate(`${i18nNamespaceKey}.loading_items`, {
-  defaultMessage: 'Loading group items...',
-});
-
-const groupItems = i18n.translate(`${i18nNamespaceKey}.items`, {
-  defaultMessage: 'Items',
-});
-
-const noItemsFound = i18n.translate(`${i18nNamespaceKey}.no_items_found`, {
-  defaultMessage: 'No items found in group',
-});
-
-const back = i18n.translate(`${i18nNamespaceKey}.back`, {
-  defaultMessage: 'Back',
-});
-
-const somethingWentWrong = i18n.translate(`${i18nNamespaceKey}.somethingWentWrong`, {
-  defaultMessage: 'Something went wrong',
-});
+import type { EntityItem, EntityOrEventItem } from './components/grouped_item/types';
+import { LoadingBody } from './components/loading_body';
+import { EmptyBody } from './components/empty_body';
+import { ContentBody } from './components/content_body';
+import { i18nNamespaceKey } from './constants';
 
 const hosts = i18n.translate(`${i18nNamespaceKey}.types.hosts`, {
   defaultMessage: 'Hosts',
+});
+
+const users = i18n.translate(`${i18nNamespaceKey}.types.users`, {
+  defaultMessage: 'Users',
 });
 
 const entities = i18n.translate(`${i18nNamespaceKey}.types.entities`, {
@@ -50,13 +31,15 @@ const events = i18n.translate(`${i18nNamespaceKey}.types.events`, {
   defaultMessage: 'Events',
 });
 
-const translateEntityType = (type?: string) => {
+const translateEntityType = (type?: string): string => {
   if (!type) return entities;
 
   // TODO Add more case branches for all possible types
   switch (type) {
     case 'host':
       return hosts;
+    case 'user':
+      return users;
     default:
       return entities;
   }
@@ -72,107 +55,108 @@ export interface GraphGroupedNodePreviewPanelProps {
   entityItems: EntityItem[];
 }
 
+interface PaginatedData {
+  items: EntityOrEventItem[];
+  totalHits: number;
+}
+
+interface ContentMetadata {
+  icon: string;
+  groupedItemsType: string;
+}
+
+const usePaginatedData = (
+  docMode: 'grouped-entities' | 'grouped-events',
+  entityItems: EntityItem[],
+  pagination: { pageIndex: number; pageSize: number },
+  fetchedData?: { page: EntityOrEventItem[]; total: number }
+): PaginatedData => {
+  return useMemo(() => {
+    if (docMode === 'grouped-entities') {
+      const startIndex = pagination.pageIndex * pagination.pageSize;
+      const endIndex = startIndex + pagination.pageSize;
+      return {
+        items: entityItems.slice(startIndex, endIndex),
+        totalHits: entityItems.length,
+      };
+    }
+
+    return {
+      items: fetchedData?.page || [],
+      totalHits: fetchedData?.total || 0,
+    };
+  }, [docMode, entityItems, pagination.pageIndex, pagination.pageSize, fetchedData]);
+};
+
+const useContentMetadata = (
+  docMode: 'grouped-entities' | 'grouped-events',
+  items: EntityOrEventItem[]
+): ContentMetadata => {
+  return useMemo(() => {
+    const isEntityMode = docMode === 'grouped-entities';
+    const firstItem = items[0];
+
+    if (isEntityMode && firstItem) {
+      const entityItem = firstItem as EntityItem;
+      return {
+        icon: entityItem.icon || 'index',
+        groupedItemsType: translateEntityType(entityItem.type),
+      };
+    }
+
+    return {
+      icon: 'index',
+      groupedItemsType: events,
+    };
+  }, [docMode, items]);
+};
+
 /**
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ showLoadingState, docMode, dataViewId, documentIds, entityItems }) => {
-    // Pagination
+  ({ docMode, dataViewId, documentIds, entityItems }) => {
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-    const onChangeItemsPerPage = useCallback(
-      (pageSize: number) =>
-        setPagination({
-          pageSize,
-          pageIndex: 0,
-        }),
-      [setPagination]
-    );
-    const onChangePage = useCallback(
-      (pageIndex: number) => setPagination((pageState) => ({ ...pageState, pageIndex })),
-      [setPagination]
-    );
 
-    const { data, isLoading, isFetching } = useFetchDocumentDetails({
+    const onChangeItemsPerPage = useCallback((pageSize: number) => {
+      setPagination({ pageSize, pageIndex: 0 });
+    }, []);
+
+    const onChangePage = useCallback((pageIndex: number) => {
+      setPagination((prevState) => ({ ...prevState, pageIndex }));
+    }, []);
+
+    const { data, isLoading, isFetching, refresh } = useFetchDocumentDetails({
       dataViewId,
       ids: documentIds,
-      pageIndex: pagination.pageIndex,
-      options: { pageSize: pagination.pageSize, enabled: docMode === 'grouped-events' },
+      options: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        enabled: docMode === 'grouped-events',
+      },
     });
 
-    const items =
-      docMode === 'grouped-entities'
-        ? entityItems.slice(
-            pagination.pageIndex * pagination.pageSize,
-            (pagination.pageIndex + 1) * pagination.pageSize
-          )
-        : data?.page || [];
-    const totalHits = docMode === 'grouped-entities' ? entityItems.length : data?.total || 0;
+    const { items, totalHits } = usePaginatedData(docMode, entityItems, pagination, data);
+    const { icon, groupedItemsType } = useContentMetadata(docMode, items);
 
-    if (showLoadingState || isLoading || isFetching) {
-      return (
-        <PanelBody>
-          <Title icon="index" text={loadingItems} />
-          <ListHeader artifactType={groupItems} />
-          <List>
-            <GroupedItem isLoading />
-            <GroupedItem isLoading />
-            <GroupedItem isLoading />
-          </List>
-        </PanelBody>
-      );
+    if (isLoading || isFetching) {
+      return <LoadingBody />;
     }
 
     if (items.length === 0) {
-      return (
-        <PanelBody>
-          <EuiEmptyPrompt
-            color="subdued"
-            title={<h2>{somethingWentWrong}</h2>}
-            layout="vertical"
-            body={<p>{noItemsFound}</p>}
-            actions={[
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                flush="both"
-                onClick={() => {}}
-                aria-label={back}
-              >
-                {back}
-              </EuiButtonEmpty>,
-            ]}
-          />
-        </PanelBody>
-      );
+      return <EmptyBody onRefresh={refresh} />;
     }
 
-    const areAllEntities = docMode === 'grouped-entities';
-    const artifactType = areAllEntities
-      ? translateEntityType((items[0] as EntityItem).type)
-      : events;
-
     return (
-      <PanelBody>
-        <Title
-          icon={areAllEntities ? (items[0] as EntityItem).icon : 'index'}
-          text={artifactType}
-          count={totalHits}
-        />
-        <ListHeader artifactType={artifactType} />
-        <List>
-          {items.map((item) => (
-            <li key={item.id}>
-              <GroupedItem item={item} />
-            </li>
-          ))}
-        </List>
-        <PaginationControls
-          pageIndex={pagination.pageIndex}
-          pageSize={pagination.pageSize}
-          pageCount={Math.ceil(totalHits / pagination.pageSize)}
-          onChangePage={onChangePage}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-        />
-      </PanelBody>
+      <ContentBody
+        items={items}
+        totalHits={totalHits}
+        icon={icon}
+        groupedItemsType={groupedItemsType}
+        pagination={pagination}
+        onChangePage={onChangePage}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+      />
     );
   }
 );

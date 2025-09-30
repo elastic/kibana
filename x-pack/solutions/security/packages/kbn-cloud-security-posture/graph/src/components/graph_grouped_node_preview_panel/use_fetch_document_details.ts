@@ -32,10 +32,11 @@ export interface UseFetchDocumentDetailsParams {
   dataViewId: DataView['id'];
   /** Document ids to retrieve */
   ids: Array<string | undefined> | undefined;
-  /** Current page index (0-based) */
-  pageIndex: number;
   /** Optional flags */
   options: {
+    /** Current page index (0-based) */
+    pageIndex: number;
+    /** Number of elements to fetch per page */
     pageSize: number;
     /** Enable / disable the underlying query (defaults true) */
     enabled?: boolean;
@@ -100,32 +101,6 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
   };
 };
 
-// const parseItemsFromHits = (
-//   hits: DocumentHit[],
-//   itemTypes: string[]
-// ): (EventItem | AlertItem)[] => {
-//   return hits.map((hit) => {
-//     // TODO Fix typing issue and replace `any`
-//     const hitSource = hit._source as Record<string, any>;
-//     return {
-//       itemType: hit._index?.includes('alerts-security.alerts-') ? 'alert' : 'event',
-//       id: hitSource.event.id,
-//       timestamp: hitSource['@timestamp'],
-//       action: hitSource.event.action,
-//       actor: { id: hitSource.actor.entity.id },
-//       target: { id: hitSource.target.entity.id },
-//       ip: hitSource.source.ip,
-//       countryCode: hitSource.source.geo.country_iso_code,
-//     };
-//   });
-// };
-
-// interface SearchRawResponse {
-//   rawResponse?: {
-//     hits?: { hits?: Array<DocumentHit<_Source>> };
-//   };
-// }
-
 /**
  * Hook to fetch full document details for a list of document ids using a single
  * Elasticsearch search request (ids query). Returns an array of hits preserving
@@ -134,7 +109,6 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
 export const useFetchDocumentDetails = <_Source = unknown>({
   dataViewId,
   ids,
-  pageIndex,
   options,
 }: UseFetchDocumentDetailsParams): UseFetchDocumentDetailsResult => {
   const missingDataView = !dataViewId;
@@ -154,10 +128,10 @@ export const useFetchDocumentDetails = <_Source = unknown>({
       'useFetchDocumentDetails',
       dataViewId,
       normalizedIds.join(','),
-      pageIndex,
+      options.pageIndex,
       options.pageSize,
     ],
-    [dataViewId, normalizedIds, pageIndex, options.pageSize]
+    [dataViewId, normalizedIds, options.pageIndex, options.pageSize]
   );
 
   const queryClient = useQueryClient();
@@ -169,7 +143,12 @@ export const useFetchDocumentDetails = <_Source = unknown>({
         return { page: [], total: 0 };
       }
       const search$ = dataService.search.search({
-        params: buildDocumentsRequest(dataViewId, normalizedIds, pageIndex, options.pageSize),
+        params: buildDocumentsRequest(
+          dataViewId,
+          normalizedIds,
+          options.pageIndex,
+          options.pageSize
+        ),
       });
       const response = await lastValueFrom(search$);
       const { hits } = response?.rawResponse;
