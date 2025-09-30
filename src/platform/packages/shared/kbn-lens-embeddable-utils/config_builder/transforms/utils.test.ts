@@ -428,35 +428,17 @@ describe('filtersAndQueryToLensState', () => {
         { language: 'kuery', query: 'category: "shoes"' },
         { language: 'lucene', query: 'price > 100' },
       ] as LensApiFilterType[],
-      query: { language: 'kuery', query: 'status: "active"' } as LensApiFilterType,
     };
 
     const result = filtersAndQueryToLensState(apiState);
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "filters": Array [
-          Object {
-            "meta": Object {},
-            "query": Object {
-              "language": "kuery",
-              "query": "category: \\"shoes\\"",
-            },
-          },
-          Object {
-            "meta": Object {},
-            "query": Object {
-              "language": "lucene",
-              "query": "price > 100",
-            },
-          },
-        ],
-        "query": Object {
-          "language": "kuery",
-          "query": "status: \\"active\\"",
-        },
-      }
-    `);
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toHaveLength(2);
+    for (const [index, filter] of Object.entries(result.filters ?? [])) {
+      expect(filter).toEqual(
+        expect.objectContaining({ query: apiState.filters?.[index as unknown as number] })
+      );
+    }
   });
 
   test('handles missing filters and query gracefully', () => {
@@ -480,7 +462,8 @@ describe('filtersAndQueryToLensState', () => {
 
     const result = filtersAndQueryToLensState(apiState);
 
-    expect(result).toMatchInlineSnapshot(`Object {}`);
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result).not.toHaveProperty('filters');
   });
 });
 

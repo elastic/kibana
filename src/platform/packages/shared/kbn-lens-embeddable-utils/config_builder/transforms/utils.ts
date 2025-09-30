@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -475,14 +475,22 @@ export const queryToLensState = (query: LensApiFilterType): Query => {
 export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
   return {
     filters: filtersToApiFormat(state.state.filters),
-    query: queryToApiFormat(state.state.query as Query),
+    query: isOfAggregateQueryType(state.state.query)
+      ? undefined
+      : queryToApiFormat(state.state.query as Query),
   };
 };
 
 export const filtersAndQueryToLensState = (state: LensApiState) => {
+  const query =
+    state.dataset.type === 'esql'
+      ? { esql: state.dataset.query }
+      : 'query' in state && state.query
+      ? queryToLensState(state.query satisfies LensApiFilterType)
+      : undefined;
   return {
     ...(state.filters ? { filters: filtersToLensState(state.filters) } : {}),
-    ...(state.query ? { query: queryToLensState(state.query as LensApiFilterType) } : {}),
+    ...(query ? { query } : {}),
   };
 };
 
