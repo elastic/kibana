@@ -59,6 +59,7 @@ import {
   insertAtIndex,
   spawnDataSource,
   spawnStep,
+  reorderSteps,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -183,6 +184,11 @@ export const streamEnrichmentMachine = setup({
       idsToDelete.add(params.id);
       return {
         stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
+      };
+    }),
+    reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
+      return {
+        stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
     reassignSteps: assign(({ context }) => ({
@@ -459,6 +465,12 @@ export const streamEnrichmentMachine = setup({
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
+                    },
+                    'step.reorder': {
+                      guard: 'hasSimulatePrivileges',
+                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
+                      target: 'idle',
+                      reenter: true,
                     },
                     'step.delete': {
                       target: 'idle',
