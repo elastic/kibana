@@ -18,13 +18,13 @@ export interface InternalToolDefinition<
   TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TType, TConfig> {
   /**
-   * The zod schema attached to this tool.
+   * Generates the schema attached to this tool.
    */
-  schema: TSchema | (() => MaybePromise<TSchema>);
+  getSchema: () => MaybePromise<TSchema>;
   /**
-   * Run handler that can be used to execute the tool.
+   * Get the handler which can be used to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<TSchema>>;
+  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
   /**
    * Optional handled to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.

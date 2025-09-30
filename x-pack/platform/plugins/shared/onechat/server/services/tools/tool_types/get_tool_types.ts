@@ -10,6 +10,7 @@ import type { AnyToolTypeDefinition } from './definitions';
 import { getEsqlToolType } from './esql';
 import { getIndexSearchToolType } from './index_search';
 import { getWorkflowToolType } from './workflow';
+import { getBuiltinToolType } from './builtin';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
@@ -17,6 +18,7 @@ export const getToolTypeDefinitions = ({
   workflowsManagement?: WorkflowsPluginSetup;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
+    getBuiltinToolType(),
     getEsqlToolType(),
     getIndexSearchToolType(),
     getWorkflowToolType({ workflowsManagement }),

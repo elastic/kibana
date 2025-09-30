@@ -10,27 +10,58 @@ import type { ToolType } from '@kbn/onechat-common';
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { LlmDescriptionHandler, ToolHandlerFn } from '@kbn/onechat-server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export interface ToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
 > {
-  type: TType;
-  disabled?: false;
-  getGeneratedProps: ToolHandlerSchemaTupleProvider<TConfig, TSchema>;
+  toolType: TType;
+  getDynamicProps: ToolHandlerDynamicPropsFn<TConfig, TSchema>;
+
+  createSchema: ObjectType;
+  updateSchema: ObjectType;
+  validateForCreate: ToolTypeCreateValidator<TConfig>;
+  validateForUpdate: ToolTypeUpdateValidator<TConfig>;
 }
 
 export interface DisabledToolTypeDefinition<TType extends ToolType = ToolType> {
-  type: TType;
+  toolType: TType;
   disabled: true;
 }
+
+export interface BuiltinToolTypeDefinition {
+  toolType: ToolType.builtin;
+  builtin: true;
+}
+
+export interface ToolTypeValidatorContext {
+  request: KibanaRequest;
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}
+
+export type ToolTypeCreateValidator<ToolTypeConfig extends object = Record<string, any>> = (opts: {
+  config: ToolTypeConfig;
+  context: ToolTypeValidatorContext;
+}) => MaybePromise<ToolTypeConfig>;
+
+export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<string, any>> = (opts: {
+  current: ToolTypeConfig;
+  update: Partial<ToolTypeConfig>;
+  context: ToolTypeValidatorContext;
+}) => MaybePromise<ToolTypeConfig>;
 
 export type AnyToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
-> = ToolTypeDefinition<TType, TConfig, TSchema> | DisabledToolTypeDefinition<TType>;
+> =
+  | ToolTypeDefinition<TType, TConfig, TSchema>
+  | DisabledToolTypeDefinition<TType>
+  | BuiltinToolTypeDefinition;
 
 export const isEnabledDefinition = <
   TType extends ToolType,
@@ -39,7 +70,27 @@ export const isEnabledDefinition = <
 >(
   definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
 ): definition is ToolTypeDefinition<TType, TConfig, TSchema> => {
-  return definition.disabled !== true;
+  return !('disabled' in definition) && !('builtin' in definition);
+};
+
+export const isBuiltinDefinition = <
+  TType extends ToolType,
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>
+>(
+  definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
+): definition is BuiltinToolTypeDefinition => {
+  return 'builtin' in definition && definition.builtin;
+};
+
+export const isDisabledDefinition = <
+  TType extends ToolType,
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>
+>(
+  definition: AnyToolTypeDefinition<TType, TConfig, TSchema>
+): definition is DisabledToolTypeDefinition<TType> => {
+  return 'disabled' in definition && definition.disabled;
 };
 
 export interface ToolHandlerSchemaTuple<TSchema extends ZodObject<any> = ZodObject<any>> {
@@ -50,7 +101,7 @@ export interface ToolHandlerSchemaTuple<TSchema extends ZodObject<any> = ZodObje
   /**
    * Run handler that can be used to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<TSchema>>;
+  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
   /**
    * Optional handler to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.
@@ -63,7 +114,7 @@ export interface ToolDynamicPropsContext {
   request: KibanaRequest;
 }
 
-export type ToolHandlerSchemaTupleProvider<
+export type ToolHandlerDynamicPropsFn<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
 > = (

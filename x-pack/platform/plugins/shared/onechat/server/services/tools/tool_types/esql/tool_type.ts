@@ -11,6 +11,8 @@ import type { EsqlToolConfig } from '@kbn/onechat-common/tools/types/esql';
 import type { ToolTypeDefinition } from '../definitions';
 import { createHandler } from './create_handler';
 import { createSchemaFromParams } from './create_schema';
+import { validateConfig } from './validate_configuration';
+import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 export const getEsqlToolType = (): ToolTypeDefinition<
   ToolType.esql,
@@ -18,12 +20,27 @@ export const getEsqlToolType = (): ToolTypeDefinition<
   ZodObject<any>
 > => {
   return {
-    type: ToolType.esql,
-    getGeneratedProps: (config) => {
+    toolType: ToolType.esql,
+    getDynamicProps: (config) => {
       return {
-        handler: createHandler(),
+        getHandler: () => createHandler(),
         getSchema: () => createSchemaFromParams(config.params),
       };
+    },
+
+    createSchema: configurationSchema,
+    updateSchema: configurationUpdateSchema,
+    validateForCreate: async ({ config }) => {
+      await validateConfig(config);
+      return config;
+    },
+    validateForUpdate: async ({ update, current }) => {
+      const mergedConfig = {
+        ...current,
+        ...update,
+      };
+      await validateConfig(mergedConfig);
+      return mergedConfig;
     },
   };
 };

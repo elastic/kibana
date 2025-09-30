@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createWorkflowToolType } from './workflow_tool_type';
+export { getBuiltinToolType } from './tool_type';
