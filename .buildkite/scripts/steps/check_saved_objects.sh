@@ -11,10 +11,10 @@ source .buildkite/scripts/common/util.sh
 # ------------------------------------------------------------------------------
 findExistingSnapshotSha() {
   # The merge base commit, to start looking for existing snapshots.
-  local sha=${1}
+  local sha="${1}"
   # The maximum number of attempts to find a existing snapshot,
   # recursing through the commit parent hierarchy. (defaults to 10)
-  local max_attempts=${2:-10}
+  local max_attempts="${2:-10}"
 
   # Counter for the number of attempts made.
   local attempts=1
@@ -32,7 +32,7 @@ findExistingSnapshotSha() {
       if [[ "$http_status" == "404"* ]]; then
         echo "Snapshot '$url' NOT FOUND, fetching parent commit snapshot (attempt $attempts of $max_attempts)..." >&2
         # Obtain the parent SHA
-        sha=$(git rev-parse $sha^)
+        sha=$(git rev-parse "$sha"^)
       else
         echo "Error fetching snapshot '$url' (attempt $attempts of $max_attempts)..." >&2
       fi
@@ -51,14 +51,14 @@ findExistingSnapshotSha() {
 echo "Check changes in Saved Objects"
 
 # Obtain an existing snapshot from merge base commit (or one of its ancestors)
-EXISTING_SNAPSHOT_SHA=$(findExistingSnapshotSha $GITHUB_PR_MERGE_BASE)
+EXISTING_SNAPSHOT_SHA="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
 if [ $? -ne 0 ]; then
   echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
   exit 1
 fi
 
 # Check compatibility from current serverless release ONLY if it's a PR for the 'main' branch
-if [[ "$GITHUB_PR_TARGET_BRANCH" == " main" ]]; then
+if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
   # Obtain the current serverless release SHA from serverless-gitops
   GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
   if [ $? -ne 0 ]; then
@@ -67,13 +67,13 @@ if [[ "$GITHUB_PR_TARGET_BRANCH" == " main" ]]; then
   fi
 
   # Expand to get the full SHA
-  GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse $GITHUB_SERVERLESS_RELEASE_REV)"
+  GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse "$GITHUB_SERVERLESS_RELEASE_REV")"
   if [ $? -ne 0 || ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]; then
     echo "❌ Couldn't expand current serverless release SHA. Ensure your branch is up to date with main."  >&2
     exit 1
   fi
 
-  node scripts/check_saved_objects --baseline $EXISTING_SNAPSHOT_SHA --baseline $GITHUB_SERVERLESS_RELEASE_SHA
+  node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA" --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
 else
-  node scripts/check_saved_objects --baseline $EXISTING_SNAPSHOT_SHA
+  node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
 fi
