@@ -54,12 +54,12 @@ export const calculateScoresWithESQL = async (
     const now = new Date().toISOString();
 
     const filter = getFilters(params);
+
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
       : getEntityAnalyticsEntityTypes();
 
     const compositeQuery = getCompositeQuery(identifierTypes, filter, params);
-
     logger.trace(
       `STEP ONE: Executing ESQL Risk Score composite query:\n${JSON.stringify(compositeQuery)}`
     );
@@ -70,7 +70,14 @@ export const calculateScoresWithESQL = async (
       });
 
     if (!response?.aggregations) {
-      throw new Error('No aggregations in composite response');
+      return {
+        after_keys: {},
+        scores: {
+          host: [],
+          user: [],
+          service: [],
+        },
+      };
     }
 
     const promises = toEntries(response.aggregations).map<Promise<ESQLResults[number]>>(
