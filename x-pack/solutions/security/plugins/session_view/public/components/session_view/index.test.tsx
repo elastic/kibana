@@ -153,7 +153,7 @@ describe('SessionView component', () => {
         });
       });
 
-      it('should clear updated alert status when refresh button is clicked', async () => {
+      it('should refresh alert status for updated alerts when refresh button is clicked', async () => {
         render();
 
         await waitFor(() => {

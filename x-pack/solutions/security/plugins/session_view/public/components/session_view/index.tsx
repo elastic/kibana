@@ -200,10 +200,13 @@ export const SessionView = ({
     refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
-    // Clear the cached alert status to ensure fresh data is fetched
-    setUpdatedAlertsStatus({});
+    // Refresh alert status for any alerts that have been updated
+    const alertUuids = Object.keys(updatedAlertsStatus);
+    if (alertUuids.length > 0) {
+      setFetchAlertStatus([...alertUuids]);
+    }
     trackEvent('refresh_clicked');
-  }, [refetch, refetchAlerts, refetchTotalTTYOutput, trackEvent]);
+  }, [refetch, refetchAlerts, refetchTotalTTYOutput, updatedAlertsStatus, trackEvent]);
 
   const hasError = error || alertsError;
   const dataLoaded = data && data.pages?.length > (jumpToCursor ? 1 : 0);
