@@ -85,10 +85,10 @@ export const JsonEditor = () => {
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
     return {
       triggerCharacters: ['"'],
-      provideCompletionItems: (
+      provideCompletionItems: async (
         model: monaco.editor.ITextModel,
         position: monaco.Position
-      ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
+      ): Promise<monaco.languages.CompletionList> => {
         const lineContentAfter = model.getValueInRange({
           startLineNumber: position.lineNumber,
           startColumn: position.column,
@@ -113,21 +113,20 @@ export const JsonEditor = () => {
         const lastLine = bodyContent.split('\n').pop()!.trim();
         const alreadyOpenedQuote = hasOddQuoteCount(lastLine);
 
-        return Promise.resolve(loadProcessorSuggestions(http)).then((terms) => {
-          const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
-            const label = String(t.name);
-            const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
-            return {
-              label,
-              kind: monaco.languages.CompletionItemKind.Constant,
-              detail: 'API',
-              insertText,
-              range,
-              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            } as monaco.languages.CompletionItem;
-          });
-          return { suggestions } as monaco.languages.CompletionList;
+        const terms = await loadProcessorSuggestions(http);
+        const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
+          const label = String(t.name);
+          const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
+          return {
+            label,
+            kind: monaco.languages.CompletionItemKind.Constant,
+            detail: 'API',
+            insertText,
+            range,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          } as monaco.languages.CompletionItem;
         });
+        return { suggestions } as monaco.languages.CompletionList;
       },
     };
   }, [http]);

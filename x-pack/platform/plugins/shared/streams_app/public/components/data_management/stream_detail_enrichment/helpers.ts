@@ -6,8 +6,14 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { JsonValue } from '@kbn/utility-types';
 
 const CONSOLE_API_SERVER = '/api/console/api_server';
+
+type ProcessorDef = { __template?: JsonValue };
+type ProcessorEntry = Record<string, ProcessorDef>;
+type DataAutocompleteRules = { processors?: Array<{ __one_of?: ProcessorEntry[] }> };
+type IngestPutPipelineEndpoint = { data_autocomplete_rules?: DataAutocompleteRules };
 
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
@@ -58,29 +64,30 @@ const formatXJsonString = (input: string) => {
 };
 
 
-export type ProcessorSuggestion = { name: string; template?: any };
+export type ProcessorSuggestion = { name: string; template?: JsonValue };
 
-let processorsCache: ProcessorSuggestion[] | null = null;
 
 export const loadProcessorSuggestions = async (http: HttpStart): Promise<ProcessorSuggestion[]> => {
+  let processorsCache: ProcessorSuggestion[] | null = null;
+
   if (processorsCache) {
     return processorsCache;
   }
   try {
-    const res = await http.get<{ es: any }>(CONSOLE_API_SERVER);
+    const res = await http.get<{ es?: { endpoints?: Record<string, unknown> } }>(CONSOLE_API_SERVER);
     const endpoints = res?.es?.endpoints ?? {};
-    const ingest = endpoints['ingest.put_pipeline'];
+    const ingest = endpoints['ingest.put_pipeline'] as IngestPutPipelineEndpoint | undefined;
     const rules = ingest?.data_autocomplete_rules;
-    const oneOf = rules?.processors?.[0]?.__one_of as Array<Record<string, any>> | undefined;
+    const oneOf = rules?.processors?.[0]?.__one_of as ProcessorEntry[] | undefined;
     if (!oneOf) {
       processorsCache = [];
       return processorsCache;
     }
-    processorsCache = oneOf.map((entry) => {
+    processorsCache = oneOf.map((entry: ProcessorEntry) => {
       const name = Object.keys(entry)[0];
-      const def = (entry)[name];
+      const def = entry[name] as ProcessorDef;
       const template = def?.__template;
-      return { name, template } as ProcessorSuggestion;
+      return { name, template };
     });
     return processorsCache;
   } catch {
@@ -95,7 +102,7 @@ export const hasOddQuoteCount = (text: string) => ((text.match(/\"/g) || []).len
 
 export const buildProcessorInsertText = (
   name: string,
-  template: any | undefined,
+  template: JsonValue | undefined,
   alreadyOpenedQuote: boolean
 ): string => {
   let insertText = alreadyOpenedQuote ? `${name}"` : `"${name}"`;
