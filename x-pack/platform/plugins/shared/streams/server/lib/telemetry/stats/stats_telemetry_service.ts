@@ -19,7 +19,7 @@ export class StatsTelemetryService {
   public setup(usageCollection?: UsageCollectionSetup) {
     if (usageCollection) {
       this.logger.debug('[Streams Stats Telemetry Service] Setting up streams usage collector');
-      registerStreamsUsageCollector(usageCollection);
+      registerStreamsUsageCollector(usageCollection, this.logger);
     } else {
       this.logger.debug(
         '[Streams Stats Telemetry Service] Usage collection not available, skipping setup'
