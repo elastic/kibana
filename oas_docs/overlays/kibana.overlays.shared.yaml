@@ -67,15 +67,6 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Data streams APIs enable you to get information on data streams
-      externalDocs:
-        description: Learn about data streams for Fleet
-        url: https://www.elastic.co/docs/reference/fleet/data-streams
-      x-displayName: 'Data streams'
-  - target: '$.tags[?(@.name=="data streams")]'
-    description: Change tag description and displayName
-    update:
-      description: >
         Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
       x-displayName: 'Data streams'
   - target: '$.tags[?(@.name=="elastic agent actions")]'
