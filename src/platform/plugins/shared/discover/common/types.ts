@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NEW_TAB_ID } from './constants';
-
 export enum TabUrlAction {
+  /**
+   * The `action` value used to indicate that a new tab should be created.
+   */
+  new = 'new',
   /**
    * The `action` value used to indicate that a link was created via Share functionality.
    */
@@ -20,7 +22,7 @@ export interface TabsUrlState {
   /**
    * Syncing the selected tab id with the URL
    */
-  tabId?: typeof NEW_TAB_ID | string;
+  tabId?: string;
   /**
    * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
    */

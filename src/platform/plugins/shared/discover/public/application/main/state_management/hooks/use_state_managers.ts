@@ -62,9 +62,9 @@ export const useStateManagers = ({
     const stopUrlSync = tabsStorageManager.startUrlSync({
       // if `_tab` in URL changes (for example via browser history), try to restore the previous state
       onChanged: (urlState) => {
-        const { tabId: restoreTabId } = urlState;
+        const { tabId: restoreTabId, action } = urlState;
         if (restoreTabId) {
-          internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
+          internalState.dispatch(internalStateActions.restoreTab({ restoreTabId, action }));
         }
       },
     });

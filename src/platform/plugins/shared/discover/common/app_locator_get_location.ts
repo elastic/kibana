@@ -15,6 +15,7 @@ import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
 import type { TabsUrlState } from './types';
+import { TabUrlAction } from './types';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -95,10 +96,13 @@ export const appLocatorGetLocationCommon = async (
 
   if (tab && Object.keys(tab).length) {
     const tabsState: TabsUrlState = {
-      tabId: tab.id,
       ...('label' in tab ? { tabLabel: tab.label } : {}),
       ...('action' in tab ? { action: tab.action } : {}),
     };
+
+    if ('id' in tab && tab.id && (!('action' in tab) || tab.action === TabUrlAction.shared)) {
+      tabsState.tabId = tab.id;
+    }
 
     if (Object.keys(tabsState).length) {
       path = setStateToKbnUrl(TAB_STATE_URL_KEY, tabsState, { useHash }, path);

@@ -16,12 +16,12 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import { TAB_STATE_URL_KEY } from '../../../../common/constants';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
-import { TabUrlAction, type TabsUrlState } from '../../../../common/types';
+import { type TabsUrlState, TabUrlAction } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -159,7 +159,10 @@ export const createTabsStorageManager = ({
     const previousState = getTabsStateFromURL();
     // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
     // This prevents cluttering the browser history with intermediate "new tab" states that are not meaningful to the user.
-    const shouldReplace = replace || previousState?.tabId === NEW_TAB_ID;
+    const shouldReplace =
+      replace ||
+      previousState?.action === TabUrlAction.new ||
+      previousState?.action === TabUrlAction.shared;
 
     try {
       isPushingTabIdToUrl = true;
@@ -402,7 +405,7 @@ export const createTabsStorageManager = ({
       // try to preselect one of the previously opened tabs
       if (
         selectedTabId &&
-        selectedTabId !== NEW_TAB_ID &&
+        selectedTabAction !== TabUrlAction.new &&
         openTabs.find((tab) => tab.id === selectedTabId)
       ) {
         return {
@@ -418,7 +421,7 @@ export const createTabsStorageManager = ({
 
       if (
         // append a new tab if requested via URL
-        selectedTabId === NEW_TAB_ID ||
+        selectedTabAction === TabUrlAction.new ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
         (selectedTabAction === TabUrlAction.shared && persistedDiscoverSession)
       ) {
