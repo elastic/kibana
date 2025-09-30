@@ -138,20 +138,20 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const inferenceIds: string[] = req.body.inferenceIds ?? [];
       const { forceUpdate } = req.body ?? {};
 
       const { documentationManager } = getServices();
 
-      await documentationManager.updateAll({
+      const updated = await documentationManager.updateAll({
         request: req,
         forceUpdate,
-        inferenceIds,
+        // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
+        inferenceIds: req.body.inferenceIds ?? [],
       });
 
       // check status after installation in case of failure
       const statuses: Record<string, PerformUpdateResponse> =
-        await documentationManager.getStatuses({ inferenceIds });
+        await documentationManager.getStatuses({ inferenceIds: updated.inferenceIds });
       return res.ok<Record<string, PerformUpdateResponse>>({
         body: statuses,
       });
