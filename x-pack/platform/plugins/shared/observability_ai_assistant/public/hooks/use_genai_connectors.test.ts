@@ -27,9 +27,11 @@ jest.mock('./use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../../common/utils/get_inference_connector', () => ({
-  getInferenceConnectorInfo: jest.fn((connector) => connector),
+
+jest.mock('./inference_endpoint_exists', () => ({
+  isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
 }));
+
 const mockConnectors: FindActionResult[] = [
   {
     id: 'connector-1',
