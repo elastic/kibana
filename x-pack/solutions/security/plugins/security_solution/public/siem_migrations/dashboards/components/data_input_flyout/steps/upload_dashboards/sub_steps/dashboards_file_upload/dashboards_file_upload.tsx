@@ -17,7 +17,7 @@ import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file
 import type { SplunkRow } from '../../../../../../../common/hooks/use_parse_file_input';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 import * as i18n from './translations';
-import type { SplunkDashboardsResult, OnMigrationCreated } from '../../../../types';
+import type { SplunkDashboardsResult } from '../../../../types';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import type { SplunkOriginalDashboardExport } from '../../../../../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
@@ -30,7 +30,6 @@ export interface DashboardsFileUploadProps {
   migrationName: string | undefined;
   apiError: string | undefined;
   onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
-  onMigrationCreated: OnMigrationCreated;
 }
 export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
   ({
