@@ -42,7 +42,8 @@ describe.skip(
       login();
     });
 
-    describe('Scan operation:', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/212175
+    describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';
