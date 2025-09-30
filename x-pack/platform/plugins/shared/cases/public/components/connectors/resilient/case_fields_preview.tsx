@@ -17,7 +17,7 @@ import type { ResilientFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
 import { useGetFields } from './use_get_fields';
-import { ResilientFieldMetadata } from './types';
+import type { ResilientFieldMetadata } from './types';
 
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
