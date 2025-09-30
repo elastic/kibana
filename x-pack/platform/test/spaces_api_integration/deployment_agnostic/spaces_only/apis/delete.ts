@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SPACES } from '../../../common/lib/spaces';
+import { SPACE_1, SPACE_2, SPACE_3, SPACES } from '../../../common/lib/spaces';
 import { deleteTestSuiteFactory } from '../../../common/suites/delete.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -13,7 +13,60 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
   const { deleteTest, expectEmptyResult, expectReservedSpaceResult, expectNotFound } =
     deleteTestSuiteFactory(context);
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+  const kbnClient = context.getService('kibanaServer');
+
+  const createSpaces = async () => {
+    await spacesService.create(SPACE_1);
+    await spacesService.create(SPACE_2);
+    await spacesService.create({ ...SPACE_3, ...(isServerless ? {} : { solution: 'es' }) });
+  };
+
+  const deleteSpaces = async () => {
+    await spacesService.delete(SPACE_1.id);
+    await spacesService.delete(SPACE_2.id);
+    await spacesService.delete(SPACE_3.id);
+  };
+
+  const loadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.load(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
+
+  const unloadSavedObjects = async () => {
+    for (const space of ['default', 'space_1', 'space_2', 'space_3', 'other_space']) {
+      await kbnClient.importExport.unload(
+        `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/${space}_objects.json`,
+        { space }
+      );
+    }
+  };
+
   describe('delete', () => {
+    before(async () => {
+      await createSpaces();
+      await loadSavedObjects();
+    });
+
+    afterEach(async () => {
+      try {
+        await spacesService.create(SPACE_2);
+      } catch (error) {
+        // Ignore
+      }
+    });
+
+    after(async () => {
+      await deleteSpaces();
+      await unloadSavedObjects();
+      await kbnClient.savedObjects.cleanStandardList();
+    });
+
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

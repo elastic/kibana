@@ -145,8 +145,8 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       _id: string;
       _source?: { namespaces: string[] };
     }>;
-    // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
-    expect(docs).length(21);
+    // Just 34 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
+    expect(docs).length(34);
     docs.forEach((doc: { _id: string; _source?: { namespaces: string[] } }) => {
       const containsSpace2 = doc._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
