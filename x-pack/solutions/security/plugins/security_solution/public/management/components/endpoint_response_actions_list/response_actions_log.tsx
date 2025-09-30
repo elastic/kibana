@@ -64,9 +64,6 @@ export const ResponseActionsLog = memo<
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
     const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
       'responseActionsCrowdstrikeManualHostIsolationEnabled'
     );
@@ -94,12 +91,7 @@ export const ResponseActionsLog = memo<
       if (!isFlyout) {
         setQueryParams((prevState) => ({
           ...prevState,
-          agentTypes:
-            isSentinelOneV1Enabled || isCrowdstrikeEnabled || isMicrosoftDefenderEnabled
-              ? agentTypesFromUrl?.length
-                ? agentTypesFromUrl
-                : prevState.agentTypes
-              : [],
+          agentTypes: agentTypesFromUrl?.length ? agentTypesFromUrl : prevState.agentTypes,
           commands: commandsFromUrl?.length
             ? commandsFromUrl.map(
                 (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
@@ -123,7 +115,6 @@ export const ResponseActionsLog = memo<
       agentIdsFromUrl,
       isFlyout,
       isCrowdstrikeEnabled,
-      isSentinelOneV1Enabled,
       isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,

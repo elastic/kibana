@@ -53,15 +53,6 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
-
-  /**
    * Enables use of SentinelOne response actions that complete asynchronously
    *
    * Release: v8.14.0
