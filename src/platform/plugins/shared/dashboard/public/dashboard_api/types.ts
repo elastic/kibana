@@ -165,7 +165,7 @@ export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;

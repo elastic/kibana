@@ -81,7 +81,7 @@ function getLocatorParams({
   const panels = savedObjectId
     ? (dashboardInternalApi.serializeLayout() as Pick<
         DashboardLocatorParams,
-        'panels' | 'references' | 'controlGroupInput'
+        'panels' | 'references'
       >)
     : undefined;
 
