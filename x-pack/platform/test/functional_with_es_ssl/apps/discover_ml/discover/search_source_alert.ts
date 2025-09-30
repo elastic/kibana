@@ -542,6 +542,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('addFieldFilterButton');
 
       // change title
+      await testSubjects.click('actionsButton');
       await testSubjects.click('editIndexPatternButton');
       await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
         clearWithKeyboard: true,
