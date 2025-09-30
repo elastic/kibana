@@ -28,6 +28,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.artifacts.global.base_url',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -261,6 +272,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned',
       }
     ),
   },
@@ -551,6 +573,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned',
       }
     ),
   },
