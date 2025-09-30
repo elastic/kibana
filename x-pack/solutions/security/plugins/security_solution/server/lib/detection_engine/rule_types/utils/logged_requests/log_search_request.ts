@@ -48,7 +48,9 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
     ...(searchRequest.body as Record<string, unknown>),
   };
 
-  const url = `/${index}/_search${convertToQueryString(params)}`;
+  const prefix = index ? `/${index}` : '';
+
+  const url = `${prefix}/_search${convertToQueryString(params)}`;
 
   if (body) {
     return `POST ${url}\n${JSON.stringify({ ...body }, null, 2)}`;

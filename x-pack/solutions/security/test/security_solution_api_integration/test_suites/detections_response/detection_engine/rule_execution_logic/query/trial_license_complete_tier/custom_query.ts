@@ -2845,7 +2845,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveLength(1);
         expect(requests![0].description).toBe('Find events');
         expect(requests![0].request_type).toBe('findDocuments');
-        expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
+        expect(requests![0].request).toContain('POST /_search?allow_no_indices=true');
       });
 
       it('should not return requests property when not enabled and suppression configured', async () => {
