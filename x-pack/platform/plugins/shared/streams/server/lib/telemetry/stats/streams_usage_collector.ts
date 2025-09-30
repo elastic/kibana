@@ -13,9 +13,6 @@ import { hasChangedRetention, percentiles } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
 
-/**
- * Creates a fetch function for Streams usage statistics with logger closure
- */
 function createFetchFunction(logger: Logger) {
   return async function fetchStreamsUsageStats({
     esClient,
@@ -89,7 +86,7 @@ function createFetchFunction(logger: Logger) {
           withFieldsCount++;
         }
 
-        if (hasChangedRetention(definition.ingest?.lifecycle)) {
+        if (hasChangedRetention(definition.ingest.lifecycle)) {
           withChangedRetentionCount++;
         }
       }
@@ -228,10 +225,7 @@ function createFetchFunction(logger: Logger) {
 
       if (Streams.WiredStream.Definition.is(definition)) {
         wiredCount++;
-      } else if (
-        Streams.ClassicStream.Definition.is(definition) &&
-        !Streams.GroupStream.Definition.is(definition)
-      ) {
+      } else if (Streams.ClassicStream.Definition.is(definition)) {
         classicCount++;
       }
     }

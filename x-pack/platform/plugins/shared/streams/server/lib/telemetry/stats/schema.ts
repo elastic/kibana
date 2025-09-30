@@ -38,7 +38,7 @@ export const streamsStatsSchema: MakeSchemaFrom<StreamsStatsTelemetry> = {
       type: 'long',
       _meta: {
         description:
-          'Number of classic streams with custom retention settings (DSL or ILM). Calculated by counting streams with lifecycle containing "dsl" property (includes both custom periods and "Forever" retention).',
+          'Number of classic streams with changed retention. Calculated by confirming stream lifecycle is not "inherited".',
       },
     },
   },

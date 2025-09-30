@@ -16,7 +16,7 @@ export interface StreamsStatsTelemetry {
     with_processing_count: number;
     /** Number of classic streams that have custom field overrides configured */
     with_fields_count: number;
-    /** Number of classic streams that have custom retention settings (DSL or ILM) */
+    /** Number of classic streams that with non-default retention settings (not inherited) */
     with_changed_retention_count: number;
   };
   wired_streams: {
