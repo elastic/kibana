@@ -24,7 +24,7 @@ import type { ResilientFieldMetadata } from './types';
 export const AdditionalFormFields = React.memo<{
   field: FieldHook<string, string>;
   connector: ConnectorFieldsProps['connector'];
-}>(({ connector, field: superFormField }) => {
+}>(({ connector, field: additionalFieldsFormField }) => {
   const { http } = useKibana().services;
   const {
     isLoading: isLoadingFields,
@@ -50,10 +50,9 @@ export const AdditionalFormFields = React.memo<{
     );
   }, [fieldsData?.data]);
 
-  // todo: make this a memo of the superFormField value
   const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
     () => {
-      const a = superFormField.value ? JSON.parse(superFormField.value) : {};
+      const a = additionalFieldsFormField.value ? JSON.parse(additionalFieldsFormField.value) : {};
       return Object.keys(a).map((key) => ({
         label: fieldsMetadataRecord[key]?.text ?? key,
         value: key,
@@ -61,9 +60,12 @@ export const AdditionalFormFields = React.memo<{
     }
   );
 
+  const defaultAdditionalFields = useMemo(() => {
+    return additionalFieldsFormField.value ? JSON.parse(additionalFieldsFormField.value) : {};
+  }, [additionalFieldsFormField.value]);
+
   const { form } = useForm<Record<string, unknown>>({
-    // todo: make this use a memo of the superFormField value instead of parsing each time
-    defaultValue: superFormField.value ? JSON.parse(superFormField.value) : {},
+    defaultValue: defaultAdditionalFields,
     options: { stripUnsetFields: false, stripEmptyFields: false, valueChangeDebounceTime: 500 },
   });
 
@@ -71,7 +73,7 @@ export const AdditionalFormFields = React.memo<{
     form,
   });
 
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(superFormField);
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(additionalFieldsFormField);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -100,10 +102,10 @@ export const AdditionalFormFields = React.memo<{
         return acc;
       }, {} as Record<string, unknown>);
 
-      superFormField.setValue(JSON.stringify(transformedFields));
+      additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
     }, 500);
     return () => clearTimeout(timeout);
-  }, [superFormField, fields, fieldsMetadataRecord]);
+  }, [additionalFieldsFormField, fields, fieldsMetadataRecord]);
 
   return (
     <Form form={form}>
