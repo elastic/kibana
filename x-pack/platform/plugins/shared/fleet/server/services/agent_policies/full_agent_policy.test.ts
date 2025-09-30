@@ -1689,19 +1689,6 @@ ssl.test: 123
 });
 
 describe('generateFleetConfig', () => {
-  const agentPolicy = {
-    id: 'agent-policy',
-    status: 'active',
-    package_policies: [],
-    is_managed: false,
-    namespace: 'default',
-    revision: 1,
-    name: 'Policy',
-    updated_at: '2020-01-01',
-    updated_by: 'qwerty',
-    is_protected: false,
-  } as any;
-
   it('should work without proxy', () => {
     const res = generateFleetConfig(
       {
