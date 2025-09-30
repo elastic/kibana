@@ -5,7 +5,7 @@
     "bucket_span": "60m",
     "detectors": [
       {
-        "detector_description": "Detects rare GCP Audit status codes.",
+        "detector_description": "Detects rare GCP Audit status codes of failing event actions",
         "function": "rare",
         "by_field_name": "gcp.audit.status.code",
         "detector_index": 0

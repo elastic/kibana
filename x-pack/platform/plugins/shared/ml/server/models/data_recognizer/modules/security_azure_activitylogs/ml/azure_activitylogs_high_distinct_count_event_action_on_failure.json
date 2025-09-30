@@ -5,7 +5,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects high distinct count of Azure Activity Logs error messages.",
+        "detector_description": "Detects high distinct count of Azure Activity Logs status messages of failing event actions.",
         "function": "high_distinct_count",
         "field_name": "event.action",
         "detector_index": 0

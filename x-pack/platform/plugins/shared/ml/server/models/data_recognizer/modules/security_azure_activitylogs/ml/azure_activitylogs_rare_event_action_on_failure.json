@@ -5,7 +5,7 @@
     "bucket_span": "60m",
     "detectors": [
       {
-        "detector_description": "Detects rare Azure Activity Logs event actions on failure.",
+        "detector_description": "Detects rare Azure Activity Logs event actions of failing event actions.",
         "function": "rare",
         "by_field_name": "event.action",
         "detector_index": 0
