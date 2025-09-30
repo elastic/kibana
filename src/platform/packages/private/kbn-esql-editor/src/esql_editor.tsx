@@ -489,6 +489,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
+  const telemetryCallbacks = useMemo(
+    () => ({
+      onDecorationHoverShown: (hoverMessage: string) =>
+        telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+    }),
+    [telemetryService]
+  );
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -767,12 +775,9 @@ const ESQLEditorInternal = function ESQLEditor({
     () =>
       ESQLLang.getHoverProvider?.({
         ...esqlCallbacks,
-        telemetry: {
-          onDecorationHoverShown:
-            telemetryService.trackLookupJoinHoverActionShown.bind(telemetryService),
-        },
+        telemetry: telemetryCallbacks,
       }),
-    [esqlCallbacks, telemetryService]
+    [esqlCallbacks, telemetryCallbacks]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
@@ -1157,4 +1162,5 @@ const ESQLEditorInternal = function ESQLEditor({
 };
 
 export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
