@@ -105,7 +105,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
     if (loadingHeaders) return;
 
     const formData = getFormData();
-
     const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
     const secretHeaders = secretHeaderKeys.map((key) => ({

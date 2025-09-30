@@ -9,19 +9,21 @@ import React from 'react';
 import { AuthConfig } from './auth_config';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
-import {
-  formSerializer,
-  formDeserializer,
-} from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form';
+import { useSecretHeaders } from './use_secret_headers';
 
-jest.mock('./use_secret_headers', () => ({
-  useSecretHeaders: jest.fn().mockReturnValue({ isLoading: false, isFetching: false, data: [] }),
-}));
+jest.mock('./use_secret_headers');
+
+const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
 describe('AuthConfig renders', () => {
   const onSubmit = jest.fn();
+
+  beforeEach(() => {
+    useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+  });
 
   it('renders all fields for authType=None', async () => {
     const testFormData = {
@@ -202,38 +204,119 @@ describe('AuthConfig renders', () => {
     expect(await screen.findByTestId('sslCertFields')).toBeInTheDocument();
   });
 
-  it.skip('renders secret headers and merges them with config headers', async () => {
-    const testFormData = {
+  describe('secret headers', () => {
+    const defaultTestFormData = {
       config: {
-        hasAuth: true,
-        authType: AuthType.SSL,
-        certType: SSLCertType.PFX,
-        headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-      },
-      secrets: {
-        crt: Buffer.from('some binary string').toString('base64'),
-        key: Buffer.from('some binary string').toString('base64'),
+        hasAuth: false,
       },
       __internal__: {
         hasHeaders: true,
         hasCA: false,
-        headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        headers: [{ key: 'config-key', value: 'text', type: 'config' }],
       },
     };
 
-    render(
-      <AuthFormTestProvider
-        defaultValue={testFormData}
-        onSubmit={onSubmit}
-        serializer={formSerializer}
-        deserializer={formDeserializer}
-      >
-        <AuthConfig readOnly={false} />
-      </AuthFormTestProvider>
+    beforeEach(() =>
+      useSecretHeadersMock
+        .mockReturnValueOnce({
+          isLoading: true,
+          isFetching: true,
+          data: [],
+        })
+        .mockReturnValue({
+          isLoading: false,
+          isFetching: false,
+          data: ['secret-key'],
+        })
     );
 
-    expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
-    expect(await screen.findByTestId('webhookHeadersValueInput')).toBeInTheDocument();
+    it('submits secret headers merged with config headers', async () => {
+      render(
+        <AuthFormTestProvider defaultValue={defaultTestFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('webhookHeadersSecretValueInput'));
+      await userEvent.paste('foobar');
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [
+                { key: 'config-key', value: 'text', type: 'config' },
+                { key: 'secret-key', value: 'foobar', type: 'secret' },
+              ],
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    it('submits properly when there are only secret headers', async () => {
+      const testFormData = {
+        ...defaultTestFormData,
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [],
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('webhookHeadersSecretValueInput'));
+      await userEvent.paste('foobar');
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [{ key: 'secret-key', value: 'foobar', type: 'secret' }],
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    it('validation fails if the secret header value is empty', async () => {
+      render(
+        <AuthFormTestProvider defaultValue={defaultTestFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      // We submit without populating the secret header value field
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+    });
   });
 
   describe('Validation', () => {
@@ -548,83 +631,21 @@ describe('AuthConfig renders', () => {
       });
     });
 
-    it.skip('succeeds with secret headers', async () => {
-      const testConfig = {
-        config: {
-          ...defaultTestFormData.config,
-          authType: AuthType.SSL,
-          certType: SSLCertType.PFX,
-        },
-        secrets: {
-          pfx: Buffer.from('some binary string').toString('base64'),
-          secretHeaders: { 'secret-key': 'secret-value' },
-        },
+    it('validation fails if there are 2 headers with the same key', async () => {
+      const testFormData = {
+        ...defaultTestFormData,
         __internal__: {
           hasHeaders: true,
           hasCA: false,
           headers: [
-            { key: 'content-type', value: 'text', type: 'config' },
-            { key: 'secret-key', value: 'secret-value', type: 'secret' },
+            { key: 'same-key', value: 'text 1', type: 'config' },
+            { key: 'same-key', value: 'text 2', type: 'config' },
           ],
         },
       };
 
       render(
-        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
-        </AuthFormTestProvider>
-      );
-
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-
-      await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {
-            config: {
-              hasAuth: true,
-              authType: AuthType.SSL,
-              certType: SSLCertType.PFX,
-            },
-            secrets: {
-              pfx: Buffer.from('some binary string').toString('base64'),
-            },
-            __internal__: {
-              hasHeaders: true,
-              hasCA: false,
-              headers: [
-                { key: 'content-type', value: 'text', type: 'config' },
-                { key: 'secret-key', value: 'secret-value', type: 'secret' },
-              ],
-            },
-          },
-          isValid: true,
-        });
-      });
-    });
-
-    it.skip('fails if the secret header value is empty', async () => {
-      const testConfig = {
-        config: {
-          ...defaultTestFormData.config,
-          authType: AuthType.SSL,
-          certType: SSLCertType.PFX,
-        },
-        secrets: {
-          pfx: Buffer.from('some binary string').toString('base64'),
-          secretHeaders: { 'secret-key': '' },
-        },
-        __internal__: {
-          hasHeaders: true,
-          hasCA: false,
-          headers: [
-            { key: 'content-type', value: 'text', type: 'config' },
-            { key: 'secret-key', value: '', type: 'secret' },
-          ],
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
           <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
@@ -639,29 +660,18 @@ describe('AuthConfig renders', () => {
       });
     });
 
-    it.skip('fails if there are 2 headers with the same key', async () => {
-      const testConfig = {
-        config: {
-          ...defaultTestFormData.config,
-          authType: AuthType.SSL,
-          certType: SSLCertType.PFX,
-        },
-        secrets: {
-          pfx: Buffer.from('some binary string').toString('base64'),
-          secretHeaders: { 'content-type': 'secret-value' },
-        },
+    it('validation fails if header key is empty', async () => {
+      const testFormData = {
+        ...defaultTestFormData,
         __internal__: {
           hasHeaders: true,
           hasCA: false,
-          headers: [
-            { key: 'content-type', value: 'text', type: 'config' },
-            { key: 'content-type', value: 'secret-value', type: 'secret' },
-          ],
+          headers: [{ key: '', value: 'text', type: 'config' }],
         },
       };
 
       render(
-        <AuthFormTestProvider defaultValue={testConfig} onSubmit={onSubmit}>
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
           <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
