@@ -21,7 +21,7 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
       settings: {
-        client: { get: jest.fn() }
+        client: { get: jest.fn() },
       },
       http: {
         get: jest.fn(),

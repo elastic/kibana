@@ -40,9 +40,12 @@ const mockActionTypeRegistry = {
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
-    services: { triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry }, settings: {
-      client: { get: jest.fn() }
-    }},
+    services: {
+      triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
+      settings: {
+        client: { get: jest.fn() },
+      },
+    },
   }),
 }));
 

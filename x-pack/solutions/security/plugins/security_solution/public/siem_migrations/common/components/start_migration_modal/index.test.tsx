@@ -14,7 +14,7 @@ import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '.';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 jest.mock('../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
