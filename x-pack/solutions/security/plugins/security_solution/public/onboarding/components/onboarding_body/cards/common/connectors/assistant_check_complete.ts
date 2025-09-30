@@ -26,7 +26,7 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
     return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors({http, settings});
+  const aiConnectors = await loadAiConnectors({ http, settings });
 
   return {
     isComplete: aiConnectors.length > 0,

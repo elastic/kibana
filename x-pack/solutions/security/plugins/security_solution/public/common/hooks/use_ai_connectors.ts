@@ -23,7 +23,7 @@ export const useAIConnectors = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: async () => loadAiConnectors({http, settings}),
+    queryFn: async () => loadAiConnectors({ http, settings }),
     onError: (err) => {
       addError(err, {
         title: i18n.ERROR_FETCH_AI_CONNECTORS,

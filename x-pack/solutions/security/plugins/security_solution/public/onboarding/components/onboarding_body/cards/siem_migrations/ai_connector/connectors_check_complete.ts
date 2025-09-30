@@ -19,7 +19,7 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors({http, settings});
+  const aiConnectors = await loadAiConnectors({ http, settings });
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {

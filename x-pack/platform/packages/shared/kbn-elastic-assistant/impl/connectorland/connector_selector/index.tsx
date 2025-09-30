@@ -68,7 +68,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       settings,
       navigateToApp,
     } = useAssistantContext();
-    
+
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const [modalForceOpen, setModalForceOpen] = useState(isOpen);
     const { data: actionTypes } = useLoadActionTypes({ http });
@@ -82,8 +82,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     });
 
     // Use optimistic selection hook for immediate UI feedback
-    const { effectiveValue: effectiveSelectedConnectorId, setOptimisticValue: setOptimisticConnectorId } = 
-      useOptimisticSelection(selectedConnectorId);
+    const {
+      effectiveValue: effectiveSelectedConnectorId,
+      setOptimisticValue: setOptimisticConnectorId,
+    } = useOptimisticSelection(selectedConnectorId);
 
     const connectorExists = useMemo(
       () => some(aiConnectors, ['id', effectiveSelectedConnectorId]),
@@ -96,7 +98,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         if (connector) {
           // Set optimistic value immediately for instant UI feedback
           setOptimisticConnectorId(connectorId);
-          
+
           onConnectorSelectionChange(connector);
           setModalForceOpen(false);
         }

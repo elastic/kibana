@@ -10,7 +10,7 @@ import { loadAllActions } from '@kbn/triggers-actions-ui-plugin/public/common/co
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
   loadAllActions: jest.fn(),
