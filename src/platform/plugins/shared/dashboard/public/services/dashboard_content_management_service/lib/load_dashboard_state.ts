@@ -93,18 +93,9 @@ export const loadDashboardState = async ({
     options,
     panels,
     kibanaSavedObjectMeta: { searchSource },
-    timeFrom,
-    timeTo,
+    timeRange,
     title,
   } = attributes;
-
-  const timeRange =
-    timeRestore && timeFrom && timeTo
-      ? {
-          from: timeFrom,
-          to: timeTo,
-        }
-      : undefined;
 
   const { filters, query } = searchSource || {};
 

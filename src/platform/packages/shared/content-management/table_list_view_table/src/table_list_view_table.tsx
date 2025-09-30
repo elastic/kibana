@@ -713,7 +713,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'controlsVertical',
+          icon: 'info',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
