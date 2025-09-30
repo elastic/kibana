@@ -6477,7 +6477,7 @@
             "stored_count": {
               "type": "long",
               "_meta": {
-                "description": "Total number of significant events detected and stored. Calculated by querying .alerts-streams.alerts-default index for alerts with kibana.alert.rule.category matching significant event rule types."
+                "description": "Total number of significant events detected and stored across all spaces. Calculated by querying .alerts-streams.alerts-* index pattern for alerts with kibana.alert.rule.category matching significant event rule types."
               }
             },
             "unique_wired_streams_with_stored_count": {
