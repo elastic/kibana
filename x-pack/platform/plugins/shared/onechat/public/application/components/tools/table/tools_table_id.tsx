@@ -7,19 +7,18 @@
 
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
-import { useToolsActions } from '../../../context/tools_table_provider';
+import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolIdWithDescriptionProps {
-  tool: ToolDefinitionWithSchema;
+  tool: ToolDefinition;
 }
 
 export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
   const { euiTheme } = useEuiTheme();
-  const { getEditToolUrl } = useToolsActions();
+  const { getEditToolUrl, getViewToolUrl } = useToolsActions();
 
   const toolIdStyle = css`
     font-weight: ${euiTheme.font.weight.semiBold};
@@ -27,17 +26,11 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {isEsqlTool(tool) ? (
-        <EuiLink href={getEditToolUrl(tool.id)}>
-          <EuiText size="s" css={toolIdStyle}>
-            {tool.id}
-          </EuiText>
-        </EuiLink>
-      ) : (
+      <EuiLink href={!tool.readonly ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}>
         <EuiText size="s" css={toolIdStyle}>
           {tool.id}
         </EuiText>
-      )}
+      </EuiLink>
       <EuiText size="s" color="subdued">
         {truncateAtNewline(tool.description)}
       </EuiText>

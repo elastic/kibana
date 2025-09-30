@@ -105,7 +105,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'schemaEditor',
+                        tab: 'schema',
                       },
                     })}
                     target="_blank"
@@ -176,7 +176,10 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 {isEditing ? (
-                  <FieldFormFormat field={field} onChange={(format) => onChange({ format })} />
+                  <FieldFormFormat
+                    value={field.format}
+                    onChange={(format) => onChange({ format })}
+                  />
                 ) : (
                   `${field.format ?? EMPTY_CONTENT}`
                 )}

@@ -11,7 +11,7 @@ import { parse } from '@kbn/esql-ast';
 
 export function getESQLWithSafeLimit(esql: string, limit: number): string {
   const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
   if (!sourceCommand) {
     return esql;
   }

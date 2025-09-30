@@ -200,7 +200,7 @@ describe('RERANK', () => {
         fields: [{ type: 'column', name: 'title' }],
       });
 
-      expect(rerankCmd).not.toHaveProperty('inferenceId');
+      expect(rerankCmd.inferenceId).toEqual(undefined);
     });
 
     it('should handle missing ON clause', () => {

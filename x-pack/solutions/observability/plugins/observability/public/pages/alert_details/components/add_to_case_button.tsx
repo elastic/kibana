@@ -27,9 +27,24 @@ export function AddToCaseButton({
   rule?: Rule;
   setIsPopoverOpen: (isOpen: boolean) => void;
 }) {
-  const { services } = useKibana();
+  const {
+    services,
+    services: { telemetryClient },
+  } = useKibana();
 
-  const selectCaseModal = services.cases?.hooks.useCasesAddToExistingCaseModal();
+  const selectCaseModal = services.cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess: ({ updatedAt }) => {
+      // If the case is newly created the updatedAt will be null
+      // onSuccess doesn't provide a way to know if the case was created or updated
+      // onCreateCaseClicked callback is NOT triggered
+      const isNewCaseCreated = !updatedAt;
+      telemetryClient.reportAlertAddedToCase(
+        isNewCaseCreated,
+        'alertDetails.addToCaseBtn',
+        rule?.ruleTypeId || 'unknown'
+      );
+    },
+  });
 
   const attachments: CaseAttachmentsWithoutOwner =
     alert && rule
@@ -52,7 +67,12 @@ export function AddToCaseButton({
   };
 
   return (
-    <EuiButton fill iconType="plus" onClick={handleAddToCase} data-test-subj="add-to-case-button">
+    <EuiButton
+      fill
+      iconType="plus"
+      onClick={handleAddToCase}
+      data-test-subj={`add-to-cases-button-${rule?.ruleTypeId}`}
+    >
       <EuiText size="s">
         {i18n.translate('xpack.observability.alertDetails.addToCase', {
           defaultMessage: 'Add to case',

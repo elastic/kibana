@@ -6,97 +6,60 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { EuiButton, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
-import type { OverlayRef } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../hooks/use_kibana';
-import { GroupStreamModificationFlyout } from '../../group_stream_modification_flyout/group_stream_modification_flyout';
 
-export const GroupStreamDetailView = ({
-  definition,
-  refreshDefinition,
-}: {
-  definition: Streams.GroupStream.GetResponse;
-  refreshDefinition: () => void;
-}) => {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-    core,
-  } = useKibana();
-
-  const streamsListFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
-        signal,
-      });
-      return streams;
-    },
-    [streamsRepositoryClient]
-  );
-
-  const overlayRef = React.useRef<OverlayRef | null>(null);
-
-  function openGroupStreamModificationFlyout(existingStream?: Streams.GroupStream.Definition) {
-    overlayRef.current?.close();
-    overlayRef.current = core.overlays.openFlyout(
-      toMountPoint(
-        <GroupStreamModificationFlyout
-          client={streamsRepositoryClient}
-          streamsList={streamsListFetch.value}
-          refresh={() => {
-            refreshDefinition();
-            overlayRef.current?.close();
-          }}
-          notifications={core.notifications}
-          existingStream={existingStream}
-        />,
-        core
-      ),
-      { size: 's' }
-    );
-  }
-
-  const stream = definition.stream;
-
+export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.GetResponse }) => {
   const meta = [
     {
       title: i18n.translate('xpack.streams.groupStreamDetailView.descriptionLabel', {
         defaultMessage: 'Description',
       }),
-      description: stream.description,
+      description: stream.stream.description,
+    },
+    {
+      title: i18n.translate('xpack.streams.groupStreamDetailView.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      description:
+        Object.keys(stream.stream.group.metadata).length === 0 ? (
+          i18n.translate('xpack.streams.groupStreamDetailView.noMetadataLabel', {
+            defaultMessage: 'None',
+          })
+        ) : (
+          <EuiCodeBlock>
+            {Object.entries(stream.stream.group.metadata)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join('\n')}
+          </EuiCodeBlock>
+        ),
     },
     {
       title: i18n.translate('xpack.streams.groupStreamDetailView.tagsLabel', {
         defaultMessage: 'Tags',
       }),
-      description: stream.group.tags.length
-        ? stream.group.tags.join(', ')
-        : i18n.translate('xpack.streams.groupStreamDetailView.noneLabel', {
-            defaultMessage: 'None',
-          }),
+      description: stream.stream.group.tags.length ? (
+        <EuiFlexGroup gutterSize="xs" wrap>
+          {stream.stream.group.tags.map((tag, index) => (
+            <EuiFlexItem key={index} grow={false}>
+              <EuiBadge>{tag}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ) : (
+        i18n.translate('xpack.streams.groupStreamDetailView.noneLabel', {
+          defaultMessage: 'None',
+        })
+      ),
     },
   ];
 
-  return (
-    <div>
-      <EuiDescriptionList textStyle="reverse" listItems={meta} />
-      <EuiSpacer size="m" />
-      <EuiButton
-        onClick={() => {
-          openGroupStreamModificationFlyout(stream);
-        }}
-      >
-        {i18n.translate('xpack.streams.groupStreamDetailView.editButtonLabel', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButton>
-    </div>
-  );
+  return <EuiDescriptionList textStyle="reverse" listItems={meta} />;
 };

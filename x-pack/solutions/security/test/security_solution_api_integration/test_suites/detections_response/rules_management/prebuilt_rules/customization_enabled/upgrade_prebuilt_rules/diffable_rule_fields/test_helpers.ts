@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { isUndefined, omitBy } from 'lodash';
 import type {
-  PartialRuleDiff,
+  PartialThreeWayRuleDiff,
   RuleResponse,
   UpgradeConflictResolution,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -199,13 +199,13 @@ export function testFieldUpgradesToMergedValue(
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const deps = {
     es,
     supertest,
     log,
-    securitySolutionApi,
+    detectionsApi,
   };
 
   it('upgrades to MERGED value', async () => {
@@ -234,7 +234,7 @@ export function testFieldUpgradesToMergedValue(
       ],
     });
 
-    const upgradedRule = await securitySolutionApi.readRule({
+    const upgradedRule = await detectionsApi.readRule({
       query: { rule_id: DEFAULT_TEST_RULE_ID },
     });
 
@@ -273,13 +273,13 @@ export function testFieldUpgradesToResolvedValue(
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const deps = {
     es,
     supertest,
     log,
-    securitySolutionApi,
+    detectionsApi,
   };
 
   it('upgrades to RESOLVED value', async () => {
@@ -308,7 +308,7 @@ export function testFieldUpgradesToResolvedValue(
       ],
     });
 
-    const upgradedRule = await deps.securitySolutionApi.readRule({
+    const upgradedRule = await deps.detectionsApi.readRule({
       query: { rule_id: DEFAULT_TEST_RULE_ID },
     });
 
@@ -326,7 +326,7 @@ interface FieldAbsenceAssertParams {
  * in the diff (`AAA` diff case)
  */
 function expectAAAFieldDiff(
-  ruleDiff: PartialRuleDiff,
+  ruleDiff: PartialThreeWayRuleDiff,
   fieldAssertParams: FieldAbsenceAssertParams
 ): void {
   expect(ruleDiff).toMatchObject({
@@ -348,7 +348,10 @@ interface FieldAssertParams {
  * Asserts provided non-customized `diffableRuleFieldName` doesn't have a conflict
  * and ready for upgrade (`AAB` diff case)
  */
-function expectAABFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectAABFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 2, // counts <fieldName> + version field
     num_fields_with_conflicts: 0,
@@ -374,7 +377,10 @@ function expectAABFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldA
  * Asserts provided customized `diffableRuleFieldName` without an upgrade doesn't have a conflict
  * and ready for upgrade (`ABA` diff case)
  */
-function expectABAFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectABAFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 1, // counts version field
     num_fields_with_conflicts: 0,
@@ -400,7 +406,10 @@ function expectABAFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldA
  * Asserts provided customized `diffableRuleFieldName` with the matching update
  * doesn't have a conflict and is ready for upgrade (`ABB` diff case)
  */
-function expectABBFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectABBFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 1, // counts version field
     num_fields_with_conflicts: 0,
@@ -427,7 +436,7 @@ function expectABBFieldDiff(ruleDiff: PartialRuleDiff, fieldAssertParams: FieldA
  * has a solvable conflict (`ABC` diff case)
  */
 function expectSolvableABCFieldDiff(
-  ruleDiff: PartialRuleDiff,
+  ruleDiff: PartialThreeWayRuleDiff,
   fieldAssertParams: FieldAssertParams
 ): void {
   expect(ruleDiff).toMatchObject({
@@ -456,7 +465,7 @@ function expectSolvableABCFieldDiff(
  * has a non-solvable conflict (`ABC` diff case)
  */
 function expectNonSolvableABCFieldDiff(
-  ruleDiff: PartialRuleDiff,
+  ruleDiff: PartialThreeWayRuleDiff,
   fieldAssertParams: FieldAssertParams
 ): void {
   expect(ruleDiff).toMatchObject({
@@ -486,7 +495,7 @@ function expectNonSolvableABCFieldDiff(
  * has the matching upgrade (`-AA` diff case)
  */
 function expectMissingBaseAAFieldDiff(
-  ruleDiff: PartialRuleDiff,
+  ruleDiff: PartialThreeWayRuleDiff,
   fieldAssertParams: FieldAbsenceAssertParams
 ): void {
   expect(ruleDiff).toMatchObject({
@@ -511,7 +520,7 @@ interface MissingBaseFieldAssertParams {
  * has an upgrade (`-AB` diff case)
  */
 function expectMissingBaseABFieldDiff(
-  ruleDiff: PartialRuleDiff,
+  ruleDiff: PartialThreeWayRuleDiff,
   fieldAssertParams: MissingBaseFieldAssertParams
 ): void {
   expect(ruleDiff).toMatchObject({

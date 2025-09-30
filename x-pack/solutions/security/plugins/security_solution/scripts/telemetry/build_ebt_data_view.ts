@@ -9,6 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
 
+import { isObject } from 'lodash';
 import { events as securityEvents } from '../../server/lib/telemetry/event_based/events';
 import { telemetryEvents } from '../../public/common/lib/telemetry/events/telemetry_events';
 // uncomment and add to run script, but do not commit as creates circular dependency
@@ -139,47 +140,46 @@ async function cli(): Promise<void> {
   }
 }
 
-function removeTrailingSlash(url: string) {
-  if (url.endsWith('/')) {
-    return url.slice(0, -1);
-  } else {
-    return url;
-  }
-}
-interface NestedObject {
-  [key: string]: { type?: string; properties?: NestedObject };
+interface NestedSchemaNode {
+  type?: string;
+  properties?: NestedSchemaNode;
+  items?: NestedSchemaNode;
+  [key: string]: unknown;
 }
 
-function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
-  const result: { [key: string]: string } = {};
-  const queue: Array<{ obj: NestedObject; prefix: string }> = [{ obj: inputObj, prefix: '' }];
+interface InspectSchemaNodeResult {
+  childToInspect?: NestedSchemaNode;
+  nodeType?: string;
+}
+
+export function flattenSchema(inputObj: NestedSchemaNode): Record<string, string> {
+  const result: Record<string, string> = {};
+  const queue: Array<{ obj: NestedSchemaNode; prefix: string }> = [{ obj: inputObj, prefix: '' }];
+
   while (queue.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { obj, prefix } = queue.shift()!;
-    for (const key in obj) {
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        if ('type' in obj[key]) {
-          const newKey = `${prefix}${key}`;
-          // @ts-ignore
-          result[newKey] = obj[key].type;
-        } else if (obj[key].properties) {
-          const nestedObj = obj[key].properties;
-          const nestedPrefix = `${prefix}${key}.`;
-          // @ts-ignore
-          queue.push({ obj: nestedObj, prefix: nestedPrefix });
-        } else if (obj[key]) {
-          const nestedObj = obj[key];
-          const nestedPrefix = `${prefix}${key}.`;
-          // @ts-ignore
-          queue.push({ obj: nestedObj, prefix: nestedPrefix });
-        }
+
+    for (const [key, node] of Object.entries(obj)) {
+      // eslint-disable-next-line no-continue
+      if (!isObject(node)) continue;
+
+      const newKey = `${prefix}${key}`;
+      const { childToInspect, nodeType } = inspectSchemaNode(node as NestedSchemaNode);
+
+      if (childToInspect) {
+        queue.push({ obj: childToInspect, prefix: `${newKey}.` });
+      }
+      if (nodeType) {
+        result[newKey] = nodeType;
       }
     }
   }
+
   return result;
 }
 
-async function upsertRuntimeFields(
+export async function upsertRuntimeFields(
   fields: { [key: string]: string },
   requestUrl: string,
   requestHeaders: { [key: string]: string }
@@ -202,5 +202,46 @@ async function upsertRuntimeFields(
         throw new Error(`Error upserting field '${fieldName}: ${fieldType}' - ${error.message}`);
       }
     }
+  }
+}
+
+function inspectArraySchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  const item = node.items;
+
+  if (!isObject(item)) {
+    return { nodeType: 'array' };
+  }
+
+  if ('type' in item && (item as NestedSchemaNode).type) {
+    const t = String((item as NestedSchemaNode).type);
+    if (t === 'array') return { nodeType: 'array' }; // array-of-arrays -> keep "array"
+    return { nodeType: t }; // array of primitives
+  }
+
+  if ((item as NestedSchemaNode).properties && isObject((item as NestedSchemaNode).properties)) {
+    return { childToInspect: item.properties }; // array of objects
+  }
+
+  return { nodeType: 'array' };
+}
+
+function inspectSchemaNode(node: NestedSchemaNode): InspectSchemaNodeResult {
+  if (!node.type) {
+    const objectNode = node.properties ?? node;
+    return { childToInspect: objectNode };
+  }
+
+  if (node.type === 'array') {
+    return inspectArraySchemaNode(node);
+  }
+
+  return { nodeType: String(node.type) };
+}
+
+function removeTrailingSlash(url: string) {
+  if (url.endsWith('/')) {
+    return url.slice(0, -1);
+  } else {
+    return url;
   }
 }

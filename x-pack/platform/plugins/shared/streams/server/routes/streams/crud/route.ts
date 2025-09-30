@@ -106,10 +106,10 @@ export const editStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({ request });
 
     if (
-      !Streams.ClassicStream.UpsertRequest.is(params.body) &&
+      Streams.WiredStream.UpsertRequest.is(params.body) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
-      throw badData('Streams are not enabled for Wired and Group streams.');
+      throw badData('Streams are not enabled for Wired streams.');
     }
 
     const core = await context.core;

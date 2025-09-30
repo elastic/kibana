@@ -397,7 +397,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -597,7 +597,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

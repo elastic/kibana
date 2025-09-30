@@ -9,7 +9,7 @@ import type {
   Message,
   ToolDefinition,
   ToolChoice,
-  ToolCallsOf,
+  ToolCallOfToolOptions,
   ToolMessage,
   MessageOf,
 } from '@kbn/inference-common';
@@ -37,7 +37,7 @@ type CallbackOf<
   TEmittedMessage extends Message
 > = (parameters: {
   messages: Message[];
-  toolCalls: ToolCallsOf<TCallToolTools>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TCallToolTools>[];
 }) => Observable<TEmittedMessage>;
 
 type GetNextRequestCallback<TCallToolTools extends CallToolTools> = ({
@@ -49,7 +49,7 @@ type GetNextRequestCallback<TCallToolTools extends CallToolTools> = ({
 }) => { system: string; messages: Message[] } & TCallToolTools;
 
 export function callTools<TCallToolOptions extends CallToolOptions>(
-  { system, messages, inferenceClient, connectorId, tools, toolChoice, logger }: TCallToolOptions,
+  options: TCallToolOptions,
   callback: CallbackOf<TCallToolOptions, ToolMessage>
 ): Observable<MessageOf<TCallToolOptions>>;
 

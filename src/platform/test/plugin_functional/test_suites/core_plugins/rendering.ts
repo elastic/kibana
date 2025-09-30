@@ -227,6 +227,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
         'xpack.cases.unsafe.enableCaseSummary (boolean?)',
+        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -259,6 +260,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
+        'xpack.cloud.serverless.in_trial (boolean?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean?)',
@@ -383,12 +385,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
-        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
+        'xpack.observability.managedOtlpServiceUrl (string?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
         'xpack.genAiSettings.showSpacesIntegration (boolean?)',
+        'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
         /**
          * Rule form V2 feature flags
          */

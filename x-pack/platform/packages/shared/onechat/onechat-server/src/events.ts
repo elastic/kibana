@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { OnechatEvent } from '@kbn/onechat-common';
+import type { ChatEventType, ToolProgressEventData, ChatEventBase } from '@kbn/onechat-common';
 
-/**
- * Public-facing events, as received by the API consumer.
- */
-export type OnechatToolEvent<
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>
-> = OnechatEvent<TEventType, TData>;
+export type InternalToolProgressEventData = Omit<ToolProgressEventData, 'tool_call_id'>;
 
-/**
- * Internal-facing events, as emitted by tool or agent owners.
- */
-export type InternalToolEvent<
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>
-> = OnechatToolEvent<TEventType, TData>;
+export type InternalToolProgressEvent = ChatEventBase<
+  ChatEventType.toolProgress,
+  InternalToolProgressEventData
+>;
+
+export type OnechatToolEvent = InternalToolProgressEvent;
+
 /**
  * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
  */
 export type ToolEventHandlerFn = (event: OnechatToolEvent) => void;
 
 /**
- * Event emitter function, exposed from tool or agent runnable context.
+ * Progress event reporter, sending a tool progress event based on the provided progress info
  */
-export type ToolEventEmitterFn = (event: InternalToolEvent) => void;
+export type ToolProgressEmitterFn = (progressMessage: string) => void;
 
+/**
+ * Tool event emitter, exposed to tool handlers
+ */
 export interface ToolEventEmitter {
-  emit: ToolEventEmitterFn;
+  /**
+   * Emit a tool progress event based on the provided progress text.
+   */
+  reportProgress: ToolProgressEmitterFn;
 }

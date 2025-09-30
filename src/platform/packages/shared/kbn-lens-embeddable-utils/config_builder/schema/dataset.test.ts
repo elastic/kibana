@@ -8,14 +8,14 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { datasetSchema, datasetTypeSchema } from './dataset';
+import { datasetSchema, datasetTypeSchema, datasetEsqlTableTypeSchema } from './dataset';
 
 describe('Dataset Schema', () => {
   describe('dataView type', () => {
     it('validates a valid dataView configuration', () => {
       const input = {
         type: 'dataView' as const,
-        name: 'my-data-view',
+        id: 'my-data-view',
       };
 
       const validated = datasetTypeSchema.validate(input);
@@ -27,7 +27,7 @@ describe('Dataset Schema', () => {
         type: 'dataView' as const,
       };
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(/\[0.name\]: expected value of type/);
+      expect(() => datasetTypeSchema.validate(input)).toThrow(/\[0.id\]: expected value of type/);
     });
   });
 
@@ -84,7 +84,7 @@ describe('Dataset Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       };
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = datasetEsqlTableTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -93,8 +93,8 @@ describe('Dataset Schema', () => {
         type: 'esql' as const,
       };
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(
-        /\[2.query\]: expected value of type/
+      expect(() => datasetEsqlTableTypeSchema.validate(input)).toThrow(
+        /\[0.query\]: expected value of type/
       );
     });
   });
@@ -112,7 +112,7 @@ describe('Dataset Schema', () => {
         table: mockTable,
       };
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = datasetEsqlTableTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -121,8 +121,8 @@ describe('Dataset Schema', () => {
         type: 'table' as const,
       };
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(
-        /\[3.table\]: expected value of type/
+      expect(() => datasetEsqlTableTypeSchema.validate(input)).toThrow(
+        /\[1.table\]: expected value of type/
       );
     });
   });
@@ -132,7 +132,7 @@ describe('Dataset Schema', () => {
       const input = {
         dataset: {
           type: 'dataView' as const,
-          name: 'my-data-view',
+          id: 'my-data-view',
         },
       };
 
@@ -144,7 +144,7 @@ describe('Dataset Schema', () => {
       const input = {
         dataset: {
           type: 'invalid' as const,
-          name: 'my-data-view',
+          id: 'my-data-view',
         },
       };
 

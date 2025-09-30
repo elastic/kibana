@@ -11,6 +11,7 @@ import { createMockStartDependencies } from '../../../editor_frame_service/mocks
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { BehaviorSubject } from 'rxjs';
+import { LENS_ITEM_LATEST_VERSION } from '../../../../common/constants';
 
 describe('inapp editing of Lens embeddable', () => {
   const core = coreMock.createStart();
@@ -33,6 +34,7 @@ describe('inapp editing of Lens embeddable', () => {
         visualization: {},
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+      version: LENS_ITEM_LATEST_VERSION,
     } as TypedLensSerializedState['attributes'];
     it('is incompatible for ESQL charts and if ui setting for ES|QL is off', async () => {
       const inAppEditAction = new EditLensEmbeddableAction(core, {

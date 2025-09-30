@@ -7,8 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { PromiseResult, PromiseRejectedResult } from 'p-settle';
-import pSettle from 'p-settle';
+import pMap from 'p-map';
 import { partition } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { File, FileJSON } from '@kbn/files-plugin/common';
@@ -128,8 +127,15 @@ const getFiles = async ({
 }): Promise<FileJSON[]> => {
   // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
   // attachment request failed)
-  const fileSettleResults = await pSettle(
-    fileIds.map(async (fileId) => fileService.getById({ id: fileId })),
+  const fileSettleResults = await pMap(
+    fileIds,
+    async (fileId) => {
+      try {
+        return await fileService.getById({ id: fileId });
+      } catch (error) {
+        return error;
+      }
+    },
     {
       concurrency: MAX_CONCURRENT_SEARCHES,
     }
@@ -156,16 +162,14 @@ const getFiles = async ({
 };
 
 export const retrieveFilesIgnoringNotFound = (
-  results: Array<PromiseResult<File<unknown>>>,
+  results: Array<File<unknown> | Error>,
   fileIds: BulkDeleteFileArgs['fileIds'],
   logger: Logger
 ) => {
   const files: File[] = [];
 
   results.forEach((result, index) => {
-    if (result.isFulfilled) {
-      files.push(result.value);
-    } else if (result.reason instanceof FileNotFoundError) {
+    if (result instanceof FileNotFoundError) {
       const warningMessage = getFileNotFoundErrorMessage({
         resultsLength: results.length,
         fileIds,
@@ -174,10 +178,10 @@ export const retrieveFilesIgnoringNotFound = (
       });
 
       logger.warn(warningMessage);
-    } else if (result.reason instanceof Error) {
-      throw result.reason;
-    } else {
-      throw new Error(`Failed to retrieve file id: ${fileIds[index]}: ${result.reason}`);
+    } else if (result instanceof Error) {
+      throw result;
+    } else if (result) {
+      files.push(result);
     }
   });
 
@@ -193,11 +197,11 @@ const getFileNotFoundErrorMessage = ({
   resultsLength: number;
   fileIds: BulkDeleteFileArgs['fileIds'];
   index: number;
-  result: PromiseRejectedResult;
+  result: Error;
 }) => {
   if (resultsLength === fileIds.length) {
-    return `Failed to find file id: ${fileIds[index]}: ${result.reason}`;
+    return `Failed to find file id: ${fileIds[index]}: ${result}`;
   }
 
-  return `Failed to find file: ${result.reason}`;
+  return `Failed to find file: ${result}`;
 };

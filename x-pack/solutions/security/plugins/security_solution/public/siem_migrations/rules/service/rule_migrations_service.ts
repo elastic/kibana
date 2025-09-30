@@ -26,11 +26,10 @@ import {
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { getSuccessToast } from './notifications/success_notification';
+import { getSuccessToast } from './notification/success_notification';
+import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 
-export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
-export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
-const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
+const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;

@@ -12,7 +12,11 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import { TrustedDeviceConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import {
+  TrustedDeviceConditionEntryField,
+  OperatingSystem,
+  isTrustedDeviceFieldAvailableForOs,
+} from '@kbn/securitysolution-utils';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -21,13 +25,18 @@ import { EndpointArtifactExceptionValidationError } from './errors';
 const TRUSTED_DEVICE_EMPTY_VALUE_ERROR = 'Field value cannot be empty';
 const TRUSTED_DEVICE_DUPLICATE_FIELD_ERROR = 'Duplicate field entries are not allowed';
 const TRUSTED_DEVICE_DUPLICATE_OS_ERROR = 'Duplicate OS entries are not allowed';
+const TRUSTED_DEVICE_USERNAME_OS_ERROR =
+  'Username field is only supported for Windows OS exclusively. Please select Windows OS only or choose a different field.';
 
 const TrustedDeviceFieldSchema = schema.oneOf([
-  schema.literal(TrustedDeviceConditionEntryField.USERNAME),
-  schema.literal(TrustedDeviceConditionEntryField.HOST),
   schema.literal(TrustedDeviceConditionEntryField.DEVICE_ID),
+  schema.literal(TrustedDeviceConditionEntryField.DEVICE_TYPE),
+  schema.literal(TrustedDeviceConditionEntryField.HOST),
   schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER),
+  schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER_ID),
   schema.literal(TrustedDeviceConditionEntryField.PRODUCT_ID),
+  schema.literal(TrustedDeviceConditionEntryField.PRODUCT_NAME),
+  schema.literal(TrustedDeviceConditionEntryField.USERNAME),
 ]);
 
 const TrustedDeviceEntrySchema = schema.object({
@@ -195,6 +204,24 @@ export class TrustedDeviceValidator extends BaseValidator {
       TrustedDeviceDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+
+    this.validateOsSpecificFields(item);
+  }
+
+  private validateOsSpecificFields(item: ExceptionItemLikeOptions): void {
+    const osTypes = item.osTypes || [];
+    const entries = item.entries || [];
+
+    const hasUsernameField = entries.some(
+      (entry) => entry.field === TrustedDeviceConditionEntryField.USERNAME
+    );
+
+    if (hasUsernameField) {
+      // USERNAME field is only allowed for Windows OS exclusively
+      if (!isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
+        throw new EndpointArtifactExceptionValidationError(TRUSTED_DEVICE_USERNAME_OS_ERROR);
+      }
     }
   }
 }

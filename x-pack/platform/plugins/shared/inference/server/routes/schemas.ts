@@ -17,37 +17,41 @@ export const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
     toolCallId: schema.string(),
     function: schema.object({
       name: schema.string(),
-      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+      arguments: schema.recordOf(schema.string(), schema.any()),
     }),
   })
 );
 
+export const toolsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      description: schema.string(),
+      schema: schema.maybe(
+        schema.object({
+          type: schema.literal('object'),
+          properties: schema.recordOf(schema.string(), schema.any()),
+          required: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+    })
+  )
+);
+
+export const toolChoiceSchema = schema.maybe(
+  schema.oneOf([
+    schema.literal(ToolChoiceType.auto),
+    schema.literal(ToolChoiceType.none),
+    schema.literal(ToolChoiceType.required),
+    schema.object({
+      function: schema.string(),
+    }),
+  ])
+);
+
 export const messageOptionsSchema = schema.object({
-  tools: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        description: schema.string(),
-        schema: schema.maybe(
-          schema.object({
-            type: schema.literal('object'),
-            properties: schema.recordOf(schema.string(), schema.any()),
-            required: schema.maybe(schema.arrayOf(schema.string())),
-          })
-        ),
-      })
-    )
-  ),
-  toolChoice: schema.maybe(
-    schema.oneOf([
-      schema.literal(ToolChoiceType.auto),
-      schema.literal(ToolChoiceType.none),
-      schema.literal(ToolChoiceType.required),
-      schema.object({
-        function: schema.string(),
-      }),
-    ])
-  ),
+  tools: toolsSchema,
+  toolChoice: toolChoiceSchema,
 });
 
 export const chatCompleteBaseSchema = schema.object({
@@ -108,7 +112,7 @@ export const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.allO
 const promptSchema = schema.object({
   prompt: schema.object({
     name: schema.string(),
-    description: schema.string(),
+    description: schema.maybe(schema.string()),
     versions: schema.arrayOf(
       schema.allOf([
         messageOptionsSchema,
@@ -174,6 +178,7 @@ const promptSchema = schema.object({
   }),
   input: schema.any(),
   prevMessages: schema.maybe(schema.arrayOf(messageSchema)),
+  toolChoice: toolChoiceSchema,
 });
 
 export const promptBodySchema: Type<PromptRequestBody> = schema.allOf([

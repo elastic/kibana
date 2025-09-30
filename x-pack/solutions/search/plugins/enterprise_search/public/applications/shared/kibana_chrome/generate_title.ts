@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ANALYTICS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_APPS_TITLE,
 } from '../../../../common/constants';
@@ -44,9 +43,6 @@ export const elasticsearchTitle = (page: Title = []) =>
       defaultMessage: 'Getting started with Elasticsearch',
     }),
   ]);
-
-export const searchExperiencesTitle = (page: Title = []) =>
-  generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
 
 export const enterpriseSearchContentTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_DATA_PLUGIN.NAME]);

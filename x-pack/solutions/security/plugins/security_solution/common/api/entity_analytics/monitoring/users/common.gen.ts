@@ -28,15 +28,9 @@ export const UserName = z.object({
     .optional(),
 });
 
-export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
-export const MonitoredUserDoc = z.object({
+export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
+export const MonitoredUserUpdateDoc = z.object({
   id: z.string().optional(),
-  event: z
-    .object({
-      ingested: z.string().datetime().optional(),
-    })
-    .optional(),
-  '@timestamp': z.string().datetime().optional(),
   user: z
     .object({
       name: z.string().optional(),
@@ -67,3 +61,15 @@ export const MonitoredUserDoc = z.object({
     })
     .optional(),
 });
+
+export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
+export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
+  z.object({
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .optional(),
+    '@timestamp': z.string().datetime().optional(),
+  })
+);

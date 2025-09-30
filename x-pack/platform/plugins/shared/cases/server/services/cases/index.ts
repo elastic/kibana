@@ -187,7 +187,11 @@ export class CasesService {
 
     const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
 
       casesWithComments.set(
         id,
@@ -195,6 +199,7 @@ export class CasesService {
           savedObject: caseInfo,
           totalComment: userComments,
           totalAlerts: alerts,
+          totalEvents: events,
         })
       );
     }

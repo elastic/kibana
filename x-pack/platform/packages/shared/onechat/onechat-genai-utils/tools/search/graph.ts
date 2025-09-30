@@ -10,7 +10,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
@@ -19,6 +19,7 @@ import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
 import { getSearchPrompt } from './prompts';
 import type { SearchTarget } from './types';
+import { progressMessages } from './i18n';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -45,19 +46,23 @@ export const createSearchToolGraph = ({
   model,
   esClient,
   logger,
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
+  events?: ToolEventEmitter;
 }) => {
   const tools = [
-    createRelevanceSearchTool({ model, esClient }),
-    createNaturalLanguageSearchTool({ model, esClient }),
+    createRelevanceSearchTool({ model, esClient, events }),
+    createNaturalLanguageSearchTool({ model, esClient, events }),
   ];
 
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
   const selectAndValidateIndex = async (state: StateType) => {
+    events?.reportProgress(progressMessages.selectingTarget());
+
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
       indexPattern: state.targetPattern ?? '*',
@@ -69,6 +74,8 @@ export const createSearchToolGraph = ({
 
     if (explorerRes.resources.length > 0) {
       const selectedResource = explorerRes.resources[0];
+      events?.reportProgress(progressMessages.selectedTarget(selectedResource.name));
+
       return {
         indexIsValid: true,
         searchTarget: { type: selectedResource.type, name: selectedResource.name },
@@ -90,6 +97,7 @@ export const createSearchToolGraph = ({
   });
 
   const callSearchAgent = async (state: StateType) => {
+    events?.reportProgress(progressMessages.resolvingSearchStrategy());
     const response = await searchModel.invoke(
       getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
     );

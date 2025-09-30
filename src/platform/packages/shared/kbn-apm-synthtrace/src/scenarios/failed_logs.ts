@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates log documents that are designed to fail ingest pipelines.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

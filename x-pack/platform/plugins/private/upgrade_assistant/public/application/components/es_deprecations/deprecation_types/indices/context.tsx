@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ApiService } from '../../../../lib/api';
 import type { ReindexState } from './use_reindex';
 import { useReindex } from './use_reindex';
@@ -37,12 +38,14 @@ interface Props {
   api: ApiService;
   children: React.ReactNode;
   deprecation: EnrichedDeprecationInfo;
+  version: Version;
 }
 
 export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   api,
   deprecation,
   children,
+  version,
 }) => {
   const indexName = deprecation.index!;
   const indexAction = deprecation.correctiveAction as IndexAction;
@@ -52,6 +55,7 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
     isInDataStream: Boolean(indexAction?.metadata.isInDataStream),
     isFrozen: Boolean(indexAction?.metadata.isFrozenIndex),
     isClosedIndex: Boolean(indexAction?.metadata.isClosedIndex),
+    kibanaVersion: version,
   });
 
   const { updateIndexState, updateIndex } = useUpdateIndex({

@@ -126,3 +126,6 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
  */
 export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
   'securitySolution.inferenceChatModelDisabled' as const;
+
+export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
+  'elasticAssistant.checkpointSaverEnabled' as const;

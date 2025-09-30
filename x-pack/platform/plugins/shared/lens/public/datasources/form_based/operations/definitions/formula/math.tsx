@@ -6,8 +6,9 @@
  */
 
 import type { TinymathAST } from '@kbn/tinymath';
+import type { ValueFormatConfig } from '../../../../../../common/types';
 import type { OperationDefinition } from '..';
-import type { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {

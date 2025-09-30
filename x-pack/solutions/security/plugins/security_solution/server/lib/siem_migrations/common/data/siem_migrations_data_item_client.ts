@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import type { ItemDocument, Stored } from '../types';
 import {
   SiemMigrationStatus,
@@ -23,10 +24,11 @@ import {
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';
 import type {
-  MigrationType,
   SiemMigrationAllDataStats,
   SiemMigrationDataStats,
   SiemMigrationFilters,
+  SiemMigrationGetItemsOptions,
+  SiemMigrationSort,
 } from './types';
 import { dsl } from './dsl_queries';
 
@@ -34,18 +36,6 @@ export type CreateMigrationItemInput<I extends ItemDocument> = Omit<
   I,
   '@timestamp' | 'id' | 'status' | 'created_by' | 'updated_by' | 'updated_at'
 >;
-
-export interface SiemMigrationItemSort {
-  sortField?: string;
-  sortDirection?: estypes.SortOrder;
-}
-
-export interface SiemMigrationGetItemsOptions<F extends object = object> {
-  filters?: F;
-  sort?: SiemMigrationItemSort;
-  from?: number;
-  size?: number;
-}
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
@@ -373,5 +363,5 @@ export abstract class SiemMigrationsDataItemClient<
     return { bool: { filter } };
   }
 
-  protected abstract getSortOptions(sort?: SiemMigrationItemSort): estypes.Sort;
+  protected abstract getSortOptions(sort?: SiemMigrationSort): estypes.Sort;
 }

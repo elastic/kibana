@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import { getDocumentById } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -18,7 +18,7 @@ const getDocumentByIdSchema = z.object({
 
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {
-    id: builtinToolIds.getDocumentById,
+    id: platformCoreTools.getDocumentById,
     description:
       'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
     schema: getDocumentByIdSchema,
@@ -58,6 +58,6 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

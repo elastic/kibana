@@ -29,15 +29,16 @@ import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/publi
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
 
 export interface StreamsApplicationProps {
   appMountParameters: AppMountParameters;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
 }
 
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
@@ -55,6 +56,7 @@ export interface StreamsAppSetupDependencies {
 export interface StreamsAppStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  datasetQuality: DatasetQualityPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
@@ -70,10 +72,9 @@ export interface StreamsAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   unifiedDocViewer: UnifiedDocViewerStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  dashboard: DashboardStart;
 }
 
 export interface StreamsAppPublicSetup {}
 
-export interface StreamsAppPublicStart {
-  createStreamsApplicationComponent: () => StreamsApplicationComponentType;
-}
+export interface StreamsAppPublicStart {}

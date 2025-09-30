@@ -25,7 +25,7 @@ async function getAssets({
 }: {
   name: string;
   assetClient: AssetClient;
-}): Promise<{ dashboards: string[]; queries: StreamQuery[] }> {
+}): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
   const assets = await assetClient.getAssets(name);
 
   const dashboards = assets
@@ -36,9 +36,14 @@ async function getAssets({
     .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
     .map((asset) => asset.query);
 
+  const rules = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'rule')
+    .map((asset) => asset[ASSET_ID]);
+
   return {
     dashboards,
     queries,
+    rules,
   };
 }
 
@@ -53,7 +58,7 @@ async function updateWiredIngest({
   name: string;
   ingest: WiredIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -73,6 +78,7 @@ async function updateWiredIngest({
       ...stream,
       ingest,
     },
+    rules,
   };
 
   return await streamsClient.upsertStream({
@@ -92,7 +98,7 @@ async function updateClassicIngest({
   name: string;
   ingest: ClassicIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -112,6 +118,7 @@ async function updateClassicIngest({
       ...stream,
       ingest,
     },
+    rules,
   };
 
   return await streamsClient.upsertStream({

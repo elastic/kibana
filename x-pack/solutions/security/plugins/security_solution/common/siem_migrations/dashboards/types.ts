@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { SiemMigrationGetItemsOptions } from '../../../server/lib/siem_migrations/common/data/types';
 import type { SiemMigrationFilters } from '../types';
 
-export interface DashboardMigrationFilters extends SiemMigrationFilters {
-  searchTerm?: string;
-  installed?: boolean;
-  installable?: boolean;
-}
+export type DashboardMigrationFilters = SiemMigrationFilters;
+
+export type DashboardMigrationGetDashboardOptions =
+  SiemMigrationGetItemsOptions<DashboardMigrationFilters>;

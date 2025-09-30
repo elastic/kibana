@@ -25,6 +25,7 @@ describe('helpers', () => {
           name: 'test_user',
         },
         entity: {
+          id: 'test_user',
           name: 'test_user',
           source: 'logs-test',
           type: 'AWS IAM User',
@@ -44,6 +45,7 @@ describe('helpers', () => {
           name: 'test_user',
         },
         entity: {
+          id: 'test_user',
           name: 'test_user',
           source: 'logs-test',
           type: 'user',
@@ -60,6 +62,7 @@ describe('helpers', () => {
           name: 'test_host',
         },
         entity: {
+          id: 'test_host',
           name: 'test_host',
           source: 'logs-test',
           type: 'EC2 Instance',
@@ -79,6 +82,7 @@ describe('helpers', () => {
           name: 'test_host',
         },
         entity: {
+          id: 'test_host',
           name: 'test_host',
           source: 'logs-test',
           type: 'host',
@@ -95,6 +99,7 @@ describe('helpers', () => {
           name: 'test_service',
         },
         entity: {
+          id: 'test_service',
           name: 'test_service',
           source: 'logs-test',
           type: 'SaaS',
@@ -114,6 +119,7 @@ describe('helpers', () => {
           name: 'test_service',
         },
         entity: {
+          id: 'test_service',
           name: 'test_service',
           source: 'logs-test',
           type: 'service',

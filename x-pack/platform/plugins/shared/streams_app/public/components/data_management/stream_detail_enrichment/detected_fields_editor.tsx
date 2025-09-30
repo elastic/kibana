@@ -10,6 +10,7 @@ import { useEuiTheme, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { Streams } from '@kbn/streams-schema';
+import { uniq } from 'lodash';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import type { SchemaField } from '../schema_editor/types';
@@ -17,6 +18,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { isSelectableField } from '../schema_editor/schema_editor_table';
 
 interface DetectedFieldsEditorProps {
   detectedFields: SchemaField[];
@@ -29,6 +31,11 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
 
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
+  const [selectedFields, setSelectedFields] = React.useState<string[]>(
+    detectedFields
+      .filter((field) => isSelectableField(definition.stream.name, field))
+      .map(({ name }) => name)
+  );
 
   const hasFields = detectedFields.length > 0;
 
@@ -76,8 +83,23 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
         defaultColumns={['name', 'type', 'format', 'status']}
         fields={detectedFields}
         stream={definition.stream}
-        onFieldUnmap={unmapField}
-        onFieldUpdate={mapField}
+        onFieldUpdate={(field) => {
+          if (field.status === 'mapped') {
+            mapField(field);
+          } else if (field.status === 'unmapped') {
+            unmapField(field.name);
+          }
+        }}
+        onFieldSelection={(names, checked) => {
+          setSelectedFields((selection) => {
+            if (checked) {
+              return uniq([...selection, ...names]);
+            } else {
+              return selection.filter((name) => !names.includes(name));
+            }
+          });
+        }}
+        fieldSelection={selectedFields}
         withControls
         withTableActions
       />

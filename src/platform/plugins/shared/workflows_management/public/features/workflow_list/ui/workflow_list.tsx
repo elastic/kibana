@@ -35,6 +35,7 @@ import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -166,6 +167,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+      },
+      {
+        field: 'triggers',
+        name: 'Triggers',
+        render: (value: any, item: WorkflowListItemDto) =>
+          item.definition?.triggers ? (
+            <WorkflowsTriggersList triggers={item.definition.triggers} />
+          ) : (
+            <EuiText size="s">No triggers</EuiText>
+          ),
       },
       {
         name: 'Last run',

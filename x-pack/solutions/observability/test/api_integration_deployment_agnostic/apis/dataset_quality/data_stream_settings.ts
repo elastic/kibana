@@ -43,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           canRead: true,
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
       },
       canViewIntegrations: true,

@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
+import { omit } from 'lodash';
 import { boomify, isBoom } from '@hapi/boom';
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+
+import type { TypeOf } from '@kbn/config-schema';
+
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
-import {
-  lensAttributesSchema,
-  lensCreateOptionsSchema,
-  lensSavedObjectSchema,
-} from '../../../content_management/v1';
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_CONTENT_TYPE,
+} from '../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../types';
+import { ConfigBuilderStub } from '../../../../common/transforms';
+import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
+import { getLensResponseItem } from '../utils';
+import { isNewApiFormat } from '../../../../common/transforms/config_builder_stub';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement }
 ) => {
   const createRoute = router.post({
-    path: `${PUBLIC_API_PATH}/visualizations`,
-    access: PUBLIC_API_ACCESS,
+    path: LENS_VIS_API_PATH,
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',
@@ -48,17 +49,14 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
   createRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          body: schema.object({
-            options: lensCreateOptionsSchema,
-            data: lensAttributesSchema,
-          }),
+          body: lensCreateRequestBodySchema,
         },
         response: {
           201: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensCreateResponseBodySchema,
             description: 'Created',
           },
           400: {
@@ -77,14 +75,33 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      let result;
-      const { data, options } = req.body;
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+
+      const { references, ...lensItem } = isNewApiFormat(req.body.data)
+        ? // TODO: Find a better way to conditionally omit id
+          omit(ConfigBuilderStub.in(req.body.data), 'id')
+        : // For now we need to be able to create old SO, this may be moved to the config builder
+          ({
+            ...req.body.data,
+            description: req.body.data.description ?? undefined,
+          } satisfies LensCreateIn['data']);
 
       try {
-        ({ result } = await client.create(data, options));
+        // Note: these types are to enforce loose param typings of client methods
+        const data: LensCreateIn['data'] = lensItem;
+        const options: LensCreateIn['options'] = { ...req.body.options, references };
+        const { result } = await client.create(data, options);
+
+        if (result.item.error) {
+          throw result.item.error;
+        }
+
+        return res.created<TypeOf<typeof lensCreateResponseBodySchema>>({
+          body: getLensResponseItem(result.item),
+        });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {
           return res.forbidden();
@@ -92,8 +109,6 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 
         return boomify(error); // forward unknown error
       }
-
-      return res.created({ body: result.item });
     }
   );
 };

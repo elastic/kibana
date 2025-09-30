@@ -9,13 +9,9 @@
 
 import { createTabItem } from './utils';
 import { type TabState } from './types';
-import { defaultTabState } from './internal_state';
+import { getTabStateMock } from './__mocks__/internal_state.mocks';
 
-const createMockTabState = (id: string, label: string): TabState => ({
-  ...defaultTabState,
-  id,
-  label,
-});
+const createMockTabState = (id: string, label: string): TabState => getTabStateMock({ id, label });
 
 describe('createTabItem', () => {
   it('should create a tab with default label when no tabs exist', () => {

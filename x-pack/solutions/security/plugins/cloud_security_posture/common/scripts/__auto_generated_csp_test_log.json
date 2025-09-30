@@ -12835,9 +12835,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/benchmark/v1.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/benchmark/v1.ts",
     "fileName": "v1.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -12957,9 +12957,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/benchmark/v2.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/benchmark/v2.ts",
     "fileName": "v2.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13016,9 +13016,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/find_csp_benchmark_rule.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/find_csp_benchmark_rule.ts",
     "fileName": "find_csp_benchmark_rule.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13201,9 +13201,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/index.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/index.ts",
     "fileName": "index.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13237,9 +13237,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/rules/v1.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/rules/v1.ts",
     "fileName": "v1.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13422,9 +13422,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/rules/v2.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/rules/v2.ts",
     "fileName": "v2.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13565,9 +13565,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_index_timeout.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_index_timeout.ts",
     "fileName": "status_index_timeout.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13689,9 +13689,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_indexed.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_indexed.ts",
     "fileName": "status_indexed.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -13876,9 +13876,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_indexing.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_indexing.ts",
     "fileName": "status_indexing.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -14000,9 +14000,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_not_deployed_not_installed.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_not_deployed_not_installed.ts",
     "fileName": "status_not_deployed_not_installed.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -14124,9 +14124,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_unprivileged.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_unprivileged.ts",
     "fileName": "status_unprivileged.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -14292,9 +14292,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_waiting_for_results.ts",
+    "filePath": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/status/status_waiting_for_results.ts",
     "fileName": "status_waiting_for_results.ts",
-    "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
+    "directory": "x-pack/solutions/security/test/api_integration/apis/cloud_security_posture",
     "tags": [
       "FTR",
       "API INTEGRATION"

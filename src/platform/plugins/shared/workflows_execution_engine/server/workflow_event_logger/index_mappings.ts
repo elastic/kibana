@@ -15,6 +15,9 @@ export const WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS: MappingTypeMapping = {
     '@timestamp': {
       type: 'date',
     },
+    spaceId: {
+      type: 'keyword',
+    },
     message: {
       type: 'text',
       fields: {

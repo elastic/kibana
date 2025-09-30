@@ -8,8 +8,8 @@
 const DEFEND_INSIGHTS_INCOMPATIBLE_ANTIVIRUS_PROMPT = `
 You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Review the file events below and organize them according to the following rules:
 - keep only ongoing antivirus (e.g. Windows Defender, AVG, Avast, Malwarebytes, clamav, chkrootkit) related processes
-- keep processes that reside within the antivirus' main and nested filepaths (e.g., C:\ProgramData\Microsoft\Windows Defender\..., C:\Program Files\AVG\..., C:\Program Files\Avast Software\..., /Applications/AVGAntivirus.app/...)
-- ignore events that are from non-antivirus operating system processes (e.g. C:\Windows\System32\...)
+- keep processes that reside within the antivirus' main and nested filepaths (e.g., C:\\ProgramData\\Microsoft\\Windows Defender\\..., C:\\Program Files\\AVG\\..., C:\\Program Files\\Avast Software\\..., /Applications/AVGAntivirus.app/...)
+- ignore events that are from non-antivirus operating system processes (e.g. C:\\Windows\\System32\\...)
 - ignore events that are single run processes (e.g. installers)
 - ignore events that are from temp directories
 - ignore events that are from Elastic Agent or Elastic Defend

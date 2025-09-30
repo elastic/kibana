@@ -410,18 +410,22 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   }
 
   generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    // Use HOST field by default for compatibility with all OS types
+    // USERNAME field can only be used with Windows-only OS
+    const defaultEntries: ExceptionListItemSchema['entries'] = [
+      {
+        field: 'host.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: `host_${this.randomString(5)}`,
+      },
+    ];
+
     return this.generate({
       name: `Trusted device (${this.randomString(5)})`,
       list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
       os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
-      entries: [
-        {
-          field: 'user.name',
-          operator: 'included',
-          type: 'match',
-          value: `user_${this.randomString(5)}`,
-        },
-      ],
+      entries: defaultEntries,
       ...overrides,
     });
   }

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a variety of unstructured log messages with different distributions (uniform, poisson, gaussian).
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { infra, log } from '@kbn/apm-synthtrace-client';
 import { fakerEN as faker } from '@faker-js/faker';

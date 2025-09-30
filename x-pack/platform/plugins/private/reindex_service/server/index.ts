@@ -10,9 +10,9 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { ReindexServiceServerPlugin } from './plugin';
 
 export type { ReindexServiceServerPluginStart } from './types';
+export { REINDEX_SERVICE_BASE_PATH } from '../common';
 
-// exported for use in api integration test
-export { generateNewIndexName } from './src/lib/index_settings';
+export { config } from './config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   return new ReindexServiceServerPlugin(ctx);

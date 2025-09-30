@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { interpolateEsqlQuery } from '@kbn/onechat-genai-utils/tools/utils';
 import type { ToolPersistedDefinition } from '../../client';
 import type { InternalToolDefinition } from '../../../tool_provider';
 
@@ -23,24 +25,39 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
     description,
     tags,
     configuration,
+    readonly: false,
     schema: createSchemaFromParams(configuration.params) as TSchema,
     handler: async (params, { esClient }) => {
       const client = esClient.asCurrentUser;
-      const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
+      const paramArray = Object.keys(configuration.params).map((param) => ({
+        [param]: params[param] ?? null,
+      }));
 
-      const response = await client.esql.query({
+      const result = await client.esql.query({
         query: configuration.query,
         // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
         params: paramArray as unknown as FieldValue[],
       });
 
+      // need the interpolated query to return in the results / to display in the UI
+      const interpolatedQuery = interpolateEsqlQuery(configuration.query, params);
+
       return {
         results: [
           {
+            type: ToolResultType.query,
+            data: {
+              esql: interpolatedQuery,
+            },
+          },
+          {
+            tool_result_id: getToolResultId(),
             type: ToolResultType.tabularData,
             data: {
-              columns: response.columns,
-              values: response.values,
+              source: 'esql',
+              query: interpolatedQuery,
+              columns: result.columns,
+              values: result.values,
             },
           },
         ],
@@ -79,6 +96,10 @@ function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<a
       case 'nested':
         field = z.array(z.record(z.unknown()));
         break;
+    }
+
+    if (param.optional) {
+      field = field.optional();
     }
 
     field = field.describe(param.description);

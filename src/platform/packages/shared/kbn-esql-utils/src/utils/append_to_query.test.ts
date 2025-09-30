@@ -51,10 +51,10 @@ describe('appendToQuery', () => {
 
     it('appends a where clause in an existing query with casting to string when the type is not string or number', () => {
       expect(
-        appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'ip')
+        appendWhereClauseToESQLQuery('from logstash-* // meow', 'ip_field', 'tada!', '-', 'ip')
       ).toBe(
         `from logstash-* // meow
-| WHERE \`dest\`::string!="tada!"`
+| WHERE \`ip_field\`!="tada!"`
       );
     });
 
@@ -169,7 +169,7 @@ AND \`dest\`=="Crete"`
         )
       ).toBe(
         `from logstash-* | where CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
-and \`ip\`::string!="127.0.0.2/32"`
+and \`ip\`!="127.0.0.2/32"`
       );
     });
 

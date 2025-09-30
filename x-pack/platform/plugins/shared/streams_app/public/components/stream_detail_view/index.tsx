@@ -8,14 +8,14 @@ import { EuiBadgeGroup, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useStreamDetail } from '../../hooks/use_stream_detail';
+import { useStreamDetailAsIngestStream } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
-import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
+import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -65,12 +65,12 @@ export function StreamDetailView() {
   const { path } = useStreamsAppParams('/{key}/{tab}', true);
   const { key, tab } = path;
 
-  const { definition } = useStreamDetail();
+  const { definition } = useStreamDetailAsIngestStream();
 
   const { features } = useStreamsPrivileges();
 
   if (tab === 'management') {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />;
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />;
   }
 
   if (!isValidStreamDetailTab(tab)) {
@@ -94,6 +94,7 @@ export function StreamDetailView() {
             {key}
             <EuiBadgeGroup gutterSize="s">
               {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>
@@ -109,7 +110,7 @@ export function StreamDetailView() {
           <EuiButton
             iconType="gear"
             href={router.link('/{key}/management/{tab}', {
-              path: { key, tab: 'route' },
+              path: { key, tab: 'partitioning' },
             })}
           >
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamLabel', {

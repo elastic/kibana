@@ -82,6 +82,8 @@ export interface LogDocumentOverview
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
+  'transaction.id'?: string;
+  'span.id'?: string;
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;
@@ -113,19 +115,12 @@ export interface LogCloudFields {
   'cloud.instance.id'?: string;
 }
 
-export interface TransactionDocumentOverview
+export interface TraceDocumentOverview
   extends TraceFields,
-    ServiceFields,
-    TransactionFields,
-    UserAgentFields {}
-
-export interface SpanDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    SpanFields,
-    UserAgentFields {
-  'transaction.id'?: string;
-  'transaction.name'?: string;
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
   duration?: number;
   kind?: string;
   'resource.attributes.telemetry.sdk.language'?: string;
@@ -169,4 +164,15 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
+}
+
+export interface TraceDocumentOverview
+  extends TraceFields,
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
+  duration?: number;
+  kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
 }

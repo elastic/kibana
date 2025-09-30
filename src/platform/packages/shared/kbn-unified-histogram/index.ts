@@ -25,9 +25,7 @@ export {
   type UnifiedHistogramChartProps,
   ChartSectionTemplate,
   type ChartSectionTemplateProps,
-  ToolbarSelector,
-  type ToolbarSelectorProps,
-  type SelectableEntry,
+  useFetch,
 } from './components/chart';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 
@@ -37,6 +35,8 @@ export {
   type UnifiedHistogramApi,
   type UnifiedHistogramPartialLayoutProps,
 } from './hooks/use_unified_histogram';
+
+export { useStableCallback } from './hooks/use_stable_callback';
 
 export type { UnifiedHistogramState } from './services/state_service';
 

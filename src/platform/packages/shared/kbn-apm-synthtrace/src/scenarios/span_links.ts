@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a distributed trace that includes span links to connect causally related spans.
+ */
+
 import { compact, shuffle } from 'lodash';
 import { Readable } from 'stream';
 import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';

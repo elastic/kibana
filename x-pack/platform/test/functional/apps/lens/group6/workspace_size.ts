@@ -157,38 +157,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }> = [
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'lnsDatatable', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'lnsLegacyMetric', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'mosaic', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'pie', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'treemap', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
+          expectedWidth: '310px',
+          expectedHeight: '310px',
         },
         { id: 'waffle', aspectRatio: UNCONSTRAINED },
         // { id: 'heatmap', ...UNCONSTRAINED }, // heatmap blocks render unless it's given two dimensions. This stops the expression renderer from requesting new dimensions.
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.switchToVisualization('lnsMetric');
       });
 
-      await assertWorkspaceDimensions('300px', '300px');
+      await assertWorkspaceDimensions('310px', '310px');
 
       await lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',

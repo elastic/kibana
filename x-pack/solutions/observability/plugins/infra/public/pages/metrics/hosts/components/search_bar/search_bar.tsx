@@ -18,17 +18,14 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
-import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
-import { isPending } from '../../../../../hooks/use_fetcher';
 
 export const SearchBar = () => {
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
     useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
   const { metricsView } = useMetricsDataViewContext();
-
-  const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
@@ -56,25 +53,22 @@ export const SearchBar = () => {
     [onSubmit, onPageRefreshStart]
   );
 
-  const isLoading = isPending(status);
-
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <SchemaSelector
-            onChange={onPreferredSchemaChange}
-            schemas={schemas}
-            value={searchCriteria.preferredSchema}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
           <UnifiedSearchBar
             onQuerySubmit={handleRefresh}
-            placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
-              defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
-            })}
+            placeholder={
+              searchCriteria.preferredSchema === 'ecs'
+                ? i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+                    defaultMessage:
+                      'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+                  })
+                : i18n.translate('xpack.infra.hosts.otelSearchPlaceholder', {
+                    defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND os.type:linux)',
+                  })
+            }
             showDatePicker
             showFilterBar
             showSubmitButton
@@ -91,6 +85,7 @@ export const SearchBar = () => {
                 filters={searchCriteria.filters}
                 onFiltersChange={onPanelFiltersChange}
                 schema={searchCriteria.preferredSchema}
+                schemas={schemas}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

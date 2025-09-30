@@ -26,7 +26,7 @@ describe('<ChartsSection />', () => {
   it('should render correctly', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SearchBarSection dataViewSpec={dataViewSpec} />
+        <SearchBarSection dataView={dataViewSpec} />
       </TestProviders>
     );
 

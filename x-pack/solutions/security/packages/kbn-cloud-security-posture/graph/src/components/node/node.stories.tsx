@@ -99,3 +99,166 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
 export const Node: StoryObj<NodeViewModel> = {
   render: Template,
 };
+
+export const Colors: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => {
+    const colorNodes = (['primary', 'danger', 'warning'] as const).map((color, index) => ({
+      id: `color-${color}`,
+      type: 'hexagon',
+      data: {
+        id: `color-${color}`,
+        label: `${color} Node`,
+        tag: 'Server',
+        color,
+        icon: 'storage',
+        interactive: true,
+        shape: 'hexagon',
+      },
+      position: { x: index * 200, y: 0 },
+    }));
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={colorNodes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const Shapes: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => {
+    const shapes = (['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map(
+      (shape, index) => ({
+        id: `entity-${shape}`,
+        type: shape,
+        data: {
+          id: `entity-${shape}`,
+          label: `${shape} node`,
+          color: 'primary',
+          icon: 'okta',
+          interactive: true,
+          shape,
+        },
+        position: { x: index * 200, y: 0 },
+      })
+    );
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={shapes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+const detailsUseCases = {
+  'No details': {},
+  'Only Tag': { tag: 'Host' },
+  'Tag and IPs': { tag: 'Host', ips: ['10.200.0.202', '74.25.14.20'] },
+  'Tag and Country Codes': { tag: 'Host', countryCodes: ['us', 'fr', 'es'] },
+  'Tag and Count > 1': { tag: 'Host', count: 2 },
+  Everything: {
+    tag: 'Host',
+    count: 2,
+    ips: ['10.200.0.202', '74.25.14.20'],
+    countryCodes: ['us', 'fr', 'es'],
+  },
+};
+
+export const Details: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => {
+    const nodes = Object.entries(detailsUseCases).map(([useCaseName, props], index) => ({
+      id: useCaseName,
+      type: 'hexagon',
+      data: {
+        id: useCaseName,
+        shape: 'hexagon',
+        color: 'primary',
+        icon: 'storage',
+        interactive: true,
+        ...props,
+      },
+      position: { x: index * 200, y: 0 },
+    }));
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={nodes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const Interactivity: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => {
+    const interactivityNodes = [
+      {
+        id: 'interactive-node',
+        type: 'hexagon',
+        data: {
+          id: 'interactive-node',
+          label: 'Interactive Node',
+          tag: 'Host',
+          color: 'primary',
+          icon: 'gear',
+          interactive: true,
+          shape: 'hexagon',
+        },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'non-interactive-node',
+        type: 'hexagon',
+        data: {
+          id: 'non-interactive-node',
+          label: 'Non-Interactive Node',
+          tag: 'Host',
+          color: 'primary',
+          icon: 'gear',
+          interactive: false,
+          shape: 'hexagon',
+        },
+        position: { x: 200, y: 0 },
+      },
+    ];
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow
+          fitView
+          attributionPosition={undefined}
+          nodeTypes={nodeTypes}
+          nodes={interactivityNodes}
+        >
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};

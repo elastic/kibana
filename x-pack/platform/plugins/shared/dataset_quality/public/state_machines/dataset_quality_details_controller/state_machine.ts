@@ -1008,7 +1008,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         if (
           'dataStreamDetails' in context &&
           context.dataStreamDetails &&
-          context.dataStreamDetails.hasFailureStore
+          context.dataStreamDetails.hasFailureStore !== undefined
         ) {
           return dataStreamDetailsClient.updateFailureStore({
             dataStream: context.dataStream,

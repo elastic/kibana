@@ -14,10 +14,11 @@
     "requiredPlugins": [
       "data",
       "dataViews",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql",
     ],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": []
   }
 }
 

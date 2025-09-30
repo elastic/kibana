@@ -131,14 +131,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", formulaAPI: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
               ") => ",
               {
                 "pluginId": "lens",
@@ -202,27 +194,6 @@
                     "docId": "kibDataViewsPluginApi",
                     "section": "def-common.DataView",
                     "text": "DataView"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-common.FormulaColumn.getData.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "formulaAPI",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.FormulaPublicApi",
-                    "text": "FormulaPublicApi"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
@@ -316,7 +287,7 @@
             "label": "build",
             "description": [],
             "signature": [
-              "() => { title: string; description?: string | undefined; references: ",
+              "() => { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -388,7 +359,7 @@
                 "section": "def-public.XYState",
                 "text": "XYState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -454,7 +425,7 @@
               },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -526,7 +497,7 @@
                 "section": "def-public.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -598,7 +569,7 @@
                 "section": "def-public.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -670,7 +641,7 @@
                 "section": "def-public.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -742,7 +713,7 @@
                 "section": "def-common.LegacyMetricState",
                 "text": "LegacyMetricState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -814,7 +785,7 @@
                 "section": "def-public.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -1196,14 +1167,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", formulaAPI: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
               ") => Record<string, Omit<",
               {
                 "pluginId": "lens",
@@ -1262,27 +1225,6 @@
                     "docId": "kibDataViewsPluginApi",
                     "section": "def-common.DataView",
                     "text": "DataView"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-common.MetricLayer.getLayer.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "formulaAPI",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.FormulaPublicApi",
-                    "text": "FormulaPublicApi"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
@@ -2277,14 +2219,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", formulaAPI: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
               ") => Record<string, Omit<",
               {
                 "pluginId": "lens",
@@ -2343,27 +2277,6 @@
                     "docId": "kibDataViewsPluginApi",
                     "section": "def-common.DataView",
                     "text": "DataView"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-common.XYDataLayer.getLayer.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "formulaAPI",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.FormulaPublicApi",
-                    "text": "FormulaPublicApi"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
@@ -3050,14 +2963,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", formulaAPI: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
               ") => ",
               {
                 "pluginId": "lens",
@@ -3127,27 +3032,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-common.ChartColumn.getData.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "formulaAPI",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.FormulaPublicApi",
-                    "text": "FormulaPublicApi"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": []
@@ -3176,26 +3060,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/lens-embeddable-utils",
-            "id": "def-common.ChartConfig.formulaAPI",
-            "type": "Object",
-            "tags": [],
-            "label": "formulaAPI",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "@kbn/lens-embeddable-utils",
             "id": "def-common.ChartConfig.dataView",
@@ -3300,14 +3164,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", formulaAPI: ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FormulaPublicApi",
-                "text": "FormulaPublicApi"
-              },
               ") => Record<string, Omit<",
               {
                 "pluginId": "lens",
@@ -3366,27 +3222,6 @@
                     "docId": "kibDataViewsPluginApi",
                     "section": "def-common.DataView",
                     "text": "DataView"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/lens-embeddable-utils",
-                "id": "def-common.ChartLayer.getLayer.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "formulaAPI",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.FormulaPublicApi",
-                    "text": "FormulaPublicApi"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
@@ -3885,7 +3720,7 @@
             "label": "build",
             "description": [],
             "signature": [
-              "() => { title: string; description?: string | undefined; references: ",
+              "() => { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3957,7 +3792,7 @@
                 "section": "def-public.XYState",
                 "text": "XYState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4023,7 +3858,7 @@
               },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4095,7 +3930,7 @@
                 "section": "def-public.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4167,7 +4002,7 @@
                 "section": "def-public.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4239,7 +4074,7 @@
                 "section": "def-public.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4311,7 +4146,7 @@
                 "section": "def-common.LegacyMetricState",
                 "text": "LegacyMetricState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -4383,7 +4218,7 @@
                 "section": "def-public.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5021,7 +4856,7 @@
         "label": "LensAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; references: ",
+          "{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5093,7 +4928,7 @@
             "section": "def-public.XYState",
             "text": "XYState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5159,7 +4994,7 @@
           },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5231,7 +5066,7 @@
             "section": "def-public.HeatmapVisualizationState",
             "text": "HeatmapVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5303,7 +5138,7 @@
             "section": "def-public.GaugeVisualizationState",
             "text": "GaugeVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5375,7 +5210,7 @@
             "section": "def-public.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5447,7 +5282,7 @@
             "section": "def-common.LegacyMetricState",
             "text": "LegacyMetricState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -5519,7 +5354,7 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

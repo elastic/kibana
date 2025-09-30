@@ -696,10 +696,6 @@
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
             {
-              "plugin": "reindexService",
-              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.ts"
-            },
-            {
               "plugin": "remoteClusters",
               "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts"
             },
@@ -750,14 +746,6 @@
             {
               "plugin": "spaces",
               "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.test.ts"
-            },
-            {
-              "plugin": "reindexService",
-              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.test.ts"
-            },
-            {
-              "plugin": "reindexService",
-              "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/reindex_service.test.ts"
             },
             {
               "plugin": "apm",

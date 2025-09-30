@@ -119,11 +119,11 @@ describe('identifyDependencyUsage', () => {
       `x-pack/solutions/${solution}/packages`,
     ]).join('|');
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|test)/([^/]+)/([^/]+)"`
+      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 

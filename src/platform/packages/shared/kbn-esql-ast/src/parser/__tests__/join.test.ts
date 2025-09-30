@@ -180,4 +180,22 @@ describe('<TYPE> JOIN command', () => {
       expect(query.src.slice(on?.location.min, on?.location.max! + 1)).toBe('ON on_1, on_2');
     });
   });
+
+  describe('malformed', () => {
+    it('can parse JOIN without target', () => {
+      const text = `FROM employees | LOOKUP JOIN `;
+      const query = EsqlQuery.fromSrc(text);
+      expect(query.ast.commands[1].args[0]).toMatchObject({
+        sourceType: 'index',
+        name: '',
+        location: {
+          min: 29,
+          max: 27,
+        },
+        text: '',
+        incomplete: true,
+        type: 'source',
+      });
+    });
+  });
 });

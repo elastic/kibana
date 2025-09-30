@@ -16,6 +16,7 @@ import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
+import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../../__mocks__/mocks';
 
 jest.mock('../../../lib/dom/get_element_from_point', () => ({
@@ -28,6 +29,12 @@ jest.mock('../../../lib/fiber/find_source_component', () => ({
 
 jest.mock('../../../lib/get_inspected_element_data', () => ({
   getInspectedElementData: jest.fn(),
+}));
+
+jest.mock('../../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
+  isKeyboardShortcut: jest.fn(),
+  isMac: jest.fn(),
+  isEscapeKey: jest.fn(),
 }));
 
 describe('InspectOverlay', () => {
@@ -129,5 +136,24 @@ describe('InspectOverlay', () => {
       expect(setIsInspecting).toHaveBeenCalledWith(false);
       expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
     });
+  });
+
+  it('should close overlay when escape key is pressed', () => {
+    const setIsInspecting = jest.fn();
+
+    (isEscapeKey as jest.Mock).mockReturnValue(true);
+
+    renderWithI18n(
+      <InspectOverlay
+        core={mockCoreStart}
+        setFlyoutOverlayRef={jest.fn()}
+        setIsInspecting={setIsInspecting}
+        branch={mockBranch}
+      />
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
+
+    expect(setIsInspecting).toHaveBeenCalledWith(false);
   });
 });

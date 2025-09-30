@@ -50,11 +50,11 @@ describe('CHANGE_POINT Validation', () => {
 
       test('raises error when the default @timestamp field is missing', () => {
         // make sure that @timestamp field is not present
-        const newFields = new Map(mockContext.fields);
-        newFields.delete('@timestamp');
+        const newColumns = new Map(mockContext.columns);
+        newColumns.delete('@timestamp');
         const context = {
           ...mockContext,
-          fields: newFields,
+          columns: newColumns,
         };
         changePointExpectErrors(
           'FROM a_index | CHANGE_POINT doubleField',

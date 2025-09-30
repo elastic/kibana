@@ -32,6 +32,7 @@ import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/sugg
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
+import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -146,6 +147,8 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
+    // Remove the user's preferred chart type from localStorage
+    deleteUserChartTypeFromSessionStorage();
     onCancelCallback?.();
     closeFlyout?.();
   }, [
@@ -193,6 +196,8 @@ export function LensEditConfigurationFlyout({
     }
 
     onApplyCallback?.(currentAttributes);
+    // Remove the user's preferred chart type from sessionStorage
+    deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,
@@ -266,6 +271,8 @@ export function LensEditConfigurationFlyout({
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
       setIsInlineFlyoutVisible(false);
+      // Remove the user's preferred chart type from sessionStorage
+      deleteUserChartTypeFromSessionStorage();
     }
   };
 

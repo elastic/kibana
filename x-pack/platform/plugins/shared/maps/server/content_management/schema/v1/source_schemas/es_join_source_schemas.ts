@@ -10,7 +10,7 @@ import { SOURCE_TYPES } from '../../../../../common';
 import { BaseESAggSourceSchema } from './es_agg_source_schemas';
 
 // TODO - replace querySchema with reusable querySchema
-const querySchema = schema.object({
+export const querySchema = schema.object({
   query: schema.oneOf([
     schema.string({
       meta: {

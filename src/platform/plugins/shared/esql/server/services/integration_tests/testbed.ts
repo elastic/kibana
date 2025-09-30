@@ -22,7 +22,16 @@ export class EsqlServiceTestbed {
   public kibana?: TestKibanaUtils;
 
   public async start() {
-    this.servers = createTestServers({ adjustTimeout: jest.setTimeout });
+    this.servers = createTestServers({
+      adjustTimeout: jest.setTimeout,
+      settings: {
+        kbn: {
+          cliArgs: {
+            oss: false,
+          },
+        },
+      },
+    });
     this.es = await this.servers.startES();
     this.kibana = await this.servers.startKibana();
   }

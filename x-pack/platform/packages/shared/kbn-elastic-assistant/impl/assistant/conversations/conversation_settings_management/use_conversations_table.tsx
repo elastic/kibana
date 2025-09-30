@@ -12,7 +12,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
 import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import { ShareBadge } from '../../share_conversation/share_badge';
 import {
@@ -64,8 +64,9 @@ interface GetColumnsParams {
   totalItemCount: number;
 }
 
-export const useConversationsTable = () => {
+export const useConversationsTable = (currentUser?: User) => {
   const getActions = useInlineActions<ConversationTableItem>();
+
   const getColumns = useCallback(
     ({
       conversationOptions,
@@ -82,7 +83,7 @@ export const useConversationsTable = () => {
       onEditActionClicked,
       totalItemCount,
     }: GetColumnsParams): Array<EuiBasicTableColumn<ConversationTableItem>> => {
-      return [
+      const columns: Array<EuiBasicTableColumn<ConversationTableItem>> = [
         {
           field: '',
           name: (
@@ -135,7 +136,11 @@ export const useConversationsTable = () => {
             connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
           sortable: false,
         },
-        {
+      ];
+
+      // Only include sharing column if assistant sharing is enabled
+      if (currentUser) {
+        columns.push({
           name: i18n.CONVERSATIONS_TABLE_COLUMN_SHARING,
           render: (conversation: ConversationTableItem) => {
             const conversationSharedState = getConversationSharedState(conversation);
@@ -161,7 +166,10 @@ export const useConversationsTable = () => {
             );
           },
           width: '100px',
-        },
+        });
+      }
+
+      columns.push(
         {
           field: 'updatedAt',
           name: i18n.CONVERSATIONS_TABLE_COLUMN_UPDATED_AT,
@@ -188,10 +196,12 @@ export const useConversationsTable = () => {
             onDelete: onDeleteActionClicked,
             onEdit: onEditActionClicked,
           }),
-        },
-      ];
+        }
+      );
+
+      return columns;
     },
-    [getActions]
+    [getActions, currentUser]
   );
   const getConversationsList = useCallback(
     ({

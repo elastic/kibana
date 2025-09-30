@@ -171,8 +171,8 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
       values={{
         end,
         start,
+        strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
         totalResults,
-        strong: (chunks) => `<strong>${chunks}</strong>`,
       }}
     />
   </EuiText>

@@ -45,6 +45,21 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
+    key: 'infer_spans',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.infer_spans.label', {
+      defaultMessage: 'Inferred Spans On/Off',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.edot.infer_spans.description', {
+      defaultMessage:
+        'Set Inferred Spans to be on or off\n' +
+        'Note with Java for this to apply, inferred spans needs to be enabled at JVM startup by setting OTEL_INFERRED_SPANS_ENABLED to true\n' +
+        '\n',
+    }),
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/php/elastic'],
+  },
+  {
     key: 'logging_level',
     validation: loggingLevelRt,
     type: 'select',
@@ -114,7 +129,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the traces exporter to send or discard traces. When set to false, all traces will be discarded so there will be no traces sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'send_metrics',
@@ -128,7 +143,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the metrics exporter to send or discard metrics. When set to false, all metrics will be discarded so there will be no metrics sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'send_logs',
@@ -142,6 +157,6 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Set the logs exporter to send or discard logs. When set to false, all logs (that are normally sent by the agent) will be discarded so there will be no logs sent to the collector\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
 ];
