@@ -13,7 +13,6 @@ import { isNumber } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { MetricField, MetricFieldsResponse } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
-import { getEcsFieldDescriptions } from '../../lib/fields/get_ecs_field_descriptions';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
 import { enrichMetricFields } from '../../lib/fields/enrich_metric_fields';
 import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
@@ -81,23 +80,9 @@ export async function getMetricFields({
     logger,
   });
 
-  // Get ECS descriptions for all field names
-  const ecsDescriptions = getEcsFieldDescriptions(enrichedMetricFields.map((field) => field.name));
-
   const finalFields = enrichedMetricFields.map((field) => {
-    const ecsDescription = ecsDescriptions.get(field.name);
-
-    const description = field.description || ecsDescription;
-    const source: MetricField['source'] = field.description
-      ? 'custom'
-      : ecsDescription
-      ? 'ecs'
-      : 'custom';
-
     return {
       ...field,
-      description,
-      source,
       dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
     };
   });
