@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
+import type { Paginated } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import type { SummaryResult, SummarySearchClient } from './summary_search_client/types';
 
 describe('FindSLO', () => {

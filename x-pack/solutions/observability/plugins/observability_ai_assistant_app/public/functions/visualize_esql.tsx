@@ -47,7 +47,7 @@ import {
   type VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
 
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WithAllKeys } from '../../state_manager';
+import type { WithAllKeys } from '../../state_manager';
 import { initializeStateManager } from '../../state_manager/state_manager';
-import { StateComparators, StateManager } from '../../state_manager/types';
-import { PublishesWritableDescription } from './publishes_description';
-import { PublishesTitle, PublishesWritableTitle } from './publishes_title';
+import type { StateComparators, StateManager } from '../../state_manager/types';
+import type { PublishesWritableDescription } from './publishes_description';
+import type { PublishesTitle, PublishesWritableTitle } from './publishes_title';
 
 export interface SerializedTitles {
   title?: string;

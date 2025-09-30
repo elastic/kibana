@@ -22,6 +22,7 @@ test('Kubernetes EA', async ({
 }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -44,20 +45,30 @@ test('Kubernetes EA', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
+  if (!isLogsEssentialsMode) {
+    await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
 
-  /**
-   * There might be a case that dashboard still does not show
-   * the data even though it was ingested already. This usually
-   * happens during the test when navigation from the onboarding
-   * flow to the dashboard happens almost immediately.
-   * Having a timeout before going to the dashboard "solves"
-   * the issue. 2 minutes is generous and should be more then enough
-   * for the data to propagate everywhere.
-   */
-  await page.waitForTimeout(2 * 60000);
+    /**
+     * There might be a case that dashboard still does not show
+     * the data even though it was ingested already. This usually
+     * happens during the test when navigation from the onboarding
+     * flow to the dashboard happens almost immediately.
+     * Having a timeout before going to the dashboard "solves"
+     * the issue. 2 minutes is generous and should be more then enough
+     * for the data to propagate everywhere.
+     */
+    await page.waitForTimeout(2 * 60000);
 
-  await kubernetesEAFlowPage.clickKubernetesAgentCTA();
+    await kubernetesEAFlowPage.clickKubernetesAgentCTA();
+    await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
+  } else {
+    await page.waitForTimeout(5 * 60000);
 
-  await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+  }
 });

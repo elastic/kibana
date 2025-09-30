@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import type { RasterTileSource } from 'maplibre-gl';
+import { AbstractSource } from '../source';
+import { getKibanaTileMap } from '../../../util';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { SOURCE_TYPES } from '../../../../common/constants';
+import { extractAttributions } from './extract_attributions';
+import type { IRasterSource, RasterTileSourceData } from '../raster_source';
+
+export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
+  defaultMessage: 'Configured Tile Map Service',
+});
+
+export class KibanaTilemapSource extends AbstractSource implements IRasterSource {
+  static type = SOURCE_TYPES.KIBANA_TILEMAP;
+
+  static createDescriptor() {
+    return {
+      type: KibanaTilemapSource.type,
+    };
+  }
+
+  async getImmutableProperties() {
+    return [
+      {
+        label: getDataSourceLabel(),
+        value: sourceTitle,
+      },
+      {
+        label: i18n.translate('xpack.maps.source.kbnTMS.urlLabel', {
+          defaultMessage: 'Tilemap url',
+        }),
+        value: await this.getUrlTemplate(),
+      },
+    ];
+  }
+  async hasLegendDetails() {
+    return false;
+  }
+
+  renderLegendDetails() {
+    return null;
+  }
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData) {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
+  async canSkipSourceUpdate() {
+    return false;
+  }
+
+  async getUrlTemplate() {
+    const tilemap = getKibanaTileMap();
+    if (!tilemap.url) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.kbnTMS.noConfigErrorMessage', {
+          defaultMessage: `Unable to find map.tilemap.url configuration in the kibana.yml`,
+        })
+      );
+    }
+    return tilemap.url;
+  }
+
+  getAttributionProvider() {
+    return async () => {
+      const tilemap = getKibanaTileMap();
+      const markdown = _.get(tilemap, 'options.attribution', '');
+      return extractAttributions(markdown);
+    };
+  }
+
+  async getDisplayName() {
+    try {
+      return await this.getUrlTemplate();
+    } catch (e) {
+      return '';
+    }
+  }
+}

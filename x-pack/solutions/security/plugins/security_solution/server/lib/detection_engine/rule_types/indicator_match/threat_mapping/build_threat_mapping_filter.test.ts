@@ -7,19 +7,21 @@
 
 import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
-  filterThreatMapping,
+  threatMappingEntriesAreValid,
   buildThreatMappingFilter,
   createInnerAndClauses,
-  createAndOrClauses,
+  createNamedAndClause,
   buildEntriesMappingFilter,
 } from './build_threat_mapping_filter';
 import {
   getThreatMappingMock,
   getThreatListItemMock,
   getThreatMappingFilterMock,
-  getFilterThreatMapping,
   getThreatMappingFilterShouldMock,
   getThreatListSearchResponseMock,
+  getThreatMappingEntriesMockWithNegate,
+  getAndClauseMock,
+  getThreatMappingEntriesMock,
 } from './build_threat_mapping_filter.mock';
 import type { BooleanFilter, ThreatListItem, ThreatMappingEntries } from './types';
 
@@ -28,66 +30,48 @@ describe('build_threat_mapping_filter', () => {
     test('it should create the correct entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      const filter = buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
+      const filter = buildThreatMappingFilter({
+        threatMappings: threatMapping,
+        threatList,
+        entryKey: 'value',
+      });
       expect(filter).toEqual(getThreatMappingFilterMock());
     });
 
     test('it should not mutate the original threatMapping', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
+      buildThreatMappingFilter({ threatMappings: threatMapping, threatList, entryKey: 'value' });
       expect(threatMapping).toEqual(getThreatMappingMock());
     });
 
     test('it should not mutate the original threatListItem', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
-      buildThreatMappingFilter({ threatMapping, threatList, entryKey: 'value' });
+      buildThreatMappingFilter({ threatMappings: threatMapping, threatList, entryKey: 'value' });
       expect(threatList).toEqual(getThreatListSearchResponseMock().hits.hits);
     });
   });
 
-  describe('filterThreatMapping', () => {
-    test('it should not remove any entries when using the default mocks', () => {
+  describe('threatMappingEntriesAreValid', () => {
+    test('should return true when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
       const threatListItem = getThreatListItemMock();
 
-      const item = filterThreatMapping({ threatMapping, threatListItem, entryKey: 'value' });
-      const expected = getFilterThreatMapping();
-      expect(item).toEqual(expected);
-    });
-
-    test('it should only give one filtered element if only 1 element is defined', () => {
-      const [firstElement] = getThreatMappingMock(); // get only the first element
-      const threatListItem = getThreatListItemMock();
-
-      const item = filterThreatMapping({
-        threatMapping: [firstElement],
+      const result = threatMappingEntriesAreValid({
+        threatMappingEntries: threatMapping[0].entries,
         threatListItem,
         entryKey: 'value',
       });
-      const [firstElementFilter] = getFilterThreatMapping(); // get only the first element to compare
-      expect(item).toEqual([firstElementFilter]);
-    });
-
-    test('it should not mutate the original threatMapping', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListItemMock();
-
-      filterThreatMapping({
-        threatMapping,
-        threatListItem,
-        entryKey: 'value',
-      });
-      expect(threatMapping).toEqual(getThreatMappingMock());
+      expect(result).toEqual(true);
     });
 
     test('it should not mutate the original threatListItem', () => {
       const threatMapping = getThreatMappingMock();
       const threatListItem = getThreatListItemMock();
 
-      filterThreatMapping({
-        threatMapping,
+      threatMappingEntriesAreValid({
+        threatMappingEntries: threatMapping[0].entries,
         threatListItem,
         entryKey: 'value',
       });
@@ -95,21 +79,17 @@ describe('build_threat_mapping_filter', () => {
     });
 
     test('it should remove the entire "AND" clause if one of the pieces of data is missing from the list', () => {
-      const item = filterThreatMapping({
-        threatMapping: [
+      const result = threatMappingEntriesAreValid({
+        threatMappingEntries: [
           {
-            entries: [
-              {
-                field: 'host.name',
-                type: 'mapping',
-                value: 'host.name',
-              },
-              {
-                field: 'host.ip',
-                type: 'mapping',
-                value: 'host.ip',
-              },
-            ],
+            field: 'host.name',
+            type: 'mapping',
+            value: 'host.name',
+          },
+          {
+            field: 'host.ip',
+            type: 'mapping',
+            value: 'host.ip',
           },
         ],
         threatListItem: getThreatListItemMock({
@@ -127,61 +107,7 @@ describe('build_threat_mapping_filter', () => {
         }),
         entryKey: 'value',
       });
-      expect(item).toEqual([]);
-    });
-
-    test('it should remove 1 "AND" clause but keep the second one from the "OR" if the first "AND" has missing data element from the list', () => {
-      const item = filterThreatMapping({
-        threatMapping: [
-          {
-            entries: [
-              {
-                field: 'host.name',
-                type: 'mapping',
-                value: 'host.name',
-              },
-              {
-                field: 'host.ip', // Since host.ip is missing, this entire "AND" should be dropped
-                type: 'mapping',
-                value: 'host.ip',
-              },
-            ],
-          },
-          {
-            entries: [
-              {
-                field: 'host.name',
-                type: 'mapping',
-                value: 'host.name',
-              },
-            ],
-          },
-        ],
-        threatListItem: getThreatListItemMock({
-          _source: {
-            '@timestamp': '2020-09-09T21:59:13Z',
-            host: {
-              name: 'host-1',
-            },
-          },
-          fields: {
-            '@timestamp': ['2020-09-09T21:59:13Z'],
-            'host.name': ['host-1'],
-          },
-        }),
-        entryKey: 'value',
-      });
-      expect(item).toEqual([
-        {
-          entries: [
-            {
-              field: 'host.name',
-              type: 'mapping',
-              value: 'host.name',
-            },
-          ],
-        },
-      ]);
+      expect(result).toEqual(false);
     });
   });
 
@@ -230,14 +156,12 @@ describe('build_threat_mapping_filter', () => {
         {
           match: {
             'host.name': {
-              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
               query: 'host-1',
             },
           },
         },
         {
           bool: {
-            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
             must_not: { match: { 'host.ip': { query: '192.168.0.0.1' } } },
           },
         },
@@ -268,14 +192,12 @@ describe('build_threat_mapping_filter', () => {
         {
           match: {
             'host.name': {
-              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
               query: 'host-a',
             },
           },
         },
         {
           exists: {
-            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
             field: 'host.ip',
           },
         },
@@ -376,43 +298,39 @@ describe('build_threat_mapping_filter', () => {
     });
   });
 
-  describe('createAndOrClauses', () => {
+  describe('createNamedAndClause', () => {
     test('it should return all clauses given the entries', () => {
-      const threatMapping = getThreatMappingMock();
+      const threatMappingEntries = getThreatMappingEntriesMockWithNegate();
       const threatListItem = getThreatListItemMock();
-      const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
-    });
-
-    test('it should filter out data from entries that do not have mappings', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatListItem = getThreatListItemMock();
-      threatListItem._source = {
-        ...getThreatListSearchResponseMock().hits.hits[0]._source,
-        foo: 'bar',
-      };
-      const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
-    });
-
-    test('it should return an empty boolean given an empty array', () => {
-      const threatListItem = getThreatListItemMock();
-      const innerClause = createAndOrClauses({
-        threatMapping: [],
+      const innerClause = createNamedAndClause({
+        threatMappingEntries,
+        threatMappingIndex: 0,
         threatListItem,
         entryKey: 'value',
       });
-      expect(innerClause).toEqual([]);
+      expect(innerClause).toEqual(getAndClauseMock());
     });
 
-    test('it should return an empty boolean clause given an empty object for a threat list item', () => {
-      const threatMapping = getThreatMappingMock();
-      const innerClause = createAndOrClauses({
-        threatMapping,
+    test('it should return undefined given an empty array', () => {
+      const threatListItem = getThreatListItemMock();
+      const innerClause = createNamedAndClause({
+        threatMappingEntries: [],
+        threatMappingIndex: 0,
+        threatListItem,
+        entryKey: 'value',
+      });
+      expect(innerClause).toEqual(undefined);
+    });
+
+    test('it should return undefined given an empty object for a threat list item', () => {
+      const threatMappingEntries = getThreatMappingEntriesMock();
+      const innerClause = createNamedAndClause({
+        threatMappingEntries,
+        threatMappingIndex: 0,
         threatListItem: getThreatListItemMock({ _source: {}, fields: {} }),
         entryKey: 'value',
       });
-      expect(innerClause).toEqual([]);
+      expect(innerClause).toEqual(undefined);
     });
   });
 
@@ -421,7 +339,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
       const mapping = buildEntriesMappingFilter({
-        threatMapping,
+        threatMappings: threatMapping,
         threatList,
         entryKey: 'value',
       });
@@ -433,7 +351,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatList: ThreatListItem[] = [];
       const mapping = buildEntriesMappingFilter({
-        threatMapping,
+        threatMappings: threatMapping,
         threatList,
         entryKey: 'value',
       });
@@ -446,7 +364,7 @@ describe('build_threat_mapping_filter', () => {
     test('it should return empty "should" given an empty threat mapping', () => {
       const threatList = getThreatListSearchResponseMock().hits.hits;
       const mapping = buildEntriesMappingFilter({
-        threatMapping: [],
+        threatMappings: [],
         threatList,
         entryKey: 'value',
       });
@@ -480,7 +398,7 @@ describe('build_threat_mapping_filter', () => {
       ];
       const threatList = getThreatListSearchResponseMock().hits.hits;
       const mapping = buildEntriesMappingFilter({
-        threatMapping,
+        threatMappings: threatMapping,
         threatList,
         entryKey: 'value',
       });
@@ -492,7 +410,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
       const mapping = buildEntriesMappingFilter({
-        threatMapping,
+        threatMappings: threatMapping,
         threatList,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {
@@ -509,7 +427,7 @@ describe('build_threat_mapping_filter', () => {
             ...mock.bool.should,
             {
               terms: {
-                _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
+                _name: '__SEP____SEP__3__SEP__tq',
                 'source.ip': ['127.0.0.1'],
               },
             },
@@ -524,7 +442,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
       const mapping = buildEntriesMappingFilter({
-        threatMapping,
+        threatMappings: threatMapping,
         threatList,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {

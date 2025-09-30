@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardSettings } from '../../../../common';
+import type { DashboardSettings } from '../../../../common';
 
 export function extractSettings(state: { [key: string]: unknown }): Partial<DashboardSettings> {
   const settings: Partial<DashboardSettings> = {};

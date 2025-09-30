@@ -21,7 +21,7 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
-import { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpService } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
 const options = getEnvOptions();

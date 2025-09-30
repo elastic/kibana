@@ -9,14 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const ExternalWorkflowServiceConfigurationSchema = schema.object({});
-
-export const ExternalWorkflowServiceSecretConfigurationSchema = schema.object({});
-
 const RunSubActionParamsSchema = schema.object({
   workflowId: schema.string(),
   inputs: schema.maybe(schema.any()),
   alerts: schema.arrayOf(schema.any()),
+  spaceId: schema.string(),
 });
 
 // Schema for rule configuration (what the UI saves)

@@ -6,29 +6,29 @@
  */
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { produce } from 'immer';
-import { useCallback, useMemo, useState } from 'react';
-import { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
+import { useCallback, useMemo } from 'react';
+import type { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { labels } from '../../utils/i18n';
-import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';
 import { useToasts } from '../use_toasts';
-import { useOnechatTool } from './use_tools';
+import { useTool } from './use_tools';
 
 type CreateToolMutationOptions = UseMutationOptions<CreateToolResponse, Error, CreateToolPayload>;
-type CreateToolMutationSuccessCallback = NonNullable<CreateToolMutationOptions['onSuccess']>;
-type CreateToolMutationErrorCallback = NonNullable<CreateToolMutationOptions['onError']>;
 
-export const useCreateTool = ({
-  onSuccess,
-  onError,
-}: {
-  onSuccess?: CreateToolMutationSuccessCallback;
-  onError?: CreateToolMutationErrorCallback;
-} = {}) => {
+export type CreateToolSuccessCallback = NonNullable<CreateToolMutationOptions['onSuccess']>;
+export type CreateToolErrorCallback = NonNullable<CreateToolMutationOptions['onError']>;
+
+export interface UseCreateToolServiceProps {
+  onSuccess?: CreateToolSuccessCallback;
+  onError?: CreateToolErrorCallback;
+}
+
+export const useCreateToolService = ({ onSuccess, onError }: UseCreateToolServiceProps = {}) => {
   const queryClient = useQueryClient();
   const { toolsService } = useOnechatServices();
 
@@ -46,19 +46,56 @@ export const useCreateTool = ({
   return { createToolSync: mutate, createTool: mutateAsync, isLoading };
 };
 
-export const useCreateToolFlyout = ({
+export interface UseCreateToolProps {
+  sourceToolId?: string;
+  onSuccess?: CreateToolSuccessCallback;
+  onError?: CreateToolErrorCallback;
+  onLoadingError?: (error: Error) => void;
+}
+
+export const useCreateTool = ({
+  sourceToolId,
   onSuccess,
   onError,
-}: {
-  onSuccess?: CreateToolMutationSuccessCallback;
-  onError?: CreateToolMutationErrorCallback;
-} = {}) => {
+  onLoadingError,
+}: UseCreateToolProps = {}) => {
   const { addSuccessToast, addErrorToast } = useToasts();
-  const { isOpen, openFlyout, closeFlyout } = useFlyoutState();
-  const [sourceToolId, setSourceToolId] = useState<string | undefined>();
-  const { tool: sourceTool, isLoading: isLoadingSourceTool } = useOnechatTool(sourceToolId);
+  const { tool: sourceTool, isLoading } = useTool({ toolId: sourceToolId, onLoadingError });
 
-  const duplicateTool = useMemo(() => {
+  const handleSuccess = useCallback<CreateToolSuccessCallback>(
+    (response, variables, context) => {
+      addSuccessToast({
+        title: labels.tools.createEsqlToolSuccessToast(response.id),
+      });
+      onSuccess?.(response, variables, context);
+    },
+    [addSuccessToast, onSuccess]
+  );
+
+  const handleError = useCallback<CreateToolErrorCallback>(
+    (error, variables, context) => {
+      addErrorToast({
+        title: labels.tools.createEsqlToolErrorToast,
+        text: formatOnechatErrorMessage(error),
+      });
+      onError?.(error, variables, context);
+    },
+    [addErrorToast, onError]
+  );
+
+  const { createTool, isLoading: isSubmitting } = useCreateToolService({
+    onSuccess: handleSuccess,
+    onError: handleError,
+  });
+
+  const handleCreateTool = useCallback(
+    async (tool: CreateToolPayload) => {
+      return createTool(tool);
+    },
+    [createTool]
+  );
+
+  const sourceToolClone = useMemo(() => {
     if (!sourceTool) {
       return;
     }
@@ -67,59 +104,10 @@ export const useCreateToolFlyout = ({
     });
   }, [sourceTool]);
 
-  const handleOpenFlyout = useCallback(
-    (toolId?: string) => {
-      if (toolId) {
-        setSourceToolId(toolId);
-      }
-      openFlyout();
-    },
-    [openFlyout]
-  );
-
-  const handleCloseFlyout = useCallback(() => {
-    setSourceToolId(undefined);
-    closeFlyout();
-  }, [closeFlyout]);
-
-  const handleSuccess = useCallback<CreateToolMutationSuccessCallback>(
-    (tool) => {
-      closeFlyout();
-      addSuccessToast({
-        title: labels.tools.createEsqlToolSuccessToast(tool.id),
-      });
-    },
-    [closeFlyout, addSuccessToast]
-  );
-
-  const handleError = useCallback<CreateToolMutationErrorCallback>(
-    (error) => {
-      addErrorToast({
-        title: labels.tools.createEsqlToolErrorToast,
-        text: formatOnechatErrorMessage(error),
-      });
-    },
-    [addErrorToast]
-  );
-  const { createTool: createToolMutation, isLoading: isSubmitting } = useCreateTool({
-    onSuccess: handleSuccess,
-    onError: handleError,
-  });
-
-  const createTool = useCallback(
-    async (tool: CreateToolPayload) => {
-      await createToolMutation(tool, { onSuccess, onError });
-    },
-    [createToolMutation, onSuccess, onError]
-  );
-
   return {
-    isOpen,
+    sourceTool: sourceToolClone,
+    isLoading: !!sourceToolId && isLoading,
     isSubmitting,
-    isLoading: !!sourceToolId && isLoadingSourceTool,
-    sourceTool: duplicateTool,
-    submit: createTool,
-    openFlyout: handleOpenFlyout,
-    closeFlyout: handleCloseFlyout,
+    createTool: handleCreateTool,
   };
 };

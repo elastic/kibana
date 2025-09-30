@@ -6,8 +6,8 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type InheritedServices = FtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
   ? TServices

@@ -13,19 +13,20 @@ import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
-  let esClient: { index: jest.Mock; update: jest.Mock };
+  let esClient: { index: jest.Mock; update: jest.Mock; search: jest.Mock };
 
   beforeEach(() => {
     esClient = {
       index: jest.fn(),
       update: jest.fn(),
+      search: jest.fn(),
     };
     repository = new WorkflowExecutionRepository(esClient as any);
   });
 
   describe('createWorkflowExecution', () => {
     it('should create a workflow execution', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow' };
+      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
       await repository.createWorkflowExecution(workflowExecution);
       expect(esClient.index).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
@@ -38,6 +39,32 @@ describe('WorkflowExecutionRepository', () => {
     it('should throw an error if ID is missing during creation', async () => {
       await expect(repository.createWorkflowExecution({})).rejects.toThrow(
         'Workflow execution ID is required for creation'
+      );
+    });
+
+    it('should respect space isolation when searching for workflow executions', async () => {
+      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      await repository.createWorkflowExecution(workflowExecution);
+      esClient.search.mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            spaceId: 'space1',
+          }),
+        })
+      );
+
+      await repository.getWorkflowExecutionById('1', 'space2');
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { spaceId: 'space2' } }]),
+            }),
+          }),
+        })
       );
     });
   });

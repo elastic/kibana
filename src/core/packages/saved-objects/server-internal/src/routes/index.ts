@@ -14,8 +14,8 @@ import type {
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import { RouteDeprecationInfo } from '@kbn/core-http-server';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';

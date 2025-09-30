@@ -13,7 +13,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-import { CommonPageObject } from './common_page';
+import type { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**
@@ -804,6 +804,9 @@ export class DashboardPageObject extends FtrService {
 
   public async verifyNoRenderErrors() {
     const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    for (const errorEmbeddable of errorEmbeddables) {
+      this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
+    }
     expect(errorEmbeddables.length).to.be(0);
   }
 

@@ -8,18 +8,19 @@
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
-import { ACTUAL_LABEL_HEIGHT, GroupStyleOverride } from '../node/styles';
+import { getStackNodeStyle } from '../node/styles';
 import { isEntityNode, isLabelNode, isStackNode, isStackedLabel } from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
-  STACK_NODE_MIN_HEIGHT,
   NODE_HEIGHT,
   ENTITY_NODE_TOTAL_HEIGHT,
+  NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
+  NODE_LABEL_DETAILS,
 } from '../constants';
 
 const GRID_SIZE_OFFSET = GRID_SIZE * 2;
@@ -56,7 +57,7 @@ export const layoutGraph = (
 
     if (isLabelNode(node.data)) {
       size = {
-        height: NODE_LABEL_HEIGHT,
+        height: NODE_LABEL_TOTAL_HEIGHT,
         width: NODE_LABEL_WIDTH,
       };
 
@@ -106,12 +107,22 @@ export const layoutGraph = (
       };
     }
 
-    const dagreNode = g.node(node.data.id);
-
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
     // We also need to snap the position to avoid subpixel rendering issues.
     // Y position is snapped as part of `alignNodesCenterInPlace` function (double snapping will cause misalignments).
+
+    const dagreNode = g.node(node.data.id);
+
+    if (isLabelNode(node.data)) {
+      const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      const y = Math.round(dagreNode.y - NODE_LABEL_HEIGHT / 2);
+
+      return {
+        ...node,
+        position: { x, y },
+      };
+    }
 
     if (isEntityNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
@@ -130,17 +141,17 @@ export const layoutGraph = (
       return {
         ...node,
         position: { x, y },
-        style: GroupStyleOverride({
+        style: getStackNodeStyle({
           width: dagreNode.width,
           height: dagreNode.height,
         }),
       };
-    } else {
-      return {
-        ...node,
-        position: { x, y },
-      };
     }
+
+    return {
+      ...node,
+      position: { x, y },
+    };
   });
 
   layoutedNodes.forEach((node) => {
@@ -157,35 +168,21 @@ const layoutStackedLabels = (
   const children = nodes.filter(
     (child) => isLabelNode(child.data) && child.parentId === groupNode.id
   );
-
   const stackSize = children.length;
-  const allChildrenHeight = children.reduce(
-    (prevHeight, node) => prevHeight + ACTUAL_LABEL_HEIGHT,
-    0
-  );
-  const stackHeight = Math.max(
-    allChildrenHeight + (stackSize - 1) * STACK_NODE_VERTICAL_PADDING,
-    STACK_NODE_MIN_HEIGHT
-  );
-  const space = (stackHeight - allChildrenHeight) / (stackSize - 1);
-  const groupNodeWidth = children.reduce((acc, child) => {
-    const currLblWidth = STACK_NODE_HORIZONTAL_PADDING * 2 + NODE_LABEL_WIDTH;
-    return Math.max(acc, currLblWidth);
-  }, 0);
-
-  const roundStackHeight = snapped(stackHeight);
-  const diffFromRounded = roundStackHeight - stackHeight;
+  const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
+  const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
+  const stackHeight = spaceBetweenLabelShapes * (stackSize + 1) + NODE_LABEL_HEIGHT * stackSize;
 
   // Layout children relative to parent
   children.forEach((child, index) => {
     child.position = {
-      x: groupNodeWidth / 2 - NODE_LABEL_WIDTH / 2,
-      y: index * (ACTUAL_LABEL_HEIGHT + space) + diffFromRounded,
+      x: stackWidth / 2 - NODE_LABEL_WIDTH / 2,
+      y: spaceBetweenLabelShapes * (index + 1) + NODE_LABEL_HEIGHT * index,
     };
   });
 
   return {
-    size: { width: groupNodeWidth, height: roundStackHeight },
+    size: { width: stackWidth, height: stackHeight },
     children,
   };
 };

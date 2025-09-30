@@ -42,7 +42,11 @@ export const DefendInsightEvent = z.object({
  * The insight type (ie. incompatible_antivirus)
  */
 export type DefendInsightType = z.infer<typeof DefendInsightType>;
-export const DefendInsightType = z.enum(['incompatible_antivirus', 'noisy_process_tree']);
+export const DefendInsightType = z.enum([
+  'incompatible_antivirus',
+  'noisy_process_tree',
+  'policy_response_failure',
+]);
 export type DefendInsightTypeEnum = typeof DefendInsightType.enum;
 export const DefendInsightTypeEnum = DefendInsightType.enum;
 
@@ -59,6 +63,10 @@ export const DefendInsight = z.object({
    * An array of event objects
    */
   events: z.array(DefendInsightEvent).optional(),
+  /**
+   * The suggested remediation for the insight
+   */
+  remediation: z.object({}).catchall(z.unknown()).optional(),
 });
 
 /**

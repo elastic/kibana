@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiAnalysisState } from '../../server/types';
+import type { ApiAnalysisState } from '../../server/types';
 
 export const apiAnalysisTestState: ApiAnalysisState = {
   dataStreamName: 'testDataStream',

@@ -7,8 +7,9 @@
 
 import { mapValues } from 'lodash';
 import { z } from '@kbn/zod';
-import { IModel, ModelRepresentation, OmitName } from '../core';
-import { Validation, validation } from './validation';
+import type { IModel, ModelRepresentation, OmitName } from '../core';
+import type { Validation } from './validation';
+import { validation } from './validation';
 
 // need explicit keys here to be able to generate Assert types (TS2775)
 export interface ModelValidation<TLeft extends IModel = any, TRight extends TLeft = any> {

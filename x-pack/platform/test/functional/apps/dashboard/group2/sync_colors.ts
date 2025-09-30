@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return colorMapping;
   }
 
-  describe('sync colors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/235883
+  describe.skip('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

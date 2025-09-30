@@ -9,7 +9,7 @@
 
 import { Transform, type TransformCallback } from 'stream';
 import { createHash, type Hash } from 'crypto';
-import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
+import type { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 
 class FileHashTransform extends Transform {
   private readonly hash: Hash;

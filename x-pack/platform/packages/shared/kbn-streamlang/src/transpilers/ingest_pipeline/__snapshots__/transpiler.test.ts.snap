@@ -24,20 +24,8 @@ Object {
       "rename": Object {
         "field": "foo",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
     return true;
   }
   return false;
@@ -86,20 +74,8 @@ Object {
       "set": Object {
         "field": "attributes.not_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if (!((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")))) {
+  if (!(($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")))) {
     return true;
   }
   return false;
@@ -114,29 +90,8 @@ if (relevant_fields['attributes.status'] != null) {
       "set": Object {
         "field": "attributes.not_nested",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-  
   try {
-  if (!(((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))))) {
+  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))))) {
     return true;
   }
   return false;
@@ -168,6 +123,7 @@ Object {
     },
     Object {
       "grok": Object {
+        "ecs_compatibility": "v1",
         "field": "body.message",
         "patterns": Array [
           "%{IP:attributes.client_ip} - %{WORD:attributes.method}",
@@ -192,23 +148,19 @@ Object {
       },
     },
     Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
+      },
+    },
+    Object {
       "set": Object {
         "field": "attributes.flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
     return true;
   }
   return false;
@@ -223,20 +175,8 @@ if (relevant_fields['attributes.status'] != null) {
       "set": Object {
         "field": "attributes.prod_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.env'] = ctx['attributes'];
-if (relevant_fields['attributes.env'] != null) {
-  if (relevant_fields['attributes.env'] instanceof Map) {
-    relevant_fields['attributes.env'] = relevant_fields['attributes.env']['env'];
-  } else {
-    relevant_fields['attributes.env'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.env'] !== null && ((relevant_fields['attributes.env'] instanceof Number && relevant_fields['attributes.env'].toString() == \\"prod\\") || relevant_fields['attributes.env'] == \\"prod\\"))) {
+  if (($('attributes.env', null) !== null && (($('attributes.env', null) instanceof Number && $('attributes.env', null).toString() == \\"prod\\") || $('attributes.env', null) == \\"prod\\"))) {
     return true;
   }
   return false;
@@ -251,29 +191,8 @@ if (relevant_fields['attributes.env'] != null) {
       "set": Object {
         "field": "attributes.prod_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) {
+  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) {
     return true;
   }
   return false;
@@ -288,38 +207,8 @@ if (relevant_fields['attributes.b'] != null) {
       "set": Object {
         "field": "attributes.department_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-relevant_fields['attributes.department'] = ctx['attributes'];
-if (relevant_fields['attributes.department'] != null) {
-  if (relevant_fields['attributes.department'] instanceof Map) {
-    relevant_fields['attributes.department'] = relevant_fields['attributes.department']['department'];
-  } else {
-    relevant_fields['attributes.department'] = null;
-  }
-}
-
-  
   try {
-  if (((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) && (relevant_fields['attributes.department'] !== null && ((relevant_fields['attributes.department'] instanceof Number && relevant_fields['attributes.department'].toString() == \\"legal\\") || relevant_fields['attributes.department'] == \\"legal\\"))) {
+  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
     return true;
   }
   return false;
@@ -334,29 +223,8 @@ if (relevant_fields['attributes.department'] != null) {
       "set": Object {
         "field": "attributes.test",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-relevant_fields['attributes.read_only'] = ctx['attributes'];
-if (relevant_fields['attributes.read_only'] != null) {
-  if (relevant_fields['attributes.read_only'] instanceof Map) {
-    relevant_fields['attributes.read_only'] = relevant_fields['attributes.read_only']['read_only'];
-  } else {
-    relevant_fields['attributes.read_only'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")) || ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"inactive\\") || relevant_fields['attributes.status'] == \\"inactive\\")) && (relevant_fields['attributes.read_only'] !== null && ((relevant_fields['attributes.read_only'] instanceof Number && relevant_fields['attributes.read_only'].toString() == \\"false\\") || relevant_fields['attributes.read_only'] == \\"false\\")))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == \\"false\\")))) {
     return true;
   }
   return false;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -15,7 +15,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { OnechatRoutes } from './routes';
 import type { OnechatInternalService } from '../services';
-import { OnechatStartDependencies } from '../types';
+import type { OnechatStartDependencies } from '../types';
 import { OnechatServicesContext } from './context/onechat_services_context';
 
 export const mountApp = async ({
@@ -31,7 +31,7 @@ export const mountApp = async ({
   history: ScopedHistory;
   services: OnechatInternalService;
 }) => {
-  const kibanaServices = { ...core, plugins };
+  const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
 
   ReactDOM.render(

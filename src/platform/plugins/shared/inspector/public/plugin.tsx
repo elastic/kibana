@@ -9,12 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
-import { InspectorOptions, InspectorSession } from './types';
-import { Adapters } from '../common';
+import type { InspectorOptions, InspectorSession } from './types';
+import type { Adapters } from '../common';
 import { getRequestsViewDescription } from './views';
 
 export interface InspectorPluginStartDeps {

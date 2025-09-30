@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import url from 'url';
 import { EuiButtonEmpty } from '@elastic/eui';
 import rison from '@kbn/rison';

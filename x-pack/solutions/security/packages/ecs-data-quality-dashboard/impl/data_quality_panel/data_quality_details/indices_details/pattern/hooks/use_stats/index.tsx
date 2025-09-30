@@ -6,12 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { HttpFetchQuery } from '@kbn/core/public';
+import type { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import * as i18n from '../../../../../translations';
 import { INTERNAL_API_VERSION } from '../../../../../constants';
-import { MeteringStatsIndex } from '../../../../../types';
+import type { MeteringStatsIndex } from '../../../../../types';
 import { useIsMountedRef } from '../../../../../hooks/use_is_mounted_ref';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';

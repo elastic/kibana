@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { defaultConfig, StorybookConfig } from '@kbn/storybook';
+import type { StorybookConfig } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 // eslint-disable-next-line import/no-nodejs-modules

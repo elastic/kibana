@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { SpanContext, TraceFlags } from '@opentelemetry/api';
+import type { SpanContext, TraceFlags } from '@opentelemetry/api';
 
 // W3C Trace Context header regex (case-insensitive)
 // version 2 hex, trace-id 32 hex, span-id 16 hex, flags 2 hex

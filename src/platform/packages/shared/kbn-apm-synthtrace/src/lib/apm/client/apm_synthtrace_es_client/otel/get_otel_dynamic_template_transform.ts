@@ -8,7 +8,7 @@
  */
 
 import { Transform } from 'stream';
-import {
+import type {
   ApmOtelFields,
   ESDocumentWithOperation,
   SynthtraceDynamicTemplate,

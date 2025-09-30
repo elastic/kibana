@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { spaceTest as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
-import {
+import type { ApiServicesFixture } from '@kbn/scout';
+import { spaceTest as baseTest, mergeTests } from '@kbn/scout';
+import type {
   SecurityApiServicesFixture,
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,

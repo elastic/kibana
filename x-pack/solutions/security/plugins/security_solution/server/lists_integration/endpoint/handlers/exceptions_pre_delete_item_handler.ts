@@ -14,6 +14,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
 export const getExceptionsPreDeleteItemHandler = (
@@ -40,6 +41,14 @@ export const getExceptionsPreDeleteItemHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
+      return data;
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      await new TrustedDeviceValidator(endpointAppContextService, request).validatePreDeleteItem(
         exceptionItem
       );
       return data;

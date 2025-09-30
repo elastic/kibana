@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import type { ImportResults } from '@kbn/file-upload-common';
 import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
-import type { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
 const services = {

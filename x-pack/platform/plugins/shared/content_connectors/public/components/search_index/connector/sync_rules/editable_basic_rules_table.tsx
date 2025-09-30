@@ -23,10 +23,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import type { FilteringRule } from '@kbn/search-connectors';
 import {
   filteringPolicyToText,
   filteringRuleToText,
-  FilteringRule,
   FilteringRuleRuleValues,
 } from '@kbn/search-connectors';
 
@@ -35,13 +35,11 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { docLinks } from '../../../shared/doc_links';
-import {
-  InlineEditableTableLogic,
-  InlineEditableTableProps,
-} from '../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import type { InlineEditableTableProps } from '../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { InlineEditableTableLogic } from '../../../shared/tables/inline_editable_table/inline_editable_table_logic';
 import { InlineEditableTable } from '../../../shared/tables/inline_editable_table';
-import { ItemWithAnID } from '../../../shared/types';
-import {
+import type { ItemWithAnID } from '../../../shared/types';
+import type {
   FormErrors,
   InlineEditableTableColumn,
 } from '../../../shared/tables/inline_editable_table/types';

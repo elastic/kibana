@@ -8,8 +8,8 @@
  */
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DefaultControlState } from '../types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DefaultControlState } from '../types';
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 

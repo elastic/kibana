@@ -12,7 +12,7 @@ import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
 
 import css from './canvas.module.scss';
-import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
+import type { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
 

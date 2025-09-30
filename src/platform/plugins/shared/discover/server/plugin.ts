@@ -24,7 +24,10 @@ import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
-import { TRACES_PRODUCT_FEATURE_ID } from '../common/constants';
+import {
+  METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
+  TRACES_PRODUCT_FEATURE_ID,
+} from '../common/constants';
 import { searchEmbeddableTransforms } from '../common/embeddable';
 
 export class DiscoverServerPlugin
@@ -69,6 +72,14 @@ export class DiscoverServerPlugin
         id: TRACES_PRODUCT_FEATURE_ID,
         description: 'APM traces in Discover',
         products: [{ name: 'observability', tier: 'complete' }],
+      },
+      {
+        id: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
+        description: 'Metrics experience in Discover',
+        products: [
+          { name: 'observability', tier: 'complete' },
+          { name: 'security', tier: 'complete' },
+        ],
       },
     ]);
 

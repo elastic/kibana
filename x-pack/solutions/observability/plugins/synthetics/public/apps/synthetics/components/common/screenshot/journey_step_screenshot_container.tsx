@@ -13,7 +13,8 @@ import { SyntheticsSettingsContext } from '../../../contexts';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screenshot_preview';
-import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
+import type { ScreenshotImageSize } from './screenshot_size';
+import { THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 interface Props {
   timestamp?: string;

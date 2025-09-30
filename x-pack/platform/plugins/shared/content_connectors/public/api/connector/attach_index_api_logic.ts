@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { Actions, createApiLogic } from '../api_logic/create_api_logic';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Actions } from '../api_logic/create_api_logic';
+import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface AttachIndexApiLogicArgs {
   connectorId: string;

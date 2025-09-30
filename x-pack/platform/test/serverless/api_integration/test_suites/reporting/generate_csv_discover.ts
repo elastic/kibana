@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
-import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -49,15 +49,15 @@ export default function ({ getService }: FtrProviderContext) {
     },
     logs: {
       data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     nanos: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/nanos',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     sales: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/sales',
-      savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
+      savedObjects: 'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs',
     },
     bigIntIdField: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/big_int_id_field',

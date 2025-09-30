@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPanelProps,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
-import { AssistantBeacon, AssistantBeaconProps, useBeaconSize } from '@kbn/ai-assistant-icon';
+import type { AssistantBeaconProps } from '@kbn/ai-assistant-icon';
+import { AssistantBeacon, useBeaconSize } from '@kbn/ai-assistant-icon';
 
 import { styles } from './call_to_action.styles';
 import { translations } from './call_to_action.translations';

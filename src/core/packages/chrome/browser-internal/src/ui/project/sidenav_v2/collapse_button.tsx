@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  UseEuiTheme,
   logicalCSS,
   logicalSizeCSS,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, useMemo } from 'react';
-import { Observable, isObservable, of } from 'rxjs';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { Observable } from 'rxjs';
+import { isObservable, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import { PRIMARY_NAVIGATION_ID } from '@kbn/core-chrome-navigation/src/constants';
 
 interface Props {
   isCollapsed: boolean | Observable<boolean>;
@@ -89,9 +92,7 @@ export const SideNavV2CollapseButton: FC<Props> = ({ isCollapsed, toggle, ...res
         }
         aria-pressed={!collapsed}
         aria-expanded={!collapsed}
-        aria-controls={
-          'primary-navigation' /** TODO: make this dynamic, hardcoded from sidenav code */
-        }
+        aria-controls={PRIMARY_NAVIGATION_ID}
         onClick={() => toggle(!collapsed)}
       />
     </div>

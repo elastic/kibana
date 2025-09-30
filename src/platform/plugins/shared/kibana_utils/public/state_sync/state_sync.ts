@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMPTY, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { tap } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
-import { IStateSyncConfig } from './types';
-import { IStateStorage } from './state_sync_state_storage';
+import type { IStateSyncConfig } from './types';
+import type { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
-import { BaseState } from '../../common/state_containers';
+import type { BaseState } from '../../common/state_containers';
 import { applyDiff } from '../state_management/utils/diff_object';
 
 /**

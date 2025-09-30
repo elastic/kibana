@@ -8,8 +8,8 @@
 import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
-import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValues } from './fetch_unallowed_values';
 import { getUnallowedValueRequestItems } from './get_unallowed_value_request_items';
 import { EcsFlatTyped, EMPTY_STAT } from '../constants';

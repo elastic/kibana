@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -16,20 +16,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const browser = getService('browser');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Index template wizard', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the index templates tab
-      await pageObjects.indexManagement.changeTabs('templatesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Create', () => {
       before(async () => {
+        await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
         // Click Create Template button
         await testSubjects.click('createTemplateButton');
+      });
+
+      after(async () => {
+        try {
+          await es.indices.deleteIndexTemplate({ name: 'test-index-template' });
+          await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
+        } catch (e) {
+          log.debug(`Template cleanup failed for test-index-template: ${e.message}`);
+        }
       });
 
       it('should set the correct page title', async () => {
@@ -114,81 +121,91 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // https://github.com/elastic/kibana/pull/195174
-    it('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async () => {
-      // Click Create Template button
-      await testSubjects.click('createTemplateButton');
-      const pageTitleText = await testSubjects.getVisibleText('pageTitle');
-      expect(pageTitleText).to.be('Create template');
+    describe('Preview template test', () => {
+      before(async () => {
+        await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
+      });
 
-      const stepTitle1 = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle1).to.be('Logistics');
+      after(async () => {
+        try {
+          await es.indices.deleteIndexTemplate({ name: 'a-star' });
+        } catch (e) {
+          log.debug(`Template cleanup failed for a-star: ${e.message}`);
+        }
+      });
 
-      // Fill out required fields
-      await testSubjects.setValue('nameField', 'a-star');
-      await testSubjects.setValue('indexPatternsField', 'a*');
-      await testSubjects.setValue('priorityField', '1000');
+      it('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async () => {
+        // Click Create Template button
+        await testSubjects.click('createTemplateButton');
+        const pageTitleText = await testSubjects.getVisibleText('pageTitle');
+        expect(pageTitleText).to.be('Create template');
 
-      // Click Next button
-      await pageObjects.indexManagement.clickNextButton();
+        const stepTitle1 = await testSubjects.getVisibleText('stepTitle');
+        expect(stepTitle1).to.be('Logistics');
 
-      // Verify empty prompt
-      const emptyPrompt = await testSubjects.exists('emptyPrompt');
-      expect(emptyPrompt).to.be(true);
+        // Fill out required fields
+        await testSubjects.setValue('nameField', 'a-star');
+        await testSubjects.setValue('indexPatternsField', 'a*');
+        await testSubjects.setValue('priorityField', '1000');
 
-      // Click Next button
-      await pageObjects.indexManagement.clickNextButton();
+        // Click Next button
+        await pageObjects.indexManagement.clickNextButton();
 
-      // Verify step title
-      const stepTitle2 = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle2).to.be('Index settings (optional)');
+        // Verify empty prompt
+        const emptyPrompt = await testSubjects.exists('emptyPrompt');
+        expect(emptyPrompt).to.be(true);
 
-      // Click Next button
-      await pageObjects.indexManagement.clickNextButton();
+        // Click Next button
+        await pageObjects.indexManagement.clickNextButton();
 
-      // Verify step title
-      const stepTitle3 = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle3).to.be('Mappings (optional)');
+        // Verify step title
+        const stepTitle2 = await testSubjects.getVisibleText('stepTitle');
+        expect(stepTitle2).to.be('Index settings (optional)');
 
-      // Click Next button
-      await pageObjects.indexManagement.clickNextButton();
+        // Click Next button
+        await pageObjects.indexManagement.clickNextButton();
 
-      // Verify step title
-      const stepTitle4 = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle4).to.be('Aliases (optional)');
+        // Verify step title
+        const stepTitle3 = await testSubjects.getVisibleText('stepTitle');
+        expect(stepTitle3).to.be('Mappings (optional)');
 
-      // Click Next button
-      await pageObjects.indexManagement.clickNextButton();
+        // Click Next button
+        await pageObjects.indexManagement.clickNextButton();
 
-      // Verify step title
-      const stepTitle = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle).to.be("Review details for 'a-star'");
+        // Verify step title
+        const stepTitle4 = await testSubjects.getVisibleText('stepTitle');
+        expect(stepTitle4).to.be('Aliases (optional)');
 
-      // Verify that summary exists
-      const summaryTabContent = await testSubjects.exists('summaryTabContent');
-      expect(summaryTabContent).to.be(true);
+        // Click Next button
+        await pageObjects.indexManagement.clickNextButton();
 
-      // Verify that index mode is set to "Standard"
-      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
-      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('Standard');
+        // Verify step title
+        const stepTitle = await testSubjects.getVisibleText('stepTitle');
+        expect(stepTitle).to.be("Review details for 'a-star'");
 
-      // Click Create template
-      await pageObjects.indexManagement.clickNextButton();
+        // Verify that summary exists
+        const summaryTabContent = await testSubjects.exists('summaryTabContent');
+        expect(summaryTabContent).to.be(true);
 
-      // Click preview tab, we know its the last one
-      const tabs = await testSubjects.findAll('tab');
-      await tabs[tabs.length - 1].click();
-      const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
-      expect(templatePreview).to.not.contain('error');
+        // Verify that index mode is set to "Standard"
+        expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be('Standard');
 
-      await testSubjects.click('closeDetailsButton');
+        // Click Create template
+        await pageObjects.indexManagement.clickNextButton();
+
+        // Click preview tab, we know its the last one
+        const tabs = await testSubjects.findAll('tab');
+        await tabs[tabs.length - 1].click();
+        const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
+        expect(templatePreview).to.not.contain('error');
+
+        await testSubjects.click('closeDetailsButton');
+      });
     });
-
     describe('Mappings step', () => {
       beforeEach(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the index templates tab
-        await pageObjects.indexManagement.changeTabs('templatesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
 
         // Click Create Template button
         await testSubjects.click('createTemplateButton');
@@ -200,6 +217,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Go to Mappings step
         await testSubjects.click('formWizardStep-3');
         expect(await testSubjects.getVisibleText('stepTitle')).to.be('Mappings (optional)');
+      });
+
+      afterEach(async () => {
+        try {
+          await es.indices.deleteIndexTemplate({ name: 'test-index-template' });
+        } catch (e) {
+          log.debug(`Template cleanup failed in mappings test: ${e.message}`);
+        }
       });
 
       // Test for catching the bug reported in https://github.com/elastic/kibana/issues/156202

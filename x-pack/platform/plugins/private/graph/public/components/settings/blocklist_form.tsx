@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { SettingsWorkspaceProps } from './settings';
+import type { SettingsWorkspaceProps } from './settings';
 import { useListKeys } from './use_list_keys';
 import { IconRenderer } from '../icon_renderer';
 import { legacyIconStyles } from './legacy_icon.styles';

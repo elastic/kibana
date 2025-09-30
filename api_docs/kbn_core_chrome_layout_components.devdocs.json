@@ -2,26 +2,10 @@
   "id": "@kbn/core-chrome-layout-components",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.ChromeLayout",
+        "id": "def-public.ChromeLayout",
         "type": "Function",
         "tags": [],
         "label": "ChromeLayout",
@@ -39,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.ChromeLayout.$1",
+            "id": "def-public.ChromeLayout.$1",
             "type": "Object",
             "tags": [],
             "label": "{ children, ...props }",
@@ -60,7 +44,7 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.LayoutConfigProvider",
+        "id": "def-public.LayoutConfigProvider",
         "type": "Function",
         "tags": [],
         "label": "LayoutConfigProvider",
@@ -78,7 +62,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.LayoutConfigProvider.$1",
+            "id": "def-public.LayoutConfigProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  value: initialValue,\n  children,\n}",
@@ -97,7 +81,7 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.LayoutDebugOverlay",
+        "id": "def-public.LayoutDebugOverlay",
         "type": "Function",
         "tags": [],
         "label": "LayoutDebugOverlay",
@@ -113,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.LayoutDebugOverlay.$1",
+            "id": "def-public.LayoutDebugOverlay.$1",
             "type": "Object",
             "tags": [],
             "label": "{ colors = {} }",
@@ -134,7 +118,7 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.SimpleDebugOverlay",
+        "id": "def-public.SimpleDebugOverlay",
         "type": "Function",
         "tags": [],
         "label": "SimpleDebugOverlay",
@@ -150,7 +134,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.SimpleDebugOverlay.$1",
+            "id": "def-public.SimpleDebugOverlay.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  label = 'Debug Overlay',\n  background = '#e6f4ff',\n  color = '#0099ff',\n  style = {},\n  children,\n}",
@@ -171,7 +155,7 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.useLayoutUpdate",
+        "id": "def-public.useLayoutUpdate",
         "type": "Function",
         "tags": [
           "throws"
@@ -198,7 +182,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.LayoutConfigProviderProps",
+        "id": "def-public.LayoutConfigProviderProps",
         "type": "Interface",
         "tags": [],
         "label": "LayoutConfigProviderProps",
@@ -211,13 +195,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.LayoutConfigProviderProps.value",
+            "id": "def-public.LayoutConfigProviderProps.value",
             "type": "Object",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "deprecated": false,
@@ -225,7 +209,7 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-common.LayoutConfigProviderProps.children",
+            "id": "def-public.LayoutConfigProviderProps.children",
             "type": "CompoundType",
             "tags": [],
             "label": "children",
@@ -245,7 +229,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.ChromeLayoutProps",
+        "id": "def-public.ChromeLayoutProps",
         "type": "Type",
         "tags": [],
         "label": "ChromeLayoutProps",
@@ -262,7 +246,7 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-common.LayoutConfig",
+        "id": "def-public.LayoutConfig",
         "type": "Type",
         "tags": [],
         "label": "LayoutConfig",
@@ -270,7 +254,7 @@
           "\nConfiguration for the layout."
         ],
         "signature": [
-          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
         "deprecated": false,
@@ -278,6 +262,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

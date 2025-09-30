@@ -12,14 +12,15 @@ import type {
   ControlsIgnoreParentSettings,
   ControlsLabelPosition,
 } from '@kbn/controls-schemas';
-import { StateComparators, initializeStateManager } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import { initializeStateManager } from '@kbn/presentation-publishing';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
-import { ControlGroupEditorState } from './types';
+import type { ControlGroupEditorState } from './types';
 
 export const defaultEditorState = {
   autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,

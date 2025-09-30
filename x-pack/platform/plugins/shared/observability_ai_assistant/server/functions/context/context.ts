@@ -9,10 +9,10 @@ import type { Serializable } from '@kbn/utility-types';
 import { encode } from 'gpt-tokenizer';
 import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
-import { FunctionRegistrationParameters } from '..';
+import type { FunctionRegistrationParameters } from '..';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
-import { MessageAddEvent } from '../../../common/conversation_complete';
-import { Message } from '../../../common/types';
+import type { MessageAddEvent } from '../../../common/conversation_complete';
+import type { Message } from '../../../common/types';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { recallAndScore } from './utils/recall_and_score';
 
@@ -22,6 +22,7 @@ export function registerContextFunction({
   client,
   functions,
   resources,
+  scopes,
   isKnowledgeBaseReady,
 }: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
@@ -31,8 +32,12 @@ export function registerContextFunction({
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       isInternal: true,
     },
-    async ({ messages, screenContexts, chat }, signal) => {
-      const { analytics } = await resources.plugins.core.start();
+    async ({ connectorId, messages, screenContexts, chat }, signal) => {
+      const { request, plugins } = resources;
+      const { analytics } = await plugins.core.start();
+      const actionsClient = await (
+        await plugins.actions.start()
+      ).getActionsClientWithRequest(request);
 
       async function getContext() {
         const screenDescription = compact(
@@ -59,6 +64,11 @@ export function registerContextFunction({
           return { content };
         }
 
+        const connector = await actionsClient.get({
+          id: connectorId,
+          throwIfSystemAction: true,
+        });
+
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
@@ -67,6 +77,8 @@ export function registerContextFunction({
           messages: removeContextToolRequest(messages),
           signal,
           analytics,
+          scopes,
+          connector,
         });
 
         return {

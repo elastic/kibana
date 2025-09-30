@@ -8,7 +8,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ObjectToConfigAdapter, IConfigService } from '@kbn/config';
+import type { IConfigService } from '@kbn/config';
+import { ObjectToConfigAdapter } from '@kbn/config';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type IConfigServiceMock = jest.Mocked<IConfigService>;
 
@@ -16,31 +18,26 @@ const createConfigServiceMock = ({
   atPath = {},
   getConfig$ = {},
 }: { atPath?: Record<string, any>; getConfig$?: Record<string, any> } = {}) => {
-  const mocked: IConfigServiceMock = {
-    atPath: jest.fn(),
-    atPathSync: jest.fn(),
-    getConfig$: jest.fn(),
-    getUsedPaths: jest.fn(),
-    getUnusedPaths: jest.fn(),
-    isEnabledAtPath: jest.fn(),
+  const mocked: IConfigServiceMock = lazyObject({
+    atPath: jest.fn().mockReturnValue(new BehaviorSubject(atPath)),
+    atPathSync: jest.fn().mockReturnValue(atPath),
+    getConfig$: jest
+      .fn()
+      .mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$))),
+    getUsedPaths: jest.fn().mockResolvedValue([]),
+    getUnusedPaths: jest.fn().mockResolvedValue([]),
+    isEnabledAtPath: jest.fn().mockResolvedValue(true),
     setSchema: jest.fn(),
     addDeprecationProvider: jest.fn(),
     validate: jest.fn(),
-    getHandledDeprecatedConfigs: jest.fn(),
-    getDeprecatedConfigPath$: jest.fn(),
+    getHandledDeprecatedConfigs: jest.fn().mockReturnValue([]),
+    getDeprecatedConfigPath$: jest
+      .fn()
+      .mockReturnValue(new BehaviorSubject({ set: [], unset: [] })),
     addDynamicConfigPaths: jest.fn(),
     setDynamicConfigOverrides: jest.fn(),
     setGlobalStripUnknownKeys: jest.fn(),
-  };
-
-  mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));
-  mocked.atPathSync.mockReturnValue(atPath);
-  mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$)));
-  mocked.getDeprecatedConfigPath$.mockReturnValue(new BehaviorSubject({ set: [], unset: [] }));
-  mocked.getUsedPaths.mockResolvedValue([]);
-  mocked.getUnusedPaths.mockResolvedValue([]);
-  mocked.isEnabledAtPath.mockResolvedValue(true);
-  mocked.getHandledDeprecatedConfigs.mockReturnValue([]);
+  });
 
   return mocked;
 };

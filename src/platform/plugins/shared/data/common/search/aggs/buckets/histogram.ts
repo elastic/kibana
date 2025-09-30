@@ -13,11 +13,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
-import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
-import { AggTypesDependencies } from '../agg_types';
-import { BaseAggParams } from '../types';
+import type { ExtendedBounds } from '../../expressions';
+import { extendedBoundsToAst } from '../../expressions';
+import type { AggTypesDependencies } from '../agg_types';
+import type { BaseAggParams } from '../types';
 
-import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggHistogramFnName } from './histogram_fn';

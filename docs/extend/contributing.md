@@ -7,13 +7,13 @@ mapped_pages:
 
 Whether you want to fix a bug, implement a feature, add an improvement, or add APIs, the following sections will guide you on the process. After committing your code, check out the [Elastic Contributor Program](https://www.elastic.co/community/contributor) where you can earn points and rewards for your contributions.
 
-Read [*Getting started*](/extend/development-getting-started.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md).
+Read [*Getting started*](/extend/development-getting-started.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md). And don't forget that [Elastic's Open Source Community Code of Conduct](https://www.elastic.co/community/codeofconduct) applies to code contributions too.
 
 * [Testing](/extend/development-tests.md)
 * [How we use Git and GitHub](/extend/development-github.md)
 * [Interpreting CI Failures](/extend/interpreting-ci-failures.md)
 * [CI Metrics](/extend/ci-metrics.md)
-* [Documentation during development](/extend/development-documentation.md)
+* [Documentation during development](docs-content://extend/contribute/index.md)
 * [Submitting a pull request](/extend/development-pull-request.md)
 * [Effective issue reporting in {{kib}}](/extend/kibana-issue-reporting.md)
 * [Signing the contributor license agreement](#signing-contributor-agreement)
@@ -25,6 +25,9 @@ Read [*Getting started*](/extend/development-getting-started.md) to get your env
 ## Signing the contributor license agreement [signing-contributor-agreement]
 
 Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
+
+### Note on contributing code written with the assistance of AI [_contributing-coe-with-AI]
+We are excited that you are interested in contributing to Kibana! While you are welcome to use any development process that works for you, the resulting PR is fully your contribution. By opening a PR, we assume you have reviewed and tested all of the code and are confident in the changes you are proposing.
 
 
 ## Localization [kibana-localization]
@@ -70,9 +73,6 @@ To make sure that your PR is included in the Release Notes, add the right label.
     * `release_note:deprecation` — Deprecates functionality that existed in previous releases.
     * `release_note:breaking` — Breaking changes that weren’t present in previous releases.
     * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `main`.
-
-
-
 
 
 

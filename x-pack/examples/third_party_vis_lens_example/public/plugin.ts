@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
-import { RotatingNumberState } from '../common/types';
+import type { RotatingNumberState } from '../common/types';
 import image from './image.png';
 
 export interface SetupDependencies {
@@ -51,6 +52,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 
   return {
+    version: LENS_ITEM_LATEST_VERSION,
     visualizationType: 'rotatingNumber',
     title: 'Prefilled from example app',
     references: [

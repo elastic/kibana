@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { DatasetQualityRouteCreateOptions, DatasetQualityRouteHandlerResources } from './types';
+import type {
+  DatasetQualityRouteCreateOptions,
+  DatasetQualityRouteHandlerResources,
+} from './types';
 
 export const createDatasetQualityServerRoute = createServerRouteFactory<
   DatasetQualityRouteHandlerResources,

@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Context, Span, context } from '@opentelemetry/api';
-import {
+import type { Context, Span } from '@opentelemetry/api';
+import { context } from '@opentelemetry/api';
+import type {
   WithActiveSpan,
   WithActiveSpanOptions,
-  withActiveSpan,
   WithActiveSpanAsUnion,
   WithActiveSpanWithContext,
 } from './with_active_span';
+import { withActiveSpan } from './with_active_span';
 
 /**
  * Factory function that creates a version of {@link WithActiveSpan} with

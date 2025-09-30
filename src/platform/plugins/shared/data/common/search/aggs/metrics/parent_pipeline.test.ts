@@ -13,7 +13,7 @@ import { getMovingAvgMetricAgg } from './moving_avg';
 import { getSerialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import type { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 describe('parent pipeline aggs', function () {
   const typesRegistry = mockAggTypesRegistry();

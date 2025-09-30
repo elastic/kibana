@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
-import {
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import pRetry from 'p-retry';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
-import {
+import type {
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
@@ -87,9 +87,7 @@ export class SyncPrivateLocationMonitorsTask {
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
     try {
-      logger.debug(
-        `Syncing private location monitors, last total params ${lastTotalParams}, last run ${lastStartedAt}`
-      );
+      this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
@@ -101,7 +99,7 @@ export class SyncPrivateLocationMonitorsTask {
       lastTotalParams = totalParams;
       lastTotalMWs = totalMWs;
       if (hasDataChanged) {
-        logger.debug(`Syncing private location monitors because data has changed`);
+        this.debugLog(`Syncing private location monitors because data has changed`);
 
         if (allPrivateLocations.length > 0) {
           await this.syncGlobalParams({
@@ -110,9 +108,9 @@ export class SyncPrivateLocationMonitorsTask {
             encryptedSavedObjects,
           });
         }
-        logger.debug(`Sync of private location monitors succeeded`);
+        this.debugLog(`Sync of private location monitors succeeded`);
       } else {
-        logger.debug(
+        this.debugLog(
           `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
         );
       }
@@ -190,8 +188,6 @@ export class SyncPrivateLocationMonitorsTask {
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
-    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
-      [];
 
     const { configsBySpaces, paramsBySpace, spaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
@@ -200,7 +196,13 @@ export class SyncPrivateLocationMonitorsTask {
       });
 
     for (const spaceId of spaceIds) {
+      const privateConfigs: Array<{
+        config: HeartbeatConfig;
+        globalParams: Record<string, string>;
+      }> = [];
+
       const monitors = configsBySpaces[spaceId];
+      this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
       if (!monitors) {
         continue;
       }
@@ -208,16 +210,22 @@ export class SyncPrivateLocationMonitorsTask {
         const { privateLocations } = this.parseLocations(monitor);
 
         if (privateLocations.length > 0) {
-          privateConfigs.push({ config: monitor, globalParams: paramsBySpace[monitor.namespace] });
+          privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
         }
       }
       if (privateConfigs.length > 0) {
+        this.debugLog(
+          `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
+        );
+
         await privateLocationAPI.editMonitors(
           privateConfigs,
           allPrivateLocations,
           spaceId,
           maintenanceWindows
         );
+      } else {
+        this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
     }
   }
@@ -381,6 +389,10 @@ export class SyncPrivateLocationMonitorsTask {
       totalMWs: noOfMWs,
     };
   }
+
+  debugLog = (message: string) => {
+    this.serverSetup.logger.debug(`[syncGlobalParams] ${message} `);
+  };
 }
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({

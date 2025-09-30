@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import {
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type {
   CoreSetup,
   IScopedClusterClient,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
+import type { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { SLORepository, TransformManager } from '../services';
-import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
+import type { SLORepository, TransformManager } from '../services';
+import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
 export type GetScopedClients = ({
   request,

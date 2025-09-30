@@ -12,16 +12,10 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import {
-  NetworkItems,
-  MimeType,
-  FriendlyFlyoutLabels,
-  FriendlyTimingLabels,
-  Timings,
-  Metadata,
-} from './types';
+import type { NetworkItems } from './types';
+import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
 import { mockMoment } from '../../../../../lib/helper/test_helpers';
-import { WaterfallDataEntry } from '../../waterfall/types';
+import type { WaterfallDataEntry } from '../../waterfall/types';
 
 export const networkItems: NetworkItems = [
   {

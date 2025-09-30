@@ -13,7 +13,7 @@ export const commandsMetadata: Record<string, unknown> = {
   change_point: {
     type: 'command',
     name: 'change_point',
-    license: 'PLATINUM',
+    license: 'platinum',
     observability_tier: 'COMPLETE',
   },
   dissect: {
@@ -43,6 +43,10 @@ export const commandsMetadata: Record<string, unknown> = {
   grok: {
     type: 'command',
     name: 'grok',
+  },
+  inline_stats: {
+    type: 'command',
+    name: 'inline_stats',
   },
   inlinestats: {
     type: 'command',

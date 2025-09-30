@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import {
   getResourceName,
   resourceNames,
 } from '@kbn/observability-ai-assistant-plugin/server/service';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../services/observability_ai_assistant_api';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import { getConcreteWriteIndexFromAlias } from './knowledge_base';

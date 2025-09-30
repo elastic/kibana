@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
 
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 import { useServices } from '../../app_context';
-import { SlmPolicyPayload, RestoreSettings } from '../../../../common/types';
+import type { SlmPolicyPayload, RestoreSettings } from '../../../../common/types';
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 

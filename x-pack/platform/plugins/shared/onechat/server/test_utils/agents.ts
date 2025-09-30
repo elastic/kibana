@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AgentType, AgentDefinition } from '@kbn/onechat-common';
-import type { AgentsServiceStart } from '../services/agents';
-import type { AgentClient } from '../services/agents/client';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import { AgentType } from '@kbn/onechat-common';
+import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
 
 export type MockedAgent = jest.Mocked<AgentDefinition>;
 export type AgentsServiceStartMock = jest.Mocked<AgentsServiceStart>;
-export type AgentClientMock = jest.Mocked<AgentClient>;
+export type AgentRegistryMock = jest.Mocked<AgentRegistry>;
 
-export const createMockedAgentClient = (): AgentClientMock => {
+export const createMockedAgentRegistry = (): AgentRegistryMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
@@ -33,6 +33,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
+    readonly: false,
     ...parts,
   };
 };
@@ -40,6 +41,6 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     execute: jest.fn(),
-    getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
+    getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
   };
 };

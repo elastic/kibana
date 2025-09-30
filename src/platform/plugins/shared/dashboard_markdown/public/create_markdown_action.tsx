@@ -14,7 +14,7 @@ import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
-import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
+import type { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
 export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_MARKDOWN_ACTION_ID,

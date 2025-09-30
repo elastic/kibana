@@ -8,15 +8,16 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
   DashboardAttributes,
   DashboardGetIn,
-  DashboardGetOut,
   DashboardSearchIn,
-  DashboardSearchOut,
   DashboardSearchOptions,
+  DashboardSearchAPIResult,
+  DashboardGetOut,
+  DashboardSearchOut,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
@@ -32,7 +33,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: DashboardSearchOut['hits'];
+  hits: DashboardSearchAPIResult['hits'];
 }
 
 export async function searchDashboards({
@@ -41,11 +42,14 @@ export async function searchDashboards({
   options,
   search,
   size,
-}: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
+}: SearchDashboardsArgs): Promise<{
+  total: DashboardSearchAPIResult['pagination']['total'];
+  hits: DashboardSearchAPIResult['hits'];
+}> {
   const {
     hits,
     pagination: { total },
-  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchOut>({
+  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: search ? `${search}*` : undefined,
@@ -88,7 +92,8 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
-    if (response.item.error) {
+
+    if ('error' in response.item) {
       throw response.item.error;
     }
 
@@ -97,7 +102,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
       id,
       status: 'success',
       attributes: response.item.attributes,
-      references: response.item.references,
+      references: response.item.references ?? [],
     };
   } catch (e) {
     return {
@@ -126,6 +131,7 @@ export async function findDashboardIdByTitle(title: string): Promise<{ id: strin
     },
     options: { onlyTitle: true },
   });
+
   // The search isn't an exact match, lets see if we can find a single exact match to use
   const matchingDashboards = hits.filter(
     (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()

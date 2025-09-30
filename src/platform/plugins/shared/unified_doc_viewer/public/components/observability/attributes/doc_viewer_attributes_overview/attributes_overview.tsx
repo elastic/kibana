@@ -8,14 +8,8 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {
-  EuiSpacer,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
@@ -47,7 +41,7 @@ export function AttributesOverview({
   dataView,
   textBasedHits,
   filter,
-  decreaseAvailableHeightBy,
+  decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
@@ -88,7 +82,7 @@ export function AttributesOverview({
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
 
   const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
     : 0;
 
   const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
@@ -161,19 +155,17 @@ export function AttributesOverview({
 
   return (
     <EuiFlexGroup
-      ref={setContainerRef}
       direction="column"
       gutterSize="none"
       responsive={false}
+      ref={setContainerRef}
       css={
         containerHeight
           ? css`
-              height: ${containerHeight}px;
+              max-height: ${containerHeight}px;
               overflow: hidden;
             `
-          : css`
-              display: block;
-            `
+          : undefined
       }
     >
       <EuiFlexItem grow={false}>

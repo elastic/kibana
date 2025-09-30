@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
 import pRetry from 'p-retry';
+import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
-  APIReturnType,
   InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';

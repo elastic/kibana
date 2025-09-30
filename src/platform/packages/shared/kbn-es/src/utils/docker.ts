@@ -13,9 +13,10 @@ import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
@@ -25,6 +26,12 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
@@ -32,7 +39,7 @@ import {
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
@@ -81,6 +88,13 @@ export type ServerlessProductTier =
   | 'complete'
   | 'search_ai_lake';
 
+export const esServerlessProjectTypes = new Map<string, string>([
+  ['es', 'elasticsearch'],
+  ['oblt', 'observability'],
+  ['security', 'security'],
+  ['chat', 'elasticsearch'],
+]);
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -111,6 +125,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
   resources?: string | string[];
+  /** Configure ES serverless with UIAM support */
+  uiam?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -280,8 +296,8 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
     ],
   },
   {
@@ -301,7 +317,6 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
     ],
   },
@@ -613,6 +628,32 @@ export function resolveEsArgs(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
       MOCK_IDP_ATTRIBUTE_EMAIL
     );
+
+    if (options.uiam) {
+      // HACK: A workaround for the Serverless ES metering service, which is enabled automatically after we set
+      // `serverless.project_id`, and, if not configured _explicitly_ with an HTTP URL, expects CA certs in a
+      // fixed location (`http-certs/ca.crt`) that we cannot override. So we just point it to Kibana as if it
+      // were a metering service and use the longest possible interval to reduce noise.
+      esArgs.set('metering.url', options.kibanaUrl);
+      esArgs.set('metering.report_period', '60m');
+
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.private_attributes`,
+        [
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+        ].join(',')
+      );
+
+      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+      esArgs.set('serverless.project_type', esServerlessProjectTypes.get(options.projectType)!);
+      esArgs.set('serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+
+      esArgs.set('serverless.universal_iam_service.enabled', 'true');
+      esArgs.set('serverless.universal_iam_service.url', 'http://uiam-cosmosdb-gateway:8080');
+    }
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
@@ -660,7 +701,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
   if (clean && exists) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    try {
+      await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    } catch (error) {
+      // Fall back to sudo if needed, CI user can have issues removing old state
+      await execa('sudo', ['rm', '-rf', objectStorePath]);
+    }
   }
 
   if (clean || !exists) {

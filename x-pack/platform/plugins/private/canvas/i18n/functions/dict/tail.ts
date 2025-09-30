@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { tail } from '../../../canvas_plugin_src/functions/common/tail';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 import { DATATABLE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof tail>> = {

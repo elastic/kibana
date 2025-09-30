@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LegacyRequest, Cluster } from '../../types';
+import type { LegacyRequest, Cluster } from '../../types';
 import { createApmQuery } from './create_apm_query';
 import { ApmMetric } from '../metrics';
 import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

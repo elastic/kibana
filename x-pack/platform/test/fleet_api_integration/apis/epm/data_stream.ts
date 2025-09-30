@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -192,8 +192,7 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage(pkgName, pkgUpdateVersion);
       });
 
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/230902
-      describe.skip('When enabling experimental data stream features', () => {
+      describe('When enabling experimental data stream features', () => {
         let agentPolicyId: string;
         let packagePolicyId: string;
 

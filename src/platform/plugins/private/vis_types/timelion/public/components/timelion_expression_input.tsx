@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
+import type { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monaco.languages.register({ id: LANGUAGE_ID });

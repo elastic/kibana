@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { FieldDefinitionConfig } from '../fields';
+import type { FieldDefinitionConfig } from '../fields';
 
 // Parameters that we consider first class and provide a curated experience for, or are added as metadata.
 const FIRST_CLASS_PARAMETERS = ['type', 'format', 'from'];

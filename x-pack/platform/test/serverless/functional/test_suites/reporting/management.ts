@@ -6,7 +6,7 @@
  */
 
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

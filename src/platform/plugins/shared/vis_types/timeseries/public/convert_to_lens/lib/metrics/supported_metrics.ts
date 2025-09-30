@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { MetricType } from '../../../../common/types';
-import { TSVB_METRIC_TYPES, PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import type { METRIC_TYPES } from '@kbn/data-plugin/public';
+import type { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { MetricType } from '../../../../common/types';
+import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 interface Agg {
   isFormula?: false;

@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VegaAdapter, InspectSignalsSets } from '../vega_adapter';
+import type { VegaAdapter, InspectSignalsSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
 interface SignalViewerProps {

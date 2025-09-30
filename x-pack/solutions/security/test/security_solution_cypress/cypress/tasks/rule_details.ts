@@ -49,7 +49,8 @@ import {
   POPOVER_ACTIONS_TRIGGER_BUTTON,
   EXPORT_RULE_ACTION_BUTTON,
 } from '../screens/rule_details';
-import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
+import type { RuleDetailsTabs } from '../urls/rule_details';
+import { ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -72,6 +73,7 @@ export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsP
 export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
+  cy.get(RULE_SWITCH).scrollIntoView();
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {

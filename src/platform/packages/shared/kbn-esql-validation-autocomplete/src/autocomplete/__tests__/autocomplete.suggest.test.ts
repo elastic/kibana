@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCallbacks } from '../../shared/types';
+import type { ESQLCallbacks } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import { getCallbackMocks } from '../../__tests__/helpers';
 

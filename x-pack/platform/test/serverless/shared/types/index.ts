@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ServerlessProjectType } from '@kbn/es';
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from '../../api_integration/services';
-import { pageObjects } from '../../functional/page_objects';
+import type { ServerlessProjectType } from '@kbn/es';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import type { services } from '../../api_integration/services';
+import type { pageObjects } from '../../functional/page_objects';
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<
   typeof services,
@@ -42,4 +42,5 @@ export interface CreateTestConfigOptions<
   services?: TServices;
   pageObjects?: TPageObjects;
   apps?: Record<string, { pathname: string; hash?: string }>;
+  screenshots?: { directory: string };
 }

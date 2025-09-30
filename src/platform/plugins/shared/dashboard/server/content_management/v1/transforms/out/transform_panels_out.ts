@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
-import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from '../../../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
 import { embeddableService, logger } from '../../../../kibana_services';
 
@@ -67,7 +70,7 @@ function transformPanelProperties(
 
   const transforms = embeddableService?.getTransforms(panelType);
 
-  const panelConfig = {
+  const config = {
     ...embeddableConfig,
     // <8.19 savedObjectId and title stored as siblings to embeddableConfig
     ...(savedObjectId !== undefined && { savedObjectId }),
@@ -77,7 +80,7 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(panelConfig, references);
+      transformedPanelConfig = transforms.transformOut(config, references);
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
@@ -87,9 +90,9 @@ function transformPanelProperties(
   }
 
   return {
-    gridData: rest,
-    panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
-    panelIndex,
+    grid: rest,
+    config: transformedPanelConfig ? transformedPanelConfig : config,
+    uid: panelIndex,
     type: panelType,
     version,
   };

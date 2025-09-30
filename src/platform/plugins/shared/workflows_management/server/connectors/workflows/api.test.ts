@@ -33,6 +33,7 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         alerts: [{ _id: 'alert-1', _index: 'test-index' }],
         inputs: { test: 'data' },
       };
@@ -50,6 +51,7 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       });
     });
@@ -57,6 +59,7 @@ describe('Workflows API', () => {
     it('should skip execution when no alerts are provided', async () => {
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         alerts: [],
         inputs: { test: 'data' },
       };
@@ -81,6 +84,7 @@ describe('Workflows API', () => {
     it('should skip execution when alerts is null', async () => {
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         alerts: null as any,
         inputs: { test: 'data' },
       };
@@ -105,6 +109,7 @@ describe('Workflows API', () => {
     it('should skip execution when alerts is undefined', async () => {
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -130,6 +135,7 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         alerts: [{ _id: 'alert-1', _index: 'test-index' }],
         inputs: { test: 'data' },
       };
@@ -144,6 +150,7 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       });
     });
@@ -156,6 +163,7 @@ describe('Workflows API', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         alerts: [{ _id: 'alert-1', _index: 'test-index' }],
       };
 
@@ -172,6 +180,7 @@ describe('Workflows API', () => {
 
       expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: undefined,
       });
     });

@@ -113,6 +113,32 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  [FieldType.SCHEDULE_TYPE]: {
+    [FieldType.SCHEDULE_TYPE]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of export: single, scheduled.',
+      },
+    },
+  },
+  [FieldType.ATTEMPT]: {
+    [FieldType.ATTEMPT]: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description: 'Which attempt this execution succeeded on, starting at 1.',
+      },
+    },
+  },
+  [FieldType.SCHEDULED_TASK_ID]: {
+    [FieldType.SCHEDULED_TASK_ID]: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'The id of the scheduled report task.',
+      },
+    },
+  },
   // TODO: not used
   [FieldType.CSV_COLUMNS]: {
     [FieldType.CSV_COLUMNS]: {
@@ -133,26 +159,32 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.IS_DEPRECATED],
       ...fields[FieldType.IS_PUBLIC_API],
+      ...fields[FieldType.SCHEDULE_TYPE],
     },
   },
   {
     eventType: EventType.REPORT_CLAIM,
     schema: {
       ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION_MS],
+      ...fields[FieldType.SCHEDULE_TYPE],
     },
   },
   {
     eventType: EventType.REPORT_COMPLETION_CSV,
     schema: {
       ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION_MS],
       ...fields[FieldType.BYTE_SIZE],
       ...fields[FieldType.CSV_ROWS],
+      ...fields[FieldType.SCHEDULE_TYPE],
+      ...fields[FieldType.ATTEMPT],
       // ...fields[FieldType.CSV_COLUMNS], // TODO add to report output metrics
     },
   },
@@ -160,6 +192,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     eventType: EventType.REPORT_COMPLETION_SCREENSHOT,
     schema: {
       ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION_MS],
@@ -167,15 +200,19 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.NUM_PAGES],
       ...fields[FieldType.SCREENSHOT_LAYOUT],
       ...fields[FieldType.SCREENSHOT_PIXELS],
+      ...fields[FieldType.SCHEDULE_TYPE],
+      ...fields[FieldType.ATTEMPT],
     },
   },
   {
     eventType: EventType.REPORT_ERROR,
     schema: {
       ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION_MS],
+      ...fields[FieldType.SCHEDULE_TYPE],
       ...fields[FieldType.ERROR_CODE],
       ...fields[FieldType.ERROR_MESSAGE],
     },
@@ -196,6 +233,29 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.EXPORT_TYPE],
       ...fields[FieldType.OBJECT_TYPE],
       ...fields[FieldType.DURATION_MS],
+    },
+  },
+  {
+    eventType: EventType.REPORT_NOTIFICATION,
+    schema: {
+      ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
+      ...fields[FieldType.EXPORT_TYPE],
+      ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.BYTE_SIZE],
+      ...fields[FieldType.SCHEDULE_TYPE],
+    },
+  },
+  {
+    eventType: EventType.REPORT_NOTIFICATION_ERROR,
+    schema: {
+      ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
+      ...fields[FieldType.EXPORT_TYPE],
+      ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.SCHEDULE_TYPE],
+      ...fields[FieldType.BYTE_SIZE],
+      ...fields[FieldType.ERROR_MESSAGE],
     },
   },
 ];

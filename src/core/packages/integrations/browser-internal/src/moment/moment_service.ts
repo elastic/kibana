@@ -8,7 +8,8 @@
  */
 
 import moment from 'moment-timezone';
-import { merge, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { merge } from 'rxjs';
 import { tap } from 'rxjs';
 
 import type { CoreService } from '@kbn/core-base-browser-internal';

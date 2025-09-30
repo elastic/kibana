@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CustomRequestHandlerContext,
   ElasticsearchClient,
   IContextProvider,
@@ -15,8 +15,8 @@ import {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { ListClient } from './services/lists/list_client';
-import { ExceptionListClient } from './services/exception_lists/exception_list_client';
+import type { ListClient } from './services/lists/list_client';
+import type { ExceptionListClient } from './services/exception_lists/exception_list_client';
 import type {
   ExtensionPointStorageClientInterface,
   ListsServerExtensionRegistrar,

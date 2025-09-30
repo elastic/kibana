@@ -11,7 +11,7 @@ mapped_pages:
 * Please include an explanation of your changes in your PR description.
 * Links to relevant issues, external resources, or related PRs are very important and useful.
 * Please update any tests that pertain to your code, and add new tests where appropriate.
-* Update or add docs when appropriate. Read more about [Documentation during development](/extend/development-documentation.md).
+* Update or add docs when appropriate. Read more about [Documentation during development](docs-content://extend/contribute/index.md).
 
 
 ## Submitting a Pull Request [_submitting_a_pull_request]

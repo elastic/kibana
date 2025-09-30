@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
-import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
-import { EventAnnotationGroupSavedObject } from '../../common/content_management';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { EventAnnotationGroupSavedObjectAttributes } from '../../common';
+import type { EventAnnotationGroupSavedObject } from '../../common/content_management';
 
 const annotationGroupResolveMocks = {
   nonExistingGroup: {

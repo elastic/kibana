@@ -9,7 +9,7 @@ import {
   uptimeSettingsObjectId,
   uptimeSettingsObjectType,
 } from '@kbn/synthetics-plugin/server/saved_objects/synthetics_settings';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

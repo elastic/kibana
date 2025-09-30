@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { CommonProps } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
 
 export const FpsTrendline: React.FC<CommonProps> = (props: CommonProps) => {
   const [fpsSamples, setFpsSamples] = useState<number[]>([]);

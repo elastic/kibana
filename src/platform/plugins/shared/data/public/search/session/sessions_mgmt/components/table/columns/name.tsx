@@ -7,36 +7,69 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTableColumn, EuiIconTip, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { SearchSessionStatus } from '../../../../../../../common';
-import { SearchUsageCollector } from '../../../../../collectors';
-import { UISession } from '../../../types';
+import type { SearchUsageCollector } from '../../../../../collectors';
+import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
 import { TableText } from '../..';
 
 function isSessionRestorable(status: SearchSessionStatus) {
   return status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE;
 }
 
+const NameColumnText = ({
+  status,
+  children,
+  href,
+  onClick,
+}: {
+  status: SearchSessionStatus;
+  children: React.ReactNode;
+  href: string;
+  onClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+}) => {
+  const hideLink = status === SearchSessionStatus.IN_PROGRESS;
+
+  if (hideLink)
+    return (
+      <EuiText data-test-subj="sessionManagementNameText" color="subdued">
+        {children}
+      </EuiText>
+    );
+
+  return (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={href} onClick={onClick} data-test-subj="sessionManagementNameLink">
+      {children}
+    </EuiLink>
+  );
+};
+
 export const nameColumn = ({
   core,
   searchUsageCollector,
   kibanaVersion,
+  onBackgroundSearchOpened,
 }: {
   core: CoreStart;
   searchUsageCollector: SearchUsageCollector;
   kibanaVersion: string;
+  onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }): EuiBasicTableColumn<UISession> => ({
   field: 'name',
   name: i18n.translate('data.mgmt.searchSessions.table.headerName', {
     defaultMessage: 'Name',
   }),
   sortable: true,
-  render: (name: UISession['name'], { restoreUrl, reloadUrl, status, version }) => {
+  render: (name: UISession['name'], session) => {
+    const { restoreUrl, reloadUrl, status, version } = session;
+
     const isRestorable = isSessionRestorable(status);
     const href = isRestorable ? restoreUrl : reloadUrl;
     const trackAction = isRestorable
@@ -83,18 +116,20 @@ export const nameColumn = ({
           application: core.application,
         }}
       >
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiLink
+        <NameColumnText
+          status={status}
           href={href}
-          onClick={() => trackAction?.()}
-          data-test-subj="sessionManagementNameCol"
+          onClick={(event) => {
+            trackAction?.();
+            onBackgroundSearchOpened?.({ session, event });
+          }}
         >
-          <TableText>
+          <TableText data-test-subj="sessionManagementNameCol">
             {name}
             {notRestorableWarning}
             {versionIncompatibleWarning}
           </TableText>
-        </EuiLink>
+        </NameColumnText>
       </RedirectAppLinks>
     );
   },

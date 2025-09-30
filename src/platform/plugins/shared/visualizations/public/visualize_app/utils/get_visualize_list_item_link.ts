@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';

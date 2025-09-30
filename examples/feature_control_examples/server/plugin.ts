@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/server';
-import {
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
   FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
 
 export interface FeatureControlExampleDeps {
@@ -28,7 +28,6 @@ export class FeatureControlsPluginExample
       name: 'Feature Plugin Examples',
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['FeaturePluginExample'],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['FeaturePluginExample'],

@@ -9,7 +9,7 @@
 
 import { CurrencyFormat } from './currency';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import { FieldFormatsGetConfigFn } from '../types';
+import type { FieldFormatsGetConfigFn } from '../types';
 
 describe('CurrencyFormat', () => {
   const config: { [key: string]: string } = {

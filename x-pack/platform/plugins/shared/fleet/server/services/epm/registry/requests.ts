@@ -33,6 +33,10 @@ async function registryFetch(url: string) {
     }`;
     const responseError = new RegistryResponseError(message, status);
 
+    // retry 5xx errors
+    if (status >= 500) {
+      throw responseError;
+    }
     throw new pRetry.AbortError(responseError);
   }
 }
@@ -59,7 +63,7 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
         //
         // throwing in onFailedAttempt will abandon all retries & fail the request
         // we only want to retry system errors, so re-throw for everything else
-        if (!isSystemError(error)) {
+        if (!isSystemError(error) && !isRegistry5xxError(error)) {
           throw error;
         }
       },
@@ -83,28 +87,40 @@ export async function getResponseStream(
   url: string,
   retries?: number
 ): Promise<NodeJS.ReadableStream> {
+  const logger = appContextService.getLogger();
   const res = await getResponse(url, retries);
-  if (res) {
-    return res?.body;
+  try {
+    if (res) {
+      return res?.body;
+    }
+    throw new RegistryResponseError('getResponseStream - Error connecting to the registry');
+  } catch (error) {
+    logger.error(`getResponseStream error: ${error}`);
+    throw error;
   }
-  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function getResponseStreamWithSize(
   url: string,
   retries?: number
 ): Promise<{ stream: NodeJS.ReadableStream; size?: number }> {
-  const res = await getResponse(url, retries);
-  if (res) {
-    const contentLengthHeader = res.headers.get('Content-Length');
-    const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
+  const logger = appContextService.getLogger();
+  try {
+    const res = await getResponse(url, retries);
+    if (res) {
+      const contentLengthHeader = res.headers.get('Content-Length');
+      const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
 
-    return {
-      stream: res.body,
-      size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
-    };
+      return {
+        stream: res.body,
+        size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
+      };
+    }
+    throw new RegistryResponseError('getResponseStreamWithSize - Error connecting to the registry');
+  } catch (error) {
+    logger.error(`getResponseStream error: ${error}`);
+    throw error;
   }
-  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
@@ -112,7 +128,7 @@ export async function fetchUrl(url: string, retries?: number): Promise<string> {
   try {
     return getResponseStream(url, retries).then(streamToString);
   } catch (error) {
-    logger.warn(`getResponseStream failed with error: ${error}`);
+    logger.warn(`fetchUrl - failed with error: ${error}`);
     throw error;
   }
 }
@@ -126,6 +142,13 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+function isRegistry5xxError(error: FailedAttemptErrors): boolean {
+  return (
+    (error instanceof RegistryResponseError || error.name === 'RegistryResponseError') &&
+    ((error as RegistryResponseError)?.status ?? 0) >= 500
+  );
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {

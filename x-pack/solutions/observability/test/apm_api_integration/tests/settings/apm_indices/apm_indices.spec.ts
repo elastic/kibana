@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { APMIndicesSavedObjectBody } from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import {
-  APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import expect from '@kbn/expect';
-import { ApmApiError } from '../../../common/apm_api_supertest';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmApiError } from '../../../common/apm_api_supertest';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apmIndicesTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');

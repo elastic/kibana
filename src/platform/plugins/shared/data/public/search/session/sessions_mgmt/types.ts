@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 
@@ -57,3 +57,8 @@ export interface SearchSessionSavedObject {
   id: string;
   attributes: PersistedSearchSessionSavedObjectAttributes;
 }
+
+export type BackgroundSearchOpenedHandler = (attrs: {
+  session: UISession;
+  event: React.MouseEvent<HTMLAnchorElement>;
+}) => void;

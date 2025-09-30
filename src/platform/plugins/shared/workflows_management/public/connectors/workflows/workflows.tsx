@@ -13,7 +13,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { lazy } from 'react';
-import { WorkflowsActionParams, WorkflowsConfig, WorkflowsSecrets } from './types';
+import type { WorkflowsActionParams, WorkflowsConfig, WorkflowsSecrets } from './types';
 
 export function getConnectorType(): ConnectorTypeModel<
   WorkflowsConfig,

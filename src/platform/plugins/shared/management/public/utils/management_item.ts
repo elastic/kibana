@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateManagementItemArgs } from '../types';
+import type { CreateManagementItemArgs } from '../types';
 
 export class ManagementItem {
   public readonly id: string = '';

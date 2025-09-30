@@ -6,9 +6,8 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import {
+import type {
   KibanaFeatureConfig,
-  KibanaFeatureScope,
   ElasticsearchFeatureConfig,
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
@@ -72,7 +71,6 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   id: PLUGIN_FEATURE_ID,
   name: PLUGIN_NAME,
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {

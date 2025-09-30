@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiToolTip, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
@@ -25,7 +25,7 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiToolTip
+      <EuiIconTip
         {...commonProps}
         content={
           <EuiText size="s">
@@ -57,9 +57,9 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
           </EuiText>
         }
         data-test-subj={getTestId('tooltipText')}
-      >
-        <EuiIcon type="info" data-test-subj={getTestId('tooltipIcon')} />
-      </EuiToolTip>
+        iconProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
+        type="info"
+      />
     );
   }
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, getPageObject }: FtrProviderContext) {
   const ml = getService('ml');

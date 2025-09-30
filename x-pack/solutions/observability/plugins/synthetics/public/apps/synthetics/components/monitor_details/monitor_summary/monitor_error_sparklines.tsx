@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { euiPaletteColorBlindBehindText, useEuiTheme } from '@elastic/eui';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ERRORS_LABEL } from './monitor_errors_count';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   from: string;

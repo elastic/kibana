@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
-import { forkJoin, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { switchMap, map } from 'rxjs';
 
 import { useCallback, useMemo } from 'react';
@@ -23,10 +21,6 @@ import {
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
-  loadAnnotationsTableData,
-  loadFilteredTopInfluencers,
-  loadTopInfluencers,
-  loadOverallAnnotations,
 } from '../explorer_utils';
 
 import { useMlApi } from '../../contexts/kibana';
@@ -36,33 +30,6 @@ import type { AnomalyExplorerChartsService } from '../../services/anomaly_explor
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { MlApi } from '../../services/ml_api_service';
 import type { ExplorerState } from '../explorer_data';
-
-// Memoize the data fetching methods.
-// wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
-// which will be considered by memoizeOne. This way we can add the `lastRefresh` argument as a
-// caching parameter without having to change all the original functions which shouldn't care
-// about this parameter. The generic type T retains and returns the type information of
-// the original function.
-const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
-const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T, context: any = null) => {
-  return function (lastRefresh: number, ...args: Parameters<T>): ReturnType<T> {
-    return func.apply(context, args);
-  };
-};
-const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
-  return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual) as (
-    lastRefresh: number,
-    ...args: Parameters<T>
-  ) => ReturnType<T>;
-};
-
-const memoizedLoadOverallAnnotations = memoize(loadOverallAnnotations);
-
-const memoizedLoadAnnotationsTableData = memoize(loadAnnotationsTableData);
-
-const memoizedLoadFilteredTopInfluencers = memoize(loadFilteredTopInfluencers);
-
-const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 
 export interface LoadExplorerDataConfig {
   influencersFilterQuery: InfluencersFilterQuery;
@@ -96,14 +63,7 @@ const loadExplorerDataProvider = (
       return of({});
     }
 
-    const {
-      lastRefresh,
-      influencersFilterQuery,
-      noInfluencersConfigured,
-      selectedCells,
-      selectedJobs,
-      viewBySwimlaneFieldName,
-    } = config;
+    const { influencersFilterQuery, selectedCells, selectedJobs, viewBySwimlaneFieldName } = config;
 
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -112,70 +72,22 @@ const loadExplorerDataProvider = (
 
     const timerange = getSelectionTimeRange(selectedCells, bounds);
 
-    // First get the data where we have all necessary args at hand using forkJoin:
-    // annotationsData, anomalyChartRecords, influencers, overallState
-    return forkJoin({
-      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, mlApi, selectedJobs, bounds),
-      annotationsData: memoizedLoadAnnotationsTableData(
-        lastRefresh,
-        mlApi,
-        selectedCells,
-        selectedJobs,
-        bounds
-      ),
-      anomalyChartRecords: anomalyExplorerChartsService.loadDataForCharts$(
+    // Fetch only chart records here; influencers are managed by InfluencersStateService
+    return anomalyExplorerChartsService
+      .loadDataForCharts$(
         jobIds,
         timerange.earliestMs,
         timerange.latestMs,
         selectionInfluencers,
         selectedCells,
         influencersFilterQuery
-      ),
-      influencers:
-        selectionInfluencers.length === 0
-          ? memoizedLoadTopInfluencers(
-              lastRefresh,
-              mlResultsService,
-              jobIds,
-              timerange.earliestMs,
-              timerange.latestMs,
-              [],
-              noInfluencersConfigured,
-              influencersFilterQuery
-            )
-          : Promise.resolve({}),
-    }).pipe(
-      switchMap(({ overallAnnotations, anomalyChartRecords, influencers, annotationsData }) =>
-        forkJoin({
-          filteredTopInfluencers:
-            (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
-            anomalyChartRecords !== undefined &&
-            anomalyChartRecords.length > 0
-              ? memoizedLoadFilteredTopInfluencers(
-                  lastRefresh,
-                  mlResultsService,
-                  jobIds,
-                  timerange.earliestMs,
-                  timerange.latestMs,
-                  anomalyChartRecords,
-                  selectionInfluencers,
-                  noInfluencersConfigured,
-                  influencersFilterQuery
-                )
-              : Promise.resolve(influencers),
-        }).pipe(
-          map(({ filteredTopInfluencers }) => {
-            return {
-              overallAnnotations,
-              annotations: annotationsData,
-              influencers: filteredTopInfluencers as any,
-              loading: false,
-              anomalyChartsDataLoading: false,
-            };
-          })
-        )
       )
-    );
+      .pipe(
+        map(() => ({
+          loading: false,
+          anomalyChartsDataLoading: false,
+        }))
+      );
   };
 };
 

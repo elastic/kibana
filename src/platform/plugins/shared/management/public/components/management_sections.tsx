@@ -58,6 +58,10 @@ const kibanaTip = i18n.translate('management.sections.kibanaTip', {
   defaultMessage: 'Customize Kibana and manage saved objects',
 });
 
+const aiTitle = i18n.translate('management.sections.aiTitle', {
+  defaultMessage: 'AI',
+});
+
 const stackTitle = i18n.translate('management.sections.stackTitle', {
   defaultMessage: 'Stack',
 });
@@ -108,6 +112,12 @@ export const KibanaSection = {
   order: 4,
 };
 
+export const AISection = {
+  id: ManagementSectionId.AI,
+  title: aiTitle,
+  order: 4,
+};
+
 export const StackSection = {
   id: ManagementSectionId.Stack,
   title: stackTitle,
@@ -122,5 +132,6 @@ export const managementSections = [
   MachineLearningSection,
   SecuritySection,
   KibanaSection,
+  AISection,
   StackSection,
 ];

@@ -108,6 +108,7 @@ import { TIMELINE_CONTEXT_MENU_BTN } from '../screens/alerts';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { COLLAPSED_ACTION_BTN, TOASTER } from '../screens/alerts_detection_rules';
 import { RUNTIME_FIELD_INPUT, SAVE_FIELD_BUTTON } from '../screens/create_runtime_field';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 const hostExistsQuery = 'host.name: *';
 
@@ -170,7 +171,10 @@ export const goToNotesTab = () => {
   cy.get(NOTES_TEXT_AREA).should('be.visible');
 };
 
-export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);
+export const goToEsqlTab = () => {
+  waitForTabToBeLoaded(ESQL_TAB);
+  cy.get(getDataTestSubjectSelector('kibanaCodeEditor')).should('be.visible');
+};
 
 export const goToCorrelationTab = () => {
   cy.get(TIMELINE_CORRELATION_TAB).click();

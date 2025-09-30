@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   FieldIcon,
   getFieldIconProps,
@@ -21,13 +21,12 @@ import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
-import { UnifiedHistogramBreakdownContext } from '../../types';
 import {
-  ToolbarSelector,
-  ToolbarSelectorProps,
   EMPTY_OPTION,
-  SelectableEntry,
-} from './toolbar_selector';
+  ToolbarSelector,
+  type SelectableEntry,
+} from '@kbn/shared-ux-toolbar-selector';
+import type { UnifiedHistogramBreakdownContext } from '../../types';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -93,8 +92,8 @@ export const BreakdownFieldSelector = ({
     return options;
   }, [fields, breakdown?.field]);
 
-  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
-    (chosenOption) => {
+  const onChange = useCallback(
+    (chosenOption?: SelectableEntry) => {
       const breakdownField = chosenOption?.value
         ? fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;

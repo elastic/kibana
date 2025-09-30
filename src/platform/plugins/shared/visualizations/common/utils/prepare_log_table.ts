@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   Datatable,
   DatatableColumn,
   DimensionType,
 } from '@kbn/expressions-plugin/common/expression_types/specs';
-import { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
-import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
+import type { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
+import type { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 

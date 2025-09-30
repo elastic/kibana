@@ -51,12 +51,6 @@ export const OVERALL_LABEL = i18n.translate('xpack.ml.explorer.overallLabel', {
 });
 
 /**
- * Hard limitation for the size of terms
- * aggregations on influencers values.
- */
-export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
-
-/**
  * Default page size for the anomaly swim lane.
  */
 export const SWIM_LANE_DEFAULT_PAGE_SIZE = 10;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ActorRef, Snapshot } from 'xstate5';
-import { IToasts } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SampleDocument } from '@kbn/streams-schema';
-import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import type { ActorRef, Snapshot } from 'xstate5';
+import type { IToasts } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SampleDocument } from '@kbn/streams-schema';
+import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface DataSourceMachineDeps {
   data: DataPublicPluginStart;

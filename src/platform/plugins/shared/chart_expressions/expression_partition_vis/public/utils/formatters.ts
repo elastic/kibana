@@ -9,7 +9,7 @@
 
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { BucketColumns } from '../../common/types';
+import type { BucketColumns } from '../../common/types';
 
 export const generateFormatters = (visData: Datatable, formatFactory: FormatFactory) =>
   visData.columns.reduce<Record<string, ReturnType<FormatFactory> | undefined>>(

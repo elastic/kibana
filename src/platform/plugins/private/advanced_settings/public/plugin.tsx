@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import {
+import type {
   AdvancedSettingsSetup,
   AdvancedSettingsStart,
   AdvancedSettingsPluginSetup,

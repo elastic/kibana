@@ -26,6 +26,7 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
@@ -40,6 +41,7 @@ import {
   TRUSTED_DEVICES,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
+  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -55,6 +57,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
+import { IconDeviceControl } from '../common/icons/device_control';
 
 const categories = [
   {
@@ -73,6 +76,7 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
       SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
@@ -128,6 +132,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.trustedApps,
       title: TRUSTED_APPLICATIONS,
       description: i18n.translate(
@@ -147,9 +164,9 @@ export const links: LinkItem = {
       title: TRUSTED_DEVICES,
       description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
         defaultMessage:
-          'Add a trusted device to improve performance or alleviate compatibility issues.',
+          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
       }),
-      landingIcon: IconDashboards,
+      landingIcon: IconDeviceControl,
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -247,6 +264,7 @@ export const getManagementFilteredLinks = async (
     canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
+    canReadEndpointExceptions,
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
@@ -272,6 +290,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+  }
+
+  if (!canReadEndpointExceptions) {
+    linksToExclude.push(SecurityPageName.endpointExceptions);
   }
 
   if (!canReadActionsLogManagement) {

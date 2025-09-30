@@ -11,6 +11,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 
 import { Tokens } from './tokens';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { InvalidGrantError } from '../errors';
 import { securityMock } from '../mocks';
 
 describe('Tokens', () => {
@@ -87,13 +88,13 @@ describe('Tokens', () => {
       });
     });
 
-    it('returns `null` if refresh token is not valid', async () => {
+    it('returns `InvalidGrantError` if refresh token is not valid', async () => {
       const refreshFailureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 400, body: {} })
       );
       mockElasticsearchClient.security.getToken.mockRejectedValue(refreshFailureReason);
 
-      await expect(tokens.refresh(refreshToken)).resolves.toBe(null);
+      await expect(tokens.refresh(refreshToken)).rejects.toBeInstanceOf(InvalidGrantError);
 
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledWith({

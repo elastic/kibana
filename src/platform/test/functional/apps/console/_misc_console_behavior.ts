@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -26,9 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
 
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     beforeEach(async () => {
@@ -141,10 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Enter a sample command
       await PageObjects.console.enterText('GET _search');
 
-      // Disable keyboard shorcuts
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(false);
-      await PageObjects.console.openConsole();
+      // Disable keyboard shortcuts
+      await PageObjects.console.setKeyboardShortcutsEnabled(false);
 
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.pressCtrlEnter();
@@ -152,9 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
 
       // Restore setting
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     describe('customizable font size', () => {

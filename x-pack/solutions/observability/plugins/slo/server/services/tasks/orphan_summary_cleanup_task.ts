@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { StoredSLODefinition } from '../../domain/models';
+import type { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
-import { SLOConfig } from '../../types';
+import type { SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -44,7 +44,6 @@ export const getDeleteQueryFilter = (
 };
 
 export class SloOrphanSummaryCleanupTask {
-  private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
   private soClient?: SavedObjectsClientContract;
@@ -60,27 +59,29 @@ export class SloOrphanSummaryCleanupTask {
         title: 'SLO Definitions Cleanup Task',
         timeout: '3m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask();
+              return this.runTask(abortController);
             },
-
-            cancel: async () => {
-              this.abortController.abort('orphan-slo-summary-cleanup task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
     });
   }
 
-  public async runTask() {
+  public async runTask(abortController: AbortController) {
     if (!this.soClient || !this.esClient) {
       return;
     }
 
-    this.abortController = new AbortController();
     let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
     do {

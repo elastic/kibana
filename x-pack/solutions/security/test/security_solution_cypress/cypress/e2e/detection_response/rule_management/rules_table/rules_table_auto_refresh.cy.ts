@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
@@ -38,6 +39,10 @@ describe(
   'Rules table: auto-refresh',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

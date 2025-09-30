@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Reference } from '@kbn/content-management-utils';
-import {
+import type {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';

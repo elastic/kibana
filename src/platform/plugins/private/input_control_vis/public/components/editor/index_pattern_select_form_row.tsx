@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
-import { injectI18n, WrappedComponentProps } from '@kbn/i18n-react';
+import type { ComponentType } from 'react';
+import React from 'react';
+import type { WrappedComponentProps } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
-import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 
 export type IndexPatternSelectFormRowUiProps = WrappedComponentProps & {
   onChange: (opt: any) => void;

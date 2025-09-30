@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/transform-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
+  "owner": ["@elastic/kibana-management"],
   "group": "platform",
   "visibility": "private",
   "description": "This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics.",
@@ -11,10 +9,7 @@
     "id": "transform",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "transform"
-    ],
+    "configPath": ["xpack", "transform"],
     "requiredPlugins": [
       "data",
       "dataViews",
@@ -33,21 +28,8 @@
       "contentManagement",
       "fieldsMetadata"
     ],
-    "optionalPlugins": [
-      "dataViewEditor",
-      "security",
-      "usageCollection",
-      "spaces",
-      "alerting"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "discover",
-      "kibanaUtils",
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": ["dataViewEditor", "security", "usageCollection", "spaces", "alerting"],
+    "requiredBundles": ["esUiShared", "discover", "kibanaUtils", "kibanaReact"],
+    "extraPublicDirs": ["common"]
   }
 }

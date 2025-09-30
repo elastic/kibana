@@ -35,6 +35,10 @@ import {
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openTab } from '../../../../tasks/inspect';
 import { CODE_BLOCK } from '../../../../screens/common';
+import { waitForAlerts } from '../../../../tasks/alerts';
+import { getDataTestSubjectSelector } from '../../../../helpers/common';
+
+const TIMELINE_TAB_QUERY_TEST_SUBJ = 'timeline-tab-content-query';
 
 describe(
   'Unsaved Timeline query tab',
@@ -45,6 +49,7 @@ describe(
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
+      waitForAlerts();
       openTimelineUsingToggle();
       createNewTimeline();
       executeTimelineSearch('*');
@@ -78,7 +83,7 @@ describe(
 
     it('should be able to add/remove columns correctly', () => {
       cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
-      addFieldToTable('agent.type');
+      addFieldToTable('agent.type', getDataTestSubjectSelector(TIMELINE_TAB_QUERY_TEST_SUBJ));
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('be.visible');
       removeFieldFromTable('agent.type');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');

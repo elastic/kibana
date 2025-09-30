@@ -9,7 +9,7 @@
 
 import { isEmpty, filter } from 'lodash';
 
-import { DashboardItem } from '../../types';
+import type { DashboardItem } from '../../types';
 import { dashboardServices } from '../../services/kibana_services';
 
 /**

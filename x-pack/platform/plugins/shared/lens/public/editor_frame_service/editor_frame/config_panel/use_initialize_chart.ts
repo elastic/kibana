@@ -7,7 +7,7 @@
 import { useEffect, useCallback, type MutableRefObject } from 'react';
 import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
 import { type ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 
 type LensAttributes = TypedLensSerializedState['attributes'];
 

@@ -7,14 +7,14 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
+import type { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
-import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 import { IlmLocatorDefinition } from './locator';
 
 export class IndexLifecycleManagementPlugin

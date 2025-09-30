@@ -17,16 +17,16 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
+import type { ServerlessOptions } from '../utils';
 import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
-  ServerlessOptions,
   isServerlessProjectType,
   serverlessProjectTypes,
   serverlessProductTiers,
 } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 import { createCliError } from '../errors';
 
 const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
@@ -40,7 +40,7 @@ export const serverless: Command = {
     Options:
 
       --projectType       Serverless project type: ${supportedProjectTypesStr}
-      --productTier      Serverless product tier: ${supportedProductTiersStr}
+      --productTier       Serverless product tier: ${supportedProductTiersStr}
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
@@ -61,6 +61,7 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
+      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support.
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
@@ -107,7 +108,7 @@ export const serverless: Command = {
         'kibanaUrl',
         'dataPath',
       ],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
+      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady', 'uiam'],
 
       default: {
         ...defaults,

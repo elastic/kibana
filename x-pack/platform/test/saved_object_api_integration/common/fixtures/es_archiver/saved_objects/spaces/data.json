@@ -942,3 +942,101 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:1",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "elasticsearch",
+        "author": "John Doe",
+        "comments": [
+          {
+            "user": "bob",
+            "message": "very helpful",
+            "date": "2024-01-16",
+            "rating": 4
+          },
+          {
+            "user": "alice",
+            "message": "kibana and this one are great",
+            "date": "2024-01-15",
+            "rating": 5
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:2",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "kibana",
+        "author": "Jane Smith",
+        "comments": [
+          {
+            "user": "charlie",
+            "message": "excellent examples",
+            "date": "2024-02-10",
+            "rating": 5
+          },
+          {
+            "user": "diana",
+            "message": "could use more detail",
+            "date": "2024-02-12",
+            "rating": 3
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": ["*"],
+      "updated_at": "2024-02-15T14:23:45.180Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:3",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "logstash",
+        "author": "Mr Nobody",
+        "comments": [
+          {
+            "user": "frank",
+            "message": "perfect for beginners",
+            "date": "2024-03-05",
+            "rating": 4
+          },
+          {
+            "user": "bob",
+            "message": "charlie and diana's posts helped me",
+            "date": "2024-02-14",
+            "rating": 5
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2024-03-11T09:15:32.450Z"
+    },
+    "type": "doc"
+  }
+}

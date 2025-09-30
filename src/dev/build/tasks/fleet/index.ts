@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config } from '../../lib';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Config } from '../../lib';
 
 import { bundleFleetPackages } from './bundle_packages';
 import { downloadElasticGpgKey } from './download_elastic_gpg_key';

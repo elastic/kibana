@@ -9,18 +9,21 @@ import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
-import { RruleSchedule, scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
+import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { IKibanaResponse } from '@kbn/core/server';
-import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { ScheduleType } from '@kbn/reporting-server';
+import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
-import {
+import type {
   ScheduledReportApiJSON,
   ScheduledReportType,
   ScheduledReportingJobResponse,
 } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RequestHandler, RequestParams } from './request_handler';
+import type { RequestParams } from './request_handler';
+import { RequestHandler } from './request_handler';
 import {
   transformRawScheduledReportToReport,
   transformRawScheduledReportToTaskParams,
@@ -236,6 +239,14 @@ export class ScheduleRequestHandler extends RequestHandler<
     const id = SavedObjectsUtils.generateId();
     try {
       report = await this.enqueueJob({ ...params, id });
+
+      const eventTracker = reporting.getEventTracker(report.id, exportTypeId, jobParams.objectType);
+      eventTracker?.createReport({
+        isDeprecated: Boolean(report.payload.isDeprecated),
+        isPublicApi: false,
+        scheduleType: ScheduleType.SCHEDULED,
+      });
+
       return res.ok<ScheduledReportingJobResponse>({
         headers: { 'content-type': 'application/json' },
         body: {

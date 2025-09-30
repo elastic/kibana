@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ControlBar, ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
+import type React from 'react';
+import type { ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
+import { ControlBar } from '../shared/control_bar';
 
 // For now it's conincidentally the same control bar, but the planned designs
 // indicate that it will diverge in the future

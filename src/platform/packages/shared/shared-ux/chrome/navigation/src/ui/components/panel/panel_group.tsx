@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
@@ -16,7 +17,8 @@ import {
   EuiSpacer,
   EuiAccordion,
 } from '@elastic/eui';
-import { Theme, css } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from '../subitem_title';
@@ -68,7 +70,9 @@ const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
   return children.some((child) => {
     if (child.renderAs === 'item') return true;
     if (child.children) {
-      return child.children.every(({ sideNavStatus }) => sideNavStatus !== 'hidden');
+      return child.children.every(
+        ({ sideNavStatus, sideNavVersion }) => sideNavStatus !== 'hidden' && sideNavVersion !== 'v2'
+      );
     }
     return true;
   });
@@ -82,7 +86,9 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, parentId, nodeIndex }) => {
   const { id, title, spaceBefore: _spaceBefore, withBadge } = navNode;
-  const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
+  const filteredChildren = navNode.children?.filter(
+    (child) => child.sideNavStatus !== 'hidden' && child.sideNavVersion !== 'v2'
+  );
   const hasTitle = !!title && title !== '';
 
   const isFirstInList = nodeIndex === 0;

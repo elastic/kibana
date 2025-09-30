@@ -9,7 +9,7 @@ import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { AlertStatus } from '../../../common/typings';
+import type { AlertStatus } from '../../../common/typings';
 
 export function setStatusOnControlConfigs(
   status: AlertStatus,

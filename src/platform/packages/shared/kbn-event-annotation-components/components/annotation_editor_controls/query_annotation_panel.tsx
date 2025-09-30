@@ -12,9 +12,8 @@ import type { Query } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import type { FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import {
-  FieldOption,
-  FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
   isFieldLensCompatible,

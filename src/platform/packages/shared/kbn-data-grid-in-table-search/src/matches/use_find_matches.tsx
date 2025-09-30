@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { AllCellsMatchesCounter } from './all_cells_matches_counter';
-import {
+import type {
   ActiveMatch,
   RowMatches,
   UseFindMatchesState,

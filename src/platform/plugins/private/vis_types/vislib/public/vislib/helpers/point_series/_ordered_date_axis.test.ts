@@ -13,7 +13,7 @@ import _ from 'lodash';
 import type { DateHistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { orderedDateAxis } from './_ordered_date_axis';
-import { OrderedChart } from './point_series';
+import type { OrderedChart } from './point_series';
 
 describe('orderedDateAxis', function () {
   const baseArgs = {

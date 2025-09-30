@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -42,6 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // add feature flags here
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'agentTamperProtectionEnabled',
+          'enableOtelIntegrations',
           'subfeaturePrivileges',
         ])}`,
 

@@ -15,7 +15,7 @@ import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
@@ -47,7 +47,8 @@ export default function (providerContext: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
 
-  describe('inputs_with_standalone_docker_agent', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236670
+  describe.skip('inputs_with_standalone_docker_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     let apiKey: string;
     let agent: AgentProcess;

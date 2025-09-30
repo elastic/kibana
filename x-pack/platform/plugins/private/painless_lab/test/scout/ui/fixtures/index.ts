@@ -8,7 +8,8 @@
 import { test as base } from '@kbn/scout';
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
-import { extendPageObjects, PainlessLabPageObjects } from './page_objects';
+import type { PainlessLabPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
 
 export interface PainlessLabTestFixtures extends ScoutTestFixtures {
   pageObjects: PainlessLabPageObjects;

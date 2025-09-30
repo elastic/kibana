@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { ToolbarButtonStyles, fontWeightDefinitions } from './toolbar_button.styles';
 

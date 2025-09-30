@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsQueryConfig } from '@kbn/es-query';
-import { GetConfigFn } from '../types';
+import type { EsQueryConfig } from '@kbn/es-query';
+import type { GetConfigFn } from '../types';
 import { UI_SETTINGS } from '../constants';
 
 interface KibanaConfig {

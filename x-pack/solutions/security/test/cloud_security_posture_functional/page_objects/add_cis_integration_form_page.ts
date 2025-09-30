@@ -7,8 +7,19 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import {
+  AWS_PROVIDER_TEST_SUBJ,
+  GCP_PROVIDER_TEST_SUBJ,
+  GCP_SINGLE_ACCOUNT_TEST_SUBJ,
+  AZURE_PROVIDER_TEST_SUBJ,
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_INPUT_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
 import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 const TEST_IDS = {
   POST_INSTALL_AZURE_ARM_TEMPLATE_MODAL: 'postInstallAzureArmTemplateModal',
@@ -33,10 +44,6 @@ const TEST_IDS = {
   AGENT_POLICY_NAME_LINK: 'agentPolicyNameLink',
   AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
   CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
-  CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
-  GCP_POLICY_OPTION_TEST_ID: 'cisGcpTestId',
-  AWS_POLICY_OPTION_TEST_ID: 'cisAwsTestId',
-  AZURE_POLICY_OPTION_TEST_ID: 'cisAzureTestId',
   INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID: 'agentPolicyFormSystemMonitoringCheckbox',
 } as const;
 
@@ -321,18 +328,20 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
-    const radioGroup = await testSubjects.find(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    const radioGroup = await testSubjects.find(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
     const radio = await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
-    await radio.click();
+    await radio.click({
+      bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
+    });
   };
 
   const getSetupTechnologyRadio = async (setupTechnology: 'agentless' | 'agent-based') => {
-    const radioGroup = await testSubjects.find(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    const radioGroup = await testSubjects.find(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
     return await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
   };
 
   const showSetupTechnologyComponent = async () => {
-    return await testSubjects.exists(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
   };
 
   const selectAwsCredentials = async (
@@ -346,7 +355,9 @@ export function AddCisIntegrationFormPageProvider({
     if (credentialType === 'cloud_connectors') {
       credentialTypeValue = 'cloud_connector';
     }
-    await testSubjects.click(AWS_CREDENTIAL_SELECTOR);
+    await testSubjects.click(AWS_CREDENTIAL_SELECTOR, undefined, {
+      bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
+    });
     await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
   };
 
@@ -363,17 +374,17 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickAwsPolicyOption = async () => {
-    const awsPolicyOption = await findOptionInPage(TEST_IDS.AWS_POLICY_OPTION_TEST_ID);
+    const awsPolicyOption = await findOptionInPage(AWS_PROVIDER_TEST_SUBJ);
     await awsPolicyOption.click();
   };
 
   const clickGcpPolicyOption = async () => {
-    const gcpPolicyOption = await findOptionInPage(TEST_IDS.GCP_POLICY_OPTION_TEST_ID);
+    const gcpPolicyOption = await findOptionInPage(GCP_PROVIDER_TEST_SUBJ);
     await gcpPolicyOption.click();
   };
 
   const clickAzurePolicyOption = async () => {
-    const azurePolicyOption = await findOptionInPage(TEST_IDS.AZURE_POLICY_OPTION_TEST_ID);
+    const azurePolicyOption = await findOptionInPage(AZURE_PROVIDER_TEST_SUBJ);
     await azurePolicyOption.click();
   };
 
@@ -409,6 +420,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const checkIntegrationPliAuthBlockExists = async () => {
     return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
+  };
+
+  const pasteTextInField = async (selector: string, text: string) => {
+    await testSubjects.setValue(selector, text);
   };
 
   const fillInTextField = async (selector: string, text: string) => {
@@ -473,7 +488,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const showCredentialJsonSecretPanel = async () => {
-    return await testSubjects.exists(TEST_IDS.CREDENTIALS_JSON_SECRET_PANEL);
+    return await testSubjects.exists(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL);
   };
 
   const inputUniqueIntegrationName = async () => {
@@ -516,23 +531,23 @@ export function AddCisIntegrationFormPageProvider({
     const directAccessKeyId = 'directAccessKeyIdTest';
     const directAccessSecretKey = 'directAccessSecretKeyTest';
 
-    await clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
+    await clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
 
     await selectSetupTechnology('agentless');
-    await selectValue(testSubjectIds.AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-    await fillInTextField(testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
-    await fillInTextField(testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID, directAccessSecretKey);
+    await selectValue(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ, 'direct_access_keys');
+    await fillInTextField(AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID, directAccessKeyId);
+    await fillInTextField(AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY, directAccessSecretKey);
   };
 
   const fillOutGCPForm = async () => {
     const projectId = 'PRJ_NAME_TEST';
     const credentialJson = 'CRED_JSON_TEST_NAME';
 
-    await clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
-    await clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
+    await clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
+    await clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
     await selectSetupTechnology('agentless');
-    await fillInTextField(testSubjectIds.PRJ_ID_TEST_ID, projectId);
-    await fillInTextField(testSubjectIds.CREDENTIALS_JSON_TEST_ID, credentialJson);
+    await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID, projectId);
+    await fillInTextField(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON, credentialJson);
   };
 
   const fillOutForm = async (cloudProvider: 'aws' | 'gcp') => {
@@ -676,6 +691,7 @@ export function AddCisIntegrationFormPageProvider({
     clickAccordianButton,
     getPostInstallModal,
     fillInTextField,
+    pasteTextInField,
     chooseDropDown,
     getFieldValueInEditPage,
     doesStringExistInCodeBlock,

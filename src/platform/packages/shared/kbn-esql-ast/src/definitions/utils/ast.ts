@@ -9,7 +9,7 @@
 
 import { EDITOR_MARKER } from '../constants';
 import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../ast/is';
-import {
+import type {
   ESQLAst,
   ESQLFunction,
   ESQLSingleAstItem,

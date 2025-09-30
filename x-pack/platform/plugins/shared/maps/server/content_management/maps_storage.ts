@@ -6,13 +6,21 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, SearchQuery, DeleteResult } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  SearchQuery,
+  DeleteResult,
+} from '@kbn/content-management-plugin/common';
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
-import {
+import type {
   MapsSavedObjectAttributes,
   MapsGetOut,
   MapsSearchOptions,
@@ -21,7 +29,7 @@ import {
   MapsUpdateOptions,
   MapsUpdateOut,
 } from './schema/v1/types';
-import { savedObjectToItem, itemToSavedObject } from './schema/v1/transform_utils';
+import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -84,8 +92,9 @@ export class MapsStorage {
       outcome,
     } = await soClient.resolve<MapsSavedObjectAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
+    const item = savedObjectToItem(savedObject, false);
     const response = {
-      item: savedObject,
+      item,
       meta: { aliasPurpose, aliasTargetId, outcome },
     };
 
@@ -98,6 +107,7 @@ export class MapsStorage {
       }
     }
     const { value, error: resultError } = transforms.get.out.result.down<MapsGetOut, MapsGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined,
       { validate: false }
@@ -140,16 +150,20 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
 
     // Save data in DB
     const savedObject = await soClient.create<MapsSavedObjectAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      {
+        ...optionsToLatest,
+        references: [
+          ...soReferences,
+          // tag refs still passed via API
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
     const item = savedObjectToItem(savedObject, false);
@@ -203,17 +217,21 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
 
     // Save data in DB
     const partialSavedObject = await soClient.update<MapsSavedObjectAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      {
+        ...optionsToLatest,
+        references: [
+          ...soReferences,
+          // tag refs still passed via API
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
     const item = savedObjectToItem(partialSavedObject, true);
@@ -232,6 +250,7 @@ export class MapsStorage {
       MapsUpdateOut,
       MapsUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above

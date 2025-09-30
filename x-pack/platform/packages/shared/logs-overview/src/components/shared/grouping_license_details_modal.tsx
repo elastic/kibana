@@ -21,11 +21,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  GroupingLicenseCtaMessageTrialButton,
-  GroupingLicenseCtaMessageTrialButtonDependencies,
-} from './grouping_license_cta_shared';
-import { GroupingPreview, GroupingPreviewDependencies } from './grouping_preview';
+import type { GroupingLicenseCtaMessageTrialButtonDependencies } from './grouping_license_cta_shared';
+import { GroupingLicenseCtaMessageTrialButton } from './grouping_license_cta_shared';
+import type { GroupingPreviewDependencies } from './grouping_preview';
+import { GroupingPreview } from './grouping_preview';
 
 export interface GroupingLicenseDetailsModalProps {
   dependencies: GroupingLicenseDetailsModalDependencies;

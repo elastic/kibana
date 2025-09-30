@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
+import type { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { Direction } from '../../../../common/search_strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';

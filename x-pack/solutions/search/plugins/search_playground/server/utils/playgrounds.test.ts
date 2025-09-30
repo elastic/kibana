@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 import { type PlaygroundSavedObject } from '../types';
 import { validatePlayground, parsePlaygroundSO, parsePlaygroundSOList } from './playgrounds';

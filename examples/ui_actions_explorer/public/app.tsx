@@ -18,8 +18,8 @@ import {
   EuiSpacer,
   EuiPageHeader,
 } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { TriggerContextExample } from './trigger_context_example';
 import { ContextMenuExamples } from './context_menu_examples';
 import { Overview } from './overview';

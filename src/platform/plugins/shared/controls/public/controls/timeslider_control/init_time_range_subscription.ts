@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
-import { BehaviorSubject, Subscription, skip } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { getTimeRangeMeta, getTimezone, TimeRangeMeta } from './get_time_range_meta';
+import type { TimeRangeMeta } from './get_time_range_meta';
+import { getTimeRangeMeta, getTimezone } from './get_time_range_meta';
 import { getMomentTimezone } from './time_utils';
 
 export function initTimeRangeSubscription(controlGroupApi: unknown) {

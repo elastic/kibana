@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DatasourceDimensionDropHandlerProps } from '../../../../types';
-import { TextBasedPrivateState } from '../types';
+import type { DatasourceDimensionDropHandlerProps } from '../../../../types';
+import type { TextBasedPrivateState } from '../types';
 
 export const column1 = {
   columnId: 'columnId1',

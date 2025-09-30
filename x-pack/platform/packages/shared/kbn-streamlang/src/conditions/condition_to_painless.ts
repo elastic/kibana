@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { isBoolean, isString, uniq } from 'lodash';
-import {
+import { isBoolean, isString } from 'lodash';
+import type {
   Condition,
   FilterCondition,
-  OPERATORS,
   RangeCondition,
   ShorthandBinaryFilterCondition,
   ShorthandUnaryFilterCondition,
 } from '../../types/conditions';
+import { BINARY_OPERATORS } from '../../types/conditions';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `relevant_fields['${conditionOrField}']`;
+    return `$('${conditionOrField}', null)`;
   }
-  return `relevant_fields['${conditionOrField.field}']`;
+  return `$('${conditionOrField.field}', null)`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -54,7 +54,7 @@ function generateRangeComparisonClauses(
 // Convert a shorthand binary filter condition to painless
 function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
   // Find which operator is present
-  const op = OPERATORS.find((k) => condition[k] !== undefined);
+  const op = BINARY_OPERATORS.find((k) => condition[k] !== undefined);
   const value = condition[op!];
 
   switch (op) {
@@ -89,11 +89,14 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         condition
       )}.endsWith(${encodeValue(String(value))}))`;
     case 'contains':
+      // Behaviour is "fuzzy"
       return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
         condition
-      )}.toString().contains(${encodeValue(String(value))})) || ${safePainlessField(
-        condition
-      )}.contains(${encodeValue(String(value))}))`;
+      )}.toString().toLowerCase().contains(${encodeValue(
+        String(value).toLowerCase()
+      )})) || ${safePainlessField(condition)}.toLowerCase().contains(${encodeValue(
+        String(value).toLowerCase()
+      )}))`;
     case 'range': {
       const range = value as RangeCondition;
       const field = safePainlessField(condition);
@@ -168,42 +171,6 @@ function shorthandUnaryToPainless(condition: ShorthandUnaryFilterCondition) {
   throw new Error('Invalid unary filter condition');
 }
 
-// Extract all fields from a condition recursively
-function extractAllFields(condition: Condition, fields: string[] = []): string[] {
-  if ('field' in condition && typeof condition.field === 'string') {
-    return uniq([...fields, condition.field]);
-  } else if ('and' in condition && Array.isArray(condition.and)) {
-    return uniq(condition.and.map((cond) => extractAllFields(cond, fields)).flat());
-  } else if ('or' in condition && Array.isArray(condition.or)) {
-    return uniq(condition.or.map((cond) => extractAllFields(cond, fields)).flat());
-  } else if ('not' in condition && condition.not) {
-    return uniq(extractAllFields(condition.not, fields));
-  }
-  return uniq(fields);
-}
-
-function generateFieldDefinition(field: string) {
-  const parts = field.split('.');
-  const firstPart = parts[0];
-  let code = `relevant_fields['${field}'] = ctx['${firstPart}'];\n`;
-  for (let i = 1; i < parts.length; i++) {
-    code += `if (relevant_fields['${field}'] != null) {
-  if (relevant_fields['${field}'] instanceof Map) {
-    relevant_fields['${field}'] = relevant_fields['${field}']['${parts[i]}'];
-  } else {
-    relevant_fields['${field}'] = null;
-  }
-}\n`;
-  }
-  return code;
-}
-
-function generateFieldDefinitions(fields: string[]) {
-  return `
-${fields.map(generateFieldDefinition).join('\n')}
-  `;
-}
-
 // Main recursive conversion to painless
 export function conditionToStatement(condition: Condition, nested = false): string {
   if ('field' in condition && typeof condition.field === 'string') {
@@ -228,10 +195,10 @@ export function conditionToStatement(condition: Condition, nested = false): stri
     return `!(${conditionToStatement(condition.not, true)})`;
   }
   // Always/never conditions (if you have them)
-  if ('always' in condition && condition.always === true) {
+  if ('always' in condition) {
     return `true`;
   }
-  if ('never' in condition && condition.never === true) {
+  if ('never' in condition) {
     return `false`;
   }
   throw new Error('Unsupported condition');
@@ -239,21 +206,14 @@ export function conditionToStatement(condition: Condition, nested = false): stri
 
 export function conditionToPainless(condition: Condition): string {
   // Always/never conditions (if you have them)
-  if ('never' in condition && condition.never === true) {
+  if ('never' in condition) {
     return `return false`;
   }
-  if ('always' in condition && condition.always === true) {
+  if ('always' in condition) {
     return `return true`;
   }
 
-  const fields = extractAllFields(condition);
-  let fieldDefinitions = '';
-  if (fields.length !== 0) {
-    fieldDefinitions = generateFieldDefinitions(fields);
-  }
   return `
-  def relevant_fields = [:];
-  ${fieldDefinitions}
   try {
   if (${conditionToStatement(condition)}) {
     return true;

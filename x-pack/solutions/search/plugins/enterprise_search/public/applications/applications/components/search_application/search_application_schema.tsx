@@ -9,10 +9,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -37,7 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 
 import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../../../../common/constants';
-import { SchemaField } from '../../../../../common/types/search_applications';
+import type { SchemaField } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
@@ -117,6 +117,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       <EuiFlexGroup direction="column" gutterSize="l">
         {notInAllIndices && (
           <EuiCallOut
+            announceOnMount
             iconType="info"
             title={
               <FormattedMessage
@@ -352,6 +353,7 @@ export const SearchApplicationSchema: React.FC = () => {
       <EuiFlexGroup direction="column" gutterSize="l">
         {hasSchemaConflicts && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.title',
               { defaultMessage: 'Potential field mapping issues found' }
@@ -455,6 +457,7 @@ export const SearchApplicationSchema: React.FC = () => {
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.title"

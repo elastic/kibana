@@ -99,16 +99,7 @@ export class PluginModule extends ContainerModule {
       return contract;
     }
 
-    for (
-      let current: Container | undefined = container;
-      current;
-      current = current.get(Parent, { optional: true })
-    ) {
-      if (current.isCurrentBound(hook)) {
-        current.getAll(hook).forEach((callback) => callback(container));
-      }
-    }
-
+    container.getAll(hook, { chained: true }).forEach((callback) => callback(container));
     this.activated[hook as symbol].add(container);
 
     return contract;

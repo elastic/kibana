@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { postChatComplete, PostChatCompleteParams } from './post_chat_complete';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { PostChatCompleteParams } from './post_chat_complete';
+import { postChatComplete } from './post_chat_complete';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const mockHttpFetch = jest.fn();

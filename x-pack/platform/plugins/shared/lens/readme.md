@@ -9,46 +9,57 @@ exposed via contract. For more information check out the example in `x-pack/exam
 
 When adding visualizations to a solution page, there are multiple ways to approach this with pros and cons:
 
-* #### **Use a dashboard**
+- #### **Use a dashboard**
+
   If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. Portable dasboards make it possible to embed a dashboard into your application, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
 
   Pros:
-   * No need to write and maintain custom code
-   * "Open in Lens" comes for free
-   * Ability for the user to customize/add/remove dashboard panels comes for free
-  
+
+  - No need to write and maintain custom code
+  - "Open in Lens" comes for free
+  - Ability for the user to customize/add/remove dashboard panels comes for free
+
   Cons:
-   * Limited data processing/visualization options - if the dashboard doesn't support it, it can't be used
-* #### **Use Lens embeddable**
+
+  - Limited data processing/visualization options - if the dashboard doesn't support it, it can't be used
+
+- #### **Use Lens embeddable**
+
   Using the Lens embeddable is an easy way to handle the rendering of charts. It allows you to specify data fetching and presentational properties of the final chart in a declarative way (the "Lens attributes") - everything is handled within the component (including re-fetching data on changing inputs). By using the `navigateToPrefilledEditor` method which takes the same configuration as the embeddable component, adding an "Open in Lens editor" button to your application comes at almost no additional cost. Such a button is always recommended as it allows a user to drill down further and explore the data on their own, using the current chart as a starting point. This approach is already widely deployed and should be the default choice for new visualizations.
 
   Pros:
-   * No need to manage searches and rendering logic on your own
-   * "Open in Lens" comes for free
-   * Simple extended visualization options - if Lens can't do it, there's also a limited set of overrides to customize the final result
-  
+
+  - No need to manage searches and rendering logic on your own
+  - "Open in Lens" comes for free
+  - Simple extended visualization options - if Lens can't do it, there's also a limited set of overrides to customize the final result
+
   Cons:
-   * Each panel does its own data fetching and rendering (can lead to performance problems for high number of embeddables on a single page, e.g. more than 20)
-   * Limited data processing options - if the Lens UI doesn't support it, it can't be used
 
+  - Each panel does its own data fetching and rendering (can lead to performance problems for high number of embeddables on a single page, e.g. more than 20)
+  - Limited data processing options - if the Lens UI doesn't support it, it can't be used
 
-* #### **Using custom data fetching and rendering**
-  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
+- #### **Using custom data fetching and rendering**
+
+  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page. **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
   Pros:
-   * Full flexibility in data fetching optimization and chart rendering
-  
+
+  - Full flexibility in data fetching optimization and chart rendering
+
   Cons:
-   * "Open in Lens" requires additional logic
-   * Should follow elastic charts api changes
+
+  - "Open in Lens" requires additional logic
+  - Should follow elastic charts api changes
 
 ## Getting started
 
-The `EmbeddableComponent` react component is exposed on the Lens plugin contract. In order to use it, 
-* Make sure you have a data view created for the data you plan to work with
-* Add `lens` to `requiredPlugins` in your plugins `kibana.json`
-* In the mount callback of your app, get `lens.EmbeddableComponent` from the start contract and pass it into your apps react tree
-* In the place where you want to render a visualization, add the component to the tree:
+The `EmbeddableComponent` react component is exposed on the Lens plugin contract. In order to use it,
+
+- Make sure you have a data view created for the data you plan to work with
+- Add `lens` to `requiredPlugins` in your plugins `kibana.json`
+- In the mount callback of your app, get `lens.EmbeddableComponent` from the start contract and pass it into your apps react tree
+- In the place where you want to render a visualization, add the component to the tree:
+
 ```tsx
 <div>
   // my app
@@ -64,13 +75,14 @@ The `EmbeddableComponent` react component is exposed on the Lens plugin contract
 You can see a working example of this in the `x-pack/examples/embedded_lens_example` directory.
 
 The `attributes` variable contains the configuration for the Lens visualization. The details are explained in the section below. It's difficult to set up this object manually, in order to quickly get to a functioning starting point, start your Kibana server with example plugins via
+
 ```
 yarn start --run-examples
 ```
 
 This will add an `Open in Playground` action to the menu bar in the Lens editor. With this option, try to configure the chart configuration directly in the editor, then open it in the playground to see the attributes object to copy. This works for any possible Lens visualization.
 
-![Go to playground](./to_playground.gif "Go to playground")
+![Go to playground](./to_playground.gif 'Go to playground')
 
 ## Lens attributes explained
 
@@ -82,19 +94,20 @@ On a high level there are references, datasource state, visualization state and 
 
 References (`references`) are regular saved object references forming a graph of saved objects which depend on each other. For the Lens case, these references can be annotation groups or data views (called `type: "index-pattern"` in code), referencing permanent data views which are used in the current Lens visualization. Often there is just a single data view in use, but it's possible to use multiple data views for multiple layers in a Lens xy chart. The `id` of a reference needs to be the saved object id of the referenced data view (see the "Handling data views" section below). The `name` of the reference is comprised out of multiple parts used to map the data view to the correct layer : `indexpattern-datasource-layer-<id of the layer>`. Even if multiple layers are using the same data view, there has to be one reference per layer (all pointing to the same data view id). References array can be empty in case of adhoc dataviews (see section below).
 
-
 ### Ad-hoc data views
 
 In some cases a globally accessible data view is not desirable:
-* You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
-* It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
-* You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
+
+- You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
+- It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
+- You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
 
 In these situations ad-hoc data views are useful - these are data views which are stored as part of the Lens visualization itself, so they do not show up in other contexts. In the UI you can create these by opening the data view picker, selecting "Create a data view" and then using the "Use without saving" button.
 
 Ad-hoc data views are part of the Lens attributes stored in `state.adHocDataViews`. Each data view is defined by its JSON-serializable `DataViewSpec` object. If a layer is using an ad hoc data view, the reference goes into the `state.internalReferences` array instead of the external `references` array.
 
 Example:
+
 ```json
 "state": {
   // ...
@@ -147,7 +160,7 @@ In some scenarios it can be useful to customize the default behaviour and avoid 
   onFilter={(data) => {
     // custom behaviour on "filter" event
     ...
-    // now prevent to add a filter in Kibana 
+    // now prevent to add a filter in Kibana
     data.preventDefault();
   }}
 />
@@ -156,12 +169,13 @@ In some scenarios it can be useful to customize the default behaviour and avoid 
 ## Handling data views
 
 In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
+
 ```ts
 let dataView = (await dataViews.find('my-pattern-*', 1))[0];
 if (!dataView) {
   dataView = await dataViews.createAndSave({
     title: 'my-pattern-*',
-    timeFieldName: '@timestamp'
+    timeFieldName: '@timestamp',
   });
 }
 const dataViewIdForLens = dataView.id;
@@ -172,19 +186,20 @@ const dataViewIdForLens = dataView.id;
 ## Refreshing a Lens embeddable
 
 The Lens embeddable is handling data fetching internally, this means as soon as the props change, it will trigger a new request if necessary. However, in some situations it's necessary to trigger a refresh even if the configuration of the chart doesn't change at all. Refreshing is managed using search sessions is Lens. To trigger a refresh without changing the actual configuration of a Lens embeddable, follow these steps:
-* Pull in the contract of the `data` plugin. It contains the session service at `plugins.data.search.session`.
-* When loading the app containing a Lens embeddable, start a new session using `session.start`. It returns the current session id - keep it in the state of our app (e.g. a `useState` hook or your redux store)
-* Pass the current session id to the Lens embeddable component via the `searchSessionId` property
-* When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
-* When unmounting your app, call `session.clear` to end the current session
+
+- Pull in the contract of the `data` plugin. It contains the session service at `plugins.data.search.session`.
+- When loading the app containing a Lens embeddable, start a new session using `session.start`. It returns the current session id - keep it in the state of our app (e.g. a `useState` hook or your redux store)
+- Pass the current session id to the Lens embeddable component via the `searchSessionId` property
+- When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
+- When unmounting your app, call `session.clear` to end the current session
 
 ## Performance considerations
 
 As the Lens embeddable is doing data fetching and processing internally as soon as props are passed to it, it's beneficial to make sure it's not rendered with new props if that's avoidable. Lens is aborting in-flight search requests as soon as the chart configuration changes based on props, but there's still non-trivial work kicked off in multiple parts of the stack. To avoid this, make sure to keep these things in mind:
-* Changing the reference of the `attributes` prop will cause the Lens vis to re-initialize from scratch. Try to keep it stable as long as possible, e.g. by using `useMemo` instead of re-constructing it on the fly on every render
-* Pass time range and filters in via the dedicated props instead of part of the `attributes` to avoid re-initalization. Changing time range or filters might kick off another search request so it makes sense to keep this stable as well, but this can also be controlled somewhat by the session id (see section above)
-* The chart will adjust itself automatically to layout changes, no need to trigger another re-render in this situation
 
+- Changing the reference of the `attributes` prop will cause the Lens vis to re-initialize from scratch. Try to keep it stable as long as possible, e.g. by using `useMemo` instead of re-constructing it on the fly on every render
+- Pass time range and filters in via the dedicated props instead of part of the `attributes` to avoid re-initalization. Changing time range or filters might kick off another search request so it makes sense to keep this stable as well, but this can also be controlled somewhat by the session id (see section above)
+- The chart will adjust itself automatically to layout changes, no need to trigger another re-render in this situation
 
 ## Getting data tables and requests/responses
 
@@ -209,8 +224,8 @@ The Lens embeddable offers a way to extends the current set of visualization fea
 <EmbeddableComponent
   // ...
   overrides={{
-    settings: {legendAction: 'ignore'},
-    axisX: {hide: true}
+    settings: { legendAction: 'ignore' },
+    axisX: { hide: true },
   }}
 />
 ```
@@ -221,6 +236,7 @@ The each override is component-specific and it inherits the prop from its `elast
 # Lens Development
 
 The following sections are concerned with developing the Lens plugin itself.
+
 ## Testing
 
 Run all tests from the `x-pack` root directory
@@ -236,8 +252,8 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
 - Performance journeys:
-  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
-  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
+  - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens`
+  - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens_http2`
 
 ## Developing tips
 
@@ -249,33 +265,33 @@ To simulate long running searches, set `data.search.aggs.shardDelay.enabled` in 
 
 Lens has a lot of UI elements – to make it easier to refer to them in issues or bugs, this is a hopefully complete list:
 
-* **Top nav** Navigation menu on top of the app (contains Save button)
-  * **Query bar** Input to enter KQL or Lucene query below the top nav
-  * **Filter bar** Row of filter pills below the query bar
-  * **Time picker** Global time range configurator right to the query bar
-* **Data panel** Panel to the left showing the field list
-  * **Field list** List of fields separated by available and empty fields in the data panel
-  * **Index pattern chooser** Select element switching between index patterns
-  * **Field filter** Search and dropdown to filter down the field list
-  * **Field information popover** Popover showing data distribution; opening when clicking a field in the field list
-* **Config panel** Panel to the right showing configuration of the current chart, separated by layers
-  * **Layer panel** One of multiple panels in the config panel, holding configuration for separate layers
-    * **Dimension trigger** Chart dimension like "X axis", "Break down by" or "Slice by" in the config panel
-    * **Dimension container** Container shown when clicking a dimension trigger and contains the dimension settints
-    * **Layer settings popover** Popover shown when clicking the button in the top left of a layer panel
-* **Workspace panel** Center panel containing the chart preview, title and toolbar
-  * **Chart preview** Full-sized rendered chart in the center of the screen
-  * **Toolbar** Bar on top of the chart preview, containing the chart switcher to the left with chart specific settings right to it
-    * **Chart switch** Select to change the chart type in the top left above the chart preview
-    * **Chart settings popover** Popover shown when clicking the "Settings" button above the chart preview
-* **Suggestion panel** Panel to the bottom showing previews for suggestions on how to change the current chart
+- **Top nav** Navigation menu on top of the app (contains Save button)
+  - **Query bar** Input to enter KQL or Lucene query below the top nav
+  - **Filter bar** Row of filter pills below the query bar
+  - **Time picker** Global time range configurator right to the query bar
+- **Data panel** Panel to the left showing the field list
+  - **Field list** List of fields separated by available and empty fields in the data panel
+  - **Index pattern chooser** Select element switching between index patterns
+  - **Field filter** Search and dropdown to filter down the field list
+  - **Field information popover** Popover showing data distribution; opening when clicking a field in the field list
+- **Config panel** Panel to the right showing configuration of the current chart, separated by layers
+  - **Layer panel** One of multiple panels in the config panel, holding configuration for separate layers
+    - **Dimension trigger** Chart dimension like "X axis", "Break down by" or "Slice by" in the config panel
+    - **Dimension container** Container shown when clicking a dimension trigger and contains the dimension settints
+    - **Layer settings popover** Popover shown when clicking the button in the top left of a layer panel
+- **Workspace panel** Center panel containing the chart preview, title and toolbar
+  - **Chart preview** Full-sized rendered chart in the center of the screen
+  - **Toolbar** Bar on top of the chart preview, containing the chart switcher to the left with chart specific settings right to it
+    - **Chart switch** Select to change the chart type in the top left above the chart preview
+    - **Chart settings popover** Popover shown when clicking the "Settings" button above the chart preview
+- **Suggestion panel** Panel to the bottom showing previews for suggestions on how to change the current chart
 
-![Layout](./layout.png "Layout")
-
+![Layout](./layout.png 'Layout')
 
 # Inline Editing of a Lens Embeddable
 
 If you have a Lens embeddable in your application and you want to allow inline editing you can do it with 3 ways:
+
 - If you use a portable dashboard, the functionality is built in and you don't need to do anything
 - If you don't have a portable dashboard then you can use UI actions to retrieve the inline editing component. For more information check out the example in `x-pack/examples/lens_embeddable_inline_editing_example`.
 - The component is also exported from Lens start contract. Check the `EditLensConfigPanelApi`. This is advised to be used only when the 2 above cases can't be used.

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
   DATE_WITH_DOCKER_DATA_FROM,
@@ -71,8 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/230580
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 
@@ -168,8 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Persist after refresh
         await browser.refresh();
-        await pageObjects.infraHome.waitForLoading();
-
+        await pageObjects.header.awaitGlobalLoadingIndicatorHidden();
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
         await retry.tryForTime(5000, async () => {
@@ -400,8 +398,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('filter nodes by search term', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
         });

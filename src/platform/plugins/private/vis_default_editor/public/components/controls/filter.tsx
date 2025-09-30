@@ -12,7 +12,7 @@ import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 
 import type { Query } from '@kbn/es-query';
-import { IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 

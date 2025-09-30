@@ -11,10 +11,10 @@ import { tap } from 'rxjs';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { pipeClosure } from '../common';
-import { OptimizerUpdate$ } from '../run_optimizer';
+import type { OptimizerUpdate$ } from '../run_optimizer';
 
-import { OptimizerState } from './optimizer_state';
-import { OptimizerConfig } from './optimizer_config';
+import type { OptimizerState } from './optimizer_state';
+import type { OptimizerConfig } from './optimizer_config';
 
 export function handleOptimizerCompletion(config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {

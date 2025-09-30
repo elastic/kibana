@@ -11,8 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Metric, Series } from '../../../../common/types';
 import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
+import type { Column } from '../convert';
 import {
-  Column,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,

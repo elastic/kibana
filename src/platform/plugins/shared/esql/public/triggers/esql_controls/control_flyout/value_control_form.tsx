@@ -11,14 +11,8 @@ import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiCallOut,
-  type EuiSwitchEvent,
-  EuiPanel,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiCallOut, type EuiSwitchEvent, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,6 +42,7 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
+  currentApp?: string;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -68,6 +63,7 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
+  currentApp,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -84,7 +80,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -370,6 +366,9 @@ export function ValueControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
       />
     </>
   );

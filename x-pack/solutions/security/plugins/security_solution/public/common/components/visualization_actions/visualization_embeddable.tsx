@@ -30,7 +30,9 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     isDonut,
     label,
     donutTextWrapperClassName,
+    donutTitleLabel,
     onLoad,
+    signalIndexName,
     ...lensProps
   } = props;
   const { session, refetchByRestartingSession, refetchByDeletingSession } =
@@ -139,18 +141,33 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         label={label}
         title={
           visualizationTablesTotalCount != null ? (
-            <ChartLabel count={visualizationTablesTotalCount} />
+            <>
+              {donutTitleLabel && <span className="donutTitleLabel">{donutTitleLabel}</span>}
+              <ChartLabel count={visualizationTablesTotalCount} />
+            </>
           ) : null
         }
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >
-        <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />
+        <LensEmbeddable
+          {...lensProps}
+          signalIndexName={signalIndexName}
+          id={id}
+          onLoad={onEmbeddableLoad}
+        />
       </DonutChartWrapper>
     );
   }
 
-  return <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />;
+  return (
+    <LensEmbeddable
+      {...lensProps}
+      signalIndexName={signalIndexName}
+      id={id}
+      onLoad={onEmbeddableLoad}
+    />
+  );
 };
 
 export const VisualizationEmbeddable = React.memo(VisualizationEmbeddableComponent);

@@ -13,7 +13,8 @@ import ReactDOM from 'react-dom/server';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { HtmlContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 

@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class OtelHostFlowPage {
   page: Page;
 
+  private readonly exploreLogsButton: Locator;
+  private readonly exploreMetricsButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
+
+    this.exploreLogsButton = this.page.getByTestId('obltOnboardingExploreLogs');
+    this.exploreMetricsButton = this.page.getByTestId('obltOnboardingExploreMetrics');
   }
 
   public async copyCollectorDownloadSnippetToClipboard() {
@@ -25,6 +31,14 @@ export class OtelHostFlowPage {
   }
 
   public async clickHostsOverviewCTA() {
-    await this.page.getByTestId('obltOnboardingExploreMetrics').click();
+    await this.exploreMetricsButton.click();
+  }
+
+  public async clickLogsExplorationCTA() {
+    await this.exploreLogsButton.click();
+  }
+
+  public async assertLogsExplorationButtonVisible() {
+    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
   }
 }

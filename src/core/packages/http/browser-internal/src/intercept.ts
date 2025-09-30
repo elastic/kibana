@@ -12,7 +12,7 @@ import type {
   HttpResponse,
   HttpFetchOptionsWithPath,
 } from '@kbn/core-http-browser';
-import { HttpInterceptController } from './http_intercept_controller';
+import type { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
 export function interceptFetch(

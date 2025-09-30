@@ -6,7 +6,7 @@
  */
 /* eslint-disable import/no-default-export */
 
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Search solution tests', function () {
@@ -17,5 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./tests/search_onboarding_api_keys.ts'));
     loadTestFile(require.resolve('./tests/search_index_details'));
     loadTestFile(require.resolve('./tests/index_management'));
+    loadTestFile(require.resolve('./tests/inference_management'));
   });
 };

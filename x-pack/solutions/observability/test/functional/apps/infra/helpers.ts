@@ -86,7 +86,7 @@ export function generateHostData({
     .rate(1)
     .generator((timestamp) =>
       hosts.flatMap(({ hostName, cpuValue }) => [
-        infra.host(hostName).cpu({ cpuTotalValue: cpuValue }).timestamp(timestamp),
+        infra.host(hostName).cpu({ 'system.cpu.total.norm.pct': cpuValue }).timestamp(timestamp),
         infra.host(hostName).memory().timestamp(timestamp),
         infra.host(hostName).network().timestamp(timestamp),
         infra.host(hostName).load().timestamp(timestamp),
@@ -114,7 +114,7 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
     .rate(1)
     .generator((timestamp) =>
       hosts.flatMap(({ hostName, cpuValue }) => [
-        infra.host(hostName).cpu({ cpuTotalValue: cpuValue }).timestamp(timestamp),
+        infra.host(hostName).cpu({ 'system.cpu.total.norm.pct': cpuValue }).timestamp(timestamp),
         infra.host(hostName).memory().timestamp(timestamp),
         infra.host(hostName).network().timestamp(timestamp),
         infra.host(hostName).load().timestamp(timestamp),

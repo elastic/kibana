@@ -7,10 +7,11 @@
 
 import React, { useMemo, useCallback } from 'react';
 
-import { EuiCallOut, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { QuerySourceFields } from '../../types';
+import type { QuerySourceFields } from '../../types';
 
 export interface ContextFieldsSelectProps {
   indexName: string;
@@ -62,6 +63,7 @@ export const ContextFieldsSelect = ({
   if (selectOptions.length === 0) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.searchPlayground.editContext.noSourceFieldWarning', {
           defaultMessage: 'No source fields found',
         })}

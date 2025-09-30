@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { EuiText, EuiLink, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiLink, EuiBadge, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import {
-  IngestStreamEffectiveLifecycle,
-  isDslLifecycle,
-  isErrorLifecycle,
-  isIlmLifecycle,
-} from '@kbn/streams-schema';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
-import { INFINITE_RETENTION_LABEL, NO_RETENTION_LABEL, NO_DATA_SHORT_LABEL } from './translations';
+import { INFINITE_RETENTION_LABEL, NO_DATA_SHORT_LABEL, NO_RETENTION_LABEL } from './translations';
+import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecycle/helpers/format_size_units';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -44,10 +42,9 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
 
   if (isIlmLifecycle(lifecycle)) {
     return (
-      <EuiBadge color="hollow">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
-          color="text"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
             policyName: lifecycle.ilm.policy,
@@ -57,21 +54,28 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             defaultMessage: 'ILM policy: {name}, click to edit the policy in a new tab',
             values: { name: lifecycle.ilm.policy },
           })}
+          css={{
+            whiteSpace: 'nowrap' as const,
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            maxWidth: '150px',
+          }}
         >
-          {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
-            defaultMessage: 'ILM policy: {name}',
-            values: {
-              name: lifecycle.ilm.policy,
-            },
-          })}
+          {lifecycle.ilm.policy}
         </EuiLink>
-      </EuiBadge>
+        <EuiBadge color="hollow">
+          <EuiText size="s">
+            {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
+              defaultMessage: 'ILM',
+            })}
+          </EuiText>
+        </EuiBadge>
+      </EuiFlexGroup>
     );
   }
 
   if (isDslLifecycle(lifecycle)) {
-    const retentionValue = lifecycle.dsl.data_retention;
-
+    const retentionValue = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
     if (retentionValue) {
       return (
         <span

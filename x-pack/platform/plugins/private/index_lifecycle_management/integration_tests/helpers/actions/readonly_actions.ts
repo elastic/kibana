@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
-import { Phase } from '../../../common/types';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import type { Phase } from '../../../common/types';
 import { createFormToggleAction } from './form_toggle_action';
 
 export const createReadonlyActions = (testBed: TestBed, phase: Phase) => {

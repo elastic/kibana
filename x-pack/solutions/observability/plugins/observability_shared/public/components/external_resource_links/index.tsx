@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
+import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import supportIconUrl from './support_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';

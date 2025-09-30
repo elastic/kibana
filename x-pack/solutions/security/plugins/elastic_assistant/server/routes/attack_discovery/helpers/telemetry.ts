@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core/server';
-import { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import type { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 
 import dateMath from '@kbn/datemath';
+import type { AttackDiscoveryScheduleInfo } from '../../../lib/telemetry/event_based_telemetry';
 import {
   ATTACK_DISCOVERY_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
-  AttackDiscoveryScheduleInfo,
 } from '../../../lib/telemetry/event_based_telemetry';
 
 export const reportAttackDiscoveryGenerationSuccess = ({

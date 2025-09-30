@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
@@ -14,7 +14,8 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -64,12 +65,12 @@ import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
-import { DateRange, LayerType } from '../../../../../common/types';
+import type { DataViewDragDropOperation, FormBasedLayer } from '../../types';
+import type { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
-import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
-import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
+import type { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 export type {
   IncompleteColumn,
@@ -294,7 +295,9 @@ interface BaseOperationDefinitionProps<
   paramEditor?: React.ComponentType<
     AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
   >;
-  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
+  getAdvancedOptions?: (
+    params: ParamEditorProps<C> & { euiTheme: EuiThemeComputed }
+  ) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern

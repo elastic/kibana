@@ -29,15 +29,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import {
+  FeatureFeedbackButton,
+  useKibanaQuerySettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
 import type { Query } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
 import { FixedDatePicker } from '../../fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
 import { KibanaEnvironmentContext, useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
@@ -57,11 +63,11 @@ export const JobSetupScreen = (props: Props) => {
   const kubernetes = useMetricK8sModuleContext();
   const { metricsView } = useMetricsDataViewContext();
   const [filter, setFilter] = useState<string>('');
-  const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const { euiTheme } = useEuiTheme();
   const { telemetry } = useKibanaContextForPlugin().services;
+  const kibanaQuerySettings = useKibanaQuerySettings();
 
   const indices = host.sourceConfiguration.indices;
 
@@ -108,7 +114,46 @@ export const JobSetupScreen = (props: Props) => {
     [telemetry, props.jobType]
   );
 
+  const isValidKuery = useCallback(
+    (expression: string) => {
+      try {
+        fromKueryExpression(expression, kibanaQuerySettings);
+      } catch (err) {
+        return false;
+      }
+      return true;
+    },
+    [kibanaQuerySettings]
+  );
+
+  const getFilterForHosts = useCallback(
+    (baseQuery: estypes.QueryDslQueryContainer): estypes.QueryDslQueryContainer => {
+      const inventoryModel = findInventoryModel('host');
+
+      return {
+        bool: {
+          filter: [...[baseQuery], ...(inventoryModel.nodeFilter?.({ schema: 'ecs' }) ?? [])],
+        },
+      };
+    },
+    []
+  );
+
   const createJobs = useCallback(() => {
+    const baseQuery = buildEsQuery(
+      metricsView?.dataViewReference,
+      {
+        language: 'kuery',
+        query: isValidKuery(filter) ? filter : '',
+      },
+      [],
+      kibanaQuerySettings
+    );
+
+    const filterQuery = JSON.stringify(
+      props.jobType === 'hosts' ? getFilterForHosts(baseQuery) : baseQuery
+    );
+
     const date = moment(startDate).toDate();
     if (hasSummaries) {
       telemetry.reportAnomalyDetectionSetup({
@@ -144,29 +189,31 @@ export const JobSetupScreen = (props: Props) => {
       );
     }
   }, [
-    cleanUpAndSetUpModule,
-    filterQuery,
-    setUpModule,
-    hasSummaries,
-    indices,
-    partitionField,
-    startDate,
-    telemetry,
+    metricsView?.dataViewReference,
+    isValidKuery,
     filter,
+    kibanaQuerySettings,
     props.jobType,
+    getFilterForHosts,
+    startDate,
+    hasSummaries,
+    telemetry,
+    partitionField,
+    cleanUpAndSetUpModule,
+    indices,
+    setUpModule,
   ]);
 
   const onFilterChange = useCallback(
     (payload: { query?: Query }) => {
       const kuery = payload.query?.query as string;
       setFilter(kuery);
-      setFilterQuery(convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference) || '');
       telemetry.reportAnomalyDetectionFilterFieldChange({
         job_type: props.jobType,
         filter_field: kuery ? kuery : undefined,
       });
     },
-    [metricsView?.dataViewReference, telemetry, props.jobType]
+    [telemetry, props.jobType]
   );
 
   const onPartitionFieldChange = useCallback(

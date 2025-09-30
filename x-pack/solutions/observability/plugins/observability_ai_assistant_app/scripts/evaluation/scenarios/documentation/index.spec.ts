@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import {
+import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,
@@ -16,6 +16,12 @@ import {
 import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { chatClient, kibanaClient, logger } from '../../services';
+
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/documentation/documentation.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
 
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';

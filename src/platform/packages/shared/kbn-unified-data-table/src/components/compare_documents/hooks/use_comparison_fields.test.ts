@@ -9,15 +9,13 @@
 
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {
-  MAX_COMPARISON_FIELDS,
-  useComparisonFields,
-  UseComparisonFieldsProps,
-} from './use_comparison_fields';
+import type { UseComparisonFieldsProps } from './use_comparison_fields';
+import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
 import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { fieldList, FieldSpec } from '@kbn/data-views-plugin/common';
-import { EsHitRecord } from '@kbn/discover-utils/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 const matchValues = (hit: EsHitRecord) => {
   hit.fields!.bytes = [50];

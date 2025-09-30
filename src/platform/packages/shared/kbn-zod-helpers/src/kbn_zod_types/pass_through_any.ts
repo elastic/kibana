@@ -8,7 +8,8 @@
  */
 
 import * as z from '@kbn/zod';
-import { KbnZodType, KbnZodTypes } from './kbn_zod_type';
+import type { KbnZodType } from './kbn_zod_type';
+import { KbnZodTypes } from './kbn_zod_type';
 
 /**
  * This is a helper schema to pass through any value without validation.

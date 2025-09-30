@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RequestHandlerWrapper } from '@kbn/core-http-server';
+import type { RequestHandlerWrapper } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 
 function isKibanaServerError(error: any): error is KibanaServerError {

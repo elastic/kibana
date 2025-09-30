@@ -40,7 +40,7 @@ export const searchResultSchema = schema.object({
   }),
 });
 
-export const searchSchemas: ProcedureSchemas = {
+export const searchSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
@@ -58,7 +58,7 @@ export const searchSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export interface SearchQuery {
   /** The text to search for */

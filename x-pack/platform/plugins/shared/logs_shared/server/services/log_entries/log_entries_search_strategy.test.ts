@@ -14,7 +14,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';

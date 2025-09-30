@@ -64,7 +64,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -116,7 +115,9 @@ function DiscoverDocumentsComponent({
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = useSavedSearchInitial();
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
   const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
@@ -310,7 +311,7 @@ function DiscoverDocumentsComponent({
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        savedSearchId={savedSearch.id}
+        savedSearchId={persistedDiscoverSession?.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
@@ -323,7 +324,7 @@ function DiscoverDocumentsComponent({
     ),
     [
       dataView,
-      savedSearch.id,
+      persistedDiscoverSession?.id,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
@@ -333,20 +334,38 @@ function DiscoverDocumentsComponent({
     ]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+    },
+    [dispatch, setDataGridUiState]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererDensity = useMemo(
+    () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
+    [density, dataGridUiState, services.storage]
+  );
+  const cellRendererRowHeight = useMemo(
+    () =>
+      getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight ?? dataGridUiState?.rowHeight,
+        configRowHeight,
+      }),
+    [rowHeight, dataGridUiState, services.storage, configRowHeight]
+  );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density: density ?? getDataGridDensity(services.storage, 'discover'),
-      rowHeight: getRowHeight({
-        storage: services.storage,
-        consumer: 'discover',
-        rowHeightState: rowHeight,
-        configRowHeight,
-      }),
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -402,14 +421,6 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
-  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
-  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
-  const onInitialStateChange = useCallback(
-    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
-      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
-    [dispatch, setDataGridUiState]
-  );
-
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -448,8 +459,8 @@ function DiscoverDocumentsComponent({
             }
             rows={rows}
             sort={(sort as SortOrder[]) || []}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
+            searchDescription={persistedDiscoverSession?.description}
+            searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
             settings={grid}

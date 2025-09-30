@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
-import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
+import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';

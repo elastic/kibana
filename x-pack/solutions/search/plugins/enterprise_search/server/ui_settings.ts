@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UiSettingsParams } from '@kbn/core/types';
+import type { UiSettingsParams } from '@kbn/core/types';
 
 /**
  * uiSettings definitions for Enterprise Search

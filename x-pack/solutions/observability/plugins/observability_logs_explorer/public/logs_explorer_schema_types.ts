@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 
 export interface Column {
   field: string;

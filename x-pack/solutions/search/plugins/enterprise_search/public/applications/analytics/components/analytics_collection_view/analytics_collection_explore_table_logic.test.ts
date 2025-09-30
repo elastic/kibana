@@ -7,15 +7,13 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import {
-  AnalyticsCollectionExploreTableLogic,
-  Sorting,
-} from './analytics_collection_explore_table_logic';
+import type { Sorting } from './analytics_collection_explore_table_logic';
+import { AnalyticsCollectionExploreTableLogic } from './analytics_collection_explore_table_logic';
 import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 

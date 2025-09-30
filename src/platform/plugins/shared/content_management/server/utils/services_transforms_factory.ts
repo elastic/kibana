@@ -12,7 +12,7 @@ import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
 import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import {
   compileServiceDefinitions,
-  getContentManagmentServicesTransforms,
+  getContentManagementServicesTransforms,
 } from '@kbn/object-versioning';
 import type { StorageContextGetTransformFn } from '../core';
 
@@ -31,13 +31,13 @@ const compiledCache = new LRUCache<string, { [path: string]: ObjectMigrationDefi
 });
 
 /**
- * Wrap the "getContentManagmentServicesTransforms()" handler from the @kbn/object-versioning package
+ * Wrap the "getContentManagementServicesTransforms()" handler from the @kbn/object-versioning package
  * to be able to cache the service definitions compilations so we can reuse them accross request as the
  * services definitions won't change until a new Elastic version is released. In which case the cache
  * will be cleared.
  *
  * @param contentTypeId The content type id for the service definition
- * @returns A "getContentManagmentServicesTransforms()"
+ * @returns A "getContentManagementServicesTransforms()"
  */
 export const getServiceObjectTransformFactory =
   (contentTypeId: string, _requestVersion: Version): StorageContextGetTransformFn =>
@@ -48,7 +48,7 @@ export const getServiceObjectTransformFactory =
       const compiledFromCache = compiledCache.get(contentTypeId);
 
       if (compiledFromCache) {
-        return getContentManagmentServicesTransforms(
+        return getContentManagementServicesTransforms(
           definitions,
           requestVersion,
           compiledFromCache
@@ -62,5 +62,5 @@ export const getServiceObjectTransformFactory =
       compiledCache.set(contentTypeId, compiled);
     }
 
-    return getContentManagmentServicesTransforms(definitions, requestVersion, compiled);
+    return getContentManagementServicesTransforms(definitions, requestVersion, compiled);
   };

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '../..';
-import { Type, TypeOptions } from '../types';
+import type { Type, TypeOptions } from '../types';
 
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.

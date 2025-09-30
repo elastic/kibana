@@ -12,7 +12,7 @@ import type {
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
-import { UUID } from '@kbn/elastic-assistant-common';
+import type { UUID } from '@kbn/elastic-assistant-common';
 
 export interface BulkOperationError {
   message: string;
@@ -22,11 +22,11 @@ export interface BulkOperationError {
   };
 }
 
-export interface WriterBulkResponse {
+export interface WriterBulkResponse<TUpdated = unknown> {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
-  docs_updated: unknown[];
+  docs_updated: TUpdated[];
   took: number;
 }
 
@@ -44,7 +44,7 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
 export interface DocumentsDataWriter {
   bulk: <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
-  ) => Promise<WriterBulkResponse>;
+  ) => Promise<WriterBulkResponse<TUpdateParams>>;
 }
 
 interface DocumentsDataWriterOptions {
@@ -60,14 +60,20 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
   public bulk = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
-  ) => {
+  ): Promise<WriterBulkResponse<TUpdateParams>> => {
     try {
       if (
         !params.documentsToCreate?.length &&
         !params.documentsToUpdate?.length &&
         !params.documentsToDelete?.length
       ) {
-        return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
+        return {
+          errors: [],
+          docs_created: [],
+          docs_deleted: [],
+          docs_updated: [],
+          took: 0,
+        } as WriterBulkResponse<TUpdateParams>;
       }
 
       const { errors, items, took } = await this.options.esClient.bulk(
@@ -91,9 +97,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           .map((item) => item.delete?._id),
         docs_updated: items
           .filter((item) => item.update?.status === 201 || item.update?.status === 200)
-          .map((item) => item.update?.get?._source),
+          .map((item) => item.update?.get?._source) as TUpdateParams[],
         took,
-      } as WriterBulkResponse;
+      } as WriterBulkResponse<TUpdateParams>;
     } catch (e) {
       this.options.logger.error(`Error bulk actions for documents: ${e.message}`);
       return {
@@ -109,10 +115,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         docs_deleted: [],
         docs_updated: [],
         took: 0,
-      } as WriterBulkResponse;
+      } as WriterBulkResponse<TUpdateParams>;
     }
   };
-
   getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({
     filter: {
       bool: {
@@ -153,6 +158,63 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
       },
     },
   });
+  getFilterByConversationUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
+              must: [
+                {
+                  exists: { field: 'created_by' },
+                },
+                {
+                  bool: {
+                    should: [
+                      // Match on users.id if profile_uid exists
+                      ...(authenticatedUser.profile_uid
+                        ? [{ term: { 'created_by.id': authenticatedUser.profile_uid } }]
+                        : []),
+                      // Always try to match on users.name
+                      { term: { 'created_by.name': authenticatedUser.username } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must: [
+                // legacy conversation without created_by field have users array we can match against
+                { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
+                {
+                  nested: {
+                    path: 'users',
+                    query: {
+                      bool: {
+                        should: [
+                          // Match on users.id if profile_uid exists
+                          ...(authenticatedUser.profile_uid
+                            ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
+                            : []),
+                          // Always try to match on users.name
+                          { term: { 'users.name': authenticatedUser.username } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  });
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
@@ -163,7 +225,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
-
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToUpdate = await this.options.esClient.search({
       query: {
         bool: {
@@ -180,7 +244,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,
@@ -200,16 +268,20 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _id: document.id,
           _index: responseToUpdate?.hits.hits.find((c) => c._id === document.id)?._index,
           _source: true,
+          retry_on_conflict: 3,
         },
       },
       getUpdateScript(document, updatedAt),
     ]);
   };
 
-  private getDeletedocumentsQuery = async (
+  private getDeleteDocumentsQuery = async (
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToDelete = await this.options.esClient.search({
       query: {
         bool: {
@@ -226,7 +298,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,
@@ -259,7 +335,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
-        ? await this.getDeletedocumentsQuery(params.documentsToDelete, params.authenticatedUser)
+        ? await this.getDeleteDocumentsQuery(params.documentsToDelete, params.authenticatedUser)
         : [];
 
     const documentUpdatedBody =

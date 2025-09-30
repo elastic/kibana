@@ -10,7 +10,7 @@ import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../../common/constants';
-import { AlertData } from '../../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../../utils/kibana_react';
 import { getBuildRelatedAlertsQuery } from './related_alerts/get_build_related_alerts_query';
 

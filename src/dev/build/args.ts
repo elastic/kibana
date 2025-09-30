@@ -10,7 +10,7 @@
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-import { BuildOptions } from './build_distributables';
+import type { BuildOptions } from './build_distributables';
 
 export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];

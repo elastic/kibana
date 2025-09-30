@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, Instance, apm } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates a low volume of APM transaction data.
+ */
+
+import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

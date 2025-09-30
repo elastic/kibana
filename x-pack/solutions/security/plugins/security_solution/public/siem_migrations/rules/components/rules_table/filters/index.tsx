@@ -7,19 +7,26 @@
 
 import React, { useCallback } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import type { AuthorFilter, FilterOptions, StatusFilter } from '../../../types';
-import { StatusFilterButton } from './status';
+import { statusFilterBaseOptions } from '../../../../common/components/filters';
+import { StatusFilterButton } from '../../../../common/components';
+import {
+  RulesSpecificStatusFilter,
+  type AuthorFilter,
+  type RulesFilterOptions,
+  type RulesStatusFilter,
+} from '../../../types';
 import { AuthorFilterButton } from './author';
+import * as i18n from './translations';
 
 export interface MigrationRulesFilterProps {
-  filterOptions?: FilterOptions;
-  onFilterOptionsChanged: (filterOptions?: FilterOptions) => void;
+  filterOptions?: RulesFilterOptions;
+  onFilterOptionsChanged: (filterOptions?: RulesFilterOptions) => void;
 }
 
 export const MigrationRulesFilter: React.FC<MigrationRulesFilterProps> = React.memo(
   ({ filterOptions, onFilterOptionsChanged }) => {
     const handleOnStatusChanged = useCallback(
-      (newStatus?: StatusFilter) => {
+      (newStatus?: RulesStatusFilter) => {
         onFilterOptionsChanged({ ...filterOptions, ...{ status: newStatus } });
       },
       [filterOptions, onFilterOptionsChanged]
@@ -32,11 +39,20 @@ export const MigrationRulesFilter: React.FC<MigrationRulesFilterProps> = React.m
       [filterOptions, onFilterOptionsChanged]
     );
 
+    const statusFilterOptions = [
+      ...statusFilterBaseOptions,
+      {
+        label: i18n.INDEX_PATTERN_MISSING_FILTER_OPTION,
+        data: { status: RulesSpecificStatusFilter.INDEX_PATTERN_MISSING },
+      },
+    ];
+
     return (
       <EuiFilterGroup>
         <StatusFilterButton
           status={filterOptions?.status}
           onStatusChanged={handleOnStatusChanged}
+          statusFilterOptions={statusFilterOptions}
         />
         <AuthorFilterButton
           author={filterOptions?.author}

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createTaskManagementScheduledAtTests({ getService }: FtrProviderContext) {
   const es = getService('es');

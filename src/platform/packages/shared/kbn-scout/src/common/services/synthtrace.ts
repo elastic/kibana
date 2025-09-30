@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import Url from 'url';
-import {
-  LogLevel,
-  SynthtraceClientTypes,
-  createLogger,
-  SynthtraceClientsManager,
-  GetClientsReturn,
-} from '@kbn/apm-synthtrace';
-import { Client } from '@elastic/elasticsearch';
-import { ScoutLogger } from './logger';
-import { ScoutTestConfig } from '../../types';
+import type { SynthtraceClientTypes, GetClientsReturn } from '@kbn/apm-synthtrace';
+import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { Client } from '@elastic/elasticsearch';
+import type { ScoutLogger } from './logger';
+import type { ScoutTestConfig } from '../../types';
 
 export interface SynthtraceClientOptions {
   kbnUrl?: string;

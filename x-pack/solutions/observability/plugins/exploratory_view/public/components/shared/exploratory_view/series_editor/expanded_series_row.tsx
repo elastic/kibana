@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { SeriesConfig, SeriesUrl } from '../types';
+import type { SeriesConfig, SeriesUrl } from '../types';
 import { PERCENTILE } from '../configurations/constants';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { OperationTypeSelect } from './columns/operation_type_select';

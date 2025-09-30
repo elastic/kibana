@@ -8,9 +8,10 @@
  */
 
 import { pick } from 'lodash';
-import { ApmFields } from '../apm/apm_fields';
-import { BaseSpan } from '../apm/base_span';
-import { serviceMap, ServiceMapOpts } from './service_map';
+import type { ApmFields } from '../apm/apm_fields';
+import type { BaseSpan } from '../apm/base_span';
+import type { ServiceMapOpts } from './service_map';
+import { serviceMap } from './service_map';
 
 describe('serviceMap', () => {
   const TIMESTAMP = 1677693600000;

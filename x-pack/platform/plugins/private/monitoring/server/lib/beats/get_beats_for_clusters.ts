@@ -9,7 +9,7 @@ import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 import type { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
+import type { LegacyRequest, Cluster } from '../../types';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

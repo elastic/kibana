@@ -9,8 +9,9 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { TagCloudVisParams } from './types';
+import type { SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
+import type { TagCloudVisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { ruleFields } from '../../../../data/detection_engine';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
@@ -19,6 +20,10 @@ import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
 describe('Non-default space rule detail page', { tags: ['@ess'] }, function () {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   const SPACE_ID = 'test';
 
   beforeEach(() => {

@@ -9,15 +9,15 @@
 
 import React from 'react';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import { OptionsListComponentApi } from '../types';
+import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 describe('Options list sorting button', () => {
   const mountComponent = async ({

@@ -9,7 +9,7 @@ import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/
 import { ByteSizeValue } from '@kbn/config-schema';
 import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 interface NodeWithLowDiskSpace {
   nodeId: string;

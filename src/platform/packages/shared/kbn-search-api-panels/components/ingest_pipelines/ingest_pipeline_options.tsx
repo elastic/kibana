@@ -10,8 +10,8 @@
 import React, { Fragment } from 'react';
 import { EuiFlexItem, EuiText, EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 
 interface OptionItem {
   value: string;

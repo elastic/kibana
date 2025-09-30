@@ -8,7 +8,7 @@
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {

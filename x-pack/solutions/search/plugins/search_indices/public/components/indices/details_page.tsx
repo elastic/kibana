@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';

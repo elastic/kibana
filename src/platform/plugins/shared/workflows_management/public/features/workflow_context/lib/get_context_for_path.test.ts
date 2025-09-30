@@ -7,32 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getContextForPath } from './get_context_for_path';
+import type { Step, WorkflowYaml } from '@kbn/workflows';
+import { getContextSchemaForPath } from './get_context_for_path';
+import { z } from '@kbn/zod';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
+import { ForEachContextSchema, DynamicStepContextSchema } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 
-describe('getContextForPath', () => {
+describe('getContextSchemaForPath', () => {
   const definition = {
     version: '1' as const,
     name: 'test-workflow',
     enabled: true,
     triggers: [
       {
-        type: 'triggers.elastic.manual' as const,
+        type: 'manual' as const,
         enabled: true,
       },
     ],
     steps: [
       {
         name: 'first-step',
-        type: 'console.log',
+        type: 'console',
         with: {
           message: 'Hello, world!',
         },
       },
       {
         name: 'second-step',
-        type: 'console.log',
+        type: 'console',
         with: {
           message: 'Again, hello, world!',
         },
@@ -44,14 +47,14 @@ describe('getContextForPath', () => {
         steps: [
           {
             name: 'if-true-1',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If true',
             },
           },
           {
             name: 'if-true-2',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If true 2',
             },
@@ -60,7 +63,7 @@ describe('getContextForPath', () => {
         else: [
           {
             name: 'if-false',
-            type: 'console.log',
+            type: 'console',
             with: {
               message: 'If false',
             },
@@ -73,36 +76,112 @@ describe('getContextForPath', () => {
     },
   } as WorkflowYaml;
 
-  const workflowGraph = getWorkflowGraph(definition);
+  const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
   it('should return the root context for the first step', () => {
-    const context = getContextForPath(definition, workflowGraph, ['steps', 0]);
+    const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {},
-    });
+    expectZodSchemaEqual(
+      context,
+      DynamicStepContextSchema.extend({
+        inputs: z.object({}),
+        consts: z.object({
+          test: z.string(),
+        }),
+      })
+    );
   });
 
   it('should return the context for the second step', () => {
-    const context2 = getContextForPath(definition, workflowGraph, ['steps', 1, 'with', 'message']);
+    const context = getContextSchemaForPath(definition, workflowGraph, [
+      'steps',
+      1,
+      'with',
+      'message',
+    ]);
 
-    expect(context2).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
+    expectZodSchemaEqual(
+      context,
+      DynamicStepContextSchema.extend({
+        inputs: z.object({}),
+        steps: z.object({
+          'first-step': z.object({
+            output: z.string().optional(),
+            error: z.any().optional(),
+          }),
+        }),
+        consts: z.object({
+          test: z.string(),
+        }),
+      })
+    );
+  });
+
+  it('should return foreach context for nested foreach step', () => {
+    const definitionWithForeach = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
         },
+      ],
+      consts: {
+        items: [
+          {
+            name: 'Robert',
+            surname: 'Carmack',
+          },
+          {
+            name: 'Jane',
+            surname: 'Doe',
+          },
+        ],
       },
+      steps: [
+        {
+          name: 'foreach-step',
+          type: 'foreach',
+          foreach: 'consts.items',
+          steps: [
+            {
+              name: 'foreach-step-1',
+              type: 'console',
+              with: {
+                message: 'Hello, {{foreach.item.name}} {{foreach.item.surname}}',
+              },
+            } as Step,
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithForeach = WorkflowGraph.fromWorkflowDefinition(definitionWithForeach);
+    const context = getContextSchemaForPath(definitionWithForeach, workflowGraphWithForeach, [
+      'steps',
+      0,
+      'steps',
+      0,
+      'with',
+      'message',
+    ]);
+    const itemSchema = z.object({
+      name: z.string(),
+      surname: z.string(),
     });
+    expect((context.shape as any).foreach).toBeDefined();
+    expectZodSchemaEqual(
+      (context.shape as any).foreach,
+      ForEachContextSchema.extend({
+        items: z.array(itemSchema),
+        item: itemSchema,
+      })
+    );
   });
 
   it('should return the context for second step in true branch of if-split', () => {
-    const context = getContextForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(definition, workflowGraph, [
       'steps',
       2,
       'steps',
@@ -111,29 +190,13 @@ describe('getContextForPath', () => {
       'message',
     ]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
-        },
-        'second-step': {
-          output: {},
-        },
-        'if-split': {
-          output: {},
-        },
-        'if-true-1': {
-          output: {},
-        },
-      },
-    });
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
+      ['first-step', 'second-step', 'if-split', 'if-true-1'].sort()
+    );
   });
 
   it('should return the context for first step in false branch of if-split', () => {
-    const context = getContextForPath(definition, workflowGraph, [
+    const context = getContextSchemaForPath(definition, workflowGraph, [
       'steps',
       2,
       'else',
@@ -142,21 +205,8 @@ describe('getContextForPath', () => {
       'message',
     ]);
 
-    expect(context).toEqual({
-      consts: {
-        test: 'test',
-      },
-      steps: {
-        'first-step': {
-          output: {},
-        },
-        'second-step': {
-          output: {},
-        },
-        'if-split': {
-          output: {},
-        },
-      },
-    });
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
+      ['first-step', 'second-step', 'if-split'].sort()
+    );
   });
 });

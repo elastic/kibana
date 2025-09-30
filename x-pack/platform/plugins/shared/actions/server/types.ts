@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -92,6 +92,7 @@ export interface ActionTypeExecutorOptions<
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 export type ActionResult = Connector;

@@ -9,12 +9,8 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { emailServices, getEmailServices } from './email';
-import {
-  ValidatedEmail,
-  InvalidEmailReason,
-  ValidateEmailAddressesOptions,
-  MustacheInEmailRegExp,
-} from '@kbn/actions-plugin/common';
+import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { InvalidEmailReason, MustacheInEmailRegExp } from '@kbn/actions-plugin/common';
 import { experimentalFeaturesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';

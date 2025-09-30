@@ -44,15 +44,14 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
-const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
+const SUPPRESS_BY_FIELDS = ['myhash.mysha256'];
 
 const rule = getNewThreatIndicatorRule();
 
-// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -62,9 +61,7 @@ describe(
       deleteAlertsAndRules();
     });
 
-    // https://github.com/elastic/kibana/issues/187621
-    // FLAKY: https://github.com/elastic/kibana/issues/196711
-    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    describe('without suppression', () => {
       beforeEach(() => {
         createRule(rule);
       });
@@ -73,7 +70,7 @@ describe(
         visit(RULES_MANAGEMENT_URL);
         editFirstRule();
 
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS, true);
         selectAlertSuppressionPerInterval();
         setAlertSuppressionDuration(2, 'h');
 
@@ -176,7 +173,7 @@ describe(
         });
         getIndicatorDeleteButton(1).click();
 
-        cy.contains('Conditions with AND clauses must have at least one MATCHES entry.');
+        cy.contains('Entries with AND clauses must have at least one MATCHES condition.');
       });
 
       it('shows error when 2 identical entries with different match operator configured', () => {
@@ -189,7 +186,7 @@ describe(
         });
 
         cy.contains(
-          'When forming an AND statement with MATCHES and DOES NOT MATCH entries, avoid selecting identical field values for comparison from the source and indicator indices.'
+          'DOES NOT MATCH and MATCHES entries that are connected by an AND clause cannot use the same threat mappings. Choose a different threat mapping for one of the entries.'
         );
       });
     });

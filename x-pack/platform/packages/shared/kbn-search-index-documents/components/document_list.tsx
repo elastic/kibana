@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
+import type { Pagination } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -21,7 +22,6 @@ import {
   EuiPopover,
   EuiText,
   EuiSpacer,
-  Pagination,
   EuiBadge,
 } from '@elastic/eui';
 

@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
+import type { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 import { CenterJustifiedSpinner } from '../components/center_justified_spinner';
 
 export function suspendedComponentWithProps<T = unknown>(

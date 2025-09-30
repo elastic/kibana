@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeseriesVisData } from '../../../../common/types';
-import { TimeseriesVisParams } from '../../../types';
-import { VisFields } from '../../lib/fetch_fields';
+import type { TimeseriesVisParams } from '../../../types';
+import type { VisFields } from '../../lib/fetch_fields';
 
 export interface PanelConfigProps {
   fields: VisFields;

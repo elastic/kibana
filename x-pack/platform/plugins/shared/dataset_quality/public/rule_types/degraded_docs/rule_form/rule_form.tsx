@@ -20,14 +20,14 @@ import {
   type RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { isArray } from 'lodash';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import { INDEX } from '../../../../common/es_fields';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { RuleConditionChart } from './rule_condition_chart';

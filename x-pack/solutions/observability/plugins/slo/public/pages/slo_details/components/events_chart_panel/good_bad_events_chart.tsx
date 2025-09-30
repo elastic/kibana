@@ -4,29 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  ElementClickListener,
-  Position,
-  ScaleType,
-  Settings,
-  XYChartElementEvent,
-} from '@elastic/charts';
+import type { ElementClickListener, XYChartElementEvent } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 import { openInDiscover } from '../../utils/get_discover_link';
-import { GetPreviewDataResponseResults } from './types';
+import type { GetPreviewDataResponseResults } from './types';
 
 export interface Props {
   data: GetPreviewDataResponseResults;

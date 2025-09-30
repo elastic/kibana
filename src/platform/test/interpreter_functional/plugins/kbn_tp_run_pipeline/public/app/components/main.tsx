@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 import { first, pluck } from 'rxjs';
-import { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';
-import { ExpressionRenderHandler } from '../../types';
+import type { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';
+import type { ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {

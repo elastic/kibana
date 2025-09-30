@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ISearchGeneric } from '@kbn/search-types';
-import {
-  getESQLSingleColumnValues,
+import type { ISearchGeneric } from '@kbn/search-types';
+import type {
   GetESQLSingleColumnValuesSuccess,
   GetESQLSingleColumnValuesFailure,
 } from './get_esql_single_column_values';
+import { getESQLSingleColumnValues } from './get_esql_single_column_values';
 
 const mockGetESQLResults = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({

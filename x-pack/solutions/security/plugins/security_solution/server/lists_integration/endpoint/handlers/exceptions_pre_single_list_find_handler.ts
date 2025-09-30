@@ -15,6 +15,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
 export const getExceptionsPreSingleListFindHandler = (
@@ -33,6 +34,13 @@ export const getExceptionsPreSingleListFindHandler = (
       // Validate Trusted applications
       isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
+    } else if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      // Validate Trusted Devices
+      isEndpointArtifact = true;
+      await new TrustedDeviceValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSingleListFind();
     } else if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       // Host Isolation Exceptions
       isEndpointArtifact = true;

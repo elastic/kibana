@@ -8,19 +8,19 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FileLayer } from '@elastic/ems-client';
+import type { FileLayer } from '@elastic/ems-client';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
-import { RenderWizardArguments } from '../layer_wizard_registry';
+import type { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
@@ -377,6 +377,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
         <EuiFormRow>
           <EuiRadioGroup
+            name="boundariesSource"
             options={BOUNDARIES_OPTIONS}
             idSelected={this.state.leftSource}
             onChange={this._onLeftSourceChange}

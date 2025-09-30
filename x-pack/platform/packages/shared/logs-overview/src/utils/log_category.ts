@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogCategory } from '../types';
+import type { LogCategory } from '../types';
 
 export const getLogCategoryTerms = (logCategory: LogCategory) => {
   return logCategory.terms.split(' ');

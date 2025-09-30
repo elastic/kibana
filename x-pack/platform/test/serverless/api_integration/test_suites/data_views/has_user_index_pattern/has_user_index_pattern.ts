@@ -13,7 +13,7 @@ import {
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { configArray } from '../constants';
-import { RoleCredentials, InternalRequestHeader } from '../../../../shared/services';
+import type { RoleCredentials, InternalRequestHeader } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

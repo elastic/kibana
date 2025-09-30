@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchCodeExamples } from '../types';
+import type { SearchCodeExamples } from '../types';
 
 import { JavascriptSearchExample } from './javascript';
 import { PythonSearchExample } from './python';

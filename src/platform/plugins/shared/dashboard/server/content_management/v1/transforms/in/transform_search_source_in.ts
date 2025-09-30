@@ -8,7 +8,7 @@
  */
 
 import { extractReferences } from '@kbn/data-plugin/common';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceIn(

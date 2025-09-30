@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
@@ -17,6 +17,12 @@ import {
   apmTransactionRateAIAssistant,
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
+
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/alerts/alerts.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
 
 describe('Alerts', () => {
   const ruleIds: any[] = [];

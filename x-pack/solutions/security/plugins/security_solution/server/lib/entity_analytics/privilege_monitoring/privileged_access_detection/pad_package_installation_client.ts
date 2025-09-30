@@ -14,7 +14,6 @@ import {
   getInstalledPackages,
   getPackages,
 } from '@kbn/fleet-plugin/server/services/epm/packages';
-
 import type {
   ElasticsearchClient,
   IScopedClusterClient,
@@ -24,7 +23,7 @@ import type {
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { Installable, RegistrySearchResult } from '@kbn/fleet-plugin/common';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../common/api/entity_analytics';
 
 interface PadPackageInstallationClientOpts {
   logger: Logger;

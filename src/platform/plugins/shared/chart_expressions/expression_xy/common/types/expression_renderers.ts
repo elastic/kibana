@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomAnnotationTooltip } from '@elastic/charts';
+import type { CustomAnnotationTooltip } from '@elastic/charts';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { ManualPointEventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
+import type { ManualPointEventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
-import { XY_VIS_RENDERER } from '../constants';
+import type { XY_VIS_RENDERER } from '../constants';
 import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
 export interface XYChartProps {

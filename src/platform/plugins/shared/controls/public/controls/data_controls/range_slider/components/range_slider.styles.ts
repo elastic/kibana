@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 // @ts-ignore - Kibana has trouble reaching into lib/components for types
 import { euiFormControlDefaultShadow } from '@elastic/eui/lib/components/form/form.styles';
 

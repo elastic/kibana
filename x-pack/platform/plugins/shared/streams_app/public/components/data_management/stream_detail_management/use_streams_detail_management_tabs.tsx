@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
+import { StreamDetailReferencesView } from '../../stream_detail_references_view/stream_detail_references_view';
 
 export function useStreamsDetailManagementTabs({
   definition,
@@ -19,13 +20,15 @@ export function useStreamsDetailManagementTabs({
   refreshDefinition: () => void;
 }) {
   const {
-    features: { significantEvents },
+    features: { significantEvents, groupStreams },
+    isLoading,
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
 
   return {
-    enrich: {
+    isLoading,
+    processing: {
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
@@ -33,15 +36,20 @@ export function useStreamsDetailManagementTabs({
         defaultMessage: 'Processing',
       }),
     },
+    ...(groupStreams?.enabled
+      ? {
+          references: {
+            content: <StreamDetailReferencesView definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.referencesTab', {
+              defaultMessage: 'References',
+            }),
+          },
+        }
+      : {}),
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {
-            content: (
-              <StreamDetailSignificantEventsView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
+            content: <StreamDetailSignificantEventsView definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
               defaultMessage: 'Significant events',
             }),

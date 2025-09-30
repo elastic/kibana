@@ -81,7 +81,7 @@ describe('get_prepackaged_rule_status_route', () => {
       prepackagedTimelines: [],
     });
 
-    getPrebuiltRulesAndTimelinesStatusRoute(server.router);
+    getPrebuiltRulesAndTimelinesStatusRoute(server.router, clients.logger);
   });
 
   describe('status codes', () => {

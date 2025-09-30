@@ -7,34 +7,41 @@ This plugin provides an app based on the `LogsExplorer` component from the `logs
 ### Stateful
 
 #### FTR Server
+
 ```
-yarn test:ftr:server --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
 ```
 
 #### FTR Runner
+
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
+
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
 ```
 
 ### Serverless
 
 #### Server
+
 ```
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 ```
 
 #### Runner
+
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/index.ts
 ```
+
 #### Running Individual Tests
+
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/$1
 ```
 
 ### Using dockerized package registry
@@ -50,16 +57,19 @@ export set FLEET_PACKAGE_REGISTRY_PORT=12345
 To unset the variable, and run the tests against the real endpoint again, execute
 
 ```
-unset FLEET_PACKAGE_REGISTRY_PORT 
+unset FLEET_PACKAGE_REGISTRY_PORT
 ```
 
 ## Checktypes
 
 #### Logs explorer
+
 ```
 node scripts/type_check.js --project x-pack/solutions/observability/plugins/logs_explorer/tsconfig.json
 ```
+
 #### Observability Logs explorer
+
 ```
 node scripts/type_check.js --project x-pack/solutions/observability/plugins/observability_logs_explorer/tsconfig.json
 ```
@@ -67,11 +77,13 @@ node scripts/type_check.js --project x-pack/solutions/observability/plugins/obse
 ### Generating Data using Synthtrace
 
 #### Logs Data only
+
 ```
 node scripts/synthtrace simple_logs.ts --clean [--live]
 ```
 
 #### Logs and Metrics Data
+
 ```
 node scripts/synthtrace logs_and_metrics.ts --clean [--live]
 ```

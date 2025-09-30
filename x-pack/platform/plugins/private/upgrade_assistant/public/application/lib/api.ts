@@ -8,6 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
+import type { ReindexArgs } from '@kbn/reindex-service-plugin/common';
 import type { UpdateIndexOperation } from '../../../common/update_index';
 import type {
   ESUpgradeStatus,
@@ -262,8 +263,12 @@ export class ApiService {
   public async getReindexStatus(indexName: string) {
     return this.reindexService!.getReindexStatus(indexName);
   }
-  public async startReindexTask(indexName: string) {
-    return this.reindexService!.startReindex(indexName);
+
+  public async startReindexTask(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
+    return this.reindexService!.startReindex({
+      ...reindexArgs,
+      reindexOptions: { enqueue: true, deleteOldIndex: true },
+    });
   }
   public async cancelReindexTask(indexName: string) {
     return this.reindexService!.cancelReindex(indexName);

@@ -2099,7 +2099,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2216,13 +2216,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
@@ -2623,7 +2617,15 @@
                 "section": "def-common.MlAnomalyRecordDoc",
                 "text": "MlAnomalyRecordDoc"
               },
-              "[]; }>; }; jobs: { jobsSummary(jobIds: string[]): Promise<",
+              "[]; }>; getTopInfluencers(payload: ",
+              "GetTopInfluencersRequest",
+              "): Promise<",
+              "InfluencersByFieldResponse",
+              ">; getScoresByBucket(payload: { jobIds: string[]; earliestMs: number; latestMs: number; intervalMs: number; perPage?: number | undefined; fromPage?: number | undefined; swimLaneSeverity?: { min: number; max?: number | undefined; }[] | undefined; }): Promise<",
+              "ViewByResponse",
+              ">; getInfluencerValueMaxScoreByTime(payload: { jobIds: string[]; influencerFieldName: string; influencerFieldValues?: string[] | undefined; earliestMs: number; latestMs: number; intervalMs: number; maxResults?: number | undefined; perPage?: number | undefined; fromPage?: number | undefined; influencersFilterQuery?: unknown; swimLaneSeverity?: { min: number; max?: number | undefined; }[] | undefined; }): Promise<",
+              "ViewByResponse",
+              ">; }; jobs: { jobsSummary(jobIds: string[]): Promise<",
               "MlSummaryJobs",
               ">; jobIdsWithGeo(): Promise<string[]>; jobsWithTimerange(dateFormatTz: string): Promise<{ jobs: ",
               "MlJobWithTimeRange",
@@ -5122,7 +5124,7 @@
           },
           " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
           "MappingTimeSeriesMetricType",
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; metadata_field?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
         "deprecated": false,

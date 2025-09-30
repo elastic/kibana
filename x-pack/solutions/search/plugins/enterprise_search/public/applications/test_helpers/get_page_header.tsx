@@ -7,9 +7,11 @@
 
 import React, { Fragment } from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiPageHeaderProps, EuiTab } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 
 /*
  * Given an AppSearchPageTemplate or WorkplaceSearchPageTemplate, these

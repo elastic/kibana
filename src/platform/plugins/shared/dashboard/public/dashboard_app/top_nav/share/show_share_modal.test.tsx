@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { DashboardLocatorParams } from '../../../../common/types';
+import type { Capabilities } from '@kbn/core/public';
+import type { DashboardLocatorParams } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
@@ -89,7 +89,7 @@ describe('ShowShareModal', () => {
       panels: {
         panel_1: {
           type: 'panel_type',
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+          grid: { w: 0, h: 0, x: 0, y: 0, i: '0' },
           panelRefName: 'superPanel',
           explicitInput: {
             id: 'superPanel',

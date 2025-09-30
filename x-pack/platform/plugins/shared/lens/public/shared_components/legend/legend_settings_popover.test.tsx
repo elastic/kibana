@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import type { LegendSettingsPopoverProps } from './legend_settings_popover';
+import { LegendSettingsPopover } from './legend_settings_popover';
 import userEvent from '@testing-library/user-event';
-import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { LegendValue } from '@elastic/charts';
 

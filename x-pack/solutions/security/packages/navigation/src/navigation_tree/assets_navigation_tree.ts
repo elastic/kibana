@@ -13,10 +13,17 @@ import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 import { renderIntegrationsLinkCallout } from './integrations_link_callout';
 
-export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({
+export const createAssetsNavigationTree = (
+  core: CoreStart,
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityGroupName.assets,
+  iconV2: 'folderClosed',
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
+  sideNavVersion,
   children: [
     {
       link: 'fleet',
@@ -55,6 +62,10 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
         {
           id: SecurityPageName.policies,
           link: securityLink(SecurityPageName.policies),
+        },
+        {
+          id: SecurityPageName.endpointExceptions,
+          link: securityLink(SecurityPageName.endpointExceptions),
         },
         {
           id: SecurityPageName.trustedApps,

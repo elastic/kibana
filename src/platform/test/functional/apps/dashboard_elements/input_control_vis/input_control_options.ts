@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('input control is clear', async () => {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
-        await comboBox.set('listControlSelect0', 'osx');
+        await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when item selected', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');

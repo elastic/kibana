@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import type { QuerySuggestion } from '../autocomplete';
+import { QuerySuggestionTypes } from '../autocomplete';
 import { SuggestionsComponent } from './suggestions_component';
 import { EuiThemeProvider } from '@elastic/eui';
 import { userEvent } from '@testing-library/user-event';

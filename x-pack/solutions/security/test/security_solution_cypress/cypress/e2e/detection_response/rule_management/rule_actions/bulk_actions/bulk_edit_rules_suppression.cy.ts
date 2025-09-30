@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { MODAL_CONFIRMATION_BODY } from '../../../../../screens/alerts_detection_rules';
 import { RULES_BULK_EDIT_FORM_TITLE } from '../../../../../screens/rules_bulk_actions';
@@ -66,6 +67,10 @@ describe(
   'Bulk Edit - Alert Suppression',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

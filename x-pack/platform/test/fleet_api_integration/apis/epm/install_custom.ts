@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const INTEGRATION_NAME = 'my_nginx';
 const INTEGRATION_VERSION = '1.0.0';

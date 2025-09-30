@@ -6,15 +6,14 @@
  */
 
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import type { ICMPFields } from '../../../../common/runtime_types/monitor_management';
 import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
+import type { NormalizerResult, NormalizedProjectProps } from './common_fields';
 import {
-  NormalizerResult,
-  NormalizedProjectProps,
   normalizeYamlConfig,
   getNormalizeCommonFields,
   getValueInSeconds,

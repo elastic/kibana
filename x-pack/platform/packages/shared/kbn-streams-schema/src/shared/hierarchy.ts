@@ -30,6 +30,10 @@ export function getAncestors(id: string) {
   return parts.slice(0, parts.length - 1).map((_, index) => parts.slice(0, index + 1).join('.'));
 }
 
+export function getRoot(id: string) {
+  return id.split('.')[0];
+}
+
 export function getAncestorsAndSelf(id: string) {
   return getAncestors(id).concat(id);
 }

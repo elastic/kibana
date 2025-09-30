@@ -9,9 +9,9 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import {
+import type {
   DrawState,
   EditState,
   Goto,

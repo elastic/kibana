@@ -7,7 +7,8 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
 import React from 'react';
 import {
   syntheticsMonitorDetailLocatorID,

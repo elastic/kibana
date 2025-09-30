@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart } from './types';
+import type { OnechatPluginSetup, OnechatPluginStart } from './types';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {};
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
-  return {};
+  return {} as OnechatPluginStart;
 };
 
 export const onechatMocks = {

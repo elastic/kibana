@@ -384,7 +384,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             />
           </EuiFlexItem>
         )}
-
         <>
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
@@ -415,42 +414,44 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           </EuiFlexItem>
         </>
         {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule margin="xl" />
-              <EuiCallOut
-                data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
-                title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
-                color="warning"
-              >
-                <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
-              </EuiCallOut>
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <EuiCallOut
+              data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
+              title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+              color="warning"
+            >
+              <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
         ) : null}
-        <EuiSpacer size="s" />
       </EuiFlexGroup>
-
-      {isEditMode && (
-        <>
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
-            <p>{i18n.ARCHIVE_SUBTITLE}</p>
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
+        gutterSize="l"
+        responsive={false}
+      >
+        {isEditMode && (
+          <EuiFlexItem grow={false}>
             <EuiButton fill color="danger" onClick={showModal}>
               {i18n.ARCHIVE}
             </EuiButton>
             {modal}
-          </EuiCallOut>
-          <EuiHorizontalRule margin="xl" />
-        </>
-      )}
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="l" responsive={false}>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>

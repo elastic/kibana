@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigKey, MonitorFields, ThrottlingConfig } from '../runtime_types';
+import type { ConfigKey, MonitorFields, ThrottlingConfig } from '../runtime_types';
 
 export type Validator = (config: Partial<MonitorFields & ThrottlingConfig>) => boolean;
 export type NamespaceValidator = (

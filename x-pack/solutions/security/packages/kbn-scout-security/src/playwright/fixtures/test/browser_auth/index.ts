@@ -15,7 +15,8 @@ import type {
   ScoutLogger,
   EsClient,
 } from '@kbn/scout';
-import { roleDescriptorsFixture, RoleDescriptorsFixture } from '../../worker';
+import type { RoleDescriptorsFixture } from '../../worker';
+import { roleDescriptorsFixture } from '../../worker';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;

@@ -11,10 +11,9 @@ import { of } from 'rxjs';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { chromeServiceMock, coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
-import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 export function createServicesMock() {
@@ -50,7 +49,6 @@ export function createServicesMock() {
 
   return {
     core: corePluginMock,
-    charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
     history: () => ({
       location: {

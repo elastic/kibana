@@ -10,7 +10,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { EuiButtonIcon, euiCanAnimate, EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiButtonIcon, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '../favorites_query';
 import { useFavoritesClient } from '../favorites_context';

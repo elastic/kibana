@@ -9,9 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { aggValueCountFnName } from './value_count_fn';
-import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
+import type { IMetricAggConfig } from './metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 const valueCountTitle = i18n.translate('data.search.aggs.metrics.valueCountTitle', {
   defaultMessage: 'Value Count',

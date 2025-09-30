@@ -24,6 +24,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/scout",
     "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -8,7 +8,7 @@
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { UpdateRuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/rules/types';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -29,6 +29,7 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
+  SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -48,20 +49,16 @@ import type {
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationIndexPatternResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
+import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
 
-export interface GetRuleMigrationStatsParams {
-  /** `id` of the migration to get stats for */
-  migrationId: string;
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
 /** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
   migrationId,
   signal,
-}: GetRuleMigrationStatsParams): Promise<RuleMigrationStats> => {
+}: GetMigrationStatsParams): Promise<RuleMigrationStats> => {
   // Typed with `RuleMigrationStats` instead of `GetRuleMigrationStatsResponse` to use native enums instead of the zod enum
   return KibanaServices.get().http.get<RuleMigrationStats>(
     replaceParams(SIEM_RULE_MIGRATION_STATS_PATH, { migration_id: migrationId }),
@@ -69,14 +66,10 @@ export const getRuleMigrationStats = async ({
   );
 };
 
-export interface GetRuleMigrationsStatsAllParams {
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
 /** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
 export const getRuleMigrationsStatsAll = async ({
   signal,
-}: GetRuleMigrationsStatsAllParams = {}): Promise<RuleMigrationStats[]> => {
+}: GetMigrationsStatsAllParams = {}): Promise<RuleMigrationStats[]> => {
   // Typed with `RuleMigrationStats` instead of `GetAllStatsRuleMigrationResponse` to use native enums instead of the zod enum
   return KibanaServices.get().http.get<RuleMigrationStats[]>(SIEM_RULE_MIGRATIONS_ALL_STATS_PATH, {
     version: '1',
@@ -258,6 +251,7 @@ export const getMigrationRules = async ({
         is_partially_translated: filters?.partiallyTranslated,
         is_untranslatable: filters?.untranslatable,
         is_failed: filters?.failed,
+        is_missing_index: filters?.missingIndex,
       },
       signal,
     }
@@ -414,5 +408,30 @@ export const deleteMigration = async ({ migrationId, signal }: DeleteMigrationPa
   return KibanaServices.get().http.delete<unknown>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
     { version: '1', signal }
+  );
+};
+
+export interface UpdateIndexPatternParams {
+  /** `id` of the migration to update the index pattern for */
+  migrationId: string;
+  /** The index pattern to update */
+  indexPattern: string;
+  /** The ids of the rules to update */
+  ids?: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+export const updateIndexPattern = async ({
+  migrationId,
+  indexPattern,
+  ids,
+  signal,
+}: UpdateIndexPatternParams): Promise<UpdateRuleMigrationIndexPatternResponse> => {
+  const payload = ids?.length
+    ? { index_pattern: indexPattern, ids }
+    : { index_pattern: indexPattern };
+  return KibanaServices.get().http.post<UpdateRuleMigrationIndexPatternResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify(payload), signal }
   );
 };

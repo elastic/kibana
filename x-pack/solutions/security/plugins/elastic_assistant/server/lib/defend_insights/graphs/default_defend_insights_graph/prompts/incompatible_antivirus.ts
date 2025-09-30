@@ -5,31 +5,14 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
+import type { DefendInsightsCombinedPrompts } from '.';
 import { promptDictionary, getPromptsByGroupId } from '../../../../prompt';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
-
-// We may need to differentiate between insights in the future, keeping the type for now
-export interface DefendInsightsPrompts {
-  default: string;
-  refine: string;
-  continue: string;
-}
-// We may need to differentiate between insights in the future, keeping the type for now
-export interface DefendInsightsGenerationPrompts {
-  group: string;
-  events: string;
-  eventsId: string;
-  eventsEndpointId: string;
-  eventsValue: string;
-}
-
-export interface DefendInsightsCombinedPrompts
-  extends DefendInsightsPrompts,
-    DefendInsightsGenerationPrompts {}
 
 export async function getIncompatibleAntivirusPrompt({
   actionsClient,

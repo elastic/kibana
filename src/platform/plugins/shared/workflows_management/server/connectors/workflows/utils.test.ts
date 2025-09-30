@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { createServiceError } from './utils';
 
 describe('Workflows Utils', () => {

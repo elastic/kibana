@@ -8,11 +8,12 @@
 import * as Rx from 'rxjs';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { apm } from '@elastic/apm-rum';
-import { InterceptDialogService, InterceptServiceStartDeps } from './service';
+import type { InterceptServiceStartDeps } from './service';
+import { InterceptDialogService } from './service';
 import { UserInterceptRunPersistenceService } from './service/user_intercept_run_persistence_service';
-import { Intercept } from './service';
+import type { Intercept } from './service';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
-import { TriggerInfo } from '../../common/types';
+import type { TriggerInfo } from '../../common/types';
 
 export type { Intercept } from './service';
 

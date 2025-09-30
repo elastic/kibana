@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EPM template tests loading base.yml: base.yml 1`] = `
+exports[`EPM template generateMappings tests loading base.yml: base.yml 1`] = `
 {
   "properties": {
     "user": {
@@ -56,7 +56,7 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
 }
 `;
 
-exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
+exports[`EPM template generateMappings tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
 {
   "properties": {
     "cockroachdb": {
@@ -134,7 +134,7 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
 }
 `;
 
-exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
+exports[`EPM template generateMappings tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
   "properties": {
     "coredns": {
@@ -186,7 +186,7 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 }
 `;
 
-exports[`EPM template tests loading system.yml: system.yml 1`] = `
+exports[`EPM template generateMappings tests loading system.yml: system.yml 1`] = `
 {
   "properties": {
     "system": {

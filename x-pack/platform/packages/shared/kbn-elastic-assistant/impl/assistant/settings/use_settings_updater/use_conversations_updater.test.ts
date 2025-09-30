@@ -9,8 +9,9 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useConversationsUpdater } from './use_conversations_updater';
 import { useAssistantContext } from '../../../assistant_context';
 import { bulkUpdateConversations } from '../../api/conversations/bulk_update_actions_conversations';
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
+import { MOCK_CURRENT_USER } from '../../../mock/conversation';
 
 jest.mock('../../../assistant_context');
 jest.mock('../../api/conversations/bulk_update_actions_conversations');
@@ -31,6 +32,9 @@ const mockConversations: Record<string, Conversation> = {
     category: 'assistant',
     replacements: {},
     updatedAt: '2025-02-20T18:47:00.327Z',
+    createdAt: '2025-02-20T18:47:00.327Z',
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
     id: '03a2ef3c-3aec-4f13-8f18-bb31b47b2df1',
   },
   'bc8fed20-a244-4343-9bae-f3ed59ed6411': {
@@ -43,6 +47,9 @@ const mockConversations: Record<string, Conversation> = {
     category: 'assistant',
     replacements: {},
     updatedAt: '2025-02-19T23:28:54.962Z',
+    createdAt: '2025-02-19T23:28:54.962Z',
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
     id: 'bc8fed20-a244-4343-9bae-f3ed59ed6411',
   },
 };
@@ -86,6 +93,9 @@ describe('useConversationsUpdater', () => {
         replacements: {},
         updatedAt: '2025-02-20T18:47:00.327Z',
         id: '03a2ef3c-3aec-4f13-8f18-bb31b47b2df1',
+        createdAt: '2025-02-19T23:28:54.962Z',
+        createdBy: MOCK_CURRENT_USER,
+        users: [MOCK_CURRENT_USER],
       },
     };
     expect(result.current.conversationSettings).toEqual(mockConversations);

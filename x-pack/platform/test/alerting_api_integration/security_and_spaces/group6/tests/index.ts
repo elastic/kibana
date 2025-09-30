@@ -11,5 +11,6 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
   describe('alerting api integration security and spaces disabled - Group 6', function () {
     loadTestFile(require.resolve('./maintenance_window_disabled'));
     loadTestFile(require.resolve('./rules_settings_disabled'));
+    loadTestFile(require.resolve('./rule_templates'));
   });
 }

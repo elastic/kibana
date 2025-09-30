@@ -6,14 +6,18 @@
  */
 
 import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import {
+  getCurrentConversationOwner,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
 
@@ -58,15 +62,15 @@ export const getComments: GetComments =
   (args) =>
   ({
     abortStream,
+    contentReferencesVisible,
     currentConversation,
+    isConversationOwner,
     isFetchingResponse,
     refetchCurrentConversation,
     regenerateMessage,
-    showAnonymizedValues,
-    currentUserAvatar,
     setIsStreaming,
+    showAnonymizedValues,
     systemPromptContent,
-    contentReferencesVisible,
   }) => {
     if (!currentConversation) return [];
 
@@ -104,23 +108,6 @@ export const getComments: GetComments =
         ]
       : [];
 
-    const UserAvatar = () => {
-      if (currentUserAvatar) {
-        return (
-          <EuiAvatar
-            name="user"
-            size="l"
-            color={currentUserAvatar?.color ?? 'subdued'}
-            {...(currentUserAvatar?.imageUrl
-              ? { imageUrl: currentUserAvatar.imageUrl as string }
-              : { initials: currentUserAvatar?.initials })}
-          />
-        );
-      }
-
-      return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
-    };
-
     return [
       ...(systemPromptContent && currentConversation.messages.length
         ? [
@@ -153,10 +140,12 @@ export const getComments: GetComments =
         const isLastComment = index === currentConversation.messages.length - 1;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
-
+        const user = isUser
+          ? message.user ?? getCurrentConversationOwner(currentConversation)
+          : undefined;
         const messageProps = {
           timelineAvatar: isUser ? (
-            <UserAvatar />
+            <SecurityUserAvatar user={user} />
           ) : (
             <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
@@ -165,11 +154,11 @@ export const getComments: GetComments =
               ? new Date().toLocaleString()
               : new Date(message.timestamp).toLocaleString()
           ),
-          username: isUser ? i18n.YOU : i18n.ASSISTANT,
+          username: isUser ? <SecurityUserName user={user} /> : i18n.ASSISTANT,
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 
-        const isControlsEnabled = isLastComment && !isUser;
+        const isControlsEnabled = isLastComment && !isUser && isConversationOwner;
 
         const transformMessage = (content: string) =>
           transformMessageWithReplacements({

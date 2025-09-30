@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { KnowledgeBaseConfig } from '../../types';
+import type { KnowledgeBaseConfig } from '../../types';
 import { AlertsRange } from '../../../knowledge_base/alerts_range';
 import * as i18n from '../../../knowledge_base/translations';
 

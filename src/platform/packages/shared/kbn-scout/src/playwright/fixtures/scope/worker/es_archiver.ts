@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
-import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
+import type { LoadActionPerfOptions } from '@kbn/es-archiver';
+import type { IndexStats } from '@kbn/es-archiver/src/lib/stats';
 import { coreWorkerFixtures } from './core_fixtures';
 import { getEsArchiver } from '../../../../common/services';
 

@@ -15,7 +15,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLAstItem, ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstItem, ESQLAstQueryExpression } from '../../types';
 import { Visitor } from '../visitor';
 
 test('change LIMIT from 24 to 42', () => {

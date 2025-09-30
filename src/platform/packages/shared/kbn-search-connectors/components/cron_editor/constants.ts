@@ -9,10 +9,11 @@
 
 import { padStart } from 'lodash';
 
-import { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 
-import { DayOrdinal, MonthOrdinal, getOrdinalValue, getDayName, getMonthName } from './services';
-import { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
+import type { DayOrdinal, MonthOrdinal } from './services';
+import { getOrdinalValue, getDayName, getMonthName } from './services';
+import type { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
 
 type FieldFlags = {
   [key in Field]?: boolean;

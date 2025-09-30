@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiButtonEmpty, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TextWithIcon } from '../text_with_icon';
 import { TriggerLineItem } from '../trigger_line_item';
@@ -74,16 +67,18 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         <div>
           {drilldownName}{' '}
           {drilldown.error && (
-            <EuiToolTip id={`drilldownError-${drilldown.id}`} content={drilldown.error}>
-              <EuiIcon
-                type="warning"
-                color="danger"
-                title={drilldown.error}
-                aria-label={drilldown.error}
-                data-test-subj={`drilldownError-${drilldown.id}`}
-                css={{ marginLeft: '4px' }} /* a bit of spacing from text */
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              id={`drilldownError-${drilldown.id}`}
+              content={drilldown.error}
+              type="warning"
+              color="danger"
+              title={drilldown.error}
+              aria-label={drilldown.error}
+              css={{ marginLeft: '4px' }}
+              iconProps={{
+                'data-test-subj': `drilldownError-${drilldown.id}`,
+              }}
+            />
           )}
         </div>
       ),

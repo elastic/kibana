@@ -10,7 +10,7 @@ import { safeElementFromExpression, fromExpression } from '@kbn/interpreter';
 import type { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
-import {
+import type {
   State,
   CanvasWorkpad,
   CanvasPage,
@@ -18,7 +18,7 @@ import {
   CanvasVariable,
   ResolvedArgType,
 } from '../../../types';
-import {
+import type {
   ExpressionContext,
   CanvasGroup,
   PositionedElement,

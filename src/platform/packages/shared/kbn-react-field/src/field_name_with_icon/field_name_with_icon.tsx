@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { FieldIcon, FieldIconProps } from '../field_icon';
+import type { FieldIconProps } from '../field_icon';
+import { FieldIcon } from '../field_icon';
 
 export interface FieldNameWithIconProps {
   name: string;

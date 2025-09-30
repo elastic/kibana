@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
-import SemVer from 'semver/classes/semver';
+import type { ComponentType } from 'react';
+import type SemVer from 'semver/classes/semver';
 
-import { MainType, SubType, DataType, NormalizedField, NormalizedFields } from '../../../../types';
+import type {
+  MainType,
+  SubType,
+  DataType,
+  NormalizedField,
+  NormalizedFields,
+} from '../../../../types';
 
 import { AliasType } from './alias_type';
 import { KeywordType } from './keyword_type';

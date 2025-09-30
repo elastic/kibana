@@ -11,18 +11,17 @@ import { AlertsProcessingTable } from './alert_processing_table';
 
 describe('AlertsProcessingTable', () => {
   const defaultProps = {
-    totalAlerts: 1000,
     filteredAlerts: 800,
     escalatedAlerts: 200,
     filteredAlertsPerc: '80%',
     escalatedAlertsPerc: '20%',
+    isLoading: false,
   };
 
-  it('renders total alerts with data-test-subj', () => {
+  it('renders main container with data-test-subj', () => {
     const { getByTestId } = render(<AlertsProcessingTable {...defaultProps} />);
-    const el = getByTestId('alertsProcessingTableTotalAlerts');
+    const el = getByTestId('alertsProcessingTable');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveTextContent('1,000');
   });
 
   it('renders filtered alerts with data-test-subj', () => {

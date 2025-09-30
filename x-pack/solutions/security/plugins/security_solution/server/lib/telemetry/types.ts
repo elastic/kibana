@@ -9,6 +9,12 @@ import type { Agent } from '@kbn/fleet-plugin/common';
 
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
+import type { RssGrowthCircuitBreakerConfig } from './diagnostic/circuit_breakers/rss_growth_circuit_breaker';
+import type { TimeoutCircuitBreakerConfig } from './diagnostic/circuit_breakers/timeout_circuit_breaker';
+import type { EventLoopUtilizationCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_utilization_circuit_breaker';
+import type { EventLoopDelayCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_delay_circuit_breaker';
+import type { ElasticsearchCircuitBreakerConfig } from './diagnostic/circuit_breakers/elastic_search_circuit_breaker';
+import type { HealthDiagnosticQueryConfig } from './diagnostic/health_diagnostic_service.types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -491,6 +497,12 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
+export interface TelemetryQueryConfiguration {
+  pageSize: number;
+  maxResponseSize: number;
+  maxCompressedResponseSize: number;
+}
+
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;
@@ -504,6 +516,8 @@ export interface TelemetryConfiguration {
   pagination_config?: PaginationConfiguration;
   indices_metadata_config?: IndicesMetadataConfiguration;
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
+  health_diagnostic_config?: HealthDiagnosticConfiguration;
+  query_config?: TelemetryQueryConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {
@@ -522,6 +536,15 @@ export interface IndicesMetadataConfiguration {
 
 export interface IngestPipelinesStatsConfiguration {
   enabled: boolean;
+}
+
+export interface HealthDiagnosticConfiguration {
+  query: HealthDiagnosticQueryConfig;
+  rssGrowthCircuitBreaker: RssGrowthCircuitBreakerConfig;
+  timeoutCircuitBreaker: TimeoutCircuitBreakerConfig;
+  eventLoopUtilizationCircuitBreaker: EventLoopUtilizationCircuitBreakerConfig;
+  eventLoopDelayCircuitBreaker: EventLoopDelayCircuitBreakerConfig;
+  elasticsearchCircuitBreaker: ElasticsearchCircuitBreakerConfig;
 }
 
 export interface PaginationConfiguration {

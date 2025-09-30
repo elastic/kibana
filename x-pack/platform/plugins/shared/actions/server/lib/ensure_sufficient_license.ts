@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type { ActionType } from '../types';
 import type { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 

@@ -13,8 +13,8 @@ import { overlayBannersServiceMock } from './banners_service.test.mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
-import { Subject } from 'rxjs';
+import type { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import type { Subject } from 'rxjs';
 
 describe('OverlayBannersService', () => {
   let bannerContent: string | undefined;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
+import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
 import type { Client as McpBaseClient } from '@modelcontextprotocol/sdk/client/index';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { MaybePromise } from '@kbn/utility-types';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * Internal representation of an MCP tool.

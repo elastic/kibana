@@ -6,9 +6,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
-import { SearchQueryDocumentResponse } from '../types';
+import type { SearchQueryDocumentResponse } from '../types';
 
 export const useFetchDocument = (indexName: string, documentId: string) => {
   const {

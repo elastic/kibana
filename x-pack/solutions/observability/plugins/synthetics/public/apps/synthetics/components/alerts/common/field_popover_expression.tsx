@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { EuiExpression, EuiPopover, EuiExpressionProps } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiExpressionProps } from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import { allOptionText } from './fields';
-import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
+import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
 interface Props {
   title?: ReactNode;

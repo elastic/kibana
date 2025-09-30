@@ -12,7 +12,7 @@ import { SiemMigrationStatus } from '../../../../../common/siem_migrations/const
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
-import { TableHeader } from './header';
+import { TableHeader } from '../../../common/components';
 
 const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
   return (

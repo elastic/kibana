@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -13,7 +14,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EsqlQueryExpression } from './esql_query_expression';
-import { EsQueryRuleParams, SearchType } from '../types';
+import type { EsQueryRuleParams } from '../types';
+import { SearchType } from '../types';
 
 jest.mock('../validation', () => ({
   hasExpressionValidationErrors: jest.fn(),

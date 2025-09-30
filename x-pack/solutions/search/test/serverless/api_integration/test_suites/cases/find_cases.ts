@@ -7,7 +7,7 @@
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import type { RoleCredentials } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

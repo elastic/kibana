@@ -7,8 +7,10 @@
 
 import { delay, finalize, switchMap, tap } from 'rxjs';
 import { debounce, isEqual } from 'lodash';
-import { waitUntilNextSessionCompletes$, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { setExecutionContext, LensGetState, LensDispatch } from '..';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import type { LensGetState, LensDispatch } from '..';
+import { setExecutionContext } from '..';
 import { getResolvedDateRange } from '../../utils';
 
 /**

@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { RenderMode } from '@kbn/expressions-plugin/common';
-import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import {
-  CellValueContext,
-  cellValueTrigger,
-  CELL_VALUE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { cellValueTrigger, CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DocumentToExpressionReturnType } from '../../async_services';
 import type { LensDocument } from '../../persistence';
-import {
+import type {
   GetCompatibleCellValueActions,
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
   VisualizationDisplayOptions,
+} from '../../types';
+import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,

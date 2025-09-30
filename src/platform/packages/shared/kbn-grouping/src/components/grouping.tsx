@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +23,8 @@ import {
 import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
@@ -28,7 +33,7 @@ import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
-import { GroupingBucket, OnGroupToggle } from './types';
+import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
@@ -49,7 +54,13 @@ export interface GroupingProps<T> {
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  takeActionItems?: (
+    groupFilters: Filter[],
+    groupNumber: number
+  ) => {
+    items: EuiContextMenuPanelItemDescriptor[];
+    panels: EuiContextMenuPanelDescriptor[];
+  };
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],

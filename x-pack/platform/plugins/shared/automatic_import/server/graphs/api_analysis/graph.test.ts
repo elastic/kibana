@@ -10,16 +10,13 @@ import {
   apiAnalysisPathSuggestionsMockedResponse,
   apiAnalysisExpectedResults,
 } from '../../../__jest__/fixtures/api_analysis';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { mockedApiAnalysisRequest } from '../../../__jest__/fixtures';
 import { handleGetSuggestedPaths } from './paths';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 jest.mock('./paths');
 

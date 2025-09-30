@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-import { RoleCredentials } from '../services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { RoleCredentials } from '../services';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');

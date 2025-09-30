@@ -12,7 +12,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
 import { createPackagePolicy } from '../helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';

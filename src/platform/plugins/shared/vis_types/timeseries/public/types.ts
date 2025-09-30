@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiDraggable } from '@elastic/eui';
+import type React from 'react';
+import type { EuiDraggable } from '@elastic/eui';
 import type { Panel } from '../common/types';
 
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;

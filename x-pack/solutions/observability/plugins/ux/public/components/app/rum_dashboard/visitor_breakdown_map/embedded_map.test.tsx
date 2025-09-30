@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { EmbeddedMap } from './embedded_map';
@@ -15,13 +15,13 @@ describe('Embedded Map', () => {
   test('it renders', () => {
     const [core] = mockCore();
 
-    const wrapper = render(
+    const { getByTestId } = render(
       <KibanaContextProvider services={{ ...core }}>
         <EmbeddedMap />
       </KibanaContextProvider>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('xpack.ux.regionMap.embeddedPanel'));
   });
 });
 

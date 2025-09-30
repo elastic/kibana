@@ -10,7 +10,7 @@
 import { EsqlQuery } from '../../query';
 import * as fixtures from '../../__tests__/fixtures';
 import { Walker } from '../walker';
-import { ESQLAstExpression, ESQLProperNode } from '../../types';
+import type { ESQLAstExpression, ESQLProperNode } from '../../types';
 import { isProperNode } from '../../ast/is';
 
 interface JsonWalkerOptions {

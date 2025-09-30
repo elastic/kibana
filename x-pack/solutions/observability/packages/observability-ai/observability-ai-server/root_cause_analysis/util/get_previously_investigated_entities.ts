@@ -7,7 +7,7 @@
 
 import { MessageRole } from '@kbn/inference-common';
 import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
-import { InvestigateEntityToolMessage, RootCauseAnalysisContext } from '../types';
+import type { InvestigateEntityToolMessage, RootCauseAnalysisContext } from '../types';
 
 export function getPreviouslyInvestigatedEntities({
   events,

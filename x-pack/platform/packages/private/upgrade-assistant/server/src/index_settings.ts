@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlatSettings, IndexWarning } from './types';
+import type { FlatSettings, IndexWarning } from './types';
 
 /**
  * An array of deprecated index settings specific to 7.0 --> 8.0 upgrade

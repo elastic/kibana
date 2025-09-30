@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
-import { EuiText, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { StyleError } from './style_error';
-import {
+import type {
   DynamicStyleProperty,
   IDynamicStyleProperty,
 } from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
-import { Mask } from '../../../../layers/vector_layer/mask';
-import { IStyleProperty } from '../../properties/style_property';
+import type { Mask } from '../../../../layers/vector_layer/mask';
+import type { IStyleProperty } from '../../properties/style_property';
 import { MaskLegend } from './mask_legend';
 
 interface Props {

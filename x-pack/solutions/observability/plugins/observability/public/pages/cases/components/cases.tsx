@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
@@ -65,6 +65,7 @@ export function Cases({ permissions }: CasesProps) {
         features={{
           alerts: { sync: false, isExperimental: false },
           observables: { enabled: false },
+          events: { enabled: false },
         }}
         owner={[observabilityFeatureId]}
         permissions={permissions}

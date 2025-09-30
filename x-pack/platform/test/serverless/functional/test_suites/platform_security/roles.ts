@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // Note: this suite is currently only called from the feature flags test config:
 // x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts

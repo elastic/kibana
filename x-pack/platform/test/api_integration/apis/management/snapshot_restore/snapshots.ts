@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { SnapshotDetails } from '@kbn/snapshot-restore-plugin/common/types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { registerEsHelpers, SlmPolicy } from './lib';
+import type { SnapshotDetails } from '@kbn/snapshot-restore-plugin/common/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SlmPolicy } from './lib';
+import { registerEsHelpers } from './lib';
 
 const REPO_NAME_1 = 'test_repo_1';
 const REPO_NAME_2 = 'test_another_repo_2';

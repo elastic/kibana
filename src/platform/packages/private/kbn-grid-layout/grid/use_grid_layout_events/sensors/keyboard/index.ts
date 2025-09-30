@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserKeyboardEvent } from './types';
+import type { UserKeyboardEvent } from './types';
 
 export { startKeyboardInteraction } from './keyboard';
 export const isKeyboardEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserKeyboardEvent => {

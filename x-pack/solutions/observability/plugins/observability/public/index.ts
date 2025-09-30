@@ -7,14 +7,14 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110905
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import {
-  Plugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   ObservabilityPublicPluginsStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -84,7 +84,7 @@ export type {
   ObservabilityHasDataResponse,
   Subset,
 } from './typings';
-import { TopAlert } from './typings/alerts';
+import type { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
 export type { AlertDetailsAppSectionProps };

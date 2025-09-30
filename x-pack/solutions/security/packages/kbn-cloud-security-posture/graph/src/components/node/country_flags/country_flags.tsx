@@ -6,32 +6,26 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getCountryFlag, getCountryName } from './country_codes';
+import {
+  GRAPH_FLAGS_BADGE_ID,
+  GRAPH_FLAGS_VISIBLE_FLAG_ID,
+  GRAPH_FLAGS_PLUS_COUNT_ID,
+  GRAPH_FLAGS_TOOLTIP_CONTENT_ID,
+  GRAPH_FLAGS_TOOLTIP_COUNTRY_ID,
+} from '../../test_ids';
 import { RoundedBadge, ToolTipButton } from '../styles';
-
-export const TEST_SUBJ_BADGE = 'country-flags-badge';
-export const TEST_SUBJ_PLUS_COUNT = 'country-flags-plus-count';
-export const TEST_SUBJ_TOOLTIP = 'country-flags-tooltip';
-export const TEST_SUBJ_TOOLTIP_CONTENT = 'country-flags-tooltip-content';
-export const TEST_SUBJ_TOOLTIP_COUNTRY = 'country-flags-tooltip-country';
+import { getCountryFlag, getCountryName } from './country_codes';
 
 export const MAX_COUNTRY_FLAGS_IN_TOOLTIP = 10;
 const VISIBLE_FLAGS_LIMIT = 2;
 
-const toolTipTitle = i18n.translate(
-  'securitySolutionPackages.csp.graph.countryFlags.toolTipTitle',
+const toolTipAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.countryFlags.toolTipAriaLabel',
   {
-    defaultMessage: 'Geolocation',
-  }
-);
-
-const openFlyoutText = i18n.translate(
-  'securitySolutionPackages.csp.graph.countryFlags.countryFlagsOverLimit',
-  {
-    defaultMessage: 'Open full details in flyout',
+    defaultMessage: 'Show geolocation details',
   }
 );
 
@@ -40,39 +34,28 @@ export interface CountryFlagsProps {
 }
 
 export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
 
   if (validCodes.length === 0) {
     return null;
   }
 
-  const toolTipContent =
-    validCodes.length > VISIBLE_FLAGS_LIMIT ? (
-      <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
-        {validCodes.slice(0, MAX_COUNTRY_FLAGS_IN_TOOLTIP).map((countryCode) => (
-          <li data-test-subj={TEST_SUBJ_TOOLTIP_COUNTRY} key={countryCode}>
-            <EuiText size="m">
-              {getCountryFlag(countryCode)} {getCountryName(countryCode)}
-            </EuiText>
-          </li>
-        ))}
-        {validCodes.length > MAX_COUNTRY_FLAGS_IN_TOOLTIP ? (
-          <>
-            <li>
-              <br />
-            </li>
-            <li>{openFlyoutText}</li>
-          </>
-        ) : null}
-      </ul>
-    ) : null;
+  const toolTipContent = (
+    <ul data-test-subj={GRAPH_FLAGS_TOOLTIP_CONTENT_ID}>
+      {validCodes.slice(0, MAX_COUNTRY_FLAGS_IN_TOOLTIP).map((countryCode, index) => (
+        <li data-test-subj={GRAPH_FLAGS_TOOLTIP_COUNTRY_ID} key={`${index}-${countryCode}`}>
+          <EuiText size="m">
+            {getCountryFlag(countryCode)} {getCountryName(countryCode)}
+          </EuiText>
+        </li>
+      ))}
+    </ul>
+  );
 
   const visibleFlags = validCodes.slice(0, VISIBLE_FLAGS_LIMIT).map((countryCode) => {
     const flag = getCountryFlag(countryCode);
     return flag ? (
-      <EuiFlexItem grow={false} key={countryCode}>
+      <EuiFlexItem grow={false} key={countryCode} data-test-subj={GRAPH_FLAGS_VISIBLE_FLAG_ID}>
         {flag}
       </EuiFlexItem>
     ) : null;
@@ -81,7 +64,7 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
   const counter =
     validCodes.length > VISIBLE_FLAGS_LIMIT ? (
       <EuiText
-        data-test-subj={TEST_SUBJ_PLUS_COUNT}
+        data-test-subj={GRAPH_FLAGS_PLUS_COUNT_ID}
         size="xs"
         color="default"
         css={css`
@@ -94,15 +77,10 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
     ) : null;
 
   return (
-    <EuiToolTip
-      data-test-subj={TEST_SUBJ_TOOLTIP}
-      title={toolTipTitle}
-      position="right"
-      content={toolTipContent}
-    >
+    <EuiToolTip position="right" content={toolTipContent}>
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton>
-        <RoundedBadge data-test-subj={TEST_SUBJ_BADGE} euiTheme={euiTheme}>
+      <ToolTipButton aria-label={toolTipAriaLabel}>
+        <RoundedBadge data-test-subj={GRAPH_FLAGS_BADGE_ID}>
           {visibleFlags}
           {counter}
         </RoundedBadge>

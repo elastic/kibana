@@ -11,7 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
-import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,8 +21,8 @@ import moment from 'moment';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { from } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { ConfigSchema } from '../../plugin';
-import { Subset } from '../../typings';
+import type { ConfigSchema } from '../../plugin';
+import type { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
@@ -57,6 +57,12 @@ jest.mock('./hooks/use_add_suggested_dashboard', () => ({
   useAddSuggestedDashboards: () => ({
     onClickAddSuggestedDashboard: jest.fn(),
     addingDashboardId: undefined,
+  }),
+}));
+
+jest.mock('./hooks/use_discover_url', () => ({
+  useDiscoverUrl: () => ({
+    discoverUrl: null,
   }),
 }));
 
@@ -164,6 +170,15 @@ const MOCK_RULE = {
   name: 'ruleName',
   ruleTypeId: MOCK_RULE_TYPE_ID,
   consumer: 'logs',
+  params: {
+    searchConfiguration: {
+      index: 'index',
+      query: {
+        query: 'tags: tag1',
+      },
+    },
+    criteria: [],
+  },
   artifacts: {
     dashboards: [
       {

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { discover, unifiedTabs, common, header, spaceSettings } = getPageObjects([
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedTabs.isTabsBarVisible()).to.be(false);
         await testSubjects.click('tryESQLLink');
         await discover.waitUntilTabIsLoaded();
-        expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logs* | LIMIT 10');
+        expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logs*');
         expect((await dataGrid.getDocTableRows()).length).to.be.above(0);
         expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
       });

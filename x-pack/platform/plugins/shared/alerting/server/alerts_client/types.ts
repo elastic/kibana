@@ -82,7 +82,11 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
-  persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
+  persistAlerts(): Promise<void>;
+  updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
+    alertIds: string[];
+    maintenanceWindowIds: string[];
+  } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
@@ -102,7 +106,6 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
-  getTrackedExecutions(): Set<string>;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -131,7 +134,6 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  trackedExecutions?: string[];
 }
 
 export interface TrackedAlerts<

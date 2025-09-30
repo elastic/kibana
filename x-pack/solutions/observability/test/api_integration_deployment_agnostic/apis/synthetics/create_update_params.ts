@@ -7,11 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
 function assertHas(actual: unknown, expected: object) {

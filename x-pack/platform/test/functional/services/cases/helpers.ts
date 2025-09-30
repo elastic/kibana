@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
-import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import type { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 export function generateRandomCaseWithoutConnector(owner = 'cases'): CasePostRequest {
@@ -22,6 +22,7 @@ export function generateRandomCaseWithoutConnector(owner = 'cases'): CasePostReq
     } as CaseConnector,
     settings: {
       syncAlerts: false,
+      extractObservables: false,
     },
     owner,
   };

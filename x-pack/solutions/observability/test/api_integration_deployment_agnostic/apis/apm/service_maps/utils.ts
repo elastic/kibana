@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
-import { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
+import type { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
+import type { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
 
 export type ConnectionElements = GroupResourceNodesResponse['elements'];
 

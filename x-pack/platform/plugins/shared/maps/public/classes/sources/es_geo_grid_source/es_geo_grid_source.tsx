@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import type {
   AggregationsCompositeAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
-import { DataView } from '@kbn/data-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
@@ -40,18 +41,16 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
+import type { ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import {
-  GetFeatureActionsArgs,
-  GeoJsonWithMeta,
-  IMvtVectorSource,
-  getLayerFeaturesRequestName,
-} from '../vector_source';
-import {
+import type { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
+import type {
+  AbstractESAggSourceDescriptor,
   DataFilters,
   ESGeoGridSourceDescriptor,
   MapExtent,
@@ -59,7 +58,7 @@ import {
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
+import type { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';
@@ -84,8 +83,10 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSource {
   static createDescriptor(
     descriptor: Partial<ESGeoGridSourceDescriptor>
-  ): ESGeoGridSourceDescriptor {
-    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+  ): ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>> {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(
+      descriptor
+    ) as AbstractESAggSourceDescriptor & Partial<ESGeoGridSourceDescriptor>;
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
     }
@@ -95,10 +96,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       geoField: normalizedDescriptor.geoField!,
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
-    };
+    } as ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
   }
 
-  readonly _descriptor: ESGeoGridSourceDescriptor;
+  readonly _descriptor: ESGeoGridSourceDescriptor &
+    Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
@@ -122,6 +124,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return i18n.translate('xpack.maps.source.esGeoGrid.cluster.bucketsName', {
       defaultMessage: 'clusters',
     });
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {

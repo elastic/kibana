@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { SearchSessionStatus } from '../../../../../../../common';
-import { OnActionComplete, TableText } from '../..';
+import type { OnActionComplete } from '../..';
+import { TableText } from '../..';
 import { dateString } from '../../../lib/date_string';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { getExpirationStatus } from '../../../lib/get_expiration_status';
-import { UISession } from '../../../types';
-import { SearchUsageCollector } from '../../../../../collectors';
+import type { UISession } from '../../../types';
+import type { SearchUsageCollector } from '../../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../../server/config';
 import { appIdColumn, nameColumn, actionsColumn, statusColumn } from '.';
 

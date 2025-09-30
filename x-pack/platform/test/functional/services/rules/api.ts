@@ -6,7 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');

@@ -6,12 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   EsKnowledgeBaseEntrySchema,
   EsDocumentEntry,
 } from '../ai_assistant_data_clients/knowledge_base/types';
@@ -38,7 +38,7 @@ const indexEntry: EsKnowledgeBaseEntrySchema = {
   ],
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -60,7 +60,7 @@ export const documentEntry: EsDocumentEntry = {
   text: 'test',
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -160,7 +160,7 @@ export const getKnowledgeBaseEntryMock = (
   global: false,
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],

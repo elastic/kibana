@@ -51,6 +51,14 @@ export function LoadingIconPanel() {
   );
 }
 
+export function ErrorIconPanel() {
+  return (
+    <Panel>
+      <EuiIcon type="error" size="original" />
+    </Panel>
+  );
+}
+
 export interface MiniIconProps
   extends Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'> {
   size?: number; // Optional size multiplier

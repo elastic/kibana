@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { initCustomElementsRoutes } from './custom_elements';
 import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 import { initTemplateRoutes } from './templates';
 import { initFunctionsRoutes } from './functions';
-import { CanvasRouteHandlerContext } from '../workpad_route_context';
+import type { CanvasRouteHandlerContext } from '../workpad_route_context';
 
 export interface RouteInitializerDeps {
   router: IRouter<CanvasRouteHandlerContext>;

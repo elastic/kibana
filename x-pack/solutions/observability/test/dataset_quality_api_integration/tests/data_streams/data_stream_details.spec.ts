@@ -7,8 +7,8 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { DatasetQualityApiClientKey } from '../../common/config';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DatasetQualityApiClientKey } from '../../common/config';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

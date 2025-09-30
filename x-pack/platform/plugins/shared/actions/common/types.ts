@@ -6,7 +6,7 @@
  */
 
 import type { SUB_FEATURE } from '@kbn/actions-types';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export type SubFeature = keyof typeof SUB_FEATURE;

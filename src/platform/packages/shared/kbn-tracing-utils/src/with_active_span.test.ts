@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Span, SpanStatusCode, Tracer, trace, context } from '@opentelemetry/api';
+import type { Span, Tracer } from '@opentelemetry/api';
+import { SpanStatusCode, trace, context } from '@opentelemetry/api';
 import { of, throwError } from 'rxjs';
-import { WithActiveSpan, withActiveSpan } from './with_active_span';
+import type { WithActiveSpan } from './with_active_span';
+import { withActiveSpan } from './with_active_span';
 import { last } from 'lodash';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';

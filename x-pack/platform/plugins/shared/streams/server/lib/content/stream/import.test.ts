@@ -17,7 +17,7 @@ describe('content pack import', () => {
       streams: [
         testContentPackEntry({
           name: 'logs',
-          routing: [{ destination: 'logs.foo', if: { always: {} } }],
+          routing: [{ destination: 'logs.foo', where: { always: {} }, status: 'enabled' }],
         }),
         testContentPackEntry({ name: 'logs.foo' }),
       ],
@@ -29,11 +29,11 @@ describe('content pack import', () => {
       streams: [
         testContentPackEntry({
           name: 'logs',
-          routing: [{ destination: 'logs.bar', if: { always: {} } }],
+          routing: [{ destination: 'logs.bar', where: { always: {} }, status: 'enabled' }],
         }),
         testContentPackEntry({
           name: 'logs.bar',
-          routing: [{ destination: 'logs.bar.baz', if: { always: {} } }],
+          routing: [{ destination: 'logs.bar.baz', where: { always: {} }, status: 'enabled' }],
         }),
         testContentPackEntry({ name: 'logs.bar.baz' }),
       ],
@@ -46,13 +46,13 @@ describe('content pack import', () => {
       testContentPackEntry({
         name: 'logs',
         routing: [
-          { destination: 'logs.foo', if: { always: {} } },
-          { destination: 'logs.bar', if: { always: {} } },
+          { destination: 'logs.foo', where: { always: {} }, status: 'enabled' },
+          { destination: 'logs.bar', where: { always: {} }, status: 'enabled' },
         ],
       }),
       testContentPackEntry({
         name: 'logs.bar',
-        routing: [{ destination: 'logs.bar.baz', if: { always: {} } }],
+        routing: [{ destination: 'logs.bar.baz', where: { always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({ name: 'logs.bar.baz' }),
       testContentPackEntry({ name: 'logs.foo' }),

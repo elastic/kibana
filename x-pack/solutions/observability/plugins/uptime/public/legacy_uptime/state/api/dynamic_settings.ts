@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import {
-  DynamicSettingsCodec,
+import type {
   DynamicSettings,
   DynamicSettingsSaveResponse,
-  DynamicSettingsSaveCodec,
 } from '../../../../common/runtime_types';
+import { DynamicSettingsCodec, DynamicSettingsSaveCodec } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS, INITIAL_REST_VERSION } from '../../../../common/constants';
 

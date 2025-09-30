@@ -1,6 +1,6 @@
 /**
 * FOR THE PROMPT-GENERATION LLM
-* 
+*
 * Make sure the reasoning includes examples of ES|QL queries, errors and how to correct them.
 * Also have some examples of hypothetical tools being available, like `visualize_esql`.
 * Additionally, the LLM MUST understand that any answer BEFORE the `complete` call is not shown
@@ -74,7 +74,7 @@ There also might be additional tools available, but you can only call them after
 
 /**
 * FOR THE PROMPT-GENERATION LLM
-* 
+*
 * What follows below is the ES|QL system prompt. It should be included in
 * the rendered system prompt as {{{esql_system_prompt}}}. Use it to rewrite
 * the task description, but don't cite it verbatim, as it will be included
@@ -278,7 +278,7 @@ MV_MEDIAN: returns the median value of a multivalued field
 MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
 MV_MIN: returns the min value of a multivalued field
 MV_PERCENTILE: returns the specified percentile of a multivalued field
-MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+MV_SLICE: accesses and extracts a subset of a multivalued field using specified start and end index values
 MV_SORT: sorts a multivalued field in lexicographical order.
 MV_SUM: returns the sum of all values of a multivalued field
 MV_ZIP: combines the values from two multivalued fields with a specified delimiter
@@ -443,6 +443,12 @@ FROM personal_info
 | EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
 | KEEP user_name, birth
 | SORT birth
+```
+
+**Returns a subset of the multivalued field using the start and end index values**
+```esql
+row a = [1, 2, 2, 3]
+| eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
 ```
 
 ==== END OF ES|QL SYSTEM PROMPT ====

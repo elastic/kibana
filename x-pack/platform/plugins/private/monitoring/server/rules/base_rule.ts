@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import {
+import type {
   RuleType,
-  RuleNotifyWhen,
   RuleExecutorOptions,
   RulesClient,
   RuleExecutorServices,
-  DEFAULT_AAD_CONFIG,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import {
+import { RuleNotifyWhen, DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
+import type {
   Rule,
   RuleTypeParams,
   RawAlertInstance,
   SanitizedRule,
   AlertInstanceContext,
 } from '@kbn/alerting-plugin/common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import {
+import type {
   AlertState,
   AlertNodeState,
   AlertCluster,

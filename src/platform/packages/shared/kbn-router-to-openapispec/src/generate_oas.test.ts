@@ -23,17 +23,14 @@ jest.mock('./process_versioned_router', () => {
   };
 });
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { generateOpenApiDocument } from './generate_oas';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
-import {
-  createTestRouters,
-  createRouter,
-  createVersionedRouter,
-  CreateTestRouterArgs,
-} from './generate_oas.test.util';
+import type { CreateTestRouterArgs } from './generate_oas.test.util';
+import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
   sharedOas,
   createSharedZodSchema,

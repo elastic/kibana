@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '@kbn/core/server';
-import { ErrorThatHandlesItsOwnResponse } from './types';
+import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { ErrorThatHandlesItsOwnResponse } from './types';
 import { GenerationErrorCode } from '../../../common/constants';
-import {
+import type {
   GenerationErrorAttributes,
   GenerationErrorBody,
 } from '../../../common/api/generation_error';

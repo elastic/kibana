@@ -19,7 +19,7 @@ interface EntryTitleProps {
 
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   const link = getAssetDetailUrl({
@@ -30,6 +30,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
       name,
     },
+    preferredSchema: searchCriteria?.preferredSchema ?? 'semconv',
   });
 
   const providerName = cloudProvider ?? 'Unknown';

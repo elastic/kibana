@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeIntervalParamEditor } from './time_interval';
 import { aggParamCommonPropsMock } from './test_utils';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 jest.mock('@kbn/data-plugin/public', () => ({
   search: {

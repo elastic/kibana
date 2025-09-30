@@ -8,7 +8,7 @@
  */
 
 import { startsWith } from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { CSV_FORMULA_CHARS } from './constants';
 
 export const cellHasFormulas = (val: string) =>

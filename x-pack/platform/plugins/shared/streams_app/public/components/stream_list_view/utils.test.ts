@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { asTrees, buildStreamRows, enrichStream } from './utils';
+import { asTrees, buildStreamRows, enrichStream, filterCollapsedStreamRows } from './utils';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {
@@ -138,5 +138,128 @@ describe('buildStreamRows', () => {
     expect(indexOf('metrics-c.child1')).toBeGreaterThan(indexOf('metrics-c'));
     expect(indexOf('metrics-c.child2')).toBeGreaterThan(indexOf('metrics-c'));
     expect(indexOf('metrics-c.child3')).toBeGreaterThan(indexOf('metrics-c'));
+  });
+});
+
+describe('filterCollapsedStreamRows', () => {
+  const rootA = createStream('logs-a', '1d');
+  const aChild1 = createStream('logs-a.child1', '8h');
+  const aChild2 = createStream('logs-a.child2', '4h');
+  const aChild3 = createStream('logs-a.child3', '6h');
+
+  const rootB = createStream('logs-b', '2d');
+  const bChild1 = createStream('logs-b.child1', '1h');
+  const bChild2 = createStream('logs-b.child2', '3h');
+  const bChild3 = createStream('logs-b.child3', '5h');
+
+  const rootC = createStream('metrics-c', '36h');
+  const cChild1 = createStream('metrics-c.child1', '2h');
+  const cChild2 = createStream('metrics-c.child2', '30m');
+  const cChild3 = createStream('metrics-c.child3', '45m');
+
+  const allStreams = asTrees([
+    rootA,
+    aChild2,
+    aChild1,
+    aChild3,
+    rootB,
+    bChild3,
+    bChild1,
+    bChild2,
+    rootC,
+    cChild2,
+    cChild3,
+    cChild1,
+  ]).map(enrichStream);
+
+  const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+
+  it('returns all rows when no streams are collapsed', () => {
+    const collapsed = new Set<string>();
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
+    expect(filtered.map((r) => r.stream.name)).toEqual(rows.map((r) => r.stream.name));
+  });
+
+  it('filters out children of collapsed streams', () => {
+    const collapsed = new Set<string>(['logs-a']);
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
+    // Should include logs-a, but not its children
+    expect(filtered.map((r) => r.stream.name)).toEqual([
+      'logs-a',
+      'logs-b',
+      'logs-b.child1',
+      'logs-b.child2',
+      'logs-b.child3',
+      'metrics-c',
+      'metrics-c.child1',
+      'metrics-c.child2',
+      'metrics-c.child3',
+    ]);
+  });
+
+  it('filters out nested children if ancestor is collapsed', () => {
+    const collapsed = new Set<string>(['metrics-c']);
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
+    expect(filtered.map((r) => r.stream.name)).toEqual([
+      'logs-a',
+      'logs-a.child1',
+      'logs-a.child2',
+      'logs-a.child3',
+      'logs-b',
+      'logs-b.child1',
+      'logs-b.child2',
+      'logs-b.child3',
+      'metrics-c',
+    ]);
+  });
+
+  it('filters out children of multiple collapsed streams', () => {
+    const collapsed = new Set<string>(['logs-a', 'metrics-c']);
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
+    expect(filtered.map((r) => r.stream.name)).toEqual([
+      'logs-a',
+      'logs-b',
+      'logs-b.child1',
+      'logs-b.child2',
+      'logs-b.child3',
+      'metrics-c',
+    ]);
+  });
+
+  it('does not filter when shouldComposeTree returns false', () => {
+    const collapsed = new Set<string>(['logs-a']);
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'retentionMs');
+    // Should return all rows regardless of collapsed streams
+    expect(filtered.map((r) => r.stream.name)).toEqual(rows.map((r) => r.stream.name));
+  });
+
+  it('filters out grandchildren if parent is collapsed', () => {
+    // Add a grandchild for testing
+    const grandchild = createStream('logs-a.child1.grandchild', '1h');
+    const streamsWithGrandchild = asTrees([
+      rootA,
+      aChild1,
+      grandchild,
+      aChild2,
+      aChild3,
+      rootB,
+      bChild1,
+      bChild2,
+      bChild3,
+      rootC,
+      cChild1,
+      cChild2,
+      cChild3,
+    ]).map(enrichStream);
+    const rowsWithGrandchild = buildStreamRows(
+      streamsWithGrandchild,
+      'nameSortKey',
+      'asc' as Direction
+    );
+    const collapsed = new Set<string>(['logs-a.child1']);
+    const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey');
+    // Should include logs-a.child1, but not its grandchild
+    expect(filtered.map((r) => r.stream.name)).toContain('logs-a.child1');
+    expect(filtered.map((r) => r.stream.name)).not.toContain('logs-a.child1.grandchild');
   });
 });

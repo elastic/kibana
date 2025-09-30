@@ -24,8 +24,6 @@ export const aggregationGroups: string[] = [
   'src/core/packages',
   'packages',
   'src',
-  'x-pack/test',
-  'x-pack/test_serverless',
   'test',
 ];
 

@@ -42,7 +42,6 @@ describe('Workflows Connector', () => {
       expect(connectorType.validate.config).toBeDefined();
       expect(connectorType.validate.secrets).toBeDefined();
       expect(connectorType.validate.params).toBeDefined();
-      expect(connectorType.validate.connector).toBeDefined();
     });
   });
 
@@ -64,6 +63,7 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
+            spaceId: 'default',
             alerts: [{ _id: 'alert-1', _index: 'test-index' }],
             inputs: { test: 'data' },
           },
@@ -87,6 +87,7 @@ describe('Workflows Connector', () => {
 
       expect(mockWorkflowsService).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
         { test: 'data' },
         mockRequest
       );
@@ -109,6 +110,7 @@ describe('Workflows Connector', () => {
             workflowId: 'test-workflow-id',
             alerts: [],
             inputs: { test: 'data' },
+            spaceId: 'default',
           },
         },
         logger: mockLogger,
@@ -142,6 +144,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             alerts: [],
+            spaceId: 'default',
           },
         },
         logger: mockLogger,
@@ -172,6 +175,7 @@ describe('Workflows Connector', () => {
             workflowId: 'test-workflow-id',
             alerts: [{ _id: 'alert-1', _index: 'test-index' }],
             inputs: { test: 'data' },
+            spaceId: 'default',
           },
         },
         logger: mockLogger,

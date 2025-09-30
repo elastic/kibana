@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Message } from '../messages';
+import type { Message } from '../messages';
 
 interface AnonymizationRuleBase {
   type: string;
@@ -64,7 +64,3 @@ export interface DeanonymizationOutput {
 }
 
 export type DeanonymizedMessage = Message & { deanonymizations: Deanonymization[] };
-export interface AnonymizationRegexWorkerTaskPayload {
-  rule: RegexAnonymizationRule;
-  records: Array<Record<string, string>>;
-}

@@ -7,11 +7,13 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
-  clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
   initialLoadReported,
@@ -59,12 +61,6 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
-    })
-    .addCase(clearOverviewStatusState, (state, action) => {
-      state.status = null;
-      state.loading = false;
-      state.loaded = false;
-      state.error = null;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;

@@ -13,7 +13,7 @@ import { createLogger } from '../../lib/utils/create_logger';
 import { SynthtraceClientsManager } from './clients_manager';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
 
 export async function bootstrap({
@@ -27,12 +27,14 @@ export async function bootstrap({
 
   const kibanaClient = getKibanaClient({
     target: kibanaUrl,
+    apiKey: runOptions.apiKey,
     logger,
   });
 
   const client = new Client({
     node: esUrl,
-    tls: getEsClientTlsSettings(esUrl),
+    ...(runOptions.apiKey && { auth: { apiKey: runOptions.apiKey } }),
+    tls: getEsClientTlsSettings(esUrl, runOptions.insecure),
     Connection: HttpConnection,
     requestTimeout: 30_000,
   });

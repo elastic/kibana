@@ -7,25 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { type ESQLCommand, type ESQLAstCompletionCommand } from '../../../types';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import { type ESQLAstCompletionCommand, type ESQLCommand } from '../../../types';
+import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
-  context?: ICommandContext
+  previousColumns: ESQLColumnData[],
+  query: string
 ) => {
   const { targetField } = command as ESQLAstCompletionCommand;
 
   return uniqBy(
     [
       ...previousColumns,
-      {
-        name: targetField ? LeafPrinter.column(targetField) : 'completion',
-        type: 'keyword' as const,
-      },
+      targetField
+        ? ({
+            name: LeafPrinter.column(targetField),
+            type: 'keyword' as const,
+            userDefined: true,
+            location: targetField.location,
+          } as ESQLUserDefinedColumn)
+        : ({
+            name: 'completion',
+            type: 'keyword' as const,
+            userDefined: false,
+          } as ESQLFieldWithMetadata),
     ],
     'name'
   );

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ColorMapping } from '@kbn/coloring';
-import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
-import { DeprecatedColorMappingConfig } from './types';
-import { ColumnMeta } from './utils';
+import type { ColorMapping } from '@kbn/coloring';
+import type { SerializedValue } from '@kbn/data-plugin/common';
+import { MultiFieldKey, RangeKey } from '@kbn/data-plugin/common';
+import type { DeprecatedColorMappingConfig } from './types';
+import type { ColumnMeta } from './utils';
 
 /**
  * Converts old stringified colorMapping configs to new raw value configs

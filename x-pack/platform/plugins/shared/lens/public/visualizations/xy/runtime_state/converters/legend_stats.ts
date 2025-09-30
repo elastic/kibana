@@ -7,7 +7,7 @@
 
 import { LegendValue } from '@elastic/charts';
 
-import { XYState } from '../../types';
+import type { XYState } from '../../types';
 
 /**
  * Old color mapping state meant for type safety during runtime migrations of old configurations

@@ -5,110 +5,26 @@
  * 2.0.
  */
 
-import type { EvaluationResult } from 'langsmith/evaluation';
-import type { Run, Example } from 'langsmith/schemas';
-import { evaluate } from 'langsmith/evaluation';
-import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
-import { Client } from 'langsmith';
 import { distance } from 'fastest-levenshtein';
-import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
-import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { MigrateRuleGraphConfig, MigrateRuleState } from './agent/types';
+import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
+import type { CustomEvaluator } from '../../common/task/siem_migrations_task_evaluator';
+import { SiemMigrationsBaseEvaluator } from '../../common/task/siem_migrations_task_evaluator';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export interface EvaluateParams {
-  connectorId: string;
-  langsmithOptions: LangSmithEvaluationOptions;
-  invocationConfig?: MigrateRuleGraphConfig;
-}
+export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
+export type RuleMigrationTaskOutput = MigrateRuleState;
 
-export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;
-type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
-export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
-
-export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
-  public async evaluate({ connectorId, langsmithOptions, invocationConfig }: EvaluateParams) {
-    if (!isLangSmithEnabled()) {
-      throw Error('LangSmith is not enabled');
-    }
-
-    const client = new Client({ apiKey: langsmithOptions.api_key });
-
-    // Make sure the dataset exists
-    const dataset: Example[] = [];
-    for await (const example of client.listExamples({ datasetName: langsmithOptions.dataset })) {
-      dataset.push(example);
-    }
-    if (dataset.length === 0) {
-      throw Error(`LangSmith dataset not found: ${langsmithOptions.dataset}`);
-    }
-
-    // Initialize the the task runner first, this may take some time
-    await this.initialize();
-
-    // Check if the connector exists and user has privileges to read it
-    const connector = await this.dependencies.actionsClient.get({ id: connectorId });
-    if (!connector) {
-      throw Error(`Connector with id ${connectorId} not found`);
-    }
-
-    // for each connector, setup the evaluator
-    await this.setup(connectorId);
-
-    // create the migration task after setup
-    const migrateRuleTask = this.createMigrateRuleTask(invocationConfig);
-    const evaluators = this.getEvaluators();
-
-    evaluate(migrateRuleTask, {
-      data: langsmithOptions.dataset,
-      experimentPrefix: connector.name,
-      evaluators,
-      client,
-      maxConcurrency: 3,
-    })
-      .then(() => {
-        this.logger.info('Evaluation finished');
-      })
-      .catch((err) => {
-        this.logger.error(`Evaluation error:\n ${JSON.stringify(err, null, 2)}`);
-      });
-  }
-
-  private getEvaluators(): Evaluator[] {
-    return Object.entries(this.evaluators).map(([key, evaluator]) => {
-      return (args) => {
-        const result = evaluator(args);
-        return { key, ...result };
-      };
-    });
-  }
-
-  /**
-   * This is a map of custom evaluators that are used to evaluate rule migration tasks
-   * The object keys are used for the `key` property of the evaluation result, and the value is a function that takes a the `run` and `example`
-   * and returns a `score` and a `comment` (and any other data needed for the evaluation)
-   **/
-  private readonly evaluators: Record<string, CustomEvaluator> = {
-    translation_result: ({ run, example }) => {
-      const runResult = (run?.outputs as MigrateRuleState)?.translation_result;
-      const expectedResult = (example?.outputs as MigrateRuleState)?.translation_result;
-
-      if (!expectedResult) {
-        return { comment: 'No translation result expected' };
-      }
-      if (!runResult) {
-        return { score: false, comment: 'No translation result received' };
-      }
-
-      if (runResult === expectedResult) {
-        return { score: true, comment: 'Correct' };
-      }
-
-      return {
-        score: false,
-        comment: `Incorrect, expected "${expectedResult}" but got "${runResult}"`,
-      };
-    },
-
+export class RuleMigrationTaskEvaluator extends SiemMigrationsBaseEvaluator<
+  RuleMigration,
+  RuleMigrationRule,
+  RuleMigrationTaskInput,
+  MigrateRuleConfigSchema,
+  RuleMigrationTaskOutput
+> {
+  protected readonly evaluators: Record<string, CustomEvaluator> = {
     custom_query_accuracy: ({ run, example }) => {
       const runQuery = (run?.outputs as MigrateRuleState)?.elastic_rule?.query;
       const expectedQuery = (example?.outputs as MigrateRuleState)?.elastic_rule?.query;

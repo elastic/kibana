@@ -5,12 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
-export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
+export function IndexManagementPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const pageObjects = getPageObjects(['common']);
 
   const browser = getService('browser');
   return {
@@ -322,6 +323,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail(manageIndexTab);
       const manageIndexComponent = await testSubjects.find(manageIndexTab);
       await manageIndexComponent.click();
+    },
+    async navigateToIndexManagementTab(
+      path: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
+    ) {
+      await pageObjects.common.navigateToApp('indexManagement', { path });
     },
   };
 }

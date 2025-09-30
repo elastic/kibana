@@ -6,18 +6,18 @@
  */
 import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
-import {
+import type {
   CreateSLOInput,
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body

@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { AggregationBuckets } from './findings_query_builders';
 import {
-  AggregationBuckets,
   getVulnerabilitiesAggregationCount,
   VULNERABILITIES_RESULT_EVALUATION,
   createGetVulnerabilityFindingsQuery,

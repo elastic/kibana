@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
+import type { graphlib } from '@dagrejs/dagre';
 
 export function getAllPredecessors(graph: graphlib.Graph, nodeId: string): string[] {
   const predecessors = graph.predecessors(nodeId);
@@ -18,4 +18,17 @@ export function getAllPredecessors(graph: graphlib.Graph, nodeId: string): strin
     predecessor,
     ...getAllPredecessors(graph, predecessor),
   ]);
+}
+
+export function getTriggerLabel(triggerType: string) {
+  switch (triggerType) {
+    case 'manual':
+      return 'Manual';
+    case 'alert':
+      return 'Alert';
+    case 'scheduled':
+      return 'Scheduled';
+    default:
+      return triggerType;
+  }
 }

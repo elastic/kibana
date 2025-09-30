@@ -5,67 +5,54 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
+import type { Ref } from 'react';
+import React from 'react';
 import { omit } from 'lodash';
-import { ControllerRenderProps } from 'react-hook-form';
-import {
-  EuiFieldText,
+import type { ControllerRenderProps } from 'react-hook-form';
+import type {
   EuiFieldTextProps,
-  EuiSelect,
   EuiSelectProps,
-  EuiFieldNumber,
   EuiFieldNumberProps,
-  EuiFieldPassword,
   EuiFieldPasswordProps,
-  EuiCheckbox,
   EuiCheckboxProps,
-  EuiSwitch,
   EuiSwitchProps,
-  EuiButtonGroup,
   EuiButtonGroupProps,
-  EuiComboBox,
   EuiComboBoxProps,
-  EuiTextArea,
   EuiTextAreaProps,
 } from '@elastic/eui';
-import { MonitorSpaces, MonitorSpacesProps } from '../fields/monitor_spaces';
 import {
-  MaintenanceWindowsField,
-  MaintenanceWindowsFieldProps,
-} from '../fields/maintenance_windows/maintenance_windows';
-import {
-  ThrottlingConfigField,
-  ThrottlingConfigFieldProps,
-} from '../fields/throttling/throttling_config_field';
-import { SourceField, SourceFieldProps } from '../fields/source_field';
-import {
-  FormattedComboBox as DefaultFormattedComboBox,
-  FormattedComboBoxProps as DefaultFormattedComboBoxProps,
-} from '../fields/combo_box';
-import {
-  JSONEditor as DefaultJSONEditor,
-  CodeEditorProps as DefaultCodeEditorProps,
-} from '../fields/code_editor';
-import {
-  MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
-  MonitorTypeRadioGroupProps,
-} from '../fields/monitor_type_radio_group';
-import {
-  HeaderField as DefaultHeaderField,
-  HeaderFieldProps as DefaultHeaderFieldProps,
-} from '../fields/header_field';
-import {
-  KeyValuePairsField as DefaultKeyValuePairsField,
-  KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
-} from '../fields/key_value_field';
-import {
-  RequestBodyField as DefaultRequestBodyField,
-  RequestBodyFieldProps as DefaultRequestBodyFieldProps,
-} from '../fields/request_body_field';
-import {
-  ResponseBodyIndexField as DefaultResponseBodyIndexField,
-  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
-} from '../fields/index_response_body_field';
+  EuiFieldText,
+  EuiSelect,
+  EuiFieldNumber,
+  EuiFieldPassword,
+  EuiCheckbox,
+  EuiSwitch,
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiTextArea,
+} from '@elastic/eui';
+import type { MonitorSpacesProps } from '../fields/monitor_spaces';
+import { MonitorSpaces } from '../fields/monitor_spaces';
+import type { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
+import { MaintenanceWindowsField } from '../fields/maintenance_windows/maintenance_windows';
+import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
+import { ThrottlingConfigField } from '../fields/throttling/throttling_config_field';
+import type { SourceFieldProps } from '../fields/source_field';
+import { SourceField } from '../fields/source_field';
+import type { FormattedComboBoxProps as DefaultFormattedComboBoxProps } from '../fields/combo_box';
+import { FormattedComboBox as DefaultFormattedComboBox } from '../fields/combo_box';
+import type { CodeEditorProps as DefaultCodeEditorProps } from '../fields/code_editor';
+import { JSONEditor as DefaultJSONEditor } from '../fields/code_editor';
+import type { MonitorTypeRadioGroupProps } from '../fields/monitor_type_radio_group';
+import { MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
+import type { HeaderFieldProps as DefaultHeaderFieldProps } from '../fields/header_field';
+import { HeaderField as DefaultHeaderField } from '../fields/header_field';
+import type { KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps } from '../fields/key_value_field';
+import { KeyValuePairsField as DefaultKeyValuePairsField } from '../fields/key_value_field';
+import type { RequestBodyFieldProps as DefaultRequestBodyFieldProps } from '../fields/request_body_field';
+import { RequestBodyField as DefaultRequestBodyField } from '../fields/request_body_field';
+import type { ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps } from '../fields/index_response_body_field';
+import { ResponseBodyIndexField as DefaultResponseBodyIndexField } from '../fields/index_response_body_field';
 
 // these props are automatically passed through to our controlled components
 // they do not have to be defined specifically on the 'props' field in the

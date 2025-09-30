@@ -22,6 +22,8 @@ import {
   getMockMlJobStatsResponse,
   getMockMlDatafeedStatsResponse,
   getMockRuleSearchResponse,
+  getMockThreatMatchRuleSO,
+  getMockThreatMatchRuleSearchResponse,
 } from './ml_jobs/get_metrics.mocks';
 import {
   getMockRuleAlertsResponse,
@@ -1246,6 +1248,105 @@ describe('Detections Usage and Metrics', () => {
           },
           elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         },
+      });
+    });
+
+    describe('threat match rules', () => {
+      let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
+      beforeEach(() => {
+        esClient.search.mockResponseOnce(getEventLogAllRules());
+        esClient.search.mockResponseOnce(getEventLogElasticRules());
+        esClient.search.mockResponseOnce(getElasticLogCustomRules()); // this is needed to get the custom rules
+        esClient.search.mockResponseOnce(getMockRuleAlertsResponse(1));
+
+        const logger = loggingSystemMock.createLogger();
+        detectionsMetricsParams = {
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        };
+      });
+
+      it('returns information on does not match condition', async () => {
+        // response has 5 threat match rules, 3 of them have negate threat mapping: 1 Elastic, 2 custom
+        savedObjectsClient.find.mockResolvedValueOnce(
+          getMockThreatMatchRuleSearchResponse([
+            getMockThreatMatchRuleSO({
+              isElastic: true,
+              isCustomized: true,
+              hasNegateThreatMapping: true,
+            }),
+            getMockThreatMatchRuleSO({
+              isElastic: true,
+              isCustomized: false,
+            }),
+            getMockThreatMatchRuleSO({
+              hasNegateThreatMapping: true,
+            }),
+            getMockThreatMatchRuleSO({
+              hasNegateThreatMapping: true,
+            }),
+            getMockThreatMatchRuleSO(),
+          ])
+        );
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_usage.threat_match.has_does_not_match_condition',
+          3
+        );
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
+          2
+        );
+        // Elastic rules details
+        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 2);
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_detail',
+          expect.arrayContaining([
+            expect.objectContaining({
+              has_does_not_match_condition: true,
+            }),
+            expect.objectContaining({
+              has_does_not_match_condition: false,
+            }),
+          ])
+        );
+      });
+
+      it('returns empty results on does not match condition usage', async () => {
+        // response has 2 threat match rules, none of them has negate threat mapping
+        savedObjectsClient.find.mockResolvedValueOnce(
+          getMockThreatMatchRuleSearchResponse([
+            getMockThreatMatchRuleSO({
+              isElastic: true,
+              isCustomized: true,
+            }),
+            getMockThreatMatchRuleSO(),
+          ])
+        );
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_usage.threat_match.has_does_not_match_condition',
+          0
+        );
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
+          0
+        );
       });
     });
   });

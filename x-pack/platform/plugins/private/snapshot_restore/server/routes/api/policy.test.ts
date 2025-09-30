@@ -7,9 +7,10 @@
 
 import { addBasePath } from '../helpers';
 import { registerPolicyRoutes } from './policy';
-import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
-import { ResolveIndexResponseFromES } from '../../types';
-import { SlmGetStatusResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RequestMock } from '../../test/helpers';
+import { RouterMock, routeDependencies } from '../../test/helpers';
+import type { ResolveIndexResponseFromES } from '../../types';
+import type { SlmGetStatusResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
   const mockEsPolicy = {

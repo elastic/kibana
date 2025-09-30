@@ -6,12 +6,14 @@
  */
 
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
 import { formatMillisecond } from '../../../common/network_data/data_formatting';
-import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
+import type { MarkerItems } from '../context/waterfall_context';
+import { useWaterfallContext } from '../context/waterfall_context';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 
 export const FIELD_SYNTHETICS_LCP = 'browser.experience.lcp.us';

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
 
@@ -108,10 +108,6 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
 
-  const tryDiscoverCsvNotAvailable = async () => {
-    expect(await PageObjects.exports.exportButtonExists()).to.be(false);
-  };
-
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openExportPopover();
     await PageObjects.exports.clickPopoverItem('CSV');
@@ -140,8 +136,7 @@ export function createScenarios(
   };
 
   const tryReportsNotAvailable = async () => {
-    await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('Export');
+    await PageObjects.exports.exportButtonMissingOrFail();
   };
 
   return {
@@ -154,7 +149,6 @@ export function createScenarios(
     tryDashboardGenerateCsvNotAvailable,
     tryDashboardGenerateCsvSuccess,
     tryDiscoverCsvFail,
-    tryDiscoverCsvNotAvailable,
     tryDiscoverCsvSuccess,
     tryGeneratePdfFail,
     tryGeneratePdfNotAvailable,

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { filter, share, tap } from 'rxjs';
-import { UnifiedHistogramInput$ } from '../../../types';
+import type { UnifiedHistogramInput$ } from '../../../types';
 
 export const useFetch = ({
   input$,

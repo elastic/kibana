@@ -8,9 +8,12 @@
  */
 
 import React from 'react';
-import { shallow, render } from 'enzyme';
-import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
+import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
 
 import { KibanaPageTemplate } from './page_template';
 
@@ -60,56 +63,57 @@ const solutionNav = {
 };
 
 const noDataConfig: NoDataPageProps = {
-  solution: 'Elastic',
   action: {
-    elasticAgent: {},
+    elasticAgent: {
+      href: '/app/integrations',
+    },
   },
-  docsLink: 'test',
 };
 
 describe('KibanaPageTemplate', () => {
-  test('render noDataConfig && solutionNav', () => {
-    const component = shallow(
-      <KibanaPageTemplate noDataConfig={noDataConfig} solutionNav={solutionNav} />
+  test('renders noDataConfig with solutionNav', () => {
+    renderWithI18n(
+      <NoDataCardProvider {...getNoDataCardServicesMock()}>
+        <KibanaPageTemplate
+          noDataConfig={noDataConfig}
+          solutionNav={solutionNav}
+          data-test-subj="noDataConfigPageWithSolutionNavBar"
+        />
+      </NoDataCardProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByTestId('noDataConfigPageWithSolutionNavBar')).toBeInTheDocument();
   });
 
-  test('render noDataConfig', () => {
-    const component = shallow(<KibanaPageTemplate noDataConfig={noDataConfig} />);
-    expect(component).toMatchSnapshot();
+  test('renders noDataConfig without solutionNav', () => {
+    renderWithI18n(
+      <NoDataCardProvider {...getNoDataCardServicesMock()}>
+        <KibanaPageTemplate noDataConfig={noDataConfig} data-test-subj="noDataConfigPage" />
+      </NoDataCardProvider>
+    );
+
+    expect(screen.getByTestId('noDataConfigPage')).toBeInTheDocument();
   });
 
-  test('render solutionNav', () => {
-    const component = shallow(
+  test('renders template with solutionNav but no noDataConfig', () => {
+    renderWithI18n(
       <KibanaPageTemplate
         pageHeader={{
           iconType: 'test',
-          title: 'test',
-          description: 'test',
-          rightSideItems: ['test'],
+          pageTitle: 'Test Page',
+          description: 'Test description',
+          rightSideItems: [<div key="test">test</div>],
         }}
         solutionNav={solutionNav}
+        data-test-subj="testPageTemplate"
       >
         <div>Child element</div>
       </KibanaPageTemplate>
     );
-    expect(component).toMatchSnapshot();
-  });
 
-  test('render basic template', () => {
-    const component = render(
-      <KibanaPageTemplate
-        pageHeader={{
-          iconType: 'test',
-          title: 'test',
-          description: 'test',
-          rightSideItems: ['test'],
-        }}
-      >
-        <div>Child element</div>
-      </KibanaPageTemplate>
-    );
-    expect(component).toMatchSnapshot();
+    // Should render the solution nav
+    expect(screen.getByText('Kibana')).toBeInTheDocument();
+    expect(screen.getByText('Child element')).toBeInTheDocument();
+    expect(screen.getByTestId('testPageTemplate')).toBeInTheDocument();
   });
 });

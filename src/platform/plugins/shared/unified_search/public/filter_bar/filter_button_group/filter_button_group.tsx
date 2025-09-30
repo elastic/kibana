@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '../../use_memo_css';
 
@@ -25,7 +27,7 @@ interface Props {
   size?: 'm' | 's';
 }
 
-export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...rest }: Props) => {
   const styles = useMemoCss(filterButtonStyles);
   return (
     <EuiFlexGroup
@@ -53,7 +55,7 @@ const filterButtonStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      height: euiTheme.size.xxl,
+      height: euiTheme.size.xl,
       backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
       borderRadius: euiTheme.border.radius.medium,
       '&::after': {

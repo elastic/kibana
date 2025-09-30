@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, ReactNode, HTMLAttributes, ForwardedRef } from 'react';
+import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiScreenReaderOnly, EuiText, IconType, useEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
 
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';
@@ -17,7 +19,8 @@ export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLBu
   href: string;
   iconSize?: 's' | 'm';
   iconType: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isHorizontal?: boolean;
   isLabelVisible?: boolean;
   isTruncated?: boolean;
@@ -33,14 +36,16 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       iconSize = 's',
       iconType,
       id,
-      isActive,
+      isHighlighted,
+      isCurrent = false,
       isLabelVisible = true,
       isTruncated = true,
       ...props
     },
     ref
   ): JSX.Element => {
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
@@ -55,7 +60,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       // 3px is from Figma; there is no token
       gap: ${isHorizontal ? euiTheme.size.s : '3px'};
       outline: none !important;
-      color: ${isActive
+      color: ${isHighlighted
         ? euiTheme.components.buttons.textColorPrimary
         : euiTheme.components.buttons.textColorText};
 
@@ -67,7 +72,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
           : isHorizontal
           ? euiTheme.colors.backgroundBaseSubdued
@@ -84,26 +89,28 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         z-index: 0;
       }
 
+      // TODO: consider using euiFocusRing
       // source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible
       &:focus-visible .iconWrapper {
-        border: 2px solid ${isActive ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thick} solid
+          ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
       }
 
       &:hover .iconWrapper::before {
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryHover
           : euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .iconWrapper::before {
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryActive
           : euiTheme.components.buttons.backgroundTextActive};
       }
 
       &:hover,
       &:active {
-        color: ${isActive
+        color: ${isHighlighted
           ? euiTheme.components.buttons.textColorPrimary
           : euiTheme.components.buttons.textColorText};
       }
@@ -125,17 +132,21 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-    const horizontalStyles =
-      !isHorizontal &&
-      css`
-        font-size: 11px;
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `;
+    const verticalStyles = css`
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `;
+
+    const horizontalStyles = css`
+      font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
+    `;
 
     const content = (
       <>
         <div className="iconWrapper">
-          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type={'empty'} />}>
+            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          </Suspense>
         </div>
         {isLabelVisible ? (
           <EuiText
@@ -143,10 +154,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             textAlign="center"
             css={css`
               ${truncatedStyles}
-              ${horizontalStyles}
+              ${isHorizontal ? horizontalStyles : verticalStyles}
               overflow: hidden;
               max-width: 100%;
-              padding: 0 4px;
+              padding: 0 ${euiTheme.size.s};
             `}
           >
             {children}
@@ -162,6 +173,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const commonProps = {
       css: buttonStyles,
       'data-menu-item': true,
+      'data-highlighted': isHighlighted ? 'true' : 'false',
       ...props,
     };
 
@@ -175,7 +187,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     return (
       <a
-        aria-current={isActive ? 'page' : undefined}
+        aria-current={isCurrent ? 'page' : undefined}
         href={href}
         ref={ref as ForwardedRef<HTMLAnchorElement>}
         {...commonProps}

@@ -13,13 +13,15 @@ import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
-import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ApplicationStart, FeatureFlagsStart, IBasePath } from '@kbn/core/public';
+import type { SearchSessionIndicatorRef } from '../search_session_indicator';
+import { SearchSessionIndicator } from '../search_session_indicator';
 import { useSearchSessionTour } from './search_session_tour';
-import { SearchUsageCollector } from '../../../collectors';
-import { ISessionService } from '../../session_service';
+import type { SearchUsageCollector } from '../../../collectors';
+import type { ISessionService } from '../../session_service';
 import { SearchSessionState } from '../../search_session_state';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -28,6 +30,7 @@ export interface SearchSessionIndicatorDeps {
   storage: IStorageWrapper;
   tourDisabled: boolean;
   usageCollector?: SearchUsageCollector;
+  featureFlags: FeatureFlagsStart;
 }
 
 export const createConnectedSearchSessionIndicator = ({
@@ -37,7 +40,13 @@ export const createConnectedSearchSessionIndicator = ({
   usageCollector,
   basePath,
   tourDisabled,
+  featureFlags,
 }: SearchSessionIndicatorDeps): React.FC => {
+  const hasBackgroundSearchEnabled = featureFlags.getBooleanValue(
+    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+    false
+  );
+
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
   const debouncedSessionServiceState$ = sessionService.state$.pipe(
@@ -68,12 +77,16 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (disableSaveAfterSearchesExpire) {
       saveDisabled = true;
-      saveDisabledReasonText = i18n.translate(
-        'data.searchSessionIndicator.disabledDueToTimeoutMessage',
-        {
-          defaultMessage: 'Search session results expired.',
-        }
-      );
+      saveDisabledReasonText = hasBackgroundSearchEnabled
+        ? i18n.translate(
+            'data.searchSessionIndicator.backgroundSearchDisabledDueToTimeoutMessage',
+            {
+              defaultMessage: 'Background search results expired.',
+            }
+          )
+        : i18n.translate('data.searchSessionIndicator.disabledDueToTimeoutMessage', {
+            defaultMessage: 'Search session results expired.',
+          });
     }
 
     if (isSaveDisabledByApp.disabled) {
@@ -85,12 +98,16 @@ export const createConnectedSearchSessionIndicator = ({
     // this happens in case there is no app that allows current user to use search session
     if (!sessionService.hasAccess()) {
       managementDisabled = saveDisabled = true;
-      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
-        'data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
-        {
-          defaultMessage: "You don't have permissions to manage search sessions",
-        }
-      );
+      managementDisabledReasonText = saveDisabledReasonText = hasBackgroundSearchEnabled
+        ? i18n.translate(
+            'data.searchSessionIndicator.backgroundSearchDisabledDueToDisabledGloballyMessage',
+            {
+              defaultMessage: "You don't have permissions to manage background searches",
+            }
+          )
+        : i18n.translate('data.searchSessionIndicator.disabledDueToDisabledGloballyMessage', {
+            defaultMessage: "You don't have permissions to manage search sessions",
+          });
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
@@ -174,6 +191,7 @@ export const createConnectedSearchSessionIndicator = ({
           startedTime={startTime}
           completedTime={completedTime}
           canceledTime={canceledTime}
+          hasBackgroundSearchEnabled={hasBackgroundSearchEnabled}
         />
       </RedirectAppLinks>
     );

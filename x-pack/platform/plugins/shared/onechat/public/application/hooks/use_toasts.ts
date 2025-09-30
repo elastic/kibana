@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToastInput } from '@kbn/core/public';
+import type { ToastInput } from '@kbn/core/public';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
 

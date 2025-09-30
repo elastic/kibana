@@ -49,7 +49,7 @@ const DashboardsSectionHeader = () => {
           <EuiTextColor color="warning">
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.title"
-              defaultMessage="Sample Dashboard"
+              defaultMessage="Sample Dashboard Snapshot"
             />
           </EuiTextColor>
         </h3>

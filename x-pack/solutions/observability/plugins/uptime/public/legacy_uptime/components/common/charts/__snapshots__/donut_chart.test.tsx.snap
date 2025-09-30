@@ -195,6 +195,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": false,
               },
             },
+            "brush": Object {
+              "fill": "#0B64DD",
+              "opacity": 0.1,
+              "stroke": "#0B64DD",
+              "strokeWidth": 1,
+            },
             "bubbleSeriesStyle": Object {
               "point": Object {
                 "dimmed": Object {
@@ -257,7 +263,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -266,7 +272,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -481,15 +487,22 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "barBackground": "#ECF1F9",
               "border": "#E3E8F2",
               "emptyBackground": "transparent",
+              "extraTextAlign": "right",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
               "textDarkColor": "#111C2C",
+              "textExtraDarkColor": "#1D2A3E",
+              "textExtraLightColor": "#CAD3E2",
               "textLightColor": "#E3E8F2",
+              "textSubtitleDarkColor": "#1D2A3E",
+              "textSubtitleLightColor": "#CAD3E2",
+              "titleWeight": "bold",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
-              "valuesTextAlign": "right",
+              "valuePosition": "bottom",
+              "valueTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -665,6 +678,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div
@@ -820,6 +834,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IStorage, IStorageWrapper } from './types';
+import type { IStorage, IStorageWrapper } from './types';
 
 export class Storage implements IStorageWrapper {
   public store: IStorage;

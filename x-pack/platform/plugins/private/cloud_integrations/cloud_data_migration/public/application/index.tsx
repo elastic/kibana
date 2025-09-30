@@ -7,11 +7,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { BreadcrumbService } from './services/breadcrumbs';
+import type { BreadcrumbService } from './services/breadcrumbs';
 import { CloudDataMigrationApp } from './components/app';
 
 export const renderApp = (

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
-import { Adapters } from '../common';
+import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
+import type { Adapters } from '../common';
 
 /**
  * The props interface that a custom inspector view component, that will be passed

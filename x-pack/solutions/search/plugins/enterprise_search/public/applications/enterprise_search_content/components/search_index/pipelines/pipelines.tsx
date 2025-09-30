@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -20,7 +21,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -135,6 +135,7 @@ export const SearchIndexPipelines: React.FC = () => {
       {showMissingPipelineCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="error"
             title={i18n.translate(

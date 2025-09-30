@@ -4,6 +4,7 @@
     "outDir": "target/types",
     "types": [
       "jest",
+      "@testing-library/jest-dom",
       "node",
       "react",
       "@kbn/ambient-ui-types",
@@ -17,5 +18,7 @@
   "kbn_references": [
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/i18n",
+    "@kbn/i18n-react"
   ]
 }

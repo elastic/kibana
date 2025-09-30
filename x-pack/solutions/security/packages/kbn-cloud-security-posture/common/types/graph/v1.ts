@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { BoolQuery } from '@kbn/es-query';
-import {
+import type {
   edgeColorSchema,
   edgeDataSchema,
   entityNodeDataSchema,

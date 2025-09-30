@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
-import { RouteDependencies } from '../types';
+import type { MlOperation } from '../../common/types';
+import { ML_UPGRADE_OP_TYPE } from '../../common/types';
+import type { RouteDependencies } from '../types';
 
 const findMlOperation = async (
   savedObjectsClient: SavedObjectsClientContract,

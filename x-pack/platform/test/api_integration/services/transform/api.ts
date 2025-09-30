@@ -8,7 +8,8 @@
 import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
-import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { TransformState } from '@kbn/transform-plugin/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ForwardDefinition } from '..';
+import type { ForwardDefinition } from '..';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('migrate legacy kibana urls', () => {

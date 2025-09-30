@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { getFormatByAccessor, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
 export const getFormat = (

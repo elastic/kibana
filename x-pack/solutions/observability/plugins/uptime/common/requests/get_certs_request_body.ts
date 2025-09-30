@@ -12,7 +12,7 @@ import {
   SUMMARY_FILTER,
   getRangeFilter,
 } from '../constants/client_defaults';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';

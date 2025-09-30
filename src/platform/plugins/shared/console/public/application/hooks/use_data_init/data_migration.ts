@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from '../../../services';
-import { ObjectStorageClient } from '../../../../common/types';
+import type { History } from '../../../services';
+import type { ObjectStorageClient } from '../../../../common/types';
 
 export interface Dependencies {
   history: History;

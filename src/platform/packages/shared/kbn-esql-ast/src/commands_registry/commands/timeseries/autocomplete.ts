@@ -15,7 +15,8 @@ import {
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(

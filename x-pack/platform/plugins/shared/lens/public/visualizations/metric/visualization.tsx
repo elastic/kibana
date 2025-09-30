@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationConfigProps,
@@ -37,7 +38,7 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState, SecondaryTrend } from './types';
+import type { MetricVisualizationState, SecondaryTrend } from './types';
 import {
   getColorMode,
   getDefaultConfigForMode,
@@ -45,6 +46,7 @@ import {
   isSecondaryTrendConfigInvalid,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
+import { convertToRunTimeState } from './runtime_state';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -54,9 +56,13 @@ export const showingBar = (
   Boolean(state.showBar && state.maxAccessor);
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
-  return showingBar(state) && isMetricNumeric
-    ? euiLightVars.euiColorPrimary
-    : euiThemeVars.euiColorEmptyShade;
+  if (showingBar(state) && isMetricNumeric) {
+    return euiLightVars.euiColorPrimary;
+  }
+  if (state.applyColorTo === 'value') {
+    return euiThemeVars.euiColorVisText0;
+  }
+  return euiThemeVars.euiColorEmptyShade;
 };
 
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
@@ -328,8 +334,9 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
-  delete state.secondaryPrefix;
+  delete state.secondaryLabel;
   delete state.secondaryTrend;
+  delete state.secondaryLabelPosition;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -394,14 +401,15 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state ?? {
-        layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+    if (state) return convertToRunTimeState(state);
+
+    return {
+      layerId: addNewLayer(),
+      layerType: layerTypes.DATA,
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
+
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
@@ -576,8 +584,9 @@ export const getMetricVisualization = ({
       return {
         state: {
           ...state,
-          secondaryPrefix: undefined,
+          secondaryLabel: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
+          secondaryLabelPosition: 'before',
         },
         references: [],
       };

@@ -29,8 +29,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { findLast } from 'lodash';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { deserializeField } from '@kbn/data-plugin/common';
 import { Assignment } from '../assignment/assignment';
 import {
@@ -39,8 +39,8 @@ import {
   removeAllAssignments,
 } from '../../state/color_mapping';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMapping } from '../../config';
 import { getColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignments({

@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
 import { exports as resolvePackageExports } from 'resolve.exports';
 import { safeStat, readFileSync } from './helpers/fs';
-import { ResolveResult } from './resolve_result';
+import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
 

@@ -10,8 +10,10 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiModal, EuiModalHeader, EuiModalBody, EuiText, useGeneratedHtmlId } from '@elastic/eui';
-import { exampleFileKind, MyImageMetadata } from '../../common';
-import { FilesClient, FileUpload } from '../imports';
+import type { MyImageMetadata } from '../../common';
+import { exampleFileKind } from '../../common';
+import type { FilesClient } from '../imports';
+import { FileUpload } from '../imports';
 
 interface Props {
   client: FilesClient<MyImageMetadata>;

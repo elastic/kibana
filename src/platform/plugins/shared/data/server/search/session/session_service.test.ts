@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import { ElasticsearchClientMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ConfigSchema } from '../../config';
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { ConfigSchema } from '../../config';
+import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -29,7 +26,7 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let elasticsearchClient: ElasticsearchClientMock;
+  let asCurrentUserElasticsearchClient: ElasticsearchClientMock;
   let service: SearchSessionService;
 
   const MOCK_STRATEGY = 'ese';
@@ -67,7 +64,7 @@ describe('SearchSessionService', () => {
   describe('Feature disabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+      asCurrentUserElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
@@ -134,7 +131,6 @@ describe('SearchSessionService', () => {
   describe('Feature enabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {
@@ -293,7 +289,10 @@ describe('SearchSessionService', () => {
 
         const options = { page: 0, perPage: 5 };
         const response = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options
         );
@@ -381,14 +380,20 @@ describe('SearchSessionService', () => {
 
         const options1 = { filter: 'foobar' };
         const response1 = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options1
         );
 
         const options2 = { filter: nodeBuilder.is('foo', 'bar') };
         const response2 = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           mockUser1,
           options2
         );
@@ -567,7 +572,10 @@ describe('SearchSessionService', () => {
 
         const options = { page: 0, perPage: 5 };
         const response = await service.find(
-          { savedObjectsClient, internalElasticsearchClient: elasticsearchClient },
+          {
+            savedObjectsClient,
+            asCurrentUserElasticsearchClient,
+          },
           null,
           options
         );

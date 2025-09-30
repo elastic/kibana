@@ -8,9 +8,9 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-      onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
+      agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -120,6 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
@@ -148,6 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
@@ -176,6 +180,38 @@ export default function ({ getService }: FtrProviderContext) {
         'blocklist_read',
         'event_filters_all',
         'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
+        'policy_management_all',
+        'policy_management_read',
+        'actions_log_management_all',
+        'actions_log_management_read',
+        'host_isolation_all',
+        'process_operations_all',
+        'file_operations_all',
+        'execute_operations_all',
+        'scan_operations_all',
+      ],
+      siemV4: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'endpoint_list_all',
+        'endpoint_list_read',
+        'workflow_insights_all',
+        'workflow_insights_read',
+        'global_artifact_management_all',
+        'trusted_applications_all',
+        'trusted_applications_read',
+        'host_isolation_exceptions_all',
+        'host_isolation_exceptions_read',
+        'blocklist_all',
+        'blocklist_read',
+        'event_filters_all',
+        'event_filters_read',
+        'endpoint_exceptions_all',
+        'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
         'actions_log_management_all',
@@ -202,7 +238,13 @@ export default function ({ getService }: FtrProviderContext) {
         'update_anonymization',
         'manage_global_knowledge_base',
       ],
-      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAttackDiscovery: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_schedule',
+      ],
       securitySolutionCases: [
         'all',
         'read',
@@ -315,10 +357,9 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-      guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
-    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
   describe('Privileges', () => {

@@ -8,19 +8,14 @@
  */
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
-import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ESQLColumnData } from '../../types';
 
-export const columnsAfter = (
-  command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
-  context?: ICommandContext
-) => {
+export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
   const columnsToDrop: string[] = [];
 
   walk(command, {
     visitColumn: (node) => {
-      columnsToDrop.push(node.name);
+      columnsToDrop.push(node.parts.join('.'));
     },
   });
 

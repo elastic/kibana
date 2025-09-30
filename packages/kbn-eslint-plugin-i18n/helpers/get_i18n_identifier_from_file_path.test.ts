@@ -13,6 +13,10 @@ const SYSTEMPATH = 'systemPath';
 
 const testMap = [
   [
+    'x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx',
+    'xpack.observability_onboarding',
+  ],
+  [
     'x-pack/solutions/observability/plugins/observability/public/header_actions.tsx',
     'xpack.observability',
   ],
@@ -29,6 +33,10 @@ const testMap = [
   [
     'src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',
     'alertsUIShared',
+  ],
+  [
+    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metric_flyout/metrics_insights_flyout.tsx',
+    'metricsExperience',
   ],
 ];
 

@@ -6,9 +6,9 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCode,
@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSet } from '../../hooks/use_fetch_synonyms_set';

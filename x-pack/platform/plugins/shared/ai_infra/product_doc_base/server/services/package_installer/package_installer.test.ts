@@ -17,11 +17,11 @@ import {
   ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
 import { cloneDeep } from 'lodash';
+import type { ProductName } from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
   DocumentationProduct,
-  ProductName,
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -29,7 +29,7 @@ import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { RegisterAPIRoutesArgs } from '../types';
+import type { RegisterAPIRoutesArgs } from '../types';
 import { registerLensVisualizationsAPIRoutes } from './visualizations';
 
 export function registerLensAPIRoutes(args: RegisterAPIRoutesArgs) {
   registerLensVisualizationsAPIRoutes(args);
 }
+
+export * from './schema';

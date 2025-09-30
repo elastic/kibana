@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser-internal"
+    "@kbn/core-analytics-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

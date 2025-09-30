@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { Asset, DashboardAsset } from '../../../common/assets';
+import type { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 

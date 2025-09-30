@@ -18,11 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { DRAW_SHAPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { DRAW_SHAPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
-import { DrawState } from '../../../../common/descriptor_types';
+import type { DrawState } from '../../../../common/descriptor_types';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',

@@ -7,15 +7,16 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SyntheticsEsClient } from '../../lib';
-import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
-import { StatusRuleExecutorOptions } from './types';
-import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
+import type { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
+import type { StatusRuleExecutorOptions } from './types';
+import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {
@@ -25,7 +26,7 @@ import {
 } from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 export const registerSyntheticsStatusCheckRule = (

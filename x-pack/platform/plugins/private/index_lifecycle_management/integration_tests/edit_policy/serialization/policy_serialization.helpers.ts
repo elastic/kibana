@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { AppServicesContext } from '../../../public/types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AppServicesContext } from '../../../public/types';
 import {
   createColdPhaseActions,
   createDeletePhaseActions,

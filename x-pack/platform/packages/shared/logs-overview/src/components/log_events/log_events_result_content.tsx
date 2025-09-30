@@ -12,7 +12,7 @@ import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import React from 'react';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
-import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
 export interface LogEventsResultContentProps {
   dependencies: LogEventsResultContentDependencies;

@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { CcrFollowRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
-import { FollowerIndex } from '../../../../common/types';
+import type { FollowerIndex } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { removeEmptyFields } from '../../../../common/services/utils';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Create a follower index

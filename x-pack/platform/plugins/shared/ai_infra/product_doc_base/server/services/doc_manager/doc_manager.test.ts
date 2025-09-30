@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { securityServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -54,6 +55,12 @@ describe('DocumentationManager', () => {
 
     docInstallClient = {
       getInstallationStatus: jest.fn(),
+      getPreviouslyInstalledInferenceIds: jest
+        .fn()
+        .mockResolvedValue([
+          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+          defaultInferenceEndpoints.ELSER,
+        ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
     docManager = new DocumentationManager({

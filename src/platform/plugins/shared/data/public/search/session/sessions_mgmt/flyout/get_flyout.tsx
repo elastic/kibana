@@ -8,15 +8,17 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ISessionsClient } from '../../../..';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
-import { SearchUsageCollector } from '../../../collectors';
+import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { Flyout } from './flyout';
+import type { BackgroundSearchOpenedHandler } from '../types';
+import { FLYOUT_WIDTH } from './constants';
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -33,11 +35,14 @@ export function openSearchSessionsFlyout({
   sessionsClient: ISessionsClient;
   share: SharePluginStart;
 }) {
-  return () => {
+  return (
+    attrs: { appId?: string; onBackgroundSearchOpened?: BackgroundSearchOpenedHandler } = {}
+  ) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
       application: coreStart.application,
       usageCollector,
+      featureFlags: coreStart.featureFlags,
     });
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
@@ -47,6 +52,11 @@ export function openSearchSessionsFlyout({
           <KibanaReactContextProvider>
             <Flyout
               onClose={() => flyout.close()}
+              onBackgroundSearchOpened={(params) => {
+                attrs.onBackgroundSearchOpened?.(params);
+                flyout.close();
+              }}
+              appId={attrs.appId}
               api={api}
               coreStart={coreStart}
               usageCollector={usageCollector}
@@ -60,7 +70,7 @@ export function openSearchSessionsFlyout({
       ),
       {
         hideCloseButton: true,
-        size: 's',
+        size: FLYOUT_WIDTH,
       }
     );
 

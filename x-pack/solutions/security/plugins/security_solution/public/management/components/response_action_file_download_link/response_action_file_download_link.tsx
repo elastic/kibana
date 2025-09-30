@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  type EuiTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -105,7 +106,7 @@ export interface ResponseActionFileDownloadLinkProps {
   canAccessFileDownloadLink: boolean;
   isTruncatedFile?: boolean;
   'data-test-subj'?: string;
-  textSize?: 's' | 'xs';
+  textSize?: EuiTextProps['size'];
   /**
    * If zip file needs a passcode to be opened. If `false`, then the passcode text will not be displayed.
    * Default is `true`

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardPanelActions.unlinkFromLibrary(mapTitle);
       await dashboardPanelActions.expectNotLinkedToLibrary(mapTitle);
 
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.filterEmbeddableNames(mapTitle);
       await find.existsByLinkText(mapTitle);
       await dashboardAddPanel.closeAddPanel();

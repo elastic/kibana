@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiText,
-  EuiTitle,
-  EuiTourStep,
-  EuiTourStepProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTitle, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
-import { EISUsageCostTourState, elasticLLMTourStep1, tourDefaultConfig } from './step_config';
+import type { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
+import type { EISUsageCostTourState } from './step_config';
+import { elasticLLMTourStep1, tourDefaultConfig } from './step_config';
 import { ELASTIC_LLM_TOUR_FINISH_TOUR } from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -41,7 +36,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   zIndex,
   wrapper = true, // Whether to wrap the children in a div with padding
 }) => {
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http, inferenceEnabled, settings } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const tourStorageKey = useTourStorageKey(storageKey);
   const [tourState, setTourState] = useLocalStorage<EISUsageCostTourState>(
@@ -72,6 +67,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   const { data: aiConnectors } = useLoadConnectors({
     http,
     inferenceEnabled,
+    settings,
   });
   const isElasticLLMConnectorSelected = useMemo(
     () =>

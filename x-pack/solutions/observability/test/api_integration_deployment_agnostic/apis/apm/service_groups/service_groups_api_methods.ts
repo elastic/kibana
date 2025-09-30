@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmApiClient } from '../../../services/apm_api';
+import type { ApmApiClient } from '../../../services/apm_api';
 
 export async function getServiceGroupsApi(apmApiClient: ApmApiClient) {
   return apmApiClient.writeUser({

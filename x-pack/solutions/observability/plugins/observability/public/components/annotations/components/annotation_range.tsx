@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import React from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { CreateAnnotationForm } from './create_annotation';
+import type { CreateAnnotationForm } from './create_annotation';
 
 const getHelpfulDateFormat = (dateFormat: string) => {
   if (dateFormat.endsWith('HH:mm:ss.SSS')) {

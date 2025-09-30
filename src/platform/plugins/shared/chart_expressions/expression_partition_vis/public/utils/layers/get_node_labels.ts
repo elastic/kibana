@@ -8,7 +8,7 @@
  */
 
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns } from '../../../common/types';
+import type { BucketColumns } from '../../../common/types';
 import { getAvailableFormatter } from '../formatters';
 
 export const getNodeLabel = (

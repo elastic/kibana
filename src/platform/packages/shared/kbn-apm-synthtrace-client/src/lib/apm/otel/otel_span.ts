@@ -8,8 +8,8 @@
  */
 
 import { generateShortId } from '../../utils/generate_id';
-import { ApmOtelError } from './apm_otel_error';
-import { ApmOtelFields } from './apm_otel_fields';
+import type { ApmOtelError } from './apm_otel_error';
+import type { ApmOtelFields } from './apm_otel_fields';
 import { OtelBaseSpan } from './otel_base_span';
 
 // In Otel we have only spans (https://opentelemetry.io/docs/concepts/signals/traces/#spans)

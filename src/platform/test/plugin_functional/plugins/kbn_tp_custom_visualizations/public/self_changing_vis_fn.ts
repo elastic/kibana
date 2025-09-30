@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import { KibanaContext } from '@kbn/data-plugin/public';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import type { KibanaContext } from '@kbn/data-plugin/public';
 
 export interface SelfChangingVisParams {
   counter: number;

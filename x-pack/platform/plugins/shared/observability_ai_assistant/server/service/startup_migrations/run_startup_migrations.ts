@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';

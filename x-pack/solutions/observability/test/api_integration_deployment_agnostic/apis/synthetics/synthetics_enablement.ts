@@ -7,8 +7,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');

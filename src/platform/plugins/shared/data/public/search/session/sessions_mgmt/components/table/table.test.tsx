@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, screen, waitFor, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import React from 'react';
@@ -16,10 +17,11 @@ import { SessionsClient } from '../../../..';
 import { SearchSessionStatus } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper } from '../../__mocks__';
-import { GetColumnsFn, SearchSessionsMgmtTable } from './table';
+import type { GetColumnsFn } from './table';
+import { SearchSessionsMgmtTable } from './table';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
-import { UISession } from '../../types';
+import type { UISession } from '../../types';
 
 const setup = async ({
   mockSessionsFindResponse = {
@@ -59,6 +61,7 @@ const setup = async ({
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   let renderResult: RenderResult;

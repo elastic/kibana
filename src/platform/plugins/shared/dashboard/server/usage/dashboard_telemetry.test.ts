@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedDashboardPanel } from '../dashboard_saved_object';
+import type { SavedDashboardPanel } from '../dashboard_saved_object';
 import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 
 const visualizationType1ByValue = {

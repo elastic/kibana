@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
+import {
+  type CoreStart,
+  type Logger,
+  type AnalyticsServiceSetup,
+  SECURITY_EXTENSION_ID,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -15,7 +20,6 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -57,6 +61,15 @@ interface StartParams {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
+}
+
+class EngineAlreadyRunningError extends Error {
+  statusCode: number;
+
+  constructor() {
+    super('The monitoring engine is already running');
+    this.statusCode = 409;
+  }
 }
 
 const getTaskName = (): string => TYPE;
@@ -102,6 +115,7 @@ export const registerPrivilegeMonitoringTask = ({
       taskManager: taskManagerStart,
       savedObjects: core.savedObjects,
       auditLogger: core.security.audit.withoutRequest,
+      experimentalFeatures,
       kibanaVersion,
       telemetry,
       apiKeyManager,
@@ -211,7 +225,7 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    const dataSourcesService = createDataSourcesService(dataClient);
+
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,
@@ -220,7 +234,8 @@ const runPrivilegeMonitoringTask = async ({
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
-    await dataSourcesService.plainIndexSync(soClient);
+    const dataSourcesService = createDataSourcesService(dataClient, soClient);
+    await dataSourcesService.syncAllSources();
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
@@ -232,18 +247,14 @@ export const removePrivilegeMonitoringTask = async ({
   taskManager,
   namespace,
   logger,
-}: {
-  taskManager: TaskManagerStartContract;
-  namespace: string;
-  logger: Logger;
-}) => {
+}: StartParams) => {
   const taskId = getTaskId(namespace);
   try {
     await taskManager.removeIfExists(taskId);
     logger.info(`Removed privilege monitoring task with id ${taskId}`);
   } catch (e) {
     logger.warn(
-      `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
+      `[Privilege Monitoring][task ${taskId}]: error removing task, received ${e.message}`
     );
     throw e;
   }
@@ -253,18 +264,20 @@ export const scheduleNow = async ({
   logger,
   namespace,
   taskManager,
-}: {
-  logger: Logger;
-  namespace: string;
-  taskManager: TaskManagerStartContract;
-}): Promise<RunSoonResult> => {
+}: StartParams): Promise<RunSoonResult> => {
   const taskId = getTaskId(namespace);
 
-  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  logger.info(`[Privilege Monitoring][task ${taskId}]: Attempting to schedule task to run now`);
   try {
     return taskManager.runSoon(taskId);
   } catch (e) {
-    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    logger.warn(
+      `[Privilege Monitoring][task ${taskId}]: error scheduling task now, received '${e.message}'`
+    );
+
+    if (e.message.contains('as it is currently running')) {
+      throw new EngineAlreadyRunningError();
+    }
     throw e;
   }
 };

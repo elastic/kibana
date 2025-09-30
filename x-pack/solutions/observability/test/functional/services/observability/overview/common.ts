@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Based on the x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {

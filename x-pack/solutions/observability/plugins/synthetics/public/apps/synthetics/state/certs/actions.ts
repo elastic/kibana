@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
+import type { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getCertsListAction = createAsyncAction<GetCertsParams, CertResult>('GET CERTS LIST');

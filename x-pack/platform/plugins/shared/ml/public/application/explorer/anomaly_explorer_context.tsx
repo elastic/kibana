@@ -22,6 +22,8 @@ import { AnomalyDetectionAlertsStateService } from './alerts';
 import { useMlJobService } from '../services/job_service';
 import { useTableInterval } from '../components/controls/select_interval';
 import { AnomalyTableStateService } from './anomaly_table_state_service';
+import { AnnotationsStateService } from './annotations_state_service';
+import { InfluencersStateService } from './influencers_state_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -31,6 +33,8 @@ export interface AnomalyExplorerContextValue {
   chartsStateService: AnomalyChartsStateService;
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
   anomalyTableService: AnomalyTableStateService;
+  annotationsStateService: AnnotationsStateService;
+  influencersStateService: InfluencersStateService;
 }
 
 /**
@@ -86,11 +90,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const anomalyTimelineService = new AnomalyTimelineService(
-      timefilter,
-      uiSettings,
-      mlResultsService
-    );
+    const anomalyTimelineService = new AnomalyTimelineService(timefilter, uiSettings, mlApi);
 
     const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
       anomalyExplorerUrlStateService,
@@ -137,6 +137,20 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       tableIntervalUrlStateService
     );
 
+    const annotationsStateService = new AnnotationsStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
+    );
+
+    const influencersStateService = new InfluencersStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
+    );
+
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
@@ -145,6 +159,8 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       chartsStateService,
       anomalyDetectionAlertsStateService,
       anomalyTableService,
+      annotationsStateService,
+      influencersStateService,
     });
 
     return () => {
@@ -155,6 +171,8 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       chartsStateService.destroy();
       anomalyDetectionAlertsStateService.destroy();
       anomalyTableService.destroy();
+      annotationsStateService.destroy();
+      influencersStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

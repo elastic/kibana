@@ -15,14 +15,14 @@ const streams = [
   testContentPackEntry({
     name: 'logs',
     routing: [
-      { destination: 'logs.foo', if: { always: {} } },
-      { destination: 'logs.hello', if: { always: {} } },
+      { destination: 'logs.foo', where: { always: {} }, status: 'enabled' },
+      { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
     ],
     queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
   }),
   testContentPackEntry({
     name: 'logs.foo',
-    routing: [{ destination: 'logs.foo.bar', if: { always: {} } }],
+    routing: [{ destination: 'logs.foo.bar', where: { always: {} }, status: 'enabled' }],
   }),
   testContentPackEntry({ name: 'logs.foo.bar' }),
   testContentPackEntry({
@@ -39,23 +39,20 @@ describe('content pack export', () => {
       streams,
     });
 
-    const exportedStreams = prepareStreamsForExport({
-      tree,
-      inheritedFields: { inherited_field_1: { type: 'keyword' } },
-    });
+    const exportedStreams = prepareStreamsForExport({ tree });
     expect(sortBy(exportedStreams, 'name')).toEqual([
       testContentPackEntry({
         name: ROOT_STREAM_ID,
-        fields: { inherited_field_1: { type: 'keyword' } },
+        fields: {},
         routing: [
-          { destination: 'foo', if: { always: {} } },
-          { destination: 'hello', if: { always: {} } },
+          { destination: 'foo', where: { always: {} }, status: 'enabled' },
+          { destination: 'hello', where: { always: {} }, status: 'enabled' },
         ],
         queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
       }),
       testContentPackEntry({
         name: 'foo',
-        routing: [{ destination: 'foo.bar', if: { always: {} } }],
+        routing: [{ destination: 'foo.bar', where: { always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({ name: 'foo.bar' }),
       testContentPackEntry({
@@ -69,11 +66,13 @@ describe('content pack export', () => {
     const tree = asTree({
       include: {
         objects: {
+          mappings: true,
           queries: [],
           routing: [
             {
               destination: 'logs.hello',
               objects: {
+                mappings: true,
                 routing: [],
                 queries: [{ id: 'hello-query' }],
               },
@@ -85,11 +84,11 @@ describe('content pack export', () => {
       streams,
     });
 
-    const exportedStreams = prepareStreamsForExport({ tree, inheritedFields: {} });
+    const exportedStreams = prepareStreamsForExport({ tree });
     expect(sortBy(exportedStreams, 'name')).toEqual([
       testContentPackEntry({
         name: ROOT_STREAM_ID,
-        routing: [{ destination: 'hello', if: { always: {} } }],
+        routing: [{ destination: 'hello', where: { always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({
         name: 'hello',

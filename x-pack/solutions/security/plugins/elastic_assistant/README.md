@@ -18,6 +18,10 @@ Maintained by the Security Solution team
 
 ![DefaultAttackDiscoveryGraph](./docs/img/default_attack_discovery_graph.png)
 
+### Default Defend insights graph
+
+![DefaultDefendInsightsGraph](./docs/img/default_defend_insights_graph.png)
+
 ## Development
 
 ### Generate graph structure

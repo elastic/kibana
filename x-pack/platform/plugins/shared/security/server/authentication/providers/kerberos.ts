@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
+import { getDetailedErrorMessage, getErrorStatusCode, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -273,16 +273,16 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
+      // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
+      // allow this because expired underlying token is an implementation detail and Kibana user
+      // facing session is still valid.
+      if (err instanceof InvalidGrantError) {
+        this.logger.warn('Both access and refresh tokens are expired. Re-authenticating…');
+        return this.authenticateViaSPNEGO(request, state);
+      }
+
       this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
-    }
-
-    // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
-    // allow this because expired underlying token is an implementation detail and Kibana user
-    // facing session is still valid.
-    if (refreshTokenResult === null) {
-      this.logger.warn('Both access and refresh tokens are expired. Re-authenticating…');
-      return this.authenticateViaSPNEGO(request, state);
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');

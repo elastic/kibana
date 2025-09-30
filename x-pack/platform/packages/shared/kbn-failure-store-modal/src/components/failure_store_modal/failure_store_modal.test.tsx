@@ -8,7 +8,8 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
-import { FailureStoreFormProps, FailureStoreModal } from './failure_store_modal';
+import type { FailureStoreFormProps } from './failure_store_modal';
+import { FailureStoreModal } from './failure_store_modal';
 
 const defaultProps = {
   onCloseModal: jest.fn(),
@@ -61,7 +62,7 @@ describe('FailureStoreModal', () => {
   it('calls onCloseModal when cancel button is clicked', () => {
     const { getByTestId } = renderModal();
 
-    fireEvent.click(getByTestId('cancelButton'));
+    fireEvent.click(getByTestId('failureStoreModalCancelButton'));
     expect(defaultProps.onCloseModal).toHaveBeenCalledTimes(1);
   });
 
@@ -77,6 +78,21 @@ describe('FailureStoreModal', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('displays a callout when there is not info about default retention period', () => {
+    const { queryByTestId } = renderModal({
+      failureStoreEnabled: true,
+    });
+    expect(queryByTestId('defaultRetentionCallout')).toBeInTheDocument();
+  });
+
+  it('displays no callout when there is info about default retention period', () => {
+    const { queryByTestId } = renderModal({
+      failureStoreEnabled: true,
+      defaultRetentionPeriod: '30d',
+    });
+    expect(queryByTestId('defaultRetentionCallout')).not.toBeInTheDocument();
+  });
   describe('save modal', () => {
     it('only saves failureStoreEnabled if it is disabled', async () => {
       const { getByTestId, queryByTestId } = renderModal({
@@ -85,8 +101,8 @@ describe('FailureStoreModal', () => {
         customRetentionPeriod: '15d',
       });
 
-      expect(getByTestId('saveButton')).toBeInTheDocument();
-      expect(getByTestId('saveButton')).toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).toBeInTheDocument();
+      expect(getByTestId('failureStoreModalSaveButton')).toBeDisabled();
       // Expect the toggle to be on initially
       expect(getByTestId('enableFailureStoreToggle')).toBeChecked();
 
@@ -94,18 +110,18 @@ describe('FailureStoreModal', () => {
       expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeInTheDocument();
 
       expect(getByTestId('selectFailureStorePeriodValue')).toHaveValue(15);
-      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveValue('d');
+      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveTextContent('Days');
 
       fireEvent.click(getByTestId('enableFailureStoreToggle'));
 
       expect(queryByTestId('selectFailureStorePeriodType')).not.toBeInTheDocument();
       expect(queryByTestId('selectFailureStorePeriodValue')).not.toBeInTheDocument();
 
-      expect(getByTestId('saveButton')).not.toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).not.toBeDisabled();
       // Expect the toggle to be off
       expect(getByTestId('enableFailureStoreToggle')).not.toBeChecked();
 
-      fireEvent.click(getByTestId('saveButton'));
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
 
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledTimes(1);
@@ -143,9 +159,9 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).toBeDisabled();
       expect(unitSelector).toBeDisabled();
 
-      // The default retention period in the props is 40m, so the value should be 40 and unit 'm'
+      // The default retention period in the props is 40m, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
       fireEvent.click(customButton);
 
@@ -155,19 +171,18 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).not.toBeDisabled();
       expect(unitSelector).not.toBeDisabled();
 
-      // The custom retention period by default is the default period, so the value should be 40 and unit 'm'
+      // The custom retention period by default is the default period, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
-      fireEvent.change(unitSelector, {
-        target: { value: 's' },
-      });
+      fireEvent.click(unitSelector);
+      fireEvent.click(getByTestId('retentionPeriodUnit-s'));
       fireEvent.change(valueSelector, { target: { value: '15' } });
 
-      expect(unitSelector).toHaveValue('s');
+      expect(unitSelector).toHaveTextContent('Seconds');
       expect(valueSelector).toHaveValue(15);
 
-      fireEvent.click(getByTestId('saveButton'));
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
 
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledWith({

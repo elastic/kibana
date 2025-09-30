@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
-import { ISessionsClient } from './sessions_client';
-import { ISessionService } from './session_service';
+import type { ISessionsClient } from './sessions_client';
+import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
 import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
@@ -26,7 +26,9 @@ export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   };
 }
 
-export function getSessionServiceMock(): jest.Mocked<ISessionService> {
+export function getSessionServiceMock(
+  overrides: Partial<jest.Mocked<ISessionService>> = {}
+): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
     start: jest.fn(),
@@ -59,6 +61,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSearchSessionIndicatorUiConfig: jest.fn(() => ({ isDisabled: () => ({ disabled: false }) })),
     hasAccess: jest.fn(() => true),
     continue: jest.fn(),
+    ...overrides,
   };
 }
 

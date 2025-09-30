@@ -8,7 +8,8 @@
  */
 
 import { type DebugState } from '@elastic/charts';
-import { render, act, waitFor, type RenderResult } from '@testing-library/react';
+import { act, waitFor, type RenderResult } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 declare global {
@@ -41,7 +42,7 @@ export async function renderChart<P extends ChartPropsWithRenderComplete>(
   // enable the ech debug flag
   if (withDebug) window._echDebugStateFlag = true;
   // render the chart
-  const component = render(<Component {...props} />);
+  const component = renderWithI18n(<Component {...props} />);
   // wait for the first request animation frame to tick (used by ech to detect the parent size from the mocked ResizeObserver)
   await waitForRenderComplete(props.renderComplete);
   // if with debug enabled, then extract that

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Toast } from '@kbn/core-notifications-browser/src/types';
+import type { Toast } from '@kbn/core-notifications-browser/src/types';
 import React, { type ComponentProps } from 'react';
 import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
 import { screen, render, fireEvent, act } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { EuiToast } from '@elastic/eui';
+import type { EuiToast } from '@elastic/eui';
 import { ToastsTelemetry } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';

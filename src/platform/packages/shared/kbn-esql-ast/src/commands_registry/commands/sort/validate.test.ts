@@ -9,6 +9,8 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
+import type { ICommandContext } from '../../types';
 
 const sortExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'sort', validate);
@@ -20,21 +22,20 @@ describe('SORT Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
+    const newColumns = new Map(mockContext.columns);
 
-    newUserDefinedColumns.set('COUNT(*)', [
-      {
-        name: 'COUNT(*)',
-        type: 'integer',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    const context = {
+    newColumns.set('COUNT(*)', {
+      name: 'COUNT(*)',
+      type: 'integer',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    const context: ICommandContext = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     sortExpectErrors('from a_index | sort "field" ', []);
-    sortExpectErrors('from a_index | sort wrongField ', ['Unknown column [wrongField]']);
+    sortExpectErrors('from a_index | sort wrongField ', ['Unknown column "wrongField"']);
     sortExpectErrors('from a_index | sort doubleField, textField', []);
     for (const dir of ['desc', 'asc']) {
       sortExpectErrors(`from a_index | sort "field" ${dir} `, []);
@@ -57,12 +58,12 @@ describe('SORT Validation', () => {
 
     // Expression parts are also validated
     sortExpectErrors('from a_index | sort sin(textField)', [
-      'Argument of [sin] must be [double], found value [textField] type [text]',
+      getNoValidCallSignatureError('sin', ['text']),
     ]);
 
     // Expression parts are also validated
     sortExpectErrors('from a_index | sort doubleField + textField', [
-      'Argument of [+] must be [double], found value [textField] type [text]',
+      getNoValidCallSignatureError('+', ['double', 'text']),
     ]);
   });
 });

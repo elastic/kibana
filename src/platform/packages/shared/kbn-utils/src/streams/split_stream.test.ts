@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 import { createSplitStream, createConcatStream, createPromiseFromStreams } from '.';
 
 async function split(stream: Transform, input: Array<Buffer | string>) {

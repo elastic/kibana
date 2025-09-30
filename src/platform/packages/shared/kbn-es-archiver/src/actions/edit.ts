@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { createGunzip, createGzip, constants } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 const unlinkAsync = promisify(Fs.unlink);

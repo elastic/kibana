@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Store } from 'redux';
-import { ReactWrapper as GenericReactWrapper } from 'enzyme';
-import { LocationDescriptor } from 'history';
+import type { Store } from 'redux';
+import type { ReactWrapper as GenericReactWrapper } from 'enzyme';
+import type { LocationDescriptor } from 'history';
 
 export type AsyncSetupFunc<T, P extends object = any> = (props?: P) => Promise<TestBed<T>>;
 export type SyncSetupFunc<T, P extends object = any> = (props?: P) => TestBed<T>;

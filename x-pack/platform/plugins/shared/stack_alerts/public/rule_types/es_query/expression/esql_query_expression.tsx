@@ -17,7 +17,8 @@ import {
   EuiSpacer,
   EuiRadioGroup,
 } from '@elastic/eui';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -30,7 +31,8 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
@@ -96,7 +98,7 @@ export const EsqlQueryExpression: React.FC<
     groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
-    // The sourceFields param is ignored for the ES|QL type
+    // The sourceFields param is ignored
     sourceFields: [],
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
@@ -168,10 +170,11 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
-        isGroupAgg
+        isGroupAgg,
+        true
       );
       const warning = getWarning(duplicateAlertIds, longAlertIds);
 
@@ -308,6 +311,7 @@ export const EsqlQueryExpression: React.FC<
             setRadioIdSelected(optionId);
             setParam('groupBy', optionId);
           }}
+          name="alertGroup"
         />
       </EuiFormRow>
       <EuiSpacer />

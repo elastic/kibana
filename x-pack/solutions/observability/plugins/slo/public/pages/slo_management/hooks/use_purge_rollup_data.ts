@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
+import type { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import { useMutation } from '@tanstack/react-query';
 
 import { useKibana } from '../../../hooks/use_kibana';
