@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import { WatcherUIPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { TestPlugin } from './plugin';
 
-export const plugin = () => new WatcherUIPlugin();
+export const plugin = async (initContext: PluginInitializerContext) => new TestPlugin(initContext);
