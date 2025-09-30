@@ -17,7 +17,7 @@ import type { InternalToolDefinition } from '../../../tool_provider';
 
 export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<any>>(
   esqlTool: ToolPersistedDefinition<EsqlToolConfig>
-): InternalToolDefinition<EsqlToolConfig, TSchema> {
+): InternalToolDefinition<ToolType.esql, EsqlToolConfig, TSchema> {
   const { id, description, tags, configuration } = esqlTool;
   return {
     id,
@@ -66,46 +66,3 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
   };
 }
 
-function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<any> {
-  const schemaFields: Record<string, z.ZodTypeAny> = {};
-
-  for (const [key, param] of Object.entries(params)) {
-    let field: z.ZodTypeAny;
-    switch (param.type) {
-      case 'text':
-      case 'keyword':
-        field = z.string();
-        break;
-      case 'long':
-      case 'integer':
-        field = z.number().int();
-        break;
-      case 'double':
-      case 'float':
-        field = z.number();
-        break;
-      case 'boolean':
-        field = z.boolean();
-        break;
-      case 'date':
-        field = z.string().datetime();
-        break;
-      case 'object':
-        field = z.record(z.unknown());
-        break;
-      case 'nested':
-        field = z.array(z.record(z.unknown()));
-        break;
-    }
-
-    if (param.optional) {
-      field = field.optional();
-    }
-
-    field = field.describe(param.description);
-
-    schemaFields[key] = field;
-  }
-
-  return z.object(schemaFields).describe('Parameters needed to execute the query');
-}

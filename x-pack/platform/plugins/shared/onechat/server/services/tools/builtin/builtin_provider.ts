@@ -8,29 +8,32 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { InternalToolDefinition, ToolSource, ReadonlyToolTypeClient } from '../tool_provider';
+import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
+import type { AnyToolTypeDefinition } from '../tool_types';
 
-export const createBuiltInToolSource = ({
+export const createBuiltinProviderFn =
+  ({
+    registry,
+    toolTypes,
+  }: {
+    registry: BuiltinToolRegistry;
+    toolTypes: AnyToolTypeDefinition[];
+  }): ToolProviderFn<true> =>
+  ({ request }) => {
+    return createBuiltinToolProvider({ registry, toolTypes, request });
+  };
+
+export const createBuiltinToolProvider = ({
   registry,
 }: {
   registry: BuiltinToolRegistry;
-}): ToolSource<ToolType.builtin> => {
+  toolTypes: AnyToolTypeDefinition[];
+  request: KibanaRequest;
+}): ReadonlyToolProvider => {
   return {
     id: 'builtin',
-    toolTypes: [ToolType.builtin],
     readonly: true,
-    getClient: ({ request }) => createBuiltinToolClient({ registry, request }),
-  };
-};
-
-export const createBuiltinToolClient = ({
-  registry,
-}: {
-  registry: BuiltinToolRegistry;
-  request: KibanaRequest;
-}): ReadonlyToolTypeClient<{}> => {
-  return {
     has(toolId: string) {
       return registry.has(toolId);
     },

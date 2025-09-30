@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltinProviderFn } from './builtin_provider';
+export { getWorkflowToolType } from './tool_type';

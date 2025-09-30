@@ -8,7 +8,7 @@
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import { randomInt } from 'crypto';
 import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 
@@ -18,7 +18,7 @@ import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 export interface ExecutableTool<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
-> extends ToolDefinition<TConfig> {
+> extends ToolDefinition<ToolType, TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
    */

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltinProviderFn } from './builtin_provider';
+export { getIndexSearchToolType } from './tool_type';

@@ -9,76 +9,44 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
-} from '@kbn/core-elasticsearch-server';
-import type { ToolTypeClient, ToolSource } from '../tool_provider';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
+import type { AnyToolTypeDefinition } from '../tool_types';
 import type { ToolPersistedDefinition } from './client';
 import { createClient } from './client';
-import {
-  createEsqlToolType,
-  createIndexSearchToolType,
-  createWorkflowToolType,
-} from './tool_types';
 import type {
   PersistedToolTypeDefinition,
   ToolTypeValidatorContext,
   ToolTypeConversionContext,
 } from './tool_types/types';
 
-export const createPersistedToolSource = ({
-  logger,
-  elasticsearch,
-  workflowsManagement,
-}: {
-  logger: Logger;
-  elasticsearch: ElasticsearchServiceStart;
-  workflowsManagement?: WorkflowsPluginSetup;
-}): ToolSource => {
-  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [
-    createEsqlToolType(),
-    createIndexSearchToolType(),
-  ];
-  if (workflowsManagement) {
-    toolDefinitions.push(createWorkflowToolType({ workflowsManagement }));
-  }
-
-  const toolTypes = toolDefinitions.map((def) => def.toolType);
-
-  return {
-    id: 'persisted',
-    toolTypes,
-    readonly: false,
-    getClient: ({ request, space }) => {
-      const esClient = elasticsearch.client.asInternalUser;
-      return createPersistedToolClient({
-        request,
-        definitions: toolDefinitions,
-        logger,
-        esClient,
-        space,
-      });
-    },
+export const createPersistedProviderFn =
+  (opts: {
+    logger: Logger;
+    esClient: ElasticsearchClient;
+    toolTypes: AnyToolTypeDefinition[];
+  }): ToolProviderFn<false> =>
+  ({ request, space }) => {
+    return createPersistedToolClient({
+      ...opts,
+      request,
+      space,
+    });
   };
-};
-
-// persistence client
 
 export const createPersistedToolClient = ({
   request,
-  definitions,
+  toolTypes,
   logger,
   esClient,
   space,
 }: {
-  definitions: PersistedToolTypeDefinition[];
+  toolTypes: AnyToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
   space: string;
   request: KibanaRequest;
-}): ToolTypeClient<any> => {
+}): WritableToolProvider => {
   const toolClient = createClient({ space, esClient, logger });
   const definitionMap = definitions.reduce((map, def) => {
     map[def.toolType] = def;
@@ -102,6 +70,9 @@ export const createPersistedToolClient = ({
   };
 
   return {
+    id: 'persisted',
+    readonly: false,
+
     async has(toolId: string) {
       try {
         await toolClient.get(toolId);

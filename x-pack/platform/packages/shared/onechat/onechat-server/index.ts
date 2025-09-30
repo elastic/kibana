@@ -6,10 +6,6 @@
  */
 
 export type {
-  BuiltinToolDefinition,
-  ToolHandlerFn,
-  ToolHandlerReturn,
-  ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -20,6 +16,12 @@ export type {
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
 } from './src/tools';
+export type {
+  BuiltinToolDefinition,
+  ToolHandlerFn,
+  ToolHandlerReturn,
+  ToolHandlerContext,
+} from './tools';
 export type { ModelProvider, ScopedModel } from './src/model_provider';
 export type {
   ScopedRunner,

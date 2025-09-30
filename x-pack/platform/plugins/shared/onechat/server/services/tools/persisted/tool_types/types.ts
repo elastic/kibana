@@ -26,7 +26,7 @@ export type ToolDefinitionConverter<
 > = (
   persisted: ToolPersistedDefinition<ToolTypeConfig>,
   context: ToolTypeConversionContext
-) => MaybePromise<InternalToolDefinition<ToolTypeConfig, TSchema>>;
+) => MaybePromise<InternalToolDefinition<ToolType, ToolTypeConfig, TSchema>>;
 
 export interface ToolTypeValidatorContext {
   request: KibanaRequest;

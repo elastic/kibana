@@ -14,11 +14,12 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
   registerBuiltinTools,
-  createBuiltInToolSource,
+  createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
-import { createPersistedToolSource } from './persisted';
+import { getToolTypeDefinitions } from './tool_types';
+import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetupDeps {
@@ -51,25 +52,35 @@ export class ToolsService {
 
   start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
-    const builtInToolSource = createBuiltInToolSource({ registry: this.builtinRegistry });
-    const persistedToolSource = createPersistedToolSource({
+
+    const toolTypes = getToolTypeDefinitions({ workflowsManagement });
+
+    const builtinProviderFn = createBuiltinProviderFn({
+      registry: this.builtinRegistry,
+      toolTypes,
+    });
+    const persistedProviderFn = createPersistedProviderFn({
       logger,
-      elasticsearch,
-      workflowsManagement,
+      esClient: elasticsearch.client.asInternalUser,
+      toolTypes,
     });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
+      const builtinProvider = await builtinProviderFn({ request, space });
+      const persistedProvider = await persistedProviderFn({ request, space });
 
       return createToolRegistry({
         getRunner,
         space,
         request,
-        toolSources: [builtInToolSource, persistedToolSource],
+        builtinProvider,
+        persistedProvider,
       });
     };
 
     const getToolTypeInfo = () => {
+      // TODO: fix
       return [
         ...persistedToolSource.toolTypes.map<ToolTypeInfo>((typeDef) => {
           return { type: typeDef, create: true };
