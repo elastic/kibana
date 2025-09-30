@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
@@ -105,6 +106,7 @@ type MetricThresholdAlertReporter = (params: {
   groups?: Group[];
   grouping?: { flatten?: Record<string, unknown>; unflatten?: Record<string, unknown> };
   thresholds?: Array<number | null>;
+  metricAlias: string;
 }) => void;
 
 // TODO: Refactor the executor code to have better flow-control with better
@@ -148,7 +150,7 @@ export const createMetricThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: MetricThresholdAlertReporter = async ({
+    const alertReporter: MetricThresholdAlertReporter = ({
       id,
       reason,
       actionGroup,
@@ -158,6 +160,7 @@ export const createMetricThresholdExecutor =
       groups,
       thresholds,
       grouping,
+      metricAlias,
     }) => {
       const { uuid } = alertsClient.report({
         id,
@@ -172,6 +175,7 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
+          [ALERT_CONTEXT]: { metricAlias },
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
@@ -191,6 +195,10 @@ export const createMetricThresholdExecutor =
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
+
+    const {
+      configuration: { metricAlias },
+    } = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId || 'default');
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -221,6 +229,7 @@ export const createMetricThresholdExecutor =
           reason,
           actionGroup: actionGroupId,
           context: alertContext,
+          metricAlias,
         });
 
         return {
@@ -444,6 +453,7 @@ export const createMetricThresholdExecutor =
           groups,
           thresholds,
           grouping: { flatten: flattenGroupings[group], unflatten: grouping },
+          metricAlias,
         });
         scheduledActionsCount++;
       }

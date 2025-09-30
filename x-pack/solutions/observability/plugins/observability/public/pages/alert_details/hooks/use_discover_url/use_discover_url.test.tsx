@@ -15,6 +15,10 @@ import {
   SYNTHETICS_TLS_RULE,
   ES_QUERY_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
+  ALERT_CONTEXT,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
@@ -31,6 +35,9 @@ const getServices = () => ({
       locator: {
         getRedirectUrl: mockGetRedirectUrl,
       },
+    },
+    uiSettings: {
+      get: jest.fn().mockReturnValue(['logs-*', 'logs-*-*']),
     },
   },
 });
@@ -273,5 +280,75 @@ describe('useDiscoverUrl', () => {
 
     expect(result.current.discoverUrl).toBeNull();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+  });
+
+  it('builds Discover url for inventory threshold rule when alert has metricAlias', () => {
+    const expectedMetricAlias = 'metricbeat-*';
+    const alertWithDataViewId = {
+      ...MOCK_ALERT,
+      fields: {
+        [ALERT_CONTEXT]: { metricAlias: expectedMetricAlias },
+      },
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+    } as unknown as Rule;
+
+    const expectedTimeRange = {
+      from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+      to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+    };
+
+    renderHook(() => useDiscoverUrl({ alert: alertWithDataViewId, rule }));
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      dataViewSpec: { title: expectedMetricAlias, timeFieldName: '@timestamp' },
+      timeRange: expectedTimeRange,
+    });
+  });
+
+  it('builds Discover url for metric threshold rule when alert has metricAlias', () => {
+    const expectedMetricAlias = 'metricbeat-*';
+    const alertWithDataViewId = {
+      ...MOCK_ALERT,
+      fields: {
+        [ALERT_CONTEXT]: { metricAlias: expectedMetricAlias },
+      },
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
+    } as unknown as Rule;
+
+    const expectedTimeRange = {
+      from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+      to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+    };
+
+    renderHook(() => useDiscoverUrl({ alert: alertWithDataViewId, rule }));
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      dataViewSpec: { title: expectedMetricAlias, timeFieldName: '@timestamp' },
+      timeRange: expectedTimeRange,
+    });
+  });
+
+  it('builds Discover url for log threshold rule when alert has log sources', () => {
+    const rule = {
+      ruleTypeId: LOG_THRESHOLD_ALERT_TYPE_ID,
+    } as unknown as Rule;
+
+    const expectedTimeRange = {
+      from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+      to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+    };
+
+    renderHook(() => useDiscoverUrl({ alert: MOCK_ALERT, rule }));
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      dataViewSpec: { title: 'logs-*,logs-*-*', timeFieldName: '@timestamp' },
+      timeRange: expectedTimeRange,
+    });
   });
 });
