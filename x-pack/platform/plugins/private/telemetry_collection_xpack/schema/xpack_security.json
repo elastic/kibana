@@ -358,10 +358,16 @@
                 "type": "keyword"
               },
               "supports_cloud_connector": {
-                "type": "boolean"
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the installation supports cloud connector functionality"
+                }
               },
               "cloud_connector_id": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "The unique identifier of the cloud connector associated with this installation"
+                }
               }
             }
           }
@@ -536,6 +542,9 @@
                 "type": "long"
               }
             }
+          },
+          "_meta": {
+            "description": "Statistics about CSPM cloud connector usage"
           }
         }
       }
