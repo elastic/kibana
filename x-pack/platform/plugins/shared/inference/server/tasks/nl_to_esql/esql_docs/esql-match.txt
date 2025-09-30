@@ -45,3 +45,15 @@ FROM books
 ```
 
 This example searches for books where the `title` field matches "Hobbit Back Again" using the `AND` operator, and keeps only the `title` field in the results.
+
+Match with sorting on score
+
+Match on a specific field
+
+```esql
+FROM books METADATA _score
+| WHERE MATCH(author, "Faulkner")
+| SORT _score DESC
+| KEEP book_no, author
+| LIMIT 5
+```

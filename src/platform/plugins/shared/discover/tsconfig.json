@@ -111,11 +111,16 @@
     "@kbn/css-utils",
     "@kbn/restorable-state",
     "@kbn/esql-editor",
+    "@kbn/controls-plugin",
+    "@kbn/esql-types",
+    "@kbn/controls-constants",
     "@kbn/core-application-browser",
     "@kbn/file-upload-plugin",
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/background-search"
   ],
   "exclude": ["target/**/*"]
 }

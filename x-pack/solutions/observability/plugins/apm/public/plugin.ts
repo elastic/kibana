@@ -282,6 +282,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './services/rest/apm_observability_overview_fetchers'
       );
       const { fetchSpanLinks } = await import('./services/rest/span_links');
+      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
       const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
@@ -294,6 +295,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         getHasData,
         hasFleetApmIntegrations,
         fetchSpanLinks,
+        fetchErrorsByTraceId,
       };
     };
 
@@ -358,6 +360,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fetchSpanLinks: async (params, signal) => {
         const { fetchSpanLinks } = await getApmDataHelper();
         return fetchSpanLinks(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-errors',
+      fetchErrorsByTraceId: async (params, signal) => {
+        const { fetchErrorsByTraceId } = await getApmDataHelper();
+        return fetchErrorsByTraceId(params, signal);
       },
     });
 

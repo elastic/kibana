@@ -183,6 +183,10 @@ export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
   defaultMessage: 'Alerts',
 });
 
+export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
+  defaultMessage: 'Events',
+});
+
 export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
   defaultMessage: 'Files',
 });

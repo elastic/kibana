@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { ProductFeatureAttackDiscoveryKey } from '../product_features_keys';
+import {
+  AttackDiscoverySubFeatureId,
+  ProductFeatureAttackDiscoveryKey,
+} from '../product_features_keys';
 import type { ProductFeaturesConfig } from '../types';
 
-export const attackDiscoveryProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureAttackDiscoveryKey> =
-  {
-    [ProductFeatureAttackDiscoveryKey.attackDiscovery]: {
-      privileges: {
-        all: {
-          ui: ['attack-discovery'],
-        },
+export const attackDiscoveryProductFeaturesConfig: ProductFeaturesConfig<
+  ProductFeatureAttackDiscoveryKey,
+  AttackDiscoverySubFeatureId
+> = {
+  [ProductFeatureAttackDiscoveryKey.attackDiscovery]: {
+    privileges: {
+      all: {
+        ui: ['attack-discovery'],
       },
-      subFeatureIds: [],
     },
-  };
+    subFeatureIds: [AttackDiscoverySubFeatureId.updateSchedule],
+  },
+};

@@ -34,4 +34,5 @@ export const testSubjectIds = {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
   ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
+  GRAPH_CONTROL_FIT_TO_VIEW_TEST_ID: 'cloudSecurityGraphGraphInvestigationFitView',
 };

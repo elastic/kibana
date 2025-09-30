@@ -38,6 +38,12 @@ import {
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
+const compareToSchemaShared = schema.object({
+  palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
+  icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
+  value: schema.maybe(schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })),
+});
+
 export const complementaryVizSchema = schema.oneOf([
   schema.object({
     type: schema.literal('bar'),
@@ -141,7 +147,23 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Compare to
    */
-  compare_to: schema.maybe(schema.string({ meta: { description: 'Compare to' } })),
+  compare: schema.maybe(
+    schema.oneOf([
+      schema.allOf([
+        compareToSchemaShared,
+        schema.object({
+          to: schema.literal('baseline'),
+          baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
+        }),
+      ]),
+      schema.allOf([
+        compareToSchemaShared,
+        schema.object({
+          to: schema.literal('primary'),
+        }),
+      ]),
+    ])
+  ),
   /**
    * Color configuration
    */

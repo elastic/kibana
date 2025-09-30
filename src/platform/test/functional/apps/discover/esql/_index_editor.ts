@@ -12,7 +12,7 @@ import path from 'path';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const INDEX_NAME_MANUAL = 'test-lookup-index-manual';
-const INDEX_NAME_FILE = 'testlookupindexfile';
+const INDEX_NAME_FILE = 'test-lookup-index-file';
 const INDEX_NAME_EDITION = 'test-lookup-index-edition';
 const INITIAL_COLUMN_PLACEHOLDERS = 4;
 const IMPORT_FILE_PATH = path.join(__dirname, 'imports', 'customers.csv');

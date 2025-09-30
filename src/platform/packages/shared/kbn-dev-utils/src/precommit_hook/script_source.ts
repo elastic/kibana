@@ -99,7 +99,7 @@ execute_precommit_hook() {
 
 execute_precommit_hook || {
   echo "Pre-commit hook failed (add --no-verify to bypass)";
-  echo '  For eslint failures you can try running \`node scripts/precommit_hook --fix\`';
+  echo '  For fixable failures you can try running \`node scripts/precommit_hook --fix\`';
   exit 1;
 }
 

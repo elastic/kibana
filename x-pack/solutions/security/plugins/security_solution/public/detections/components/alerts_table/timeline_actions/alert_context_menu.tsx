@@ -95,16 +95,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-  const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
-    scopeId as TableId
-  );
 
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
     onMenuItemClick,
-    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-    isInDetections,
     refetch,
   });
 
@@ -174,7 +169,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
     useEventFilterModal();
 
-  const { actionItems: statusActionItems } = useAlertsActions({
+  const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
     scopeId,
@@ -266,8 +261,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
+      ...statusActionPanels,
     ],
-    [alertTagsPanels, alertAssigneesPanels, items]
+    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
   );
 
   const button = useMemo(() => {

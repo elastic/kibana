@@ -31,6 +31,9 @@ export const i18nMessages = {
   paramTypeLabel: i18n.translate('xpack.onechat.tools.newTool.paramTypeLabel', {
     defaultMessage: 'Type',
   }),
+  optionalParamLabel: i18n.translate('xpack.onechat.tools.newTool.optionalParamLabel', {
+    defaultMessage: 'Optional',
+  }),
   removeParamButtonLabel: i18n.translate('xpack.onechat.tools.newTool.removeParamButtonLabel', {
     defaultMessage: 'Remove parameter',
   }),
@@ -87,7 +90,7 @@ export const i18nMessages = {
             'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.description',
             {
               defaultMessage:
-                'Shapes tool behavior and agent understanding. Start with a short human-friendly summary — the first ~50 characters appear in the tool list.',
+                'Help humans and agents understand how the tool works. Start with a short human-friendly summary, because the first ~50 characters appear in the tool list.',
             }
           ),
         },
@@ -147,7 +150,8 @@ export const i18nMessages = {
         defaultMessage: 'Configuration',
       }),
       description: i18n.translate('xpack.onechat.tools.newTool.configuration.description', {
-        defaultMessage: 'Set up how the tool works, including its logic and any needed parameters.',
+        defaultMessage:
+          'Set up how the tool works, by defining the index pattern or ES|QL query syntax and any required parameters.',
       }),
       documentationLink: i18n.translate(
         'xpack.onechat.tools.newTool.configuration.documentationLink',
@@ -173,6 +177,12 @@ export const i18nMessages = {
             defaultMessage: 'Index search',
           }
         ),
+        workflowOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.workflowOption',
+          {
+            defaultMessage: 'Workflow',
+          }
+        ),
       },
       indexSearch: {
         patternLabel: i18n.translate(
@@ -193,6 +203,14 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.esql.parametersLabel',
           {
             defaultMessage: 'ES|QL Parameters',
+          }
+        ),
+      },
+      workflow: {
+        workflowLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.workflowLabel',
+          {
+            defaultMessage: 'Workflow',
           }
         ),
       },
