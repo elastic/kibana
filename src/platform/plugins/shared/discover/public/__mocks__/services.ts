@@ -268,6 +268,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract().features,
+    discoverFeatureFlags: {
+      getTabsEnabled: () => true,
+    },
   } as unknown as DiscoverServices;
 }
 
