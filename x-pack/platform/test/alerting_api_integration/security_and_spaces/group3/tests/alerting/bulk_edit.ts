@@ -1104,8 +1104,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
-
         const response = await supertest
           .post('/internal/alerting/rules/_bulk_edit')
           .set('kbn-xsrf', 'foo')
