@@ -6421,6 +6421,9 @@
             },
             "llama": {
               "type": "long"
+            },
+            "contextualai": {
+              "type": "long"
             }
           }
         }
