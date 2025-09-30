@@ -26,6 +26,7 @@ _search_ai_lake_analyst:
         - ".siem-signals-*"
         - ".preview.alerts-security*"
         - ".internal.preview.alerts-security*"
+        - "logs-*"
       privileges:
         - "read"
         - "view_index_metadata"
@@ -40,11 +41,6 @@ _search_ai_lake_analyst:
         - "security_solution-*.misconfiguration_latest*"
       privileges:
         - "read"
-    - names:
-        - "logs-*"
-      privileges:
-        - "read"
-        - "view_index_metadata"
   applications:
     - application: "kibana-.kibana"
       privileges:
