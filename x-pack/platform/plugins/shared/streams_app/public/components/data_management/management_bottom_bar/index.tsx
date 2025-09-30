@@ -35,7 +35,7 @@ export function ManagementBottomBar({
   });
 
   return (
-    <EuiBottomBar position="sticky">
+    <EuiBottomBar position="fixed">
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
         <EuiButtonEmpty
           data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
