@@ -58,6 +58,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
     expandButtonClick,
     ipClickHandler,
+    countryClickHandler,
   } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
@@ -167,7 +168,12 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
           />
         </LabelNodeContainer>
       </EuiToolTip>
-      <LabelNodeDetails ips={ips} countryCodes={countryCodes} onIpClick={ipClickHandler} />
+      <LabelNodeDetails
+        ips={ips}
+        countryCodes={countryCodes}
+        onIpClick={ipClickHandler}
+        onCountryClick={countryClickHandler}
+      />
     </>
   );
 });

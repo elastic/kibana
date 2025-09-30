@@ -52,6 +52,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
     expandButtonClick,
     nodeClick,
     ipClickHandler,
+    countryClickHandler,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -142,6 +143,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
         ips={ips}
         countryCodes={countryCodes}
         onIpClick={ipClickHandler}
+        onCountryClick={countryClickHandler}
       />
     </NodeContainer>
   );

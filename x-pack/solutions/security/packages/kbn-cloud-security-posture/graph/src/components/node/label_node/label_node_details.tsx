@@ -16,9 +16,15 @@ export interface LabelNodeDetailsProps {
   ips?: string[];
   countryCodes?: string[];
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const LabelNodeDetails = ({ ips, countryCodes, onIpClick }: LabelNodeDetailsProps) => {
+export const LabelNodeDetails = ({
+  ips,
+  countryCodes,
+  onIpClick,
+  onCountryClick,
+}: LabelNodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
   const shouldRenderIps = ips && ips.length > 0;
   const shouldRenderCountryFlags = countryCodes && countryCodes.length > 0;
@@ -33,7 +39,9 @@ export const LabelNodeDetails = ({ ips, countryCodes, onIpClick }: LabelNodeDeta
       `}
     >
       {shouldRenderIps && <Ips ips={ips} onIpClick={onIpClick} />}
-      {shouldRenderCountryFlags && <CountryFlags countryCodes={countryCodes} />}
+      {shouldRenderCountryFlags && (
+        <CountryFlags countryCodes={countryCodes} onCountryClick={onCountryClick} />
+      )}
     </div>
   ) : null;
 };
