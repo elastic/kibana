@@ -20,9 +20,17 @@ interface NodeDetailsProps {
   label?: string;
   ips?: string[];
   countryCodes?: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetailsProps) => {
+export const NodeDetails = ({
+  count,
+  tag,
+  label,
+  ips,
+  countryCodes,
+  onIpClick,
+}: NodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
 
   const shouldRenderTag = !!tag || (count && count > 1);
@@ -50,7 +58,7 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
       {shouldRenderBottom ? (
         <EuiFlexItem grow={false} css={{ alignItems: 'center', gap: euiTheme.size.xxs }}>
           {shouldRenderLabel ? <Label text={label} /> : null}
-          {shouldRenderIps ? <Ips ips={ips} /> : null}
+          {shouldRenderIps ? <Ips ips={ips} onIpClick={onIpClick} /> : null}
           {shouldRenderFlags ? <CountryFlags countryCodes={countryCodes} /> : null}
         </EuiFlexItem>
       ) : null}

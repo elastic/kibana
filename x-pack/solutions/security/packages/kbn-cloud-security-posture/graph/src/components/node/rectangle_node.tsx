@@ -51,6 +51,7 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
     interactive,
     expandButtonClick,
     nodeClick,
+    ipClickHandler,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -136,6 +137,7 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
         label={label ? label : id}
         ips={ips}
         countryCodes={countryCodes}
+        onIpClick={ipClickHandler}
       />
     </NodeContainer>
   );
