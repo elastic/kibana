@@ -13,7 +13,7 @@ import { GroupedItem } from './grouped_item/grouped_item';
 import type { EntityOrEventItem } from './grouped_item/types';
 import { PaginationControls } from './pagination_controls';
 
-interface ContentBodyProps {
+export interface ContentBodyProps {
   items: EntityOrEventItem[];
   totalHits: number;
   icon: string;
