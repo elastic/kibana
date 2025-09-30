@@ -114,6 +114,7 @@ export type {
   AuthorizeFindParams,
   WithAuditName,
   AuthorizeChangeAccessControlParams,
+  SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';

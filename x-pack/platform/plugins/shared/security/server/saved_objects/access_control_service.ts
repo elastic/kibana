@@ -43,9 +43,16 @@ export class AccessControlService {
 
     // This is all here because our authz functions support multiple actions at once.
     // This is not a real use case, but we need to handle it anyway.
-    const actionsIgnoringDefaultMode = [SecurityAction.UPDATE, SecurityAction.BULK_UPDATE];
-    const anyActionsForcingDefaultCheck =
-      Array.from(actions).filter((item) => !actionsIgnoringDefaultMode.includes(item)).length > 0;
+    const actionsIgnoringDefaultMode = new Set([
+      SecurityAction.UPDATE,
+      SecurityAction.BULK_UPDATE,
+      SecurityAction.DELETE,
+      SecurityAction.BULK_DELETE,
+    ]);
+
+    const anyActionsForcingDefaultCheck = Array.from(actions).some(
+      (item) => !actionsIgnoringDefaultMode.has(item)
+    );
 
     const results: AccessControlAuthorizeResult[] = objects.map((obj) => {
       let requiresManageAccessControl = false;
