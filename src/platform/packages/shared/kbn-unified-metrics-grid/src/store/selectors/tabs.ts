@@ -10,3 +10,5 @@
 import type { MetricsExperienceState } from '../types';
 
 export const selectTab = (state: MetricsExperienceState, tabId: string) => state.tabs.byId[tabId];
+
+export const selectAllTabIds = (state: MetricsExperienceState) => state.tabs.allIds;

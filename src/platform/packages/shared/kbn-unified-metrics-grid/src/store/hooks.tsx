@@ -40,7 +40,7 @@ export const InternalStateProvider = ({
 };
 
 export const useAppDispatch = createDispatchHook(metricsGridContext) as () => AppDispatch;
-const useAppSelector: TypedUseSelectorHook<MetricsExperienceState> =
+export const useAppSelector: TypedUseSelectorHook<MetricsExperienceState> =
   createSelectorHook(metricsGridContext);
 
 export const useAppWithTabSelector: TypedUseSelectorHook<MetricsExperienceTabState> = (

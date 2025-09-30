@@ -22,6 +22,7 @@ export const useUnifiedHistogramRuntimeState = (
   localStorageKeyPrefix?: string
 ) => {
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
+
   const [options] = useState<UseUnifiedHistogramOptions>(() => {
     const layoutPropsMap = selectInitialUnifiedHistogramLayoutPropsMap(
       stateContainer.runtimeStateManager,

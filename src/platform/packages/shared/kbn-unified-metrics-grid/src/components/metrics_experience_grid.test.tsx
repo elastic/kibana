@@ -88,7 +88,8 @@ describe('MetricsExperienceGrid', () => {
     services: {
       fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     } as unknown as UnifiedHistogramServices,
-    tabId: 'test-tab-id',
+    currentTabId: 'test-tab-id',
+    allTabIds: ['test-tab-id'],
     input$,
   };
 

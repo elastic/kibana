@@ -11,15 +11,17 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import type { MetricsExperienceState, MetricsExperienceTabState } from '../types';
 import { selectTab } from '../selectors/tabs';
+import { initializeTabs } from '../actions/tabs';
 
 const initialState: MetricsExperienceState = {
   tabs: {
     byId: {},
+    allIds: [],
+    initializing: false,
   },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
-
 type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
 const withTab = <TAction extends TabAction>(
@@ -38,6 +40,40 @@ export const metricsGridSlice = createSlice({
   name: 'metricsGrid',
   initialState,
   reducers: {
+    setTabs: (
+      state,
+      action: PayloadAction<{
+        allIds: string[];
+        removedTabIds?: string[];
+        addedTabsState?: Record<string, MetricsExperienceTabState>;
+      }>
+    ) => {
+      const { allIds, removedTabIds = [], addedTabsState = {} } = action.payload;
+
+      removedTabIds.forEach((tabId) => {
+        delete state.tabs.byId[tabId];
+      });
+
+      Object.entries(addedTabsState).forEach(([tabId, tabState]) => {
+        state.tabs.byId[tabId] = tabState;
+      });
+
+      allIds.forEach((tabId) => {
+        if (!state.tabs.byId[tabId]) {
+          // initialize the tab state
+          state.tabs.byId[tabId] = {
+            currentPage: 0,
+            searchTerm: '',
+            isFullscreen: false,
+            dimensions: [],
+            valueFilters: [],
+          };
+        }
+      });
+
+      // Update the list of all tab IDs
+      state.tabs.allIds = allIds;
+    },
     setCurrentPage: (state, action: TabAction<Pick<MetricsExperienceTabState, 'currentPage'>>) => {
       return withTab(state, action, (tab) => {
         tab.currentPage = action.payload.currentPage;
@@ -92,4 +128,4 @@ export const metricsGridSlice = createSlice({
   },
 });
 
-export const metricsGridActions = metricsGridSlice.actions;
+export const metricsGridActions = { ...metricsGridSlice.actions, initializeTabs };

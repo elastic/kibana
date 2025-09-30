@@ -45,10 +45,9 @@ export const MetricsExperienceGrid = ({
   searchSessionId,
   requestParams,
   services,
-  tabId,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
-}: ChartSectionProps) => {
+}: Omit<ChartSectionProps, 'tabsState'>) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 

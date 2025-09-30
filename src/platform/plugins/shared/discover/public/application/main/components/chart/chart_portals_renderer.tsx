@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useEffect, useRef, useMemo } from 'react';
+import React, { type PropsWithChildren, useCallback, useEffect, useRef, useMemo } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type {
   ChartSectionConfiguration,
@@ -16,6 +16,7 @@ import type {
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
+import type { TabItem } from '@kbn/unified-tabs';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -32,7 +33,6 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
-
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
 
@@ -209,6 +209,28 @@ const CustomChartSectionWrapper = ({
     stateContainer,
     chartSectionConfig.localStorageKeyPrefix
   );
+  const tabs = useInternalStateSelector((state) => state.tabs);
+
+  const getTabById = useCallback(
+    (tabId: string): TabItem => {
+      const tab = tabs.byId[tabId];
+      return {
+        duplicatedFromId: tab.duplicatedFromId,
+        id: tab.id,
+        label: tab.label,
+      };
+    },
+    [tabs.byId]
+  );
+
+  const tabsState = useMemo(
+    () => ({
+      getTabById,
+      allIds: tabs.allIds,
+    }),
+    [getTabById, tabs.allIds]
+  );
+
   const localStorageKeyPrefix =
     chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
@@ -268,7 +290,8 @@ const CustomChartSectionWrapper = ({
       renderToggleActions={renderCustomChartToggleActions}
       input$={input$}
       requestParams={requestParams}
-      tabId={currentTabId}
+      currentTabId={currentTabId}
+      tabsState={tabsState}
       {...unifiedHistogramProps}
     />
   );

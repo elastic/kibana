@@ -11,7 +11,7 @@ export { useMetricFieldsQuery } from './use_metric_fields_query';
 export { useDimensionsQuery } from './use_dimensions_query';
 export { useValueFilters } from './use_value_filters';
 export { useEsqlQueryInfo } from './use_esql_query_info';
-export { useMetricsExperience } from './use_metrics_experience';
+export { useMetricsExperienceClient as useMetricsExperience } from '../context/metrics_experience_client/use_metrics_experience';
 export { useMetricsGridState } from './use_metrics_grid_state';
 export { usePaginatedFields } from './use_paginated_fields';
 export { useFullScreenStyles, useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
