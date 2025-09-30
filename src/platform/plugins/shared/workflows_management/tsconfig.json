@@ -51,9 +51,11 @@
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
     "@kbn/field-types",
-    "@kbn/core-lifecycle-browser",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-plugin"
   ],
   "exclude": ["target/**/*"]
 }
