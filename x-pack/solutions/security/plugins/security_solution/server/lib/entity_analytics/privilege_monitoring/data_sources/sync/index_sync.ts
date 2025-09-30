@@ -71,7 +71,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
         });
 
         // collect stale users
-        const staleUsers = await findStaleUsers(source.id, allUserNames);
+        const staleUsers = await findStaleUsers(source.id, allUserNames, 'index');
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
@@ -91,7 +91,11 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
     // Soft delete stale users
     dataClient.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
-      const ops = bulkUtilsService.bulkSoftDeleteOperations(allStaleUsers, dataClient.index);
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(
+        allStaleUsers,
+        dataClient.index,
+        'index'
+      );
       const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
 
       const errors = getErrorFromBulkResponse(resp);

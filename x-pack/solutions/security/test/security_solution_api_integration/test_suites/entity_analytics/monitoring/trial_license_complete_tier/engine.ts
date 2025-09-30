@@ -564,7 +564,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
-        const syncMarkersIndices = sources.body.map((s: any) => s.integrations?.syncMarkersIndex);
+        const syncMarkersIndices = sources.body.map((s: any) => s.integrations?.syncMarkerIndex);
         // confirm default sources have been created
         expect(names).toEqual(
           expect.arrayContaining([

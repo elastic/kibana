@@ -7,12 +7,16 @@
 
 import datemath from '@kbn/datemath';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Aggregate } from '@kbn/session-view-plugin/common';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { MonitoringEntitySourceDescriptorClient } from '../../../../saved_objects';
 
 const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run, look back over last month
+
+interface EventDoc {
+  '@timestamp': string;
+  event?: { action?: 'started' | 'completed' };
+}
 
 const parseOrThrow = (expr: string): string => {
   const date = datemath.parse(expr);
@@ -60,25 +64,26 @@ export const createSyncMarkersService = (
     if (fromSO) return fromSO;
 
     // Fallback: search index
-    const fromIndex = await findLastFullSyncMarkerInIndex(source);
+    const fromIndex = await findLastEventMarkerInIndex(source, 'completed');
     if (!fromIndex) return undefined;
 
     // Update the SO for next time
-    await updateLastFullSyncMarker(fromIndex);
+    await updateLastFullSyncMarker(source, fromIndex);
     return fromIndex;
   };
 
-  const findLastFullSyncMarkerInIndex = async (
-    source: MonitoringEntitySource
-  ): Promise<string | undefined> => {
-    // find the last full sync marker in the index
+  const findLastEventMarkerInIndex = async (
+    source: MonitoringEntitySource,
+    action: 'started' | 'completed'
+  ) => {
+    // find the last event marker in the index
     const esClient = deps.clusterClient.asCurrentUser;
-    const resp = await esClient.search<never, Aggregate>({
+    const resp = await esClient.search<EventDoc>({
       index: source.integrations?.syncMarkerIndex,
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: 1,
       query: {
-        term: { 'event.action': 'completed' },
+        term: { 'event.action': action },
       },
       _source: ['@timestamp'],
     });
@@ -86,10 +91,27 @@ export const createSyncMarkersService = (
     return hit;
   };
 
+  const detectNewFullSync = async (source: MonitoringEntitySource): Promise<boolean> => {
+    const lastFullSync = await getLastFullSyncMarker(source);
+    const latestCompletedEvent = await findLastEventMarkerInIndex(source, 'completed');
+    // No completed event found, no new full sync.
+    if (!latestCompletedEvent) return false;
+
+    // Decide if we should update (first marker OR newer than saved)
+    const shouldUpdate = !lastFullSync || latestCompletedEvent > lastFullSync;
+
+    if (!shouldUpdate) return false;
+
+    await updateLastFullSyncMarker(source, latestCompletedEvent);
+    return true;
+  };
+
   return {
     updateLastProcessedMarker,
     getLastProcessedMarker,
     updateLastFullSyncMarker,
     getLastFullSyncMarker,
+    findLastEventMarkerInIndex,
+    detectNewFullSync,
   };
 };

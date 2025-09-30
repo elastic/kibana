@@ -11,18 +11,22 @@ import type { PrivMonBulkUser } from '../../types';
 
 export const findStaleUsersForIndexFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  async (sourceId: string, userNames: string[]): Promise<PrivMonBulkUser[]> => {
+  async (
+    sourceId: string,
+    userNames: string[],
+    labelsSource: 'index' | 'entity_analytics_integration'
+  ): Promise<PrivMonBulkUser[]> => {
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
 
     const response = await esClient.search<MonitoredUserDoc>({
       index: dataClient.index,
-      size: 10, // check this
+      size: 10,
       _source: ['user.name', 'labels.source_ids'],
       query: {
         bool: {
           must: [
             { term: { 'user.is_privileged': true } },
-            { term: { 'labels.sources': 'index' } },
+            { term: { 'labels.sources': labelsSource } },
             { term: { 'labels.source_ids.keyword': sourceId } },
           ],
           must_not: {

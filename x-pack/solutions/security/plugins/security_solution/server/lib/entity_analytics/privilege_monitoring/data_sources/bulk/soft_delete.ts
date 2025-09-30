@@ -8,6 +8,43 @@
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
 
+const INDEX_SCRIPT = `
+            ctx._source['@timestamp'] = params.now;
+            ctx._source.event.ingested = params.now;
+            if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
+              ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
+            }
+
+            if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
+              if (ctx._source.labels?.sources != null) {
+                ctx._source.labels.sources.removeIf(src -> src == 'index');
+              }
+            }
+
+            if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
+              ctx._source.user.is_privileged = false;
+            }
+          `;
+// TODO: unify both scripts
+const INTEGRATIONS_SCRIPT = `
+    src['@timestamp'] = params.now;
+    src.event.ingested = params.now;
+
+    if (src.labels == null) { src.labels = new HashMap(); }
+    if (src.labels.sources == null) { src.labels.sources = new ArrayList(); }
+    if (src.labels.source_ids == null) { src.labels.source_ids = new ArrayList(); }
+
+    src.labels.source_ids.removeIf(l -> l == params.source_id);
+    src.labels.sources.removeIf(l -> l == params.source_type);
+
+    if (src.entity_analytics_monitoring != null && src.entity_analytics_monitoring.labels != null) {
+      src.entity_analytics_monitoring.labels.removeIf(l -> l.source == params.source_id);
+    }
+    if (src.labels.sources.size() == 0) {
+      src.user.is_privileged = false;
+    }
+  `;
+
 /**
  * Builds bulk operations to soft-delete users by updating their privilege status.
  *
@@ -27,7 +64,11 @@ import type { PrivMonBulkUser } from '../../types';
  */
 export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  (users: PrivMonBulkUser[], userIndexName: string): object[] => {
+  (
+    users: PrivMonBulkUser[],
+    userIndexName: string,
+    sourceType: 'index' | 'entity_analytics_integration'
+  ): object[] => {
     const ops: object[] = [];
     dataClient.log('debug', `Building bulk operations for soft delete users`);
     const now = new Date().toISOString();
@@ -36,23 +77,7 @@ export const bulkSoftDeleteOperationsFactory =
         { update: { _index: userIndexName, _id: user.existingUserId } },
         {
           script: {
-            source: `
-            ctx._source['@timestamp'] = params.now;
-            ctx._source.event.ingested = params.now;
-            if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
-              ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
-            }
-
-            if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
-              if (ctx._source.labels?.sources != null) {
-                ctx._source.labels.sources.removeIf(src -> src == 'index');
-              }
-            }
-
-            if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
-              ctx._source.user.is_privileged = false;
-            }
-          `,
+            source: sourceType === 'index' ? INDEX_SCRIPT : INTEGRATIONS_SCRIPT,
             params: {
               source_id: user.sourceId,
               now,
