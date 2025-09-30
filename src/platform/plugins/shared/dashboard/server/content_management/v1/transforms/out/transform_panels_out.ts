@@ -80,7 +80,10 @@ function transformPanelProperties(
   let transformedPanelConfig;
   try {
     if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(config, references);
+      transformedPanelConfig = transforms.transformOut(config, references) as Record<
+        string,
+        unknown
+      >;
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError

@@ -36,13 +36,13 @@ describe('transformPanelsIn', () => {
           type: 'foo',
           embeddableConfig: { foo: 'bar' },
           panelIndex: '1',
-          gridData: { x: 0, y: 0, w: 12, h: 12 },
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
         },
         {
           type: 'bar',
           embeddableConfig: { bizz: 'buzz' },
           panelIndex: 'mock-uuid',
-          gridData: { x: 0, y: 0, w: 12, h: 12 },
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid' },
         },
       ])
     );

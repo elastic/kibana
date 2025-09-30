@@ -67,7 +67,7 @@ function transformPanelIn(panel: DashboardPanel): {
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {
@@ -82,7 +82,10 @@ function transformPanelIn(panel: DashboardPanel): {
       ...restPanel,
       embeddableConfig: transformedPanelConfig as SavedDashboardPanel['embeddableConfig'],
       panelIndex: idx,
-      gridData: grid,
+      gridData: {
+        ...grid,
+        i: idx,
+      },
     },
     references: prefixReferencesFromPanel(idx, references ?? []),
   };

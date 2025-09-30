@@ -29,8 +29,8 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'config'> & {
   // Dashboard interacts with embeddables via the API returned from ReactEmbeddableRenderer.
   // Dashboard should never directly access embeddable state.
-  // Typing as object to enforce this contract.
-  config: object;
+  // Typing as Record to enforce this contract.
+  config: Record<string, unknown>;
 };
 export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
