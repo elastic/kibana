@@ -7,7 +7,7 @@
 
 import { registerStreamsUsageCollector } from './streams_usage_collector';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
@@ -32,13 +32,6 @@ describe('Streams Usage Collector', () => {
 
   describe('fetch method', () => {
     it('returns default values when there is no data', async () => {
-      const soClientMock = savedObjectsClientMock.create();
-      soClientMock.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
-        page: 0,
-      });
       esClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
         aggregations: {},
@@ -49,7 +42,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ soClient: soClientMock, esClient });
+      const result = await collector.fetch({ esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -74,8 +67,6 @@ describe('Streams Usage Collector', () => {
     });
 
     it('returns default values on client error', async () => {
-      const soClientMock = savedObjectsClientMock.create();
-      soClientMock.find.mockRejectedValue(new Error('SO error'));
       esClient.search.mockRejectedValue(new Error('ES error'));
 
       // Set NODE_ENV to production to avoid error throwing
@@ -84,7 +75,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ soClient: soClientMock, esClient });
+      const result = await collector.fetch({ esClient });
 
       // Restore original NODE_ENV
       process.env.NODE_ENV = originalEnv;
@@ -111,16 +102,6 @@ describe('Streams Usage Collector', () => {
       });
     });
     it('returns computed metrics when data is available', async () => {
-      const soClientMock = savedObjectsClientMock.create();
-
-      // Mock streams data - no SavedObjects queries for rules anymore
-      soClientMock.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
-        page: 0,
-      });
-
       // Mock search calls - for streams, rules, significant events, and event log
       esClient.search.mockImplementation(async (params: any) => {
         const baseResponse = {
@@ -176,7 +157,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ soClient: soClientMock, esClient });
+      const result = await collector.fetch({ esClient });
 
       expect(result).toEqual({
         classic_streams: {
@@ -201,7 +182,6 @@ describe('Streams Usage Collector', () => {
     });
 
     it('handles circuit_breaking_exception gracefully', async () => {
-      const soClientMock = savedObjectsClientMock.create();
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
       // Mock circuit breaker error
@@ -221,7 +201,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ soClient: soClientMock, esClient: esClientMock });
+      const result = await collector.fetch({ esClient: esClientMock });
 
       // Should return default values when ES calls fail
       expect(result).toEqual({
@@ -247,7 +227,6 @@ describe('Streams Usage Collector', () => {
     });
 
     it('handles too_long_http_line_exception gracefully', async () => {
-      const soClientMock = savedObjectsClientMock.create();
       const esClientMock2 = elasticsearchServiceMock.createElasticsearchClient();
 
       // Mock too long HTTP line error
@@ -267,7 +246,7 @@ describe('Streams Usage Collector', () => {
 
       registerStreamsUsageCollector(usageCollectionMock);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-      const result = await collector.fetch({ soClient: soClientMock, esClient: esClientMock2 });
+      const result = await collector.fetch({ esClient: esClientMock2 });
 
       // Should return default values when ES calls fail
       expect(result).toEqual({

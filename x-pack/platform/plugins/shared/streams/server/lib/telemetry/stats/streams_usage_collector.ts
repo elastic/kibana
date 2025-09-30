@@ -22,10 +22,8 @@ import { registerStreamsUsageCollector as registerCollector } from './register_c
  * Fetches Streams usage statistics for telemetry collection
  */
 export async function fetchStreamsUsageStats({
-  soClient,
   esClient,
 }: {
-  soClient: any;
   esClient: any;
 }): Promise<StreamsStatsTelemetry> {
   const result: StreamsStatsTelemetry = {

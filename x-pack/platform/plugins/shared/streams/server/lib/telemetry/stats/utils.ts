@@ -45,13 +45,11 @@ export function percentiles(arr: number[], p: number[]): number[] {
   });
 }
 
-/**
- * Lightweight stream type detection utilities for telemetry collection.
- *
- * These are optimized versions that avoid the overhead of full schema validation
- * during telemetry collection. Compatibility with Streams.*.Definition.is()
- * type guards is maintained through comprehensive tests.
- */
+// Lightweight stream type detection utilities for telemetry collection.
+//
+// These are optimized versions that avoid the overhead of full schema validation
+// during telemetry collection. Compatibility with Streams.*.Definition.is()
+// type guards is maintained through comprehensive tests.
 
 /**
  * Lightweight check if a stream definition is a classic stream

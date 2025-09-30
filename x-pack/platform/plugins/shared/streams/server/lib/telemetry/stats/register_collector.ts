@@ -11,18 +11,13 @@ import { streamsStatsSchema } from './schema';
 
 /**
  * Registers the Streams usage statistics collector with Kibana's usage collection service
+ * This is reported under stack_stats as snapshot telemetry and collected once daily
  */
 export function registerStreamsUsageCollector(
   usageCollection: UsageCollectionSetup,
   collectorOptions: {
     isReady: () => boolean;
-    fetch: ({
-      soClient,
-      esClient,
-    }: {
-      soClient: any;
-      esClient: any;
-    }) => Promise<StreamsStatsTelemetry>;
+    fetch: ({ esClient }: { esClient: any }) => Promise<StreamsStatsTelemetry>;
   }
 ) {
   const streamsUsageCollector = usageCollection.makeUsageCollector<StreamsStatsTelemetry>({

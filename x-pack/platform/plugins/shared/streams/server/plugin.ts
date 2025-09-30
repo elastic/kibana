@@ -67,7 +67,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemetryService = new EbtTelemetryService();
+  private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService: StatsTelemetryService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
@@ -88,7 +88,7 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(plugins.usageCollection);
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
@@ -164,7 +164,7 @@ export class StreamsPlugin
         assets: assetService,
         systems: systemService,
         server: this.server,
-        telemetry: this.telemetryService.getClient(),
+        telemetry: this.ebtTelemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {

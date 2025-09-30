@@ -9,8 +9,7 @@ import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type { StreamsStatsTelemetry } from './types';
 
 /**
- * Schema definition for Streams usage statistics telemetry
- * Includes metadata descriptions for each field explaining calculation and meaning
+ * Schema definition for Streams Stats telemetry (stack stats/snapshot telemetry)
  */
 export const streamsStatsSchema: MakeSchemaFrom<StreamsStatsTelemetry> = {
   classic_streams: {
