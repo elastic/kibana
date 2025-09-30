@@ -118,7 +118,7 @@ export const AdditionalFormFields = React.memo<{
         error={errorMessage}
       >
         <EuiComboBox
-          data-test-subj="incidentTypeComboBox"
+          data-test-subj="resilientAdditionalFieldsComboBox"
           fullWidth
           isClearable={true}
           isDisabled={isLoadingFields}

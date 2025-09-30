@@ -141,7 +141,7 @@ export const AdditionalFormField = React.memo<{ field: ResilientFieldMetadata }>
               <EuiFormRow fullWidth label={field.text} isInvalid={isInvalid}>
                 <EuiComboBox
                   isInvalid={isInvalid}
-                  data-test-subj="incidentTypeComboBox"
+                  data-test-subj={dataTestSubj}
                   fullWidth
                   isClearable={true}
                   isDisabled={false}
