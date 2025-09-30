@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { PreviewDataSparkPlot } from './add_significant_event_flyout/common/preview_data_spark_plot';
@@ -34,6 +35,7 @@ interface Props {
 export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     timeState: { start, end },
+    setTime,
   } = useTimefilter();
   const { unifiedSearch } = useKibana().dependencies.start;
 
@@ -54,6 +56,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     start,
     end,
   });
+
   const { removeQuery } = useSignificantEventsApi({
     name: definition.stream.name,
     start,
@@ -66,6 +69,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const [query, setQuery] = useState<string>('');
+
+  const { significantEvents, combinedQuery } = useFilteredSigEvents(
+    significantEventsFetchState.value ?? [],
+    query
+  );
 
   if (systemsLoading || significantEventsFetchState.loading) {
     return <LoadingPanel size="xxl" />;
@@ -166,11 +174,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 submitButtonStyle="iconOnly"
                 displayStyle="inPage"
                 disableQueryLanguageSwitcher
+                onRefresh={(q) => {
+                  significantEventsFetchState.refresh();
+                  setTime(q.dateRange);
+                }}
                 onQuerySubmit={(queryN) => {
                   setQuery(String(queryN.query?.query ?? ''));
+                  setTime(queryN.dateRange);
                 }}
                 onQueryChange={(queryN) => {
                   setQuery(String(queryN.query?.query ?? ''));
+                  setTime(queryN.dateRange);
                 }}
                 query={{
                   query,
@@ -200,7 +214,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <EuiFlexItem grow={false}>
           <PreviewDataSparkPlot
             definition={definition.stream}
-            query={{ kql: { query: '*' }, id: 'preview_all', title: 'All events' }}
+            query={{ kql: { query: combinedQuery ?? '' }, id: 'preview_all', title: 'All events' }}
             isQueryValid={true}
             noOfBuckets={50}
           />
@@ -208,9 +222,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
-            query={query}
+            loading={significantEventsFetchState.loading}
             definition={definition.stream}
-            response={significantEventsFetchState}
+            items={significantEvents}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
               setQueryToEdit({

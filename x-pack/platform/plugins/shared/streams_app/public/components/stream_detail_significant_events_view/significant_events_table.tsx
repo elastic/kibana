@@ -10,8 +10,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AbortableAsyncState } from '@kbn/react-hooks';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { StreamSystemDetailsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_system_details_flyout';
@@ -24,18 +23,18 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function SignificantEventsTable({
   definition,
-  response,
+  items,
   onDeleteClick,
   onEditClick,
   xFormatter,
-  query: queryString,
+  loading,
 }: {
+  loading?: boolean;
   definition: Streams.all.Definition;
-  response: Pick<AbortableAsyncState<SignificantEventItem[]>, 'value' | 'loading' | 'error'>;
+  items: SignificantEventItem[];
   onDeleteClick?: (query: SignificantEventItem) => Promise<void>;
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
-  query?: string;
 }) {
   const {
     dependencies: {
@@ -44,24 +43,10 @@ export function SignificantEventsTable({
   } = useKibana();
   const { timeState } = useTimefilter();
 
-  const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const items = useMemo(() => {
-    const values = response.value ?? [];
-    if (queryString) {
-      const lowerCaseQuery = queryString.toLowerCase();
-      return values.filter(
-        (item) =>
-          item.title.toLowerCase().includes(lowerCaseQuery) ||
-          item.query.system?.name.toLowerCase().includes(lowerCaseQuery) ||
-          item.query.system?.name?.toLowerCase().includes(lowerCaseQuery) ||
-          item.query.kql.query.toLowerCase().includes(lowerCaseQuery)
-      );
-    }
-    return response.value ?? [];
-  }, [response.value, queryString]);
   const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
@@ -198,7 +183,7 @@ export function SignificantEventsTable({
           type: 'icon',
           color: 'danger',
           name: i18n.translate('xpack.streams.significantEventsTable.removeQueryActionTitle', {
-            defaultMessage: 'Remove',
+            defaultMessage: 'Delete',
           }),
           description: i18n.translate(
             'xpack.streams.significantEventsTable.removeQueryActionDescription',
@@ -225,10 +210,9 @@ export function SignificantEventsTable({
         items={items}
         rowHeader="title"
         columns={columns}
-        loading={response.loading}
+        loading={loading}
         tableLayout="auto"
         itemId="id"
-        selection={{ onSelectionChange: setSelectedItems, selected: selectedItems }}
       />
       {isSystemDetailFlyoutOpen && (
         <StreamSystemDetailsFlyout
@@ -253,9 +237,11 @@ export function SignificantEventsTable({
           titleProps={{ id: 'deleteSignificantModal' }}
           onCancel={() => setIsDeleteModalVisible(false)}
           onConfirm={() => {
+            setIsDeleteLoading(true);
             onDeleteClick?.(selectedDeleteItem).finally(() => {
               setIsDeleteModalVisible(false);
               setSelectedDeleteItem(undefined);
+              setIsDeleteLoading(false);
             });
           }}
           cancelButtonText={i18n.translate(
@@ -266,6 +252,7 @@ export function SignificantEventsTable({
             'xpack.streams.significantEventsTable.euiConfirmModal.deleteSignificantEventButtonLabel',
             { defaultMessage: 'Delete significant event' }
           )}
+          isLoading={isDeleteLoading}
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
