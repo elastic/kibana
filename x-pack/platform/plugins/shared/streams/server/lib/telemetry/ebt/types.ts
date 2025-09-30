@@ -11,4 +11,13 @@ interface StreamEndpointLatencyProps {
   duration_ms: number;
 }
 
-export { type StreamEndpointLatencyProps };
+interface StreamsStateErrorProps {
+  error: {
+    name: string;
+    message: string;
+    stack_trace?: string;
+  };
+  status_code: number;
+}
+
+export { type StreamEndpointLatencyProps, type StreamsStateErrorProps };

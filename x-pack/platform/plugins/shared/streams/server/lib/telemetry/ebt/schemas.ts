@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@elastic/ebt/client';
-import type { StreamEndpointLatencyProps } from './types';
+import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
   name: {
@@ -29,4 +29,36 @@ const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
   },
 };
 
-export { streamsEndpointLatencySchema };
+const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
+  error: {
+    properties: {
+      name: {
+        type: 'keyword',
+        _meta: {
+          description: 'The name of the error class',
+        },
+      },
+      message: {
+        type: 'text',
+        _meta: {
+          description: 'The error message',
+        },
+      },
+      stack_trace: {
+        type: 'text',
+        _meta: {
+          description: 'The error stack trace',
+          optional: true,
+        },
+      },
+    },
+  },
+  status_code: {
+    type: 'long',
+    _meta: {
+      description: 'The HTTP status code associated with the error',
+    },
+  },
+};
+
+export { streamsEndpointLatencySchema, streamsStateErrorSchema };
