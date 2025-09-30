@@ -363,6 +363,13 @@ export interface RedactNamespacesParams<T, A extends string> {
 
 export type WithAuditName<T> = T & { name?: string };
 
+export interface SetAccessControlToWriteParams {
+  accessMode: SavedObjectAccessControl['accessMode'] | undefined;
+  type: string;
+  createdBy?: string;
+  preflightAccessControl?: SavedObjectAccessControl;
+}
+
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
@@ -581,4 +588,11 @@ export interface ISavedObjectsSecurityExtension {
    * Retrieves whether we need to include save objects names in the audit out
    */
   includeSavedObjectNames: () => boolean;
+
+  /**
+   * Sets the access control for a saved object that supports access control
+   */
+  setAccessControlToWrite: (
+    params: SetAccessControlToWriteParams
+  ) => SavedObjectAccessControl | undefined;
 }

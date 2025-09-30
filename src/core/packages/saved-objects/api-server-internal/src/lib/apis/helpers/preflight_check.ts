@@ -104,7 +104,7 @@ export class PreflightCheckHelper {
       .map(({ value: { type, id, fields } }) => ({
         _id: this.serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces', ...(fields ?? [])],
+        _source: ['type', 'namespaces', 'accessControl', ...(fields ?? [])],
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
@@ -328,6 +328,14 @@ export interface PreflightCheckNamespacesResult {
    * checkResult == not_found or checkResult == found_in_namespace
    */
   savedObjectNamespaces?: string[];
+  /** The source of the raw document, if the object already exists */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+/**
+ * @internal
+ */
+export interface PreflightAccessControlResult {
   /** The source of the raw document, if the object already exists */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }

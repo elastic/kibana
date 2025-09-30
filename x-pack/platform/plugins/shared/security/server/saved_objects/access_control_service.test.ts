@@ -26,7 +26,7 @@ describe('AccessControlService', () => {
         })
       : null;
 
-  describe('getTypesRequiringAccessControlPrivilegeCheck', () => {
+  describe('#getTypesRequiringAccessControlPrivilegeCheck', () => {
     let service: AccessControlService;
 
     beforeEach(() => {
@@ -73,23 +73,6 @@ describe('AccessControlService', () => {
         {
           id: '1',
           type: 'dashboard',
-        },
-      ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        typeRegistry,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
-      expect(typesRequiringAccessControl.size).toBe(0);
-    });
-
-    it('does not return type if accessMode is not read_only', () => {
-      service.setUserForOperation(makeUser('bob'));
-      const objects = [
-        {
-          id: '1',
-          type: 'dashboard',
-          accessControl: { owner: 'alice', accessMode: 'default' as const },
         },
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
@@ -176,9 +159,45 @@ describe('AccessControlService', () => {
       expect(typesRequiringAccessControl.has('visualization')).toBe(false);
       expect(typesRequiringAccessControl.size).toBe(1);
     });
+
+    describe('when accessMode is default', () => {
+      it('change ownership action returns type if user is not owner', () => {
+        service.setUserForOperation(makeUser('bob'));
+        const objects = [
+          {
+            type: 'dashboard',
+            id: 'id_1',
+            accessControl: { accessMode: 'default' as const, owner: 'alice' },
+          },
+        ];
+        const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
+          objects,
+          typeRegistry,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
+        expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
+      });
+
+      it('change access mode action returns type if user is not owner', () => {
+        service.setUserForOperation(makeUser('bob'));
+        const objects = [
+          {
+            type: 'dashboard',
+            id: 'id_1',
+            accessControl: { accessMode: 'default' as const, owner: 'alice' },
+          },
+        ];
+        const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
+          objects,
+          typeRegistry,
+          actions: new Set([SecurityAction.CHANGE_ACCESS_MODE]),
+        });
+        expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
+      });
+    });
   });
 
-  describe('enforceAccessControl', () => {
+  describe('#enforceAccessControl', () => {
     let service: AccessControlService;
     beforeEach(() => {
       service = new AccessControlService();
