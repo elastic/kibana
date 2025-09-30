@@ -14,13 +14,16 @@ import {
   deletePrivateLocationAction,
   editPrivateLocationAction,
   getPrivateLocationsAction,
+  resetPrivateLocationAction,
 } from '../../../../state/private_locations/actions';
 import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
 
 export const usePrivateLocationsAPI = () => {
   const dispatch = useDispatch();
 
-  const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
+  const { loading, createLoading, deleteLoading, resetLoading, data } = useSelector(
+    selectPrivateLocationsState
+  );
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
@@ -44,13 +47,19 @@ export const usePrivateLocationsAPI = () => {
     dispatch(deletePrivateLocationAction.get(id));
   };
 
+  const onResetLocationAPI = (id: string) => {
+    dispatch(resetPrivateLocationAction.get(id));
+  };
+
   return {
     onCreateLocationAPI,
     onEditLocationAPI,
     onDeleteLocationAPI,
+    onResetLocationAPI,
     deleteLoading,
     loading,
     createLoading,
+    resetLoading,
     privateLocations: data ?? [],
   };
 };

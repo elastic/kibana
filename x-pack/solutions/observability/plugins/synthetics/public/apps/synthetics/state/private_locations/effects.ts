@@ -13,12 +13,14 @@ import {
   deleteSyntheticsPrivateLocation,
   editSyntheticsPrivateLocation,
   getSyntheticsPrivateLocations,
+  resetSyntheticsPrivateLocation,
 } from './api';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
   editPrivateLocationAction,
   getPrivateLocationsAction,
+  resetPrivateLocationAction,
 } from './actions';
 
 export function* fetchPrivateLocationsEffect() {
@@ -77,9 +79,21 @@ export function* deletePrivateLocationEffect() {
   );
 }
 
+export function* resetPrivateLocationEffect() {
+  yield takeLeading(
+    resetPrivateLocationAction.get,
+    fetchEffectFactory(
+      resetSyntheticsPrivateLocation,
+      resetPrivateLocationAction.success,
+      resetPrivateLocationAction.fail
+    )
+  );
+}
+
 export const privateLocationsEffects = [
   fetchPrivateLocationsEffect,
   createPrivateLocationEffect,
   editPrivateLocationEffect,
   deletePrivateLocationEffect,
+  resetPrivateLocationEffect,
 ];

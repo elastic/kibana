@@ -14,6 +14,7 @@ import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
   editPrivateLocationAction,
+  resetPrivateLocationAction,
   setPrivateLocationToEdit,
 } from './actions';
 import { setIsPrivateLocationFlyoutVisible, getPrivateLocationsAction } from './actions';
@@ -25,6 +26,7 @@ export interface PrivateLocationsState {
   createLoading?: boolean;
   editLoading?: boolean;
   deleteLoading?: boolean;
+  resetLoading?: boolean;
   error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;
   isPrivateLocationFlyoutVisible?: boolean;
@@ -40,6 +42,7 @@ const initialState: PrivateLocationsState = {
   isPrivateLocationFlyoutVisible: false,
   createLoading: false,
   editLoading: false,
+  resetLoading: false,
   privateLocationToEdit: undefined,
 };
 
@@ -93,6 +96,17 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     .addCase(deletePrivateLocationAction.fail, (state, action) => {
       state.error = action.payload;
       state.deleteLoading = false;
+    })
+    .addCase(resetPrivateLocationAction.get, (state) => {
+      state.resetLoading = true;
+    })
+    .addCase(resetPrivateLocationAction.success, (state, action) => {
+      state.resetLoading = false;
+      state.data = null;
+    })
+    .addCase(resetPrivateLocationAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.resetLoading = false;
     })
     .addCase(setIsPrivateLocationFlyoutVisible, (state, action) => {
       state.isPrivateLocationFlyoutVisible = action.payload;

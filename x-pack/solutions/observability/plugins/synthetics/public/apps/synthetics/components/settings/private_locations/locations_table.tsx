@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ResetLocation } from './reset_location';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -42,11 +43,13 @@ interface ListItem extends PrivateLocation {
 export const PrivateLocationsTable = ({
   deleteLoading,
   onDelete,
+  onReset,
   onEdit,
   privateLocations,
 }: {
   deleteLoading?: boolean;
   onDelete: (id: string) => void;
+  onReset: (id: string) => void;
   onEdit: (privateLocation: PrivateLocation) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -54,6 +57,9 @@ export const PrivateLocationsTable = ({
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState<PrivateLocation | null>(null);
+  const [isResetOpen, setIsResetOpen] = useState<PrivateLocation | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -118,6 +124,20 @@ export const PrivateLocationsTable = ({
       name: ACTIONS_LABEL,
       actions: [
         {
+          name: RESET_LABEL,
+          description: RESET_LABEL,
+          isPrimary: true,
+          'data-test-subj': 'action-reset',
+          onClick: (item: ListItem) => setIsResetOpen(item),
+          icon: 'refresh',
+          type: 'icon',
+          enabled: (item) => {
+            const monCount = locationMonitors?.find((l) => l.id === item.id)?.count ?? 0;
+            const canReset = monCount > 0;
+            return canSave && canReset && canManagePrivateLocations;
+          },
+        },
+        {
           name: EDIT_LOCATION,
           description: EDIT_LOCATION,
           isPrimary: true,
@@ -125,21 +145,22 @@ export const PrivateLocationsTable = ({
           onClick: onEdit,
           icon: 'pencil',
           type: 'icon',
+          enabled: () => canSave && canManagePrivateLocations,
         },
         {
           name: DELETE_LOCATION,
           description: DELETE_LOCATION,
-          render: (item: ListItem) => (
-            <DeleteLocation
-              id={item.id}
-              label={item.label}
-              locationMonitors={locationMonitors}
-              onDelete={onDelete}
-              loading={deleteLoading}
-            />
-          ),
+          onClick: (item: ListItem) => setIsDeleteOpen(item),
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
           isPrimary: true,
           'data-test-subj': 'action-delete',
+          enabled: (item) => {
+            const monCount = locationMonitors?.find((l) => l.id === item.id)?.count ?? 0;
+            const canDelete = monCount === 0;
+            return canSave && canDelete && canManagePrivateLocations;
+          },
         },
       ],
     },
@@ -221,6 +242,22 @@ export const PrivateLocationsTable = ({
           ],
         }}
       />
+      {isResetOpen && (
+        <ResetLocation
+          id={isResetOpen.id}
+          label={isResetOpen.label}
+          onReset={onReset}
+          setIsModalOpen={setIsResetOpen}
+        />
+      )}
+      {isDeleteOpen && (
+        <DeleteLocation
+          id={isDeleteOpen.id}
+          label={isDeleteOpen.label}
+          onDelete={onDelete}
+          setIsModalOpen={setIsDeleteOpen}
+        />
+      )}
     </div>
   );
 };
@@ -244,17 +281,24 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
-    defaultMessage: 'Delete private location',
+    defaultMessage: 'Delete location',
   }
 );
 
 const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
-  defaultMessage: 'Edit private location',
+  defaultMessage: 'Edit location',
 });
 
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',
 });
+
+const RESET_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.privateLocations.resetLabel',
+  {
+    defaultMessage: 'Reset location',
+  }
+);
 
 export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',
