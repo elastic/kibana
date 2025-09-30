@@ -60,7 +60,6 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { useFocusedStepOutline } from '../lib/hooks';
-import type { EditorState } from '../lib/state/state';
 import { useEditorState } from '../lib/state/state';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GraphEdge, graphlib } from '@dagrejs/dagre';
+import type { GraphEdge } from '@dagrejs/dagre';
+import { graphlib } from '@dagrejs/dagre';
 import type { GraphNodeUnion } from '../types';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import { createTypedGraph } from './create_typed_graph';
