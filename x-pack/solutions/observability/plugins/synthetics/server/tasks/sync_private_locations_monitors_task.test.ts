@@ -527,6 +527,42 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toHaveProperty('performSync');
     });
+
+    it('should skip cleanup if hasAlreadyDoneCleanup is true', async () => {
+      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+      expect(result.performSync).toBe(false);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as it has already been done once '
+      );
+    });
+
+    it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 0 };
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+      expect(result.performSync).toBe(false);
+      expect(state.hasAlreadyDoneCleanup).toBe(true);
+      expect(state.maxCleanUpRetries).toBe(3);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached '
+      );
+    });
+
+    it('should decrement maxCleanUpRetries and eventually skip after failures', async () => {
+      // Simulate error in fetchAllItemIds
+      mockFleet.packagePolicyService.fetchAllItemIds.mockRejectedValue(new Error('fail'));
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 2 };
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+      expect(state.maxCleanUpRetries).toBe(1);
+      expect(result).toHaveProperty('performSync');
+      // Call again to reach 0
+      await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+      expect(state.hasAlreadyDoneCleanup).toBe(true);
+      expect(state.maxCleanUpRetries).toBe(3);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached '
+      );
+    });
   });
 });
 
