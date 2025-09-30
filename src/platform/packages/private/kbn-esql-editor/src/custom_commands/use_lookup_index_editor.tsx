@@ -127,7 +127,8 @@ export const useLookupIndexCommand = (
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
-  onIndexCreated: (resultQuery: string) => Promise<void>
+  onIndexCreated: (resultQuery: string) => Promise<void>,
+  onIndexEditorClose?: () => void
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -224,6 +225,8 @@ export const useLookupIndexCommand = (
       resultIndexName: string | null,
       indexCreated: boolean
     ) => {
+      onIndexEditorClose?.();
+
       if (!indexCreated || resultIndexName === null) return;
 
       const cursorPosition = editorRef.current?.getPosition();
@@ -251,7 +254,7 @@ export const useLookupIndexCommand = (
         await addLookupIndicesDecorator();
       }
     },
-    [editorRef, query.esql, onIndexCreated, addLookupIndicesDecorator]
+    [onIndexEditorClose, editorRef, onIndexCreated, query.esql, addLookupIndicesDecorator]
   );
 
   const openFlyout = useCallback(

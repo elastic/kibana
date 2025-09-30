@@ -430,4 +430,42 @@ describe('useLookupIndexCommand', () => {
     expect(decoratorResult).toBe(false);
     expect(mockModel.deltaDecorations).not.toHaveBeenCalled();
   });
+
+  it('should call onIndexEditorClose when flyout is closed', async () => {
+    const mockOnIndexEditorClose = jest.fn();
+
+    renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated,
+          mockOnIndexEditorClose
+        ),
+      { wrapper: createWrapper }
+    );
+
+    // Access the onFlyoutClose function through the openFlyout mechanism
+    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
+    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
+      await context.onClose({
+        indexName: 'new-index',
+        indexCreatedDuringFlyout: false,
+      });
+    });
+
+    // Trigger the command
+    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const commandHandler = registerCommandCall[1];
+
+    await commandHandler(undefined, {
+      indexName: 'test-index',
+      doesIndexExist: false,
+      canEditIndex: false,
+    });
+
+    expect(mockOnIndexEditorClose).toHaveBeenCalledTimes(1);
+  });
 });
