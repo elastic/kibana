@@ -15,9 +15,9 @@ import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { GeneralSettingsPage } from './page_objects/general_settings';
-import { AgentConfigurationsPage } from './page_objects/agent_configurations';
 import { CustomLinksPage } from './page_objects/custom_links';
 import { IndicesPage } from './page_objects/indices';
+import { AgentConfigurationsPage } from './page_objects/agent_configurations';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {

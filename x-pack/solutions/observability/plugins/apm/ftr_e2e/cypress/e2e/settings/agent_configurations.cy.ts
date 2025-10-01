@@ -133,11 +133,11 @@ describe('Agent configuration', () => {
       cy.getByTestSubj('serviceNameComboBox').type('opbeans-node{enter}');
       cy.wait('@serviceEnvironmentApi');
 
-      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+      cy.getByTestSubj('serviceEnvironmentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList').should(
         'be.visible'
       );
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList')
         .contains('button', 'production')
         .click();
 
@@ -145,7 +145,7 @@ describe('Agent configuration', () => {
       cy.contains('Create configuration');
       cy.contains('Edit').click();
       cy.wait('@serviceEnvironmentApi');
-      cy.getByTestSubj('serviceEnviromentComboBox')
+      cy.getByTestSubj('serviceEnvironmentComboBox')
         .find('input')
         .invoke('val')
         .should('contain', 'production');
@@ -160,11 +160,11 @@ describe('Agent configuration', () => {
       cy.getByTestSubj('serviceNameComboBox').type('opbeans-java-edot{enter}');
       cy.wait('@serviceEnvironmentApi');
 
-      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+      cy.getByTestSubj('serviceEnvironmentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList').should(
         'be.visible'
       );
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList')
         .contains('button', 'production')
         .click();
 
@@ -203,11 +203,11 @@ describe('Agent configuration', () => {
         .click();
       cy.wait('@serviceEnvironmentApi');
 
-      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+      cy.getByTestSubj('serviceEnvironmentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList').should(
         'be.visible'
       );
-      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+      cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList')
         .contains('button', 'All')
         .click();
 
@@ -216,7 +216,7 @@ describe('Agent configuration', () => {
       cy.getByTestSubj('settingsPage_environmentName').contains('All');
       cy.contains('Edit').click();
       cy.wait('@serviceEnvironmentApi');
-      cy.getByTestSubj('serviceEnviromentComboBox')
+      cy.getByTestSubj('serviceEnvironmentComboBox')
         .find('input')
         .invoke('val')
         .should('contain', 'All');
@@ -233,11 +233,11 @@ describe('Agent configuration', () => {
         cy.getByTestSubj('serviceNameComboBox').type('opbeans-java-edot{enter}');
         cy.wait('@serviceEnvironmentApi');
 
-        cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
-        cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+        cy.getByTestSubj('serviceEnvironmentComboBox').find('input').click();
+        cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList').should(
           'be.visible'
         );
-        cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+        cy.getByTestSubj('comboBoxOptionsList serviceEnvironmentComboBox-optionsList')
           .contains('button', 'production')
           .click();
 
