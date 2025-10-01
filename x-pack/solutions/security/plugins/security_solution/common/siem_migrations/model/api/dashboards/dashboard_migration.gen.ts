@@ -19,6 +19,7 @@ import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
+  DashboardMigrationTranslationStats,
   DashboardMigrationTaskStats,
   DashboardMigration,
   DashboardMigrationDashboard,
@@ -87,6 +88,21 @@ export type GetAllDashboardMigrationsStatsResponse = z.infer<
   typeof GetAllDashboardMigrationsStatsResponse
 >;
 export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
+
+export type GetAllTranslationStatsDashboardMigrationRequestParams = z.infer<
+  typeof GetAllTranslationStatsDashboardMigrationRequestParams
+>;
+export const GetAllTranslationStatsDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetAllTranslationStatsDashboardMigrationRequestParamsInput = z.input<
+  typeof GetAllTranslationStatsDashboardMigrationRequestParams
+>;
+
+export type GetAllTranslationStatsDashboardMigrationResponse = z.infer<
+  typeof GetAllTranslationStatsDashboardMigrationResponse
+>;
+export const GetAllTranslationStatsDashboardMigrationResponse = DashboardMigrationTranslationStats;
 
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
 export const GetDashboardMigrationRequestParams = z.object({

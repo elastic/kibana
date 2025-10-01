@@ -18,13 +18,15 @@ import type { MenuItem } from '../../../types';
 import { MenuItem as MenuItemComponent } from '../menu_item';
 import { useTooltip } from '../../hooks/use_tooltip';
 import { BetaBadge } from '../beta_badge';
+import { TOOLTIP_OFFSET } from '../../constants';
 
 export interface SideNavPrimaryMenuItemProps extends MenuItem {
   as?: 'a' | 'button';
   children: ReactNode;
   hasContent?: boolean;
   iconType: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isCollapsed: boolean;
   isHorizontal?: boolean;
   onClick?: () => void;
@@ -38,7 +40,8 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       href,
       iconType,
       id,
-      isActive,
+      isHighlighted,
+      isCurrent,
       isCollapsed,
       isHorizontal,
       badgeType,
@@ -69,7 +72,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
     );
 
     const getTooltipContent = () => {
-      if (isHorizontal || (isCollapsed && hasContent)) return null;
+      if (isHorizontal || hasContent) return null;
       if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
       if (!isCollapsed && badgeType)
         return getLabelWithBeta(
@@ -94,7 +97,8 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
         data-test-subj={`sideNavPrimaryMenuItem-${id}`}
         href={href}
         iconType={iconType}
-        isActive={isActive}
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
         isHorizontal={isHorizontal}
         isLabelVisible={isHorizontal ? true : !isCollapsed}
         ref={ref}
@@ -116,6 +120,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
           onMouseOut={handleMouseOut}
           position="right"
           repositionOnScroll
+          offset={TOOLTIP_OFFSET}
         >
           {menuItem}
         </EuiToolTip>

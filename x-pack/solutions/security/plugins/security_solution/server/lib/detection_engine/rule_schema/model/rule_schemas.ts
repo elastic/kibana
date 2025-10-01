@@ -104,6 +104,14 @@ export const RuleSourceCamelCased = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('external'),
     isCustomized: IsExternalRuleCustomized,
+    customizedFields: z
+      .array(
+        z.object({
+          fieldName: z.string(),
+        })
+      )
+      .optional(),
+    hasBaseVersion: z.boolean().optional(),
   }),
   z.object({
     type: z.literal('internal'),

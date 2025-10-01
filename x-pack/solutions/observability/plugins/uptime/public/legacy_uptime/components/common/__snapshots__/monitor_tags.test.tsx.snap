@@ -242,8 +242,6 @@ exports[`MonitorTags component render against summary 1`] = `
               },
               "timestamp": "2020-12-09T17:08:22.200Z",
               "tls": Object {
-                "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-                "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
                 "cipher": "TLS-AES-128-GCM-SHA256",
                 "established": true,
                 "server": Object {
@@ -279,8 +277,6 @@ exports[`MonitorTags component render against summary 1`] = `
           ],
           "timestamp": "2020-12-09T17:08:22.200Z",
           "tls": Object {
-            "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-            "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
             "cipher": "TLS-AES-128-GCM-SHA256",
             "established": true,
             "rtt": Object {
@@ -424,8 +420,6 @@ exports[`MonitorTags component renders against ping 1`] = `
         },
         "timestamp": "2020-12-09T17:08:22.200Z",
         "tls": Object {
-          "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-          "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
           "cipher": "TLS-AES-128-GCM-SHA256",
           "established": true,
           "server": Object {

@@ -373,7 +373,7 @@
               "ReqOptions",
               ") => Promise<",
               "AxiosResponse",
-              "<T, any>>"
+              "<T, any, {}>>"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
@@ -731,7 +731,7 @@
                   "- Optional log level string (highest priority)"
                 ],
                 "signature": [
-                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
                 "deprecated": false,
@@ -4367,7 +4367,12 @@
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
-                    "references": []
+                    "references": [
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"
+                      }
+                    ]
                   }
                 ]
               }

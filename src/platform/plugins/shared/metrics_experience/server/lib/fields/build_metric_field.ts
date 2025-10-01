@@ -8,8 +8,7 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import type { Dimension } from '../../../common/dimensions/types';
-import type { MetricField } from '../../../common/fields/types';
+import type { Dimension, MetricField } from '../../../common/types';
 
 export function buildMetricField({
   name,
@@ -28,10 +27,6 @@ export function buildMetricField({
     ? typeInfo.meta.unit.join(', ')
     : typeInfo.meta?.unit;
 
-  const description = Array.isArray(typeInfo.meta?.description)
-    ? typeInfo.meta.description.join(', ')
-    : typeInfo.meta?.description;
-
   const display = Array.isArray(typeInfo.meta?.display)
     ? typeInfo.meta.display.join(', ')
     : typeInfo.meta?.display;
@@ -43,7 +38,6 @@ export function buildMetricField({
     type,
     instrument: typeInfo.time_series_metric,
     unit,
-    description,
     display,
   };
 }

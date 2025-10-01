@@ -25,6 +25,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -59,4 +60,5 @@ export interface StreamsPluginStartDependencies {
   alerting: AlertingServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
+  fieldsMetadata: FieldsMetadataServerStart;
 }

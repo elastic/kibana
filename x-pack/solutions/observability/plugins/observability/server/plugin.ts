@@ -171,9 +171,9 @@ export class ObservabilityPlugin
         repository: getObservabilityServerRouteRepository(config),
         isDev: this.initContext.env.mode.dev,
       });
-    });
 
-    setEsqlRecommendedQueries(plugins.esql);
+      setEsqlRecommendedQueries(plugins.esql);
+    });
 
     return {
       getAlertDetailsConfig() {

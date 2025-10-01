@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  type CasesPublicSetup,
-  CasesDeepLinkId,
-  type CasesPublicStart,
-  getCasesDeepLinks,
-} from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -50,7 +46,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
+import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -121,6 +117,7 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
+  managedOtlpServiceUrl: string;
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
@@ -177,7 +174,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
-  streams?: StreamsPluginStart;
+  streams: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
@@ -197,6 +194,7 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
   private telemetry: TelemetryService;
+  private isServerless: boolean = false;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -224,12 +222,14 @@ export class Plugin
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
+    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    const startServicesPromise = coreSetup.getStartServices();
     if (pluginsSetup.cases) {
       this.deepLinks.push(
         getCasesDeepLinks({
@@ -454,6 +454,40 @@ export class Plugin
                     ...sloLink,
                     ...casesLink,
                     ...aiAssistantLink,
+                  ],
+                },
+              ];
+            })
+          )
+        )
+      )
+    );
+
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(startServicesPromise).pipe(
+        switchMap(([_, pluginsStart]) =>
+          pluginsStart.streams.navigationStatus$.pipe(
+            map(({ status }) => {
+              if (status !== 'enabled') {
+                return [];
+              }
+
+              return [
+                {
+                  label: '',
+                  sortKey: 101,
+                  entries: [
+                    {
+                      label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
+                        defaultMessage: 'Streams',
+                      }),
+                      app: 'streams',
+                      path: '/',
+                      isTechnicalPreview: this.isServerless,
+                      matchPath(currentPath: string) {
+                        return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                      },
+                    },
                   ],
                 },
               ];

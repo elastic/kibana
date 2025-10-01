@@ -31,7 +31,8 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        debug: true
+        packs: |
+          githubsecuritylab/codeql-${{ matrix.language }}-queries
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -80,6 +81,7 @@ jobs:
       working-directory: ./kibana-operations/triage
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        GITHUB_REPO: kibana
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
         SLACK_CHANNEL: ${{secrets.CODE_SCANNING_SLACK_CHANNEL_ID}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
@@ -95,7 +97,7 @@ jobs:
     if: failure()
     steps:
       - name: Send notification to slack
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
         with:
           method: chat.postMessage
           token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}

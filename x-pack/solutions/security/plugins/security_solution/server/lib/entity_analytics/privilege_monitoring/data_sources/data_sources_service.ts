@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
 import { createIndexSyncService } from './sync/index_sync';
+import { createIntegrationsSyncService } from './sync/integrations/integrations_sync';
 
-export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createDataSourcesService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract
+) => {
+  const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
+  const indexSyncService = createIndexSyncService(dataClient);
+  const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
+  const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
   /**
    * This creates an index for the user to populate privileged users.
@@ -53,9 +62,21 @@ export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClie
     );
   };
 
+  const syncAllSources = async () => {
+    const jobs = [indexSyncService.plainIndexSync(soClient)];
+    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
+
+    const settled = await Promise.allSettled(jobs);
+    settled
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .forEach((r) => dataClient.log('warn', `Data sources sync failed: ${String(r.reason)}`));
+  };
+
   return {
     createImportIndex,
     searchPrivilegesIndices,
+    syncAllSources,
     ...createIndexSyncService(dataClient),
+    ...createIntegrationsSyncService(dataClient, soClient),
   };
 };

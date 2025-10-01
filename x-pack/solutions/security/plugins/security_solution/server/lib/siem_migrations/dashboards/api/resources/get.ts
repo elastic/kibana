@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsResourceGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -40,7 +40,7 @@ export const registerSiemDashboardMigrationsResourceGetRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (
             context,
             req,

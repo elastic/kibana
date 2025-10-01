@@ -19,7 +19,7 @@ export const columnsAfter = (
 
   walk(command, {
     visitColumn: (node) => {
-      columnsToKeep.push(node.name);
+      columnsToKeep.push(node.parts.join('.'));
     },
   });
 

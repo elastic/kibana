@@ -83,7 +83,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed } = rawDashboardContent;
+  const { references, attributes, managed, version } = rawDashboardContent;
 
   const {
     refreshInterval,
@@ -92,25 +92,16 @@ export const loadDashboardState = async ({
     options,
     panels,
     kibanaSavedObjectMeta: { searchSource },
-    timeFrom,
-    timeTo,
+    timeRange,
     title,
   } = attributes;
-
-  const timeRange =
-    timeRestore && timeFrom && timeTo
-      ? {
-          from: timeFrom,
-          to: timeTo,
-        }
-      : undefined;
 
   const { filters, query } = searchSource || {};
 
   return {
     managed,
     references,
-    resolveMeta,
+    resolveMeta: { ...resolveMeta, version },
     dashboardInput: {
       ...options,
       refreshInterval,

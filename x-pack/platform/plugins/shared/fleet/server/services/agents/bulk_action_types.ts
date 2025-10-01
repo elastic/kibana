@@ -11,4 +11,5 @@ export enum BulkActionTaskType {
   UPGRADE_RETRY = 'fleet:upgrade_action:retry',
   UPDATE_AGENT_TAGS_RETRY = 'fleet:update_agent_tags:retry',
   REQUEST_DIAGNOSTICS_RETRY = 'fleet:request_diagnostics:retry',
+  MIGRATE_RETRY = 'fleet:migrate_action:retry',
 }

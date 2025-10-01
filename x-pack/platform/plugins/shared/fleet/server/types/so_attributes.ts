@@ -27,7 +27,7 @@ import type {
   PackagePolicyPackage,
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { SecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -35,6 +35,7 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
+import type { CloudProvider, CloudConnectorVars } from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -138,7 +139,7 @@ export interface PackagePolicySOAttributes {
   updated_by: string;
   description?: string;
   is_managed?: boolean;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
   elasticsearch?: {
@@ -152,7 +153,7 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
 }
 
-interface OutputSoBaseAttributes {
+export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
@@ -168,7 +169,7 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
-  write_to_logs_streams?: boolean;
+  write_to_logs_streams?: boolean | null;
   secrets?: {
     ssl?: {
       key?: { id: string };
@@ -183,7 +184,7 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
 
 export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
   secrets?: {
     service_token?: { id: string };
     ssl?: {
@@ -192,7 +193,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   };
   sync_integrations?: boolean;
   kibana_url?: string;
-  kibana_api_key?: string;
+  kibana_api_key?: string | null;
   sync_uninstalled_integrations?: boolean;
 }
 
@@ -260,6 +261,7 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  action_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -287,3 +289,13 @@ export interface DownloadSourceSOAttributes {
   };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
+
+export interface CloudConnectorSOAttributes {
+  name: string;
+  namespace?: string;
+  cloudProvider: CloudProvider;
+  vars: CloudConnectorVars;
+  packagePolicyCount: number;
+  created_at: string;
+  updated_at: string;
+}

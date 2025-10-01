@@ -205,20 +205,33 @@ export const createIndexSelectorPrompt = ({
       'system',
       `You are an AI assistant for the Elasticsearch company.
 
-       Based on a natural language query provided by the user, your task is to select up to ${limit} most relevant targets
-       to perform that search, from a list of indices, aliases and datastreams.`,
+Your sole function is to identify the most relevant Elasticsearch resources (indices, aliases, data streams) based on a user's query.
+
+You MUST call the 'select_resources' tool to provide your answer. Do NOT respond with conversational text, explanations, or any data outside of the tool call.
+
+- The user's query will be provided.
+- A list of available resources will be provided in XML format.
+- You must analyze the query against the resource names, descriptions, and fields.
+- Select up to a maximum of ${limit} of the most relevant resources.
+- For each selected resource, you MUST provide its 'name', 'type', and a brief 'reason' for your choice.
+- If NO resources are relevant, you MUST call the 'select_resources' tool with an empty 'targets' array.
+
+Now, perform your function for the following query and resources.
+`,
     ],
     [
       'human',
-      `*The natural language query is:* "${nlQuery}"
+      `## Query
 
-       ## Available resources
-       <resources>
-        ${resources.map(formatResource).join('\n')}
-       </resources>
+*The natural language query is:* "${nlQuery}"
 
-       Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
-       Remember, you should select at maximum ${limit} targets. If none match, just return an empty list.`,
+## Available resources
+<resources>
+${resources.map(formatResource).join('\n')}
+</resources>
+
+Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
+Remember, you should select at maximum ${limit} targets. If none match, just return an empty list.`,
     ],
   ];
 };
@@ -236,23 +249,26 @@ const selectResources = async ({
 }): Promise<SelectedResource[]> => {
   const { chatModel } = model;
   const indexSelectorModel = chatModel.withStructuredOutput(
-    z.object({
-      reasoning: z
-        .string()
-        .optional()
-        .describe(
-          'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+    z
+      .object({
+        reasoning: z
+          .string()
+          .optional()
+          .describe(
+            'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+          ),
+        targets: z.array(
+          z.object({
+            reason: z.string().describe('brief explanation of why this resource could be relevant'),
+            type: z
+              .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
+              .describe('the type of the resource'),
+            name: z.string().describe('name of the index, alias or data stream'),
+          })
         ),
-      targets: z.array(
-        z.object({
-          reason: z.string().describe('brief explanation of why this resource could be relevant'),
-          type: z
-            .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
-            .describe('the type of the resource'),
-          name: z.string().describe('name of the index, alias or data stream'),
-        })
-      ),
-    })
+      })
+      .describe('Tool to use to select the relevant targets to search against'),
+    { name: 'select_resources' }
   );
 
   const promptContent = createIndexSelectorPrompt({

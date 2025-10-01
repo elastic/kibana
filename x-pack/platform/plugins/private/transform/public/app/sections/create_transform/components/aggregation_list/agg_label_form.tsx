@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
@@ -19,6 +20,15 @@ import { isPivotAggsConfigWithUiBase } from '../../../../common';
 import { PopoverForm } from './popover_form';
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { SubAggsSection } from './sub_aggs_section';
+import { transformLabelStyles, useIntervalButtonStyles } from '../../styles';
+
+const useStyles = () => {
+  return {
+    transformAggHelperText: css`
+      line-height: 20px;
+    `,
+  };
+};
 
 interface Props {
   item: PivotAggsConfig;
@@ -35,6 +45,8 @@ export const AggLabelForm: React.FC<Props> = ({
   onChange,
   options,
 }) => {
+  const intervalButtonStyles = useIntervalButtonStyles();
+  const styles = useStyles();
   const [isPopoverVisible, setPopoverVisibility] = useState(
     isPivotAggsWithExtendedForm(item) && !item.isValid()
   );
@@ -54,7 +66,7 @@ export const AggLabelForm: React.FC<Props> = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem className="transform__AggregationLabel--text">
+        <EuiFlexItem css={transformLabelStyles}>
           <span className="eui-textTruncate" data-test-subj="transformAggregationEntryLabel">
             {item.aggName}
           </span>
@@ -63,15 +75,15 @@ export const AggLabelForm: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiTextColor
               color="subdued"
+              css={styles.transformAggHelperText}
               className="eui-textTruncate"
               data-test-subj="transformAggHelperText"
-              style={{ lineHeight: '20px' }}
             >
               {helperText}
             </EuiTextColor>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
+        <EuiFlexItem grow={false} css={intervalButtonStyles}>
           <EuiPopover
             id="transformFormPopover"
             ownFocus
@@ -97,7 +109,7 @@ export const AggLabelForm: React.FC<Props> = ({
             />
           </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
+        <EuiFlexItem grow={false} css={intervalButtonStyles}>
           <EuiButtonIcon
             aria-label={i18n.translate('xpack.transform.aggLabelForm.deleteItemAriaLabel', {
               defaultMessage: 'Delete item',

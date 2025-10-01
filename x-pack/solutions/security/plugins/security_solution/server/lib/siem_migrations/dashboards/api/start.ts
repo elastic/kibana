@@ -19,7 +19,7 @@ import { authz } from '../../common/api/util/authz';
 import { getRetryFilter } from '../../common/api/util/retry';
 import { withLicense } from '../../common/api/util/with_license';
 import { createTracersCallbacks } from '../../common/api/util/tracing';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -42,7 +42,7 @@ export const registerSiemDashboardMigrationsStartRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<StartDashboardsMigrationResponse>> => {
             const migrationId = req.params.migration_id;
             const {

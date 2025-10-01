@@ -17,6 +17,7 @@
     "@kbn/core-plugins-browser-internal",
     "@kbn/core-plugins-browser",
     "@kbn/config",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",
