@@ -94,7 +94,7 @@ export function buildStepExecutionsTree(
         stepExecution.stepId,
       ];
       const key = computedPath.join('>');
-      computedPathsMap.set(stepExecution.id!, computedPath);
+      computedPathsMap.set(stepExecution.id, computedPath);
       stepExecutionsMap.set(key, {
         ...stepExecution,
       });
