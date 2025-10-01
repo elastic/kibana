@@ -22,6 +22,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.configurations,
       ProductFeatureKey.externalDetections,
       ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.casesConnectors,
     ],
     // neither of these tiers are available in ai_soc product line
     essentials: [],
