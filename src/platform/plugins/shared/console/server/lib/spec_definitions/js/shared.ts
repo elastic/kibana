@@ -18,4 +18,4 @@ export const ChunkingSettings = {
   max_chunk_size: 250,
   sentence_overlap: 1,
   overlap: 1,
-}
+};

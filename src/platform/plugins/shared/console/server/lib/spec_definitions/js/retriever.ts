@@ -150,7 +150,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
         inference_id: '',
         inference_text: '',
         field: '',
-        chunk_rescorer: {}
+        chunk_rescorer: {},
       },
       retriever: {
         __scope_link: '.',
@@ -165,7 +165,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       chunk_rescorer: {
         size: 1,
-        chunking_settings: ChunkingSettings
+        chunking_settings: ChunkingSettings,
       },
     },
   });
