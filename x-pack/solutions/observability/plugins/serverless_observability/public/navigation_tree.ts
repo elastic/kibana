@@ -126,6 +126,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
+            sideNavVersion: 'v1',
           },
           ...(streamsAvailable
             ? [
