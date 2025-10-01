@@ -97,6 +97,8 @@ export const storedPackagePolicyToAgentInputs = (
         package: {
           name: packagePolicy.package.name,
           version: packagePolicy.package.version,
+          policy_template: input.policy_template,
+          release: packageInfo?.release,
         },
       };
     }
