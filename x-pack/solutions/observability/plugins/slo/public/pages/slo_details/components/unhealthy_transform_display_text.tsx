@@ -46,7 +46,7 @@ export function TransformDisplayText({
               <EuiText size={textSize} color="danger">
                 <FormattedMessage
                   id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
-                  defaultMessage="Inspect transform"
+                  defaultMessage="Inspect"
                 />
               </EuiText>
             </EuiFlexItem>
