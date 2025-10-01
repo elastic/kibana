@@ -2288,6 +2288,7 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
+      'settings',
       'incremental_id',
       'settings',
       'total_alerts',

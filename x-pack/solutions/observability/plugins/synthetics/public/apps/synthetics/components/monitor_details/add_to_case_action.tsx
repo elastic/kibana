@@ -19,7 +19,6 @@ import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 export function AddToCaseContextItem() {
   const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
   const services = useKibana<ClientPluginsStart>().services;
-  const observabilityAIAssistant = services.observabilityAIAssistant;
   const cases = services.cases;
   const canUseCases = cases?.helpers?.canUseCases;
   const notifications = services.notifications;
@@ -76,7 +75,7 @@ export function AddToCaseContextItem() {
       return;
     }
     setIsAddToCaseModalOpen(true);
-  }, [setIsAddToCaseModalOpen, redirectUrl, monitor?.name, notifications.toasts]);
+  }, [redirectUrl, monitor?.name, notifications.toasts]);
 
   const onCloseModal = useCallback(() => {
     setIsAddToCaseModalOpen(false);
@@ -124,7 +123,6 @@ export function AddToCaseContextItem() {
           cases={cases}
           onCloseModal={onCloseModal}
           notifications={notifications}
-          observabilityAIAssistant={observabilityAIAssistant}
         />
       )}
     </>
