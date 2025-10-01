@@ -2,8 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
     key: build_project_image
-    env:
-      CI_FORCE_NODE_POINTER_COMPRESSION: "false"
     agents:
       machineType: n2-standard-16
       preemptible: true
