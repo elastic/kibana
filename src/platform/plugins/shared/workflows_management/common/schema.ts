@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
@@ -622,6 +623,9 @@ const staticConnectors: ConnectorContract[] = [
       })
       .required(),
     outputSchema: z.string(),
+    description: i18n.translate('workflows.connectors.console.description', {
+      defaultMessage: 'Log a message to the workflow logs',
+    }),
   },
   // Note: inference sub-actions are now generated dynamically
   // Generic request types for raw API calls
@@ -635,6 +639,9 @@ const staticConnectors: ConnectorContract[] = [
       params: z.any().optional(),
     }),
     outputSchema: z.any(),
+    description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
+      defaultMessage: 'Make a generic request to an Elasticsearch API',
+    }),
   },
   {
     type: 'kibana.request',
@@ -646,6 +653,9 @@ const staticConnectors: ConnectorContract[] = [
       headers: z.any().optional(),
     }),
     outputSchema: z.any(),
+    description: i18n.translate('workflows.connectors.kibana.request.description', {
+      defaultMessage: 'Make a generic request to a Kibana API',
+    }),
   },
 ];
 
@@ -779,7 +789,7 @@ export function convertDynamicConnectorsToContracts(
         });
       }
     } catch (error) {
-      console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
+      // console.warn(`Error processing connector type ${connectorType.actionTypeId}:`, error);
       // Return a basic connector contract as fallback
       connectorContracts.push({
         type: connectorType.actionTypeId,
@@ -938,7 +948,7 @@ export function getAllConnectorsWithDynamic(
 
   // Graceful fallback if dynamic connectors are not available
   if (!dynamicConnectorTypes || Object.keys(dynamicConnectorTypes).length === 0) {
-    console.debug('Dynamic connectors not available, using static connectors only');
+    // console.debug('Dynamic connectors not available, using static connectors only');
     return staticAndGeneratedConnectors;
   }
 
@@ -954,7 +964,7 @@ export function getAllConnectorsWithDynamic(
     // Connectors added successfully without logging noise
     return [...staticAndGeneratedConnectors, ...uniqueDynamicConnectors];
   } catch (error) {
-    console.error('Error processing dynamic connectors, falling back to static connectors:', error);
+    // console.error('Error processing dynamic connectors, falling back to static connectors:', error);
     return staticAndGeneratedConnectors;
   }
 }
@@ -978,39 +988,3 @@ export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(static
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema
-
-// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
-const AlertSchema = z.object({
-  _id: z.string(),
-  _index: z.string(),
-  kibana: z.object({
-    alert: z.any(),
-  }),
-  '@timestamp': z.string(),
-});
-
-const SummarizedAlertsChunkSchema = z.object({
-  count: z.number(),
-  data: z.array(z.union([AlertSchema, z.any()])),
-});
-
-const RuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tags: z.array(z.string()),
-  consumer: z.string(),
-  producer: z.string(),
-  ruleTypeId: z.string(),
-});
-
-export const EventSchema = z.object({
-  alerts: z.object({
-    new: SummarizedAlertsChunkSchema,
-    ongoing: SummarizedAlertsChunkSchema,
-    recovered: SummarizedAlertsChunkSchema,
-    all: SummarizedAlertsChunkSchema,
-  }),
-  rule: RuleSchema,
-  spaceId: z.string(),
-  params: z.any(),
-});

@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -56,7 +48,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server-mocks",
     "@kbn/cloud-plugin",
-    "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
     "@kbn/inference-common",
     "@kbn/core-ui-settings-server-mocks",
@@ -75,5 +66,13 @@
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/share-plugin",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/workflows-management-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/doc-links",
+    "@kbn/ui-actions-plugin",
+    "@kbn/workflows",
+    "@kbn/spaces-utils",
+    "@kbn/spaces-plugin"
   ]
 }

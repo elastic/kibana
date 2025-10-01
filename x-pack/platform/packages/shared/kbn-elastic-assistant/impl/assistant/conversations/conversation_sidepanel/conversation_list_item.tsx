@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
-import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
+import {
+  ConversationSharedState,
+  getConversationSharedState,
+  type User,
+} from '@kbn/elastic-assistant-common';
 import { getSharedIcon } from '../../share_conversation/utils';
 
 import type { ConversationWithOwner } from '../../api';
@@ -19,6 +23,7 @@ import * as i18n from './translations';
 
 interface Props {
   conversation: ConversationWithOwner;
+  currentUser?: User;
   handleCopyUrl: (conversation: Conversation) => Promise<void>;
   handleDuplicateConversation: (conversation: Conversation) => Promise<void>;
   isActiveConversation: boolean;
@@ -30,6 +35,7 @@ interface Props {
 
 export const ConversationListItem: React.FC<Props> = ({
   conversation,
+  currentUser,
   handleCopyUrl,
   handleDuplicateConversation,
   isActiveConversation,
@@ -61,8 +67,8 @@ export const ConversationListItem: React.FC<Props> = ({
   );
 
   const shouldShowIcon = useMemo(
-    () => conversationSharedState !== ConversationSharedState.PRIVATE,
-    [conversationSharedState]
+    () => conversationSharedState !== ConversationSharedState.PRIVATE && !!currentUser,
+    [conversationSharedState, currentUser]
   );
   const { iconType, iconTitle } = useMemo(
     () =>

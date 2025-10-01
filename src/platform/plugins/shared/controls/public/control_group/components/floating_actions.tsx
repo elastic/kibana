@@ -133,6 +133,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           }`}
           className={classNames(
             'presentationUtil__floatingActions',
+            'controlFrameFloatingActions',
             `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
             className
           )}

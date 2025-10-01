@@ -24,6 +24,9 @@
       "esUiShared",
       "stackConnectors",
     ],
-    "optionalPlugins": ["alerting"]
+    "optionalPlugins": [
+      "alerting",
+      "serverless"
+    ]
   }
 }

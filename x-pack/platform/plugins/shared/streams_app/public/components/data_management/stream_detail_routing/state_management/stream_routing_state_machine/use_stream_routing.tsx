@@ -26,6 +26,7 @@ const consoleInspector = createConsoleInspector();
 const StreamRoutingContext = createActorContext(streamRoutingMachine);
 
 export const useStreamsRoutingSelector = StreamRoutingContext.useSelector;
+export const useStreamsRoutingActorRef = StreamRoutingContext.useActorRef;
 
 export type StreamRoutingEvents = ReturnType<typeof useStreamRoutingEvents>;
 

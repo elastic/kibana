@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { ObjectType } from '@kbn/config-schema';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -13,27 +14,36 @@ import type { ToolType } from '@kbn/onechat-common';
 import type { InternalToolDefinition } from '../../tool_provider';
 import type { ToolPersistedDefinition } from '../client';
 
+export interface ToolTypeConversionContext {
+  request: KibanaRequest;
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}
+
 export type ToolDefinitionConverter<
   ToolTypeConfig extends object = any,
   TSchema extends z.ZodObject<any> = z.ZodObject<any>
 > = (
-  persisted: ToolPersistedDefinition<ToolTypeConfig>
-) => InternalToolDefinition<ToolTypeConfig, TSchema>;
+  persisted: ToolPersistedDefinition<ToolTypeConfig>,
+  context: ToolTypeConversionContext
+) => MaybePromise<InternalToolDefinition<ToolTypeConfig, TSchema>>;
 
 export interface ToolTypeValidatorContext {
+  request: KibanaRequest;
+  spaceId: string;
   esClient: ElasticsearchClient;
 }
 
-export type ToolTypeCreateValidator<ToolTypeConfig extends object = Record<string, any>> = (
-  config: ToolTypeConfig,
-  context: ToolTypeValidatorContext
-) => MaybePromise<ToolTypeConfig>;
+export type ToolTypeCreateValidator<ToolTypeConfig extends object = Record<string, any>> = (opts: {
+  config: ToolTypeConfig;
+  context: ToolTypeValidatorContext;
+}) => MaybePromise<ToolTypeConfig>;
 
-export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<string, any>> = (
-  update: Partial<ToolTypeConfig>,
-  config: ToolTypeConfig,
-  context: ToolTypeValidatorContext
-) => MaybePromise<ToolTypeConfig>;
+export type ToolTypeUpdateValidator<ToolTypeConfig extends object = Record<string, any>> = (opts: {
+  current: ToolTypeConfig;
+  update: Partial<ToolTypeConfig>;
+  context: ToolTypeValidatorContext;
+}) => MaybePromise<ToolTypeConfig>;
 
 export interface PersistedToolTypeDefinition<ToolTypeConfig extends object = Record<string, any>> {
   toolType: ToolType;

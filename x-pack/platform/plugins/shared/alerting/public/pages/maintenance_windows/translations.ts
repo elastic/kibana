@@ -405,7 +405,7 @@ export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
   {
     defaultMessage:
-      'When you save the changes, the maintenance window will affect rules in all solutions.',
+      'When you save the changes, the maintenance window will affect all rules that meet the filtering criteria.',
   }
 );
 

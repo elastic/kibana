@@ -182,6 +182,12 @@ export const getMockServerDependencies = () => {
     } as unknown as Partial<CspClientPluginStartDeps>,
     core: {
       ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        getUrlForApp: (appId: string) => {
+          return `/app/${appId}`;
+        },
+      },
       http: {
         ...coreMock.createStart().http,
         get: async (path: string, options: any) => {

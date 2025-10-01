@@ -330,6 +330,7 @@ module.exports = {
     '@kbn/imports/no_boundary_crossing': 'error',
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
+    '@kbn/imports/no_direct_handlebars_import': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',

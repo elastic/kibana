@@ -9,9 +9,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import './reorderable_table.scss';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { BodyRow } from './body_row';
 import { BodyRows } from './body_rows';
@@ -19,6 +17,7 @@ import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
 import type { Column } from './types';
+import * as Styles from './styles';
 
 interface ReorderableTableProps<Item> {
   columns: Array<Column<Item>>;
@@ -49,8 +48,9 @@ export const ReorderableTable = <Item extends object>({
   rowErrors = () => undefined,
   showRowIndex = false,
 }: ReorderableTableProps<Item>) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <div className={classNames(className, 'reorderableTable')}>
+    <div className={classNames(className)} css={Styles.reorderableTableStyles(euiTheme)}>
       <HeaderRow
         columns={columns}
         leftAction={disableReordering ? undefined : <></>}
