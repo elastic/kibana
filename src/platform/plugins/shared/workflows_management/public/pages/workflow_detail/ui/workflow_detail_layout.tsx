@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useIsWithinBreakpoints } from '@elastic/eui';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -32,13 +31,13 @@ interface WorkflowEditorWithSidebarLayoutProps {
 }
 
 const WorkflowsSidebarWidthPrefix = 'WORKFLOWS_SIDEBAR_WIDTH_';
-const DefaultSidebarModeWidth = {
+const DefaultSidebarModeWidth: Record<SideBarMode, number> = {
   list: 400,
   detail: 600,
 };
-const MinSidebarModeWidth = {
-  list: 300,
-  detail: 300,
+const MinSidebarModeWidth: Record<SideBarMode, number> = {
+  list: 200,
+  detail: 400,
 };
 const MinEditorWidth = 400;
 
@@ -108,13 +107,6 @@ const WorkflowEditorWithSidebarLayout = ({
     defaultSidebarWidth
   );
 
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
-
-  const layoutMode = isMobile ? ResizableLayoutMode.Static : ResizableLayoutMode.Resizable;
-  const layoutDirection = isMobile
-    ? ResizableLayoutDirection.Vertical
-    : ResizableLayoutDirection.Horizontal;
-
   return (
     <ResizableLayout
       flexPanel={editorPortal}
@@ -124,8 +116,8 @@ const WorkflowEditorWithSidebarLayout = ({
       onFixedPanelSizeChange={setSidebarWidth}
       minFixedPanelSize={MinSidebarModeWidth[mode]}
       fixedPanelOrder={ResizableLayoutOrder.End}
-      mode={layoutMode}
-      direction={layoutDirection}
+      mode={ResizableLayoutMode.Resizable}
+      direction={ResizableLayoutDirection.Horizontal}
       resizeButtonClassName="workflowSidebarResizeButton"
       data-test-subj="WorkflowEditorWithSidebarLayout"
       className="workflowResizableLayout"

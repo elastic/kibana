@@ -100,7 +100,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
         }
         fixedPanelSize={sidebarWidth}
         onFixedPanelSizeChange={setSidebarWidth}
-        minFixedPanelSize={150}
+        minFixedPanelSize={200}
         fixedPanelOrder={ResizableLayoutOrder.Start}
         flexPanel={
           <WorkflowStepExecutionDetails
@@ -110,7 +110,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
             isLoading={isLoading}
           />
         }
-        minFlexPanelSize={250}
+        minFlexPanelSize={200}
         mode={ResizableLayoutMode.Resizable}
         direction={ResizableLayoutDirection.Horizontal}
         resizeButtonClassName="workflowExecutionDetailResizeButton"
