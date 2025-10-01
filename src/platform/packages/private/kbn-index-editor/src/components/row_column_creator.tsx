@@ -20,7 +20,7 @@ export const RowColumnCreator = ({
   dataTableRef: RefObject<EuiDataGridRefProps>;
 }) => {
   const {
-    services: { indexUpdateService },
+    services: { indexUpdateService, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
 
   const columns = useObservable(indexUpdateService.dataTableColumns$);

@@ -62,6 +62,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       dataViewFieldEditor,
       indexUpdateService,
+      indexEditorTelemetryService,
       storage,
     },
   } = useKibana<KibanaContextExtra>();
@@ -146,8 +147,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         columns: props.columns,
         onValueChange,
         dataTableRef,
+        telemetry: indexEditorTelemetryService,
       }),
-    [rows, props.columns, onValueChange, dataTableRef]
+    [rows, props.columns, onValueChange, dataTableRef, indexEditorTelemetryService]
   );
   const CellValueRenderer = useMemo(() => {
     return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);

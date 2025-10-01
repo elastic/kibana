@@ -15,6 +15,7 @@ import { once } from 'lodash';
  */
 export const INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE = 'index_editor.flyout_opened';
 export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitted';
+export const INDEX_EDITOR_EDIT_INTERACTION_EVENT_TYPE = 'index_editor.edit_interaction';
 
 /**
  * Registers the index editor analytics events.
@@ -100,6 +101,42 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
         type: 'keyword',
         _meta: {
           description: 'The latency of the save action in buckets',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: INDEX_EDITOR_EDIT_INTERACTION_EVENT_TYPE,
+    schema: {
+      flyout_mode: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The mode in which the index editor flyout was opened. Possible values are: create|view|edit',
+        },
+      },
+      edit_op: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of edit operation performed in the index editor. Possible values are: cell_edit|add_row|add_column|delete_row',
+        },
+      },
+      validation_outcome: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description:
+            'The outcome of the validation process in the index editor. Possible values are: ok|failed',
+        },
+      },
+      failure_reason: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description:
+            'The reason for a validation failure in the index editor. Possible values are: type|unknown',
         },
       },
     },
