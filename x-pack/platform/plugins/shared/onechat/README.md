@@ -80,20 +80,20 @@ Additionally, the plugin implements [MCP server](#mcp-server) that exposes onech
 
 ## Tools
 
-A tool can be thought of as a agent-friendly function, with the metadata required for the agent to understand its purpose
+A tool can be thought of as an agent-friendly function, with the metadata required for the agent to understand its purpose
 and how to call it.
 
-Tool can come from multiple sources:
+Tools can come from multiple sources:
 - built-in from Kibana
 - created by users
 - from MCP servers (not implemented yet)
 
 ### Type of tools
 
-- builtin: "Code" tools, exposing an handler executing an arbitrary function
-- esql: ES|QL tools, defined by an ES|QL templated query and the corresponding parameters
-- index_search: An agentic search tool which can be scoped to an index pattern
-- workflow: Execute a workflow as a tool
+- builtin: "Code" tools, which expose a handler that executes an arbitrary function.
+- esql: ES|QL tools, which are defined by a templated ES|QL query and its corresponding parameters.
+- index_search: An agentic search tool that can be scoped to an index pattern.
+- workflow: A tool that executes a workflow.
 
 ### Registering a tool
 
