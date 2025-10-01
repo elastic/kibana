@@ -40,6 +40,7 @@ export function VisualizeLens({
 
   const { euiTheme } = useEuiTheme();
 
+  console.log('lensInput', lensInput);
   const onLoad = useCallback(
     (
       _isLoading: boolean,

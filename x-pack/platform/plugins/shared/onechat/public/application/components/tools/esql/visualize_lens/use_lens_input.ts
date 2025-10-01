@@ -38,9 +38,6 @@ export function useLensInput({ dataViews, lens, lensConfig }: Params): ReturnVal
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>({
     attributes: lensAttributes,
     id: uuidv4(),
-    renderMode: 'edit',
-    viewMode: 'edit',
-    hidePanelTitles: false,
   });
 
   const isLoading = !lensHelpersAsync.value || !lensInput;

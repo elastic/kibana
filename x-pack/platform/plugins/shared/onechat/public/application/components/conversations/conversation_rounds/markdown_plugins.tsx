@@ -170,6 +170,7 @@ export function createVisualizationRenderer({
           lensConfig={visualization}
           dataViews={startDependencies.dataViews}
           lens={startDependencies.lens}
+          uiActions={startDependencies.uiActions}
         />
       );
     }
