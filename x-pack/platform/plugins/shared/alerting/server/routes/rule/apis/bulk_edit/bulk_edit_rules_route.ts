@@ -7,8 +7,6 @@
 
 import { type IRouter } from '@kbn/core/server';
 
-import type { RulesClient } from '../../../../rules_client';
-import type { RegistryRuleType } from '../../../../rule_type_registry';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -27,7 +25,7 @@ import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import { validateInternalRuleTypesByQuery } from '../../../lib/validate_internal_rule_types_by_query';
+import { validateInternalRuleTypesBulkOperation } from '../../../lib/validate_internal_rule_types_by_query';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -58,10 +56,11 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
           const { filter, operations, ids } = bulkEditData;
 
           try {
-            await validateInternalRuleTypesBulkEdit({
+            await validateInternalRuleTypesBulkOperation({
               ids: bulkEditData.ids,
               ruleTypes,
               rulesClient,
+              operationText: 'update',
             });
 
             validateRequiredGroupInDefaultActionsInOperations(
@@ -123,21 +122,4 @@ const validateRequiredGroupInDefaultActionsInOperations = (
       });
     }
   }
-};
-
-const validateInternalRuleTypesBulkEdit = async ({
-  ids,
-  ruleTypes,
-  rulesClient,
-}: {
-  ids?: BulkEditRulesRequestBodyV1['ids'];
-  ruleTypes: Map<string, RegistryRuleType>;
-  rulesClient: RulesClient;
-}) => {
-  await validateInternalRuleTypesByQuery({
-    req: { ids },
-    ruleTypes,
-    rulesClient,
-    operationText: 'update',
-  });
 };

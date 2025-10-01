@@ -560,9 +560,17 @@ describe('bulkEditRules', () => {
         shouldInvalidateApiKeys: false,
       });
 
-      const filter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
 
-      expect(toKqlExpression(filter)).toMatchInlineSnapshot(
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
         `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
       );
     });
@@ -578,9 +586,17 @@ describe('bulkEditRules', () => {
         ignoreInternalRuleTypes: false,
       });
 
-      const filter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
 
-      expect(toKqlExpression(filter)).toMatchInlineSnapshot(
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
         `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
       );
     });

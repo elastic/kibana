@@ -8,9 +8,7 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, nodeBuilder, toKqlExpression } from '@kbn/es-query';
-import type { RegistryRuleType } from '../../../rule_type_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { nodeBuilder } from '@kbn/es-query';
 import type { RuleParams } from '../../../application/rule/types';
 import type { RuleBulkOperationAggregation, RulesClientContext } from '../../types';
 import { ruleAuditEvent, type RuleAuditAction } from '../audit_events';
@@ -43,6 +41,10 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
+import {
+  combineFiltersWithInternalRuleTypeFilter,
+  constructInternalRuleTypesFilter,
+} from '../construct_internal_rule_type_filters';
 
 export interface BulkEditOptions<Params extends RuleParams> {
   filter?: string | KueryNode;
@@ -209,48 +211,3 @@ export async function bulkEditRules<Params extends RuleParams>(
 
   return { rules: publicRules, skipped, errors, total };
 }
-
-const constructInternalRuleTypesFilter = ({
-  ruleTypes,
-}: {
-  ruleTypes: Map<string, RegistryRuleType>;
-}) => {
-  const internalRuleTypes = Array.from(ruleTypes.values()).filter((type) => type.internallyManaged);
-
-  if (internalRuleTypes.length === 0) {
-    return null;
-  }
-
-  const internalRuleTypeNode = nodeBuilder.or(
-    internalRuleTypes.map((type) =>
-      nodeBuilder.is(`${RULE_SAVED_OBJECT_TYPE}.attributes.alertTypeId`, type.id)
-    )
-  );
-
-  const internalRuleTypeNodesAsExpression = toKqlExpression(internalRuleTypeNode);
-  const ignoreInternalRuleTypes = `not ${internalRuleTypeNodesAsExpression}`;
-
-  return fromKueryExpression(ignoreInternalRuleTypes);
-};
-
-const combineFiltersWithInternalRuleTypeFilter = ({
-  filter,
-  internalRuleTypeFilter,
-}: {
-  filter: KueryNode | null;
-  internalRuleTypeFilter: KueryNode | null;
-}) => {
-  if (!filter && !internalRuleTypeFilter) {
-    return null;
-  }
-
-  if (!filter) {
-    return internalRuleTypeFilter;
-  }
-
-  if (!internalRuleTypeFilter) {
-    return filter;
-  }
-
-  return nodeBuilder.and([filter, internalRuleTypeFilter]);
-};

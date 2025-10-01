@@ -57,3 +57,22 @@ export const validateInternalRuleTypesByQuery = async ({
     );
   }
 };
+
+export const validateInternalRuleTypesBulkOperation = async ({
+  ids,
+  ruleTypes,
+  rulesClient,
+  operationText,
+}: {
+  ids?: string[];
+  ruleTypes: Map<string, RegistryRuleType>;
+  rulesClient: RulesClient;
+  operationText: string;
+}) => {
+  await validateInternalRuleTypesByQuery({
+    req: { ids },
+    ruleTypes,
+    rulesClient,
+    operationText,
+  });
+};
