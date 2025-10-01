@@ -46,6 +46,51 @@ export default {
   title: 'Data Cascade/Configuration Examples',
 } satisfies Meta;
 
+function useCustomTableHeader({ headerTitle }: { headerTitle: React.ReactNode }) {
+  return useCallback<
+    NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['customTableHeader']>
+  >(
+    ({ currentSelectedColumns, availableColumns, onGroupSelection }) => (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>{headerTitle}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <strong>Group by:</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonGroup
+                legend="select columns"
+                idSelected={currentSelectedColumns[0]}
+                options={availableColumns.map((col) => ({ id: col, label: col }))}
+                onChange={(id) => {
+                  onGroupSelection([id]);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [headerTitle]
+  );
+}
+
+function useRowHeaderTitleSlot() {
+  return useCallback<
+    NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']>
+  >(({ rowData, nodePath }) => {
+    const rowGroup = nodePath[nodePath.length - 1];
+    return (
+      <EuiText>
+        <h2>{rowData[rowGroup]}</h2>
+      </EuiText>
+    );
+  }, []);
+}
+
 export const CascadeNestedGridImplementation: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -131,17 +176,7 @@ export const CascadeNestedGridImplementation: StoryObj<
       [initData]
     );
 
-    const rowHeaderTitleSlot = useCallback<
-      DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderTitleSlot']
-    >(({ rowData, nodePath }) => {
-      const rowGroup = nodePath[nodePath.length - 1];
-
-      return (
-        <EuiText>
-          <h2>{rowData[rowGroup]}</h2>
-        </EuiText>
-      );
-    }, []);
+    const rowHeaderTitleSlot = useRowHeaderTitleSlot();
 
     const rowHeaderMetaSlots = useCallback<
       NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
@@ -610,46 +645,22 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       [generateGroupFieldRecord]
     );
 
-    const customTableHeader = useCallback<
-      NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['customTableHeader']>
-    >(
-      ({ currentSelectedColumns, availableColumns, onGroupSelection }) => (
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    const customTableHeader = useCustomTableHeader({
+      headerTitle: (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="securitySignal" size="xl" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiText>
-                  <h2>Security alerts</h2>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiIcon type="securitySignal" size="xl" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <strong>Group by:</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonGroup
-                  legend="select columns"
-                  idSelected={currentSelectedColumns[0]}
-                  options={availableColumns.map((col) => ({ id: col, label: col }))}
-                  onChange={(id) => {
-                    onGroupSelection([id]);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiText>
+              <h2>Security alerts</h2>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      []
-    );
+    });
+
+    const rowHeaderTitleSlot = useRowHeaderTitleSlot();
 
     const onCascadeGroupingChange = useCallback<
       NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['onCascadeGroupingChange']>
@@ -679,18 +690,6 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       },
       [generateGroupFieldRecord]
     );
-
-    const rowHeaderTitleSlot = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']
-    >(({ rowData, nodePath }) => {
-      const rowGroup = nodePath[nodePath.length - 1];
-
-      return (
-        <EuiText>
-          <h2>{rowData[rowGroup]}</h2>
-        </EuiText>
-      );
-    }, []);
 
     const rowHeaderMetaSlots = useCallback<
       NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>
@@ -914,46 +913,22 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       [generateGroupFieldRecord]
     );
 
-    const customTableHeader = useCallback<
-      NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['customTableHeader']>
-    >(
-      ({ currentSelectedColumns, availableColumns, onGroupSelection }) => (
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    const customTableHeader = useCustomTableHeader({
+      headerTitle: (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="securitySignal" size="xl" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiText>
-                  <h2>Security alerts</h2>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiIcon type="securitySignal" size="xl" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <strong>Group by:</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonGroup
-                  legend="select columns"
-                  idSelected={currentSelectedColumns[0]}
-                  options={availableColumns.map((col) => ({ id: col, label: col }))}
-                  onChange={(id) => {
-                    onGroupSelection([id]);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiText>
+              <h2>Security alerts</h2>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      []
-    );
+    });
+
+    const rowHeaderTitleSlot = useRowHeaderTitleSlot();
 
     const onCascadeGroupingChange = useCallback<
       NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['onCascadeGroupingChange']>
@@ -983,18 +958,6 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       },
       [generateGroupFieldRecord]
     );
-
-    const rowHeaderTitleSlot = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']
-    >(({ rowData, nodePath }) => {
-      const rowGroup = nodePath[nodePath.length - 1];
-
-      return (
-        <EuiText>
-          <h2>{rowData[rowGroup]}</h2>
-        </EuiText>
-      );
-    }, []);
 
     const rowHeaderMetaSlots = useCallback<
       NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>

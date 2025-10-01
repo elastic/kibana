@@ -11,6 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
+import type { CascadeVirtualizerReturnValue } from '../../../lib/core/virtualizer';
 import { DataCascadeProvider } from '../../../store_provider';
 
 const renderComponent = ({
@@ -18,10 +19,11 @@ const renderComponent = ({
   children,
   initialGroupColumn,
   row,
+  getVirtualizer,
   onCascadeLeafNodeExpanded = jest.fn(),
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
-  'onCascadeLeafNodeExpanded' | 'row' | 'children'
+  'onCascadeLeafNodeExpanded' | 'row' | 'children' | 'getVirtualizer'
 > &
   Pick<
     React.ComponentProps<typeof DataCascadeProvider>,
@@ -34,6 +36,7 @@ const renderComponent = ({
         size="m"
         onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
         row={row}
+        getVirtualizer={getVirtualizer}
       >
         {children}
       </CascadeRowCellPrimitive>
@@ -52,12 +55,27 @@ describe('CascadeRowCellPrimitive', () => {
       randomField: 'randomValue',
     });
 
+    const mockVirtualizerGetter = jest.fn(
+      () =>
+        ({
+          getVirtualItems: jest.fn(() => []),
+          getTotalSize: jest.fn(() => 0),
+          isScrolling: false,
+          measureElement: jest.fn(),
+          scrollOffset: 0,
+          scrollElement: null,
+          activeStickyIndex: null,
+          virtualizedRowComputedTranslateValue: new Map(),
+        } as unknown as CascadeVirtualizerReturnValue)
+    );
+
     renderComponent({
       cascadeGroups,
       initialGroupColumn: cascadeGroups[0],
       row: { id: '1', depth: 0, original: rowData } as Row<any>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
+      getVirtualizer: mockVirtualizerGetter,
     });
 
     expect(onCascadeLeafNodeExpanded).toHaveBeenCalledWith({

@@ -36,9 +36,9 @@ describe('accessibility', () => {
       const { result } = renderHook(() => useTreeGridContainerARIAAttributes());
       expect(result.current).toMatchInlineSnapshot(`
         Object {
-          "aria-colcount": -1,
           "aria-multiselectable": false,
           "aria-readonly": true,
+          "aria-rowcount": -1,
           "role": "treegrid",
         }
       `);
