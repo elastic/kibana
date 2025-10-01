@@ -70,7 +70,7 @@ export const IngestionCard = ({
           hasPrivileges={definition.privileges.monitor}
           title={i18n.translate(
             'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
-            { defaultMessage: 'ingestion rate monthly' }
+            { defaultMessage: 'Monthly ingestion rate' }
           )}
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes((stats.bytesPerDay || 0) * 30) : '-'}
