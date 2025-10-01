@@ -93,3 +93,31 @@ export const buildProcessorInsertText = (
 
   return insertText;
 };
+
+export const shouldSuggestProcessorKey = (
+  lineBeforeCursor: string,
+  nearbyContextBeforeCursor: string
+): boolean => {
+  const tripleQuoteCount = (lineBeforeCursor.match(/"""/g) || []).length;
+  if (tripleQuoteCount % 2 === 1) return false;
+
+  const trimmedEnd = lineBeforeCursor.trimEnd();
+  if (!trimmedEnd.endsWith('"')) return false;
+
+  let i = lineBeforeCursor.length - 2;
+  while (i >= 0 && /\s/.test(lineBeforeCursor[i])) i--;
+  const prev = i >= 0 ? lineBeforeCursor[i] : '';
+
+  const lastColon = nearbyContextBeforeCursor.lastIndexOf(':');
+  const lastQuote = nearbyContextBeforeCursor.lastIndexOf('"');
+  if (lastColon !== -1 && lastColon > lastQuote) return false;
+
+  const lastOpenBracket = nearbyContextBeforeCursor.lastIndexOf('[');
+  const lastCloseBracket = nearbyContextBeforeCursor.lastIndexOf(']');
+  if (lastOpenBracket !== -1 && lastOpenBracket > lastCloseBracket) {
+    const colonBeforeBracket = nearbyContextBeforeCursor.lastIndexOf(':', lastOpenBracket);
+    if (colonBeforeBracket !== -1) return false;
+  }
+
+  return prev === '{' || prev === '[' || prev === ',' || prev === '';
+};

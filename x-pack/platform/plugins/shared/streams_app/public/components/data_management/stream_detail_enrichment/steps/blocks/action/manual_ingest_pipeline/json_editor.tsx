@@ -16,11 +16,13 @@ import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
+import type { JsonValue } from '@kbn/utility-types';
 import {
- 
-  serializeXJson, parseXJsonOrString,
+  serializeXJson,
+  parseXJsonOrString,
   buildProcessorInsertText,
   hasOddQuoteCount,
+  shouldSuggestProcessorKey,
 } from '../../../../helpers';
 
 export const JsonEditor = () => {
@@ -86,12 +88,35 @@ export const JsonEditor = () => {
   };
 
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
+    const isProcessorTypeKeyContext = (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position
+    ) => {
+      const lineBefore = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 1,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
+      const nearbyContext = model.getValueInRange({
+        startLineNumber: Math.max(1, position.lineNumber - 6),
+        startColumn: 1,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
+      return shouldSuggestProcessorKey(lineBefore, nearbyContext);
+    };
+
     return {
       triggerCharacters: ['"'],
       provideCompletionItems: async (
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> => {
+        if (!isProcessorTypeKeyContext(model, position)) {
+          return { suggestions: [] };
+        }
+
         const lineContentAfter = model.getValueInRange({
           startLineNumber: position.lineNumber,
           startColumn: position.column,
@@ -116,7 +141,12 @@ export const JsonEditor = () => {
         const lastLine = bodyContent.split('\n').pop()!.trim();
         const alreadyOpenedQuote = hasOddQuoteCount(lastLine);
 
-        const terms = await consoleStart.specClient.getIngestProcessorSuggestions();
+        let terms: Array<{ name: string; template?: JsonValue }> = [];
+        try {
+          terms = await consoleStart.specClient.getIngestProcessorSuggestions();
+        } catch {
+          terms = [];
+        }
         const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
           const label = String(t.name);
           const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
@@ -134,6 +164,7 @@ export const JsonEditor = () => {
     };
   }, [consoleStart]);
 
+
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);
     return () => disposable.dispose();
@@ -143,7 +174,7 @@ export const JsonEditor = () => {
     () => ({
       automaticLayout: true,
       wordWrap: 'on',
-      quickSuggestions: { strings: true, other: true, comments: false },
+      quickSuggestions: { strings: false, other: true, comments: false },
       suggestOnTriggerCharacters: true,
     }),
     []
