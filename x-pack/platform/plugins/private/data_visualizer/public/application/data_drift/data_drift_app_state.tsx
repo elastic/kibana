@@ -44,12 +44,12 @@ export interface DataDriftDetectionAppStateProps {
 
 export type DataDriftSpec = typeof DataDriftDetectionAppState;
 
-const getStr = (arg: string | string[] | null, fallbackStr?: string): string => {
+const getStr = (arg: string | (string | null)[] | null, fallbackStr?: string): string => {
   if (arg === undefined || arg == null) return fallbackStr ?? '';
 
   if (typeof arg === 'string') return arg.replaceAll(`'`, '');
 
-  if (Array.isArray(arg)) return arg.join(',');
+  if (Array.isArray(arg)) return arg.filter((item): item is string => item !== null).join(',');
 
   return '';
 };
