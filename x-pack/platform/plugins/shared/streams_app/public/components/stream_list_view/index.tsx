@@ -191,7 +191,6 @@ export function StreamListView() {
         ) : (
           <>
             <WelcomePanel />
-            <EuiSpacer size="l" />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
@@ -227,67 +226,70 @@ function WelcomePanel() {
   }
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <AssetImage type="yourPreviewWillAppearHere" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>
-                  {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
-                    defaultMessage: 'Welcome to Streams',
+    <>
+      <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <AssetImage type="yourPreviewWillAppearHere" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h4>
+                    {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
+                      defaultMessage: 'Welcome to Streams',
+                    })}
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
+                    defaultMessage:
+                      'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
                   })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
-                  defaultMessage:
-                    'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    size="s"
-                    href={docLinks.links.observability.logsStreams}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                      defaultMessage: 'Go to docs',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    color="text"
-                    size="s"
-                    onClick={() => setIsDismissed(true)}
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamsListView.dismissWelcomeButtonLabel',
-                      {
-                        defaultMessage: 'Dismiss welcome panel',
-                      }
-                    )}
-                  >
-                    {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                      defaultMessage: 'Hide this',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="primary"
+                      size="s"
+                      href={docLinks.links.observability.logsStreams}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                        defaultMessage: 'Go to docs',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      color="text"
+                      size="s"
+                      onClick={() => setIsDismissed(true)}
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamsListView.dismissWelcomeButtonLabel',
+                        {
+                          defaultMessage: 'Dismiss welcome panel',
+                        }
+                      )}
+                    >
+                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                        defaultMessage: 'Hide this',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="l" />
+    </>
   );
 }
