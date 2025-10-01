@@ -69,7 +69,7 @@ export function initializeControlGroupManager(
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
-      untilControlsInitialized
+      untilControlsInitialized,
     },
   };
 }
