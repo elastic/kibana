@@ -1,7 +1,8 @@
 
 export const timeSeriesDataStreamTutorialCommands: string = `# Welcome to the tutorial on setting up time series data! 🎉
-# 🚀 This tutorial will guide you through setting up timeseries data stream, ingest metrics data and run basic query using API calls from the Kibana dev Console.
+# 🚀 This tutorial will guide you through setting up timeseries data stream, ingest sample data and run a search query from the Kibana dev Console.
 # After selecting a command, execute it by clicking the ▶️ button or pressing Ctrl+Enter or Cmd+Enter.
+# Note
 # -----------------------------------------------
 # Step 1: Create an index template
 # -----------------------------------------------
