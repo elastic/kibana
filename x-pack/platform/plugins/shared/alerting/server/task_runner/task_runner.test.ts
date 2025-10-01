@@ -3137,16 +3137,9 @@ describe('Task Runner', () => {
       triggeredActions: 0,
       generatedActions: 1,
       status: 'ok',
-      logAlert: 1,
+      logAlert: 0,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-      1,
-      generateAlertOpts({
-        action: EVENT_LOG_ACTIONS.activeInstance,
-        group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
-      })
-    );
+    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
