@@ -24,7 +24,6 @@ import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
 import { useNavigateToDashboard } from '../hooks/use_navigate_to_dashboard';
 import { AnalyticsEvents } from '../analytics/constants';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
-import { useIsSampleDataAvailable } from '@kbn/search-homepage/public/hooks/use_is_sample_data_available';
 
 interface SampleDataActionButtonProps {
   clickEvent?: string;

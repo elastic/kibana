@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
 import { SampleDataActionButton } from './sample_data_action_button';
-import { useIsSampleDataAvailable } from '@kbn/search-homepage/public/hooks/use_is_sample_data_available';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 
 interface GettingStartedCardMetadata {
   title: string | NonNullable<React.ReactNode>;
@@ -120,6 +120,7 @@ export const GetStartedWithElasticsearch = () => {
   }, [application, chrome]);
 
   const {
+    hasRequiredLicense,
     isPluginAvailable: isSampleDataIngestPluginAvailable,
     hasPrivileges: hasSampleDataRequiredPrivileges,
   } = useIsSampleDataAvailable();
@@ -169,7 +170,7 @@ export const GetStartedWithElasticsearch = () => {
           defaultMessage="Start with pre-built data sets, including sample visualizations, dashboards, and more."
         />
       ),
-      buttonComponent: <SampleDataActionButton />,
+      buttonComponent: <SampleDataActionButton hasRequiredLicense={hasRequiredLicense} />,
       conditionalCheck: () =>
         sampleDataIngest !== undefined &&
         isSampleDataIngestPluginAvailable &&
