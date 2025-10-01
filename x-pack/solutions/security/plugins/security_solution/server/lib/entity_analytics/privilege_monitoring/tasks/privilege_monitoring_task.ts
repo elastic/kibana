@@ -115,6 +115,7 @@ export const registerPrivilegeMonitoringTask = ({
       taskManager: taskManagerStart,
       savedObjects: core.savedObjects,
       auditLogger: core.security.audit.withoutRequest,
+      experimentalFeatures,
       kibanaVersion,
       telemetry,
       apiKeyManager,
@@ -224,7 +225,7 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    const dataSourcesService = createDataSourcesService(dataClient);
+
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,
@@ -233,7 +234,8 @@ const runPrivilegeMonitoringTask = async ({
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
-    await dataSourcesService.plainIndexSync(soClient);
+    const dataSourcesService = createDataSourcesService(dataClient, soClient);
+    await dataSourcesService.syncAllSources();
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }

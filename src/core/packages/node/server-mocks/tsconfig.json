@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/core-node-server-internal",
     "@kbn/utility-types",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

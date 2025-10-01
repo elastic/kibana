@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useHistory } from 'react-router-dom';
 import type {
   DatasetQualityDetailsController,
@@ -17,6 +17,7 @@ import {
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
+import { useTimefilter } from './use_timefilter';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 
 export const useDatasetQualityController = (
@@ -33,6 +34,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
+  const { timeState, setTime, refreshInterval, setRefreshInterval } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -50,7 +52,14 @@ export const useDatasetQualityController = (
       if (initialState === null) {
         initialState = {
           dataStream: definition.stream.name,
-          view: 'streams' as DatasetQualityView,
+          view: (Streams.WiredStream.Definition.is(definition.stream)
+            ? 'wired'
+            : 'classic') as DatasetQualityView,
+          timeRange: {
+            from: timeState.timeRange.from,
+            to: timeState.timeRange.to,
+            refresh: refreshInterval,
+          },
         };
       }
 
@@ -58,7 +67,9 @@ export const useDatasetQualityController = (
         await datasetQuality.createDatasetQualityDetailsController({
           initialState: {
             ...initialState,
-            view: 'streams' as DatasetQualityView,
+            view: (Streams.WiredStream.Definition.is(definition.stream)
+              ? 'wired'
+              : 'classic') as DatasetQualityView,
           },
         });
       datasetQualityDetailsController.service.start();
@@ -76,6 +87,8 @@ export const useDatasetQualityController = (
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
+            setTime,
+            setRefreshInterval,
           });
         }
       );
@@ -94,6 +107,12 @@ export const useDatasetQualityController = (
     urlStateStorageContainer,
     definition.stream.name,
     saveStateInUrl,
+    definition.stream,
+    timeState.timeRange.from,
+    timeState.timeRange.to,
+    setTime,
+    refreshInterval,
+    setRefreshInterval,
   ]);
 
   return controller;

@@ -78,7 +78,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         <LazyLoadedAuthConfig
           readOnly={readOnly}
           isPfxEnabled={isPfxEnabled}
-          isOAuth2Enabled={false} // intermediate release: temporarily disabled, will be enabled in a follow-up PR
+          isOAuth2Enabled={true}
         />
       </React.Suspense>
     </>

@@ -36,7 +36,6 @@ export const SearchIndexDetailsMappings = ({
       <EuiSpacer />
       <IndexMappingComponent
         index={index}
-        showAboutMappings={false}
         hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
       />
     </>

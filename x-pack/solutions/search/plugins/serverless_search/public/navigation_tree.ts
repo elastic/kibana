@@ -9,6 +9,8 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
 import { i18n } from '@kbn/i18n';
+import agentsIcon from './assets/robot.svg';
+import playgroundIcon from './assets/playground.svg';
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -40,9 +42,6 @@ const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', 
 
 const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
   defaultMessage: 'Other',
-});
-const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
-  defaultMessage: 'Agents',
 });
 const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
   defaultMessage: 'AI',
@@ -99,6 +98,10 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
+            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            link: 'agent_builder',
+          },
+          {
             link: 'workflows',
             withBadge: true,
             badgeTypeV2: 'techPreview' as const,
@@ -109,17 +112,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
-          },
-          {
-            title: AGENTS_TITLE,
-            link: 'agent_builder',
-            sideNavVersion: 'v1',
-          },
-          {
-            iconV2: 'comment',
-            link: 'agent_builder',
-            sideNavVersion: 'v2',
-            title: AGENTS_TITLE,
           },
           {
             id: 'build',
@@ -151,7 +143,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
-                iconV2: 'broom' /* TODO: review icon */,
+                iconV2: playgroundIcon, // Temp svg until we have icon in EUI
               }),
             ],
           },
@@ -237,21 +229,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             sideNavVersion: 'v2',
             title: MACHINE_LEARNING_TITLE,
           },
-          {
-            iconV2: 'globe' /* TODO: review icon */,
-            link: 'maps',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'graphApp',
-            link: 'graph',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'visualizeApp',
-            link: 'visualize',
-            sideNavVersion: 'v2',
-          },
         ],
       },
     ],
@@ -318,11 +295,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               },
             ],
             iconV2: 'database',
-            id: 'ingest_and_data',
+            id: 'data_management',
             sideNavVersion: 'v2',
             renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessSearch.nav.ingestAndData', {
-              defaultMessage: 'Ingest and manage data',
+            title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
+              defaultMessage: 'Data management',
             }),
           },
           {
@@ -518,6 +495,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 children: [
                   { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
                   { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                  { link: 'visualize' },
                   { link: 'management:objects', breadcrumbStatus: 'hidden' },
                   { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
                   { link: 'management:reporting', breadcrumbStatus: 'hidden' },

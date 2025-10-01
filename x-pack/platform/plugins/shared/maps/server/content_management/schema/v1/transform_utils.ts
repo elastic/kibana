@@ -6,8 +6,9 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import type { MapItem, MapAttributes } from '../../../../common/content_management';
-import type { MapsCreateOptions, MapsSavedObjectAttributes } from './types';
+import type { MapsSavedObjectAttributes } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -28,38 +29,34 @@ export function savedObjectToItem(
   partial: true
 ): PartialMapsItem;
 
-// export function savedObjectToItem(
-//   savedObject:
-//     | SavedObject<MapsSavedObjectAttributes>
-//     | PartialSavedObject<MapsSavedObjectAttributes>,
-//   partial: boolean
-// ): MapItem | PartialMapsItem {
-//   return savedObject;
-// }
-
 export function savedObjectToItem(
   savedObject:
     | SavedObject<MapsSavedObjectAttributes>
     | PartialSavedObject<MapsSavedObjectAttributes>,
   partial: boolean
 ): MapItem | PartialMapsItem {
-  const normalizedAttributes = {
-    ...savedObject.attributes,
-    description: savedObject.attributes?.description ?? undefined,
-    mapStateJSON: savedObject.attributes?.mapStateJSON ?? undefined,
-    layerListJSON: savedObject.attributes?.layerListJSON ?? undefined,
-    uiStateJSON: savedObject.attributes?.uiStateJSON ?? undefined,
-  };
-
+  const { references, attributes, ...rest } = savedObject;
   return {
-    ...savedObject,
-    attributes: normalizedAttributes,
+    ...rest,
+    attributes: transformMapOut(attributes as MapAttributes, references ?? []),
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
 }
 
-export function itemToSavedObject(item: {
-  attributes: MapAttributes;
-  references?: MapsCreateOptions['references'];
-}) {
-  return item as SavedObject<MapsSavedObjectAttributes>;
+function transformMapOut(storedMapState: MapAttributes, references: SavedObjectReference[]) {
+  const { attributes } = injectReferences({
+    attributes: storedMapState,
+    references: references ?? [],
+  });
+  // TODO convert stringified JSON to objects
+  return attributes;
+}
+
+export function transformMapIn(mapState: MapAttributes) {
+  const { attributes, references } = extractReferences({ attributes: mapState });
+  // TODO convert API state to stringified JSON
+  return {
+    attributes,
+    references,
+  };
 }
