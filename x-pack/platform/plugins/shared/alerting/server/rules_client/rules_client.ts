@@ -109,6 +109,8 @@ import type {
   RuleGapStatusSummary,
 } from '../application/rule/methods/get_aggregated_gap_status_by_rule_ids';
 import { getAggregatedGapStatusByRuleIds } from '../application/rule/methods/get_aggregated_gap_status_by_rule_ids';
+import { getGapsSummaryForAllRules } from '../application/rule/methods/get_gaps_summary_for_all_rules';
+import type { GetGapsSummaryForAllRulesParams } from '../application/rule/methods/get_gaps_summary_for_all_rules/types';
 interface UpdateGapFillAutoSchedulerMethodParams {
   id: string;
   updates: UpdateGapFillAutoSchedulerParams;
@@ -267,6 +269,9 @@ export class RulesClient {
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
 
+  public getGapsSummaryForAllRules = (params: GetGapsSummaryForAllRulesParams) =>
+    getGapsSummaryForAllRules(this.context, params);
+
   public createGapFillAutoScheduler = (params: CreateGapFillAutoSchedulerParams) =>
     createGapFillAutoScheduler(this.context, params);
 
@@ -286,5 +291,4 @@ export class RulesClient {
     params: GetAggregatedGapStatusByRuleIdsParams
   ): Promise<Record<string, RuleGapStatusSummary>> =>
     getAggregatedGapStatusByRuleIds(this.context, params);
-
 }
