@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./field_retention_operators'));
     loadTestFile(require.resolve('./host_transform'));
     loadTestFile(require.resolve('./snapshots'));
+    loadTestFile(require.resolve('./upsert_crud_api'));
   });
 }

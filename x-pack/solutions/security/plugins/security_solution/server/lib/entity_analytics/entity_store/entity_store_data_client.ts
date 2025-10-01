@@ -34,6 +34,7 @@ import {
   ENTITY_STORE_HISTORY_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+  ENTITY_STORE_UPDATES_INDEX_PATTERN,
 } from '../../../../common/entity_analytics/entity_store/constants';
 import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
@@ -123,7 +124,17 @@ import { convertToEntityManagerDefinition } from './entity_definitions/entity_ma
 import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
+import {
+  deleteEntityUpdatesDataStreams,
+  getEntityUpdatesDataStreamStatus,
+  initEntityUpdatesDataStream,
+} from './elasticsearch_assets/updates_entity_data_stream';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
+import {
+  createEntityUpdatesIndexComponentTemplate,
+  deleteEntityUpdatesIndexComponentTemplate,
+  getEntityUpdatesIndexComponentTemplateStatus,
+} from './elasticsearch_assets/updates_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -260,6 +271,7 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
           ...(await getEntityILMPolicyStatuses({
             esClient: this.esClient,
             isServerless: this.isServerless,
@@ -268,8 +280,14 @@ export class EntityStoreDataClient {
             definitionId: definition.id,
             esClient: this.esClient,
           }),
+          getEntityUpdatesIndexComponentTemplateStatus(definition.id, this.esClient),
         ])
       : Promise.resolve([] as EngineComponentStatus[]);
+  }
+
+  public async isEngineRunning(type: EntityType) {
+    const engine = await this.engineClient.maybeGet(type);
+    return engine?.status === ENGINE_STATUS.STARTED;
   }
 
   public async enable(
@@ -503,6 +521,12 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
+
+      // CRUD Assets
+      await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log(`debug`, entityType, `Created entity updates index component template`);
+      await initEntityUpdatesDataStream(entityType, this.esClient, namespace);
+      this.log(`debug`, entityType, `Initialized entity updates data stream`);
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
@@ -761,6 +785,12 @@ export class EntityStoreDataClient {
       await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
       this.log('debug', entityType, `Deleted entity store snapshot task`);
 
+      // CRUD Assets
+      await deleteEntityUpdatesDataStreams(entityType, this.esClient, namespace);
+      this.log('debug', entityType, `Delete entity updates index`);
+      await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log('debug', entityType, `Delete entity updates index`);
+
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
@@ -987,6 +1017,7 @@ export class EntityStoreDataClient {
 
     // The entity store has to create the following indices
     indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_UPDATES_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[ENTITY_STORE_HISTORY_INDEX_PATTERN] = [
       'create_index',

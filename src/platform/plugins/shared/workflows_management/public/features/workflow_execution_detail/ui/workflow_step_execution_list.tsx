@@ -15,18 +15,15 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiButton,
   EuiFlexItem,
-  EuiTitle,
-  EuiButtonEmpty,
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -45,7 +42,8 @@ function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | nu
       stepType === 'foreach' ||
       stepType === 'if-branch' ||
       stepType === 'if') &&
-    !item.children.length
+    !item.children.length &&
+    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
   ) {
     return ExecutionStatus.SKIPPED;
   }
@@ -123,6 +121,7 @@ function convertTreeToEuiTreeViewItems(
 
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
+  definition: WorkflowYaml | null;
   isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
@@ -136,6 +135,7 @@ export const WorkflowStepExecutionList = ({
   isLoading,
   error,
   execution,
+  definition,
   onStepExecutionClick,
   selectedId,
   onClose,
@@ -145,7 +145,7 @@ export const WorkflowStepExecutionList = ({
 
   let content: React.ReactNode = null;
 
-  if (isLoading && !execution) {
+  if (isLoading || !execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -176,7 +176,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution) {
+  } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -185,16 +185,40 @@ export const WorkflowStepExecutionList = ({
           <h2>
             <FormattedMessage
               id="workflows.workflowStepExecutionList.noExecutionFound"
-              defaultMessage="No step executions yet"
+              defaultMessage="No step executions found"
             />
           </h2>
         }
       />
     );
-  } else if (execution.workflowDefinition) {
+  } else if (definition) {
+    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
+      (step, index) => ({
+        stepId: step.name,
+        stepType: step.type,
+        status: ExecutionStatus.PENDING,
+        id: `${step.name}-${step.type}-${index}`,
+        scopeStack: [],
+        workflowRunId: '',
+        workflowId: '',
+        startedAt: '',
+        finishedAt: '',
+        children: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        topologicalIndex: 0,
+      })
+    );
     const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
+    const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
     for (const stepExecution of execution.stepExecutions) {
+      stepExecutionNameMap.set(stepExecution.stepId, stepExecution);
       stepExecutionMap.set(stepExecution.id, stepExecution);
+    }
+    for (const skeletonStepExecution of skeletonStepExecutions) {
+      if (!stepExecutionNameMap.has(skeletonStepExecution.stepId)) {
+        stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
+      }
     }
     const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -219,9 +243,6 @@ export const WorkflowStepExecutionList = ({
             )}
           />
         </div>
-        <EuiButton onClick={onClose} css={styles.doneButton}>
-          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-        </EuiButton>
       </>
     );
   } else {
@@ -248,46 +269,18 @@ export const WorkflowStepExecutionList = ({
       justifyContent="flexStart"
       css={styles.container}
     >
-      <EuiFlexItem grow={false}>
-        <header css={styles.header}>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <EuiButtonEmpty iconType="arrowLeft" onClick={onClose} size="xs">
-                  <FormattedMessage
-                    id="workflows.workflowStepExecutionList.backToExecution"
-                    defaultMessage="Back to executions"
-                  />
-                </EuiButtonEmpty>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
-          </EuiFlexGroup>
-        </header>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
       <EuiFlexItem css={styles.content}>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
-      overflow: 'hidden',
-    }),
-  content: css({
+  container: css({
     overflow: 'hidden',
   }),
-  header: css({
-    minHeight: `32px`,
-    display: 'flex',
-    alignItems: 'center',
-  }),
-  doneButton: css({
-    marginTop: 'auto',
-    justifySelf: 'flex-end',
-    flexShrink: 0,
+  content: css({
+    overflow: 'hidden',
   }),
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
     overflow-y: auto;

@@ -30,7 +30,7 @@ import { useSimulatorSelector } from '../../../../state_management/stream_enrich
 import type { ProcessorFormState } from '../../../../types';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import type { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -192,7 +192,7 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
+          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {

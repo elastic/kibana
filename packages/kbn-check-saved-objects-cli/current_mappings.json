@@ -624,6 +624,9 @@
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "text": {
+            "type": "text"
           }
         },
         "type": "unsigned_long"
@@ -644,6 +647,9 @@
       },
       "settings": {
         "properties": {
+          "extractObservables": {
+            "type": "boolean"
+          },
           "syncAlerts": {
             "type": "boolean"
           }
@@ -2704,6 +2710,9 @@
   "maintenance-window": {
     "dynamic": false,
     "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3119,6 +3128,9 @@
       },
       "dataViewId": {
         "type": "keyword"
+      },
+      "enableResetToZero": {
+        "type": "boolean"
       },
       "enabled": {
         "type": "boolean"

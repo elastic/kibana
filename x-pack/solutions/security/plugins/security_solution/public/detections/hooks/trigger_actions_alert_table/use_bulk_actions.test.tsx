@@ -53,10 +53,10 @@ describe('useBulkActionsByTableType', () => {
       id: 'timelineAction',
     });
 
-    (useBulkAlertActionItemsModule.useBulkAlertActionItems as jest.Mock).mockReturnValue([
-      { id: 'action1' },
-      { id: 'action2' },
-    ]);
+    (useBulkAlertActionItemsModule.useBulkAlertActionItems as jest.Mock).mockReturnValue({
+      items: [{ id: 'action1' }, { id: 'action2' }],
+      panels: [],
+    });
   });
 
   it('correctly combines bulk actions and panels from hooks', () => {
