@@ -62,8 +62,12 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
     afterEach(async () => {
       try {
         await spacesService.create(SPACE_2);
+        await kbnClient.importExport.load(
+          `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2_objects.json`,
+          { space: 'space_2' }
+        );
       } catch (error) {
-        // Ignore
+        // Ignore if the space was not deleted
       }
     });
 

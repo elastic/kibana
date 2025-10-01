@@ -37,7 +37,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
   const es = getService('es');
   const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
-  const log = getService('log');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
@@ -76,8 +75,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
-
-    log.debug('buckets', JSON.stringify(buckets));
 
     // The test fixture contains six legacy URL aliases:
     // (1) two for "default", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
