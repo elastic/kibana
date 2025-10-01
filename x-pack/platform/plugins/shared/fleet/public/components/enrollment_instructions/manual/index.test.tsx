@@ -95,6 +95,24 @@ describe('ManualInstructions', () => {
       ]);
     });
 
+    it('should return instructions for windows', async () => {
+      expect(result.windows.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.zip -OutFile elastic-agent-9.0.0-windows-x86_64.zip ',
+        'Expand-Archive .\\elastic-agent-9.0.0-windows-x86_64.zip -DestinationPath .',
+        'cd elastic-agent-9.0.0-windows-x86_64',
+        '.\\elastic-agent.exe install --url=https://testhost --enrollment-token=APIKEY',
+      ]);
+    });
+
+    it('should return instructions for windows msi', async () => {
+      expect(result.windows_msi.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi ',
+        '.\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS="--url=https://testhost --enrollment-token=APIKEY"',
+      ]);
+    });
+
     it('should return instructions for kubernetes', async () => {
       expect(result.kubernetes.split('\n')).toEqual([
         'kubectl apply -f elastic-agent-managed-kubernetes.yml',
@@ -187,6 +205,24 @@ describe('ManualInstructions', () => {
         'tar xzvf elastic-agent-9.0.0-darwin-x86_64.tar.gz',
         'cd elastic-agent-9.0.0-darwin-x86_64',
         'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --install-servers',
+      ]);
+    });
+
+    it('should return instructions for windows', async () => {
+      expect(result.windows.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.zip -OutFile elastic-agent-9.0.0-windows-x86_64.zip ',
+        'Expand-Archive .\\elastic-agent-9.0.0-windows-x86_64.zip -DestinationPath .',
+        'cd elastic-agent-9.0.0-windows-x86_64',
+        '.\\elastic-agent.exe install --url=https://testhost --enrollment-token=APIKEY --install-servers',
+      ]);
+    });
+
+    it('should return instructions for windows msi', async () => {
+      expect(result.windows_msi.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi ',
+        '.\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS="--url=https://testhost --enrollment-token=APIKEY --install-servers"',
       ]);
     });
 
@@ -297,6 +333,24 @@ describe('ManualInstructions', () => {
       ]);
     });
 
+    it('should return instructions for windows', async () => {
+      expect(result.windows.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.zip -OutFile elastic-agent-9.0.0-windows-x86_64.zip ',
+        'Expand-Archive .\\elastic-agent-9.0.0-windows-x86_64.zip -DestinationPath .',
+        'cd elastic-agent-9.0.0-windows-x86_64',
+        '.\\elastic-agent.exe install --url=https://testhost --enrollment-token=APIKEY --proxy-url=http://test-proxy --proxy-header "test1=header"',
+      ]);
+    });
+
+    it('should return instructions for windows msi', async () => {
+      expect(result.windows_msi.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi ',
+        '.\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS="--url=https://testhost --enrollment-token=APIKEY --proxy-url=http://test-proxy --proxy-header "test1=header""',
+      ]);
+    });
+
     it('should return instructions for kubernetes', async () => {
       expect(result.kubernetes.split('\n')).toEqual([
         'kubectl apply -f elastic-agent-managed-kubernetes.yml',
@@ -404,6 +458,24 @@ describe('ManualInstructions', () => {
         'tar xzvf elastic-agent-9.0.0-darwin-x86_64.tar.gz',
         'cd elastic-agent-9.0.0-darwin-x86_64',
         'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY',
+      ]);
+    });
+
+    it('should return instructions for windows', async () => {
+      expect(result.windows.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri http://localregistry.co/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.zip -OutFile elastic-agent-9.0.0-windows-x86_64.zip -Proxy "http://ds-proxy"',
+        'Expand-Archive .\\elastic-agent-9.0.0-windows-x86_64.zip -DestinationPath .',
+        'cd elastic-agent-9.0.0-windows-x86_64',
+        '.\\elastic-agent.exe install --url=https://testhost --enrollment-token=APIKEY',
+      ]);
+    });
+
+    it('should return instructions for windows msi', async () => {
+      expect(result.windows_msi.split('\n')).toEqual([
+        "$ProgressPreference = 'SilentlyContinue'",
+        'Invoke-WebRequest -Uri http://localregistry.co/beats/elastic-agent/elastic-agent-9.0.0-windows-x86_64.msi -OutFile elastic-agent-9.0.0-windows-x86_64.msi -Proxy "http://ds-proxy"',
+        '.\\elastic-agent-9.0.0-windows-x86_64.msi --% INSTALLARGS="--url=https://testhost --enrollment-token=APIKEY"',
       ]);
     });
 
