@@ -169,7 +169,7 @@ export function SloAlertsTable({
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       columns={columns}
       hideLazyLoader
-      initialPageSize={ALERTS_PER_PAGE}
+      pageSize={ALERTS_PER_PAGE}
       onLoaded={() => {
         if (onLoaded) {
           onLoaded();

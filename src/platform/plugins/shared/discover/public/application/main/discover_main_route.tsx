@@ -37,7 +37,6 @@ import {
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
@@ -101,11 +100,11 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome } = services;
+  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -179,6 +178,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
+    data.search.session.clear();
+
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }

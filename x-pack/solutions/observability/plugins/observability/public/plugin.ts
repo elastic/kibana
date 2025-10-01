@@ -194,6 +194,7 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
   private telemetry: TelemetryService;
+  private isServerless: boolean = false;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -221,6 +222,7 @@ export class Plugin
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
+    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -481,7 +483,7 @@ export class Plugin
                       }),
                       app: 'streams',
                       path: '/',
-                      isTechnicalPreview: true,
+                      isTechnicalPreview: this.isServerless,
                       matchPath(currentPath: string) {
                         return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
                       },

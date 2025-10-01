@@ -1032,8 +1032,8 @@ export function getCompletionItemProvider(
         const shouldBeQuoted =
           isScalar(yamlNode) &&
           scalarType === 'PLAIN' &&
-          ((yamlNode?.value as string)?.startsWith('{') ||
-            (yamlNode?.value as string)?.startsWith('@'));
+          typeof yamlNode?.value === 'string' &&
+          (yamlNode?.value?.startsWith('{') || yamlNode?.value?.startsWith('@'));
 
         let context: z.ZodType;
         try {
