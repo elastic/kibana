@@ -30,9 +30,11 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
+      await deleteDocs();
     });
 
     afterEach(async () => {
+      await deleteDocs();
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
@@ -70,6 +72,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // this should trigger the circuit breaker and while we'd expect groups 0 and 1
       // to recover under normal conditions, they should stay active because the
       // circuit breaker hit
+      await deleteDocs();
       await createEsDocumentsInGroups(22, getEndDate(), 2);
 
       // trigger the rule to run
@@ -145,6 +148,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // it looks like alerts were reported in reverse order (group-23, 22, 21, down to 9)
       // so all the 15 new alerts will recover, leading to 17 recovered alerts
       // so our active alerts will be groups 2, 3, 4, 5 and 6 with groups 5 and 6 as new alerts
+      await deleteDocs();
       await createEsDocumentsInGroups(5, getEndDate(), 2);
 
       // get the first execution to have recovered alerts
@@ -257,8 +261,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
             groupBy: params.groupBy,
             termField: params.termField,
             termSize: params.termSize,
-            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 5,
-            timeWindowUnit: 's',
+            timeWindowSize: 1,
+            timeWindowUnit: 'h',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
           },
@@ -290,14 +294,20 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
     }
 
     async function runSoon(ruleId: string) {
-      // wait the desired interval before running the rule again
-      await new Promise((r) => setTimeout(r, RULE_INTERVAL_MILLIS));
       await retry.try(async () => {
         // Sometimes the rule may already be running, which returns a 200. Try until it isn't
         const runSoonResponse = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
           .set('kbn-xsrf', 'foo');
         expect(runSoonResponse.status).to.eql(204);
+      });
+    }
+
+    async function deleteDocs() {
+      await es.deleteByQuery({
+        index: ES_TEST_INDEX_NAME,
+        query: { match_all: {} },
+        conflicts: 'proceed',
       });
     }
 
