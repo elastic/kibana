@@ -14,10 +14,12 @@ import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-i
 import { lazyObject } from '@kbn/lazy-object';
 
 const omittedProps = [
+  'diagnostic',
   'name',
   'connectionPool',
   'transport',
   'serializer',
+  'helpers',
   'acceptedParams',
 ] as Array<PublicKeys<Client>>;
 
@@ -187,7 +189,7 @@ function getClientShape(): ShapeNode {
   }
 }
 
-function buildLazyMockFromShape(shape: ShapeNode, res?: Promise<unknown>): any {
+function buildLazyMockFromShape(shape: ShapeNode, res: Promise<unknown>): any {
   if (shape.type !== 'object') return {};
   const target: Record<string, any> = {};
 
@@ -197,7 +199,7 @@ function buildLazyMockFromShape(shape: ShapeNode, res?: Promise<unknown>): any {
       enumerable: true,
       get() {
         const fn = createMockedApi();
-        fn.mockImplementation(() => res ?? createSuccessTransportRequestPromise({}));
+        fn.mockImplementation(() => res);
         Object.defineProperty(obj, key, {
           value: fn,
           configurable: true,
@@ -285,7 +287,10 @@ function buildLazyMockFromShape(shape: ShapeNode, res?: Promise<unknown>): any {
 
 const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedApi<Client> => {
   const shape = getClientShape();
-  const mockClient: any = buildLazyMockFromShape(shape, res);
+  const mockClient: any = buildLazyMockFromShape(
+    shape,
+    res ?? Object.freeze(createSuccessTransportRequestPromise({}))
+  );
 
   mockClient.close = jest.fn().mockReturnValue(Promise.resolve());
   mockClient.child = jest.fn().mockImplementation(() => createInternalClientMock());
