@@ -9,6 +9,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   Streams,
+  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -68,9 +69,8 @@ export const RetentionCard = ({
         })
       );
       data = <IlmLink lifecycle={lifecycle} />;
-    } else {
-      const formattedRetention =
-        isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
+    } else if (isDslLifecycle(lifecycle)) {
+      const formattedRetention = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
       const isIndefiniteRetention = formattedRetention === undefined;
 
       baseSubtitles.push(
@@ -83,6 +83,15 @@ export const RetentionCard = ({
             })
       );
       data = formattedRetention ?? '∞';
+    } else if (isDisabledLifecycle(lifecycle)) {
+      baseSubtitles.push(
+        i18n.translate('xpack.streams.streamDetailLifecycle.retention.disabled', {
+          defaultMessage: 'Disabled',
+        })
+      );
+      data = '∞';
+    } else {
+      data = '—';
     }
 
     const subtitles = retentionOrigin ? [...baseSubtitles, retentionOrigin] : baseSubtitles;
