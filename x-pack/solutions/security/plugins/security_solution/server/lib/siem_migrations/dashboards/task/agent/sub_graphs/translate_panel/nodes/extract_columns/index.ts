@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export enum PersistableAttachmentType {
-  page = '.page',
-}
-
-export enum PageAttachmentType {
-  slo_history = 'slo_history',
-  synthetics_monitor = 'synthetics_monitor',
-}
+export * from './extract_columns';

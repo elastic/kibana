@@ -27,7 +27,11 @@ import type { PrivMonBulkUser } from '../../types';
  */
 export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  (users: PrivMonBulkUser[], userIndexName: string): object[] => {
+  (
+    users: PrivMonBulkUser[],
+    userIndexName: string,
+    sourceType: 'index' | 'entity_analytics_integration'
+  ): object[] => {
     const ops: object[] = [];
     dataClient.log('debug', `Building bulk operations for soft delete users`);
     const now = new Date().toISOString();
@@ -45,7 +49,7 @@ export const bulkSoftDeleteOperationsFactory =
 
             if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
               if (ctx._source.labels?.sources != null) {
-                ctx._source.labels.sources.removeIf(src -> src == 'index');
+                ctx._source.labels.sources.removeIf(src -> src == params.source_type);
               }
             }
 
@@ -59,6 +63,7 @@ export const bulkSoftDeleteOperationsFactory =
             params: {
               source_id: user.sourceId,
               now,
+              source_type: sourceType,
             },
           },
         }
