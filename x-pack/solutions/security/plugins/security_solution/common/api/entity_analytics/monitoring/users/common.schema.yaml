@@ -53,15 +53,21 @@ components:
             labels:
               type: array
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  value:
-                    type: string
-                  source:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
 
+    MonitoringLabel:
+      type: object
+      required:
+        - field
+        - value
+        - source
+      properties:
+        field:
+          type: string
+        value:
+          type: string
+        source:
+          type: string
     MonitoredUserDoc:
       allOf:
       - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
