@@ -17,7 +17,6 @@ import type {
   AggregationsAggregate,
   FieldValue,
   QueryDslQueryContainer,
-  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { typedSearch } from '../utils/queries';
@@ -45,6 +44,12 @@ export class GetSLOStatsOverview {
     private racClient: AlertsClient
   ) {}
 
+  /*
+    This service retrieves stats from alert and rule indices to display on the SLO landing page. 
+    When filters are applied to SLOs, we want to forward those filters onto the searches performed on alerts and rules so the overview stats actively reflect viewable SLO data.
+    To achieve this, we need to retrieve a list of all SLO ids and instanceIds that may appear across all SLO list pages
+      to use them as filter conditions on the alert and rule stats that we want to count. 
+  */
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
@@ -52,44 +57,40 @@ export class GetSLOStatsOverview {
     const kqlQuery = params?.kqlQuery ?? '';
     const filters = params?.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
+    const kqlQueriesProvided = !!params?.kqlQuery && params?.kqlQuery?.length > 0;
 
+    const querySLOsForIds = !!(
+      (!!parsedFilters &&
+        Object.keys(parsedFilters).some(
+          (key) => Array.isArray(parsedFilters[key]) && parsedFilters[key].length > 0
+        )) ||
+      kqlQueriesProvided
+    );
+
+    if (params.kqlQuery && parsedFilters.must) {
+      parsedFilters.must.push({
+        kql: { query: params.kqlQuery },
+      });
+    } else if (params.kqlQuery) {
+      parsedFilters.must = [
+        {
+          kql: { query: params.kqlQuery },
+        },
+      ];
+    }
+
+    const sloRuleQueryKeys: string[] = [];
+    const instanceIdIncluded = Object.values(params).find(
+      (value) => typeof value === 'string' && value.includes('slo.instanceId')
+    );
+    let alertFilters: QueryDslQueryContainer[] = [];
+    let alertFilterTerms: QueryDslQueryContainer[] = [];
+    let afterKey: AggregationsAggregate | undefined;
+    // instantiate ruleFilters with dummy value
     let ruleFilters: KueryNode = {
       type: 'literal',
       def: true,
     };
-    let burnRateFilters: QueryDslQueryContainer[] = [];
-
-    let querySLOsForIds = false;
-
-    const kqlQueriesProvided = !!params?.kqlQuery && params?.kqlQuery?.length > 0;
-
-    try {
-      querySLOsForIds = !!(
-        (!!parsedFilters &&
-          parsedFilters.some((value: Array<string>) => Array.isArray(value) && value.length > 0)) ||
-        kqlQueriesProvided
-      );
-    } catch (error) {
-      querySLOsForIds = kqlQueriesProvided;
-      this.logger.error(`Error parsing filters: ${error}`);
-    }
-
-    let sloKeysFromES: QueryDslQueryContainer[] = [];
-    const sloRuleKeysFromES: string[] = [];
-    let afterKey: AggregationsAggregate | undefined;
-
-    let totalHits = 0;
-
-    const boolFilters = parsedFilters;
-    if (params.kqlQuery) {
-      boolFilters.must.push({
-        kql: { query: params.kqlQuery },
-      });
-    }
-
-    const instanceIdIncluded = Object.values(params).find(
-      (value) => typeof value === 'string' && value.includes('slo.instanceId')
-    );
 
     try {
       if (querySLOsForIds) {
@@ -118,16 +119,17 @@ export class GetSLOStatsOverview {
             },
             index: '.slo-observability.summary-*',
             _source: ['slo.id', 'slo.instanceId'],
-            ...(Object.values(boolFilters).some((value) => Array.isArray(value) && value.length > 0)
+            ...(Object.values(parsedFilters).some(
+              (value) => Array.isArray(value) && value.length > 0
+            )
               ? {
                   query: {
-                    bool: boolFilters,
+                    bool: parsedFilters,
                   },
                 }
               : {}),
           });
 
-          totalHits = (sloIdCompositeQueryResponse.hits?.total as SearchTotalHits).value || 0;
           afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
 
           const buckets = (
@@ -136,9 +138,9 @@ export class GetSLOStatsOverview {
             }
           )?.buckets;
           if (buckets && buckets.length > 0) {
-            sloKeysFromES = sloKeysFromES.concat(
+            alertFilterTerms = alertFilterTerms.concat(
               ...buckets.map((bucket) => {
-                sloRuleKeysFromES.push(bucket.key.sloId);
+                sloRuleQueryKeys.push(bucket.key.sloId);
                 return {
                   bool: {
                     must: [
@@ -160,26 +162,18 @@ export class GetSLOStatsOverview {
           }
         } while (afterKey);
 
-        const resultNodes =
-          sloRuleKeysFromES.length > 0
-            ? nodeBuilder.or(
-                sloRuleKeysFromES.map((sloId) =>
-                  nodeBuilder.is(`alert.attributes.params.sloId`, sloId)
-                )
-              )
-            : nodeBuilder.is(`alert.attributes.params.sloId`, '%NO%MATCHES%');
+        const resultNodes = nodeBuilder.or(
+          sloRuleQueryKeys.map((sloId) => nodeBuilder.is(`alert.attributes.params.sloId`, sloId))
+        );
 
         ruleFilters = resultNodes;
-
-        burnRateFilters = [
+        alertFilters = [
           {
             bool: {
-              should: [...sloKeysFromES],
+              should: [...alertFilterTerms],
             },
           },
         ];
-      } else {
-        totalHits = -1;
       }
     } catch (error) {
       this.logger.error(`Error querying SLOs for IDs: ${error}`);
@@ -251,27 +245,46 @@ export class GetSLOStatsOverview {
       },
     });
 
-    const [rules, alerts] = await Promise.all([
-      this.rulesClient.find({
-        options: {
-          ruleTypeIds: SLO_RULE_TYPE_IDS,
-          consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
-          ...(ruleFilters?.def ? {} : { filter: ruleFilters }),
-        },
-      }),
+    /*
+     If we know there are no SLOs that match the provided filters, we can skip querying for rules and alerts
+    */
+    const [rules, alerts] = await Promise.all(
+      querySLOsForIds && sloRuleQueryKeys.length === 0
+        ? [
+            {
+              total: 0,
+            },
+            {
+              activeAlertCount: 0,
+              recoveredAlertCount: 0,
+            },
+          ]
+        : [
+            this.rulesClient.find({
+              options: {
+                ruleTypeIds: SLO_RULE_TYPE_IDS,
+                consumers: [
+                  AlertConsumers.SLO,
+                  AlertConsumers.ALERTS,
+                  AlertConsumers.OBSERVABILITY,
+                ],
+                ...(ruleFilters?.def ? {} : { filter: ruleFilters }),
+              },
+            }),
 
-      this.racClient.getAlertSummary({
-        ruleTypeIds: SLO_RULE_TYPE_IDS,
-        consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
-        gte: moment().subtract(24, 'hours').toISOString(),
-        lte: moment().toISOString(),
-        ...(burnRateFilters?.length
-          ? {
-              filter: burnRateFilters,
-            }
-          : {}),
-      }),
-    ]);
+            this.racClient.getAlertSummary({
+              ruleTypeIds: SLO_RULE_TYPE_IDS,
+              consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
+              gte: moment().subtract(24, 'hours').toISOString(),
+              lte: moment().toISOString(),
+              ...(alertFilters?.length
+                ? {
+                    filter: alertFilters,
+                  }
+                : {}),
+            }),
+          ]
+    );
 
     const aggs = response.aggregations;
 
@@ -282,8 +295,8 @@ export class GetSLOStatsOverview {
       noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
       burnRateRules: rules.total,
-      burnRateActiveAlerts: totalHits ? alerts.activeAlertCount : 0,
-      burnRateRecoveredAlerts: totalHits ? alerts.recoveredAlertCount : 0,
+      burnRateActiveAlerts: alerts.activeAlertCount,
+      burnRateRecoveredAlerts: alerts.recoveredAlertCount,
     };
   }
 }
