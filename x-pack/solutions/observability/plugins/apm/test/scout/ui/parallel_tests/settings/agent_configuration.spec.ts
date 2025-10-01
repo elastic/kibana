@@ -74,3 +74,19 @@ test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => 
     });
   });
 });
+
+test.describe('Agent Configuration - Viewer', { tag: ['@svlOblt'] }, () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsViewer();
+  });
+
+  test('The agent configuration settings page is not available in serverless', async ({
+    pageObjects: { agentConfigurationsPage },
+    page,
+  }) => {
+    await agentConfigurationsPage.goto();
+    await expect(
+      page.getByRole('tab').locator('span').getByText('Agent Configuration')
+    ).toBeHidden();
+  });
+});

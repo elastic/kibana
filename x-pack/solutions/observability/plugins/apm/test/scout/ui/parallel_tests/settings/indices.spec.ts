@@ -54,3 +54,17 @@ test.describe('Indices - Privileged User', { tag: ['@ess', '@svlOblt'] }, () => 
     expect(saveResponse.status()).toBe(200);
   });
 });
+test.describe('Indices - Privileged User', { tag: ['@svlOblt'] }, () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test('The indices settings page is not available in serverless', async ({
+    page,
+    pageObjects: { indicesPage },
+  }) => {
+    await indicesPage.goto();
+
+    await expect(page.getByRole('tab').locator('span').getByText('Indices')).toBeHidden();
+  });
+});

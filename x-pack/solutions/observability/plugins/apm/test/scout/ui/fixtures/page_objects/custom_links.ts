@@ -59,47 +59,4 @@ export class CustomLinksPage {
     const editButton = row.locator('[data-test-subj="editCustomLink"]');
     await editButton.click();
   }
-
-  async deleteAllCustomLinksFromUI() {
-    await this.goto();
-
-    // Check if empty prompt is visible - if so, no links to delete
-    const emptyPrompt = this.page.getByTestId('customLinksEmptyPrompt');
-    if (await emptyPrompt.isVisible()) {
-      return; // No links to delete
-    }
-
-    // Keep deleting custom links while they exist
-    let maxAttempts = 10; // Safety limit
-    while (maxAttempts > 0) {
-      // Check if any edit buttons exist
-      const editButtons = this.page.testSubj.locator('editCustomLink');
-      const count = await editButtons.count();
-
-      if (count > 0) {
-        // Click the first available edit button
-        await editButtons.click();
-
-        // Wait for the edit form and click delete
-        await this.page.getByText('Delete').waitFor({ state: 'visible', timeout: 5000 });
-        await this.page.getByText('Delete').click();
-
-        // Wait for deletion to complete - check if empty prompt appears or count decreases
-        await this.page.waitForLoadingIndicatorHidden();
-
-        // If empty prompt appears, we're done
-        if (await emptyPrompt.isVisible()) {
-          break;
-        }
-      } else {
-        break; // No more links
-      }
-
-      maxAttempts--;
-    }
-  }
-
-  async getCustomLinksEmptyPrompt() {
-    return this.page.testSubj.locator('customLinksEmptyPrompt');
-  }
 }

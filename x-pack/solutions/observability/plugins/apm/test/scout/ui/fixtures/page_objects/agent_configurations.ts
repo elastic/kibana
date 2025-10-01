@@ -86,54 +86,34 @@ export class AgentConfigurationsPage {
     // Use a more generic approach - find any option containing the service name
     const option = this.page.locator(`[role="option"]:has-text("${serviceName}")`);
 
-    try {
-      // Wait for the specific option to be visible
-      await option.waitFor({ state: 'visible', timeout: 5000 });
-      await option.click();
-      return serviceName; // Return the actual service selected
-    } catch (error) {
-      // Fallback: if specific service not found, use "All" option if available
-      const allOption = this.page.locator('[role="option"]:has-text("All")');
-      await allOption.click();
-      return 'All'; // Return "All" to indicate we used fallback
-    }
+    // Wait for the specific option to be visible
+    await option.waitFor({ state: 'visible', timeout: 5000 });
+    await option.click();
+    return serviceName;
   }
 
   async selectEnvironment(environmentName: string) {
-    try {
-      // Check if environment combo box exists at all
-      const environmentComboBox = this.page.testSubj
-        .locator('serviceEnvironmentComboBox')
-        .locator('input');
+    const environmentComboBox = this.page.testSubj
+      .locator('serviceEnvironmentComboBox')
+      .locator('input');
 
-      await environmentComboBox.isVisible();
-      await environmentComboBox.click();
+    await environmentComboBox.isVisible();
+    await environmentComboBox.click();
 
-      // Wait for options list to appear
-      const optionsList = this.page.testSubj.locator(
-        'comboBoxOptionsList serviceEnvironmentComboBox-optionsList'
-      );
-      await optionsList.waitFor({
-        state: 'visible',
-        timeout: 5000,
-      });
+    // Wait for options list to appear
+    const optionsList = this.page.testSubj.locator(
+      'comboBoxOptionsList serviceEnvironmentComboBox-optionsList'
+    );
+    await optionsList.waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
 
-      // Use generic option selector
-      const option = this.page.locator(`[role="option"]:has-text("${environmentName}")`);
+    // Use generic option selector
+    const option = this.page.locator(`[role="option"]:has-text("${environmentName}")`);
 
-      try {
-        await option.waitFor({ state: 'visible', timeout: 3000 });
-        await option.click();
-      } catch (optionError) {
-        // Fallback to "All" if specific environment not found
-        const allOption = this.page.locator('[role="option"]:has-text("All")');
-        await allOption.click();
-      }
-    } catch (error) {
-      // Environment combo box doesn't exist, is not visible, or other issues
-      // For agent configurations, this might be expected behavior when service="All"
-      throw error; // Re-throw so calling code can handle it
-    }
+    await option.waitFor({ state: 'visible', timeout: 3000 });
+    await option.click();
   }
 
   async clickNextStep() {
@@ -161,34 +141,5 @@ export class AgentConfigurationsPage {
     const columnButtons = this.page.testSubj.locator('apmColumnsButton');
     await columnButtons.getByText(serviceName).isVisible();
     await columnButtons.getByText(environment).isVisible();
-  }
-
-  async addAdvancedConfiguration() {
-    await this.page.testSubj.locator('apmSettingsAddAdvancedConfigurationButton').click();
-  }
-
-  async setAdvancedConfigurationKey(index: number, key: string) {
-    const keyFields = this.page.testSubj.locator('apmSettingsAdvancedConfigurationKeyField');
-    await keyFields.locator(`>> nth=${index}`).fill(key);
-  }
-
-  async setAdvancedConfigurationValue(index: number, value: string) {
-    const valueFields = this.page.testSubj.locator('apmSettingsAdvancedConfigurationValueField');
-    await valueFields.locator(`>> nth=${index}`).fill(value);
-  }
-
-  async removeAdvancedConfiguration(index: number) {
-    const removeButtons = this.page.testSubj.locator(
-      'apmSettingsRemoveAdvancedConfigurationButton'
-    );
-    await removeButtons.locator(`>> nth=${index}`).click();
-  }
-
-  async getDocumentationLink() {
-    return this.page.testSubj.locator('apmAdvancedConfigurationDocumentationLink');
-  }
-
-  async discardChanges() {
-    await this.page.testSubj.locator('apmBottomBarActionsDiscardChangesButton').click();
   }
 }

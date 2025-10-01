@@ -43,7 +43,10 @@ test.describe('Custom links - Privileged User', { tag: ['@ess', '@svlOblt'] }, (
     await expect(page.getByText('Create link')).toBeVisible();
   });
 
-  test('creates custom link', async ({ page, pageObjects: { customLinksPage } }) => {
+  test('creates custom link and deletes the created custom link', async ({
+    page,
+    pageObjects: { customLinksPage },
+  }) => {
     await customLinksPage.goto();
 
     await customLinksPage.clickCreateCustomLink();
@@ -59,39 +62,40 @@ test.describe('Custom links - Privileged User', { tag: ['@ess', '@svlOblt'] }, (
     await expect(page.getByText('Save')).toBeEnabled();
     await customLinksPage.clickSave();
 
-    // Verify we're back on the main page and our link appears
     await expect(page).toHaveURL(/.*custom-links$/);
     // Check that our unique link appears in the table (if table exists) or in the page content
     await expect(page.locator('body')).toContainText(uniqueLabel);
-  });
 
-  test('shows create button', async ({ page, pageObjects: { customLinksPage } }) => {
-    await customLinksPage.goto();
+    await test.step('shows create button', async () => {
+      await customLinksPage.goto();
+      const createButton = await customLinksPage.getCreateCustomLinkButton();
+      await expect(createButton).toBeEnabled();
+    });
 
-    const createButton = await customLinksPage.getCreateCustomLinkButton();
-    await expect(createButton).toBeEnabled();
-  });
+    await test.step('deletes custom link', async () => {
+      // First create a unique custom link
+      await customLinksPage.goto();
+      await customLinksPage.clickCreateCustomLink();
 
-  test('deletes custom link', async ({ page, pageObjects: { customLinksPage } }) => {
-    // First create a unique custom link
-    await customLinksPage.goto();
-    await customLinksPage.clickCreateCustomLink();
+      const uniqueDeleteLabel = `delete-test-${Date.now()}`;
+      await customLinksPage.fillLabel(uniqueDeleteLabel);
+      await customLinksPage.fillUrl('https://example.com/delete-test');
+      await customLinksPage.clickSave();
 
-    const uniqueLabel = `delete-test-${Date.now()}`;
-    await customLinksPage.fillLabel(uniqueLabel);
-    await customLinksPage.fillUrl('https://delete-test.com');
-    await customLinksPage.clickSave();
+      // Verify we're back on the main page and our link appears
+      await expect(page).toHaveURL(/.*custom-links$/);
+      await expect(page.locator('body')).toContainText(uniqueDeleteLabel);
 
-    // Verify we're back on the main page and our link appears
-    await expect(page).toHaveURL(/.*custom-links$/);
-    await expect(page.locator('body')).toContainText(uniqueLabel);
+      // Then delete the specific link we created
+      await customLinksPage.clickEditCustomLinkForRow(uniqueDeleteLabel);
+      await customLinksPage.clickDelete();
 
-    // Then delete the specific link we created
-    await customLinksPage.clickEditCustomLinkForRow(uniqueLabel);
-    await customLinksPage.clickDelete();
+      // Verify deletion - the specific link should no longer be present
+      await expect(page).toHaveURL(/.*custom-links$/);
+      await expect(page.locator('body')).not.toContainText(uniqueDeleteLabel);
 
-    // Verify deletion - the specific link we created should no longer be present
-    await expect(page).toHaveURL(/.*custom-links$/);
-    await expect(page.locator('body')).not.toContainText(uniqueLabel);
+      // Verify the previously created link is still present
+      await expect(page.locator('body')).toContainText(uniqueLabel);
+    });
   });
 });
