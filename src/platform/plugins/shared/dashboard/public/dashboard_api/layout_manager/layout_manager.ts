@@ -127,18 +127,6 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Panel placement functions
   // --------------------------------------------------------------------------------------
-  const placeIncomingPanel = (uuid: string, size: EmbeddablePackageState['size']) => {
-    const { newPanelPlacement } = runPanelPlacementStrategy(
-      PanelPlacementStrategy.findTopLeftMostOpenSpace,
-      {
-        width: size?.width ?? DEFAULT_PANEL_WIDTH,
-        height: size?.height ?? DEFAULT_PANEL_HEIGHT,
-        currentPanels: layout$.value.panels,
-      }
-    );
-    return { ...newPanelPlacement, i: uuid };
-  };
-
   const placeNewPanel = async (
     uuid: string,
     panelPackage: PanelPackage,
@@ -187,7 +175,13 @@ export function initializeLayoutManager(
     const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
     const sameType = existingPanel?.type === type;
 
-    const grid = existingPanel ? existingPanel.grid : placeIncomingPanel(uuid, size);
+    const grid = existingPanel
+      ? existingPanel.grid
+      : runPanelPlacementStrategy(PanelPlacementStrategy.findTopLeftMostOpenSpace, {
+          width: size?.width ?? DEFAULT_PANEL_WIDTH,
+          height: size?.height ?? DEFAULT_PANEL_HEIGHT,
+          currentPanels: layout$.value.panels,
+        }).newPanelPlacement;
     currentChildState[uuid] = {
       rawState: {
         ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
