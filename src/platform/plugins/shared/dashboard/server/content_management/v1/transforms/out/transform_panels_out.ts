@@ -60,7 +60,7 @@ function transformPanelProperties(
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
 ) {
-  const { sectionId, i, ...restOfGrid } = gridData; // drop section ID, if it exists
+  const { sectionId, i, ...restOfGrid } = gridData;
 
   const matchingReference =
     panelRefName && references
@@ -86,7 +86,7 @@ function transformPanelProperties(
       transformedPanelConfig = transforms.transformOut(config, references) as Record<
         string,
         unknown
-      >;;
+      >;
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
