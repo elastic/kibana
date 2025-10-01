@@ -13,20 +13,6 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AddPageAttachmentToCaseModal } from './add_page_attachment_to_case_modal';
-import * as usePageSummaryHook from '../../hooks/use_page_summary';
-
-jest.mock('../../hooks/use_page_summary', () => ({
-  usePageSummary: jest.fn(() => ({
-    isObsAIAssistantEnabled: true,
-    generateSummary: jest.fn(),
-    isLoading: false,
-    summary: '',
-    errors: [],
-    abortController: { signal: new AbortController().signal, abort: jest.fn() },
-    screenContexts: [],
-    isComplete: false,
-  })),
-}));
 
 const mockCases: Partial<CasesPublicStart> = mockCasesContract();
 
@@ -127,17 +113,6 @@ describe('AddPageAttachmentToCaseModal', () => {
   });
 
   it('opens case modal when confirm button is clicked', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      isComplete: true,
-    });
-
     const mockCasesModal = {
       open: jest.fn(),
       close: jest.fn(),
@@ -159,17 +134,6 @@ describe('AddPageAttachmentToCaseModal', () => {
   });
 
   it('passes correct getAttachments payload when case modal is opened', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      isComplete: true,
-    });
-
     const mockCasesModal = {
       open: jest.fn(),
       close: jest.fn(),
@@ -200,7 +164,6 @@ describe('AddPageAttachmentToCaseModal', () => {
       {
         persistableStateAttachmentState: {
           ...pageAttachmentState,
-          screenContext: [],
           summary: comment,
         },
         persistableStateAttachmentTypeId: '.page',
@@ -209,63 +172,7 @@ describe('AddPageAttachmentToCaseModal', () => {
     ]);
   });
 
-  it('passes correct screenContexts to the case attachment', () => {
-    const mockCasesModal = {
-      open: jest.fn(),
-      close: jest.fn(),
-    };
-    mockCases.hooks!.useCasesAddToExistingCaseModal = jest.fn(() => mockCasesModal);
-    const screenContexts = [{ screenDescription: 'testContext' }];
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts,
-      isComplete: true,
-    });
-    render(
-      <IntlProvider locale="en">
-        <AddPageAttachmentToCaseModal
-          pageAttachmentState={pageAttachmentState}
-          cases={mockCases as CasesPublicStart}
-          onCloseModal={jest.fn()}
-          notifications={notifications}
-        />
-      </IntlProvider>
-    );
-    fireEvent.click(screen.getByText('Confirm'));
-    expect(mockCasesModal!.open).toHaveBeenCalledWith({
-      getAttachments: expect.any(Function),
-    });
-    const attachments = mockCasesModal!.open.mock.calls[0][0].getAttachments();
-    expect(attachments).toEqual([
-      {
-        persistableStateAttachmentState: {
-          ...pageAttachmentState,
-          screenContext: screenContexts,
-          summary: '',
-        },
-        persistableStateAttachmentTypeId: '.page',
-        type: 'persistableState',
-      },
-    ]);
-  });
-
   it('can update the summary comment', () => {
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      isComplete: true,
-    });
-
     const mockCasesModal = {
       open: jest.fn(),
       close: jest.fn(),
@@ -292,7 +199,6 @@ describe('AddPageAttachmentToCaseModal', () => {
       {
         persistableStateAttachmentState: {
           ...pageAttachmentState,
-          screenContext: [],
           summary: comment,
         },
         persistableStateAttachmentTypeId: '.page',
