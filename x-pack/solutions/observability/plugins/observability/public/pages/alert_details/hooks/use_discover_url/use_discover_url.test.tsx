@@ -293,6 +293,7 @@ describe('useDiscoverUrl', () => {
 
     const rule = {
       ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+      params: { filterQueryText: 'observer.version_major: 9' },
     } as unknown as Rule;
 
     const expectedTimeRange = {
@@ -305,6 +306,10 @@ describe('useDiscoverUrl', () => {
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       dataViewSpec: { title: expectedMetricAlias, timeFieldName: '@timestamp' },
       timeRange: expectedTimeRange,
+      query: {
+        query: 'observer.version_major: 9',
+        language: 'kuery',
+      },
     });
   });
 
@@ -319,6 +324,7 @@ describe('useDiscoverUrl', () => {
 
     const rule = {
       ruleTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
+      params: {},
     } as unknown as Rule;
 
     const expectedTimeRange = {
