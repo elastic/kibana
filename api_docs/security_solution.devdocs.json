@@ -3405,7 +3405,7 @@
         "label": "SECURITY_FEATURE_ID",
         "description": [],
         "signature": [
-          "\"siemV3\""
+          "\"siemV4\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
