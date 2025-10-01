@@ -21,7 +21,6 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
 import { ConditionPanel } from '../../shared';
 import {
@@ -31,18 +30,19 @@ import {
 
 export function CreateStreamConfirmationModal({
   partition,
+  onSuccess,
 }: {
-  definition: Streams.WiredStream.GetResponse;
   partition: ReviewSuggestionsInputs['suggestions'][number];
+  onSuccess: () => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const isForking = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { reviewSuggestedRule: 'forking' } })
+  );
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
-  const isForking = routingSnapshot.matches({ ready: { reviewSuggestedRule: 'forking' } });
-
   return (
-    <EuiModal onClose={cancelChanges} aria-labelledby={modalTitleId}>
+    <EuiModal onClose={() => cancelChanges()} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmTitle', {
@@ -73,7 +73,7 @@ export function CreateStreamConfirmationModal({
         <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={cancelChanges} isDisabled={isForking}>
+        <EuiButtonEmpty onClick={() => cancelChanges()} isDisabled={isForking}>
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
             defaultMessage: 'Cancel',
           })}
@@ -84,7 +84,7 @@ export function CreateStreamConfirmationModal({
             forkStream({
               destination: partition.name,
               where: partition.condition,
-            })
+            }).then(() => onSuccess())
           }
           fill
         >

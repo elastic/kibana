@@ -55,8 +55,9 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: (routingRule?: RoutingDefinition) => {
+      forkStream: async (routingRule?: RoutingDefinition) => {
         service.send({ type: 'routingRule.fork', routingRule });
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
