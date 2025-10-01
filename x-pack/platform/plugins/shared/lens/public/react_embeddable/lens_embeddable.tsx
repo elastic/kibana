@@ -220,6 +220,8 @@ export const createLensEmbeddableFactory = (
         searchContextConfig.cleanup();
       };
 
+      performance.mark('embeddable_built');
+
       return {
         api,
         Component: () => (

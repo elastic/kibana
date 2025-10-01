@@ -251,6 +251,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       dataViews: indexPatterns,
       onResponse: (request, response, options) => {
+        performance.mark('search_response_received');
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 

@@ -69,6 +69,10 @@ export function LensEmbeddableComponent({
       }
     : undefined;
 
+  if (expressionParams) {
+    performance.mark('expression_sent_to_engine');
+  }
+
   return (
     <div
       css={{ width: '100%', height: '100%', position: 'relative' }}

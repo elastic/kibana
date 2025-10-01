@@ -763,6 +763,8 @@ export function XYChart({
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
+  performance.mark('charts_lib_invoked');
+
   return (
     <>
       <GlobalXYChartStyles />

@@ -112,6 +112,18 @@ export function loadEmbeddableData(
   };
 
   const onRenderComplete = () => {
+    performance.mark('render_complete');
+    // list performance marks
+    performance.measure('time_to_charts_lib', 'search_response_received', 'charts_lib_invoked');
+    performance.measure('time_to_render', 'charts_lib_invoked', 'render_complete');
+    // log them
+    console.log(
+      `Performance: ${performance
+        .getEntriesByType('measure')
+        .map((m) => `${m.name}=${m.duration.toFixed(2)}ms`)
+        .join(', ')}`
+    );
+
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
     if (!dispatchBlockingErrorIfAny()) {
