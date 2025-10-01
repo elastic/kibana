@@ -206,7 +206,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet Server agents or unsupported version."
+                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected, Fleet Server agents, containerized agents, or unsupported version."
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: unsupportedMigrateAgents.length,
