@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
 export interface StepInfo {
   stepId: string;
@@ -54,7 +54,7 @@ export interface WorkflowLookup {
  */
 export function buildWorkflowLookup(
   yamlDocument: YAML.Document,
-  model: monaco.editor.ITextModel
+  lineCounter: LineCounter
 ): WorkflowLookup {
   const steps: Record<string, StepInfo> = {};
 
@@ -66,7 +66,7 @@ export function buildWorkflowLookup(
 
   Object.assign(
     steps,
-    inspectStep(yamlDocument?.contents, model) // stepItems can be null if there are no steps defined yet
+    inspectStep(yamlDocument?.contents, lineCounter) // stepItems can be null if there are no steps defined yet
   );
 
   return {
@@ -74,7 +74,7 @@ export function buildWorkflowLookup(
   };
 }
 
-function inspectStep(node: any, model: monaco.editor.ITextModel): Record<string, StepInfo> {
+function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
   let stepId: string | undefined;
@@ -92,18 +92,18 @@ function inspectStep(node: any, model: monaco.editor.ITextModel): Record<string,
             }
           }
         }
-        Object.assign(result, inspectStep(item.value, model));
+        Object.assign(result, inspectStep(item.value, lineCounter));
       }
     });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, model));
+      Object.assign(result, inspectStep(subItem, lineCounter));
     });
   }
 
   if (stepId && stepType) {
-    const lineStart = model.getPositionAt(node.range![0]).lineNumber;
-    const lineEnd = model.getPositionAt(node.range![2]).lineNumber - 1;
+    const lineStart = lineCounter.linePos(node.range![0]).line;
+    const lineEnd = lineCounter.linePos(node.range![2] - 1).line;
     result[stepId] = {
       stepId,
       stepType,
