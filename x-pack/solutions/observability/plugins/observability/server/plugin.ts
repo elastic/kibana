@@ -8,6 +8,7 @@
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -55,6 +56,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
+  cases?: CasesServerSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
@@ -95,9 +97,11 @@ export class ObservabilityPlugin
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
-    plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+    if (plugins.cases?.config.enabled) {
+      plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+    }
 
     plugins.features.registerKibanaFeature(getLogsFeature());
 
