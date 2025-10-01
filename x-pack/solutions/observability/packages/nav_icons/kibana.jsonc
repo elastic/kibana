@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/observability-nav-icons",
+  "id": "@kbn/obs-ux-management-team",
   "owner": [
     "@elastic/observability-ui"
   ],
