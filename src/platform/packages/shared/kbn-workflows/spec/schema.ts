@@ -112,10 +112,10 @@ export const TriggerTypes = [
 export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
-export const StepWithTimeoutSchema = z.object({
+export const TimeoutPropSchema = z.object({
   timeout: DurationSchema.optional(),
 });
-export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
   foreach: z.string().optional(),
@@ -140,7 +140,7 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -167,7 +167,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 

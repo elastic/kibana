@@ -24,7 +24,7 @@ import type {
   StepWithForeach,
   WorkflowSettings,
   WorkflowOnFailure,
-  StepWithTimeout,
+  TimeoutProp,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -120,8 +120,8 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
   }
 
-  if ((currentStep as StepWithTimeout).timeout) {
-    const step = currentStep as BaseStep & StepWithTimeout;
+  if ((currentStep as TimeoutProp).timeout) {
+    const step = currentStep as BaseStep & TimeoutProp;
     return handleTimeout(
       getStepId(step, context),
       'step_level_timeout',
