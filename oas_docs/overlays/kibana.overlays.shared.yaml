@@ -150,7 +150,7 @@ actions:
     update:
       description: >
         Enables you to rotate message signing key pairs for secure Fleet communication.
-      x-displayName: 'Message Signing Service'
+      x-displayName: 'Fleet Message Signing Service'
   - target: '$.tags[?(@.name=="machine learning")]'
     description: Change tag description and displayName
     update:
@@ -161,7 +161,7 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality management, privilege monitoring, entity engines, and risk scoring operations.
+        Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
       x-displayName: 'Security entity analytics'
   - target: '$.tags[?(@.name=="user session management")]'
     description: Change tag description and displayName
