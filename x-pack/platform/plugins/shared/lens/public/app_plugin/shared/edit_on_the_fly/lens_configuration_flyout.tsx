@@ -297,6 +297,12 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          toolbar={
+            <VisualizationToolbarWrapper
+              visualizationMap={visualizationMap}
+              framePublicAPI={framePublicAPI}
+            />
+          }
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -338,6 +344,12 @@ export function LensEditConfigurationFlyout({
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        toolbar={
+          <VisualizationToolbarWrapper
+            visualizationMap={visualizationMap}
+            framePublicAPI={framePublicAPI}
+          />
+        }
       >
         <>
           <div
@@ -526,6 +538,7 @@ export function LensEditConfigurationFlyout({
               grow={isSuggestionsAccordionOpen ? 1 : false}
               data-test-subj="InlineEditingSuggestions"
               css={css`
+                border-top: ${euiTheme.euiTheme.border.thin};
                 border-bottom: ${euiTheme.euiTheme.border.thin};
                 padding-left: ${euiTheme.euiTheme.size.base};
                 padding-right: ${euiTheme.euiTheme.size.base};
