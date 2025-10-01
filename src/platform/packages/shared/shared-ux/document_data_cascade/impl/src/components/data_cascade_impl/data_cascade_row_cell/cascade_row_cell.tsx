@@ -98,12 +98,33 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
 
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
-  const getScrollMargin = useCallback(
-    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index)?.start ?? 0,
+  const virtualRow = useMemo(
+    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
     [rootVirtualizer, row]
   );
+  const getScrollMargin = useCallback(() => virtualRow?.start ?? 0, [virtualRow]);
   const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
   const getScrollOffset = useCallback(() => rootVirtualizer.scrollOffset ?? 0, [rootVirtualizer]);
+
+  useEffect(
+    () => () => {
+      // ensure that for a row that's been scrolled,
+      // if said row is technically still in view because it's cell is being rendered,
+      // when we are unmounting because the expand action from the cell's row was clicked,
+      // we want to ensure said row is the top most item in our list
+      if (
+        virtualRow?.index &&
+        !rootVirtualizer.isScrolling &&
+        getScrollOffset() > getScrollMargin()
+      ) {
+        rootVirtualizer.scrollToVirtualizedIndex(virtualRow.index, {
+          align: 'start',
+          behavior: 'auto',
+        });
+      }
+    },
+    [getScrollMargin, getScrollOffset, rootVirtualizer, virtualRow?.index]
+  );
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
