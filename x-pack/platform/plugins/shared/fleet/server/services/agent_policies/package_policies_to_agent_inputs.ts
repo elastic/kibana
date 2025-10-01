@@ -96,9 +96,9 @@ export const storedPackagePolicyToAgentInputs = (
       fullInput.meta = {
         package: {
           name: packagePolicy.package.name,
-          version: packagePolicy.package.version,
-          policy_template: input.policy_template,
-          release: packageInfo?.release,
+          version: packagePolicy.package.version ?? packageInfo?.version,
+          ...(input.policy_template ? { policy_template: input.policy_template } : {}),
+          ...(packageInfo?.release ? { release: packageInfo.release } : {}),
         },
       };
     }
