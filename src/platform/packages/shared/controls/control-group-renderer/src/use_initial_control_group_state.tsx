@@ -43,6 +43,7 @@ export const useInitialControlGroupState = (
           [id]: controlState,
         };
       }, {} as ControlGroupRuntimeState['initialChildControlState']);
+
       lastSavedState$Ref.current.next(controls);
       setInitialState({
         ...creationOptions,

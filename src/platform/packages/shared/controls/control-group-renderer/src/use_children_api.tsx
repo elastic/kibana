@@ -36,7 +36,9 @@ export const useChildrenApi = (
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
-  const currentChildState = useRef<{ [id: string]: SerializedPanelState<object> }>({});
+  const currentChildState$Ref = useRef(
+    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({})
+  );
   const lastSavedChildState$Ref = useRef(
     new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({}) // derived from lastSavedState$Ref
   );
@@ -49,7 +51,7 @@ export const useChildrenApi = (
         serializedState[id] = { rawState: omit(control, ['grow', 'width', 'order']) };
       });
       lastSavedChildState$Ref.current.next(serializedState);
-      currentChildState.current = serializedState;
+      currentChildState$Ref.current.next(serializedState);
     });
 
     return () => {
@@ -69,7 +71,7 @@ export const useChildrenApi = (
               [child.uuid]: child.serializeState(),
             };
           }, {});
-          currentChildState.current = result;
+          currentChildState$Ref.current.next(result);
         }
       });
     return () => {
@@ -89,9 +91,9 @@ export const useChildrenApi = (
         });
       },
       setSerializedStateForChild: (id: string, childState: SerializedPanelState<object>) => {
-        currentChildState.current[id] = childState;
+        currentChildState$Ref.current.getValue()[id] = childState;
       },
-      getSerializedStateForChild: (id: string) => currentChildState.current[id],
+      getSerializedStateForChild: (id: string) => currentChildState$Ref.current.getValue()[id],
       lastSavedStateForChild$: (id: string) => {
         return lastSavedChildState$Ref.current.pipe(map((lastSavedState) => lastSavedState[id]));
       },
@@ -120,5 +122,5 @@ export const useChildrenApi = (
     };
   }, [state, lastSavedChildState$Ref]);
 
-  return childrenApi;
+  return { childrenApi, currentChildState$Ref };
 };

@@ -24,5 +24,5 @@ export type ControlsRendererParentApi = PublishesViewMode &
   HasSerializedChildState<object> &
   Partial<PublishesDisabledActionIds> &
   Pick<DashboardApi, 'registerChildApi' | 'layout$'> & {
-    getCompressed?: () => boolean;
+    isCompressed?: () => boolean;
   };

@@ -32,7 +32,7 @@ export const usePropsApi = ({
   const propsApi = useMemo(() => {
     return {
       ...propsStateManager.api,
-      isCompressed: () => compressed,
+      isCompressed: () => compressed ?? true,
     };
   }, [propsStateManager, compressed]);
 

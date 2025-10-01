@@ -15,7 +15,7 @@ import type {
 import { areComparatorsEqual, getTitle } from '@kbn/presentation-publishing';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';
-import { combineLatestWith, debounceTime, map, of, tap } from 'rxjs';
+import { combineLatestWith, debounceTime, map, of } from 'rxjs';
 import { isEqual, sortBy } from 'lodash';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';

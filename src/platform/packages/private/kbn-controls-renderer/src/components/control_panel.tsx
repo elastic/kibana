@@ -195,7 +195,7 @@ export const ControlPanel = ({
                 )}
               </>
             }
-            compressed={parentApi.getCompressed ? parentApi.getCompressed() : true}
+            compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
               key={uuid}

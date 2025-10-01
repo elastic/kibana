@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import {
+  apiPublishesUnsavedChanges,
   useSearchApi,
-  type SerializedPanelState,
   type ViewMode,
 } from '@kbn/presentation-publishing';
+import type { StickyControlState } from '@kbn/controls-schemas';
 
 import type {
   ControlGroupCreationOptions,
@@ -30,7 +29,6 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
-import { StickyControlState } from '@kbn/controls-schemas';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -59,7 +57,7 @@ export const ControlGroupRenderer = ({
 
   /** Creation options management */
   const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
-  const childrenApi = useChildrenApi(initialState, lastSavedState$Ref);
+  const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
   const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
 
   /** Props management */
@@ -80,17 +78,30 @@ export const ControlGroupRenderer = ({
     };
   }, [childrenApi, layoutApi, searchApi, propsApi]);
 
-  useEffect(() => {
+  const currentState$: BehaviorSubject<{ [id: string]: StickyControlState }> = useMemo(() => {
     if (!parentApi) return;
+    return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
+      map(([currentChildState, currentLayout]) => {
+        const combinedState: { [id: string]: StickyControlState } = {};
+        Object.keys(currentLayout.controls).forEach((id) => {
+          combinedState[id] = { ...currentChildState[id].rawState, ...currentLayout.controls[id] };
+        });
+      })
+    );
+  }, [currentChildState$Ref, parentApi]);
+
+  useEffect(() => {
+    if (!parentApi || !currentState$) return;
 
     const reload$ = new Subject<void>();
 
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
-      getInput$: () => lastSavedState$Ref.current,
-      getInput: () => lastSavedState$Ref.current.value,
+      getInput$: () => currentState$,
+      getInput: () => currentState$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
+        /** Set the last saved state to the new input and then reset each child to this state */
         const newState: { [id: string]: StickyControlState } = {};
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
@@ -100,11 +111,11 @@ export const ControlGroupRenderer = ({
         });
         lastSavedState$Ref.current.next(newState);
         Object.values(parentApi.children$.getValue()).forEach((child) => {
-          child.resetUnsavedChanges();
+          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
         });
       },
     } as unknown as ControlGroupRendererApi);
-  }, [parentApi, onApiAvailable]);
+  }, [parentApi, currentState$, onApiAvailable]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : <ControlsRenderer parentApi={parentApi} />;

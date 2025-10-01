@@ -148,6 +148,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       if (isEqual(getStoredControlState(), newState)) {
         return;
       }
+      console.log({ newState, oldState: getStoredControlState() });
       if (
         !isEqual(
           newState?.initialChildControlState,
@@ -222,8 +223,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       return;
     }
 
-    const inputSubscription = controlGroup.getInput$().subscribe({
-      next: handleStateUpdates,
+    const inputSubscription = controlGroup.getInput$().subscribe((test) => {
+      console.log({ test });
+      handleStateUpdates(test);
     });
 
     return () => {
