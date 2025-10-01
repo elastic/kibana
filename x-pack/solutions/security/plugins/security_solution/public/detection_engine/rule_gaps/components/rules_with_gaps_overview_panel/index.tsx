@@ -221,7 +221,9 @@ const GapSummaryPanel = () => {
       color: '#F6726A',
       rules: unfilledRules,
     },
-  ].filter((item) => item.count > 0); // Only show segments with data
+  ];
+
+  const filteredGapDataForChart = gapDataForChart.filter((item) => item.count > 0); // Only show segments with data
 
   const themeOverrides: PartialTheme = {
     partition: { emptySizeRatio: 0.6 },
@@ -247,7 +249,7 @@ const GapSummaryPanel = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      {gapDataForChart.filter((item) => item.count > 0).length > 0 ? (
+      {filteredGapDataForChart.filter((item) => item.count > 0).length > 0 ? (
         <EuiFlexGroup gutterSize="m" alignItems="center">
           {/* Left Column - Chart */}
           <EuiFlexItem grow={false}>
@@ -264,7 +266,7 @@ const GapSummaryPanel = () => {
                     groupByRollup: (d: (typeof gapDataForChart)[0]) => d.status,
                     shape: {
                       fillColor: (_, sortIndex) =>
-                        gapDataForChart[sortIndex % gapDataForChart.length].color,
+                        filteredGapDataForChart[sortIndex % filteredGapDataForChart.length].color,
                     },
                   },
                 ]}
