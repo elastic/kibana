@@ -88,5 +88,6 @@
     "@kbn/storage-adapter",
     "@kbn/cloud-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/console-plugin",
   ]
 }
