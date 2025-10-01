@@ -548,6 +548,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setSearchBarValue('"my api key"');
         await ensureApiKeysExist(['my api key']);
+
+        await pageObjects.apiKeys.setSearchBarValue('"api"');
+        await ensureApiKeysExist(['my api key']);
       });
     });
   });
