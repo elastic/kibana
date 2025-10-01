@@ -50,6 +50,7 @@ describe('AddPageAttachmentToCaseModal', () => {
       getUICapabilities: jest.fn().mockReturnValue({}),
       getRuleIdFromEvent: jest.fn().mockReturnValue({}),
       groupAlertsByRule: jest.fn().mockReturnValue({}),
+      getObservablesFromEcs: jest.fn().mockReturnValue({}),
     };
   });
 
