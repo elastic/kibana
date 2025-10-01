@@ -17,6 +17,7 @@ import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
+import { getExtractColumnsFromEsqlQueryNode } from './nodes/extract_columns';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);
@@ -24,6 +25,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const validationNode = getValidationNode(params);
   const fixQueryErrorsNode = getFixQueryErrorsNode(params);
   const ecsMappingNode = getEcsMappingNode(params);
+  const extractColumnsFromEsqlNode = getExtractColumnsFromEsqlQueryNode(params);
   const selectIndexPatternNode = getSelectIndexPatternNode(params);
   const translationResultNode = getTranslationResultNode(params);
 
@@ -37,6 +39,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
     .addNode('ecsMapping', ecsMappingNode)
+    .addNode('extractColumnsFromEsql', extractColumnsFromEsqlNode)
     .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translationResult', translationResultNode)
 
@@ -49,8 +52,9 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'selectIndexPattern',
+      'extractColumnsFromEsql',
     ])
+    .addEdge('extractColumnsFromEsql', 'selectIndexPattern')
     .addEdge('selectIndexPattern', 'translationResult')
     .addEdge('translationResult', END);
 
@@ -73,5 +77,5 @@ const validationRouter = (state: TranslateDashboardPanelState) => {
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
-  return 'selectIndexPattern';
+  return 'extractColumnsFromEsql';
 };
