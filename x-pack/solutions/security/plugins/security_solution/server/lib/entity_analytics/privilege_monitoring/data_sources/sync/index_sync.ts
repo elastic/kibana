@@ -16,7 +16,7 @@ import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import { createBulkUtilsService } from '../bulk';
-import { findStaleUsersForIndexFactory } from './stale_users';
+import { findStaleUsersFactory } from './stale_users';
 import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
@@ -29,7 +29,7 @@ export const createIndexSyncService = (
   const esClient = deps.clusterClient.asCurrentUser;
 
   const bulkUtilsService = createBulkUtilsService(dataClient);
-  const findStaleUsers = findStaleUsersForIndexFactory(dataClient);
+  const findStaleUsers = findStaleUsersFactory(dataClient);
 
   const searchService = createSearchService(dataClient);
 
@@ -80,7 +80,7 @@ export const createIndexSyncService = (
         });
 
         // collect stale users
-        const staleUsers = await findStaleUsers(source.id, allUserNames);
+        const staleUsers = await findStaleUsers(source.id, allUserNames, 'index');
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
@@ -100,7 +100,11 @@ export const createIndexSyncService = (
     // Soft delete stale users
     dataClient.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
-      const ops = bulkUtilsService.bulkSoftDeleteOperations(allStaleUsers, dataClient.index);
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(
+        allStaleUsers,
+        dataClient.index,
+        'index'
+      );
       const resp = await esClient.bulk({ body: ops, refresh: 'wait_for' });
 
       const errors = getErrorFromBulkResponse(resp);
