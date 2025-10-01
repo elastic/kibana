@@ -4,15 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -68,23 +60,6 @@ export const WelcomeText: React.FC<{}> = () => {
         <EuiText textAlign="center" color="subdued">
           <p>{labels.subtitle}</p>
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href={docLinks.agentBuilder}
-          target="_blank"
-          size="m"
-          aria-label={i18n.translate(
-            'xpack.onechat.newConversationPrompt.agentBuilderDocsAriaLabel',
-            {
-              defaultMessage: 'Read Agent Builder documentation',
-            }
-          )}
-        >
-          {i18n.translate('xpack.onechat.newConversationPrompt.agentBuilderDocs', {
-            defaultMessage: 'Read the docs',
-          })}
-        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
