@@ -23,5 +23,8 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerEntityStoreRoutes(routeDeps);
   }
   registerPrivilegeMonitoringRoutes(routeDeps);
-  registerEntityDetailsRoutes(routeDeps);
+
+  if (routeDeps.config.experimentalFeatures.entityDetailsHighlightsEnabled) {
+    registerEntityDetailsRoutes(routeDeps);
+  }
 };

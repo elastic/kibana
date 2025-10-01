@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
 
-  describe('@ess @skipInServerlessMKI Entity Details - Highlights API', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,

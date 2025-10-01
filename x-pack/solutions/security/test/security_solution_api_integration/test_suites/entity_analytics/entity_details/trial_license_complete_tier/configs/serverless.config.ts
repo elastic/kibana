@@ -16,6 +16,9 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'entityDetailsHighlightsEnabled',
+    ])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {
