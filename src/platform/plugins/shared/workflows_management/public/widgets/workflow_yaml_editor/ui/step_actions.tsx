@@ -21,13 +21,11 @@ import { RunStepButton } from './run_step_button';
 import { selectFocusedStepInfo } from '../lib/state';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
-export interface ElasticsearchStepActionsProps {
+export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
-export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> = ({
-  onStepActionClicked,
-}) => {
+export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
 

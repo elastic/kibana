@@ -51,7 +51,7 @@ import {
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
-import { ElasticsearchStepActions } from './elasticsearch_step_actions';
+import { StepActions } from './step_actions';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
@@ -1432,7 +1432,7 @@ export const WorkflowYAMLEditor = ({
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
-        <ElasticsearchStepActions onStepActionClicked={onStepActionClicked} />
+        <StepActions onStepActionClicked={onStepActionClicked} />
       </div>
       {isDevelopment && (
         <div
