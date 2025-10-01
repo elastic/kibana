@@ -27,16 +27,19 @@ StreamsAppPageTemplate.Body = ({
   <EuiPageTemplate.Section
     grow
     css={css`
+      max-height: calc(
+        100vh - var(--euiFixedHeadersOffset, 0) - 164px
+      ); /* 164px is the height of the streams app header */
       overflow-y: auto;
       padding-inline: ${noPadding ? '0px' : '24px'};
     `}
     contentProps={{
       css: css`
-        max-height: calc(83vh - var(--euiFixedHeadersOffset, 0));
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         padding-block: ${noPadding ? '0px' : '24px'};
+        height: 100%;
       `,
     }}
     {...props}
