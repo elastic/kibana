@@ -75,3 +75,12 @@ export function fetchFieldsFromESQL(
       throw new Error(err.message);
     });
 }
+
+/**
+ * ES|QL with limit 0 returns only the columns and is more performant.
+ * @param query
+ * @returns
+ */
+export function decorateQueryForFetchFields(query: string): string {
+  return `${query} | limit 0`;
+}

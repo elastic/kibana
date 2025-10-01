@@ -128,7 +128,7 @@ export const useLookupIndexCommand = (
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => Promise<void>,
-  onIndexEditorClose?: () => void
+  onNewFieldsAddedToIndex?: (indexName: string) => void
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -223,9 +223,12 @@ export const useLookupIndexCommand = (
     async (
       initialIndexName: string | undefined,
       resultIndexName: string | null,
-      indexCreated: boolean
+      indexCreated: boolean,
+      indexHasNewFields: boolean
     ) => {
-      onIndexEditorClose?.();
+      if (indexHasNewFields && resultIndexName) {
+        onNewFieldsAddedToIndex?.(resultIndexName);
+      }
 
       if (!indexCreated || resultIndexName === null) return;
 
@@ -254,7 +257,7 @@ export const useLookupIndexCommand = (
         await addLookupIndicesDecorator();
       }
     },
-    [onIndexEditorClose, editorRef, onIndexCreated, query.esql, addLookupIndicesDecorator]
+    [editorRef, onIndexCreated, query.esql, onNewFieldsAddedToIndex, addLookupIndicesDecorator]
   );
 
   const openFlyout = useCallback(
@@ -269,8 +272,17 @@ export const useLookupIndexCommand = (
         doesIndexExist,
         canEditIndex,
         triggerSource,
-        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
+        onClose: async ({
+          indexName: resultIndexName,
+          indexCreatedDuringFlyout,
+          indexHasNewFields,
+        }) => {
+          await onFlyoutClose(
+            indexName,
+            resultIndexName,
+            indexCreatedDuringFlyout,
+            indexHasNewFields
+          );
         },
       } as EditLookupIndexContentContext);
     },
