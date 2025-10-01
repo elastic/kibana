@@ -6,8 +6,8 @@
   },
   "include": [
     "common/*",
-    "public/**/**/*",
-    "server/**/**/*",
+    "public/**/*",
+    "server/**/*",
     "../../../../../typings/*"
   ],
   "kbn_references": [
