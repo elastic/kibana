@@ -5,25 +5,13 @@
     "functions": [
       {
         "parentPluginId": "@kbn/siem-readiness",
-        "id": "def-public.useLogReadinessTask",
+        "id": "def-public.useReadinessTasks",
         "type": "Function",
         "tags": [],
-        "label": "useLogReadinessTask",
-        "description": [
-          "\nHook for logging SIEM readiness tasks via API endpoint"
-        ],
+        "label": "useReadinessTasks",
+        "description": [],
         "signature": [
-          "(options?: ",
-          "UseMutationOptions",
-          "<void, unknown, ",
-          {
-            "pluginId": "@kbn/siem-readiness",
-            "scope": "public",
-            "docId": "kibKbnSiemReadinessPluginApi",
-            "section": "def-public.SiemReadinessTask",
-            "text": "SiemReadinessTask"
-          },
-          ", unknown> | undefined) => { logReadinessTask: ",
+          "() => { logReadinessTask: ",
           "UseMutateFunction",
           "<void, unknown, ",
           {
@@ -33,42 +21,23 @@
             "section": "def-public.SiemReadinessTask",
             "text": "SiemReadinessTask"
           },
-          ", unknown>; }"
+          ", unknown>; getLatestTasks: ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.TaskSource",
+            "text": "TaskSource"
+          },
+          "[], unknown>; }"
         ],
-        "path": "x-pack/solutions/security/packages/siem-readiness/src/use_log_readiness_task.ts",
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/use_readiness_tasks.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/siem-readiness",
-            "id": "def-public.useLogReadinessTask.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [
-              "- TanStack mutation options"
-            ],
-            "signature": [
-              "UseMutationOptions",
-              "<void, unknown, ",
-              {
-                "pluginId": "@kbn/siem-readiness",
-                "scope": "public",
-                "docId": "kibKbnSiemReadinessPluginApi",
-                "section": "def-public.SiemReadinessTask",
-                "text": "SiemReadinessTask"
-              },
-              ", unknown> | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/siem-readiness/src/use_log_readiness_task.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "Mutation hook for logging readiness tasks"
-        ],
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -92,7 +61,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
+              "\"lets-get-started\" | \"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
             "deprecated": false,
@@ -140,6 +109,17 @@
             "type": "number",
             "tags": [],
             "label": "order",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.ReadinessTaskConfig.taskNumber",
+            "type": "string",
+            "tags": [],
+            "label": "taskNumber",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
             "deprecated": false,
@@ -214,10 +194,67 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.TaskSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "TaskSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.TaskSource",
+            "text": "TaskSource"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.SiemReadinessTask",
+            "text": "SiemReadinessTask"
+          }
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.TaskSource.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.GET_LATEST_SIEM_READINESS_TASKS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_LATEST_SIEM_READINESS_TASKS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/siem_readiness/get_latest_tasks\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/siem-readiness",
         "id": "def-public.POST_SIEM_READINESS_TASK_API_PATH",
@@ -263,7 +300,7 @@
         "label": "ReadinessTaskId",
         "description": [],
         "signature": [
-          "\"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
+          "\"lets-get-started\" | \"enable-endpoint-visibility\" | \"ingest-cloud-audit-logs\" | \"ingest-asset-inventory\" | \"enable-kubernetes-container-logs\" | \"ingest-all-cloud-logs-inventory\" | \"enable-mitre-aligned-detection-rules\" | \"view-detection-coverage-mitre\" | \"add-threat-intel-feeds\" | \"customize-create-rules\" | \"use-attack-discovery\" | \"maintain-rule-coverage\" | \"enable-cspm-on-all-clouds\" | \"investigate-alert-using-timeline\" | \"use-ai-assistant-for-alert-root-cause\" | \"add-external-connectors\" | \"automate-response-rules-case-creation\" | \"create-manage-case-workflows\" | \"complete-automated-cases\""
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/readiness_tasks.ts",
         "deprecated": false,
