@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
+import { getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -17,6 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
   const retry = getService('retry');
+  const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('webhook', () => {
     beforeEach(async () => {
@@ -27,34 +30,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    it.skip('creates a connector via API with config and secret headers and verifies UI', async () => {
-      const webhookConnectorName = 'webhook connector with headers';
-      const webhook = await actions.api.createConnector({
-        name: 'webhook connector with headers',
-        config: {
-          method: 'post',
-          url: 'https://example.com/webhook',
-          headers: {
-            configHeader: 'value',
-          },
-        },
-        secrets: {
-          secretHeaders: {
-            secretHeader: 'secretValue',
-          },
-        },
-        connectorTypeId: '.webhook',
-      });
+    it('should create a connector with config and secret headers', async () => {
+      const connectorName = 'web';
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+      await testSubjects.click('.webhook-card');
 
-      objectRemover.add(webhook.id, 'connector', 'actions');
+      await testSubjects.click('webhookViewHeadersSwitch');
+      await testSubjects.click('webhookAddHeaderButton');
 
-      await pageObjects.triggersActionsUI.searchConnectors(webhookConnectorName);
-      await retry.try(async () => {
-        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResultsBeforeEdit.length).to.eql(1);
-      });
+      await testSubjects.setValue('nameInput', connectorName);
+      await testSubjects.setValue('webhookUrlText', 'https://www.example.com');
+      await testSubjects.click('authNone');
 
-      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+      const headerKeys = await find.allByCssSelector('[data-test-subj="webhookHeadersKeyInput"]');
+      const headerValues = await find.allByCssSelector(
+        '[data-test-subj="webhookHeadersValueInput"]'
+      );
+      const headerInputTypes = await find.allByCssSelector(
+        '[data-test-subj="webhookHeaderTypeSelect"]'
+      );
+
+      expect(headerKeys.length).to.eql(2);
+      expect(headerValues.length).to.eql(2);
+      expect(headerInputTypes.length).to.eql(2);
+
+      // Config header
+      await headerKeys[0].type('config-key');
+      await headerValues[0].type('config-value');
+
+      // Secret header
+      await headerKeys[1].type('secret-key');
+      await headerValues[1].type('secret-value');
+      await headerInputTypes[1].click();
+      await (await find.byCssSelector('[data-test-subj="option-secret"]')).click();
+
+      const flyOutSaveButton = await testSubjects.find('create-connector-flyout-save-btn');
+      expect(await flyOutSaveButton.isEnabled()).to.be(true);
+      await flyOutSaveButton.click();
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created '${connectorName}'`);
+
+      const connector = await getConnectorByName(connectorName, supertest);
+      objectRemover.add(connector.id, 'connector', 'actions');
     });
 
     it('should render the cr and pfx tab for ssl auth', async () => {
@@ -70,68 +88,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await certTypeTabs[1].getAttribute('data-test-subj')).to.be('webhookCertTypePFXTab');
     });
 
-    it('should render the config headers correctly', async () => {
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
-      await testSubjects.click('webhookViewHeadersSwitch');
+    it('connector created via API displays headers as expected', async () => {
+      const webhookConnectorName = 'webhook connector with headers';
+      const webhook = await actions.api.createConnector({
+        name: 'webhook connector with headers',
+        config: {
+          method: 'post',
+          hasAuth: false,
+          url: 'https://example.com/webhook',
+          headers: {
+            configHeader: 'config-value',
+          },
+        },
+        secrets: {
+          secretHeaders: {
+            secretHeader: 'secretValue', // the value should not be displayed in the UI
+          },
+        },
+        connectorTypeId: '.webhook',
+      });
 
-      await testSubjects.existOrFail('webhookHeaderText');
+      objectRemover.add(webhook.id, 'connector', 'actions');
 
-      const httpHeadersTitle = await find.byCssSelector('[data-test-subj="webhookHeaderText"]');
-      expect(await httpHeadersTitle.getVisibleText()).to.be('HTTP headers');
+      await browser.refresh();
 
-      await testSubjects.existOrFail('webhookAddHeaderButton');
-      await testSubjects.click('webhookAddHeaderButton');
+      await pageObjects.triggersActionsUI.searchConnectors(webhookConnectorName);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
-      const headerKey = await find.byCssSelector('[data-test-subj="webhookHeadersKeyInput"]');
-      const headerValue = await find.byCssSelector('[data-test-subj="webhookHeadersValueInput"]');
-      const headerValueInputType = await headerValue.getAttribute('type');
-      const typeSelector = await find.byCssSelector('[data-test-subj="webhookHeaderTypeSelect"]');
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      expect(await headerKey.isDisplayed()).to.be(true);
-      expect(await headerValue.isDisplayed()).to.be(true);
-      expect(headerValueInputType).to.be('text');
-      expect(await typeSelector.isDisplayed()).to.be(true);
+      const headerKeys = await find.allByCssSelector('[data-test-subj="webhookHeadersKeyInput"]');
+      expect(headerKeys.length).to.eql(2);
+      expect(await headerKeys[0].getAttribute('value')).to.be('configHeader');
+      expect(await headerKeys[1].getAttribute('value')).to.be('secretHeader');
 
-      await headerKey.type('config-key');
-      await headerValue.type('config-value');
+      const configHeaderValue = await find.allByCssSelector(
+        '[data-test-subj="webhookHeadersValueInput"]'
+      );
+      expect(configHeaderValue.length).to.eql(1);
+      expect(await configHeaderValue[0].getAttribute('value')).to.be('config-value');
 
-      expect(await headerKey.getAttribute('value')).to.be('config-key');
-      expect(await headerValue.getAttribute('value')).to.be('config-value');
-    });
-
-    it('should render the secret headers correctly', async () => {
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
-      await testSubjects.click('webhookViewHeadersSwitch');
-
-      await testSubjects.existOrFail('webhookAddHeaderButton');
-      await testSubjects.click('webhookAddHeaderButton');
-
-      await testSubjects.click('webhookHeaderTypeSelect');
-      const secretOption = await find.byCssSelector('[data-test-subj="option-secret"]');
-      await secretOption.click();
-
-      const headerKey = await find.byCssSelector('[data-test-subj="webhookHeadersKeyInput"]');
-      const headerValue = await find.byCssSelector(
+      const secretHeaderValue = await find.allByCssSelector(
         '[data-test-subj="webhookHeadersSecretValueInput"]'
       );
-      const headerValueInputType = await headerValue.getAttribute('type');
+      expect(secretHeaderValue.length).to.eql(1);
 
-      expect(await headerKey.isDisplayed()).to.be(true);
-      expect(await headerValue.isDisplayed()).to.be(true);
-      expect(headerValueInputType).to.be('password');
-
-      await headerKey.type('secret-key');
-      await headerValue.type('secret-value');
-
-      expect(await headerKey.getAttribute('value')).to.be('secret-key');
-      expect(await headerValue.getAttribute('value')).to.be('secret-value');
-
-      const encryptedHeaderBadge = await find.byCssSelector(
-        '[data-test-subj="encryptedHeadersBadge"]'
-      );
-      expect(await encryptedHeaderBadge.isDisplayed()).to.be(true);
+      // as expected, we do not show the passwords
+      expect(await secretHeaderValue[0].getAttribute('value')).to.be('');
     });
   });
 };
