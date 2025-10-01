@@ -91,11 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+      it('Should be called "Background search" in the management apps sidebar', async () => {
         await PageObjects.common.navigateToApp('management');
         const searchSessionsAnchor = await testSubjects.find('search_sessions');
         const anchorText = await searchSessionsAnchor.getVisibleText();
-        expect(anchorText).to.be('Search Sessions');
+        expect(anchorText).to.be('Background Search');
       });
     });
   });
