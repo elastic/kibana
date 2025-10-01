@@ -370,6 +370,11 @@ export const getConfirmDeletionModalText = (
     },
   });
 
+export const getConfirmDeletionModalWarningText = () =>
+  i18n.translate('xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.warningText', {
+    defaultMessage: 'Elastic managed (internal) rules will be ignored',
+  });
+
 export const getConfirmDeletionButtonText = (
   numIdsToDelete: number,
   singleTitle: string,
