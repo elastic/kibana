@@ -506,9 +506,12 @@ export const getPackagePolicyDeleteCallback = (
       }
     }
 
-    policiesToRemove.push(
-      updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
-    );
+    // If Endpoint package policies were delete, then also ensure we update response actions to tag them as orphan
+    if (policiesToRemove.length > 0) {
+      policiesToRemove.push(
+        updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
+      );
+    }
 
     await Promise.all(policiesToRemove);
 

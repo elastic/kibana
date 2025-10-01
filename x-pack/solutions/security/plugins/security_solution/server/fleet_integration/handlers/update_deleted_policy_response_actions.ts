@@ -25,6 +25,11 @@ export const updateDeletedPolicyResponseActions = async (
     return;
   }
 
+  if (deletedIntegrationPolicies.length === 0) {
+    logger.debug(`No deleted integration policies provided on input. Nothing to do`);
+    return;
+  }
+
   logger.debug(
     `Checking if response action requests need to be updated for deleted integration policies`
   );
