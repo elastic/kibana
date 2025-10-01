@@ -27,6 +27,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
 
+const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
+  defaultMessage: 'Apply and close',
+});
+
 export const FlyoutWrapper = ({
   children,
   isInlineFlyoutVisible,
@@ -39,6 +43,7 @@ export const FlyoutWrapper = ({
   navigateToLensEditor,
   onApply,
   isReadOnly,
+  applyButtonLabel = applyAndCloseLabel,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -171,10 +176,7 @@ export const FlyoutWrapper = ({
                   iconType="check"
                   data-test-subj="applyFlyoutButton"
                 >
-                  <FormattedMessage
-                    id="xpack.lens.config.applyFlyoutLabel"
-                    defaultMessage="Apply and close"
-                  />
+                  {applyButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}

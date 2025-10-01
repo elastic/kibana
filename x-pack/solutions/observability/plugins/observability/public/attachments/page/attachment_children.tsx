@@ -29,7 +29,7 @@ export function PageAttachmentChildren({
       notifications: { toasts },
     },
   } = useKibana();
-  const { url, summary } = pageState;
+  const { url } = pageState;
   const label = url?.label;
 
   const href = useMemo(() => {
@@ -119,7 +119,6 @@ export function PageAttachmentChildren({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {summary && <EuiText size="s">{summary}</EuiText>}
     </>
   );
 }

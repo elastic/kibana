@@ -161,7 +161,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     // is this rule type editable from within Rules Management
     (ruleTypeRegistry.has(rule.ruleTypeId)
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+      : false) &&
+    !ruleType.isInternallyManaged;
 
   const onRunRule = async (id: string) => {
     await runRule(http, toasts, id);
@@ -257,6 +258,12 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const editButton = hasEditButton ? (
     <>
       <EuiButtonEmpty
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
+          {
+            defaultMessage: 'Edit',
+          }
+        )}
         data-test-subj="openEditRuleFlyoutButton"
         iconType="pencil"
         onClick={onEditRuleClick}
@@ -430,10 +437,17 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }}
               onEnableDisable={onEnableDisable}
               onRunRule={onRunRule}
+              isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
           editButton,
           <EuiButtonEmpty
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
+              {
+                defaultMessage: 'Refresh',
+              }
+            )}
             data-test-subj="refreshRulesButton"
             iconType="refresh"
             onClick={requestRefresh}

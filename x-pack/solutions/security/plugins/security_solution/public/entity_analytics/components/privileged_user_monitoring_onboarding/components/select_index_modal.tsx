@@ -31,6 +31,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { CreateIndexModal } from './create_index_modal';
+import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
 
 export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
@@ -73,6 +74,8 @@ export const IndexSelectorModal = ({
   const debouncedSetSearchQuery = useDebounceFn(setSearchQuery, DEBOUNCE_OPTIONS);
   const { registerPrivMonMonitoredIndices, updatePrivMonMonitoredIndices } =
     useEntityAnalyticsRoutes();
+  const { userStats } = useUserLimitStatus();
+  const maxUsersAllowed = userStats?.maxAllowed ?? 10000; // fallback to default config value
   const options = useMemo(
     () =>
       indices?.map((index) => ({
@@ -138,9 +141,10 @@ export const IndexSelectorModal = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.description"
-            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users."
+            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users (maximum number allowed: {maxPrivilegedUsersAllowed})."
             values={{
               nameField: <EuiCode>{'user.name'}</EuiCode>,
+              maxPrivilegedUsersAllowed: maxUsersAllowed,
             }}
           />
         </EuiText>
@@ -186,6 +190,10 @@ export const IndexSelectorModal = ({
               iconType="plusInCircle"
               onClick={showCreateIndexModal}
               data-test-subj="create-index-button"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonAriaLabel',
+                { defaultMessage: 'Create index' }
+              )}
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
@@ -195,7 +203,13 @@ export const IndexSelectorModal = ({
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={onClose}>
+              <EuiButtonEmpty
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.cancelButtonAriaLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.cancelButtonLabel"
                   defaultMessage="Cancel"

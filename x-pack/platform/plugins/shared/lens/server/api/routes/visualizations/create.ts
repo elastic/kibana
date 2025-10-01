@@ -75,18 +75,25 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestBodyData = req.body.data;
+      if (!requestBodyData.visualizationType) {
+        throw new Error('visualizationType is required');
+      }
+
       // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { references, ...lensItem } = isNewApiFormat(req.body.data)
+      const { references, ...lensItem } = isNewApiFormat(requestBodyData)
         ? // TODO: Find a better way to conditionally omit id
-          omit(ConfigBuilderStub.in(req.body.data), 'id')
+          omit(ConfigBuilderStub.in(requestBodyData), 'id')
         : // For now we need to be able to create old SO, this may be moved to the config builder
           ({
-            ...req.body.data,
-            description: req.body.data.description ?? undefined,
+            ...requestBodyData,
+            // fix type mismatches, null -> undefined
+            description: requestBodyData.description ?? undefined,
+            visualizationType: requestBodyData.visualizationType,
           } satisfies LensCreateIn['data']);
 
       try {

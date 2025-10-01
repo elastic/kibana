@@ -140,6 +140,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       telemetryClient: telemetryService.getClient(),
+      version: '1.0.0',
     },
     isServerless: false,
   };
