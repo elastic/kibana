@@ -18,7 +18,7 @@ import { type OperatorFunction, map } from 'rxjs';
  * @returns An operator emitting smoothed values.
  * @remarks
  * Uses **accumulating mean value** until the observation window is full (i.e., until enough samples have been received to cover the specified period),
- * then switches to exponential smoothing for subsequent values. The switch haapens when the number of values emitted reaches `period / interval`.
+ * then switches to exponential smoothing for subsequent values. The switch happens when the number of values emitted reaches `period / interval`.
  * This ensures the initial output isn't biased by insufficient data, and provides a smooth transition to exponential smoothing.
  */
 export function exponentialMovingAverage(
