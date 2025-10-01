@@ -377,13 +377,7 @@ export const termsOperation: OperationDefinition<
       includeIsRegex: Boolean(column.params.includeIsRegex),
       excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
-      otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
-        defaultMessage: 'Other',
-      }),
       missingBucket: column.params.otherBucket && column.params.missingBucket,
-      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-        defaultMessage: '(missing value)',
-      }),
     }).toAst();
   },
   getDefaultLabel: (column, columns, indexPattern) =>
