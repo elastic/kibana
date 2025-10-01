@@ -32,10 +32,22 @@ test('Firehose', async ({ page, onboardingHomePage, firehoseFlowPage }) => {
   const snippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   /**
+   * Use a unique CloudFormation stack name per run to avoid collisions
+   * with any pre-existing delivery streams in the account/region.
+   * This only affects the ephemeral test-executed command; the product UI
+   * continues to show the default stack name.
+   */
+  const uniqueSuffix = Date.now().toString(36).slice(-6);
+  const updatedSnippet = snippet.replace(
+    /--stack-name\s+Elastic-Firehose(?!-)/,
+    `--stack-name Elastic-Firehose-${uniqueSuffix}`
+  );
+
+  /**
    * Ensemble story watches for the code snippet file
    * to be created and then executes it
    */
-  fs.writeFileSync(outputPath, snippet);
+  fs.writeFileSync(outputPath, updatedSnippet);
 
   /**
    * The page waits for the browser window to loose
