@@ -31,7 +31,6 @@ export const AdditionalChargesCallout = ({ aiFeatures }: AdditionalChargesCallou
               href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
               target="_blank"
               rel="noopener noreferrer"
-              external
             >
               {chunks}
             </EuiLink>
@@ -41,7 +40,6 @@ export const AdditionalChargesCallout = ({ aiFeatures }: AdditionalChargesCallou
               href={docLinks?.links?.observability?.elasticManagedLlm}
               target="_blank"
               rel="noopener noreferrer"
-              external
             >
               {chunks}
             </EuiLink>
