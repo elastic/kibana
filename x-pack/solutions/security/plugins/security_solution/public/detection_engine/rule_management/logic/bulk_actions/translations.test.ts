@@ -6,7 +6,7 @@
  */
 
 import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import * as i18n from '../../../common/translations';
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { explainBulkEditSuccess } from './translations';
 import type { BulkActionSummary } from '../../api/api';
 
