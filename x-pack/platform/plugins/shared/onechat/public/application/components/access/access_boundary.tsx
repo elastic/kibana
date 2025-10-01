@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { AddLlmConnectionPrompt } from './prompts/add_llm_connection_prompt';
 
 export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { accessChecker } = useOnechatServices();
@@ -19,8 +19,7 @@ export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) 
   }
 
   if (!hasLlmConnector) {
-    // TODO: Render "connect to an LLM" prompt
-    return null;
+    return <AddLlmConnectionPrompt />;
   }
 
   return children;
