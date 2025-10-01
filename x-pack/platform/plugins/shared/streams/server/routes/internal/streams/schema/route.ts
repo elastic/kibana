@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -116,7 +117,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }): Promise<{
     status: 'unknown' | 'success' | 'failure';
     simulationError: string | null;
-    documentsWithRuntimeFieldsApplied: SampleDocument[] | null;
+    documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -246,23 +247,29 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     // This gives us a "fields" representation rather than _source from the simulation
     const runtimeFieldsResult = await scopedClusterClient.asCurrentUser.search({
       index: params.path.name,
+      query: {
+        ids: {
+          values: sampleResults.hits.hits.map((hit) => hit._id) as string[],
+        },
+      },
       ...runtimeFieldsSearchBody,
     });
 
     return {
       status: 'success',
       simulationError: null,
-      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits
-        .map((hit) => {
-          if (!hit.fields) {
-            return {};
-          }
-          return Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
+      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits.map((hit, index) => {
+        if (!hit.fields) {
+          return { ignored_fields: simulation.docs[index].doc.ignored_fields || [] };
+        }
+        return {
+          values: Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
             acc[field] = hit.fields![field][0];
             return acc;
-          }, {});
-        })
-        .filter((doc) => Object.keys(doc).length > 0),
+          }, {}),
+          ignored_fields: simulation.docs[index].doc.ignored_fields || [],
+        };
+      }),
     };
   },
 });

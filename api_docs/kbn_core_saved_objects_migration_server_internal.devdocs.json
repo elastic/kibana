@@ -3277,7 +3277,7 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; readonly scrollDuration: string; readonly retryAttempts: number; }"
+              "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,

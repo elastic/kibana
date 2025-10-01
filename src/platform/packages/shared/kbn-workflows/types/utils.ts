@@ -43,6 +43,15 @@ export function transformWorkflowYamlJsontoEsWorkflow(
   };
 }
 
+export function isInProgressStatus(status: ExecutionStatus) {
+  return (
+    status === ExecutionStatus.RUNNING ||
+    status === ExecutionStatus.PENDING ||
+    status === ExecutionStatus.WAITING ||
+    status === ExecutionStatus.WAITING_FOR_INPUT
+  );
+}
+
 export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
