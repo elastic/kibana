@@ -263,7 +263,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     contentManagement.register({
       id: CONTENT_ID,
       storage: new MapsStorage({
-        throwOnResultValidationError: false,
+        throwOnResultValidationError: this._initializerContext.env.mode.dev,
         logger: this._logger.get('storage'),
       }),
       version: {
