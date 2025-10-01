@@ -56,26 +56,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.closePanel('applications');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
-          expect(isOpen).to.be(false);
-        }
-
-        // open Infrastructure panel and navigate to some link inside the panel
-        await solutionNavigation.sidenav.openPanel('metrics');
+        // open Infrastructure popover and navigate to some link inside the panel
+        await solutionNavigation.sidenav.expandMore();
+        await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
+        // open first link in popover to open a panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
           expect(isOpen).to.be(true);
         }
-        await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Infrastructure inventory',
+        });
+        await solutionNavigation.sidenav.clickPanelLink('metrics:hosts');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Hosts',
         });
 
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(false);
+          expect(isOpen).to.be(true);
         }
 
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
@@ -96,6 +96,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('renders a feedback callout', async () => {
+        await solutionNavigation.sidenav.feedbackCallout.reset();
+        await solutionNavigation.sidenav.openPanel('applications');
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
