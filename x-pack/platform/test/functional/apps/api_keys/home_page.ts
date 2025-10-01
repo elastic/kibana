@@ -487,7 +487,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        // await clearAllApiKeys(es, log);
+        await clearAllApiKeys(es, log);
       });
 
       beforeEach(async () => {
