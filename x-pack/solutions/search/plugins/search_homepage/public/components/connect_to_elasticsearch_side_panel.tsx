@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
-import { SampleDataActionButton } from './sample_data_action_button';
-import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
+import { SampleDataIngestPanel } from './sample_data_ingest_panel';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;
@@ -20,11 +19,6 @@ export const ConnectToElasticsearchSidePanel = () => {
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
-  const {
-    hasRequiredLicense,
-    isPluginAvailable: isSampleDataIngestPluginAvailable,
-    hasPrivileges: hasSampleDataRequiredPrivileges,
-  } = useIsSampleDataAvailable();
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -56,49 +50,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        {isSampleDataIngestPluginAvailable && hasSampleDataRequiredPrivileges && (
-          <EuiCard
-            display="plain"
-            hasBorder
-            textAlign="left"
-            titleSize="xs"
-            data-test-subj="sampleDataSection"
-            betaBadgeProps={{
-              label: i18n.translate(
-                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.title',
-                {
-                  defaultMessage: 'Enterprise',
-                }
-              ),
-              'data-test-subj': 'licenceRequiredBadge',
-              tooltipContent: i18n.translate(
-                'xpack.searchHomepage.connectToElasticsearch.licenseBadge.description',
-                {
-                  defaultMessage:
-                    'This dataset makes use of AI features that require an Enterprise license.',
-                }
-              ),
-            }}
-            title={
-              <FormattedMessage
-                id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
-                defaultMessage="Add sample data"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-                defaultMessage="Add data sets with sample visualizations, dashboards, and more."
-              />
-            }
-            footer={
-              <SampleDataActionButton
-                data-test-subj="sampleDataActionButton"
-                hasRequiredLicense={hasRequiredLicense}
-              />
-            }
-          />
-        )}
+        <SampleDataIngestPanel />
 
         {/* TODO: Enable CE block once we can discern the billing type.
         <EuiCard
