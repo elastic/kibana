@@ -226,10 +226,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       services,
     });
 
-    if (
-      tabInitialInternalState?.searchSessionId &&
-      !searchSessionManager.hasSearchSessionIdInURL()
-    ) {
+    if (tabInitialInternalState?.searchSessionId) {
       searchSessionManager.pushSearchSessionIdToURL(tabInitialInternalState.searchSessionId, {
         replace: true,
       });
