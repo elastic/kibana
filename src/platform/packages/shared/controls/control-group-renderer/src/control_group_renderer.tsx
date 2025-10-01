@@ -21,6 +21,7 @@ import {
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
+  SerializedPanelState,
   apiPublishesUnsavedChanges,
   useSearchApi,
   type ViewMode,
@@ -37,6 +38,7 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -90,6 +92,7 @@ export const ControlGroupRenderer = ({
     if (!parentApi) return;
     return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
       map(([currentChildState, currentLayout]) => {
+        console.log({ currentChildState, currentLayout });
         const combinedState: ControlGroupRuntimeState['initialChildControlState'] = {};
         Object.keys(currentLayout.controls).forEach((id) => {
           combinedState[id] = {
@@ -104,8 +107,11 @@ export const ControlGroupRenderer = ({
 
   useEffect(() => {
     if (!parentApi || !currentState$) return;
-
+    currentState$.subscribe((test) => {
+      console.log({ test });
+    });
     const reload$ = new Subject<void>();
+
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
@@ -113,7 +119,7 @@ export const ControlGroupRenderer = ({
       getInput: () => currentState$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
         /** Set the last saved state to the new input and then reset each child to this state */
-        const newState: { [id: string]: StickyControlState } = {};
+        const newState = lastSavedState$Ref.current.getValue();
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
             ...lastSavedState$Ref.current.value[id],
