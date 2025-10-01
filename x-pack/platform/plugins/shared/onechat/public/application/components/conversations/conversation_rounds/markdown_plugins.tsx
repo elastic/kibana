@@ -12,11 +12,12 @@ import {
   visualizationElement,
   type TabularDataResult,
 } from '@kbn/onechat-common/tools/tool_result';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep, OtherResult } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
+import { VisualizeLens } from '../../tools/esql/visualize_lens';
 
 export const visualizationPlugin = () => {
   const visitor = (node: Node) => {
@@ -71,7 +72,7 @@ export function getVisualizationHandler({
 
     const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
 
-    const toolResult = steps
+    let toolResult: TabularDataResult | OtherResult | undefined = steps
       .filter((s) => s.type === 'tool_call')
       .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
       .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
@@ -79,7 +80,30 @@ export function getVisualizationHandler({
       | undefined;
 
     if (!toolResult) {
+      toolResult = steps
+        .filter((s) => s.type === 'tool_call')
+        .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+        .find(
+          (r) =>
+            r.type === 'other' &&
+            r.data.type === 'visualization' &&
+            r.tool_result_id === toolResultId
+        ) as OtherResult | undefined;
+    }
+
+    if (!toolResult) {
       return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
+    }
+
+    if (toolResult.type === 'other') {
+      const { visualization } = toolResult.data;
+      return (
+        <VisualizeLens
+          lensConfig={visualization}
+          dataViews={startDependencies.dataViews}
+          lens={startDependencies.lens}
+        />
+      );
     }
 
     const { columns, query } = toolResult.data;

@@ -19,6 +19,7 @@ import type {
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -224,6 +225,7 @@ Please fix the configuration and provide a corrected version that passes validat
           results: [
             {
               type: ToolResultType.other,
+              tool_result_id: getToolResultId(),
               data: {
                 type: 'visualization',
                 query: nlQuery,

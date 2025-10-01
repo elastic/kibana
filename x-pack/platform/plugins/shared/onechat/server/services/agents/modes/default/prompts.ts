@@ -139,6 +139,8 @@ export const getActPrompt = ({
 
         ${visEnabled ? renderVisualizationPrompt() : ''}
 
+        ${visEnabled ? renderVisualizationFromConfigPrompt() : ''}
+
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
@@ -170,6 +172,38 @@ function renderVisualizationPrompt() {
       {
         "tool_result_id": "LiDo",
         "type": "${tabularData}",
+        "data": {
+          "source": "esql",
+          "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",
+          "result": { "columns": [...], "values": [...] }
+        }
+      }
+
+      To visualize this response your reply should be:
+      <${tagName} ${attributes.toolResultId}="LiDo" />`;
+}
+
+function renderVisualizationFromConfigPrompt() {
+  const { other } = ToolResultType;
+  const { tagName, attributes } = visualizationElement;
+
+  return `#### Rendering Visualizations with the <${tagName}> Element
+      When a tool call returns a result of type "${other}" with data.type set to "visualization", you may render a visualization in the UI by emitting a custom XML element:
+
+      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
+
+      **Rules**
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${other}\` with data.type set to "visualization".
+      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
+
+      **Example Usage:**
+
+      Tool response includes:
+      {
+        "tool_result_id": "LiDo",
+        "type": "${other}",
         "data": {
           "source": "esql",
           "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",

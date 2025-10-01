@@ -47,6 +47,7 @@ export interface QueryResult {
 }
 
 export interface OtherResult {
+  tool_result_id?: string;
   type: ToolResultType.other;
   data: Record<string, unknown>;
 }
