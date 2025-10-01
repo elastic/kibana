@@ -30,7 +30,7 @@ Platform tools and agents are read-only, and cannot be modified or deleted by th
 Platform tools can use the internal `builtin` tool type, allowing them to register tools executing arbitrary code from
 the Kibana server, where user-created tools can only use the other (serializable) tool types.
 
-## Registering Built tools tools
+## Registering Built-in tools
 
 ### Registering the tool
 
@@ -55,7 +55,13 @@ in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
-### Registering built-in tools
+### Making sure the tool's namespace is registered as being internal
+
+Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools. 
+When introducing a new protected namespace (e.g. when adding a new category of tools), it must be added
+to the `protectedNamespaces` array in `x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts`
+
+### Built-in tool examples
 
 #### Basic example
 
@@ -235,6 +241,12 @@ To add a tool to the allow list, simply add the tool's id to the `AGENT_BUILDER_
 in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
+
+### Making sure the agent's namespace is registered as being internal
+
+Platform agents should all be namespaced under protected namespaces, to avoid id collisions with user-created agents.
+When introducing a new protected namespace (e.g. when adding a new category of agents), it must be added
+to the `protectedNamespaces` array in `x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts`
 
 ### Basic example
 
