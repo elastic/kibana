@@ -17,5 +17,7 @@ import type {
 export type ScheduleBackfillParam = TypeOf<typeof scheduleBackfillParamSchema>;
 export type ScheduleBackfillParams = TypeOf<typeof scheduleBackfillParamsSchema>;
 export type ScheduleBackfillResult = TypeOf<typeof scheduleBackfillResultSchema>;
+
+export type BackfillInitiator = 'user' | 'system';
 export type ScheduleBackfillResults = TypeOf<typeof scheduleBackfillResultsSchema>;
 export type ScheduleBackfillError = TypeOf<typeof scheduleBackfillErrorSchema>;

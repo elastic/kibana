@@ -13,6 +13,7 @@ export const findQuerySchema = schema.object(
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 10, min: 0 }),
     rule_ids: schema.maybe(schema.string()),
+    initiator: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
     sort_field: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
     sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),

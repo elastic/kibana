@@ -14,11 +14,12 @@ import type { RulesClientContext } from '../../../../rules_client';
 interface ProcessGapsBatchFromRulesParams {
   gaps: Gap[];
   range: BulkFillGapsByRuleIdsParams['range'];
+  initiator?: 'user' | 'system';
 }
 
 export const processGapsBatchFromRules = async (
   context: RulesClientContext,
-  { gaps, range }: ProcessGapsBatchFromRulesParams
+  { gaps, range, initiator }: ProcessGapsBatchFromRulesParams
 ): Promise<{
   results: Array<{
     ruleId: string;
@@ -37,6 +38,7 @@ export const processGapsBatchFromRules = async (
   const schedulingPayloads: Array<{
     ruleId: string;
     ranges: Array<{ start: string; end: string }>;
+    initiator?: 'user' | 'system';
   }> = [];
 
   // Group gaps by rule ID
@@ -72,6 +74,7 @@ export const processGapsBatchFromRules = async (
     schedulingPayloads.push({
       ruleId,
       ranges: gapRanges,
+      ...(initiator ? { initiator } : {}),
     });
   }
 

@@ -77,6 +77,7 @@ export const findBackfillsForRules = async ({
   ruleIds,
   page,
   perPage,
+  initiator,
   signal,
   sortField = 'createdAt',
   sortOrder = 'desc',
@@ -84,6 +85,7 @@ export const findBackfillsForRules = async ({
   ruleIds: string[];
   page: number;
   perPage: number;
+  initiator?: Array<'user' | 'system'> | 'user' | 'system';
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
@@ -96,6 +98,11 @@ export const findBackfillsForRules = async ({
         rule_ids: ruleIds.join(','),
         page,
         per_page: perPage,
+        ...(initiator
+          ? {
+              initiator: Array.isArray(initiator) ? initiator.join(',') : initiator,
+            }
+          : {}),
         sort_field: sortField,
         sort_order: sortOrder,
       },

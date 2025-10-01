@@ -214,6 +214,9 @@ export function setupSavedObjects(
         createdAt: {
           type: 'date',
         },
+        initiator: {
+          type: 'keyword',
+        },
         end: {
           type: 'date',
         },

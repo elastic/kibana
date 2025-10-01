@@ -20,6 +20,7 @@ export const scheduleBodySchema = schema.arrayOf(
         })
       ),
       run_actions: schema.maybe(schema.boolean()),
+      initiator: schema.maybe(schema.oneOf([schema.literal('user'), schema.literal('system')])),
     },
     {
       validate({ ranges }) {

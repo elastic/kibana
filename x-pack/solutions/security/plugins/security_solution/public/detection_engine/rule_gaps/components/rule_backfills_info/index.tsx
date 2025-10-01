@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import { InitiatorFilter } from './initiator_filter';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
@@ -136,6 +137,7 @@ const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [initiator, setInitiator] = useState<Array<'user' | 'system'>>(['user']);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const { timelines } = useKibana().services;
@@ -143,6 +145,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
     ruleIds: [ruleId],
     page: pageIndex + 1,
     perPage: pageSize,
+    initiator,
   });
 
   const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
@@ -179,6 +182,10 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
               subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
             />
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <InitiatorFilter selected={initiator} onChange={setInitiator} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

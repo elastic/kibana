@@ -19,6 +19,7 @@ export const scheduleBackfillParamSchema = schema.object(
       })
     ),
     runActions: schema.maybe(schema.boolean()),
+    initiator: schema.maybe(schema.oneOf([schema.literal('user'), schema.literal('system')])),
   },
   {
     validate({ ranges }) {

@@ -31,6 +31,7 @@ export const transformBackfillParamToAdHocRun = (
     duration: rule.schedule.interval,
     enabled: true,
     end,
+    initiator: param.initiator ?? 'user',
     rule: {
       name: rule.name,
       tags: rule.tags,

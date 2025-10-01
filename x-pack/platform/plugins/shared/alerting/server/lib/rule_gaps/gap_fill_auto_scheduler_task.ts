@@ -663,6 +663,7 @@ export function registerGapFillAutoSchedulerTask({
                       processGapsBatchFromRules(rulesClientContext, {
                         gaps: filteredGaps,
                         range: { start: startDate.toISOString(), end: now.toISOString() },
+                        initiator: 'system',
                       })
                   );
 
