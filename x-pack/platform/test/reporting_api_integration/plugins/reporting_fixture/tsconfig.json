@@ -5,8 +5,8 @@
     "isolatedModules": true
   },
   "include": [
-    "public/**/**/*",
-    "server/**/**/*",
+    "public/**/*",
+    "server/**/*",
     "common/**/*",
   ],
   "exclude": [
