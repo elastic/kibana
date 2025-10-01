@@ -1106,7 +1106,7 @@ describe('processDetectionRuleCustomizations', () => {
     expect(customizationsField).toBeUndefined();
   });
 
-  it("returns undefined if rule doesn't have `has_base_version` field", () => {
+  it("returns undefined if rule_source doesn't have `has_base_version` field", () => {
     const customizationsField = processDetectionRuleCustomizations({
       'kibana.alert.rule.parameters': {
         // @ts-expect-error
@@ -1120,7 +1120,7 @@ describe('processDetectionRuleCustomizations', () => {
     expect(customizationsField).toBeUndefined();
   });
 
-  it("returns undefined if rule doesn't have `customized_fields` field", () => {
+  it("returns undefined if rule_source doesn't have `customized_fields` field", () => {
     const customizationsField = processDetectionRuleCustomizations({
       'kibana.alert.rule.parameters': {
         // @ts-expect-error
@@ -1134,7 +1134,7 @@ describe('processDetectionRuleCustomizations', () => {
     expect(customizationsField).toBeUndefined();
   });
 
-  it("returns undefined if rule doesn't have `customized_fields` or `has_base_version` fields", () => {
+  it("returns undefined if rule_source doesn't have `customized_fields` or `has_base_version` fields", () => {
     const customizationsField = processDetectionRuleCustomizations({
       'kibana.alert.rule.parameters': {
         // @ts-expect-error
