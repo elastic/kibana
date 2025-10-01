@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { release } from 'os';
 import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
