@@ -132,6 +132,13 @@ jest.mock('./use_ids_from_url', () => ({
   }),
 }));
 
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
+
 const historyMock = {
   ...mockHistory,
   location: {
