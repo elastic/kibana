@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { resolve } from 'path';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
 import { services } from '../services';
@@ -18,6 +20,7 @@ export default createTestConfig({
     reportName: 'Serverless Search Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
+  screenshots: { directory: resolve(__dirname, '../../../screenshots') },
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
@@ -33,12 +36,8 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
-    '--xpack.searchSynonyms.enabled=true',
   ],
   apps: {
-    serverlessElasticsearch: {
-      pathname: '/app/elasticsearch/getting_started',
-    },
     serverlessConnectors: {
       pathname: '/app/connectors',
     },
@@ -56,6 +55,12 @@ export default createTestConfig({
     },
     searchHomepage: {
       pathname: '/app/elasticsearch/home',
+    },
+    searchSynonyms: {
+      pathname: '/app/elasticsearch/search_synonyms',
+    },
+    searchQueryRules: {
+      pathname: '/app/elasticsearch/query_rules',
     },
   },
 });

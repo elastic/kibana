@@ -12,7 +12,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -405,32 +405,24 @@ export class IndexUpdateService {
           });
         });
 
-      return (
-        dataView.fields
-          .concat(unsavedFields)
-          // Exclude metadata fields. TODO check if this is the right way to do it
-          // @ts-ignore
-          .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
-          .map((field) => {
-            return {
-              name: field.name,
-              id: field.name,
-              isNull: field.isNull,
-              meta: {
-                type: field.type,
-                params: {
-                  id: field.name,
-                  sourceParams: {
-                    fieldName: field.name,
-                  },
-                },
-                aggregatable: field.aggregatable,
-                searchable: field.searchable,
-                esTypes: field.esTypes,
+      return dataView.fields
+        .concat(unsavedFields)
+        .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
+        .map((field) => {
+          const datatableColumn: DatatableColumn = {
+            name: field.name,
+            id: field.name,
+            isNull: field.isNull,
+            meta: {
+              type: field.type as DatatableColumnType,
+              params: {
+                id: field.name,
               },
-            } as DatatableColumn;
-          })
-      );
+              esType: field.esTypes?.at(0),
+            },
+          };
+          return datatableColumn;
+        });
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );

@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -78,8 +70,9 @@
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
     "@kbn/doc-links",
+    "@kbn/ui-actions-plugin",
     "@kbn/workflows",
     "@kbn/spaces-utils",
-    "@kbn/spaces-plugin",
+    "@kbn/spaces-plugin"
   ]
 }
