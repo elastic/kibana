@@ -35,6 +35,7 @@ interface RawVariableItem {
   start: number;
   end: number;
   key: string | null;
+  type: 'regexp' | 'foreach';
 }
 
 interface UseYamlValidationProps {
@@ -245,6 +246,7 @@ export function useYamlValidation({
                   start: foreachValueNode.range[0],
                   end: foreachValueNode.range[2],
                   key: node.configuration.foreach,
+                  type: 'foreach',
                 };
               }
             }
@@ -255,11 +257,12 @@ export function useYamlValidation({
           start: match.index ?? 0,
           end: (match.index ?? 0) + match[0].length, // match[0] is the entire {{...}} expression
           key: match.groups?.key ?? null,
+          type: 'regexp',
         }));
         const variableItems = [...textMatches, ...foreachVariableItems];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
         for (const variableItem of variableItems) {
-          const { start, end, key } = variableItem;
+          const { start, end, key, type } = variableItem;
           // Get the position (line, column) for the match
           const startPos = model.getPositionAt(start);
           const endPos = model.getPositionAt(end);
@@ -296,6 +299,15 @@ export function useYamlValidation({
                 const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
                 if (!refSchema) {
                   errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+                } else if (
+                  getZodTypeName(refSchema) === 'string' &&
+                  variableItem.type === 'foreach'
+                ) {
+                  severity = 'warning';
+                  errorMessage = `Foreach parameter can be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`;
+                } else if (getZodTypeName(refSchema) === 'any' && refSchema.description) {
+                  severity = 'warning';
+                  errorMessage = refSchema.description;
                 } else if (getZodTypeName(refSchema) === 'unknown') {
                   hoverMessage = `<pre>(property) ${
                     parsedPath.propertyPath
@@ -327,7 +339,7 @@ export function useYamlValidation({
                 endPos.column
               ),
               options: {
-                inlineClassName: 'template-variable-error',
+                inlineClassName: `template-variable-${severity}`,
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
                 hoverMessage: hoverMessage ? createMarkdownContent(hoverMessage) : null,
               },

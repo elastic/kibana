@@ -1531,6 +1531,10 @@ const componentStyles = {
         color: euiTheme.colors.severity.danger,
         borderRadius: '2px',
       },
+      '.template-variable-warning': {
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
+        borderRadius: '2px',
+      },
       '.step-highlight': {
         backgroundColor: euiTheme.colors.backgroundBaseAccent,
         borderRadius: '2px',
