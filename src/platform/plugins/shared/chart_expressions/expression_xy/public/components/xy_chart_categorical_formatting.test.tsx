@@ -27,6 +27,7 @@ import { type CoreSetup } from '@kbn/core/public';
 import type { ExtendedDataLayerConfig } from '../../common/types';
 import { getAggsFormats } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { NULL_LABEL } from '@kbn/field-formats-plugin/common/constants/replacement_labels';
 
 // these are used within the DSL terms aggs custom format
 const OTHER_BUCKET_LABEL = '[OTHER LABEL]';
@@ -314,7 +315,7 @@ describe('XY categorical formatting', () => {
     ]);
   });
 
-  test('Skips null in formatting categories in ordinal X axis', async () => {
+  test('Dont skip null in formatting categories in ordinal X axis', async () => {
     const { debugState } = await renderChart(
       {
         ...defaultXYChartProps,
@@ -335,14 +336,14 @@ describe('XY categorical formatting', () => {
       XYChart,
       true
     );
-    expect(debugState?.axes?.x[0]?.labels).toEqual(['Group A', EMPTY_LABEL, 'Group B']);
+    expect(debugState?.axes?.x[0]?.labels).toEqual(['Group A', EMPTY_LABEL, NULL_LABEL, 'Group B']);
     // 1 series
     expect(debugState?.bars).toHaveLength(1);
     // 3 bars, null value skipped
-    expect(debugState?.bars?.[0].bars).toHaveLength(3);
+    expect(debugState?.bars?.[0].bars).toHaveLength(4);
   });
 
-  test('Skips null values with split series and ordinal X axis', async () => {
+  test('Dont skip null values with split series and ordinal X axis', async () => {
     const { debugState } = await renderChart(
       {
         ...defaultXYChartProps,
@@ -366,7 +367,7 @@ describe('XY categorical formatting', () => {
               { x: 'A', y: 1, g: null },
               { x: '', y: 1, g: null },
               { x: null, y: 1, g: null },
-              { x: 'b', y: 1, g: null },
+              { x: 'B', y: 1, g: null },
             ],
           },
         }),
@@ -375,10 +376,10 @@ describe('XY categorical formatting', () => {
       XYChart,
       true
     );
-    // should be 4 categories, null skipped
-    expect(debugState?.axes?.x[0]?.labels).toEqual(['A', EMPTY_LABEL, 'B']);
-    // should be 3 series, null series is skipped
-    expect(debugState?.bars?.map((b) => b.name)).toEqual(['Group A', EMPTY_LABEL]);
+    // should be 4 categories including nulls
+    expect(debugState?.axes?.x[0]?.labels).toEqual(['A', EMPTY_LABEL, NULL_LABEL, 'B']);
+    // should be 3 series, null series are not skipped
+    expect(debugState?.bars?.map((b) => b.name)).toEqual(['Group A', EMPTY_LABEL, NULL_LABEL]);
   });
 
   test('Skips null values with multi-split series and ordinal X axis', async () => {
@@ -430,7 +431,7 @@ describe('XY categorical formatting', () => {
       true
     );
     // 3 categorical values
-    expect(debugState?.axes?.x[0]?.labels).toEqual(['A', EMPTY_LABEL, 'B']);
+    expect(debugState?.axes?.x[0]?.labels).toEqual(['A', EMPTY_LABEL, NULL_LABEL, 'B']);
     // two series
     expect(debugState?.bars?.map((b) => b.name)).toEqual([
       'Group A - Sub A',
@@ -438,8 +439,8 @@ describe('XY categorical formatting', () => {
       `${EMPTY_LABEL} - Sub A`,
       `${EMPTY_LABEL} - Sub B`,
       // These two are not right, these labels should be also converted
-      `Sub A`,
-      `Sub B`,
+      `${NULL_LABEL} - Sub A`,
+      `${NULL_LABEL} - Sub B`,
     ]);
   });
 });

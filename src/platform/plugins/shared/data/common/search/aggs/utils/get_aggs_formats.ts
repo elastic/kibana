@@ -155,10 +155,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           params as SerializedFieldFormat<{}, SerializableRecord>
         );
 
-        if (val === '__other__') {
+        if (val === '__other__' && params.otherBucketLabel) {
           return `${params.otherBucketLabel}`;
         }
-        if (val === '__missing__') {
+        if (val === '__missing__' && params.missingBucketLabel) {
           return `${params.missingBucketLabel}`;
         }
 
@@ -176,7 +176,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return this.getCachedFormat(fieldParams);
         });
 
-        if (String(val) === '__other__') {
+        if (String(val) === '__other__' && params.otherBucketLabel) {
           return `${params.otherBucketLabel}`;
         }
 
