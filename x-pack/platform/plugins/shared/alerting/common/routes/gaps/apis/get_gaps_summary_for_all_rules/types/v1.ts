@@ -16,6 +16,9 @@ export interface GetGapsSummaryForAllRulesResponseV1 {
     total_in_progress_duration_ms: number;
     total_filled_duration_ms: number;
     total_gap_duration_ms: number;
+    total_unfilled_rules: number;
+    total_in_progress_rules: number;
+    total_filled_rules: number;
   };
 }
 

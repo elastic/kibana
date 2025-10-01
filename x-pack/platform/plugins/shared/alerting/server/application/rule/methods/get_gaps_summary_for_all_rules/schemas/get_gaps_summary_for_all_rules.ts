@@ -17,4 +17,7 @@ export const getGapsSummaryForAllRulesResponseSchema = schema.object({
   totalInProgressDurationMs: schema.number(),
   totalFilledDurationMs: schema.number(),
   totalGapDurationMs: schema.number(),
+  totalUnfilledRules: schema.number(),
+  totalInProgressRules: schema.number(),
+  totalFilledRules: schema.number(),
 });

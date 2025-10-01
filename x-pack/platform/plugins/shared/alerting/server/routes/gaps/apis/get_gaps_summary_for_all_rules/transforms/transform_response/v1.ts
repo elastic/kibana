@@ -14,4 +14,7 @@ export const transformResponse = (
   total_in_progress_duration_ms: result.totalInProgressDurationMs,
   total_filled_duration_ms: result.totalFilledDurationMs,
   total_gap_duration_ms: result.totalGapDurationMs,
+  total_unfilled_rules: result.totalUnfilledRules,
+  total_in_progress_rules: result.totalInProgressRules,
+  total_filled_rules: result.totalFilledRules,
 });

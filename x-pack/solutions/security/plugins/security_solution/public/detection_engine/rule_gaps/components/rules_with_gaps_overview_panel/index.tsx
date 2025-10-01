@@ -150,9 +150,7 @@ const ExecutionSummaryPanel = () => {
                     </EuiFlexGroup>
                   </EuiTableRowCell>
                   <EuiTableRowCell width="40%">
-                    <EuiText size="s">
-                      <strong>{item.count}</strong>
-                    </EuiText>
+                    <EuiText size="s">{item.count}</EuiText>
                   </EuiTableRowCell>
                 </EuiTableRow>
               ))}
@@ -200,22 +198,28 @@ const GapSummaryPanel = () => {
   const unfilledMs = gapData?.total_unfilled_duration_ms || 0;
   const inProgressMs = gapData?.total_in_progress_duration_ms || 0;
   const filledMs = gapData?.total_filled_duration_ms || 0;
+  const unfilledRules = gapData?.total_unfilled_rules || 0;
+  const inProgressRules = gapData?.total_in_progress_rules || 0;
+  const filledRules = gapData?.total_filled_rules || 0;
 
   const gapDataForChart = [
     {
       status: 'Filled',
       count: filledMs,
       color: '#16C5C0',
+      rules: filledRules,
     },
     {
       status: 'In Progress',
       count: inProgressMs,
       color: '#61A2FF',
+      rules: inProgressRules,
     },
     {
       status: 'Unfilled',
       count: unfilledMs,
       color: '#F6726A',
+      rules: unfilledRules,
     },
   ].filter((item) => item.count > 0); // Only show segments with data
 
@@ -274,7 +278,8 @@ const GapSummaryPanel = () => {
             <EuiTable>
               <EuiTableHeader>
                 <EuiTableHeaderCell width="60%">{'Status'}</EuiTableHeaderCell>
-                <EuiTableHeaderCell width="40%">{'Duration'}</EuiTableHeaderCell>
+                <EuiTableHeaderCell width="15%">{'Rules'}</EuiTableHeaderCell>
+                <EuiTableHeaderCell width="25%">{'Duration'}</EuiTableHeaderCell>
               </EuiTableHeader>
               <EuiTableBody>
                 {gapDataForChart.map((item, index) => (
@@ -296,10 +301,12 @@ const GapSummaryPanel = () => {
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiTableRowCell>
-                    <EuiTableRowCell width="40%">
-                      <EuiText size="s">
-                        <strong>{formatDuration(item.count)}</strong>
-                      </EuiText>
+
+                    <EuiTableRowCell width="15%">
+                      <EuiText size="s">{item.rules}</EuiText>
+                    </EuiTableRowCell>
+                    <EuiTableRowCell width="25%">
+                      <EuiText size="s">{formatDuration(item.count)}</EuiText>
                     </EuiTableRowCell>
                   </EuiTableRow>
                 ))}

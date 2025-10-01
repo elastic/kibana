@@ -53,7 +53,7 @@ export async function getGapsSummaryForAllRules(
 
     const { from, to } = resolveTimeRange({ from: start, to: end });
     const filter = `${buildBaseGapsFilter(from, to)} AND kibana.alert.rule.gap.status: *`;
-console.log('filter', JSON.stringify(filter, null, 2));
+
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
@@ -72,23 +72,60 @@ console.log('filter', JSON.stringify(filter, null, 2));
           totalGapDurationMs: {
             sum: { field: 'kibana.alert.rule.gap.duration_ms' },
           },
+          // Distinct rule counts per duration field > 0
+          unfilledRules: {
+            filter: { range: { 'kibana.alert.rule.gap.unfilled_duration_ms': { gt: 0 } } },
+            aggs: {
+              uniqueRules: { cardinality: { field: 'rule.id' } },
+            },
+          },
+          inProgressRules: {
+            filter: { range: { 'kibana.alert.rule.gap.in_progress_duration_ms': { gt: 0 } } },
+            aggs: {
+              uniqueRules: { cardinality: { field: 'rule.id' } },
+            },
+          },
+          filledRules: {
+            filter: { range: { 'kibana.alert.rule.gap.filled_duration_ms': { gt: 0 } } },
+            aggs: {
+              uniqueRules: { cardinality: { field: 'rule.id' } },
+            },
+          },
         },
       }
     );
-
-    console.log('aggs', JSON.stringify(aggs, null, 2));
 
     const totalUnfilled =
       (aggs.aggregations?.totalUnfilledDurationMs as { value: number })?.value ?? 0;
     const totalInProgress =
       (aggs.aggregations?.totalInProgressDurationMs as { value: number })?.value ?? 0;
     const totalFilled = (aggs.aggregations?.totalFilledDurationMs as { value: number })?.value ?? 0;
-    const totalGapDuration = (aggs.aggregations?.totalGapDurationMs as { value: number })?.value ?? 0;
+    const totalGapDuration =
+      (aggs.aggregations?.totalGapDurationMs as { value: number })?.value ?? 0;
+    type CardinalityAgg = { value: number } | undefined;
+    type FilterBucket = { uniqueRules?: CardinalityAgg } | undefined;
+    const buckets = aggs.aggregations as
+      | {
+          unfilledRules?: FilterBucket;
+          inProgressRules?: FilterBucket;
+          filledRules?: FilterBucket;
+        }
+      | undefined;
+
+    const totalUnfilledRules =
+      (buckets?.unfilledRules?.uniqueRules as { value: number } | undefined)?.value ?? 0;
+    const totalInProgressRules =
+      (buckets?.inProgressRules?.uniqueRules as { value: number } | undefined)?.value ?? 0;
+    const totalFilledRules =
+      (buckets?.filledRules?.uniqueRules as { value: number } | undefined)?.value ?? 0;
     const result: GetGapsSummaryForAllRulesResponse = {
       totalUnfilledDurationMs: totalUnfilled,
       totalInProgressDurationMs: totalInProgress,
       totalFilledDurationMs: totalFilled,
       totalGapDurationMs: totalGapDuration,
+      totalUnfilledRules,
+      totalInProgressRules,
+      totalFilledRules,
     };
 
     return result;
