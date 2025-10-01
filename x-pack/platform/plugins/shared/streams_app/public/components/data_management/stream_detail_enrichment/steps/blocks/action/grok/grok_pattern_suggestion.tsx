@@ -31,7 +31,7 @@ import type { ProcessorFormState } from '../../../../types';
 import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import type { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
