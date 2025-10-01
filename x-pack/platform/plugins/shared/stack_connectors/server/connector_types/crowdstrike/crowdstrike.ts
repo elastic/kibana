@@ -33,6 +33,7 @@ import {
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
+  CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
@@ -60,7 +61,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
   private experimentalFeatures: ExperimentalFeatures;
   private crowdStrikeSessionManager: CrowdStrikeSessionManager;
   private urls: {
-    getToken: string;
     agents: string;
     hostAction: string;
     agentStatus: string;
@@ -79,7 +79,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
     super(params);
     this.experimentalFeatures = experimentalFeatures;
     this.urls = {
-      getToken: `${this.config.url}/oauth2/token`,
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
