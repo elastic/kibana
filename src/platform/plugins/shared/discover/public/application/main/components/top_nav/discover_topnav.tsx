@@ -13,7 +13,6 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -33,8 +32,8 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { DiscoverTopNavMenu } from './discover_topnav_menu';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -57,7 +56,7 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
@@ -70,10 +69,7 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.core.featureFlags.getBooleanValue(
-    TABS_ENABLED_FEATURE_FLAG_KEY,
-    false
-  );
+  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
   const discoverSessionTitle = useInternalStateSelector(
     (state) => state.persistedDiscoverSession?.title
   );
@@ -176,15 +172,6 @@ export const DiscoverTopNav = ({
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const topNavProps = useMemo(
-    () => ({
-      badges: topNavBadges,
-      config: topNavMenu,
-      setMenuMountPoint: setHeaderActionMenu,
-      gutterSize: 'xxs' as EuiHeaderLinksProps['gutterSize'],
-    }),
-    [setHeaderActionMenu, topNavBadges, topNavMenu]
-  );
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
@@ -248,8 +235,8 @@ export const DiscoverTopNav = ({
 
   return (
     <span css={floatingActionStyles}>
+      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
-        {...topNavProps}
         useBackgroundSearchButton={
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession

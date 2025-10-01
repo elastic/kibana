@@ -20,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { ExecutionDetail } from './execution_detail';
 import { CancelExecutionButton } from './cancel_execution_button';
@@ -27,6 +28,7 @@ import { CancelExecutionButton } from './cancel_execution_button';
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;
   workflowYaml: string;
+  showBackButton?: boolean;
   fields?: Array<keyof EsWorkflowStepExecution>;
   onClose?: () => void;
 }
@@ -34,6 +36,7 @@ export interface WorkflowExecutionProps {
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
   workflowExecutionId,
   workflowYaml,
+  showBackButton = true,
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -52,28 +55,40 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
         justifyContent="flexStart"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false}>
-          <header
-            css={css({
-              minHeight: `32px`,
-              display: 'flex',
-              alignItems: 'center',
-            })}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <EuiButtonEmpty iconType="arrowLeft" onClick={onClose} size="xs">
-                    <FormattedMessage
-                      id="workflows.workflowStepExecutionList.backToExecution"
-                      defaultMessage="Back to executions"
-                    />
-                  </EuiButtonEmpty>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </header>
-        </EuiFlexItem>
+        {showBackButton && (
+          <EuiFlexItem grow={false}>
+            <header
+              css={css({
+                minHeight: `32px`,
+                display: 'flex',
+                alignItems: 'center',
+              })}
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <EuiButtonEmpty
+                      iconType="arrowLeft"
+                      onClick={onClose}
+                      size="xs"
+                      aria-label={i18n.translate(
+                        'workflows.workflowStepExecutionList.backToExecution',
+                        {
+                          defaultMessage: 'Back to executions',
+                        }
+                      )}
+                    >
+                      <FormattedMessage
+                        id="workflows.workflowStepExecutionList.backToExecution"
+                        defaultMessage="Back to executions"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </header>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <ExecutionDetail
             workflowExecutionId={workflowExecutionId}

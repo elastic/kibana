@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
-import React, { forwardRef } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
@@ -132,17 +132,21 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-    const horizontalStyles =
-      !isHorizontal &&
-      css`
-        ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `;
+    const verticalStyles = css`
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `;
+
+    const horizontalStyles = css`
+      font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
+    `;
 
     const content = (
       <>
         <div className="iconWrapper">
-          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type={'empty'} />}>
+            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          </Suspense>
         </div>
         {isLabelVisible ? (
           <EuiText
@@ -150,10 +154,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             textAlign="center"
             css={css`
               ${truncatedStyles}
-              ${horizontalStyles}
+              ${isHorizontal ? horizontalStyles : verticalStyles}
               overflow: hidden;
               max-width: 100%;
-              padding: 0 ${euiTheme.size.xs};
+              padding: 0 ${euiTheme.size.s};
             `}
           >
             {children}
