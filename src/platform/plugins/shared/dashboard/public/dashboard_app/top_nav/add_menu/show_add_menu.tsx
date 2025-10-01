@@ -7,36 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import {
-  type EuiContextMenuPanelDescriptor,
   EuiContextMenu,
   EuiWrappingPopover,
+  type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
-import { uiActionsService } from '../../../services/kibana_services';
-import {
-  getAddControlButtonTitle,
-  getControlButtonTitle,
-  getAddESQLControlButtonTitle,
-  getAddTimeSliderControlButtonTitle,
-  getCreateVisualizationButtonTitle,
-  getEditControlGroupButtonTitle,
-} from '../../_dashboard_app_strings';
+import { getCreateVisualizationButtonTitle } from '../../_dashboard_app_strings';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -57,24 +44,8 @@ function cleanup() {
 }
 
 export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
+  /** TODO: Set this as part of the timeslider conversion */
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
-
-  useEffect(() => {
-    if (!controlGroupApi) {
-      return;
-    }
-
-    const subscription = controlGroupApi.children$.subscribe((children) => {
-      const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
-        return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
-      });
-      setHasTimeSliderControl(nextHasTimeSliderControl);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [controlGroupApi]);
 
   const onSave = () => {
     dashboardApi.scrollToTop();
@@ -144,12 +115,6 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           },
         },
         {
-          name: getControlButtonTitle(),
-          icon: 'controlsHorizontal',
-          'data-test-subj': 'dashboard-controls-menu-button',
-          panel: 1,
-        },
-        {
           name: i18n.translate(
             'dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel',
             {
@@ -160,94 +125,6 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           icon: 'folderOpen',
           onClick: () => {
             addFromLibrary(dashboardApi);
-            closePopover();
-          },
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: getControlButtonTitle(),
-      initialFocusedItemIndex: 0,
-      items: [
-        {
-          name: getAddControlButtonTitle(),
-          icon: 'empty',
-          disabled: !controlGroupApi,
-          'data-test-subj': 'controls-create-button',
-          onClick: () => {
-            controlGroupApi?.openAddDataControlFlyout({ onSave });
-            closePopover();
-          },
-        },
-        {
-          name: getAddESQLControlButtonTitle(),
-          icon: 'empty',
-          disabled: !controlGroupApi,
-          'data-test-subj': 'esql-control-create-button',
-          onClick: async () => {
-            try {
-              const variablesInParent = apiPublishesESQLVariables(dashboardApi)
-                ? dashboardApi.esqlVariables$.value
-                : [];
-
-              await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-                queryString: '',
-                variableType: ESQLVariableType.VALUES,
-                controlType: EsqlControlType.VALUES_FROM_QUERY,
-                esqlVariables: variablesInParent,
-                onSaveControl: (controlState: DefaultControlApi) => {
-                  controlGroupApi?.addNewPanel({
-                    panelType: 'esqlControl',
-                    serializedState: {
-                      rawState: {
-                        ...controlState,
-                      },
-                    },
-                  });
-                  dashboardApi.scrollToTop();
-                  closePopover();
-                },
-                onCancelControl: closePopover,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.error('Error getting ESQL control trigger', e);
-            }
-            closePopover();
-          },
-        },
-        {
-          name: getAddTimeSliderControlButtonTitle(),
-          icon: 'empty',
-          'data-test-subj': 'controls-create-timeslider-button',
-          disabled: !controlGroupApi || hasTimeSliderControl,
-          onClick: async () => {
-            controlGroupApi?.addNewPanel({
-              panelType: TIME_SLIDER_CONTROL,
-              serializedState: {
-                rawState: {
-                  grow: true,
-                  width: 'large',
-                  id: uuidv4(),
-                },
-              },
-            });
-            dashboardApi.scrollToTop();
-            closePopover();
-          },
-        },
-        {
-          isSeparator: true,
-          key: 'sep',
-        },
-        {
-          name: getEditControlGroupButtonTitle(),
-          icon: 'empty',
-          'data-test-subj': 'controls-settings-button',
-          disabled: !controlGroupApi,
-          onClick: async () => {
-            controlGroupApi?.onEdit();
             closePopover();
           },
         },

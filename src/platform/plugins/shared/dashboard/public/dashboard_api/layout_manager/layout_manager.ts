@@ -272,7 +272,7 @@ export function initializeLayoutManager(
     if (options?.displaySuccessMessage) {
       const title = (serializedState?.rawState as SerializedTitles)?.title;
       coreServices.notifications.toasts.addSuccess({
-        title: getPanelAddedSuccessString(title),a
+        title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
     }

@@ -57,7 +57,7 @@ export function transformDashboardOut(
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupOut && { controlGroupInputa: controlGroupOut }),
+    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
