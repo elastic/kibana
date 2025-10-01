@@ -75,21 +75,10 @@ const validateBulkAction = (
     };
   }
 
-  // Validate that ids and gap range params are not used together
-  if (body?.ids && (body.gaps_range_start || body.gaps_range_end)) {
+  // Validate that ids and gap status params are not used together
+  if (body?.ids && body.gap_status) {
     return {
-      body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
-      statusCode: 400,
-    };
-  }
-
-  // Validate that both gap range params are provided if any is used
-  if (
-    (body.gaps_range_start && !body.gaps_range_end) ||
-    (!body.gaps_range_start && body.gaps_range_end)
-  ) {
-    return {
-      body: `Both gaps_range_start and gaps_range_end must be provided together.`,
+      body: `Cannot use both ids and gap_status in request payload.`,
       statusCode: 400,
     };
   }
@@ -187,15 +176,6 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
-          let gapRange;
-
-          // If gap range params are present, set up the gap range parameter
-          if (body.gaps_range_start && body.gaps_range_end) {
-            gapRange = {
-              start: body.gaps_range_start,
-              end: body.gaps_range_end,
-            };
-          }
 
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
@@ -205,7 +185,7 @@ export const performBulkActionRoute = (
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
-            gapRange,
+            gapStatus: body.gap_status,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

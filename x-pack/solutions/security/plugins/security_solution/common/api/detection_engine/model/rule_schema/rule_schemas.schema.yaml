@@ -211,7 +211,7 @@ components:
           type: string
           nullable: true
           description: Aggregated gap status for the rule when enrichment is enabled
-          enum: [IN_PROGRESS, UNFILLED, FILLED]
+          enum: [in_progress, unfilled, filled]
       required:
         - id
         - rule_id

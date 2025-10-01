@@ -11,8 +11,5 @@ import type { GetRuleIdsWithGapsParams } from '../../../../../../application/rul
 export const transformRequest = (request: GetRuleIdsWithGapBodyV1): GetRuleIdsWithGapsParams => ({
   start: request.start,
   end: request.end,
-  statuses: request.statuses,
-  hasUnfilledIntervals: request.has_unfilled_intervals,
-  hasInProgressIntervals: request.has_in_progress_intervals,
-  hasFilledIntervals: request.has_filled_intervals,
+  aggregatedStatuses: request.statuses,
 });

@@ -14,7 +14,11 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import { aggregatedGapStatus } from '../../../../../common/constants';
+import {
+  buildBaseGapsFilter,
+  resolveTimeRange,
+} from '../get_aggregated_gap_status_by_rule_ids/gap_intervals';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 export async function getRuleIdsWithGaps(
@@ -47,14 +51,8 @@ export async function getRuleIdsWithGaps(
     const { start, end, statuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const filter = buildGapsFilter({
-      start,
-      end,
-      statuses,
-      hasUnfilledIntervals: params.hasUnfilledIntervals,
-      hasInProgressIntervals: params.hasInProgressIntervals,
-      hasFilledIntervals: params.hasFilledIntervals,
-    });
+    const { from, to } = resolveTimeRange({ from: start, to: end });
+    const filter = `${buildBaseGapsFilter(from, to)} AND kibana.alert.rule.gap.status: *`;
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
@@ -62,48 +60,59 @@ export async function getRuleIdsWithGaps(
       {
         filter,
         aggs: {
-          latest_gap_timestamp: {
-            max: {
-              field: '@timestamp',
-            },
-          },
-          unique_rule_ids: {
-            terms: {
-              field: 'rule.id',
-              size: 10000,
-              order: {
-                oldest_gap_timestamp: 'asc',
-              },
-            },
+          latest_gap_timestamp: { max: { field: '@timestamp' } },
+          by_rule: {
+            terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
             aggs: {
-              oldest_gap_timestamp: {
-                min: {
-                  field: '@timestamp',
-                },
+              sum_unfilled_ms: { sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' } },
+              sum_in_progress_ms: {
+                sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
               },
+              sum_filled_ms: { sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' } },
             },
           },
         },
       }
     );
 
-    interface UniqueRuleIdsAgg {
-      buckets: Array<{ key: string }>;
+    interface ByRuleBucket {
+      key: string;
+      sum_unfilled_ms?: { value: number | null };
+      sum_in_progress_ms?: { value: number | null };
+      sum_filled_ms?: { value: number | null };
     }
 
-    const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
+    const byRuleAgg = aggs.aggregations?.by_rule as unknown as
+      | { buckets: ByRuleBucket[] }
+      | undefined;
+    const buckets = byRuleAgg?.buckets ?? [];
+    const categories = new Set(params.aggregatedStatuses);
+
+    const ruleIds: string[] = [];
+    for (const b of buckets) {
+      const sumUnfilledMs = Math.max(0, b.sum_unfilled_ms?.value ?? 0);
+      const sumInProgressMs = Math.max(0, b.sum_in_progress_ms?.value ?? 0);
+      const sumFilledMs = Math.max(0, b.sum_filled_ms?.value ?? 0);
+      // Precedence: IN_PROGRESS > UNFILLED > FILLED (match existing behavior)
+      const status =
+        sumInProgressMs > 0
+          ? aggregatedGapStatus.IN_PROGRESS
+          : sumUnfilledMs > 0
+          ? aggregatedGapStatus.UNFILLED
+          : sumFilledMs > 0
+          ? aggregatedGapStatus.FILLED
+          : null;
+      if (status && categories.has(status)) {
+        ruleIds.push(b.key);
+      }
+    }
+
     const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
-
-    const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
-
-    const ruleIds = resultBuckets.map((bucket) => bucket.key) ?? [];
-
     const result: GetRuleIdsWithGapsResponse = {
-      total: ruleIds?.length,
+      total: ruleIds.length,
       ruleIds,
       latestGapTimestamp: latestGapTimestampAgg?.value,
     };
-
     return result;
   } catch (err) {
     const errorMessage = `Failed to find rules with gaps`;

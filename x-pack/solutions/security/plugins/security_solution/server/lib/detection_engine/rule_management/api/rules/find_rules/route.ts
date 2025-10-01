@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { gapStatus } from '@kbn/alerting-plugin/common';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -54,15 +54,14 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const rulesClient = await ctx.alerting.getRulesClient();
 
           let ruleIds: string[] | undefined;
-          if (query.gaps_range_start && query.gaps_range_end) {
-            const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
-              start: query.gaps_range_start,
-              end: query.gaps_range_end,
-              statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-              hasUnfilledIntervals: true,
+          // Filter by aggregated gap status if requested (unified API)
+
+          if (query.gap_status) {
+            const aggregatedResult = await rulesClient.getRuleIdsWithGaps({
+              aggregatedStatuses: [query.gap_status],
             });
-            ruleIds = ruleIdsWithGaps.ruleIds;
-            if (ruleIds.length === 0) {
+            const filteredIds = aggregatedResult.ruleIds;
+            if (filteredIds.length === 0) {
               const emptyRules = transformFindAlerts({
                 data: [],
                 page: query.page,
@@ -71,6 +70,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               });
               return response.ok({ body: emptyRules });
             }
+            ruleIds = filteredIds;
           }
 
           const rules = await findRules({
@@ -83,28 +83,52 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             fields: query.fields,
             ruleIds,
           });
-          console.log('1');
           // Optional enrichment: aggregated gap status per rule
           if (query.include_gap_status) {
-            console.log('2');
             const pageRuleIds = rules.data.map((r) => r.id);
             if (pageRuleIds.length > 0) {
-              console.log('3');
-              const timeRange =
-                query.gaps_range_start && query.gaps_range_end
-                  ? { from: query.gaps_range_start, to: query.gaps_range_end }
-                  : undefined;
               const summaries = await rulesClient.getAggregatedGapStatusByRuleIds({
                 ruleIds: pageRuleIds,
-                timeRange,
               });
-              console.log('4');
-              console.log('summaries', JSON.stringify(summaries, null, 2));
-              rules.data = rules.data.map((r) => ({
-                ...r,
-                // Attach top-level gap_status, null when no active gaps
-                gap_status: summaries[r.id]?.status ?? null,
-              })) as typeof rules.data;
+              rules.data = rules.data.map((r) => {
+                const summary = summaries[r.id] as (typeof summaries)[string] &
+                  Partial<{
+                    sums: {
+                      unfilled_ms: number;
+                      in_progress_ms: number;
+                      filled_ms: number;
+                      total_ms: number;
+                    };
+                  }>;
+
+                const status = summary?.status ?? null;
+                const sums = summary?.sums;
+                const latestUpdate = (summary as unknown as { latestUpdate?: string })
+                  ?.latestUpdate;
+                return {
+                  ...r,
+                  // Unified gaps object containing status and durations
+                  gaps: {
+                    status,
+                    durations_ms: {
+                      in_progress_ms: Math.max(0, sums?.in_progress_ms ?? 0),
+                      unfilled_ms: Math.max(0, sums?.unfilled_ms ?? 0),
+                      filled_ms: Math.max(0, sums?.filled_ms ?? 0),
+                      total_ms: Math.max(0, sums?.total_ms ?? 0),
+                    },
+                    ...(latestUpdate ? { latest_update: latestUpdate } : {}),
+                  } as {
+                    status: AggregatedGapStatus;
+                    durations_ms: {
+                      in_progress_ms: number;
+                      unfilled_ms: number;
+                      filled_ms: number;
+                      total_ms: number;
+                    };
+                    latest_update?: string;
+                  },
+                } as typeof r;
+              }) as typeof rules.data;
             }
           }
 

@@ -75,20 +75,24 @@ Filters the returned results according to the value of the specified field, usin
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
   /**
-   * Gaps range start
-   */
-  gaps_range_start: z.string().optional(),
-  /**
-   * Gaps range end
-   */
-  gaps_range_end: z.string().optional(),
-  /**
    * Include aggregated gap status in response enrichment
    */
   include_gap_status: z
     .preprocess((v) => (typeof v === 'string' ? v === 'true' : v), z.boolean())
     .optional()
     .default(false),
+  /**
+   * Filter by aggregated gap status category
+   */
+  gap_status: z.enum(['in_progress', 'unfilled', 'filled']).optional(),
+  /**
+   * Time range start for aggregated gap status computation
+   */
+  gap_time_from: z.string().optional(),
+  /**
+   * Time range end for aggregated gap status computation
+   */
+  gap_time_to: z.string().optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

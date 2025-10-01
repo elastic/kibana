@@ -77,6 +77,32 @@ paths:
           required: false
           schema:
             type: string
+        - name: include_gap_status
+          in: query
+          description: Include aggregated gap status in response enrichment
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: gap_status
+          in: query
+          description: Filter by aggregated gap status category
+          required: false
+          schema:
+            type: string
+            enum: [in_progress, unfilled, filled]
+        - name: gap_time_from
+          in: query
+          description: Time range start for aggregated gap status computation
+          required: false
+          schema:
+            type: string
+        - name: gap_time_to
+          in: query
+          description: Time range end for aggregated gap status computation
+          required: false
+          schema:
+            type: string
       x-codeSamples:
         - lang: cURL
           source: |

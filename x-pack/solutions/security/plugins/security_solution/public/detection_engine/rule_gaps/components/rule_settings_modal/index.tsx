@@ -90,8 +90,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
     }
     setIntervalError(undefined);
     try {
-      const status = (query.error as { response?: { status?: number } })?.response?.status;
-      if (status === 404) {
+      if (!query.data) {
         await createMutation.mutateAsync({ enabled, schedule: { interval: intervalString } });
       } else {
         await updateMutation.mutateAsync({ enabled, schedule: { interval: intervalString } });

@@ -68,10 +68,10 @@ export const internalRuleToAPIResponse = (
     execution_summary: executionSummary ?? undefined,
   };
 
-  // Carry through optional top-level enrichments (e.g., gap_status) when present on the source rule
-  const maybeGapStatus = rule?.gap_status;
-  if (maybeGapStatus !== undefined) {
-    ruleResponse.gap_status = maybeGapStatus;
+  const maybeGaps = (rule as unknown as { gaps?: unknown })?.gaps;
+  if (maybeGaps !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ruleResponse as any).gaps = maybeGaps;
   }
 
   return ruleResponse;

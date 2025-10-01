@@ -8,6 +8,7 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
@@ -23,6 +24,7 @@ export interface FindRulesQueryArgs {
     end: string;
   };
   includeGapStatus?: boolean;
+  gapStatus?: AggregatedGapStatus;
 }
 
 const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];

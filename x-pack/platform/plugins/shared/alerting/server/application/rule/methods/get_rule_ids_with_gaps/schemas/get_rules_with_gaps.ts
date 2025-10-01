@@ -14,6 +14,8 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   hasUnfilledIntervals: schema.maybe(schema.boolean()),
   hasInProgressIntervals: schema.maybe(schema.boolean()),
   hasFilledIntervals: schema.maybe(schema.boolean()),
+  // Optional aggregated mode: if provided, selects rules by aggregated categories
+  aggregatedStatuses: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const getRuleIdsWithGapsResponseSchema = schema.object({

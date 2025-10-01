@@ -179,7 +179,7 @@ export const ResponseFields = z.object({
   revision: RuleRevision,
   required_fields: RequiredFieldArray,
   execution_summary: RuleExecutionSummary.optional(),
-  gap_status: z.enum(['IN_PROGRESS', 'UNFILLED', 'FILLED']).nullable().optional(),
+  gap_status: z.enum(['in_progress', 'unfilled', 'filled']).nullable().optional(),
 });
 
 export type SharedCreateProps = z.infer<typeof SharedCreateProps>;

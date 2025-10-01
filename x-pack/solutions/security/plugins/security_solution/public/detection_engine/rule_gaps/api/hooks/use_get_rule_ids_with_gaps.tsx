@@ -26,39 +26,23 @@ export const useInvalidateGetRuleIdsWithGapsQuery = () => {
 
 export const useGetRuleIdsWithGaps = (
   {
+    aggregatedStatus,
     gapRange,
-    statuses,
-    hasUnfilledIntervals,
-    hasInProgressIntervals,
-    hasFilledIntervals,
   }: {
     gapRange: GapRangeValue;
-    statuses: string[];
-    hasUnfilledIntervals?: boolean;
-    hasInProgressIntervals?: boolean;
-    hasFilledIntervals?: boolean;
+    aggregatedStatus: string[];
   },
   options?: UseQueryOptions<GetRuleIdsWithGapResponseBody>
 ) => {
   return useQuery<GetRuleIdsWithGapResponseBody>(
-    [
-      GET_RULE_IDS_WITH_GAPS,
-      gapRange,
-      ...statuses,
-      hasUnfilledIntervals,
-      hasInProgressIntervals,
-      hasFilledIntervals,
-    ],
+    [GET_RULE_IDS_WITH_GAPS, gapRange, ...aggregatedStatus],
     async ({ signal }) => {
       const { start, end } = getGapRange(gapRange);
       const response = await getRuleIdsWithGaps({
         signal,
         start,
         end,
-        statuses,
-        hasUnfilledIntervals,
-        hasInProgressIntervals,
-        hasFilledIntervals,
+        aggregatedStatus,
       });
 
       return response;

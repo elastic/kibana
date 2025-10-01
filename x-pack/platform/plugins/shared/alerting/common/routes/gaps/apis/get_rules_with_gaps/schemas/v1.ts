@@ -11,9 +11,6 @@ export const getRuleIdsWithGapBodySchema = schema.object(
     end: schema.string(),
     start: schema.string(),
     statuses: schema.maybe(schema.arrayOf(schema.string())),
-    has_unfilled_intervals: schema.maybe(schema.boolean()),
-    has_in_progress_intervals: schema.maybe(schema.boolean()),
-    has_filled_intervals: schema.maybe(schema.boolean()),
   },
   {
     validate({ start, end }) {

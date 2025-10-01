@@ -16,6 +16,7 @@ import * as i18n from '../../../../common/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
+import { GapStatusSelector } from './gap_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 
@@ -44,6 +45,7 @@ const RulesTableFiltersComponent = () => {
     tags: selectedTags,
     enabled,
     ruleExecutionStatus: selectedRuleExecutionStatus,
+    gapStatus,
   } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -113,6 +115,15 @@ const RulesTableFiltersComponent = () => {
           <RuleExecutionStatusSelector
             onSelectedStatusChanged={handleSelectedExecutionStatus}
             selectedStatus={selectedRuleExecutionStatus}
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <GapStatusSelector
+            selectedStatus={gapStatus}
+            onSelectedStatusChanged={(newStatus) => setFilterOptions({ gapStatus: newStatus })}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

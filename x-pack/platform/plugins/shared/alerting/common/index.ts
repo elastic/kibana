@@ -183,7 +183,8 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus } from './constants';
+export { gapStatus, aggregatedGapStatus } from './constants';
+export type { GapStatus, AggregatedGapStatus } from './constants';
 
 export type {
   MaintenanceWindowModificationMetadata,

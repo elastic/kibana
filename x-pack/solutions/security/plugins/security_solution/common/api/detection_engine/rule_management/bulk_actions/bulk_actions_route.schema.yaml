@@ -1211,11 +1211,8 @@ components:
           minItems: 1
           items:
             type: string
-        gaps_range_start:
-          description: Gaps range start, valid only when query is provided
-          type: string
-        gaps_range_end:
-          description: Gaps range end, valid only when query is provided
+        gap_status:
+          description: Gap status, valid only when query is provided
           type: string
 
     BulkDeleteRules:

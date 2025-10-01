@@ -7,10 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client';
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
-
-export type AggregatedGapStatus = 'IN_PROGRESS' | 'UNFILLED' | 'FILLED' | null;
-
+import { buildBaseGapsFilter, resolveTimeRange } from './gap_intervals';
+import type { AggregatedGapStatus } from '../../../../../common/constants';
+import { aggregatedGapStatus } from '../../../../../common/constants';
 export interface RuleGapStatusSummary {
   ruleId: string;
   status: AggregatedGapStatus;
@@ -24,26 +23,13 @@ export interface GetAggregatedGapStatusByRuleIdsParams {
   timeRange?: { from: string; to: string };
 }
 
-function toAggregatedStatus(
-  counts: { filled: number; partially_filled: number; unfilled: number },
-  inProgressDocs: number
-): AggregatedGapStatus {
-  const total = counts.filled + counts.partially_filled + counts.unfilled;
-  if (total === 0) return null;
-  if (counts.unfilled > 0 || counts.partially_filled > 0) return 'UNFILLED';
-  if (inProgressDocs > 0) return 'IN_PROGRESS';
-  return 'FILLED';
-}
-
-interface StatusCountsAgg {
-  buckets: Record<string, { doc_count: number }>; // filled, partially_filled, unfilled
-}
-
 interface ByRuleBucket {
   key: string; // rule.id
   doc_count: number;
-  status_counts: StatusCountsAgg;
-  has_in_progress: { doc_count: number };
+  sum_unfilled_ms: { value: number | null };
+  sum_in_progress_ms: { value: number | null };
+  sum_filled_ms: { value: number | null };
+  sum_total_ms?: { value: number | null };
   latest_update: { value: number | null };
 }
 
@@ -57,15 +43,8 @@ export async function getAggregatedGapStatusByRuleIds(
       return {};
     }
 
-    const now = new Date();
-    const fromDefault = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const toDefault = now.toISOString();
-    const from = params.timeRange?.from ?? fromDefault;
-    const to = params.timeRange?.to ?? toDefault;
-
-    // Base KQL filter for gaps with deleted:false plus time range
-    const baseFilter = buildGapsFilter({ start: from, end: to });
-    const filter = `${baseFilter} AND kibana.alert.rule.gap.status: *`;
+    const { from, to } = resolveTimeRange(params.timeRange);
+    const filter = `${buildBaseGapsFilter(from, to)} AND kibana.alert.rule.gap.status: *`;
 
     const eventLogClient = await context.getEventLogClient();
 
@@ -75,19 +54,19 @@ export async function getAggregatedGapStatusByRuleIds(
         by_rule: {
           terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
           aggs: {
-            status_counts: {
-              filters: {
-                filters: {
-                  filled: { term: { 'kibana.alert.rule.gap.status': 'filled' } },
-                  partially_filled: {
-                    term: { 'kibana.alert.rule.gap.status': 'partially_filled' },
-                  },
-                  unfilled: { term: { 'kibana.alert.rule.gap.status': 'unfilled' } },
-                },
-              },
+            // sums-only aggregations
+            sum_unfilled_ms: {
+              sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
             },
-            has_in_progress: {
-              filter: { exists: { field: 'kibana.alert.rule.gap.in_progress_intervals' } },
+            sum_in_progress_ms: {
+              sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
+            },
+            sum_filled_ms: {
+              sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
+            },
+            // optional total
+            sum_total_ms: {
+              sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
             },
             latest_update: { max: { field: '@timestamp' } },
           },
@@ -100,24 +79,54 @@ export async function getAggregatedGapStatusByRuleIds(
     const result: Record<string, RuleGapStatusSummary> = {};
 
     for (const bucket of byRule) {
-      const counts = {
-        filled: bucket.status_counts?.buckets?.filled?.doc_count ?? 0,
-        partially_filled: bucket.status_counts?.buckets?.partially_filled?.doc_count ?? 0,
-        unfilled: bucket.status_counts?.buckets?.unfilled?.doc_count ?? 0,
-      };
-      const inProgressDocs = bucket.has_in_progress?.doc_count ?? 0;
-      const status = toAggregatedStatus(counts, inProgressDocs);
+      const sumUnfilledMs = Math.max(0, bucket.sum_unfilled_ms?.value ?? 0);
+      const sumInProgressMs = Math.max(0, bucket.sum_in_progress_ms?.value ?? 0);
+      const sumFilledMs = Math.max(0, bucket.sum_filled_ms?.value ?? 0);
+      const sumTotalMs = Math.max(0, bucket.sum_total_ms?.value ?? 0);
+
+      // Aggregated status based on sums
+      const status =
+        sumInProgressMs > 0
+          ? aggregatedGapStatus.IN_PROGRESS
+          : sumUnfilledMs > 0
+          ? aggregatedGapStatus.UNFILLED
+          : sumFilledMs > 0
+          ? aggregatedGapStatus.FILLED
+          : null;
+
       const latestUpdate = bucket.latest_update?.value
         ? new Date(bucket.latest_update.value).toISOString()
         : undefined;
 
-      result[bucket.key] = {
+      // keep legacy fields for backwards compatibility
+      const counts = {
+        filled: sumFilledMs > 0 ? 1 : 0,
+        partially_filled: 0,
+        unfilled: sumUnfilledMs > 0 ? 1 : 0,
+      };
+      const inProgressDocs = sumInProgressMs > 0 ? 1 : 0;
+
+      const extended: RuleGapStatusSummary & {
+        sums?: {
+          unfilled_ms: number;
+          in_progress_ms: number;
+          filled_ms: number;
+          total_ms: number;
+        };
+      } = {
         ruleId: bucket.key,
         status,
         counts,
         inProgressDocs,
         latestUpdate,
       };
+      extended.sums = {
+        unfilled_ms: sumUnfilledMs,
+        in_progress_ms: sumInProgressMs,
+        filled_ms: sumFilledMs,
+        total_ms: sumTotalMs,
+      };
+      result[bucket.key] = extended;
     }
 
     // For ruleIds with no buckets, set null status

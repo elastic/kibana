@@ -195,6 +195,7 @@ export const fetchRules = async ({
   },
   gapsRange,
   includeGapStatus,
+  gapStatus,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
@@ -204,8 +205,8 @@ export const fetchRules = async ({
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(gapsRange ? { gaps_range_start: gapsRange.start, gaps_range_end: gapsRange.end } : {}),
     ...(includeGapStatus ? { include_gap_status: true } : {}),
+    ...(gapStatus ? { gap_status: gapStatus } : {}),
     ...(kql !== '' ? { filter: kql } : {}),
   };
 
@@ -417,8 +418,7 @@ export async function performBulkAction({
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
-    gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
-    gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
+    gap_status: 'gapStatus' in bulkAction ? bulkAction.gapStatus : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
   };

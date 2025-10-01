@@ -18,7 +18,7 @@ import { findGapsSearchAfter } from './find_gaps';
 import { processGapsBatchFromRules } from '../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch_from_rules';
 
 import type { RulesClient } from '../../rules_client/rules_client';
-import { gapStatus } from '../../../common/constants';
+import { aggregatedGapStatus, gapStatus } from '../../../common/constants';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { Gap } from './gap';
 import type { BackfillClient } from '../../backfill_client/backfill_client';
@@ -322,8 +322,8 @@ async function fetchRuleIdsWithGapsPhase(
         {
           start: startDate.toISOString(),
           end: now.toISOString(),
-          statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-          hasUnfilledIntervals: true,
+          aggregatedStatus: [aggregatedGapStatus.UNFILLED],
+          // add skip erroed gaps
         }
       );
       ruleIds = ruleIdsFromGetRuleIdsWithGaps;

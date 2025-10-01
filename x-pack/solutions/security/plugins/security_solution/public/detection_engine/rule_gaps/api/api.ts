@@ -14,7 +14,7 @@ import {
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
   INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH,
-  gapStatus,
+  aggregatedGapStatus,
 } from '@kbn/alerting-plugin/common';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
@@ -198,17 +198,11 @@ export const getRuleIdsWithGaps = async ({
   signal,
   start,
   end,
-  statuses = [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-  hasUnfilledIntervals,
-  hasInProgressIntervals,
-  hasFilledIntervals,
+  aggregatedStatus = [aggregatedGapStatus.UNFILLED],
 }: {
-  start: string;
-  end: string;
-  statuses: string[];
-  hasUnfilledIntervals?: boolean;
-  hasInProgressIntervals?: boolean;
-  hasFilledIntervals?: boolean;
+  start?: string;
+  end?: string;
+  aggregatedStatus: string[];
   signal?: AbortSignal;
 }): Promise<GetRuleIdsWithGapResponseBody> =>
   KibanaServices.get().http.fetch<GetRuleIdsWithGapResponseBody>(
@@ -218,16 +212,7 @@ export const getRuleIdsWithGaps = async ({
       body: JSON.stringify({
         start,
         end,
-        statuses,
-        ...(hasUnfilledIntervals !== undefined && {
-          has_unfilled_intervals: hasUnfilledIntervals,
-        }),
-        ...(hasInProgressIntervals !== undefined && {
-          has_in_progress_intervals: hasInProgressIntervals,
-        }),
-        ...(hasFilledIntervals !== undefined && {
-          has_filled_intervals: hasFilledIntervals,
-        }),
+        statuses: aggregatedStatus,
       }),
       signal,
     }

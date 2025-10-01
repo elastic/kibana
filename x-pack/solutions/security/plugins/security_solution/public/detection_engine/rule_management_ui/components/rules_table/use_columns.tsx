@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -551,19 +553,54 @@ export const useMonitoringColumns = ({
 export const useGapStatusColumn = (): TableColumn => {
   return useMemo(
     () => ({
-      field: 'gap_status',
+      field: 'gaps',
       name: i18n.COLUMN_GAP_STATUS ?? 'Gap status',
-      render: (value: 'IN_PROGRESS' | 'UNFILLED' | 'FILLED' | null | undefined) => {
-        if (!value) return getEmptyTagValue();
+      render: (_: unknown, item: Rule) => {
+        const gaps = (
+          item as unknown as {
+            gaps?: {
+              status?: AggregatedGapStatus;
+              durations_ms?: {
+                in_progress_ms?: number;
+                unfilled_ms?: number;
+                filled_ms?: number;
+                total_ms?: number;
+              };
+            };
+            gap_status?: AggregatedGapStatus;
+            gap_status_info?: {
+              durations_ms?: {
+                in_progress_ms?: number;
+                unfilled_ms?: number;
+                filled_ms?: number;
+                total_ms?: number;
+              };
+            };
+          }
+        )?.gaps;
+
+        const status: AggregatedGapStatus | null | undefined =
+          gaps?.status ??
+          (
+            item as unknown as {
+              gap_status?: AggregatedGapStatus;
+            }
+          )?.gap_status;
+        if (!status) return getEmptyTagValue();
+
         const color =
-          value === 'IN_PROGRESS' ? '#9170B8' : value === 'UNFILLED' ? '#FDDDD8' : '#C9F3E3';
+          status === aggregatedGapStatus.IN_PROGRESS
+            ? '#9170B8'
+            : status === aggregatedGapStatus.UNFILLED
+            ? '#FDDDD8'
+            : '#C9F3E3';
         const label =
-          value === 'IN_PROGRESS'
+          status === aggregatedGapStatus.IN_PROGRESS
             ? kbnI18n.translate(
                 'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.inProgress',
                 { defaultMessage: 'In progress' }
               )
-            : value === 'UNFILLED'
+            : status === aggregatedGapStatus.UNFILLED
             ? kbnI18n.translate(
                 'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.unfilled',
                 { defaultMessage: 'Unfilled' }
@@ -572,7 +609,71 @@ export const useGapStatusColumn = (): TableColumn => {
                 'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.filled',
                 { defaultMessage: 'Filled' }
               );
-        return (
+
+        const durationsMs =
+          gaps?.durations_ms ??
+          (
+            item as unknown as {
+              gap_status_info?: {
+                durations_ms?: {
+                  in_progress_ms?: number;
+                  unfilled_ms?: number;
+                  filled_ms?: number;
+                  total_ms?: number;
+                };
+              };
+            }
+          )?.gap_status_info?.durations_ms;
+
+        const getDurationHumanized = (duration: number) => {
+          return duration === 0 ? '0ms' : moment.duration(duration, 'ms').humanize();
+        };
+
+        const tooltip = durationsMs ? (
+          <div>
+            <EuiText size="s">
+              {kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.inProgress',
+                {
+                  defaultMessage: 'In progress: {duration}',
+                  values: {
+                    duration: getDurationHumanized(durationsMs.in_progress_ms ?? 0),
+                  },
+                }
+              )}
+            </EuiText>
+            <EuiText size="s">
+              {kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.unfilled',
+                {
+                  defaultMessage: 'Unfilled: {duration}',
+                  values: {
+                    duration: getDurationHumanized(durationsMs.unfilled_ms ?? 0),
+                  },
+                }
+              )}
+            </EuiText>
+            <EuiText size="s">
+              {kbnI18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.filled',
+                {
+                  defaultMessage: 'Filled: {duration}',
+                  values: {
+                    duration: getDurationHumanized(durationsMs.filled_ms ?? 0),
+                  },
+                }
+              )}
+            </EuiText>
+          </div>
+        ) : undefined;
+
+        return tooltip ? (
+          <EuiToolTip position="top" content={tooltip}>
+            <EuiBadge color={color} data-test-subj="gapStatusBadge">
+              {label}
+            </EuiBadge>
+          </EuiToolTip>
+        ) : (
           <EuiBadge color={color} data-test-subj="gapStatusBadge">
             {label}
           </EuiBadge>

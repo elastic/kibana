@@ -106,13 +106,9 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
   const globalQuery = useMemo(() => {
-    const gapRange = filterOptions?.showRulesWithGaps
-      ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
-      : undefined;
-
     return {
       query: kql,
-      ...(gapRange && { gapRange }),
+      ...(filterOptions?.gapStatus && { gapStatus: filterOptions.gapStatus }),
     };
   }, [kql, filterOptions]);
 
@@ -123,6 +119,9 @@ export const useBulkActions = ({
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
+
+  console.log('isAllSelected', isAllSelected);
+  console.log('globalQuery', globalQuery);
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {

@@ -13,12 +13,6 @@ export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
     defaultMessage: 'Total rules with gaps:',
   }
 );
-export const RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.showRulesWithGapsLabel',
-  {
-    defaultMessage: 'Only rules with unfilled gaps',
-  }
-);
 
 export const RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.last24HoursLabel',
