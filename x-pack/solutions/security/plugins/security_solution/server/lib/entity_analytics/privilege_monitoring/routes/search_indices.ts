@@ -20,6 +20,8 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
+import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 // Return a subset of all indices that contain the user.name field
 const LIMIT = 20;
@@ -59,7 +61,13 @@ export const searchPrivilegeMonitoringIndicesRoute = (
         );
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const service = createDataSourcesService(dataClient);
+        const soClient = dataClient.getScopedSoClient(request, {
+          includedHiddenTypes: [
+            PrivilegeMonitoringApiKeyType.name,
+            monitoringEntitySourceType.name,
+          ],
+        });
+        const service = createDataSourcesService(dataClient, soClient);
         try {
           const indices = await service.searchPrivilegesIndices(query);
 
