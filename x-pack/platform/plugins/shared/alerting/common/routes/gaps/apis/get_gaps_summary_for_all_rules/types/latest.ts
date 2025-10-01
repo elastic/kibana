@@ -6,4 +6,7 @@
  */
 
 export type { GetGapsSummaryForAllRulesBodyV1 as GetGapsSummaryForAllRulesBodyLatest } from './v1';
-export type { GetGapsSummaryForAllRulesResponseV1 as GetGapsSummaryForAllRulesResponseLatest } from './v1';
+export type {
+  GetGapsSummaryForAllRulesResponseV1 as GetGapsSummaryForAllRulesResponseLatest,
+  GetGapsSummaryForAllRulesResponseBodyV1 as GetGapsSummaryForAllRulesResponseBodyLatest,
+} from './v1';

@@ -30,9 +30,20 @@ import {
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
 
-export const AutoFillSchedulerFlyoutTrigger = () => {
+interface AutoFillSchedulerFlyoutTriggerProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const AutoFillSchedulerFlyoutTrigger = ({
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+}: AutoFillSchedulerFlyoutTriggerProps = {}) => {
   const { data: scheduler } = useGetGapAutoFillScheduler();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [internalIsFlyoutOpen, setInternalIsFlyoutOpen] = useState(false);
+
+  const isFlyoutOpen = externalIsOpen ?? internalIsFlyoutOpen;
+  const setIsFlyoutOpen = externalOnClose ? externalOnClose : setInternalIsFlyoutOpen;
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
     start: 'now-24h',
     end: 'now',
@@ -114,15 +125,6 @@ export const AutoFillSchedulerFlyoutTrigger = () => {
 
   return (
     <>
-      <EuiBadge
-        color={color}
-        iconType={iconType}
-        onClick={onBadgeClick}
-        onClickAriaLabel={enabled ? i18n.AUTO_FILL_ON_LABEL : i18n.AUTO_FILL_OFF_LABEL}
-        style={{ display: 'inline-flex', width: 'auto' }}
-      >
-        {enabled ? i18n.AUTO_FILL_ON_LABEL : i18n.AUTO_FILL_OFF_LABEL}
-      </EuiBadge>
       {isFlyoutOpen && (
         <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby="gapFillTracker">
           <EuiFlyoutHeader hasBorder>

@@ -15,5 +15,8 @@ export interface GetGapsSummaryForAllRulesResponseV1 {
     total_unfilled_duration_ms: number;
     total_in_progress_duration_ms: number;
     total_filled_duration_ms: number;
+    total_gap_duration_ms: number;
   };
 }
+
+export type GetGapsSummaryForAllRulesResponseBodyV1 = GetGapsSummaryForAllRulesResponseV1['body'];

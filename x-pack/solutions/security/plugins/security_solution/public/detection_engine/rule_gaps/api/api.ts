@@ -11,6 +11,7 @@ import {
   INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
   INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
   INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
+  INTERNAL_ALERTING_GAPS_GET_SUMMARY_FOR_ALL_RULES_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
   INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH,
@@ -20,6 +21,7 @@ import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugi
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryForAllRulesResponseBodyLatest } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_for_all_rules';
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
@@ -244,6 +246,27 @@ export const getGapsSummaryByRuleIds = async ({
         start,
         end,
         rule_ids: ruleIds,
+      }),
+    }
+  );
+
+export const getGapsSummaryForAllRules = async ({
+  signal,
+  start,
+  end,
+}: {
+  start?: string;
+  end?: string;
+  signal?: AbortSignal;
+}): Promise<GetGapsSummaryForAllRulesResponseBodyLatest> =>
+  KibanaServices.get().http.fetch<GetGapsSummaryForAllRulesResponseBodyLatest>(
+    INTERNAL_ALERTING_GAPS_GET_SUMMARY_FOR_ALL_RULES_API_PATH,
+    {
+      signal,
+      method: 'POST',
+      body: JSON.stringify({
+        ...(start ? { start } : {}),
+        ...(end ? { end } : {}),
       }),
     }
   );

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { GetGapsSummaryForAllRulesResponseV1 } from '../../../../../../common/routes/gaps/apis/get_gaps_summary_for_all_rules';
+import type { GetGapsSummaryForAllRulesResponseV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_for_all_rules';
 import type { GetGapsSummaryForAllRulesResponse } from '../../../../../../application/rule/methods/get_gaps_summary_for_all_rules/types';
 
 export const transformResponse = (
@@ -13,4 +13,5 @@ export const transformResponse = (
   total_unfilled_duration_ms: result.totalUnfilledDurationMs,
   total_in_progress_duration_ms: result.totalInProgressDurationMs,
   total_filled_duration_ms: result.totalFilledDurationMs,
+  total_gap_duration_ms: result.totalGapDurationMs,
 });

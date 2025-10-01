@@ -4,9 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 
-export const getGapsSummaryForAllRulesBodySchemaV1 = schema.object({
-  start: schema.string(),
-  end: schema.string(),
-});
+export * from './v1';

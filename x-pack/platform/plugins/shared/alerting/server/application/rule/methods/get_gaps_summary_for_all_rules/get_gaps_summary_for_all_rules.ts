@@ -53,7 +53,7 @@ export async function getGapsSummaryForAllRules(
 
     const { from, to } = resolveTimeRange({ from: start, to: end });
     const filter = `${buildBaseGapsFilter(from, to)} AND kibana.alert.rule.gap.status: *`;
-
+console.log('filter', JSON.stringify(filter, null, 2));
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
@@ -69,19 +69,26 @@ export async function getGapsSummaryForAllRules(
           totalFilledDurationMs: {
             sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
           },
+          totalGapDurationMs: {
+            sum: { field: 'kibana.alert.rule.gap.duration_ms' },
+          },
         },
       }
     );
+
+    console.log('aggs', JSON.stringify(aggs, null, 2));
 
     const totalUnfilled =
       (aggs.aggregations?.totalUnfilledDurationMs as { value: number })?.value ?? 0;
     const totalInProgress =
       (aggs.aggregations?.totalInProgressDurationMs as { value: number })?.value ?? 0;
     const totalFilled = (aggs.aggregations?.totalFilledDurationMs as { value: number })?.value ?? 0;
+    const totalGapDuration = (aggs.aggregations?.totalGapDurationMs as { value: number })?.value ?? 0;
     const result: GetGapsSummaryForAllRulesResponse = {
       totalUnfilledDurationMs: totalUnfilled,
       totalInProgressDurationMs: totalInProgress,
       totalFilledDurationMs: totalFilled,
+      totalGapDurationMs: totalGapDuration,
     };
 
     return result;
