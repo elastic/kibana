@@ -106,6 +106,18 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           : currentStep === 4
           ? currentStep
           : ((currentStep + 1) as PossibleStepNumbers);
+
+      const currentFields = getFields();
+      const headerFields = Object.keys(currentFields).filter((field) =>
+        field.startsWith('__internal__.headers[')
+      );
+      if (currentStep === 1) {
+        headerFields.forEach((field) => {
+          if (!fields.step1.includes(field)) {
+            fields.step1.push(field);
+          }
+        });
+      }
       const fieldsToValidate: string[] =
         nextStep === 2
           ? fields.step1
@@ -128,7 +140,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         setCurrentStep(nextStep);
       }
     },
-    [currentStep, validateFields]
+    [currentStep, validateFields, getFields]
   );
 
   const horizontalSteps = useMemo(
