@@ -10,19 +10,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
-  countMetricOperationSchema,
-  counterRateOperationSchema,
-  cumulativeSumOperationSchema,
-  differencesOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  movingAverageOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
   esqlColumnSchema,
   genericOperationOptionsSchema,
   metricOperationDefinitionSchema,
@@ -30,6 +17,7 @@ import {
 import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -56,9 +44,13 @@ const gaugeStateSharedOptionsSchema = {
 
 const gaugeStateMetricOptionsSchema = schema.object({
   /**
-   * Sub label
+   * Title (overrides label on chart panel, but not in table)
    */
-  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
+  title: schema.maybe(schema.string({ meta: { description: 'Title' } })),
+  /**
+   * Sub title
+   */
+  sub_title: schema.maybe(schema.string({ meta: { description: 'Sub title' } })),
   /**
    * Color configuration
    */
@@ -71,8 +63,20 @@ const gaugeStateMetricOptionsSchema = schema.object({
       defaultValue: 'auto',
     })
   ),
+  /**
+   * Minimum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
   min: schema.maybe(metricOperationDefinitionSchema),
+  /**
+   * Maximum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
   max: schema.maybe(metricOperationDefinitionSchema),
+  /**
+   * Goal value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
   goal: schema.maybe(metricOperationDefinitionSchema),
 });
 
@@ -85,29 +89,7 @@ export const gaugeStateSchemaNoESQL = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    schema.oneOf([
-      schema.allOf([gaugeStateMetricOptionsSchema, countMetricOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, metricOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, sumMetricOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, lastValueOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, percentileOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([gaugeStateMetricOptionsSchema, differencesOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, movingAverageOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, cumulativeSumOperationSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, counterRateOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([gaugeStateMetricOptionsSchema, staticOperationDefinitionSchema]),
-      schema.allOf([gaugeStateMetricOptionsSchema, formulaOperationDefinitionSchema]),
-    ]),
-  ]),
+  metric: mergeAllMetricsWithChartDimensionSchema(gaugeStateMetricOptionsSchema),
 });
 
 const gaugeStateSchemaESQL = schema.object({
