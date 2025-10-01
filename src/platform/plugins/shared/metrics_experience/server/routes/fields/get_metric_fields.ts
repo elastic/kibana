@@ -19,6 +19,7 @@ import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
 import { buildMetricField } from '../../lib/fields/build_metric_field';
 import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
 import { applyPagination } from '../../lib/pagination/apply_pagination';
+import type { EpochTimeRange } from '../../types';
 
 export async function getMetricFields({
   indexPattern,
@@ -32,7 +33,7 @@ export async function getMetricFields({
   esClient: TracedElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  timerange: { from: number; to: number };
+  timerange: EpochTimeRange;
   page: number;
   size: number;
   logger: Logger;
