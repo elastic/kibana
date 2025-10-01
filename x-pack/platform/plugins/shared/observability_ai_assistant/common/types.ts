@@ -205,3 +205,12 @@ export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
 }
+
+export interface IntegrationKnowledgeBaseEntry {
+  content: string;
+  package_name: string;
+  filename: string;
+  version: string;
+  path: string;
+  installed_at: string;
+}
