@@ -11,6 +11,7 @@ import {
   REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD,
 } from '@kbn/reporting-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IndicesRolloverRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export async function rollDataStreamIfRequired(
   logger: Logger,
@@ -95,10 +96,14 @@ export async function rollDataStreamIfRequired(
   // Roll over the data stream to pick up the new mappings.
   // The `lazy` option will cause the rollover to run on the next write.
   // This limits potential race conditions of multiple Kibana's rolling over at once.
-  await esClient.indices.rollover({
+  const request: IndicesRolloverRequest = {
     alias: REPORTING_DATA_STREAM_ALIAS,
     lazy: true,
-  });
+    // the lazy option is not in the types for older versions
+  } as IndicesRolloverRequest;
+
+  debug(`${msgPrefix} rollover request: ${JSON.stringify(request)}`);
+  await esClient.indices.rollover(request);
 
   logger.info(`${msgPrefix} rolled over to pick up index template version ${templateVersion}`);
   return true;

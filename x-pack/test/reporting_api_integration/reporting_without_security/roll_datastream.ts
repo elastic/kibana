@@ -23,6 +23,7 @@ import { cloneDeep } from 'lodash';
 import { URI_ROLLOVER } from '@kbn/reporting-test-routes/server/routes';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esClient: ElasticsearchClient = getService('es');
   const supertest: Superagent = getService('supertest');
