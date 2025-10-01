@@ -16,7 +16,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import useLatest from 'react-use/lib/useLatest';
-import { ResizableLayoutSide, type ResizableLayoutDirection } from '../types';
+import { ResizableLayoutOrder, type ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({
@@ -27,7 +27,7 @@ export const PanelsResizable = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
-  fixedPanelSide = ResizableLayoutSide.Left,
+  fixedPanelSide = ResizableLayoutOrder.Start,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
@@ -39,7 +39,7 @@ export const PanelsResizable = ({
   minFlexPanelSize: number;
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
-  fixedPanelSide?: ResizableLayoutSide;
+  fixedPanelSide?: ResizableLayoutOrder;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
@@ -236,7 +236,7 @@ export const PanelsResizable = ({
 
           return (
             <>
-              {fixedPanelSide === ResizableLayoutSide.Left ? (
+              {fixedPanelSide === ResizableLayoutOrder.Start ? (
                 <>
                   {fixedPanelElement}
                   {resizeButtonElement}

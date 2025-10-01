@@ -43,28 +43,10 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
   const { workflowExecution, isLoading, error } = useWorkflowExecutionPolling(workflowExecutionId);
   const { setSelectedStepExecution, selectedStepExecutionId, setSelectedStep } =
     useWorkflowUrlState();
-
   const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
     WidthStorageKey,
     DefaultSidebarWidth
   );
-
-  const setSelectedStepExecutionId = useCallback(
-    (stepExecutionId: string | null) => {
-      setSelectedStepExecution(stepExecutionId);
-    },
-    [setSelectedStepExecution]
-  );
-  const workflowDefinition = useMemo(() => {
-    if (workflowExecution) {
-      return workflowExecution.workflowDefinition;
-    }
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml, workflowExecution]);
 
   useEffect(() => {
     if (workflowExecution && !selectedStepExecutionId) {
@@ -75,6 +57,24 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
       }
     }
   }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution]);
+
+  const setSelectedStepExecutionId = useCallback(
+    (stepExecutionId: string | null) => {
+      setSelectedStepExecution(stepExecutionId);
+    },
+    [setSelectedStepExecution]
+  );
+
+  const workflowDefinition = useMemo(() => {
+    if (workflowExecution) {
+      return workflowExecution.workflowDefinition;
+    }
+    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    if (!parsingResult.success) {
+      return null;
+    }
+    return parsingResult.data as WorkflowYaml;
+  }, [workflowYaml, workflowExecution]);
 
   const selectedStepExecution = useMemo(() => {
     if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
@@ -101,7 +101,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
         fixedPanelSize={sidebarWidth}
         onFixedPanelSizeChange={setSidebarWidth}
         minFixedPanelSize={150}
-        fixedPanelSide={ResizableLayoutSide.Left}
+        fixedPanelOrder={ResizableLayoutSide.Start}
         flexPanel={
           <WorkflowStepExecutionDetails
             workflowExecutionId={workflowExecutionId}

@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
-import type { ResizableLayoutDirection, ResizableLayoutSide } from '../types';
+import type { ResizableLayoutDirection, ResizableLayoutOrder } from '../types';
 import { ResizableLayoutMode } from '../types';
 
 export interface ResizableLayoutProps {
@@ -50,7 +50,7 @@ export interface ResizableLayoutProps {
   /**
    * The side to render the fixed panel.
    */
-  fixedPanelSide?: ResizableLayoutSide;
+  fixedPanelOrder?: ResizableLayoutOrder;
   /**
    * Class name for the resize button
    */
@@ -76,7 +76,7 @@ export const ResizableLayout = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
-  fixedPanelSide,
+  fixedPanelOrder: fixedPanelSide,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
