@@ -17,7 +17,7 @@ import {
   EuiTextTruncate,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import type { DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
+import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -177,9 +177,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
               defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
               values={{
                 identifier,
-                identifierValue: Number.isFinite(Number(rowData[identifier]))
-                  ? Math.round(Number(rowData[identifier])).toLocaleString()
-                  : (rowData[identifier] as string),
+                identifierValue: rowData[identifier] as string | number,
                 bold: (chunks) => (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" textAlign="right">
@@ -190,11 +188,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
                 badge: ([chunk]) => {
                   return (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        {Number.isNaN(Number(chunk))
-                          ? chunk
-                          : Math.round(Number(chunk)).toLocaleString()}
-                      </EuiBadge>
+                      {Number.isNaN(Number(chunk)) ? (
+                        <EuiBadge color="hollow">{chunk}</EuiBadge>
+                      ) : (
+                        <NumberBadge value={Number(chunk)} shortenAtExpSize={3} />
+                      )}
                     </EuiFlexItem>
                   );
                 },
