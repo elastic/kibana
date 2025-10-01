@@ -10,7 +10,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiButton,
   EuiLoadingSpinner,
@@ -21,13 +20,10 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { Chart, Axis, Position, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
 
@@ -37,19 +33,19 @@ interface Props {
 
 export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const { filesClient } = useFilesManagementContext();
-  const chartBaseTheme = useElasticChartsTheme();
   const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();
   });
-  const titleId = useGeneratedHtmlId({ prefix: 'diagnosticsFlyoutTitle' });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s" aria-labelledby={titleId}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>{i18nTexts.diagnosticsFlyoutTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      session={true}
+      aria-label={i18nTexts.diagnosticsFlyoutTitle}
+      flyoutMenuProps={{ title: i18nTexts.diagnosticsFlyoutTitle }}
+    >
       <EuiFlyoutBody>
         {status === 'error' ? (
           <EuiEmptyPrompt
@@ -94,46 +90,12 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
               <EuiTitle size="xs">
                 <h3>{i18nTexts.diagnosticsBreakdownsStatus}</h3>
               </EuiTitle>
-              <Chart size={{ height: 200, width: '100%' }}>
-                <Settings baseTheme={chartBaseTheme} />
-                <Axis id="y" position={Position.Left} showOverlappingTicks />
-                <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
-                  data={Object.entries(data.countByStatus).map(([key, count]) => ({
-                    key,
-                    count,
-                  }))}
-                  id="Status"
-                  xAccessor={'key'}
-                  yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  timeZone="local"
-                />
-              </Chart>
             </EuiPanel>
             <EuiSpacer />
             <EuiPanel hasBorder hasShadow={false}>
               <EuiTitle size="xs">
                 <h3>{i18nTexts.diagnosticsBreakdownsExtension}</h3>
               </EuiTitle>
-              <Chart size={{ height: 200, width: '100%' }}>
-                <Settings baseTheme={chartBaseTheme} />
-                <Axis id="y" position={Position.Left} showOverlappingTicks />
-                <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
-                  data={Object.entries(data.countByExtension).map(([key, count]) => ({
-                    key,
-                    count,
-                  }))}
-                  id="Extension"
-                  xAccessor={'key'}
-                  yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  timeZone="local"
-                />
-              </Chart>
             </EuiPanel>
           </>
         )}
