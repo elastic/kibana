@@ -125,7 +125,7 @@ describe('RRule Scheduling Integration', () => {
           interval: 1,
           tzid: 'UTC',
         })
-      ).toThrow('Invalid RRule frequency for workflow test-workflow: "INVALID"');
+      ).toThrow('Invalid RRule frequency: "INVALID"');
     });
 
     it('should validate weekly frequency requires byweekday', () => {
@@ -213,7 +213,7 @@ describe('RRule Scheduling Integration', () => {
         type: 'scheduled' as const,
         with: {
           every: '5',
-          unit: 'minute',
+          unit: 'm',
         },
       };
 
@@ -336,12 +336,15 @@ describe('RRule Scheduling Integration', () => {
 
       // Verify the task instance structure
       expect(taskInstance.schedule).toBeDefined();
-      expect(taskInstance.schedule.rrule).toBeDefined();
-      expect(taskInstance.schedule.rrule.freq).toBe(Frequency.DAILY);
-      expect(taskInstance.schedule.rrule.interval).toBe(1);
-      expect(taskInstance.schedule.rrule.tzid).toBe('UTC');
-      expect(taskInstance.schedule.rrule.byhour).toEqual([9]);
-      expect(taskInstance.schedule.rrule.byminute).toEqual([0]);
+      expect('rrule' in taskInstance.schedule).toBe(true);
+      if ('rrule' in taskInstance.schedule) {
+        expect(taskInstance.schedule.rrule).toBeDefined();
+        expect(taskInstance.schedule.rrule.freq).toBe(Frequency.DAILY);
+        expect(taskInstance.schedule.rrule.interval).toBe(1);
+        expect(taskInstance.schedule.rrule.tzid).toBe('UTC');
+        expect(taskInstance.schedule.rrule.byhour).toEqual([9]);
+        expect(taskInstance.schedule.rrule.byminute).toEqual([0]);
+      }
     });
 
     it('should handle multiple RRule patterns', () => {
@@ -388,10 +391,13 @@ describe('RRule Scheduling Integration', () => {
 
         const result = convertWorkflowScheduleToTaskSchedule(trigger);
 
-        expect(result.rrule).toBeDefined();
-        expect(result.rrule.freq).toBeDefined();
-        expect(result.rrule.interval).toBeDefined();
-        expect(result.rrule.tzid).toBeDefined();
+        expect('rrule' in result).toBe(true);
+        if ('rrule' in result) {
+          expect(result.rrule).toBeDefined();
+          expect(result.rrule.freq).toBeDefined();
+          expect(result.rrule.interval).toBeDefined();
+          expect(result.rrule.tzid).toBeDefined();
+        }
       });
     });
   });
@@ -411,7 +417,7 @@ describe('RRule Scheduling Integration', () => {
             interval: 1,
             tzid: 'UTC',
           },
-          expectedError: 'Invalid RRule frequency for workflow test-workflow: "INVALID"',
+          expectedError: 'Invalid RRule frequency: "INVALID"',
         },
         {
           name: 'Weekly without byweekday',

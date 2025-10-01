@@ -123,7 +123,7 @@ export function generateRRuleTriggerSnippet(
     case 'weekly':
       if (monacoSuggestionFormat) {
         rruleConfig = {
-          freq: '${1:DAILY}',
+          freq: '${1:WEEKLY}',
           interval: '${2:1}',
           tzid: '${3:America/New_York}',
           byweekday: '${4:[MO,TU,WE,TH,FR]}',
@@ -132,7 +132,7 @@ export function generateRRuleTriggerSnippet(
         };
       } else {
         rruleConfig = {
-          freq: 'DAILY',
+          freq: 'WEEKLY',
           interval: 1,
           tzid: 'America/New_York',
           byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],

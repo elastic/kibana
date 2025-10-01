@@ -117,7 +117,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule frequency for workflow test-workflow: "INVALID"'
+        'Invalid RRule frequency: "INVALID"'
       );
     });
 
@@ -235,7 +235,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byhour for workflow test-workflow: "25"'
+        'Invalid RRule byhour: "25"'
       );
     });
 
@@ -275,7 +275,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byminute for workflow test-workflow: "60"'
+        'Invalid RRule byminute: "60"'
       );
     });
 
@@ -315,7 +315,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule bymonthday for workflow test-workflow: "32"'
+        'Invalid RRule bymonthday: "32"'
       );
     });
 
@@ -355,7 +355,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byweekday for workflow test-workflow: "INVALID"'
+        'Invalid RRule byweekday: "INVALID"'
       );
     });
 
@@ -395,7 +395,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       };
 
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule dtstart for workflow test-workflow: "invalid-date"'
+        'Invalid RRule dtstart: "invalid-date"'
       );
     });
 
@@ -484,7 +484,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       await scheduler.scheduleWorkflowTasks(workflow, 'default');
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('RRule schedule created for workflow test-workflow:')
+        expect.stringContaining('RRule schedule created')
       );
     });
   });

@@ -58,6 +58,6 @@ export function getReadableInterval(freq: number, interval: number): string {
   return pluralize(interval, intervalText);
 }
 
-function pluralize(count: number, singluarText: string, plularText?: string) {
-  return count === 1 ? singluarText : !plularText ? singluarText + 's' : singluarText;
+function pluralize(count: number, singularText: string, plularText?: string) {
+  return count === 1 ? singularText : !plularText ? singularText + 's' : plularText;
 }
