@@ -17,6 +17,7 @@ import type { LensCreateIn, LensSavedObject } from '../../../content_management'
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../types';
 import {
   lensCreateRequestBodySchema,
+  lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
 } from './schema';
@@ -27,7 +28,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   { contentManagement, builder }
 ) => {
   const createRoute = router.post({
-    path: LENS_VIS_API_PATH,
+    path: `${LENS_VIS_API_PATH}/{id?}`,
     access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
@@ -52,6 +53,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       validate: {
         request: {
           query: lensCreateRequestQuerySchema,
+          params: lensCreateRequestParamsSchema,
           body: lensCreateRequestBodySchema,
         },
         response: {
@@ -83,7 +85,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       try {
         // Note: these types are to enforce loose param typings of client methods
         const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references, id: req.body.id };
+        const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {

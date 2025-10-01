@@ -61,12 +61,19 @@ export class LensConfigBuilder {
     metric: { fromAPItoLensState, fromLensStateToAPI },
   };
   private dataViewsAPI: DataViewsCommon | undefined;
+  private enableAPITransforms: boolean;
 
-  constructor(dataViewsAPI?: DataViewsCommon) {
+  constructor(dataViewsAPI?: DataViewsCommon, enableAPITransforms = false) {
     this.dataViewsAPI = dataViewsAPI;
+    this.enableAPITransforms = enableAPITransforms;
+  }
+
+  public setEnabled(enabled: boolean) {
+    this.enableAPITransforms = enabled;
   }
 
   isSupported(chartType?: string | null): boolean {
+    if (!this.enableAPITransforms) return false;
     if (!chartType) return false;
     const type = compatibilityMap[chartType] ?? chartType;
     return type in this.apiConvertersByChart;

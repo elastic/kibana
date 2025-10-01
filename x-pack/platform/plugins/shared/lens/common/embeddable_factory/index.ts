@@ -18,6 +18,11 @@ export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;
 };
 
+/**
+ * Hardcoded layer key used in LensConfigBuilder
+ */
+const apiLayerKey = 'layer_0';
+
 export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
   state,
   references
@@ -41,8 +46,19 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
     });
   }
 
-  // TODO temporary fix for layer ref lookup
-  typedState.attributes.references.push(...matchedReferences);
+  if (matchedReferences.length === 0) {
+    // TODO temporary fix for layer ref lookup
+    // if empty and has layer_0 it will set the references to those from the attributes
+    const layerIndexRef = typedState.attributes.references.find((r) =>
+      r.name.endsWith(apiLayerKey)
+    );
+
+    if (layerIndexRef?.type === 'index-pattern') {
+      matchedReferences.push(...typedState.attributes.references);
+    }
+  }
+
+  typedState.attributes.references = matchedReferences;
 
   return typedState as unknown as EmbeddableStateWithType;
 };

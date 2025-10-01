@@ -36,6 +36,7 @@ import type { TextBasedPersistedState } from '../datasources/form_based/esql_lay
 import { DOC_TYPE } from '../../common/constants';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import { getLensPublicTransforms } from './transforms';
+import { getLensFeatureFlags } from '../get_feature_flags';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -182,7 +183,8 @@ export function transformInitialState(
   initialState: LensSerializedAPIConfig,
   references?: Reference[]
 ): LensSerializedState {
-  const builder = new LensConfigBuilder();
+  const enableAPITransforms = getLensFeatureFlags().apiFormat;
+  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
   const transforms = getLensPublicTransforms(builder);
 
   if (!transforms.transformIn) {
@@ -199,7 +201,8 @@ export function transformInitialState(
 export function transformOutputState(
   outputState: SerializedPanelState<LensSerializedState>
 ): SerializedPanelState<LensByValueSerializedAPIConfig> {
-  const builder = new LensConfigBuilder();
+  const enableAPITransforms = getLensFeatureFlags().apiFormat;
+  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
   const transforms = getLensPublicTransforms(builder);
 
   if (!transforms.transformOut) {
