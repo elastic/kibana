@@ -12,7 +12,6 @@ import { isBuiltinDefinition, isEnabledDefinition } from '../tool_types/definiti
 export const getToolTypeInfo = (definitions: AnyToolTypeDefinition[]): ToolTypeInfo[] => {
   const typeInfos: ToolTypeInfo[] = [];
 
-  // TOD
   for (const definition of definitions) {
     if (isEnabledDefinition(definition)) {
       typeInfos.push({
