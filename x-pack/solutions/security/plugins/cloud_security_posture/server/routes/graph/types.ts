@@ -15,14 +15,31 @@ export interface OriginEventId {
 }
 
 export interface GraphEdge {
-  badge: number;
-  docs: string[] | string;
-  actorIds: string[] | string;
+  // event/alert attributes
   action: string;
-  targetIds: Array<string | null> | string;
+  docs: string[] | string;
+  isAlert: boolean;
   isOrigin: boolean;
   isOriginAlert: boolean;
-  isAlert: boolean;
+  badge: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
+  sourceIps?: string[] | string;
+  sourceCountryCodes?: string[] | string;
+  // actor attributes
+  actorIds: string[] | string;
+  actorIdsCount: number;
   actorsDocData?: Array<string | null> | string;
+  actorEntityGroup: string;
+  actorEntityType: string;
+  actorLabel: string;
+  actorHostIps?: string[] | string;
+  // target attributes
+  targetIds: Array<string | null> | string;
+  targetIdsCount: number;
   targetsDocData?: Array<string | null> | string;
+  targetEntityGroup?: string;
+  targetEntityType: string;
+  targetLabel: string;
+  targetHostIps?: string[] | string;
 }
