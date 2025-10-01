@@ -172,6 +172,7 @@ describe('useWorkflowExecutionPolling', () => {
       ExecutionStatus.FAILED,
       ExecutionStatus.CANCELLED,
       ExecutionStatus.SKIPPED,
+      ExecutionStatus.TIMED_OUT,
     ];
 
     terminalStatuses.forEach((status) => {

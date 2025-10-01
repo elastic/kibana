@@ -21,6 +21,8 @@ import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { CancelExecutionButton } from './cancel_execution_button';
+import { isCancelableStatus } from '../lib/execution_status';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -43,8 +45,8 @@ export interface WorkflowExecutionListProps {
 }
 
 export const WorkflowStepExecutionList = ({
-  execution: workflowExecution,
-  definition: workflowDefinition,
+  execution,
+  definition,
   showBackButton = true,
   isLoading,
   error,
@@ -80,9 +82,9 @@ export const WorkflowStepExecutionList = ({
 
       <EuiFlexItem grow={false}>
         <WorkflowExecutionListItem
-          status={workflowExecution?.status ?? ExecutionStatus.PENDING}
-          startedAt={workflowExecution?.startedAt ? new Date(workflowExecution.startedAt) : null}
-          duration={workflowExecution?.duration ?? null}
+          status={execution?.status ?? ExecutionStatus.PENDING}
+          startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
+          duration={execution?.duration ?? null}
           selected={false}
           onClick={null}
         />
@@ -90,8 +92,8 @@ export const WorkflowStepExecutionList = ({
 
       <EuiFlexItem>
         <WorkflowStepExecutionTree
-          definition={workflowDefinition}
-          execution={workflowExecution ?? null}
+          definition={definition}
+          execution={execution ?? null}
           isLoading={isLoading}
           error={error}
           onStepExecutionClick={onStepExecutionClick}
@@ -101,15 +103,19 @@ export const WorkflowStepExecutionList = ({
 
       {!showBackButton && (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={onClose}
-            iconType="check"
-            size="s"
-            fullWidth
-            aria-label={i18nTexts.done}
-          >
-            {i18nTexts.done}
-          </EuiButton>
+          {execution && isCancelableStatus(execution.status) ? (
+            <CancelExecutionButton executionId={execution.id} />
+          ) : (
+            <EuiButton
+              onClick={onClose}
+              iconType="check"
+              size="s"
+              fullWidth
+              aria-label={i18nTexts.done}
+            >
+              {i18nTexts.done}
+            </EuiButton>
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

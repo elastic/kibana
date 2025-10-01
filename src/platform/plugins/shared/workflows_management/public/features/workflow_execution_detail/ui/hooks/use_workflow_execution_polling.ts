@@ -8,15 +8,8 @@
  */
 
 import { useEffect } from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
-
-const TerminalStates: readonly ExecutionStatus[] = [
-  ExecutionStatus.COMPLETED,
-  ExecutionStatus.FAILED,
-  ExecutionStatus.CANCELLED,
-  ExecutionStatus.SKIPPED,
-];
+import { isTerminalStatus } from '../../lib/execution_status';
 
 export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
   const {
@@ -32,7 +25,7 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
     }
 
     // Check if the execution is in a terminal state
-    if (TerminalStates.includes(workflowExecution.status)) {
+    if (isTerminalStatus(workflowExecution.status)) {
       return;
     }
 
