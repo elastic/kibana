@@ -13,7 +13,7 @@ import type {
   NavigationTreeDefinition,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
-import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -36,9 +36,6 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
-const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
-  defaultMessage: 'Agents',
-});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -130,7 +127,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   iconV2: agentsIcon,
                   link: 'agent_builder',
-                  title: AGENTS_TITLE,
                 },
                 {
                   badgeOptions: {
@@ -363,11 +359,11 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   iconV2: 'database',
-                  id: INGEST_AND_MANAGE_DATA_NAV_ID, // This id can't be changed as we use it to anchor the tour step
+                  id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
                   sideNavVersion: 'v2',
                   renderAs: 'panelOpener',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
-                    defaultMessage: 'Ingest and manage data',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
+                    defaultMessage: 'Data management',
                   }),
                 },
                 {
