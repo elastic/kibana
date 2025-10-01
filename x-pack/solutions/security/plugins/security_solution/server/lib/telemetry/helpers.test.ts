@@ -1106,6 +1106,47 @@ describe('processDetectionRuleCustomizations', () => {
     expect(customizationsField).toBeUndefined();
   });
 
+  it("returns undefined if rule doesn't have `has_base_version` field", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule doesn't have `customized_fields` field", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule doesn't have `customized_fields` or `has_base_version` fields", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
   it("returns undefined if rule doesn't have a base version", () => {
     const customizationsField = processDetectionRuleCustomizations({
       'kibana.alert.rule.parameters': {

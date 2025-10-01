@@ -90,6 +90,7 @@ export interface TelemetryEvent {
   'kibana.alert.rule.parameters'?: {
     rule_source?: RuleSource;
   };
+  customizations?: PrebuiltRuleCustomizations;
 }
 
 /**
@@ -601,3 +602,8 @@ export interface FleetAgentResponse {
 }
 
 export type AnyObject = Record<string, unknown>;
+
+export interface PrebuiltRuleCustomizations {
+  customized_fields: string[];
+  num_functional_fields: number;
+}
