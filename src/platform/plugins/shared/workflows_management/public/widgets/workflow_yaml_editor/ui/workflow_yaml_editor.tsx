@@ -182,7 +182,7 @@ export const WorkflowYAMLEditor = ({
 
   // Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const { initEditor: setEditor } = useEditorState();
+  const { initEditor } = useEditorState();
   const { styles: stepOutlineStyles } = useFocusedStepOutline();
 
   // Memoize the schema to avoid re-generating it on every render
@@ -347,6 +347,7 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
+    initEditor(editor);
 
     editor.updateOptions({
       glyphMargin: true,

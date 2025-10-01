@@ -41,8 +41,8 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   focusedStepRef.current = focusedStepInfo;
 
   const updateContainerPosition = (
-    stepInfo: StepInfo | null,
-    _editor: monaco.editor.IStandaloneCodeEditor | null
+    stepInfo: StepInfo,
+    _editor: monaco.editor.IStandaloneCodeEditor
   ) => {
     if (!_editor || !stepInfo) {
       return;
@@ -55,7 +55,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   };
 
   useEffect(() => {
-    if (!focusedStepInfo) {
+    if (!focusedStepInfo || !editor) {
       return;
     }
     updateContainerPosition(focusedStepInfo, editor);
@@ -66,7 +66,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
       return;
     }
 
-    editor.onDidScrollChange(() => updateContainerPosition(focusedStepRef.current, editor));
+    editor.onDidScrollChange(() => updateContainerPosition(focusedStepRef.current!, editor));
   }, [focusedStepInfo, editor, setPositionStyles]);
 
   const closePopover = () => {
