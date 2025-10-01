@@ -439,6 +439,21 @@
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.hash",
+            "type": "Object",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "Hash",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
