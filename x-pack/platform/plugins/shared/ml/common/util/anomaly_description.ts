@@ -10,11 +10,17 @@ import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 
 export function getAnomalyDescription(
   anomaly: MlAnomaliesTableRecordExtended,
-  escapeUrlLikeStrings: boolean = false
+  options: {
+    // Used in anomaly detection alerting rule to break auto linkify for field names in email clients.
+    breakAutoLinkifyFieldName: boolean;
+  } = {
+    breakAutoLinkifyFieldName: false,
+  }
 ): {
   anomalyDescription: string;
   mvDescription: string | undefined;
 } {
+  const { breakAutoLinkifyFieldName } = options;
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomalyDescription.anomalyInLabel', {
@@ -28,7 +34,9 @@ export function getAnomalyDescription(
     anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.foundForLabel', {
       defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
       values: {
-        anomalyEntityName: escapeUrlLikeStrings ? `${anomaly.entityName}-` : anomaly.entityName,
+        anomalyEntityName: breakAutoLinkifyFieldName
+          ? `${anomaly.entityName}-`
+          : anomaly.entityName,
         anomalyEntityValue: anomaly.entityValue,
       },
     });
@@ -41,7 +49,7 @@ export function getAnomalyDescription(
     anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.detectedInLabel', {
       defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
       values: {
-        sourcePartitionFieldName: escapeUrlLikeStrings
+        sourcePartitionFieldName: breakAutoLinkifyFieldName
           ? `${source.partition_field_name}-`
           : source.partition_field_name,
         sourcePartitionFieldValue: source.partition_field_value,
@@ -58,7 +66,9 @@ export function getAnomalyDescription(
         'multivariate correlations found in {sourceByFieldName}; ' +
         '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
       values: {
-        sourceByFieldName: escapeUrlLikeStrings ? `${source.by_field_name}-` : source.by_field_name,
+        sourceByFieldName: breakAutoLinkifyFieldName
+          ? `${source.by_field_name}-`
+          : source.by_field_name,
         sourceByFieldValue: source.by_field_value,
         sourceCorrelatedByFieldValue: source.correlated_by_field_value,
       },
