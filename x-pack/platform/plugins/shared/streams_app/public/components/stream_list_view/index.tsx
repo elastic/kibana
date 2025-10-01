@@ -210,7 +210,7 @@ export function StreamListView() {
                       <EuiText size="s" color="subdued">
                         {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
                           defaultMessage:
-                            'Use Streams to organize and process your data into clear structured  flows, and simplify routing, field extraction, and retention management.',
+                            'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
                         })}
                       </EuiText>
                     </EuiFlexItem>
