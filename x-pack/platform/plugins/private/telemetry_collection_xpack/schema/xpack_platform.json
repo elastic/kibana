@@ -6423,7 +6423,10 @@
               "type": "long"
             },
             "contextualai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Contextual AI provider."
+              }
             }
           }
         }
