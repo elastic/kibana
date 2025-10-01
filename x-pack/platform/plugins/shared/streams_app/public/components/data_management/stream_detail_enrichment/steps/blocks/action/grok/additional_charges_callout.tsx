@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
 export interface AdditionalChargesCalloutProps {
