@@ -19,7 +19,6 @@ const omittedProps = [
   'connectionPool',
   'transport',
   'serializer',
-  'helpers',
   'acceptedParams',
 ] as Array<PublicKeys<Client>>;
 

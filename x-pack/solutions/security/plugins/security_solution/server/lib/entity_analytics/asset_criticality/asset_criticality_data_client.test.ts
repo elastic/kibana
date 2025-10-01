@@ -312,7 +312,7 @@ describe('AssetCriticalityDataClient', () => {
     beforeEach(() => {
       esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
 
-      esClientMock.helpers.bulk = mockEsBulk();
+      mockEsBulk(esClientMock.helpers.bulk);
       loggerMock = loggingSystemMock.createLogger();
       subject = new AssetCriticalityDataClient({
         esClient: esClientMock,
@@ -394,8 +394,8 @@ describe('AssetCriticalityDataClient', () => {
   });
 });
 
-const mockEsBulk = () =>
-  jest.fn().mockImplementation(async ({ datasource }) => {
+const mockEsBulk = (jestMock: Mock) =>
+  jestMock.mockImplementation(async ({ datasource }) => {
     let count = 0;
     for await (const _ of datasource) {
       count++;
