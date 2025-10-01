@@ -39,7 +39,6 @@ import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { NodesFactory } from './step/nodes_factory';
-import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
@@ -74,6 +73,7 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -92,6 +92,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
+                clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
               } = await createContainer(
                 workflowRunId,
                 spaceId,
@@ -106,16 +109,21 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.start();
 
-              await workflowExecutionLoop(
+              await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
-                workflowExecutionGraph
-              );
+                workflowExecutionGraph,
+                esClient: clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
+                taskAbortController,
+              });
             },
             async cancel() {
-              // Cancel function for the task
+              taskAbortController.abort();
             },
           };
         },
@@ -128,6 +136,8 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
+
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -146,6 +156,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
+                clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
               } = await createContainer(
                 workflowRunId,
                 spaceId,
@@ -160,15 +173,22 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.resume();
 
-              await workflowExecutionLoop(
+              await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
-                workflowExecutionGraph
-              );
+                workflowExecutionGraph,
+                esClient: clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
+                taskAbortController,
+              });
             },
-            async cancel() {},
+            async cancel() {
+              taskAbortController.abort();
+            },
           };
         },
       },
@@ -225,6 +245,9 @@ export class WorkflowsExecutionEnginePlugin
           workflowLogger,
           nodesFactory,
           workflowExecutionGraph,
+          fakeRequest,
+          clientToUse,
+          coreStart,
         } = await createContainer(
           workflowExecution.id!,
           workflowExecution.spaceId!,
@@ -239,13 +262,18 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         await workflowRuntime.start();
-        await workflowExecutionLoop(
+        await workflowExecutionLoop({
           workflowRuntime,
           workflowExecutionState,
+          workflowExecutionRepository,
           workflowLogger,
           nodesFactory,
-          workflowExecutionGraph
-        );
+          workflowExecutionGraph,
+          esClient: clientToUse,
+          fakeRequest,
+          coreStart,
+          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
+        });
       } else {
         // Normal manual execution - schedule a task
         const taskInstance = {
@@ -359,6 +387,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
+        cancellationReason: 'Cancelled by user',
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
@@ -452,18 +481,6 @@ async function createContainer(
     clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   }
 
-  // fakeRequest is automatically created by Task Manager from taskInstance.apiKey
-  // Will be undefined if no API key was provided when scheduling the workflow task
-
-  const contextManager = new WorkflowContextManager({
-    workflowExecutionGraph,
-    workflowExecutionRuntime: workflowRuntime,
-    workflowExecutionState,
-    esClient: clientToUse, // Either user-scoped or fallback client
-    fakeRequest, // Will be undefined if no API key provided
-    coreStart, // For accessing Kibana's internal services
-  });
-
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
   const urlValidator = new UrlValidator({
@@ -471,9 +488,9 @@ async function createContainer(
   });
 
   const nodesFactory = new NodesFactory(
-    contextManager,
     connectorExecutor,
     workflowRuntime,
+    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
@@ -484,12 +501,14 @@ async function createContainer(
     workflowExecutionGraph,
     workflowRuntime,
     workflowExecutionState,
-    contextManager,
     connectorExecutor,
     workflowLogger,
     taskManagerPlugin,
     workflowExecutionRepository,
     workflowTaskManager,
     nodesFactory,
+    fakeRequest,
+    clientToUse,
+    coreStart,
   };
 }
