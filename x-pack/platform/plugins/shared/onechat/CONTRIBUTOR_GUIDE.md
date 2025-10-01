@@ -46,7 +46,7 @@ class MyPlugin {
 
 ### Adding the tool to the allow list
 
-To allow the agent builder owners to control which tools are added to our framework, we are maintaining an hardcoded
+To allow the agent builder owners to control which tools are added to our framework, we are maintaining a hardcoded
 list of all internally registered tools. The intention is simply to trigger a code review from the team when
 tools are added, so that we can review it.
 
@@ -129,8 +129,8 @@ Agentic tool execution (performing LLM calls) can take some time.
 To allow the user to know what the tool is currently doing, we expose a progress reporting API accessible via
 the `events` service from the handler context, which can be used to report progress updates of the tool.
 
-Those progress updates will be displayed in the UI (inside the thinking panel), improving the user experience by increasing
-the visibility of the tool's progress.
+Those progress updates will be displayed in the UI (inside the thinking panel), improving the user experience by being transparent
+regarding what is happening under the hood.
 
 ```ts
 onechat.tools.register({
