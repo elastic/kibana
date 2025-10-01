@@ -61,91 +61,91 @@ actions:
         # description: 
         # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
       x-displayName: 'Agent Builder'
-  - target: '$.tags[?(@.name=="data streams")]'
+  - target: '$.tags[?(@.name=="Data streams")]'
     description: Change tag description and displayName
     update:
       description: >
         Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
       x-displayName: 'Data streams'
-  - target: '$.tags[?(@.name=="elastic agent actions")]'
+  - target: '$.tags[?(@.name=="Elastic Agent actions")]'
     description: Change tag description and displayName
     update:
       description: >
         Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
       x-displayName: 'Elastic Agent actions'
-  - target: '$.tags[?(@.name=="elastic agent binary download sources")]'
+  - target: '$.tags[?(@.name=="Elastic Agent binary download sources")]'
     description: Change tag description and displayName
     update:
       description: >
         Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent installations.
       x-displayName: 'Elastic Agent binary download sources'
-  - target: '$.tags[?(@.name=="elastic agent policies")]'
+  - target: '$.tags[?(@.name=="Elastic Agent policies")]'
     description: Change tag description and displayName
     update:
       description: >
         Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as managing policy outputs, manifests, and auto-upgrade settings.
       x-displayName: 'Elastic Agent policies'
-  - target: '$.tags[?(@.name=="elastic agent status")]'
+  - target: '$.tags[?(@.name=="Elastic Agent status")]'
     description: Change tag description and displayName
     update:
       description: >
         Elastic Agent status APIs enable you to retrieve status information about Elastic Agents, including health summaries and operational status.
       x-displayName: 'Elastic Agent status'
-  - target: '$.tags[?(@.name=="elastic agents")]'
+  - target: '$.tags[?(@.name=="Elastic Agents")]'
     description: Change tag description and displayName
     update:
       description: >
         Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and configuring agent setup.
       x-displayName: 'Elastic Agents'
-  - target: '$.tags[?(@.name=="fleet enrollment api keys")]'
+  - target: '$.tags[?(@.name=="Fleet enrollment API keys")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking keys used for agent enrollment.
       x-displayName: 'Fleet enrollment API keys'
-  - target: '$.tags[?(@.name=="fleet internals")]'
+  - target: '$.tags[?(@.name=="Fleet internals")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
       x-displayName: 'Fleet internals'
-  - target: '$.tags[?(@.name=="fleet outputs")]'
+  - target: '$.tags[?(@.name=="Fleet outputs")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating API keys, and monitoring output health.
       x-displayName: 'Fleet outputs'
-  - target: '$.tags[?(@.name=="fleet package policies")]'
+  - target: '$.tags[?(@.name=="Fleet package policies")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
       x-displayName: 'Fleet package policies'
-  - target: '$.tags[?(@.name=="fleet proxies")]'
+  - target: '$.tags[?(@.name=="Fleet proxies")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
       x-displayName: 'Fleet proxies'
-  - target: '$.tags[?(@.name=="fleet server hosts")]'
+  - target: '$.tags[?(@.name=="Fleet Server hosts")]'
     description: Change tag description and displayName
     update:
       description: >
         Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
       x-displayName: 'Fleet Server hosts'
-  - target: '$.tags[?(@.name=="fleet service tokens")]'
+  - target: '$.tags[?(@.name=="Fleet service tokens")]'
     description: Change tag description and displayName
     update:
       description: >
         Enables you to create tokens for Fleet service authentication and authorization.
       x-displayName: 'Fleet service tokens'
-  - target: '$.tags[?(@.name=="fleet uninstall tokens")]'
+  - target: '$.tags[?(@.name=="Fleet uninstall tokens")]'
     description: Change tag description and displayName
     update:
       description: >
         Enables you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
       x-displayName: 'Fleet uninstall tokens'
-  - target: '$.tags[?(@.name=="message signing service")]'
+  - target: '$.tags[?(@.name=="Message Signing Service")]'
     description: Change tag description and displayName
     update:
       description: >
@@ -157,18 +157,17 @@ actions:
       description: >
         Enables you to synchronize machine learning saved objects.
       x-displayName: 'Machine learning'
-  - target: '$.tags[?(@.name=="security entity analytics")]'
+  - target: '$.tags[?(@.name=="Security Entity Analytics API")]'
     description: Change tag description and displayName
     update:
       description: >
         Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
       x-displayName: 'Security entity analytics'
-  - target: '$.tags[?(@.name=="user session management")]'
-    description: Change tag description and displayName
+  - target: '$.tags[?(@.name=="user session")]'
+    description: Change tag description
     update:
       description: >
         Enables you to invalidate user sessions for security and session management purposes.
-      x-displayName: 'User session management'
   # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
