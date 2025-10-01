@@ -63,13 +63,8 @@ export const createInitialisationService = (
     const descriptor = await descriptorClient.init();
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
 
-    if (deps.experimentalFeatures?.integrationsSyncEnabled ?? false) {
-      // upsert index AND integration sources
-      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
-    } else {
-      // upsert ONLY index source
-      await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
-    }
+    // upsert index AND integration sources
+    await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
 
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');

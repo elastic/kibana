@@ -20,7 +20,6 @@ export const createDataSourcesService = (
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const indexSyncService = createIndexSyncService(dataClient);
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
-  const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
   /**
    * This creates an index for the user to populate privileged users.
