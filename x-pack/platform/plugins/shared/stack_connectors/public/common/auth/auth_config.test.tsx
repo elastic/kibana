@@ -308,10 +308,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      const headersToggle = await screen.findByTestId('webhookViewHeadersSwitch');
-
-      await userEvent.click(headersToggle);
-
+      await userEvent.click(await screen.findByTestId('webhookViewHeadersSwitch'));
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
