@@ -517,6 +517,7 @@ src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
+src/platform/packages/shared/kbn-management/autoops_promotion_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/application @elastic/kibana-management
@@ -894,7 +895,6 @@ x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infr
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/cases-ai @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management

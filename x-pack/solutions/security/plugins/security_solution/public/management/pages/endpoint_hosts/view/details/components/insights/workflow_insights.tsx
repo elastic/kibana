@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
+import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { useKnowledgeBaseStatus } from '@kbn/elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsResults } from './workflow_insights_results';
 import { WorkflowInsightsScanSection } from './workflow_insights_scan';
-import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsProps {
   endpointId: string;
@@ -33,6 +35,12 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
     'defendInsightsPolicyResponseFailure'
   );
+  const {
+    inferenceEnabled,
+    http,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
 
   const onInsightGenerationFailure = () => {
     setInsightGenerationFailures(true);
@@ -43,21 +51,26 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     () => setIsScanCompleted(true),
   ];
 
+  const insightTypes = useMemo<DefendInsightType[]>(() => {
+    const typesToQuery: DefendInsightType[] = [DefendInsightType.Enum.incompatible_antivirus];
+    if (
+      defendInsightsPolicyResponseFailureEnabled &&
+      // we only want to run `policy_response_failure` type with KB
+      (kbStatus?.defend_insights_exists || kbStatus?.is_setup_in_progress)
+    ) {
+      typesToQuery.push(DefendInsightType.Enum.policy_response_failure);
+    }
+    return typesToQuery;
+  }, [defendInsightsPolicyResponseFailureEnabled, kbStatus]);
+
   // refetch is automatically triggered when expectedCount changes
   const { data: insights, isFetching: isFetchingInsights } = useFetchInsights({
     endpointId,
     onSuccess: setScanCompleted,
     scanCompleted,
     expectedCount,
+    insightTypes,
   });
-
-  const insightTypes = useMemo<DefendInsightType[]>(
-    () =>
-      defendInsightsPolicyResponseFailureEnabled
-        ? ['incompatible_antivirus', 'policy_response_failure']
-        : ['incompatible_antivirus'],
-    [defendInsightsPolicyResponseFailureEnabled]
-  );
 
   const {
     data: latestScan,
@@ -82,13 +95,11 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
 
   useEffect(() => {
     const isInsightRunning = latestScan?.hasRunning ?? false;
-    const hasPendingInsights = expectedCount !== null && insights?.length !== expectedCount;
     const initialFetchNotStarted = expectedCount === null;
     setIsScanButtonDisabled(
       isPostDefendInsightsLoading ||
         isLoadingLatestScan ||
         isInsightRunning ||
-        hasPendingInsights ||
         isFetchingInsights ||
         initialFetchNotStarted // hold off until we know `expectedCount` (even 0)
     );
@@ -97,7 +108,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     isPostDefendInsightsLoading,
     isLoadingLatestScan,
     latestScan,
-    insights,
     expectedCount,
     isFetchingInsights,
   ]);
@@ -122,8 +132,12 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     if (isScanButtonDisabled) {
       return [];
     }
-    return (insights ?? []).filter((insight) => insight.action.type === ActionType.Refreshed);
-  }, [isScanButtonDisabled, insights]);
+
+    const insightTypesSet = new Set(insightTypes);
+    return (insights ?? []).filter(
+      (insight) => insightTypesSet.has(insight.type) && insight.action.type === ActionType.Refreshed
+    );
+  }, [isScanButtonDisabled, insights, insightTypes]);
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
@@ -175,6 +189,9 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       <WorkflowInsightsScanSection
         isScanButtonDisabled={isScanButtonDisabled}
         onScanButtonClick={onScanButtonClick}
+        inferenceEnabled={inferenceEnabled}
+        kbStatus={kbStatus}
+        defendInsightsPolicyResponseFailureEnabled={defendInsightsPolicyResponseFailureEnabled}
       />
       <EuiSpacer size={'m'} />
       <WorkflowInsightsResults
