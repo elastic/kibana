@@ -533,6 +533,22 @@
           },
           {
             "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getInitializedWithExistingIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getInitializedWithExistingIndex",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
             "id": "def-common.FileUploadManager.getExistingIndexName",
             "type": "Function",
             "tags": [],

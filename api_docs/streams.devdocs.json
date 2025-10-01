@@ -1491,7 +1491,7 @@
             " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }))[]; }; }>, ",
             "StreamsRouteHandlerResources",
             ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: ",
-            "RecursiveRecord",
+            "DocumentWithIgnoredFields",
             "[] | null; }, undefined>; \"GET /internal/streams/{name}/schema/unmapped_fields\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -3242,7 +3242,7 @@
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }))[]; }; }>, ",
           "StreamsRouteHandlerResources",
           ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: ",
-          "RecursiveRecord",
+          "DocumentWithIgnoredFields",
           "[] | null; }, undefined>; \"GET /internal/streams/{name}/schema/unmapped_fields\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",

@@ -1627,10 +1627,12 @@
         "signature": [
           "(props: { id: string; columns?: ",
           "EuiDataGridColumn",
-          "[] | undefined; query: Pick<",
+          "[] | undefined; onColumnsChange?: ((newColumns: ",
+          "EuiDataGridColumn",
+          "[]) => void) | undefined; visibleColumns?: string[] | undefined; onVisibleColumnsChange?: ((newVisibleColumns: string[]) => void) | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; initialSort?: ",
-          "SortCombinations",
+          "AlertsTableSortCombinations",
           "[] | undefined; initialPageSize?: number | undefined; browserFields?: ",
           {
             "pluginId": "@kbn/alerting-types",
@@ -3801,7 +3803,7 @@
             "section": "def-public.IStorageWrapper",
             "text": "IStorageWrapper"
           },
-          "<any, void> | undefined; services: { data: ",
+          "<any, void> | null | undefined; services: { data: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -3897,10 +3899,12 @@
             "signature": [
               "{ id: string; columns?: ",
               "EuiDataGridColumn",
-              "[] | undefined; query: Pick<",
+              "[] | undefined; onColumnsChange?: ((newColumns: ",
+              "EuiDataGridColumn",
+              "[]) => void) | undefined; visibleColumns?: string[] | undefined; onVisibleColumnsChange?: ((newVisibleColumns: string[]) => void) | undefined; query: Pick<",
               "QueryDslQueryContainer",
               ", \"ids\" | \"bool\">; initialSort?: ",
-              "SortCombinations",
+              "AlertsTableSortCombinations",
               "[] | undefined; initialPageSize?: number | undefined; browserFields?: ",
               {
                 "pluginId": "@kbn/alerting-types",
@@ -6071,7 +6075,7 @@
                 "section": "def-public.IStorageWrapper",
                 "text": "IStorageWrapper"
               },
-              "<any, void> | undefined; services: { data: ",
+              "<any, void> | null | undefined; services: { data: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -6844,8 +6848,19 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertDetails: { logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; managedOtlpServiceUrl: string; }"
+              "{ alertDetails: { logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; }"
             ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ConfigSchema.managedOtlpServiceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "managedOtlpServiceUrl",
+            "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9313,8 +9328,7 @@
                 "docId": "kibStreamsPluginApi",
                 "section": "def-public.StreamsPluginStart",
                 "text": "StreamsPluginStart"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -10200,10 +10214,12 @@
         "signature": [
           "{ id: string; columns?: ",
           "EuiDataGridColumn",
-          "[] | undefined; query: Pick<",
+          "[] | undefined; onColumnsChange?: ((newColumns: ",
+          "EuiDataGridColumn",
+          "[]) => void) | undefined; visibleColumns?: string[] | undefined; onVisibleColumnsChange?: ((newVisibleColumns: string[]) => void) | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; initialSort?: ",
-          "SortCombinations",
+          "AlertsTableSortCombinations",
           "[] | undefined; initialPageSize?: number | undefined; browserFields?: ",
           {
             "pluginId": "@kbn/alerting-types",
@@ -12374,7 +12390,7 @@
             "section": "def-public.IStorageWrapper",
             "text": "IStorageWrapper"
           },
-          "<any, void> | undefined; services: { data: ",
+          "<any, void> | null | undefined; services: { data: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -12456,10 +12472,12 @@
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey] extends null | undefined ? never : { id: string; columns?: ",
           "EuiDataGridColumn",
-          "[] | undefined; query: Pick<",
+          "[] | undefined; onColumnsChange?: ((newColumns: ",
+          "EuiDataGridColumn",
+          "[]) => void) | undefined; visibleColumns?: string[] | undefined; onVisibleColumnsChange?: ((newVisibleColumns: string[]) => void) | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; initialSort?: ",
-          "SortCombinations",
+          "AlertsTableSortCombinations",
           "[] | undefined; initialPageSize?: number | undefined; browserFields?: ",
           {
             "pluginId": "@kbn/alerting-types",
@@ -14630,7 +14648,7 @@
             "section": "def-public.IStorageWrapper",
             "text": "IStorageWrapper"
           },
-          "<any, void> | undefined; services: { data: ",
+          "<any, void> | null | undefined; services: { data: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -14797,10 +14815,12 @@
         "signature": [
           "{ id: string; columns?: ",
           "EuiDataGridColumn",
-          "[] | undefined; query: Pick<",
+          "[] | undefined; onColumnsChange?: ((newColumns: ",
+          "EuiDataGridColumn",
+          "[]) => void) | undefined; visibleColumns?: string[] | undefined; onVisibleColumnsChange?: ((newVisibleColumns: string[]) => void) | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; initialSort?: ",
-          "SortCombinations",
+          "AlertsTableSortCombinations",
           "[] | undefined; initialPageSize?: number | undefined; browserFields?: ",
           {
             "pluginId": "@kbn/alerting-types",
@@ -16971,7 +16991,7 @@
             "section": "def-public.IStorageWrapper",
             "text": "IStorageWrapper"
           },
-          "<any, void> | undefined; services: { data: ",
+          "<any, void> | null | undefined; services: { data: ",
           {
             "pluginId": "data",
             "scope": "public",
