@@ -12,7 +12,6 @@ import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
-import { INTEGRATION_KNOWLEDGE_INDEX } from '@kbn/fleet-plugin/server/services/epm/packages/knowledge_base_index';
 import { resourceNames } from '..';
 import type {
   Instruction,
@@ -40,6 +39,8 @@ import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startu
 import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
+
+const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
