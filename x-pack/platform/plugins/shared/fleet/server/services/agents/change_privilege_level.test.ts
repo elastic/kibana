@@ -185,7 +185,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       created_at: expect.any(String),
       data: { unprivileged: true, user_info: { groupname: 'group1', username: 'user1' } },
       id: expect.any(String),
-      namespaces: [],
+      namespaces: ['default'],
       secrets: { user_info: { password: 'test' } },
       total: 2,
       type: 'PRIVILEGE_LEVEL_CHANGE',

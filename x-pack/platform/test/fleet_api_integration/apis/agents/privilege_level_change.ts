@@ -315,7 +315,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
-        await verifyActionResult(2);
+        await verifyActionResult(3);
       });
 
       it('should return 200 with errors if one of the agents has integrations that require root access', async () => {
