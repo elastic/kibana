@@ -12,35 +12,33 @@ import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
-  ResizableLayoutSide,
+  ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
 interface WorkflowDetailLayoutProps {
   editor: React.ReactNode;
   executionList: React.ReactNode | null;
   executionDetail: React.ReactNode | null;
-  singleStepExecutionDetail?: React.ReactNode | null;
 }
-type SideBarMode = 'list' | 'detail' | 'step';
+type SideBarMode = 'list' | 'detail';
 
 interface WorkflowEditorWithSidebarLayoutProps {
-  editor: React.ReactNode;
+  editorPortal: React.ReactNode;
   mode: SideBarMode;
-  sideBar: React.ReactNode;
+  sideBarPortal: React.ReactNode;
 }
 
 const WorkflowsSidebarWidthPrefix = 'WORKFLOWS_SIDEBAR_WIDTH_';
 const DefaultSidebarModeWidth = {
   list: 400,
   detail: 600,
-  step: 400,
 };
 const MinSidebarModeWidth = {
-  list: 200,
+  list: 300,
   detail: 300,
-  step: 200,
 };
 const MinEditorWidth = 400;
 
@@ -48,41 +46,50 @@ const MinEditorWidth = 400;
  * Layout for the workflow editor page, it receives the editor and the different sidebar components
  * If no sidebar is provided, it just renders the editor full width
  * If a sidebar is provided, it renders the editor and the sidebar in a resizable layout
- * The sidebar can be either the execution list, the execution detail or the single step execution detail
+ * The sidebar can be either the execution list or the execution detail
  */
 export const WorkflowEditorLayout = ({
   editor,
   executionList,
   executionDetail,
-  singleStepExecutionDetail,
 }: WorkflowDetailLayoutProps) => {
+  // Create portal nodes to prevent re-mounting of the editor when sideBarMode changes
+  const [editorPortalNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+  );
+  const [sideBarPortalNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+  );
+
   const sideBarMode = useMemo<SideBarMode | undefined>(() => {
     if (executionList) {
       return 'list';
     } else if (executionDetail) {
       return 'detail';
-    } else if (singleStepExecutionDetail) {
-      return 'step';
     }
-  }, [executionDetail, executionList, singleStepExecutionDetail]);
+  }, [executionDetail, executionList]);
 
-  if (!sideBarMode) {
-    return <Fragment data-test-subj="WorkflowEditorLayout">{editor}</Fragment>;
-  } else {
-    return (
-      <WorkflowEditorWithSidebarLayout
-        editor={editor}
-        mode={sideBarMode}
-        sideBar={
-          sideBarMode === 'list'
-            ? executionList
-            : sideBarMode === 'detail'
-            ? executionDetail
-            : singleStepExecutionDetail
-        }
-      />
-    );
-  }
+  return (
+    <>
+      <InPortal node={editorPortalNode}>{editor}</InPortal>
+
+      {sideBarMode && (
+        <InPortal node={sideBarPortalNode}>
+          {sideBarMode === 'list' ? executionList : executionDetail}
+        </InPortal>
+      )}
+
+      {!sideBarMode ? (
+        <OutPortal node={editorPortalNode} />
+      ) : (
+        <WorkflowEditorWithSidebarLayout
+          editorPortal={<OutPortal node={editorPortalNode} />}
+          mode={sideBarMode}
+          sideBarPortal={<OutPortal node={sideBarPortalNode} />}
+        />
+      )}
+    </>
+  );
 };
 
 /**
@@ -90,9 +97,9 @@ export const WorkflowEditorLayout = ({
  * Reuses the ResizableLayout component from @kbn/resizable-layout
  */
 const WorkflowEditorWithSidebarLayout = ({
-  editor,
+  editorPortal,
   mode,
-  sideBar,
+  sideBarPortal,
 }: WorkflowEditorWithSidebarLayoutProps) => {
   const defaultSidebarWidth = DefaultSidebarModeWidth[mode];
 
@@ -110,13 +117,13 @@ const WorkflowEditorWithSidebarLayout = ({
 
   return (
     <ResizableLayout
-      flexPanel={editor}
+      flexPanel={editorPortal}
       minFlexPanelSize={MinEditorWidth}
-      fixedPanel={sideBar}
+      fixedPanel={sideBarPortal}
       fixedPanelSize={sidebarWidth}
       onFixedPanelSizeChange={setSidebarWidth}
       minFixedPanelSize={MinSidebarModeWidth[mode]}
-      fixedPanelOrder={ResizableLayoutSide.End}
+      fixedPanelOrder={ResizableLayoutOrder.End}
       mode={layoutMode}
       direction={layoutDirection}
       resizeButtonClassName="workflowSidebarResizeButton"

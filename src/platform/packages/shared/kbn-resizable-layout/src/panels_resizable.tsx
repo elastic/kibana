@@ -27,7 +27,7 @@ export const PanelsResizable = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
-  fixedPanelSide = ResizableLayoutOrder.Start,
+  fixedPanelOrder = ResizableLayoutOrder.Start,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
@@ -39,7 +39,7 @@ export const PanelsResizable = ({
   minFlexPanelSize: number;
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
-  fixedPanelSide?: ResizableLayoutOrder;
+  fixedPanelOrder?: ResizableLayoutOrder;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
@@ -236,7 +236,7 @@ export const PanelsResizable = ({
 
           return (
             <>
-              {fixedPanelSide === ResizableLayoutOrder.Start ? (
+              {fixedPanelOrder === ResizableLayoutOrder.Start ? (
                 <>
                   {fixedPanelElement}
                   {resizeButtonElement}

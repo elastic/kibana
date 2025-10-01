@@ -14,7 +14,7 @@ import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
-  ResizableLayoutSide,
+  ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -101,7 +101,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
         fixedPanelSize={sidebarWidth}
         onFixedPanelSizeChange={setSidebarWidth}
         minFixedPanelSize={150}
-        fixedPanelOrder={ResizableLayoutSide.Start}
+        fixedPanelOrder={ResizableLayoutOrder.Start}
         flexPanel={
           <WorkflowStepExecutionDetails
             workflowExecutionId={workflowExecutionId}

@@ -76,7 +76,7 @@ export const ResizableLayout = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
-  fixedPanelOrder: fixedPanelSide,
+  fixedPanelOrder,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
@@ -95,7 +95,7 @@ export const ResizableLayout = ({
       fixedPanelSize={fixedPanelSize}
       minFixedPanelSize={minFixedPanelSize}
       minFlexPanelSize={minFlexPanelSize}
-      fixedPanelSide={fixedPanelSide}
+      fixedPanelOrder={fixedPanelOrder}
       resizeButtonClassName={resizeButtonClassName}
       data-test-subj={dataTestSubj}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
