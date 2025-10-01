@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
-import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
@@ -436,10 +436,9 @@ export const streamRoutingMachine = setup({
                 id: 'forkStreamActor',
                 src: 'forkStream',
                 input: ({ context, event }) => {
-                  const { routingRule } = event as Extract<
-                    StreamRoutingEvent,
-                    { type: 'routingRule.fork' }
-                  >;
+                  assertEvent(event, 'routingRule.fork');
+
+                  const { routingRule } = event;
                   if (!routingRule) {
                     throw new Error('No routing rule to fork');
                   }
