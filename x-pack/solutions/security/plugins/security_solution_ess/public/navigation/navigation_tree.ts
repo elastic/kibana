@@ -34,6 +34,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           link: 'discover',
           iconV2: 'discoverApp',
+          sideNavVersion: 'v1',
         },
         defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
         {
