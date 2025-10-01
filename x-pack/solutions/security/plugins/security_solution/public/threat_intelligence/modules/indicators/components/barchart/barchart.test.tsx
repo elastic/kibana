@@ -84,6 +84,7 @@ describe('<IndicatorsBarChart />', () => {
         </div>
         <div
           class="echChart"
+          data-testid="echChart"
           style="width: 100%; height: 200px;"
         >
           <div
