@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiTextTruncate,
   useEuiTheme,
+  euiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
@@ -81,9 +82,7 @@ export const ActionBlockListItem = ({
                 data-test-subj="streamsAppProcessorLegend"
                 css={css`
                   display: block;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
+                  ${euiTextTruncate()}
                 `}
               >
                 {step.action.toUpperCase()}
