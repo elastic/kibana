@@ -224,7 +224,7 @@ const createUpgradeButtonColumn = (
         disabled={isUpgradeButtonDisabled}
         onClick={() => {
           telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick, {
-            hasMissingBaseVersion: record.has_base_version === false,
+            hasBaseVersion: record.has_base_version === true,
           });
           upgradeRules([ruleId]);
         }}

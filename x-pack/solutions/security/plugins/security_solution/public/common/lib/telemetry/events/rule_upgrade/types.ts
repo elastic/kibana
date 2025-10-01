@@ -17,7 +17,7 @@ interface ReportRuleUpgradeFlyoutButtonClickParams {
 }
 
 interface ReportRuleUpgradeSingleButtonClickParams {
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
 }
 
 interface ReportRuleUpgradeFlyoutOpenParams {

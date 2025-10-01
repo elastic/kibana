@@ -31,10 +31,10 @@ export const ruleUpgradeFlyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
 export const ruleUpgradeSingleButtonClickEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick,
   schema: {
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
       _meta: {
-        description: 'Indicates if the rule has a missing base version',
+        description: 'Indicates if the rule has base version',
         optional: false,
       },
     },
