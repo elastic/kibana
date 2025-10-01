@@ -86,19 +86,18 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
               })
             );
 
-            await dashboardMigrationsClient.data.items.create(items);
-
-            await siemMigrationAuditLogger.logAddDashboards({
-              migrationId,
-              count: originalDashboardsCount,
-            });
-
             const resourceIdentifier = new DashboardResourceIdentifier(
               items[0].original_dashboard.vendor
             );
-            const extractedResources = await resourceIdentifier.fromOriginals(
-              items.map((dash) => dash.original_dashboard)
-            );
+
+            const [, , extractedResources] = await Promise.all([
+              dashboardMigrationsClient.data.items.create(items),
+              siemMigrationAuditLogger.logAddDashboards({
+                migrationId,
+                count: originalDashboardsCount,
+              }),
+              resourceIdentifier.fromOriginals(items.map((dash) => dash.original_dashboard)),
+            ]);
 
             const resources = extractedResources.map((resource) => ({
               ...resource,
