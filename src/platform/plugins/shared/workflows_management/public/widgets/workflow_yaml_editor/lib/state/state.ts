@@ -11,13 +11,10 @@ import { configureStore, createSlice } from '@reduxjs/toolkit';
 import type { Middleware } from '@reduxjs/toolkit';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
-import actionCreatorFactory from 'typescript-fsa';
 import type { StepInfo, WorkflowLookup } from './build_workflow_lookup';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
-
-const actionCreator = actionCreatorFactory('workflow');
 
 // State interface - only serializable data
 export interface WorkflowEditorState {
@@ -27,20 +24,6 @@ export interface WorkflowEditorState {
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   focusedStepInfo?: StepInfo;
 }
-
-export const setYamlString = actionCreator<string>('SET_YAML_STRING');
-
-export const setComputedData = actionCreator<{
-  yamlDocument?: YAML.Document;
-  workflowLookup?: WorkflowLookup;
-  workflowGraph?: WorkflowGraph;
-}>('SET_COMPUTED_DATA');
-
-export const setCursorPosition = actionCreator<{
-  lineNumber: number;
-}>('CURSOR_POSITION_CHANGE');
-
-export const clearComputedData = actionCreator<void>('CLEAR_COMPUTED_DATA');
 
 // Initial state
 const initialState: WorkflowEditorState = {
@@ -56,10 +39,19 @@ const workflowEditorSlice = createSlice({
   name: 'workflow',
   initialState,
   reducers: {
-    setYamlString: (state, action: ReturnType<typeof setYamlString>) => {
+    setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
     },
-    setComputedData: (state, action: ReturnType<typeof setComputedData>) => {
+    setComputedData: (
+      state,
+      action: {
+        payload: {
+          yamlDocument?: YAML.Document;
+          workflowLookup?: WorkflowLookup;
+          workflowGraph?: WorkflowGraph;
+        };
+      }
+    ) => {
       state.yamlDocument = action.payload.yamlDocument;
       state.workflowLookup = action.payload.workflowLookup;
       state.workflowGraph = action.payload.workflowGraph;
@@ -69,7 +61,7 @@ const workflowEditorSlice = createSlice({
       state.workflowLookup = undefined;
       state.workflowGraph = undefined;
     },
-    setFocusedStepInfo: (state, action: ReturnType<typeof setCursorPosition>) => {
+    setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.workflowLookup) {
         state.focusedStepInfo = undefined;
         return;
@@ -79,6 +71,10 @@ const workflowEditorSlice = createSlice({
     },
   },
 });
+
+// Export action creators from the slice
+export const { setYamlString, setComputedData, clearComputedData, setCursorPosition } =
+  workflowEditorSlice.actions;
 
 function findStepByLine(
   lineNumber: number,
@@ -154,13 +150,19 @@ export const createWorkflowEditorStore = () => {
       getDefaultMiddleware({
         serializableCheck: {
           // Ignore these non-serializable fields in the state
-          ignoredPaths: ['workflow.yamlDocument', 'workflow.workflowGraph'],
+          ignoredPaths: [
+            'workflow.yamlDocument',
+            'workflow.workflowGraph',
+            'workflow.workflowLookup',
+          ],
           // Ignore these non-serializable fields in actions
           ignoredActionsPaths: [
             'payload.yamlDocument',
             'payload.workflowGraph',
+            'payload.workflowLookup',
             'meta.arg.yamlDocument',
             'meta.arg.workflowGraph',
+            'meta.arg.workflowLookup',
           ],
         },
       }).concat(workflowComputationMiddleware),
@@ -211,6 +213,11 @@ export const selectFocusedStepInfo = (state: RootState) => state.workflow.focuse
  *   const handleYamlChange = (newYaml: string) => {
  *     dispatch(setYamlString(newYaml));
  *     // yamlDocument, workflowLookup, and workflowGraph will be computed automatically
+ *   };
+ *
+ *   const handleCursorChange = (lineNumber: number) => {
+ *     dispatch(setCursorPosition({ lineNumber }));
+ *     // focusedStepInfo will be updated automatically
  *   };
  *
  *   return (
