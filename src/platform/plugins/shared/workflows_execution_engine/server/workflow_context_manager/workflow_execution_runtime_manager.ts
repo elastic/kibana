@@ -354,6 +354,16 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
+  public markWorkflowTimeouted(): void {
+    const finishedAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.TIMED_OUT,
+      finishedAt,
+      duration:
+        new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
+    });
+  }
+
   public async start(): Promise<void> {
     this.workflowLogger?.logInfo('Starting workflow execution with APM tracing', {
       workflow: { execution_id: this.workflowExecution.id },
