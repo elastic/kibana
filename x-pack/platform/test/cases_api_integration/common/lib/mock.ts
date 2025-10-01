@@ -50,6 +50,7 @@ export const postCaseReq: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: 'securitySolutionFixture',
   assignees: [],

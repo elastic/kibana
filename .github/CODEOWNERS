@@ -72,7 +72,6 @@ packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
-packages/kbn-lock-manager @elastic/obs-ai-assistant
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
@@ -515,8 +514,10 @@ src/platform/packages/shared/kbn-jest-benchmarks @elastic/obs-ui-devex-team
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
+src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
+src/platform/packages/shared/kbn-management/autoops_promotion_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/application @elastic/kibana-management
@@ -894,7 +895,6 @@ x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infr
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/cases-ai @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -930,6 +930,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
@@ -1073,6 +1074,7 @@ x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/
 x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
+x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
@@ -1117,7 +1119,6 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/o
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
-x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
@@ -1177,6 +1178,7 @@ x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generat
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
@@ -2382,6 +2384,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/fixtures/kbn_archives/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/solutions/security/test/fixtures/es_archives/packetbeat @elastic/security-solution
 /x-pack/solutions/security/test/fixtures/es_archives/security_solution @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta/ @elastic/security-solution
 /x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
 /x-pack/solutions/security/test/functional/ @elastic/security-solution
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
