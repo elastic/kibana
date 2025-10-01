@@ -339,7 +339,7 @@ export class Parser {
 
   public parse(): ParseResult<ESQLAstQueryExpression> {
     try {
-      return this.parseTarget<ESQLAstQueryExpression>(['singleStatement', 'fromSingleStatement']);
+      return this.parseTarget<ESQLAstQueryExpression>(['statements', 'fromStatements']);
     } catch (error) {
       if (error !== 'Empty Stack')
         // eslint-disable-next-line no-console
@@ -367,7 +367,7 @@ export class Parser {
   }
 
   public parseErrors(): EditorError[] {
-    this.parser.singleStatement();
+    this.parser.statements();
 
     return this.errors.getErrors();
   }
