@@ -158,7 +158,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
   const tooltipRef = useRef<EuiToolTipRef | null>(null);
-  const handleMouseOut = () => tooltipRef.current?.hideToolTip();
+  const hideToolTip = () => tooltipRef.current?.hideToolTip();
 
   return (
     <>
@@ -169,7 +169,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           { defaultMessage: 'Keyboard shortcut Ctrl ;' }
         )}
         disableScreenReaderOutput
-        onMouseOut={handleMouseOut}
+        onMouseOut={hideToolTip}
       >
         <EuiButtonBasicOrEmpty
           aria-label={i18n.translate(
@@ -178,7 +178,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           )}
           data-test-subj="observabilityAiAssistantAppNavControlButton"
           onClick={() => {
-            tooltipRef.current?.hideToolTip?.();
+            hideToolTip();
             service.conversations.openNewConversation({
               messages: [],
             });
