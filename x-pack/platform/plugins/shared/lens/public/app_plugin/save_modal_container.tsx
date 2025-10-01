@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
@@ -34,6 +35,12 @@ export type SaveModalContainerProps = {
   getOriginatingPath?: (dashboardId: string) => string;
   persistedDoc?: LensDocument;
   lastKnownDoc?: LensDocument;
+  /**
+   * Used if you want to carry to the save modal the state of the controls
+   * (e.g. your Lens visualization is controlled by a UI control and you want to
+   * transfer the control state)
+   */
+  controlsState?: ControlPanelsState;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
   onSave?: (saveProps: SaveProps) => void;
@@ -78,6 +85,7 @@ export function SaveModalContainer({
   lensServices,
   initialContext,
   managed,
+  controlsState,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -148,6 +156,7 @@ export function SaveModalContainer({
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
+          controlsState,
           onAppLeave: () => {},
           ...lensServices,
         },
@@ -232,6 +241,7 @@ export type SaveVisualizationProps = Simplify<
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
     lensDocumentService: LensDocumentService;
+    controlsState?: ControlPanelsState;
   } & ExtraProps &
     Pick<
       LensAppServices,
@@ -270,6 +280,7 @@ export const runSaveLensVisualization = async (
     switchDatasource,
     application,
     lensDocumentService,
+    controlsState,
   } = props;
 
   if (!lastKnownDoc) {
@@ -373,6 +384,7 @@ export const runSaveLensVisualization = async (
         stateTransfer,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
+        controlsState,
       });
       return;
     }

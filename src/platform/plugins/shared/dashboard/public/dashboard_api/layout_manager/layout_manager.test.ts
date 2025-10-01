@@ -69,21 +69,23 @@ describe('layout manager', () => {
   });
 
   test('should append incoming embeddable to existing panels', () => {
-    const incomingEmbeddable = {
-      embeddableId: 'panelTwo',
-      serializedState: {
-        rawState: {
-          title: 'Panel Two',
+    const incomingEmbeddables = [
+      {
+        embeddableId: 'panelTwo',
+        serializedState: {
+          rawState: {
+            title: 'Panel Two',
+          },
         },
+        size: {
+          height: 1,
+          width: 1,
+        },
+        type: 'testPanelType',
       },
-      size: {
-        height: 1,
-        width: 1,
-      },
-      type: 'testPanelType',
-    };
+    ];
     const layoutManager = initializeLayoutManager(
-      incomingEmbeddable,
+      incomingEmbeddables,
       [panel1],
       trackPanelMock,
       () => []

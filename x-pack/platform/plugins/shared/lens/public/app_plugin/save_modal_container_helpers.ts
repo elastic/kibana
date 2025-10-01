@@ -4,7 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as generateId } from 'uuid';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import {
+  DEFAULT_CONTROLS_CHAINING,
+  DEFAULT_CONTROLS_LABEL_POSITION,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
+} from '@kbn/controls-constants';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -17,24 +28,61 @@ export const redirectToDashboard = ({
   originatingApp,
   getOriginatingPath,
   stateTransfer,
+  controlsState,
 }: {
   embeddableInput: LensSerializedState;
   dashboardId: string;
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
+  controlsState?: ControlPanelsState;
 }) => {
   const { references } = extract(rawState as unknown as EmbeddableStateWithType);
 
   const appId = originatingApp || 'dashboards';
-  stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(appId, {
-    state: {
+
+  const controls: ControlsGroupState['controls'] = [];
+  Object.values(controlsState ?? {}).forEach((panel, idx) => {
+    const { width, grow, type, ...controlConfig } = panel;
+    const id = generateId();
+    controls.push({
+      id,
+      grow,
+      order: idx,
+      type,
+      width,
+      controlConfig,
+    });
+  });
+  const embeddablePackages: EmbeddablePackageState[] = [
+    {
       type: LENS_EMBEDDABLE_TYPE,
       serializedState: {
         rawState,
         references,
       },
     },
+  ];
+
+  // Only add controls group if they exist
+  if (controls.length > 0) {
+    embeddablePackages.push({
+      type: CONTROLS_GROUP_TYPE,
+      serializedState: {
+        rawState: {
+          labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
+          chainingSystem: DEFAULT_CONTROLS_CHAINING,
+          autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
+          ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
+          controls,
+        },
+        references: [] as Reference[],
+      },
+    });
+  }
+
+  stateTransfer.navigateToWithMultipleEmbeddablePackage(appId, {
+    state: embeddablePackages,
     path:
       getOriginatingPath?.(dashboardId) ??
       (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`),

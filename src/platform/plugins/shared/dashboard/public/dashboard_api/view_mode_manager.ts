@@ -15,7 +15,7 @@ import { getDashboardBackupService } from '../services/dashboard_backup_service'
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager(
-  incomingEmbeddable?: EmbeddablePackageState,
+  incomingEmbeddables?: EmbeddablePackageState[],
   savedObjectResult?: LoadDashboardReturn
 ) {
   const dashboardBackupService = getDashboardBackupService();
@@ -25,7 +25,7 @@ export function initializeViewModeManager(
     }
 
     if (
-      incomingEmbeddable ||
+      incomingEmbeddables?.length ||
       savedObjectResult?.newDashboardCreated ||
       dashboardBackupService.dashboardHasUnsavedEdits(savedObjectResult?.dashboardId)
     )
