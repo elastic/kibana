@@ -134,6 +134,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: false,
+
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
@@ -203,12 +204,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: true,
-
-  /**
-   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
-   */
-
-  continueSuppressionWindowAdvancedSettingEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
