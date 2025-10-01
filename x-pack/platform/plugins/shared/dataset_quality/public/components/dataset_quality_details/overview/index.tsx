@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { OnRefreshProps } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -71,8 +71,8 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
     React.useState<QualityIssueType>('degraded');
 
   const handleRefresh = useCallback(
-    (refreshProps: OnRefreshProps) => {
-      updateTimeRange(refreshProps);
+    (refreshProps: TimeRange) => {
+      updateTimeRange({ start: refreshProps.from, end: refreshProps.to });
       setLastReloadTime(Date.now());
     },
     [updateTimeRange]
