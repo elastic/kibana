@@ -50,7 +50,7 @@ export const IngestionCard = ({
           hasPrivileges={definition.privileges.monitor}
           title={i18n.translate(
             'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
-            { defaultMessage: 'ingestion rate daily' }
+            { defaultMessage: 'Daily ingestion rate' }
           )}
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes(stats.bytesPerDay || 0) : '-'}
