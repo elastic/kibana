@@ -48,6 +48,7 @@ import {
   starterPromptPrompt4,
   costSavingsInsightPart1,
   costSavingsInsightPart2,
+  ENTITY_DETAILS_HIGHLIGHTS_PROMPT,
 } from './prompts';
 
 export const promptGroupId = {
@@ -58,11 +59,13 @@ export const promptGroupId = {
     policyResponseFailure: 'defendInsights-policyResponseFailure',
   },
   aiForSoc: 'aiForSoc',
+  aiForEntityAnalytics: 'aiForEntityDetails',
 };
 
 export const promptDictionary = {
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
+  entityDetailsHighlights: `entityDetailsHighlights`,
   costSavingsInsightPart1: `costSavingsInsightPart1`,
   costSavingsInsightPart2: `costSavingsInsightPart2`,
   systemPrompt: `systemPrompt`,
@@ -409,6 +412,13 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
       default: costSavingsInsightPart2,
+    },
+  },
+  {
+    promptId: promptDictionary.entityDetailsHighlights,
+    promptGroupId: promptGroupId.aiForEntityAnalytics,
+    prompt: {
+      default: ENTITY_DETAILS_HIGHLIGHTS_PROMPT,
     },
   },
   {

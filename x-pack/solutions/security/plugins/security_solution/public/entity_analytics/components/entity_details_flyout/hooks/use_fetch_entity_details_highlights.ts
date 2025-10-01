@@ -13,33 +13,6 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
 
-const llmPrompt = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
-### Format
-Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
-  The result must be a list of bullet points, nothing more.
-  Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
-    - Risk score: Summarize the entity's risk score and the main factors contributing to it.
-    - Criticality: Note the entity's criticality level and its impact on the risk score.
-    - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
-    - Misconfigurations: Summarize any significant Misconfiguration and briefly explain why it is significant.
-    - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
-  The generated data **MUST** follow this pattern:
-"""- **{title1}**: {description1}
-- **{title2}**: {description2}
-...
-- **{titleN}**: {descriptionN}
-
-**Recommended action**: {description}"""
-
-  **Strict rules**:
-    _ Only reply with the required sections, and nothing else.
-    - Limit your total response to 500 characters.
-    - Never return an section which there is no data available in the context.
-    - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
-    - Recommended action title should be bold and text should be inline.    
-    - **Do not** include any extra explanation, reasoning or text.
-  `;
-
 export const useFetchEntityDetailsHighlights = ({
   connectorId,
   anonymizationFields,
@@ -68,18 +41,35 @@ export const useFetchEntityDetailsHighlights = ({
   });
 
   const fetchEntityHighlights = useCallback(async () => {
-    const { summary, replacements } = await fetchEntityDetailsHighlights({
+    const errorTitle = i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.highlights.fetch.errorTitle',
+      {
+        defaultMessage: `Failed to run LLM`,
+      }
+    );
+
+    const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
       entityType,
       entityIdentifier,
       anonymizationFields,
       from: new Date(from).getTime(),
       to: new Date(to).getTime(),
+      connectorId,
+    }).catch((error) => {
+      addError(error, {
+        title: errorTitle,
+      });
+      return { summary: null, replacements: null, prompt: null };
     });
+
+    if (!summary || !replacements || !prompt) {
+      return;
+    }
 
     const summaryFormatted = JSON.stringify(summary);
 
     const rawResponse = await sendMessage({
-      message: `${llmPrompt}.      
+      message: `${prompt}.      
         Context:
             EntityType: ${entityType},
             EntityIdentifier: ${getAnonymizedEntityIdentifier(entityIdentifier, replacements)},
@@ -93,9 +83,7 @@ export const useFetchEntityDetailsHighlights = ({
 
     if (rawResponse.isError) {
       addError(new Error(rawResponse.response), {
-        title: i18n.translate('xpack.securitySolution.??', {
-          defaultMessage: `Failed to run LLM`,
-        }),
+        title: errorTitle,
       });
 
       return;
@@ -107,14 +95,15 @@ export const useFetchEntityDetailsHighlights = ({
       replacements,
     });
   }, [
-    addError,
-    entityIdentifier,
-    entityType,
     fetchEntityDetailsHighlights,
-    from,
-    sendMessage,
+    entityType,
+    entityIdentifier,
     anonymizationFields,
+    from,
     to,
+    connectorId,
+    sendMessage,
+    addError,
   ]);
 
   return {

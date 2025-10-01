@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 info:
   title: Entity Details highlights
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/entity_details/highlights:
+  /internal/entity_details/highlights:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -33,13 +33,17 @@ paths:
                   description: The 'from' date.
                 to:
                   type: number
-                  description: The 'to' date.              
+                  description: The 'to' date.      
+                connectorId:
+                  type: string
+                  description: The connector id.
               required:
                 - entityType
                 - entityIdentifier
                 - anonymizationFields
                 - from
-                - to        
+                - to      
+                - connectorId  
       responses:
         '200':
           description: Successful response
@@ -74,8 +78,12 @@ paths:
                     description: The highlights of the entity.
                   replacements:
                     $ref: '../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+                  prompt:
+                    type: string
+                    description: The prompt used to generate the highlights.
                 required:
                   - summary
                   - replacements
+                  - prompt
         '400':
           description: Invalid request

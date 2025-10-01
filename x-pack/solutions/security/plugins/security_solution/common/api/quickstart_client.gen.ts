@@ -1395,9 +1395,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
     return this.kbnClient
       .request<EntityDetailsHighlightsResponse>({
-        path: '/api/entity_details/highlights',
+        path: '/internal/entity_details/highlights',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,

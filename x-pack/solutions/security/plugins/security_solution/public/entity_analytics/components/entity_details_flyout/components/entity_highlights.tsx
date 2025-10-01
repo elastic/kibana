@@ -18,14 +18,17 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useFetchAnonymizationFields, useLoadConnectors } from '@kbn/elastic-assistant';
+import {
+  useAssistantContext,
+  useFetchAnonymizationFields,
+  useLoadConnectors,
+} from '@kbn/elastic-assistant';
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
-import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
@@ -35,13 +38,13 @@ export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
 }> = ({ entityType, entityIdentifier }) => {
-  const { http } = useKibana().services;
-
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
+  const { http, settings } = useAssistantContext();
 
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    settings,
   });
   const spaceId = useSpaceId();
   const { euiTheme } = useEuiTheme();
@@ -176,7 +179,3 @@ export const EntityHighlightsAccordion: React.FC<{
     </>
   );
 };
-
-// TODO: Add unit tests
-
-// allow cancelling the request?

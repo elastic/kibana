@@ -30,6 +30,11 @@ import type {
   QueryDslQueryContainer,
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  promptDictionary,
+  promptGroupId,
+} from '@kbn/elastic-assistant-plugin/server/lib/prompt/local_prompt_object';
+import { getPrompt } from '@kbn/elastic-assistant-plugin/server/lib/prompt/get_prompt';
 import type { EntityDetailsHighlightsResponse } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { EntityDetailsHighlightsRequestBody } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
@@ -80,12 +85,14 @@ export const entityDetailsHighlightsRoute = (
           const entityType = request.body.entityType;
           const entityIdentifier = request.body.entityIdentifier;
           const anonymizationFields = request.body.anonymizationFields;
+          const connectorId = request.body.connectorId;
           const entityField = EntityTypeToIdentifierField[entityType];
           const fromDate = request.body.from;
           const toDate = request.body.to;
 
           const [coreStart] = await getStartServices();
           const securitySolution = await context.securitySolution;
+          const actions = await context.actions;
           const esClient = coreStart.elasticsearch.client.asInternalUser;
           const spaceId = securitySolution.getSpaceId();
 
@@ -158,7 +165,7 @@ export const entityDetailsHighlightsRoute = (
               currentReplacements: localReplacements,
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements,
-              rawData: getRawDataOrDefault(hit.fields),
+              rawData: getRawDataOrDefault(omit(hit.fields, '_id')), // We need to exclude _id because asset criticality id contains user data
             })
           );
 
@@ -182,20 +189,6 @@ export const entityDetailsHighlightsRoute = (
             query: misconfigurationQuery.query as QueryDslQueryContainer,
           });
 
-          const vulnerabilitiesQuery = getVulnerabilitiesQuery({
-            query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
-            enabled: true,
-            pageSize: 1,
-          });
-
-          const vulnerabilities = await esClient.search({
-            ...vulnerabilitiesQuery,
-            query: misconfigurationQuery.query as QueryDslQueryContainer,
-            _source: false,
-            fields,
-            size: 10,
-          });
-
           const misconfigurationsAnonymized = misconfigurations.hits.hits.map((hit) =>
             transformRawDataToRecord({
               anonymizationFields,
@@ -206,7 +199,24 @@ export const entityDetailsHighlightsRoute = (
             })
           );
 
-          // TODO: got a bug where agent.id was anonymized but not present into replacements
+          const vulnerabilitiesQuery = getVulnerabilitiesQuery({
+            query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
+            enabled: true,
+            pageSize: 1,
+          });
+
+          const vulnerabilities =
+            entityField === 'host.name' // only hosts have vulnerabilities
+              ? await esClient.search({
+                  ...vulnerabilitiesQuery,
+                  query: vulnerabilitiesQuery.query as QueryDslQueryContainer,
+                  aggs: undefined, // We only need the hits
+                  _source: false,
+                  fields,
+                  size: 10,
+                })
+              : { hits: { hits: [] } };
+
           const vulnerabilitiesAnonymized = vulnerabilities.hits.hits.map((hit) =>
             transformRawDataToRecord({
               anonymizationFields,
@@ -279,6 +289,14 @@ export const entityDetailsHighlightsRoute = (
             });
           }
 
+          const prompt = await getPrompt({
+            actionsClient: actions.getActionsClient(),
+            connectorId,
+            promptId: promptDictionary.entityDetailsHighlights,
+            promptGroupId: promptGroupId.aiForEntityAnalytics,
+            savedObjectsClient: soClient,
+          });
+
           return response.ok({
             body: {
               summary: {
@@ -289,6 +307,7 @@ export const entityDetailsHighlightsRoute = (
                 anomalies: anomaliesAnonymized,
               },
               replacements: localReplacements,
+              prompt,
             },
           });
         } catch (e) {

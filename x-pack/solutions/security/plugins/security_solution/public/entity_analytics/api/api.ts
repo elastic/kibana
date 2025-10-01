@@ -454,6 +454,7 @@ export const useEntityAnalyticsRoutes = () => {
         anonymizationFields: AnonymizationFieldResponse[];
         from: number;
         to: number;
+        connectorId: string;
       },
       signal?: AbortSignal
     ): Promise<EntityDetailsHighlightsResponse> =>

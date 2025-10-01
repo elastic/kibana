@@ -95,7 +95,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
 
   const items = useMemo(
     () => [
-      <EuiPanel color="transparent" paddingSize="none">
+      <EuiPanel color="transparent" paddingSize="none" key={'entity-highlights-settings-menu'}>
         <EuiContextMenuItem
           aria-label={i18n.translate(
             'xpack.securitySolution.flyout.entityDetails.highlights.regenerateAriaLabel',

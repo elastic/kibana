@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Entity Details highlights
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z } from '@kbn/zod';
@@ -36,6 +36,10 @@ export const EntityDetailsHighlightsRequestBody = z.object({
    * The 'to' date.
    */
   to: z.number(),
+  /**
+   * The connector id.
+   */
+  connectorId: z.string(),
 });
 export type EntityDetailsHighlightsRequestBodyInput = z.input<
   typeof EntityDetailsHighlightsRequestBody
@@ -54,4 +58,8 @@ export const EntityDetailsHighlightsResponse = z.object({
     anomalies: z.array(z.object({})).optional(),
   }),
   replacements: Replacements,
+  /**
+   * The prompt used to generate the highlights.
+   */
+  prompt: z.string(),
 });
