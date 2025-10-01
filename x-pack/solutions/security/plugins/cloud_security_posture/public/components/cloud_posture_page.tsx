@@ -121,9 +121,9 @@ const defaultErrorRenderer = (error: unknown) => (
 export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
-      data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
       action={{
         elasticAgent: {
+          'data-test-subj': DEFAULT_NO_DATA_TEST_SUBJECT,
           // TODO: Add real docs link once we have it
           docsLink: 'https://www.elastic.co/guide/index.html',
         },
