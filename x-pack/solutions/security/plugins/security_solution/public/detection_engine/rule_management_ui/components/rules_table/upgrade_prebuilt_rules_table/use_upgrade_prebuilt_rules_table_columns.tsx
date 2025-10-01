@@ -186,7 +186,6 @@ const createUpgradeButtonColumn = (
   loadingRules: RuleSignatureId[],
   isDisabled: boolean,
   isPrebuiltRulesCustomizationEnabled: boolean,
-  rulesUpgradeStates: RuleUpgradeState[],
   telemetry: ReturnType<typeof useKibana>['services']['telemetry']
 ): TableColumn => ({
   field: 'rule_id',
@@ -224,12 +223,9 @@ const createUpgradeButtonColumn = (
         size="s"
         disabled={isUpgradeButtonDisabled}
         onClick={() => {
-          const ruleUpgradeState = rulesUpgradeStates.find((r) => r.rule_id === ruleId);
-          if (ruleUpgradeState) {
-            telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick, {
-              hasMissingBaseVersion: ruleUpgradeState.has_base_version === false,
-            });
-          }
+          telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick, {
+            hasMissingBaseVersion: record.has_base_version === false,
+          });
           upgradeRules([ruleId]);
         }}
         data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
@@ -242,9 +238,7 @@ const createUpgradeButtonColumn = (
   align: 'center',
 });
 
-export const useUpgradePrebuiltRulesTableColumns = (
-  ruleUpgradeStates: RuleUpgradeState[]
-): TableColumn[] => {
+export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -292,7 +286,6 @@ export const useUpgradePrebuiltRulesTableColumns = (
               loadingRules,
               isDisabled,
               isRulesCustomizationEnabled,
-              ruleUpgradeStates,
               telemetry
             ),
           ]
@@ -306,7 +299,6 @@ export const useUpgradePrebuiltRulesTableColumns = (
       loadingRules,
       isDisabled,
       isRulesCustomizationEnabled,
-      ruleUpgradeStates,
       telemetry,
     ]
   );
