@@ -97,7 +97,6 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/securitysolution-ecs"
   ],
   "exclude": [
     "target/**/*"
