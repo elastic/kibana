@@ -245,7 +245,11 @@ describe('createPrivilegedUsersCrudService', () => {
         refresh: 'wait_for',
         doc: {
           ...mockUserInput,
-          user: { ...mockUserInput.user, is_privileged: true },
+          user: {
+            ...mockUserInput.user,
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           labels: { sources: ['csv', 'api'] },
         },
       });
@@ -505,7 +509,11 @@ describe('createPrivilegedUsersCrudService', () => {
       });
       expect(result).toEqual({
         id: 'test-id',
-        user: { name: 'updated-name', is_privileged: true },
+        user: {
+          name: 'updated-name',
+          is_privileged: true,
+          entity: { attributes: { Privileged: true } },
+        },
         '@timestamp': '2025-08-25T00:00:00.000Z',
       });
     });
@@ -526,7 +534,11 @@ describe('createPrivilegedUsersCrudService', () => {
               _id: 'user1',
               _score: 1.0,
               _source: {
-                user: { name: 'user1', is_privileged: true },
+                user: {
+                  name: 'user1',
+                  is_privileged: true,
+                  entity: { attributes: { Privileged: true } },
+                },
                 '@timestamp': '2025-08-25T00:00:00.000Z',
               },
             },
@@ -535,7 +547,11 @@ describe('createPrivilegedUsersCrudService', () => {
               _id: 'user2',
               _score: 1.0,
               _source: {
-                user: { name: 'user2', is_privileged: true },
+                user: {
+                  name: 'user2',
+                  is_privileged: true,
+                  entity: { attributes: { Privileged: true } },
+                },
                 '@timestamp': '2025-08-25T01:00:00.000Z',
               },
             },
@@ -555,12 +571,20 @@ describe('createPrivilegedUsersCrudService', () => {
       expect(result).toEqual([
         {
           id: 'user1',
-          user: { name: 'user1', is_privileged: true },
+          user: {
+            name: 'user1',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         },
         {
           id: 'user2',
-          user: { name: 'user2', is_privileged: true },
+          user: {
+            name: 'user2',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T01:00:00.000Z',
         },
       ]);
