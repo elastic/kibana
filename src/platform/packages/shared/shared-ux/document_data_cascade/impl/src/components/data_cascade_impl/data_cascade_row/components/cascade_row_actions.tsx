@@ -63,7 +63,7 @@ export const CascadeRowActions = function RowActions({
   const visibleActions = useMemo(
     () =>
       headerRowActions.slice(0, hideOver).map(({ label, ...props }, index) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={index} grow={false}>
           {label ? (
             <EuiButtonEmpty {...defaultActionProps} {...props}>
               {label}
@@ -100,7 +100,7 @@ export const CascadeRowActions = function RowActions({
     >
       <React.Fragment>{visibleActions}</React.Fragment>
       {headerRowActions.length > hideOver && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiPopover
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}

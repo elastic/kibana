@@ -32,7 +32,7 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     paddingLeft: euiTheme.size.s,
-    // flexGrow: 0, // FIXME: align with Ryan about the consequences of having this here
+    flexGrow: 0,
 
     '& > *': {
       // Ensure that all direct children of the slot wrapper
