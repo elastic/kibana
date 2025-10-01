@@ -19,10 +19,7 @@ import type {
 import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../../kibana_services';
 
-export function transformPanelsIn(
-  widgets: DashboardAttributes['panels'] | undefined,
-  dropSections: boolean = false
-): {
+export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undefined): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -40,7 +37,7 @@ export function transformPanelsIn(
         const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
           ...storedPanel,
-          gridData: { ...storedPanel.gridData, ...(!dropSections && { sectionId: idx }) },
+          gridData: { ...storedPanel.gridData, sectionId: idx },
         });
         panelReferences.push(...references);
       });
