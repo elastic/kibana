@@ -5,30 +5,42 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 
 import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
-import type { AddLayerFunction, Visualization } from '@kbn/lens-common';
+import type { AddLayerFunction, LayerAction, Visualization } from '@kbn/lens-common';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import {
   addLayer as addLayerAction,
   changeIndexPattern,
+  cloneLayer,
   registerLibraryAnnotationGroup,
+  removeOrClearLayer,
   selectSelectedLayerId,
   selectVisualization,
   setSelectedLayerId,
   updateIndexPatterns,
+  updateVisualizationState,
   useLensDispatch,
   useLensSelector,
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { generateId } from '../../../id_generator';
 import type { LayerPanelProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { createIndexPatternService } from '../../../data_views_service/service';
-import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
+import { LayerActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
+import { getSharedActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
+import { getRemoveOperation } from '../../../utils';
+import { useFocusUpdate } from '../../../editor_frame_service/editor_frame/config_panel/use_focus_update';
 
 import type { LayerConfigurationProps } from './types';
 
@@ -51,10 +63,19 @@ export function LayerTabs(
   }
 ) {
   const { activeVisualization, coreStart, startDependencies } = props;
+  const { datasourceMap } = useEditorFrameService();
   const { euiTheme } = useEuiTheme();
 
-  const { visualization, datasourceStates, query } = useLensSelector((state) => state.lens);
+  const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
+    (state) => state.lens
+  );
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
+
+  const [datasource] = Object.values(props.framePublicAPI.datasourceLayers);
+  const isTextBasedLanguage =
+    datasource?.isTextBasedLanguage() ||
+    isOfAggregateQueryType(props.attributes?.state.query) ||
+    false;
 
   const dispatchLens = useLensDispatch();
 
@@ -142,17 +163,131 @@ export function LayerTabs(
     return layerTabDisplayNames;
   }, [layerConfigs]);
 
+  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
+
+  const { removeRef: removeLayerRef } = useFocusUpdate(layerIds);
+
+  const onRemoveLayer = useCallback(
+    async (layerToRemoveId: string) => {
+      const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
+      const datasourceId = datasourcePublicAPI?.datasourceId;
+
+      if (datasourceId) {
+        const layerDatasource = datasourceMap[datasourceId];
+        const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+        const trigger = startDependencies.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+        const action = await startDependencies.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+        action?.execute({
+          trigger,
+          fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerToRemoveId),
+          usedDataViews: layerDatasource
+            .getLayers(layerDatasourceState)
+            .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+          defaultDataView: layerDatasource.getUsedDataView(layerDatasourceState),
+        } as ActionExecutionContext);
+      }
+
+      dispatchLens(
+        removeOrClearLayer({
+          visualizationId: activeVisualization.id,
+          layerId: layerToRemoveId,
+          layerIds,
+        })
+      );
+
+      removeLayerRef(layerToRemoveId);
+    },
+    [
+      activeVisualization.id,
+      datasourceMap,
+      datasourceStates,
+      dispatchLens,
+      layerIds,
+      props.framePublicAPI.datasourceLayers,
+      startDependencies.uiActions,
+      removeLayerRef,
+    ]
+  );
+
   const renderTabs = useCallback(() => {
     const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
 
+    const updateVisualization = (newState: unknown) => {
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: activeVisualization.id,
+          newState,
+        })
+      );
+    };
+
+    const visualizationState = visualization.state;
+
     const layerTabs = visibleLayerConfigs.map((layerConfig, layerIndex) => {
+      const compatibleActions: LayerAction[] = [
+        ...(activeVisualization
+          .getSupportedActionsForLayer?.(
+            layerConfig.layerId,
+            visualizationState,
+            updateVisualization,
+            registerLibraryAnnotationGroupFunction,
+            isSaveable
+          )
+          .map((action) => ({
+            ...action,
+            execute: () => {
+              action.execute(layerActionsFlyoutRef.current);
+            },
+          })) || []),
+
+        ...getSharedActions({
+          layerId: layerConfig.layerId,
+          activeVisualization,
+          core: coreStart,
+          layerIndex,
+          layerType: activeVisualization.getLayerType(layerConfig.layerId, visualizationState),
+          isOnlyLayer:
+            getRemoveOperation(
+              activeVisualization,
+              visualization.state,
+              selectedLayerId ?? '',
+              layerIds.length
+            ) === 'clear',
+          isTextBasedLanguage,
+          hasLayerSettings: false,
+          openLayerSettings: () => {},
+          onCloneLayer: () => {
+            if (selectedLayerId)
+              dispatchLens(
+                cloneLayer({
+                  layerId: selectedLayerId,
+                })
+              );
+          },
+          onRemoveLayer: () => onRemoveLayer(layerConfig.layerId),
+          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
+            layerConfig.layerId,
+            visualizationState
+          ),
+        }),
+      ].filter((i) => i.isCompatible);
       return (
         <EuiTab
-          key={layerIndex}
+          key={layerConfig.layerId}
           onClick={() => onSelectedTabChanged(layerConfig.layerId)}
           isSelected={layerConfig.layerId === selectedLayerId}
           disabled={false}
           data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
+          append={
+            <>
+              <LayerActions
+                actions={compatibleActions}
+                layerIndex={layerIndex}
+                mountingPoint={layerActionsFlyoutRef.current}
+              />
+            </>
+          }
         >
           {layerLabels.get(layerConfig.layerId)}
         </EuiTab>
@@ -160,7 +295,21 @@ export function LayerTabs(
     });
 
     return layerTabs;
-  }, [layerConfigs, layerLabels, onSelectedTabChanged, selectedLayerId]);
+  }, [
+    activeVisualization,
+    coreStart,
+    dispatchLens,
+    isSaveable,
+    isTextBasedLanguage,
+    layerConfigs,
+    layerIds.length,
+    layerLabels,
+    onRemoveLayer,
+    onSelectedTabChanged,
+    registerLibraryAnnotationGroupFunction,
+    selectedLayerId,
+    visualization,
+  ]);
 
   const addLayerButton = useMemo(() => {
     if (hideAddLayerButton) {
@@ -251,6 +400,7 @@ export function LayerTabs(
         </EuiFlexItem>
         {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
       </EuiFlexGroup>
+      <div ref={layerActionsFlyoutRef} />
     </>
   ) : null;
 }
