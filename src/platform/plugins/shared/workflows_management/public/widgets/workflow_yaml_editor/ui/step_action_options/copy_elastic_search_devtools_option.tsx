@@ -12,7 +12,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
-import { useEditorState } from '../../lib/state/state';
+import { useSelector } from 'react-redux';
+import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/state/state';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
 
 export interface CopyElasticSearchDevToolsOptionProps {
@@ -22,7 +23,8 @@ export interface CopyElasticSearchDevToolsOptionProps {
 export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevToolsOptionProps> = ({
   onClick,
 }) => {
-  const { focusedStepInfo, workflowGraph } = useEditorState();
+  const workflowGraph = useSelector(selectWorkflowGraph);
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana<CoreStart>();

@@ -27,6 +27,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import YAML, { type Pair, type Scalar, isPair, isScalar } from 'yaml';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   getStepNodesWithType,
   getTriggerNodes,
@@ -58,7 +59,8 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
-import { useEditorState } from '../lib/state';
+import type { StepInfo } from '../lib/state';
+import { selectFocusedStepInfo, setCursorPosition, setYamlString } from '../lib/state';
 import { useFocusedStepOutline } from '../lib/hooks';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
@@ -138,7 +140,7 @@ export const WorkflowYAMLEditor = ({
   const {
     services: { http, notifications },
   } = useKibana<CoreStart>();
-
+  const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -182,8 +184,10 @@ export const WorkflowYAMLEditor = ({
 
   // Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const { initEditor } = useEditorState();
-  const { styles: stepOutlineStyles } = useFocusedStepOutline();
+  const dispatch = useDispatch();
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+
+  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
 
   // Memoize the schema to avoid re-generating it on every render
   const workflowYamlSchemaLoose = useMemo(() => {
@@ -216,6 +220,53 @@ export const WorkflowYAMLEditor = ({
     }
     return changed;
   }, []);
+
+  useEffect(() => {
+    dispatch(setYamlString(yamlDocument?.toString() || ''));
+  }, [yamlDocument, dispatch]);
+
+  const updateContainerPosition = (
+    stepInfo: StepInfo,
+    _editor: monaco.editor.IStandaloneCodeEditor
+  ) => {
+    if (!_editor || !stepInfo) {
+      return;
+    }
+
+    setPositionStyles({
+      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+      right: '0px',
+    });
+  };
+
+  useEffect(() => {
+    if (!focusedStepInfo) {
+      return;
+    }
+    updateContainerPosition(focusedStepInfo, editorRef.current!);
+  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
+
+  useEffect(() => {
+    if (!focusedStepInfo) {
+      return;
+    }
+
+    editorRef.current!.onDidScrollChange(() =>
+      updateContainerPosition(focusedStepInfo, editorRef.current!)
+    );
+  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
+
+  useEffect(() => {
+    if (!isEditorMounted) {
+      return;
+    }
+
+    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+    });
+
+    return () => disposable.dispose();
+  }, [isEditorMounted, dispatch]);
 
   // Apply diff highlight when toggled
   useEffect(() => {
@@ -347,7 +398,6 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
-    initEditor(editor);
 
     editor.updateOptions({
       glyphMargin: true,
@@ -1375,7 +1425,9 @@ export const WorkflowYAMLEditor = ({
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      <ElasticsearchStepActions onStepActionClicked={onStepActionClicked} />
+      <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
+        <ElasticsearchStepActions onStepActionClicked={onStepActionClicked} />
+      </div>
       {isDevelopment && (
         <div
           css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
@@ -1894,4 +1946,13 @@ const componentStyles = {
     overflow: 'hidden',
     zIndex: 2, // to overlay the editor flying action buttons
   }),
+  stepActionsContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      zIndex: 1002, // Above the highlighting and pseudo-element
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      padding: euiTheme.size.xs,
+      borderRadius: euiTheme.border.radius.small,
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    }),
 };

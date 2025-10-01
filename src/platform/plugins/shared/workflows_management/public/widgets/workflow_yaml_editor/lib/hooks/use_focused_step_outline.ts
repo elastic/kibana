@@ -10,10 +10,11 @@
 import { monaco } from '@kbn/monaco';
 import { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEditorState } from '../state/state';
+import { useSelector } from 'react-redux';
+import { selectFocusedStepInfo } from '../state';
 
-export const useFocusedStepOutline = () => {
-  const { focusedStepInfo, editor } = useEditorState();
+export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
 
   const styles = useMemo(
     () =>

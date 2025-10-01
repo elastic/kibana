@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -19,10 +19,9 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
+import { useSelector } from 'react-redux';
 import { RunStepButton } from './run_step_button';
-import { useEditorState } from '../lib/state/state';
-import type { StepInfo } from '../lib/state/build_workflow_lookup';
+import { selectFocusedStepInfo } from '../lib/state/state';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
 export interface ElasticsearchStepActionsProps {
@@ -34,40 +33,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
 }) => {
   const styles = useMemoCss(componentStyles);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  // Use state to force re-renders when actions change
-  const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { focusedStepInfo, editor } = useEditorState();
-  const focusedStepRef = useRef(focusedStepInfo);
-  focusedStepRef.current = focusedStepInfo;
-
-  const updateContainerPosition = (
-    stepInfo: StepInfo,
-    _editor: monaco.editor.IStandaloneCodeEditor
-  ) => {
-    if (!_editor || !stepInfo) {
-      return;
-    }
-
-    setPositionStyles({
-      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-      right: '0px',
-    });
-  };
-
-  useEffect(() => {
-    if (!focusedStepInfo || !editor) {
-      return;
-    }
-    updateContainerPosition(focusedStepInfo, editor);
-  }, [editor, focusedStepInfo, setPositionStyles]);
-
-  useEffect(() => {
-    if (!editor || !focusedStepRef.current) {
-      return;
-    }
-
-    editor.onDidScrollChange(() => updateContainerPosition(focusedStepRef.current!, editor));
-  }, [focusedStepInfo, editor, setPositionStyles]);
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -107,14 +73,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   }
 
   return (
-    <EuiFlexGroup
-      id="shit"
-      css={styles.container}
-      style={positionStyles ? positionStyles : {}}
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-    >
+    <EuiFlexGroup css={styles.container} gutterSize="xs" alignItems="center" responsive={false}>
       {focusedStepInfo && (
         <EuiFlexItem grow={false}>
           <RunStepButton

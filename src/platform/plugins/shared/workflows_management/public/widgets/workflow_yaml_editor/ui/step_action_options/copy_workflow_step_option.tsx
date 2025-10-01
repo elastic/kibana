@@ -11,14 +11,15 @@ import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { useEditorState } from '../../lib/state/state';
+import { useSelector } from 'react-redux';
+import { selectFocusedStepInfo } from '../../lib/state';
 
 export interface CopyWorkflowStepOption {
   onClick: () => void;
 }
 
 export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onClick }) => {
-  const { focusedStepInfo } = useEditorState();
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana<CoreStart>();

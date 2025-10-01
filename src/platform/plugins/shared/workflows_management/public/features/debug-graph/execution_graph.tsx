@@ -16,7 +16,8 @@ import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
-import { useEditorState } from '../../widgets/workflow_yaml_editor/lib/state';
+import { selectWorkflowGraph, useEditorState } from '../../widgets/workflow_yaml_editor/lib/state';
+import { useSelector } from 'react-redux';
 
 export interface ExecutionGraphProps {
   workflowYaml: string | undefined;
@@ -80,7 +81,7 @@ const ReactFlowWrapper: React.FC<{
 
 export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) => {
   const { euiTheme } = useEuiTheme();
-  const { workflowGraph } = useEditorState();
+  const workflowGraph = useSelector(selectWorkflowGraph);
 
   const layoutResult: { result: any; error: string } | null = useMemo(() => {
     if (!workflowGraph) {

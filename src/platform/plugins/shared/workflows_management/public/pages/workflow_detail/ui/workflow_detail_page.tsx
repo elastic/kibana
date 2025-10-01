@@ -19,6 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Provider } from 'react-redux';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -34,7 +35,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { EditorStateProvider } from '../../../widgets/workflow_yaml_editor/lib/state';
+import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/state';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -49,6 +50,8 @@ const WorkflowVisualEditor = React.lazy(() =>
 );
 
 export function WorkflowDetailPage({ id }: { id: string }) {
+  const workflowEditorStore = useMemo(() => createWorkflowEditorStore(), []);
+  console.log(workflowEditorStore);
   const styles = useMemoCss(componentStyles);
   const { application, uiSettings, notifications } = useKibana().services;
   const {
@@ -306,7 +309,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <EditorStateProvider>
+    <Provider store={workflowEditorStore}>
       <div css={styles.pageContainer}>
         <WorkflowDetailHeader
           name={workflow?.name}
@@ -409,7 +412,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         )}
       </div>
-    </EditorStateProvider>
+    </Provider>
   );
 }
 

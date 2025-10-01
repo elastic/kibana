@@ -6,6 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export { EditorStateProvider, useEditorState } from './state';
-export type { EditorState } from './state';
+export {
+  clearComputedData,
+  createWorkflowEditorStore,
+  setComputedData,
+  workflowEditorStore,
+  selectWorkflowGraph,
+  selectWorkflowLookup,
+  selectYamlDocument,
+  selectYamlString,
+  setYamlString,
+  setCursorPosition,
+  selectFocusedStepInfo,
+} from './state';
 export type { WorkflowLookup, StepInfo } from './build_workflow_lookup';
