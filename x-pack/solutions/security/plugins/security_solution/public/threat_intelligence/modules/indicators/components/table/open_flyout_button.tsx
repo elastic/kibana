@@ -21,10 +21,6 @@ export interface OpenIndicatorFlyoutButtonProps {
    * Method called by the onClick event to open/close the flyout.
    */
   onOpen: (indicator: Indicator) => void;
-  /**
-   * Boolean used to change the color and type of icon depending on the state of the flyout.
-   */
-  isOpen: boolean;
 }
 
 /**
@@ -33,18 +29,16 @@ export interface OpenIndicatorFlyoutButtonProps {
 export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
   indicator,
   onOpen,
-  isOpen,
 }) => {
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
-        data-test-subj={BUTTON_TEST_ID}
-        color={isOpen ? 'text' : 'primary'}
-        iconType={isOpen ? 'minimize' : 'expand'}
-        isSelected={isOpen}
-        iconSize="s"
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
+        color="text"
+        data-test-subj={BUTTON_TEST_ID}
+        iconType="expand"
         onClick={() => onOpen(indicator)}
+        size="s"
       />
     </EuiToolTip>
   );
