@@ -13,6 +13,7 @@ import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tansta
 import type { GroupNode } from '../../../store_provider';
 
 type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
+type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
 
 export interface CascadeVirtualizerProps<G extends GroupNode>
   extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan'> {
@@ -27,13 +28,18 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
 
 export interface CascadeVirtualizerReturnValue
   extends Pick<
-    ReturnType<typeof useVirtualizer>,
-    'getTotalSize' | 'getVirtualItems' | 'measureElement' | 'scrollOffset' | 'scrollElement'
+    UseVirtualizerReturnType,
+    | 'getTotalSize'
+    | 'getVirtualItems'
+    | 'isScrolling'
+    | 'measureElement'
+    | 'scrollOffset'
+    | 'scrollElement'
   > {
   activeStickyIndex: number | null;
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<number, number>;
-  scrollToVirtualizedIndex: (index: number) => void;
+  scrollToVirtualizedIndex: UseVirtualizerReturnType['scrollToIndex'];
   scrollToLastVirtualizedRow: () => void;
 }
 
@@ -135,24 +141,27 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   return useMemo(
     () => ({
       activeStickyIndex,
-      getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
       getTotalSize: virtualizerImpl.getTotalSize.bind(virtualizerImpl),
-      get scrollOffset() {
-        return virtualizerImpl.scrollOffset;
+      getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
+      measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
+      scrollToVirtualizedIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
+      get isScrolling() {
+        return virtualizerImpl.isScrolling;
+      },
+      get scrollElement() {
+        return virtualizerImpl.scrollElement;
       },
       get scrollToLastVirtualizedRow() {
-        return () => virtualizerImpl.scrollToIndex(rows.length - 1);
+        return () => this.scrollToVirtualizedIndex(rows.length - 1);
       },
-      scrollToVirtualizedIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
-      measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
-      get virtualizedRowsSizeCache() {
-        return virtualizedRowsSizeCacheRef.current;
+      get scrollOffset() {
+        return virtualizerImpl.scrollOffset;
       },
       get virtualizedRowComputedTranslateValue() {
         return virtualizedRowComputedTranslateValueRef.current;
       },
-      get scrollElement() {
-        return virtualizerImpl.scrollElement;
+      get virtualizedRowsSizeCache() {
+        return virtualizedRowsSizeCacheRef.current;
       },
     }),
     [activeStickyIndex, virtualizerImpl, rows.length]
