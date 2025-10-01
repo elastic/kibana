@@ -28,8 +28,10 @@ interface IngestStreamPrivileges {
   simulate: boolean;
   // User can get data information using the text structure API (e.g. to detect the structure of a message)
   text_structure: boolean;
-  // User can read from the failure store
+  // User can read failure store information
   read_failure_store: boolean;
+  // User can manage failure store information
+  manage_failure_store: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -39,6 +41,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   simulate: z.boolean(),
   text_structure: z.boolean(),
   read_failure_store: z.boolean(),
+  manage_failure_store: z.boolean(),
 });
 
 export interface IngestBase {

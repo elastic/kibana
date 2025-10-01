@@ -51,7 +51,26 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
 });
 
 export type OnNodeClick = (id: string) => void;
-export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
+export type OnErrorClick = (params: {
+  traceId: string;
+  docId: string;
+  errorCount: number;
+  errorDocId?: string;
+}) => void;
+
+interface Props {
+  children: React.ReactNode;
+  traceItems: TraceItem[];
+  showAccordion: boolean;
+  highlightedTraceId?: string;
+  onClick?: OnNodeClick;
+  onErrorClick?: OnErrorClick;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
+  showLegend: boolean;
+  serviceName?: string;
+}
 
 export function TraceWaterfallContextProvider({
   children,
@@ -65,19 +84,7 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-}: {
-  children: React.ReactNode;
-  traceItems: TraceItem[];
-  showAccordion: boolean;
-  highlightedTraceId?: string;
-  onClick?: OnNodeClick;
-  onErrorClick?: OnErrorClick;
-  scrollElement?: Element;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
-  isEmbeddable: boolean;
-  showLegend: boolean;
-  serviceName?: string;
-}) {
+}: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
       traceItems,

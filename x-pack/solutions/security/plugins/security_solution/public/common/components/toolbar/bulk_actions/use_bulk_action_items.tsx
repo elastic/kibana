@@ -104,7 +104,7 @@ export const useBulkActionItems = ({
 
   const onClickUpdate = useCallback(
     async (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
-      if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+      if (status === 'closed' && !(await promptAlertCloseConfirmation({ query, ids: eventIds }))) {
         return;
       }
 

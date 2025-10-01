@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, memo, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { debounce } from 'lodash';
 import {
   EuiProgress,
@@ -39,10 +40,46 @@ import {
 import { MonacoEditor } from './monaco_editor';
 import { MonacoEditorOutput } from './monaco_editor_output';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    consoleEditorPanel: consoleEditorPanelStyles,
+
+    requestProgressBarContainer: css`
+      position: relative;
+      z-index: ${euiTheme.levels.menu};
+    `,
+
+    resizerButton: useResizerButtonStyles(),
+
+    // Consolidated styles for editor panels with positioning
+    editorPanelPositioned: css`
+      top: 0;
+      height: calc(100% - 40px);
+    `,
+
+    outputPanelCentered: css`
+      align-content: center;
+      top: 0;
+      height: calc(100% - 40px);
+    `,
+
+    actionsPanelWithBackground: css`
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    `,
+
+    fullHeightPanel: css`
+      height: 100%;
+    `,
+  };
+};
 
 interface Props {
   loading: boolean;
@@ -54,7 +91,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const {
     services: { storage, objectStorageClient },
   } = useServicesContext();
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
 
   const { currentTextObject } = useEditorReadContext();
 
@@ -131,12 +168,12 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   return (
     <>
       {fetchingAutocompleteEntities ? (
-        <div className="conApp__requestProgressBarContainer">
+        <div css={styles.requestProgressBarContainer}>
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>
       ) : null}
       <EuiResizableContainer
-        css={{ height: '100%' }}
+        css={styles.fullHeightPanel}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
         onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
         data-test-subj="consoleEditorContainer"
@@ -153,13 +190,12 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                 grow={true}
                 borderRadius="none"
                 hasShadow={false}
-                css={{ height: '100%' }}
+                css={styles.fullHeightPanel}
               >
                 <EuiSplitPanel.Inner
                   paddingSize="none"
                   grow={true}
-                  className="consoleEditorPanel"
-                  css={{ top: 0, height: 'calc(100% - 40px)' }}
+                  css={[styles.consoleEditorPanel, styles.editorPanelPositioned]}
                 >
                   {loading ? (
                     <EditorContentSpinner />
@@ -177,7 +213,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                     grow={false}
                     paddingSize="s"
                     color="subdued"
-                    className="consoleEditorPanel"
+                    css={styles.consoleEditorPanel}
                   >
                     <EuiButtonEmpty
                       size="xs"
@@ -197,7 +233,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
             </EuiResizablePanel>
 
             <EuiResizableButton
-              className="conApp__resizerButton"
+              css={styles.resizerButton}
               aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
                 defaultMessage: "Press left/right to adjust panels' sizes",
               })}
@@ -209,11 +245,14 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               tabIndex={0}
               paddingSize="none"
             >
-              <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} css={{ height: '100%' }}>
+              <EuiSplitPanel.Outer
+                borderRadius="none"
+                hasShadow={false}
+                css={styles.fullHeightPanel}
+              >
                 <EuiSplitPanel.Inner
                   paddingSize="none"
-                  css={{ alignContent: 'center', top: 0, height: 'calc(100% - 40px)' }}
-                  className="consoleEditorPanel"
+                  css={[styles.consoleEditorPanel, styles.outputPanelCentered]}
                 >
                   {data ? (
                     <MonacoEditorOutput />
@@ -228,10 +267,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   <EuiSplitPanel.Inner
                     grow={false}
                     paddingSize="s"
-                    css={{
-                      backgroundColor: euiTheme.colors.backgroundBasePlain,
-                    }}
-                    className="consoleEditorPanel"
+                    css={[styles.consoleEditorPanel, styles.actionsPanelWithBackground]}
                   >
                     <EuiFlexGroup gutterSize="none" responsive={false}>
                       <EuiFlexItem grow={false}>
