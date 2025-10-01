@@ -413,8 +413,6 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
           .send(rulePayload)
           .expect(200);
 
-        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
-
         await supertest
           .delete(`/api/alerting/rule/${createdRule.id}/snooze_schedule/1`)
           .set('kbn-xsrf', 'foo')
