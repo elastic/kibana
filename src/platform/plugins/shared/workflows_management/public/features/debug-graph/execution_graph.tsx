@@ -16,7 +16,7 @@ import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
-import { selectWorkflowGraph, useEditorState } from '../../widgets/workflow_yaml_editor/lib/state';
+import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/state';
 import { useSelector } from 'react-redux';
 
 export interface ExecutionGraphProps {
