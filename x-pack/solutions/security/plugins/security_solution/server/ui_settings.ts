@@ -35,6 +35,7 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_ESQL_RISK_SCORING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
@@ -50,10 +51,6 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-  DEFAULT_VALUE_REPORT_TITLE,
-  ENABLE_ESQL_RISK_SCORING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -636,7 +633,7 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
             {
               defaultMessage:
-                'Default AI connector for serverless AI features (Elastic EASE Engine)',
+                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
             }
           ),
           type: 'select',
