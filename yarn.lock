@@ -6776,7 +6776,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-test-routes@link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes":
+"@kbn/reporting-test-routes@link:x-pack/test/reporting_api_integration/plugins/reporting_test_routes":
   version "0.0.0"
   uid ""
 
