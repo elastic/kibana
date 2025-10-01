@@ -22,14 +22,15 @@ export const useScrollToActive = <T extends HTMLElement = HTMLElement>(condition
   useEffect(() => {
     if (!condition || !ref.current) return;
 
-    const timeoutId = setTimeout(() => {
-      ref.current?.scrollIntoView({
+    const frameId = requestAnimationFrame(() => {
+      if (!ref.current) return; // Re-check in case component unmounted
+      ref.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
       });
-    }, 0);
+    });
 
-    return () => clearTimeout(timeoutId);
+    return () => cancelAnimationFrame(frameId);
   }, [condition]);
 
   return ref;

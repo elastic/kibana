@@ -45,7 +45,6 @@ export const SecondaryMenuItemComponent = ({
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
-  // TODO: the "scroll to active" behavior was disabled because it causes a scroll in the main container
   const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
 
   const iconSide = iconType ? 'left' : 'right';
