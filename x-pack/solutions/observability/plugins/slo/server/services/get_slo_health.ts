@@ -9,6 +9,7 @@ import type { TransformGetTransformStatsTransformStats } from '@elastic/elastics
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
+import type { AggregationsAggregate, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { Dictionary } from 'lodash';
 import { groupBy, keyBy } from 'lodash';
 import moment from 'moment';
@@ -17,34 +18,99 @@ import {
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import type { SLODefinition } from '../domain/models';
 import type { HealthStatus, State } from '../domain/models/health';
-import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
+const ES_PAGESIZE_LIMIT = 1000;
+
+function getAfterKey(
+  agg: AggregationsAggregate | undefined
+): Record<string, FieldValue> | undefined {
+  if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
+    return agg.after_key as Record<string, FieldValue>;
+  }
+  return undefined;
+}
 
 export class GetSLOHealth {
-  constructor(
-    private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository
-  ) {}
+  constructor(private scopedClusterClient: IScopedClusterClient) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
-    const sloIds = params.list.map(({ sloId }) => sloId);
-    const sloList = await this.repository.findAllByIds(sloIds);
-    const sloById = keyBy(sloList, 'id');
+    let afterKey: AggregationsAggregate | undefined;
+    let sloKeysFromES: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }> = [];
 
-    const filteredList = params.list
-      .filter((item) => !!sloById[item.sloId])
-      .map((item) => ({
-        sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
-        sloRevision: sloById[item.sloId].revision,
-      }));
+    do {
+      const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
+        size: 0,
+        aggs: {
+          sloIds: {
+            composite: {
+              after: afterKey as Record<string, FieldValue>,
+              size: ES_PAGESIZE_LIMIT,
+              sources: [
+                {
+                  sloId: { terms: { field: 'slo.id' } },
+                },
+                {
+                  sloInstanceId: { terms: { field: 'slo.instanceId' } },
+                },
+                {
+                  sloRevision: { terms: { field: 'slo.revision' } },
+                },
+              ],
+            },
+          },
+        },
+        index: '.slo-observability.summary-*',
+        _source: ['slo.id', 'slo.instanceId', 'slo.revision'],
+        ...(params.list?.length && {
+          query: {
+            bool: {
+              filter: [{ terms: { 'slo.id': params.list.map((slo) => slo.sloId) } }],
+            },
+          },
+        }),
+      });
 
-    const transformStatsById = await this.getTransformStats(sloList);
+      afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
+
+      const buckets = (
+        sloIdCompositeQueryResponse.aggregations?.sloIds as {
+          buckets?: Array<{ key: { sloId: string; sloInstanceId: string; sloRevision: number } }>;
+        }
+      )?.buckets;
+      if (buckets && buckets.length > 0) {
+        sloKeysFromES = sloKeysFromES.concat([
+          ...buckets.map((bucket) => {
+            return {
+              sloId: bucket.key.sloId,
+              sloInstanceId: bucket.key.sloInstanceId,
+              sloRevision: bucket.key.sloRevision,
+            };
+          }),
+        ]);
+      }
+    } while (afterKey);
+
+    // let filteredList = sloKeysFromES.map((item) => ({
+    //   sloId: item.sloId,
+    //   sloInstanceId: item.sloInstanceId,
+    //   sloRevision: item.sloRevision,
+    // }));
+
+    let filteredList: any[] = [];
+
+    for (let i = 0; i < 100; i++) {
+      filteredList = filteredList.concat({
+        sloId: '770a62cb-f103-478d-b34c-b310c8e80b8e',
+        // sloInstanceId: 'ES-Air',
+        sloRevision: 1,
+      });
+    }
+
+    const transformStatsById = await this.getTransformStats(filteredList);
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
     const results = filteredList.map((item) => {
@@ -60,7 +126,19 @@ export class GetSLOHealth {
       };
     });
 
-    return fetchSLOHealthResponseSchema.encode(results);
+    // REVERT FROM TESTING
+    const mappedResults = results; // Array.from(new Map(results.map((item) => [item.sloId, item])).values());
+
+    // If a statusFilter is provided, we need to filter the results accordingly.
+    // We also need to ensure that we return only unique SLO IDs, as there might be multiple instances.
+    const uniqueResults = params.statusFilter
+      ? mappedResults.filter((item) => item.health.overall === params.statusFilter)
+      : mappedResults;
+
+    return fetchSLOHealthResponseSchema.encode({
+      data: uniqueResults.slice(0, 1000), // limit to 1000 results to avoid too large responses
+      total: uniqueResults.length,
+    });
   }
 
   private async getSummaryDocsById(
@@ -89,16 +167,19 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
+  /*
+  TODO: debug this
+  */
   private async getTransformStats(
-    sloList: SLODefinition[]
+    sloList: { sloId: string; sloRevision: number }[]
   ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
     const transformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
           transform_id: sloList
-            .map((slo: SLODefinition) => [
-              getSLOTransformId(slo.id, slo.revision),
-              getSLOSummaryTransformId(slo.id, slo.revision),
+            .map((slo: { sloId: string; sloRevision: number }) => [
+              getSLOTransformId(slo.sloId, slo.sloRevision),
+              getSLOSummaryTransformId(slo.sloId, slo.sloRevision),
             ])
             .flat(),
           allow_no_match: true,

@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
@@ -16,7 +17,8 @@ import { TransformDisplayText } from '../../../slo_details/components/unhealthy_
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
 export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
-  const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
+  const { isLoading, isError, data: resultData } = useFetchSloHealth({});
+  const { data: results } = resultData ?? {};
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
   );
@@ -34,10 +36,10 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     return null;
   }
 
-  const unhealthyRollupTransforms = results.filter(
+  const unhealthyRollupTransforms = unhealthySloList.filter(
     (result) => result.health.rollup === 'unhealthy'
   );
-  const unhealthySummaryTransforms = results.filter(
+  const unhealthySummaryTransforms = unhealthySloList.filter(
     (result) => result.health.summary === 'unhealthy'
   );
 
@@ -79,27 +81,35 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
               }}
             />
             <ul>
-              {unhealthyRollupTransforms.map((result) => (
-                <li key={result.sloId}>
-                  <TransformDisplayText
-                    textSize="xs"
-                    transformId={getSLOTransformId(result.sloId, result.sloRevision)}
-                  />
-                </li>
-              ))}
-              {unhealthySummaryTransforms.map((result) => (
-                <li key={result.sloId}>
-                  <TransformDisplayText
-                    textSize="xs"
-                    transformId={getSLOSummaryTransformId(result.sloId, result.sloRevision)}
-                  />
-                </li>
+              {unhealthySloList.map((result) => (
+                <>
+                  {result.health.rollup === 'unhealthy' && (
+                    <li key={result.sloId}>
+                      <TransformDisplayText
+                        textSize="xs"
+                        transformId={getSLOTransformId(result.sloId, result.sloRevision)}
+                      />
+                    </li>
+                  )}
+                  {result.health.summary === 'unhealthy' && (
+                    <li key={result.sloId}>
+                      <TransformDisplayText
+                        textSize="xs"
+                        transformId={getSLOSummaryTransformId(result.sloId, result.sloRevision)}
+                      />
+                    </li>
+                  )}
+                </>
               ))}
             </ul>
           </EuiFlexItem>
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.slo.sloList.healthCallout.buttonDimissAriaLabel',
+                  { defaultMessage: 'Dismiss SLO health callout' }
+                )}
                 data-test-subj="sloHealthCalloutDimissButton"
                 color="text"
                 size="s"
