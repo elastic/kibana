@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.clickAreaChart();
         await visualize.clickNewSearch('ecommerce');
         await reporting.selectExportItem('PDF');
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(true);
       });
 
       it('becomes available when saved', async () => {
