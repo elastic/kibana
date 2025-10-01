@@ -75,7 +75,7 @@ export async function getMetricFields({
     metricFields: applyPagination({ metricFields: allMetricFields, page, size }),
     dataStreamFieldCapsMap,
     logger,
-    timerange: { from, to },
+    timerange,
   });
 
   const finalFields = enrichedMetricFields.map((field) => {
