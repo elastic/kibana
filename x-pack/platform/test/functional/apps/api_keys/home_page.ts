@@ -483,13 +483,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           username: 'elastic',
           password: 'changeme',
         });
-
-        await pageObjects.common.navigateToApp('apiKeys');
       });
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        await clearAllApiKeys(es, log);
+        // await clearAllApiKeys(es, log);
+      });
+
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('apiKeys');
       });
 
       it('active/expired filter buttons work as expected', async () => {
