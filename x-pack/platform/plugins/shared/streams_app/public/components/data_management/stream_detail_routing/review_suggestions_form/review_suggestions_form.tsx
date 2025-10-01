@@ -16,8 +16,8 @@ import { FormProvider } from './use_review_suggestions_form';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
-import type { AIFeatures } from '../../stream_detail_enrichment/steps/blocks/action/grok/use_ai_features';
 import { useReviewSuggestionsFormContext } from './use_review_suggestions_form';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
 export interface ReviewSuggestionsFormProps {
   definition: Streams.WiredStream.GetResponse;
@@ -46,7 +46,10 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
     <FormProvider {...reviewSuggestionsForm}>
       <EuiCallOut
         announceOnMount
-        title="Review partitioning suggestions"
+        title={i18n.translate(
+          'xpack.streams.reviewSuggestionsForm.euiCallOut.reviewPartitioningSuggestionsLabel',
+          { defaultMessage: 'Review partitioning suggestions' }
+        )}
         onDismiss={resetForm}
         className={css`
           min-block-size: auto; /* Prevent background clipping */
