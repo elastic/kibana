@@ -88,11 +88,13 @@ describe('useFetchLatestScan', () => {
         data: [
           {
             id: 'test-insight-1',
+            insightType: 'incompatible_antivirus',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test', events: [{}] }],
           },
           {
             id: 'test-insight-2',
+            insightType: 'policy_response_failure',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test', events: [{}] }],
           },
@@ -268,6 +270,7 @@ describe('useFetchLatestScan', () => {
         data: [
           {
             id: 'insight-1',
+            insightType: 'incompatible_antivirus',
             status: DefendInsightStatusEnum.succeeded,
             insights: [
               { group: 'test1', events: [{}, {}, {}] },
@@ -276,6 +279,7 @@ describe('useFetchLatestScan', () => {
           },
           {
             id: 'insight-2',
+            insightType: 'policy_response_failure',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test3', events: [{}, {}] }],
           },
@@ -286,7 +290,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
-          insightTypes: ['incompatible_antivirus'],
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })

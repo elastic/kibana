@@ -25,7 +25,7 @@ import { getPrebuiltRuleBaseVersion } from '../../../../utils/rules/prebuilt_rul
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   const ruleAsset = createRuleAssetSavedObject({
@@ -51,14 +51,14 @@ export default ({ getService }: FtrProviderContext): void => {
           body: {
             data: [baseVersion],
           },
-        } = await securitySolutionApi.findRules({
+        } = await detectionsApi.findRules({
           query: {
             filter: 'alert.attributes.params.immutable: true',
             per_page: 1,
           },
         });
 
-        const { body: modifiedCurrentVersion } = await securitySolutionApi.patchRule({
+        const { body: modifiedCurrentVersion } = await detectionsApi.patchRule({
           body: { rule_id: 'rule_1', description: 'new description' },
         });
 
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
           body: {
             data: [baseVersion],
           },
-        } = await securitySolutionApi.findRules({
+        } = await detectionsApi.findRules({
           query: {
             filter: 'alert.attributes.params.immutable: true',
             per_page: 1,
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {
               data: [prebuiltRule],
             },
-          } = await securitySolutionApi.findRules({
+          } = await detectionsApi.findRules({
             query: {
               filter: 'alert.attributes.params.immutable: true',
               per_page: 1,
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns a 404 error if rule is custom', async () => {
-          const { body: customRule } = await securitySolutionApi.createRule({
+          const { body: customRule } = await detectionsApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
           });
 

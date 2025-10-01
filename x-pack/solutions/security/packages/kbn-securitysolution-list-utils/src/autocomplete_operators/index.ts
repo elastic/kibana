@@ -144,6 +144,10 @@ export const ALL_OPERATORS: OperatorOption[] = [
   doesNotMatchOperator,
 ];
 
+export const ALL_OPERATORS_SANS_MATCHES: OperatorOption[] = ALL_OPERATORS.filter(
+  (operator) => operator !== matchesOperator && operator !== doesNotMatchOperator
+);
+
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
   isOperator,
   isNotOperator,

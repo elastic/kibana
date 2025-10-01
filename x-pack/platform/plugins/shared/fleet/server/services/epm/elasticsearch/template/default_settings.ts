@@ -10,11 +10,14 @@ import { appContextService } from '../../../app_context';
 export function buildDefaultSettings({
   ilmPolicy,
   type,
+  isOtelInputType,
 }: {
   type: string;
   ilmPolicy?: string | undefined;
+  isOtelInputType?: boolean;
 }) {
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  const defaultIlmPolicy = isOtelInputType ? `${type}@lifecycle` : type;
 
   return {
     index: {
@@ -23,7 +26,7 @@ export function buildDefaultSettings({
         : {
             // ILM Policy must be added here, for now point to the default global ILM policy name
             lifecycle: {
-              name: ilmPolicy ? ilmPolicy : type,
+              name: ilmPolicy ? ilmPolicy : defaultIlmPolicy,
             },
           }),
     },

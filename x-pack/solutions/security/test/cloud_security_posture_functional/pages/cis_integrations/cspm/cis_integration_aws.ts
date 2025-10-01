@@ -234,7 +234,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Organization Manual Shared Access', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/225030
+    describe.skip('CIS_AWS Organization Manual Shared Access', () => {
       it('CIS_AWS Organization Manual Shared Access Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';

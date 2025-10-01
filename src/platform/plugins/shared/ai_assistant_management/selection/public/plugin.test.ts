@@ -30,6 +30,10 @@ describe('AI Assistant Management Selection Plugin', () => {
             return AIAssistantType.Default;
           }
         }),
+        get$: jest.fn(() =>
+          new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+        ),
+        isDefault: jest.fn(() => false),
       },
       application: {
         capabilities: {
@@ -52,8 +56,10 @@ describe('AI Assistant Management Selection Plugin', () => {
     });
     subscription.unsubscribe();
 
-    const allCalls = (coreStart.uiSettings.get as jest.Mock).mock.calls;
-    expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
+    expect(coreStart.uiSettings.get).toHaveBeenCalledWith(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Default
+    );
     expect(collected).toEqual([AIAssistantType.Default]);
   });
 
@@ -134,7 +140,13 @@ describe('AI Assistant Management Selection Plugin', () => {
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          uiSettings: {
+            get: jest.fn(() => AIAssistantType.Default),
+            get$: jest.fn(() =>
+              new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+            ),
+            isDefault: jest.fn(() => false),
+          },
           application: applicationCapabilities,
         } as any,
         {
@@ -171,7 +183,13 @@ describe('AI Assistant Management Selection Plugin', () => {
       const license$ = new BehaviorSubject<any>(makeLicense('platinum'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          uiSettings: {
+            get: jest.fn(() => AIAssistantType.Default),
+            get$: jest.fn(() =>
+              new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+            ),
+            isDefault: jest.fn(() => false),
+          },
           application: applicationCapabilities,
         } as any,
         {
@@ -201,7 +219,13 @@ describe('AI Assistant Management Selection Plugin', () => {
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
       plugin.start(
         {
-          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          uiSettings: {
+            get: jest.fn(() => AIAssistantType.Default),
+            get$: jest.fn(() =>
+              new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
+            ),
+            isDefault: jest.fn(() => false),
+          },
           application: {
             capabilities: {
               management: {

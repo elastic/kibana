@@ -25,6 +25,7 @@ import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { MIGRATION_VERSION } from './report';
+import { rollDataStreamIfRequired } from './rollover';
 
 type UpdateResponse<T> = estypes.UpdateResponse<T>;
 type IndexResponse = estypes.IndexResponse;
@@ -77,7 +78,7 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   return {
     ...doc,
     migration_version: MIGRATION_VERSION,
-    '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
+    '@timestamp': doc.created_at || new Date().toISOString(),
   };
 };
 
@@ -170,9 +171,19 @@ export class ReportingStore {
         await this.createIlmPolicy();
       }
     } catch (e) {
-      this.logger.error('Error in start phase');
-      this.logger.error(e);
+      this.logger.error(`Error creating ILM policy: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
       throw e;
+    }
+
+    try {
+      await rollDataStreamIfRequired(this.logger, await this.getClient());
+    } catch (e) {
+      this.logger.error(`Error rolling over data stream: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
+      // not rethrowing, as this is not a fatal error
     }
   }
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
+import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
@@ -103,6 +105,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
+  getSyntheticsTriggerTaskRun,
+  cleanupPrivateLocationRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

@@ -29,7 +29,7 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   }, []);
 
   return (
-    <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="indicesList">
       <IndexTable history={history as ScopedHistory} />
     </div>
   );

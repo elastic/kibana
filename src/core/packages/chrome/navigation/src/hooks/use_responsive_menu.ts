@@ -7,21 +7,81 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefObject } from 'react';
+import type { MutableRefObject } from 'react';
 import { useCallback, useRef, useState, useLayoutEffect } from 'react';
 
-import type { MenuCalculations, MenuItem, NavigationStructure } from '../../types';
-import { getActualItemHeights } from '../utils/get_actual_item_heights';
-import {
-  COLLAPSED_MENU_ITEM_HEIGHT,
-  EXPANDED_MENU_ITEM_HEIGHT,
-  MAX_MENU_ITEMS,
-} from '../constants';
-import { calculateVisibleItemCount } from '../utils/calculate_item_visible_count';
-import { partitionMenuItems } from '../utils/partition_menu_items';
+import type { MenuItem } from '../../types';
+import { MAX_MENU_ITEMS } from '../constants';
+import { getStyleProperty } from '../utils/get_style_property';
+
+/**
+ * Utility function to cache the heights of the menu items in a ref.
+ * It assumes one initial render where all items are in the DOM.
+ *
+ * @param ref - The ref to the heights cache.
+ * @param menu - The menu element.
+ * @param items - The menu items.
+ */
+const cacheHeights = (
+  ref: MutableRefObject<number[]>,
+  menu: HTMLElement,
+  items: MenuItem[]
+): void => {
+  if (ref.current?.length !== items.length) {
+    const children: Element[] = Array.from(menu.children);
+
+    // Only cache if the DOM has rendered all the items we expect
+    if (children.length === items.length) {
+      ref.current = children.map((child) => child.clientHeight);
+    }
+  }
+};
+
+/**
+ * Utility function to get the number of visible menu items until we reach the menu height or the limit of menu items.
+ *
+ * @param heights - The heights of the menu items.
+ * @param gap - The gap between the menu items.
+ * @param menuHeight - The height of the menu.
+ *
+ * @returns The number of visible menu items.
+ */
+const countVisibleItems = (heights: number[], gap: number, menuHeight: number): number => {
+  const countItemsToFit = (availableHeight: number, limit: number) => {
+    let itemCount = 0;
+    let totalHeight = 0;
+
+    for (let i = 0; i < heights.length && itemCount < limit; i++) {
+      const itemHeight = heights[i];
+      const nextTotalHeight = totalHeight + itemHeight + (itemCount > 0 ? gap : 0);
+
+      if (nextTotalHeight <= availableHeight) {
+        totalHeight = nextTotalHeight;
+        itemCount++;
+      } else {
+        break;
+      }
+    }
+
+    return itemCount;
+  };
+
+  // 1. Calculate how many items can fit without considering the "More" button
+  const initialVisibleCount = countItemsToFit(menuHeight, MAX_MENU_ITEMS);
+
+  // 2. If not all items are visible, we need the "More" button
+  if (heights.length > initialVisibleCount) {
+    const moreItemHeight = heights[0]; // Approximately the same height as any other item
+    const availableHeight = menuHeight - moreItemHeight - gap;
+
+    return countItemsToFit(availableHeight, MAX_MENU_ITEMS - 1);
+  }
+
+  return initialVisibleCount;
+};
 
 interface ResponsiveMenuState {
-  primaryMenuRef: RefObject<HTMLElement>;
+  primaryMenuRef: MutableRefObject<HTMLElement | null>;
   visibleMenuItems: MenuItem[];
   overflowMenuItems: MenuItem[];
 }
@@ -32,80 +92,56 @@ interface ResponsiveMenuState {
  * @param items - Navigation items
  * @returns Object with menu ref and partitioned menu items
  */
-export function useResponsiveMenu(
-  isCollapsed: boolean,
-  items: NavigationStructure
-): ResponsiveMenuState {
-  const primaryMenuRef = useRef<HTMLElement>(null);
+export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
+  const primaryMenuRef = useRef<HTMLElement | null>(null);
+  const heightsCacheRef = useRef<number[]>([]);
 
-  const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>([]);
+  const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>(items);
   const [overflowMenuItems, setOverflowMenuItems] = useState<MenuItem[]>([]);
 
   const recalculateMenuLayout = useCallback(() => {
-    const menuElement = primaryMenuRef.current;
-    if (!menuElement) {
-      return;
-    }
+    if (!primaryMenuRef.current) return;
 
-    const menuRect = menuElement.getBoundingClientRect();
-    const computedStyle = window.getComputedStyle(menuElement);
-    const itemGap = parseFloat(computedStyle.getPropertyValue('gap')) || 0;
-    const renderedItemHeights = getActualItemHeights(menuElement);
+    // Primary menu
+    const menu = primaryMenuRef.current;
+    const menuHeight = menu.clientHeight;
 
-    const actualItemHeights: number[] = [];
+    // 1. Cache the heights of all children
+    cacheHeights(heightsCacheRef, menu, items);
 
-    for (let i = 0; i < items.primaryItems.length; i++) {
-      if (i < renderedItemHeights.length) {
-        actualItemHeights.push(renderedItemHeights[i]);
-      } else {
-        const avgHeight =
-          renderedItemHeights.length > 0
-            ? renderedItemHeights.reduce((sum, h) => sum + h, 0) / renderedItemHeights.length
-            : isCollapsed
-            ? COLLAPSED_MENU_ITEM_HEIGHT
-            : EXPANDED_MENU_ITEM_HEIGHT;
-        actualItemHeights.push(avgHeight);
-      }
-    }
+    if (heightsCacheRef.current.length === 0) return;
 
-    const calculations: MenuCalculations = {
-      availableHeight: menuRect.height,
-      itemGap,
-      maxVisibleItems: MAX_MENU_ITEMS,
-    };
+    // Primary menu items
+    const childrenHeights = heightsCacheRef.current;
+    const childrenGap = getStyleProperty(menu, 'gap');
 
-    const maxVisibleItems = calculateVisibleItemCount(calculations, actualItemHeights);
+    // 2. Calculate the number of visible menu items
+    const visibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
 
-    // if we need overflow (more total items than can fit), we need to account for "More" button space
-    let adjustedMaxVisible = maxVisibleItems;
-    if (items.primaryItems.length > maxVisibleItems) {
-      const moreButtonHeight = actualItemHeights[0] || EXPANDED_MENU_ITEM_HEIGHT;
-      const availableForRegularItems = calculations.availableHeight - moreButtonHeight;
-
-      const adjustedCalculations = {
-        ...calculations,
-        availableHeight: availableForRegularItems,
-      };
-      adjustedMaxVisible = calculateVisibleItemCount(adjustedCalculations, actualItemHeights);
-    }
-
-    const { visible, overflow } = partitionMenuItems(items.primaryItems, adjustedMaxVisible);
-
-    setVisibleMenuItems(visible);
-    setOverflowMenuItems(overflow);
-  }, [isCollapsed, items]);
+    // 3. Update the visible and overflow menu items
+    setVisibleMenuItems(items.slice(0, visibleCount));
+    setOverflowMenuItems(items.slice(visibleCount));
+  }, [items]);
 
   useLayoutEffect(() => {
+    setVisibleMenuItems(items);
+    setOverflowMenuItems([]);
+
+    // Invalidate the cache when items change
+    heightsCacheRef.current = [];
+
     const observer = new ResizeObserver(recalculateMenuLayout);
 
     if (primaryMenuRef.current) {
       observer.observe(primaryMenuRef.current);
     }
 
-    recalculateMenuLayout();
-
     return () => observer.disconnect();
-  }, [recalculateMenuLayout]);
+  }, [isCollapsed, items, recalculateMenuLayout]);
+
+  useLayoutEffect(() => {
+    recalculateMenuLayout();
+  }, [isCollapsed, recalculateMenuLayout]);
 
   return {
     primaryMenuRef,

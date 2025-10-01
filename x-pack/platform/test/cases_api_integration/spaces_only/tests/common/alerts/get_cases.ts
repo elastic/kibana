@@ -65,9 +65,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(cases.length).to.eql(3);
       validateCasesFromAlertIDResponse(cases, [
-        { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
-        { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
-        { caseInfo: case3, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case1, totals: { alerts: 1, events: 0, userComments: 0 } },
+        { caseInfo: case2, totals: { alerts: 1, events: 0, userComments: 0 } },
+        { caseInfo: case3, totals: { alerts: 1, events: 0, userComments: 0 } },
       ]);
     });
 
@@ -116,6 +116,7 @@ export default ({ getService }: FtrProviderContext): void => {
           totals: {
             userComments: 0,
             alerts: 1,
+            events: 0,
           },
         },
       ]);

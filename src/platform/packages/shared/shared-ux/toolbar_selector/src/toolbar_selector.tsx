@@ -132,7 +132,17 @@ export const ToolbarSelector = ({
   >(
     (newOptions) => {
       if (singleSelection === false) {
-        onChange?.(newOptions.filter(({ checked }) => checked === 'on'));
+        // For multi-selection, we need to preserve previously selected options
+        const currentlyVisibleSelected = newOptions.filter(({ checked }) => checked === 'on');
+        const currentlyVisibleValues = new Set(newOptions.map((option) => option.value));
+
+        // Find previously selected options that are not currently visible (filtered out)
+        const previouslySelectedButHidden = options.filter(
+          (option) => option.checked === 'on' && !currentlyVisibleValues.has(option.value)
+        );
+
+        const allSelected = [...currentlyVisibleSelected, ...previouslySelectedButHidden];
+        onChange?.(allSelected);
       } else {
         const chosenOption = newOptions.find(({ checked }) => checked === 'on');
         onChange?.(
@@ -142,7 +152,7 @@ export const ToolbarSelector = ({
         disableLabelPopover();
       }
     },
-    [closePopover, disableLabelPopover, onChange, singleSelection]
+    [closePopover, disableLabelPopover, onChange, singleSelection, options]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(

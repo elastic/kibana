@@ -526,6 +526,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
           );
         });
+
+        it('should close the flyout when current quality switch is toggled on and the flyout is already open with an old field ', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: degradedDatasetWithLimitDataStreamName,
+            expandedDegradedField: 'cloud',
+          });
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
+          );
+
+          await testSubjects.click(
+            PageObjects.datasetQuality.testSubjectSelectors
+              .datasetQualityDetailsOverviewDegradedFieldToggleSwitch
+          );
+
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
+          );
+        });
       });
 
       describe('character limit exceeded', () => {

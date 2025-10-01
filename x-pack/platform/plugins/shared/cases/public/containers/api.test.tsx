@@ -43,7 +43,7 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
-  removeAlertFromComment,
+  bulkPostObservables,
 } from './api';
 
 import {
@@ -70,7 +70,6 @@ import {
   mockCase,
   similarCases,
   similarCasesSnake,
-  alertCommentPatch,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -773,22 +772,19 @@ describe('Cases API', () => {
       await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
-        patch: {
-          comment: 'updated comment',
-          type: AttachmentType.user,
-          owner: SECURITY_SOLUTION_OWNER,
-        },
+        commentUpdate: 'updated comment',
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'PATCH',
         body: JSON.stringify({
-          id: basicCase.comments[0].id,
-          version: basicCase.comments[0].version,
           comment: 'updated comment',
           type: AttachmentType.user,
+          id: basicCase.comments[0].id,
+          version: basicCase.comments[0].version,
           owner: SECURITY_SOLUTION_OWNER,
         }),
         signal: abortCtrl.signal,
@@ -799,15 +795,27 @@ describe('Cases API', () => {
       const resp = await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
-        patch: {
-          comment: 'updated comment',
-          type: AttachmentType.user,
-          owner: SECURITY_SOLUTION_OWNER,
-        },
+        commentUpdate: 'updated comment',
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
       });
       expect(resp).toEqual(basicCase);
+    });
+
+    it('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+
+      const resp = await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
 
@@ -829,6 +837,7 @@ describe('Cases API', () => {
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       category: 'test',
@@ -1000,59 +1009,6 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
-    });
-  });
-
-  describe('removeAlertFromComment', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-    });
-
-    it('patch comment should be called with correct check url, method, signal', async () => {
-      const updatedComment = {
-        ...alertCommentPatch,
-        alertId: alertCommentPatch.alertId.slice(1),
-        index: alertCommentPatch.index.slice(1),
-      };
-      fetchMock.mockResolvedValue(updatedComment);
-      await removeAlertFromComment({
-        caseId: basicCaseId,
-        alertId: alertCommentPatch.alertId[0],
-        alertAttachment: alertCommentPatch,
-        signal: abortCtrl.signal,
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
-        body: JSON.stringify({
-          ...updatedComment,
-        }),
-        method: 'PATCH',
-        signal: abortCtrl.signal,
-      });
-    });
-
-    it('delete alert should be called with correct check url, method, signal', async () => {
-      const updatedComment = {
-        ...alertCommentPatch,
-        alertId: alertCommentPatch.alertId.slice(3),
-        index: alertCommentPatch.index.slice(3),
-      };
-      fetchMock.mockResolvedValue(null);
-      const resp = await removeAlertFromComment({
-        caseId: basicCaseId,
-        alertId: alertCommentPatch.alertId[3],
-        alertAttachment: updatedComment,
-        signal: abortCtrl.signal,
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `${CASES_URL}/${basicCase.id}/comments/${alertCommentPatch.id}`,
-        {
-          method: 'DELETE',
-          signal: abortCtrl.signal,
-        }
-      );
-      expect(resp).toEqual(undefined);
     });
   });
 
@@ -1352,6 +1308,64 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
+    });
+  });
+
+  describe('bulkPostObservables', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await bulkPostObservables(
+        {
+          caseId: mockCase.id,
+          observables: [
+            {
+              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+              value: 'test value',
+              description: '',
+            },
+          ],
+        },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_create`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            caseId: mockCase.id,
+            observables: [
+              {
+                typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+                value: 'test value',
+                description: '',
+              },
+            ],
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await bulkPostObservables(
+        {
+          caseId: mockCase.id,
+          observables: [
+            {
+              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+              value: 'test value',
+              description: '',
+            },
+          ],
+        },
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
     });
   });
 });

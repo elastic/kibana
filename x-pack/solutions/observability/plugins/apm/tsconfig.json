@@ -144,7 +144,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/esql-composer",
-    "@kbn/discover-shared-plugin"
+    "@kbn/discover-shared-plugin",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

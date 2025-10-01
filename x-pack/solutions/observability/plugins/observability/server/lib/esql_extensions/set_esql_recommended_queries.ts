@@ -107,26 +107,10 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
-// Those are only Metrics Experience recommended queries that we can toggle on/off with a FF
-const METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES = [] as any[];
-
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
   esqlExtensionsRegistry.setRecommendedQueries(
-    [
-      ...TRACES_ESQL_RECOMMENDED_QUERIES,
-      ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
-      ...METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES,
-    ],
-    'oblt'
-  );
-}
-
-export function unsetMetricsExperienceEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
-  const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
-
-  esqlExtensionsRegistry.unsetRecommendedQueries(
-    METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES,
+    [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
     'oblt'
   );
 }

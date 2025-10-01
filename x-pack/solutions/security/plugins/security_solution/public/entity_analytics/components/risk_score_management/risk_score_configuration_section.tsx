@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiSpacer,
   useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { getEntityAnalyticsRiskScorePageStyles } from './risk_score_page_styles';
@@ -35,6 +36,10 @@ export const RiskScoreConfigurationSection = ({
   if (!selectedRiskEngineSettings) return <EuiLoadingSpinner size="m" />;
   return (
     <>
+      <EuiTitle>
+        <h4>{i18n.RISK_SCORE_ALERT_CONFIG}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center">
         <EuiSwitch
           label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}

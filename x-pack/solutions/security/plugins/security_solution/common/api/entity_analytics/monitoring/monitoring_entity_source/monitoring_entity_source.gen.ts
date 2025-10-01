@@ -17,6 +17,29 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
+export type Integrations = z.infer<typeof Integrations>;
+export const Integrations = z.object({
+  /**
+   * Index to read latest sync markers from
+   */
+  syncMarkerIndex: z.string().optional(),
+  /**
+   * integrations latest full sync and update syncData
+   */
+  syncData: z
+    .object({
+      /**
+       * Timestamp of the last full sync from integrations
+       */
+      lastFullSync: z.string().datetime().optional(),
+      /**
+       * Timestamp of the last update processed from integrations
+       */
+      lastUpdateProcessed: z.string().datetime().optional(),
+    })
+    .optional(),
+});
+
 export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
 export const CreateMonitoringEntitySource = z.object({
   type: z.string(),
@@ -39,6 +62,7 @@ export const CreateMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  integrations: Integrations.optional(),
 });
 
 export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
@@ -63,6 +87,13 @@ export const UpdatedMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  integrations: Integrations.optional(),
+});
+
+export type Matcher = z.infer<typeof Matcher>;
+export const Matcher = z.object({
+  fields: z.array(z.string()),
+  values: z.array(z.string()),
 });
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
@@ -73,19 +104,13 @@ export const MonitoringEntitySourceProperties = z.object({
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
+  matchers: z.array(Matcher).optional(),
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  integrations: Integrations.optional(),
 });
 
 export type MonitoringEntitySourceNoId = z.infer<typeof MonitoringEntitySourceNoId>;

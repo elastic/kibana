@@ -1,0 +1,8 @@
+Stream name:
+{{stream.name}}
+
+Stream description:
+- {{{stream.description}}}
+
+Initial clustering:
+{{{initial_clustering}}}

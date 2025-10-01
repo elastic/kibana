@@ -33,6 +33,7 @@
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
     "@kbn/chart-test-jest-helpers",
+    "@kbn/field-formats-common",
   ],
   "exclude": [
     "target/**/*",

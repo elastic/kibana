@@ -12,7 +12,7 @@ import type { DashboardAttributes } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
 describe('transformDashboardIn', () => {
-  test('should transform dashboard state to saved object', async () => {
+  test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
@@ -46,12 +46,12 @@ describe('transformDashboardIn', () => {
       },
       panels: [
         {
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          panelConfig: {
+          grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          config: {
             enhancements: {},
             savedObjectId: '1',
           },
-          panelIndex: '1',
+          uid: '1',
           title: 'title1',
           type: 'type1',
           version: '2',
@@ -61,11 +61,13 @@ describe('transformDashboardIn', () => {
       timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
-      timeFrom: 'now-15m',
-      timeTo: 'now',
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
     };
 
-    const output = await transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn({ dashboardState });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -97,7 +99,7 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', async () => {
+  it('should handle missing optional state keys', () => {
     const dashboardState: DashboardAttributes = {
       title: 'title',
       description: 'my description',
@@ -107,7 +109,7 @@ describe('transformDashboardIn', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = await transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn({ dashboardState });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {

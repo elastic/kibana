@@ -16,17 +16,17 @@ import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/_
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 import { generateAttackDiscoveries } from './generate_discoveries';
 import { generateAndUpdateAttackDiscoveries } from './generate_and_update_discoveries';
-import { reportAttackDiscoverySuccessTelemetry } from './helpers';
+import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
-import { handleGraphError } from '../post/helpers/handle_graph_error';
+import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
 jest.mock('./generate_discoveries', () => ({
   ...jest.requireActual('./generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
-jest.mock('./helpers', () => ({
-  ...jest.requireActual('./helpers'),
+jest.mock('./report_attack_discovery_success_telemetry', () => ({
+  ...jest.requireActual('./report_attack_discovery_success_telemetry'),
   reportAttackDiscoverySuccessTelemetry: jest.fn(),
 }));
 jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
@@ -38,8 +38,8 @@ jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
       ).mockAttackDiscoveries
     ),
 }));
-jest.mock('../post/helpers/handle_graph_error', () => ({
-  ...jest.requireActual('../post/helpers/handle_graph_error'),
+jest.mock('../public/post/helpers/handle_graph_error', () => ({
+  ...jest.requireActual('../public/post/helpers/handle_graph_error'),
   handleGraphError: jest.fn(),
 }));
 jest.mock('./telemetry', () => {
@@ -112,11 +112,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(generateAttackDiscoveries).toHaveBeenCalledWith({
@@ -135,11 +137,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(reportAttackDiscoverySuccessTelemetry).toHaveBeenCalledWith(
@@ -164,11 +168,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(handleGraphError).not.toBeCalled();
@@ -181,11 +187,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(results).toEqual({
@@ -194,6 +202,64 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         replacements: mockConfig.replacements,
       });
     });
+
+    it.each([[true], [false]])(
+      'should call createAttackDiscoveryAlerts with withReplacements=%s',
+      async (withReplacementsVal) => {
+        const executionUuid = 'test-1';
+
+        await generateAndUpdateAttackDiscoveries({
+          actionsClient: mockActionsClient,
+          authenticatedUser: mockAuthenticatedUser,
+          config: mockConfig,
+          dataClient: mockDataClient,
+          enableFieldRendering: true,
+          esClient: mockEsClient,
+          executionUuid,
+          logger: mockLogger,
+          savedObjectsClient: mockSavedObjectsClient,
+          telemetry: mockTelemetry,
+          withReplacements: withReplacementsVal,
+        });
+
+        expect(createAttackDiscoveryAlerts).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAttackDiscoveryAlertsParams: expect.objectContaining({
+              withReplacements: withReplacementsVal,
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([[true], [false]])(
+      'should call createAttackDiscoveryAlerts with enableFieldRendering=%s',
+      async (enableFieldRenderingVal) => {
+        const executionUuid = 'test-2';
+
+        await generateAndUpdateAttackDiscoveries({
+          actionsClient: mockActionsClient,
+          authenticatedUser: mockAuthenticatedUser,
+          config: mockConfig,
+          dataClient: mockDataClient,
+          enableFieldRendering: enableFieldRenderingVal,
+          esClient: mockEsClient,
+          executionUuid,
+          logger: mockLogger,
+          savedObjectsClient: mockSavedObjectsClient,
+          telemetry: mockTelemetry,
+          withReplacements: false,
+        });
+
+        expect(createAttackDiscoveryAlerts).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAttackDiscoveryAlertsParams: expect.objectContaining({
+              enableFieldRendering: enableFieldRenderingVal,
+            }),
+          })
+        );
+      }
+    );
   });
 
   describe('when `generateAttackDiscoveries` throws an error', () => {
@@ -206,11 +272,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(handleGraphError).toHaveBeenCalledWith(
@@ -232,11 +300,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(reportAttackDiscoverySuccessTelemetry).not.toBeCalled();
@@ -251,11 +321,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(results).toEqual({ error: testInvokeError });
@@ -276,11 +348,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(handleGraphError).not.toBeCalled();
@@ -293,11 +367,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(results).toEqual({

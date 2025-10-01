@@ -6,13 +6,9 @@
  */
 
 import moment from 'moment';
-
-jest.mock('./post_pagerduty', () => ({
-  postPagerduty: jest.fn(),
-}));
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './post_pagerduty';
 import type { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -25,6 +21,11 @@ import type {
 import { getConnectorType } from '.';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+
+jest.mock('./post_pagerduty', () => ({
+  postPagerduty: jest.fn(),
+}));
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 const services: Services = actionsMock.createServices();
@@ -576,7 +577,7 @@ describe('execute()', () => {
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
-      throw new Error('doing some testing');
+      throw createTaskRunError(new Error('doing some testing'), TaskErrorSource.USER);
     });
 
     const actionId = 'some-action-id';
@@ -594,6 +595,7 @@ describe('execute()', () => {
     expect(actionResponse).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-action-id",
+        "errorSource": "user",
         "message": "error posting pagerduty event",
         "serviceMessage": "doing some testing",
         "status": "error",

@@ -13,21 +13,23 @@ import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { DIMENSIONS_COLUMN } from '../../../common/utils';
+import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
 import { useEsqlQueryInfo } from '../../../hooks';
 
 export const useChartLayers = ({
   query,
-  timeRange,
+  getTimeRange,
   color,
   seriesType,
   services,
+  unit,
   abortController,
 }: {
   query: string;
   color?: string;
-  unit?: string;
-  timeRange: TimeRange;
+  unit?: MetricUnit;
+  getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   services: ChartSectionProps['services'];
   abortController?: AbortController;
@@ -40,12 +42,17 @@ export const useChartLayers = ({
         esqlQuery: query,
         search: services.data.search.search,
         signal: abortController?.signal,
+        timeRange: getTimeRange(),
       }),
 
-    [query, services.data.search.search, timeRange]
+    [query, services.data.search, abortController, getTimeRange]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
+    if (columns.length === 0) {
+      return [];
+    }
+
     const xAxisColumn = columns.find((col) => col.meta.type === 'date');
     const xAxis: LensSeriesLayer['xAxis'] = {
       type: 'dateHistogram',
@@ -62,9 +69,9 @@ export const useChartLayers = ({
       .map((col) => ({
         label: col.name,
         value: col.name,
-        decimals: 1,
         compactValues: true,
         seriesColor: color,
+        ...(unit ? getLensMetricFormat(unit) : {}),
       }));
 
     const hasDimensions = queryInfo.dimensions.length > 0;
@@ -77,7 +84,7 @@ export const useChartLayers = ({
         breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
       },
     ];
-  }, [columns, queryInfo.dimensions, seriesType, color]);
+  }, [columns, queryInfo.dimensions, seriesType, color, unit]);
 
   return layers;
 };

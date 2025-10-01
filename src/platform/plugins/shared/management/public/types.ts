@@ -111,6 +111,8 @@ export interface AppDependencies {
   cardsNavigationConfig?: NavigationCardsSubject;
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  hasEnterpriseLicense: boolean;
 }
 
 export interface ConfigSchema {

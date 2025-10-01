@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('metrics_experience', () => {
     loadTestFile(require.resolve('./dimensions'));
     loadTestFile(require.resolve('./fields'));
+    loadTestFile(require.resolve('./index_pattern'));
   });
 }

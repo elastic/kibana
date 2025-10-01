@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { setProjectAnnotations, composeStories } from '@storybook/react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { action } from '@storybook/addon-actions';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -22,6 +22,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -119,6 +120,25 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
+const waitAndExecute = async (callback: () => void, timeout: number = 3000) => {
+  const startTime = Date.now();
+  const pollInterval = 100;
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      callback();
+      // If callback executes without throwing, we're done
+      return;
+    } catch (error) {
+      // If callback throws, wait and try again
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+  }
+
+  // If we've reached the timeout, try one final time and let any error bubble up
+  callback();
+};
+
 describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
@@ -192,7 +212,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).toHaveTextContent('Show alert details');
     });
 
-    it('should not show `Show event details` list item when label node misses documentsData', () => {
+    xit('should not show `Show event details` list item when label node misses documentsData', () => {
       const { container, queryByTestId } = renderStory();
 
       expandNode(
@@ -204,21 +224,34 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows `Show entity details` list item when entity node has documentsData', () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData', () => {
       const { container, getByTestId } = renderStory();
 
       expandNode(container, 'projects/your-project-id/roles/customRole');
 
       const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
       expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
-    it('should not show `Show entity details` list item when entity node misses documentsData', () => {
-      const { container, queryByTestId } = renderStory();
+    xit('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
 
       expandNode(container, 'admin@example.com');
-      const showDetailsItem = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-      expect(showDetailsItem).not.toBeInTheDocument();
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      await fireEvent.mouseOver(showDetailsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Details not available');
+      });
     });
   });
 

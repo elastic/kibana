@@ -2672,10 +2672,10 @@
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
           },
-          "<string | string[]>; customHeaders: ",
+          "<true, string | string[], string | string[]>; customHeaders: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

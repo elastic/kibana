@@ -296,8 +296,8 @@ const FleetTopNav = memo(
       });
     }
     topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-        defaultMessage: 'Send feedback',
+      label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+        defaultMessage: 'Give feedback',
       }),
       iconType: 'popout',
       run: () => window.open(FEEDBACK_URL),

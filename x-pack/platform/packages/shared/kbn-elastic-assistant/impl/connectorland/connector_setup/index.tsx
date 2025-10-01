@@ -35,9 +35,9 @@ export const ConnectorSetup = ({
   );
   const { setApiConfig } = useConversation();
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, http, inferenceEnabled } = useAssistantContext();
+  const { actionTypeRegistry, http, inferenceEnabled, settings } = useAssistantContext();
 
-  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled });
+  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled, settings });
 
   const { data: actionTypes } = useLoadActionTypes({ http });
 

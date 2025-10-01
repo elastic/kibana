@@ -11,8 +11,11 @@ export const ONECHAT_FEATURE_ID = 'agentBuilder';
 export const ONECHAT_FEATURE_NAME = 'Agent Builder';
 export const ONECHAT_APP_ID = 'agent_builder';
 export const ONECHAT_PATH = '/app/agent_builder';
-export const ONECHAT_TITLE = i18n.translate('xpack.onechat.app.mainTitle', {
+export const AGENT_BUILDER_FULL_TITLE = i18n.translate('xpack.onechat.app.fullTitle', {
   defaultMessage: 'Agent Builder',
+});
+export const AGENT_BUILDER_SHORT_TITLE = i18n.translate('xpack.onechat.app.shortTitle', {
+  defaultMessage: 'Agents',
 });
 
 export const uiPrivileges = {

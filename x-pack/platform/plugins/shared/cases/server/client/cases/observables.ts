@@ -10,12 +10,16 @@ import { v4 } from 'uuid';
 import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
+import type { Observable } from '../../../common/types/domain';
 import { CaseRt } from '../../../common/types/domain';
 import {
   AddObservableRequestRt,
   type AddObservableRequest,
   type UpdateObservableRequest,
   UpdateObservableRequestRt,
+  type BulkAddObservablesRequest,
+  BulkAddObservablesRequestRt,
+  type ObservablePost,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
@@ -30,6 +34,7 @@ import {
   validateObservableTypeKeyExists,
   validateObservableValue,
 } from '../validators';
+import { processObservables } from './utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -239,5 +244,77 @@ export const deleteObservable = async (
     });
   } catch (error) {
     throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
+  }
+};
+
+export const bulkAddObservables = async (
+  params: BulkAddObservablesRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+) => {
+  const {
+    services: { caseService, licensingService },
+    authorization,
+  } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+
+  try {
+    const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
+    const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
+    await ensureUpdateAuthorized(authorization, retrievedCase);
+
+    await Promise.all(
+      params.observables.map((observable: ObservablePost) =>
+        validateObservableTypeKeyExists(casesClient, {
+          caseOwner: retrievedCase.attributes.owner,
+          observableTypeKey: observable.typeKey,
+        })
+      )
+    );
+
+    const currentObservables = retrievedCase.attributes.observables ?? [];
+    const updatedObservablesMap = new Map<string, Observable>();
+    currentObservables.forEach((observable) => {
+      processObservables(updatedObservablesMap, observable);
+    });
+
+    paramArgs.observables.forEach((observable) =>
+      processObservables(updatedObservablesMap, observable)
+    );
+
+    const finalObservables = Array.from(updatedObservablesMap.values()).slice(
+      0,
+      MAX_OBSERVABLES_PER_CASE
+    );
+
+    const updatedCase = await caseService.patchCase({
+      caseId: retrievedCase.id,
+      originalCase: retrievedCase,
+      updatedAttributes: {
+        observables: finalObservables,
+      },
+    });
+
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...retrievedCase,
+        ...updatedCase,
+        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
+        references: retrievedCase.references,
+      },
+    });
+
+    return decodeOrThrow(CaseRt)(res);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to add observable: ${error}`);
   }
 };

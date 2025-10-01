@@ -15,6 +15,11 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiIconTip: () => '',
+}));
+
 describe('FilterAggForm', () => {
   const runtimeMappings: RuntimeMappings = {
     rt_bytes_bigger: {

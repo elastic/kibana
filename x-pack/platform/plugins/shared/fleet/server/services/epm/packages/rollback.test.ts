@@ -6,7 +6,7 @@
  */
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import { agentPolicyService, packagePolicyService } from '../..';
+import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
 
 import { installPackage } from './install';
@@ -15,6 +15,7 @@ import { rollbackInstallation } from './rollback';
 jest.mock('../..', () => ({
   appContextService: {
     getLogger: jest.fn().mockReturnValue({ info: jest.fn() } as any),
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -49,19 +50,18 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if the package is not installed', async () => {
-    const savedObjectsClient = {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
         saved_objects: [],
       }),
-    } as any;
-
+    });
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('Package test-package not found');
   });
 
   it('should throw an error if no previous package version is found', async () => {
-    const savedObjectsClient = {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
         saved_objects: [
           {
@@ -71,15 +71,15 @@ describe('rollbackInstallation', () => {
           },
         ],
       }),
-    } as any;
+    });
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('No previous version found for package test-package');
   });
 
   it('should throw an error if the package was not installed from the registry', async () => {
-    const savedObjectsClient = {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
         saved_objects: [
           {
@@ -89,15 +89,15 @@ describe('rollbackInstallation', () => {
           },
         ],
       }),
-    } as any;
+    });
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('test-package was not installed from the registry (install source: upload)');
   });
 
   it('should throw an error if at least one package policy does not have a previous version', async () => {
-    const savedObjectsClient = {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
         saved_objects: [
           {
@@ -107,7 +107,7 @@ describe('rollbackInstallation', () => {
           },
         ],
       }),
-    } as any;
+    });
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -124,12 +124,17 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({
+        esClient,
+        currentUserPolicyIds: ['test-package-policy'],
+        pkgName,
+        spaceId,
+      })
     ).rejects.toThrow('No previous version found for package policies: test-package-policy');
   });
 
   it('should throw an error if at least one package policy has a different previous version', async () => {
-    const savedObjectsClient = {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({
         saved_objects: [
           {
@@ -139,7 +144,7 @@ describe('rollbackInstallation', () => {
           },
         ],
       }),
-    } as any;
+    });
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -166,7 +171,12 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({
+        esClient,
+        currentUserPolicyIds: ['test-package-policy', 'test-package-policy:prev'],
+        pkgName,
+        spaceId,
+      })
     ).rejects.toThrow(
       'Wrong previous version for package policies: test-package-policy (version: 1.2.0, expected: 1.0.0)'
     );
@@ -185,6 +195,9 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -211,7 +224,12 @@ describe('rollbackInstallation', () => {
     } as any);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({
+        esClient,
+        currentUserPolicyIds: ['test-package-policy', 'test-package-policy:prev'],
+        pkgName,
+        spaceId,
+      })
     ).rejects.toThrow(
       'Failed to rollback package test-package to version 1.0.0: Installation failed'
     );
@@ -242,6 +260,9 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -267,7 +288,12 @@ describe('rollbackInstallation', () => {
       ],
     } as any);
 
-    await rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId });
+    await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: ['test-package-policy', 'test-package-policy:prev'],
+      pkgName,
+      spaceId,
+    });
     expect(packagePolicyServiceMock.rollback).toHaveBeenCalled();
     expect(installPackage).toHaveBeenCalledWith({
       esClient,
@@ -295,6 +321,9 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [
         {
@@ -326,7 +355,59 @@ describe('rollbackInstallation', () => {
     ]);
 
     await expect(
-      rollbackInstallation({ esClient, savedObjectsClient, pkgName, spaceId })
+      rollbackInstallation({
+        esClient,
+        currentUserPolicyIds: ['test-package-policy', 'test-package-policy:prev'],
+        pkgName,
+        spaceId,
+      })
     ).rejects.toThrow('Cannot rollback integration with managed package policies');
+  });
+
+  it('should throw error on rollback when current user does not have access to all package policies', async () => {
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    const savedObjectsClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+          },
+        ],
+      }),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test-package-policy',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
+        {
+          id: 'test-package-policy:prev',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-1`,
+            package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+            revision: 1,
+            latest_revision: false,
+          },
+        },
+      ],
+    } as any);
+    agentPolicyServiceMock.getByIds.mockResolvedValue([{} as any]);
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow('Not authorized to rollback integration policies in all spaces');
   });
 });

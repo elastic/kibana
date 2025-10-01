@@ -152,6 +152,8 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        integrations:
+            $ref: '#/components/schemas/Integrations'          
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -193,6 +195,8 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        integrations: 
+            $ref: '#/components/schemas/Integrations'
 
     MonitoringEntitySourceProperties:
       type: object
@@ -212,19 +216,7 @@ components:
         matchers:
           type: array
           items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                
-              values:
-                type: array
-                items:
-                  type: string        
+            $ref: '#/components/schemas/Matcher'
         filter:
           type: object
           properties:
@@ -232,6 +224,23 @@ components:
               oneOf:
               - type: string
               - type: object
+        integrations: 
+          $ref: '#/components/schemas/Integrations'
+
+    Matcher:
+      type: object
+      required:
+      - fields
+      - values
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+        values:
+          type: array
+          items:
+            type: string
 
     MonitoringEntitySourceNoId:
       allOf:
@@ -247,3 +256,22 @@ components:
         properties:
           id:
             type: string
+
+    Integrations: 
+      type: object
+      properties:
+        syncMarkerIndex: 
+          type: string
+          description: Index to read latest sync markers from
+        syncData: 
+          type: object
+          description: integrations latest full sync and update syncData
+          properties:
+            lastFullSync: 
+              type: string
+              format: date-time
+              description: Timestamp of the last full sync from integrations
+            lastUpdateProcessed: 
+              type: string
+              format: date-time
+              description: Timestamp of the last update processed from integrations

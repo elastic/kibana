@@ -24,6 +24,7 @@ const mockConversations = {
 const testProps = {
   conversationSharedState: ConversationSharedState.PRIVATE,
   conversationsLoaded: true,
+  currentUser: { name: 'elastic' },
   selectedConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {

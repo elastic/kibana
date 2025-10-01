@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
@@ -29,15 +29,17 @@ export const AlertSuppressionLabel = ({ label, ruleType }: AlertSuppressionLabel
         <TechnicalPreviewBadge label={label} />
       )}
       {alertSuppressionUpsellingMessage && (
-        <EuiToolTip position="top" content={alertSuppressionUpsellingMessage}>
-          <EuiIcon
-            type={'warning'}
-            size="l"
-            color="danger"
-            css={{ marginLeft: '8px' }}
-            data-test-subj="alertSuppressionInsufficientLicensingIcon"
-          />
-        </EuiToolTip>
+        <EuiIconTip
+          content={alertSuppressionUpsellingMessage}
+          position="top"
+          type="warning"
+          size="l"
+          color="danger"
+          css={{ marginLeft: '8px' }}
+          iconProps={{
+            'data-test-subj': 'alertSuppressionInsufficientLicensingIcon',
+          }}
+        />
       )}
     </>
   );

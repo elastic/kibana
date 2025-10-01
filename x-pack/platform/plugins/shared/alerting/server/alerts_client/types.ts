@@ -73,6 +73,7 @@ export interface IAlertsClient<
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
+  getMaxAlertLimit(): number;
   checkLimitUsage(): void;
   processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
@@ -106,7 +107,6 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
-  getTrackedExecutions(): Set<string>;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -135,7 +135,6 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  trackedExecutions?: string[];
 }
 
 export interface TrackedAlerts<

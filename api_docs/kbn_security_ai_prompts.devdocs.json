@@ -142,7 +142,13 @@
             "text": "ActionsClient"
           },
           "> | undefined; providedConnector?: ",
-          "Connector",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           " | undefined; }) => Promise<{ provider?: string | undefined; model?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
@@ -239,7 +245,13 @@
                 "label": "providedConnector",
                 "description": [],
                 "signature": [
-                  "Connector",
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.Connector",
+                    "text": "Connector"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
@@ -302,7 +314,13 @@
             "label": "connector",
             "description": [],
             "signature": [
-              "Connector",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.Connector",
+                "text": "Connector"
+              },
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",

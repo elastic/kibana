@@ -11,7 +11,8 @@
     "**/*.ts",
   ],
   "kbn_references": [
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

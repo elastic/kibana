@@ -14,7 +14,6 @@ export {
   ENTERPRISE_SEARCH_WEB_CRAWLERS_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  SERVERLESS_ES_APP_ID,
   SEARCH_HOMEPAGE,
   SERVERLESS_ES_CONNECTORS_ID,
   SERVERLESS_ES_WEB_CRAWLERS_ID,
@@ -32,6 +31,5 @@ export type {
   EnterpriseSearchContentApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
-  ServerlessSearchApp,
   DeepLinkId,
 } from './deep_links';

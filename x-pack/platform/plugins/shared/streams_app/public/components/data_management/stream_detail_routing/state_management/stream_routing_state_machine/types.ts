@@ -10,8 +10,12 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
+import type { Condition } from '@kbn/streamlang';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
+import type { RoutingSamplesContext } from './routing_samples_state_machine';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
@@ -20,6 +24,7 @@ export interface StreamRoutingServiceDependencies {
   timeState$: TimefilterHook['timeState$'];
   core: CoreStart;
   data: DataPublicPluginStart;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export interface StreamRoutingInput {
@@ -43,4 +48,13 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
-  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions };
+  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
+  | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
+  | {
+      type: 'suggestion.preview';
+      condition: Condition;
+      name: string;
+      index: number;
+      toggle?: boolean;
+    }
+  | { type: 'suggestion.append'; definitions: RoutingDefinition[] };

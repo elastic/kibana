@@ -3004,10 +3004,10 @@
           "<",
           {
             "pluginId": "maps",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
+            "section": "def-common.MapEmbeddableState",
+            "text": "MapEmbeddableState"
           },
           "> & Partial<{ enhancements: { dynamicActions: ",
           {
@@ -3132,18 +3132,18 @@
           "<",
           {
             "pluginId": "maps",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
+            "section": "def-common.MapByReferenceState",
+            "text": "MapByReferenceState"
           },
           ", ",
           {
             "pluginId": "maps",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibMapsPluginApi",
-            "section": "def-public.MapSerializedState",
-            "text": "MapSerializedState"
+            "section": "def-common.MapByValueState",
+            "text": "MapByValueState"
           },
           "> & { getLayerList: () => ",
           "ILayer",
@@ -3185,52 +3185,6 @@
           "\"MAPS_APP_LOCATOR\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/locators/map_locator/locator_definition.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
-        "id": "def-public.MapSerializedState",
-        "type": "Type",
-        "tags": [],
-        "label": "MapSerializedState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTimeRange",
-            "text": "SerializedTimeRange"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
-          },
-          " & Partial<",
-          {
-            "pluginId": "embeddableEnhanced",
-            "scope": "public",
-            "docId": "kibEmbeddableEnhancedPluginApi",
-            "section": "def-public.DynamicActionsSerializedState",
-            "text": "DynamicActionsSerializedState"
-          },
-          "> & { attributes?: ",
-          "MapAttributes",
-          " | undefined; savedObjectId?: string | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
-          "MapCenterAndZoom",
-          " | undefined; mapBuffer?: ",
-          "MapExtent",
-          " | undefined; mapSettings?: Partial<",
-          "MapSettings",
-          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4085,7 +4039,7 @@
               },
               ", data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4135,12 +4089,12 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4163,7 +4117,7 @@
               },
               ", id: string, data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4228,12 +4182,12 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9862,6 +9816,125 @@
           "\"map\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.MapByReferenceState",
+        "type": "Type",
+        "tags": [],
+        "label": "MapByReferenceState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTimeRange",
+            "text": "SerializedTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          " & Partial<",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.DynamicActionsSerializedState",
+            "text": "DynamicActionsSerializedState"
+          },
+          "> & { isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
+          "MapCenterAndZoom",
+          " | undefined; mapBuffer?: ",
+          "MapExtent",
+          " | undefined; mapSettings?: Partial<",
+          "MapSettings",
+          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; } & { savedObjectId: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.MapByValueState",
+        "type": "Type",
+        "tags": [],
+        "label": "MapByValueState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTimeRange",
+            "text": "SerializedTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          " & Partial<",
+          {
+            "pluginId": "embeddableEnhanced",
+            "scope": "public",
+            "docId": "kibEmbeddableEnhancedPluginApi",
+            "section": "def-public.DynamicActionsSerializedState",
+            "text": "DynamicActionsSerializedState"
+          },
+          "> & { isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
+          "MapCenterAndZoom",
+          " | undefined; mapBuffer?: ",
+          "MapExtent",
+          " | undefined; mapSettings?: Partial<",
+          "MapSettings",
+          "> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; } & { attributes: ",
+          "MapAttributes",
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.MapEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "MapEmbeddableState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.MapByReferenceState",
+            "text": "MapByReferenceState"
+          },
+          " | ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.MapByValueState",
+            "text": "MapByValueState"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -17,6 +17,7 @@ import {
   selectProviderTools,
   conversationToLangchainMessages,
 } from '../utils';
+import { resolveCapabilities } from '../utils/capabilities';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -37,6 +38,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation = [],
+    capabilities,
     toolSelection = allToolsSelection,
     customInstructions,
     runId = uuidv4(),
@@ -46,6 +48,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
+  const resolvedCapabilities = resolveCapabilities(capabilities);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
@@ -75,6 +78,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
+    capabilities: resolvedCapabilities,
     customInstructions,
   });
 

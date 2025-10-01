@@ -18,11 +18,19 @@ export function getFetchAgent(url: string) {
   return isHTTPS && isLocalhost ? new https.Agent({ rejectUnauthorized: false }) : undefined;
 }
 
-export function getEsClientTlsSettings(url: string) {
+export function getEsClientTlsSettings(url: string, insecure: boolean = false) {
   const isHTTPS = new URL(url).protocol === 'https:';
+  const isLocalhost = new URL(url).hostname === 'localhost';
+
+  // If insecure flag is set, disable certificate verification
+  if (insecure && isHTTPS) {
+    return {
+      rejectUnauthorized: false,
+    };
+  }
+
   // load the CA cert from disk if necessary
   const caCert = isHTTPS ? Fs.readFileSync(CA_CERT_PATH) : null;
-  const isLocalhost = new URL(url).hostname === 'localhost';
 
   return caCert && isLocalhost
     ? {

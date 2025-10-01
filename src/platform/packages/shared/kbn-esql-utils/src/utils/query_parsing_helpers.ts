@@ -14,6 +14,8 @@ import {
   isFunctionExpression,
   isColumn,
   WrappingPrettyPrinter,
+  BasicPrettyPrinter,
+  isStringLiteral,
 } from '@kbn/esql-ast';
 
 import type {
@@ -118,6 +120,34 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts timeseries (TS) commands to FROM commands in an ES|QL query
+ * @param esql - The ES|QL query string
+ * @returns The modified query with TS commands converted to FROM commands
+ */
+export function convertTimeseriesCommandToFrom(esql?: string): string {
+  const { root } = Parser.parse(esql || '');
+  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  if (!timeseriesCommand) return esql || '';
+
+  const fromCommand = {
+    ...timeseriesCommand,
+    name: 'from',
+  };
+
+  // Replace the ts command with the from command in the commands array
+  const newCommands = root.commands.map((command) =>
+    command === timeseriesCommand ? fromCommand : command
+  );
+
+  const newRoot = {
+    ...root,
+    commands: newCommands,
+  };
+
+  return BasicPrettyPrinter.print(newRoot);
+}
+
+/**
  * When the ?_tstart and ?_tend params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
@@ -168,6 +198,26 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   return columnName;
+};
+
+export const getKqlSearchQueries = (esql: string) => {
+  const { ast } = parse(esql);
+  const functions: ESQLFunction[] = [];
+
+  walk(ast, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const searchFunctions = functions.filter(({ name }) => name === 'kql');
+
+  return searchFunctions
+    .map((func) => {
+      if (func.args.length > 0 && isStringLiteral(func.args[0])) {
+        return func.args[0].valueUnquoted.trim();
+      }
+      return '';
+    })
+    .filter((query) => query !== '');
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {

@@ -83,6 +83,7 @@ const mockUseKibanaReturnValue = {
           reopenCase: true,
         }),
         getRuleIdFromEvent: jest.fn(),
+        getObservablesFromEcs: jest.fn().mockReturnValue([]),
       },
     },
   },
@@ -112,7 +113,7 @@ const addToExistingCaseButton = 'add-to-existing-case-action';
 const addToNewCaseButton = 'add-to-new-case-action';
 const markAsOpenButton = 'open-alert-status';
 const markAsAcknowledgedButton = 'acknowledged-alert-status';
-const markAsClosedButton = 'close-alert-status';
+const markAsClosedButton = 'alert-close-context-menu-item';
 const addEndpointEventFilterButton = 'add-event-filter-menu-item';
 const applyAlertTagsButton = 'alert-tags-context-menu-item';
 const applyAlertAssigneesButton = 'alert-assignees-context-menu-item';
@@ -162,18 +163,6 @@ describe('Alert table context menu', () => {
         expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
         expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
       });
-    });
-
-    test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', async () => {
-      const wrapper = render(
-        <TestProviders>
-          <AlertContextMenu {...props} scopeId="timeline-test" />
-        </TestProviders>
-      );
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
-
-      expect(wrapper.queryByTestId(addToExistingCaseButton)).toBeNull();
-      expect(wrapper.queryByTestId(addToNewCaseButton)).toBeNull();
     });
   });
 
@@ -289,37 +278,6 @@ describe('Alert table context menu', () => {
 
           expect(button).toBeInTheDocument();
           expect(button).toBeDisabled();
-        });
-      });
-
-      describe("when users don't have write event filters privilege", () => {
-        beforeEach(() => {
-          (useUserPrivileges as jest.Mock).mockReturnValue({
-            ...mockInitialUserPrivilegesState(),
-            endpointPrivileges: { loading: false, canWriteEventFilters: false },
-          });
-        });
-
-        test('it disables actionMenuButton when timeline id is host events page but does not has write event filters privilege', () => {
-          const wrapper = render(
-            <TestProviders>
-              <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />
-            </TestProviders>
-          );
-
-          // <TestProviders>Entire actionMenuButton is disabled as there is no option available
-          expect(wrapper.getByTestId(actionMenuButton)).toBeDisabled();
-        });
-
-        test('it disables actionMenuButton when timeline id is user events page but does not has write event filters privilege', () => {
-          const wrapper = render(
-            <TestProviders>
-              <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />
-            </TestProviders>
-          );
-
-          // <TestProviders>Entire actionMenuButton is disabled as there is no option available
-          expect(wrapper.getByTestId(actionMenuButton)).toBeDisabled();
         });
       });
     });

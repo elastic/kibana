@@ -42,18 +42,21 @@ export async function cleanFleetIndices(esClient: Client) {
       q: '*',
       ignore_unavailable: true,
       refresh: true,
+      conflicts: 'proceed',
     }),
     esClient.deleteByQuery({
       index: AGENTS_INDEX,
       q: '*',
       ignore_unavailable: true,
       refresh: true,
+      conflicts: 'proceed',
     }),
     esClient.deleteByQuery({
       index: AGENT_ACTIONS_INDEX,
       q: '*',
       ignore_unavailable: true,
       refresh: true,
+      conflicts: 'proceed',
     }),
   ]);
 }
@@ -64,6 +67,7 @@ export async function cleanFleetAgents(esClient: Client) {
     q: '*',
     ignore_unavailable: true,
     refresh: true,
+    conflicts: 'proceed',
   });
 }
 
@@ -73,6 +77,7 @@ export async function cleanFleetAgentPolicies(esClient: Client) {
     q: '*',
     refresh: true,
     ignore_unavailable: true,
+    conflicts: 'proceed',
   });
 }
 
@@ -84,12 +89,14 @@ export async function cleanFleetActionIndices(esClient: Client) {
         q: '*',
         ignore_unavailable: true,
         refresh: true,
+        conflicts: 'proceed',
       }),
       esClient.deleteByQuery(
         {
           index: AGENT_ACTIONS_RESULTS_INDEX,
           q: '*',
           refresh: true,
+          conflicts: 'proceed',
         },
         ES_INDEX_OPTIONS
       ),

@@ -17,7 +17,6 @@ import {
   type RuntimeStateManager,
 } from '../redux';
 import { createTabsStorageManager } from '../tabs_storage_manager';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 
@@ -37,11 +36,9 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const tabsEnabled = services.core.featureFlags?.getBooleanValue(
-    TABS_ENABLED_FEATURE_FLAG_KEY,
-    false
-  );
-  // syncing with the _t part URL
+  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
+
+  // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
@@ -63,14 +60,11 @@ export const useStateManagers = ({
 
   useEffect(() => {
     const stopUrlSync = tabsStorageManager.startUrlSync({
-      // if `_t` in URL changes (for example via browser history), try to restore the previous state
+      // if `_tab` in URL changes (for example via browser history), try to restore the previous state
       onChanged: (urlState) => {
         const { tabId: restoreTabId } = urlState;
         if (restoreTabId) {
           internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
-        } else {
-          // if tabId is not present in `_t`, clear all tabs
-          internalState.dispatch(internalStateActions.clearAllTabs());
         }
       },
     });

@@ -695,6 +695,36 @@ describe('case transforms', () => {
       ).not.toBeDefined();
     });
 
+    it('returns the correct value for extractObservables when it is defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          settings: {
+            syncAlerts: true,
+            extractObservables: true,
+          },
+        },
+      });
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.settings
+          .extractObservables
+      ).toBe(true);
+    });
+
+    it('returns false for extractObservables when it is not defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          settings: {
+            syncAlerts: true,
+            extractObservables: undefined,
+          },
+        },
+      });
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.settings
+          .extractObservables
+      ).toBe(false);
+    });
+
     it('does not return the total comments', () => {
       const resWithTotalComments = createCaseSavedObjectResponse({
         overrides: {

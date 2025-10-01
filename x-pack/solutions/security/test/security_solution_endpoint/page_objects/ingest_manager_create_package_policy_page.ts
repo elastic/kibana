@@ -6,6 +6,7 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function IngestManagerCreatePackagePolicy({
@@ -142,9 +143,10 @@ export function IngestManagerCreatePackagePolicy({
         ele.getPosition(),
         browser.getWindowSize(),
       ]);
-      await browser.execute(
-        `document.scrollingElement.scrollTop = ${elementPosition.y - windowSize.height / 2}`
-      );
+      await browser.execute(`
+        const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+        scrollContainer.scrollTop = ${elementPosition.y - windowSize.height / 2};
+      `);
     },
 
     /**

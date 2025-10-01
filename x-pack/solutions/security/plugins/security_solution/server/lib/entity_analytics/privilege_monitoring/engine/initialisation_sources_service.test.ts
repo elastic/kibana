@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
-import { mockGlobalState } from '../../../../../public/common/mock';
+import { allowedExperimentalValues } from '../../../../../common';
 
 jest.mock('../saved_objects', () => {
   const mockEngineDescriptorInit = jest.fn();
@@ -61,7 +61,7 @@ describe('createInitialisationSourcesService', () => {
     auditLogger: auditMock,
     telemetry: telemetryMock,
     savedObjects: savedObjectServiceMock,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    experimentalFeatures: allowedExperimentalValues,
   };
 
   let dataClient: PrivilegeMonitoringDataClient;
@@ -87,7 +87,7 @@ describe('createInitialisationSourcesService', () => {
   it('should update sources when they already exist', async () => {
     const existingSources = [
       { id: '1', name: '.entity_analytics.monitoring.users-default' },
-      { id: '2', name: '.entity_analytics.monitoring.sources.okta-default' },
+      { id: '2', name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default' },
       { id: '3', name: '.entity_analytics.monitoring.sources.ad-default' },
     ];
     (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);

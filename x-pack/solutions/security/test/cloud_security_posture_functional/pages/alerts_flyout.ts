@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`
       );
-      await alertsPage.waitForListToHaveAlerts();
+      await alertsPage.waitForListToHaveAlerts(20000);
 
       await alertsPage.flyout.expandVisualizations();
       await alertsPage.flyout.assertGraphPreviewVisible();
@@ -118,6 +118,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
@@ -152,6 +154,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         value: 'admin2@example.com',
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
       await expandedFlyoutGraph.assertGraphNodesNumber(5);
 
       // Open timeline

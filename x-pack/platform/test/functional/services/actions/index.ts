@@ -12,6 +12,7 @@ import { ActionsTinesServiceProvider } from './tines';
 import { ActionsAPIServiceProvider } from './api';
 import { ActionsSlackServiceProvider } from './slack';
 import { ActionsJsmServiceProvider } from './jsm';
+import { ActionsWebhookServiceProvider } from './webhook';
 
 export function ActionsServiceProvider(context: FtrProviderContext) {
   const common = ActionsCommonServiceProvider(context);
@@ -23,5 +24,6 @@ export function ActionsServiceProvider(context: FtrProviderContext) {
     jsm: ActionsJsmServiceProvider(context, common),
     tines: ActionsTinesServiceProvider(context, common),
     slack: ActionsSlackServiceProvider(context, common),
+    webhook: ActionsWebhookServiceProvider(context, common),
   };
 }

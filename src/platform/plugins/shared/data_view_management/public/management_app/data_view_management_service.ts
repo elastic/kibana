@@ -244,6 +244,7 @@ export class DataViewMgmtService {
       indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
+      defaultIndex: await this.services.uiSettings.get('defaultIndex'),
       isRefreshing: false,
       conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
       scriptedFields: dataView.getScriptedFields(),

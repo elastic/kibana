@@ -134,6 +134,18 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
   }, [ruleType, fetchedFormData, application]);
 
+  const computedInitialMetadata = useMemo(() => {
+    // Injecting isEdit only for esquery rules to enable this feature: https://github.com/elastic/kibana/issues/226839
+    // to minimize possible changes to other ruletypes
+    if (ruleType?.id === '.es-query') {
+      return {
+        ...initialMetadata,
+        isEdit: true,
+      };
+    }
+    return initialMetadata;
+  }, [ruleType, initialMetadata]);
+
   if (isInitialLoading) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
@@ -211,7 +223,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: actionsWithFrequency,
         },
         id,
-        metadata: initialMetadata,
+        metadata: computedInitialMetadata,
         plugins,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleType: ruleType,

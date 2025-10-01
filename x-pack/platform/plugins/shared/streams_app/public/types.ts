@@ -33,13 +33,13 @@ import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/publ
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
 
 export interface StreamsApplicationProps {
   appMountParameters: AppMountParameters;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
 }
 
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
@@ -74,10 +74,9 @@ export interface StreamsAppStartDependencies {
   unifiedDocViewer: UnifiedDocViewerStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
+  cloud?: CloudStart;
 }
 
 export interface StreamsAppPublicSetup {}
 
-export interface StreamsAppPublicStart {
-  createStreamsApplicationComponent: () => StreamsApplicationComponentType;
-}
+export interface StreamsAppPublicStart {}

@@ -30,6 +30,8 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
   type ToolResultEvent,
   type ToolResultEventData,
@@ -54,4 +56,5 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isConversationIdSetEvent,
 } from './events';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy, pick } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
@@ -16,9 +16,9 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { TAB_STATE_URL_KEY, NEW_TAB_ID } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
-import { createTabItem } from './redux/utils';
+import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { fromSavedObjectTabToTabState } from './redux';
 
@@ -57,7 +57,14 @@ export interface TabsInternalStatePayload {
 }
 
 export interface TabsUrlState {
-  tabId?: string; // syncing the selected tab id with the URL
+  /**
+   * Syncing the selected tab id with the URL
+   */
+  tabId?: string;
+  /**
+   * (Optional) Label for the tab, used when creating a new tab via locator URL.
+   */
+  tabLabel?: string;
 }
 
 export interface TabsStorageManager {
@@ -65,26 +72,30 @@ export interface TabsStorageManager {
    * Supports two-way sync of the selected tab id with the URL.
    */
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
+  pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
-    props: TabsInternalStatePayload,
+    props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getAppState: (tabId: string) => DiscoverAppState | undefined,
-    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
+    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
+    discoverSessionId: string | undefined
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
     tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
   ) => void;
-  updateDiscoverSessionIdLocally: (discoverSessionId: string | undefined) => void;
   loadLocally: (props: {
     userId: string;
     spaceId: string;
     persistedDiscoverSession?: DiscoverSession;
+    shouldClearAllTabs?: boolean;
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
-  getNRecentlyClosedTabs: (
-    previousRecentlyClosedTabs: RecentlyClosedTabState[],
-    newClosedTabs: TabState[]
-  ) => RecentlyClosedTabState[];
+  getNRecentlyClosedTabs: (params: {
+    previousOpenTabs: TabState[];
+    previousRecentlyClosedTabs: RecentlyClosedTabState[];
+    nextOpenTabs: TabState[];
+    justRemovedTabs?: TabState[];
+  }) => RecentlyClosedTabState[];
 }
 
 export const createTabsStorageManager = ({
@@ -97,11 +108,13 @@ export const createTabsStorageManager = ({
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
-  const sessionInfo: Pick<TabsStateInLocalStorage, 'userId' | 'spaceId' | 'discoverSessionId'> = {
+  const sessionInfo: Pick<TabsStateInLocalStorage, 'userId' | 'spaceId'> = {
     userId: '',
     spaceId: '',
-    discoverSessionId: undefined,
   };
+
+  // Used to avoid triggering onChanged during programmatic tab ID URL updates
+  let isPushingTabIdToUrl = false;
 
   const startUrlSync: TabsStorageManager['startUrlSync'] = ({
     onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
@@ -123,12 +136,14 @@ export const createTabsStorageManager = ({
           }
         },
       },
-      storageKey: TABS_STATE_URL_KEY,
+      storageKey: TAB_STATE_URL_KEY,
     });
 
     const listener = onChanged
       ? urlStateContainer.state$.subscribe((state) => {
-          onChanged(state);
+          if (!isPushingTabIdToUrl) {
+            onChanged(state);
+          }
         })
       : null;
 
@@ -140,26 +155,39 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getSelectedTabIdFromURL = () => {
-    return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsUrlState)?.tabId;
+  const getTabsStateFromURL = () => {
+    return urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY);
   };
 
-  const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
+  const pushSelectedTabIdToUrl: TabsStorageManager['pushSelectedTabIdToUrl'] = async (
+    selectedTabId,
+    { replace = false } = {}
+  ) => {
     const nextState: TabsUrlState = {
       tabId: selectedTabId,
     };
-    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState);
+    const previousState = getTabsStateFromURL();
+    // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
+    // This prevents cluttering the browser history with intermediate "new tab" states that are not meaningful to the user.
+    const shouldReplace = replace || previousState?.tabId === NEW_TAB_ID;
+
+    try {
+      isPushingTabIdToUrl = true;
+      await urlStateStorage.set(TAB_STATE_URL_KEY, nextState, { replace: shouldReplace });
+    } finally {
+      isPushingTabIdToUrl = false;
+    }
   };
 
   const toTabStateInStorage = (
     tabState: TabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined,
-    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
+    getAppState: ((tabId: string) => DiscoverAppState | undefined) | undefined,
+    getInternalState: ((tabId: string) => TabState['initialInternalState'] | undefined) | undefined
   ): TabStateInLocalStorage => {
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
-      getInternalState(tabId) || tabState.initialInternalState;
+      getInternalState?.(tabId) || tabState.initialInternalState;
     const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
-      getAppState(tabId) || tabState.initialAppState;
+      getAppState?.(tabId) || tabState.initialAppState;
 
     return {
       id: tabState.id,
@@ -171,11 +199,9 @@ export const createTabsStorageManager = ({
   };
 
   const toRecentlyClosedTabStateInStorage = (
-    tabState: RecentlyClosedTabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined,
-    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
+    tabState: RecentlyClosedTabState
   ): RecentlyClosedTabStateInLocalStorage => {
-    const state = toTabStateInStorage(tabState, getAppState, getInternalState);
+    const state = toTabStateInStorage(tabState, undefined, undefined);
     return {
       ...state,
       closedAt: tabState.closedAt,
@@ -198,12 +224,20 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
+    const controlGroupState = internalState?.controlGroupJson
+      ? parseControlGroupJson(internalState.controlGroupJson)
+      : undefined;
+    const esqlVariables = controlGroupState
+      ? extractEsqlVariables(controlGroupState)
+      : defaultTabState.esqlVariables;
+
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
       globalState: globalState || {},
+      esqlVariables,
     };
   };
 
@@ -228,18 +262,22 @@ export const createTabsStorageManager = ({
     };
   };
 
-  const getNRecentlyClosedTabs: TabsStorageManager['getNRecentlyClosedTabs'] = (
+  const getNRecentlyClosedTabs: TabsStorageManager['getNRecentlyClosedTabs'] = ({
+    previousOpenTabs,
     previousRecentlyClosedTabs,
-    newClosedTabs
-  ) => {
+    nextOpenTabs,
+    justRemovedTabs,
+  }) => {
+    const removedTabs = justRemovedTabs ?? differenceBy(previousOpenTabs, nextOpenTabs, 'id');
+
     const closedAt = Date.now();
-    const newRecentlyClosedTabs: RecentlyClosedTabState[] = newClosedTabs.map((tab) => ({
+    const newRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({
       ...tab,
       closedAt,
     }));
 
     const newSortedRecentlyClosedTabs = orderBy(
-      [...newRecentlyClosedTabs, ...previousRecentlyClosedTabs],
+      uniqBy([...newRecentlyClosedTabs, ...previousRecentlyClosedTabs], 'id'), // prevent duplicates
       'closedAt',
       'desc'
     );
@@ -267,37 +305,26 @@ export const createTabsStorageManager = ({
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
-    { allTabs, selectedTabId, recentlyClosedTabs },
+    { allTabs, recentlyClosedTabs },
     getAppState,
-    getInternalState
+    getInternalState,
+    discoverSessionId
   ) => {
     if (!enabled) {
       return;
     }
 
-    await pushSelectedTabIdToUrl(selectedTabId);
-
-    const keptTabIds: Record<string, boolean> = {};
-
-    const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) => {
-      const tabStateInStorage = toTabStateInStorage(tab, getAppState, getInternalState);
-      keptTabIds[tab.id] = true;
-      return tabStateInStorage;
-    });
-    const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) => {
-      const tabStateInStorage = toRecentlyClosedTabStateInStorage(
-        tab,
-        getAppState,
-        getInternalState
-      );
-      keptTabIds[tab.id] = true;
-      return tabStateInStorage;
-    });
+    const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) =>
+      toTabStateInStorage(tab, getAppState, getInternalState)
+    );
+    const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) =>
+      toRecentlyClosedTabStateInStorage(tab)
+    );
 
     const nextTabsInStorage: TabsStateInLocalStorage = {
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
-      discoverSessionId: sessionInfo.discoverSessionId,
+      discoverSessionId,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -335,31 +362,19 @@ export const createTabsStorageManager = ({
     }
   };
 
-  const updateDiscoverSessionIdLocally: TabsStorageManager['updateDiscoverSessionIdLocally'] = (
-    discoverSessionId
-  ) => {
-    if (!enabled) {
-      return;
-    }
-
-    sessionInfo.discoverSessionId = discoverSessionId;
-
-    const storedTabsState = readFromLocalStorage();
-    const updatedTabsState = {
-      ...storedTabsState,
-      discoverSessionId,
-    };
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
-  };
-
   const loadLocally: TabsStorageManager['loadLocally'] = ({
     userId,
     spaceId,
     persistedDiscoverSession,
+    shouldClearAllTabs,
     defaultTabState,
   }) => {
-    const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
+    const tabsStateFromURL = getTabsStateFromURL();
+    const selectedTabId = enabled
+      ? shouldClearAllTabs
+        ? undefined
+        : tabsStateFromURL?.tabId
+      : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -375,65 +390,112 @@ export const createTabsStorageManager = ({
 
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
-    sessionInfo.discoverSessionId = persistedDiscoverSession?.id;
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab })
     );
-    const openTabs =
-      persistedDiscoverSession?.id === storedTabsState.discoverSessionId
-        ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
-        : persistedTabs ?? [];
+    const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
+      toTabState(tab, defaultTabState)
+    );
+    let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
+    if (persistedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+      // if the discover session has changed, use the tabs from the session
+      openTabs = persistedTabs ?? [];
+    }
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
 
+    // restore previously opened tabs
     if (enabled && selectedTabId) {
-      // restore previously opened tabs
+      if (selectedTabId === NEW_TAB_ID) {
+        // append a new tab if requested via URL
+
+        const newTab = {
+          ...defaultTabState,
+          ...createTabItem(openTabs),
+        };
+
+        if (tabsStateFromURL?.tabLabel) {
+          newTab.label = tabsStateFromURL.tabLabel;
+        }
+
+        const allTabsWithNewTab = [...openTabs, newTab];
+        return {
+          allTabs: allTabsWithNewTab,
+          selectedTabId: newTab.id,
+          recentlyClosedTabs: getNRecentlyClosedTabs({
+            previousOpenTabs,
+            previousRecentlyClosedTabs: closedTabs,
+            nextOpenTabs: allTabsWithNewTab,
+          }),
+        };
+      }
+
+      // try to preselect one of the previously opened tabs
       if (openTabs.find((tab) => tab.id === selectedTabId)) {
         return {
           allTabs: openTabs,
           selectedTabId,
-          recentlyClosedTabs: closedTabs,
+          recentlyClosedTabs: getNRecentlyClosedTabs({
+            previousOpenTabs,
+            previousRecentlyClosedTabs: closedTabs,
+            nextOpenTabs: openTabs,
+          }),
         };
       }
 
+      // try to reopen some of the previously closed tabs
       if (!persistedDiscoverSession) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
           // restore previously closed tabs, for example when only the default tab was shown
+          const restoredTabs = storedTabsState.closedTabs
+            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
+            .map((tab) => toTabState(tab, defaultTabState));
           return {
-            allTabs: storedTabsState.closedTabs
-              .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-              .map((tab) => toTabState(tab, defaultTabState)),
+            allTabs: restoredTabs,
             selectedTabId,
-            recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+            recentlyClosedTabs: getNRecentlyClosedTabs({
+              previousOpenTabs,
+              previousRecentlyClosedTabs: closedTabs,
+              nextOpenTabs: restoredTabs,
+            }),
           };
         }
       }
     }
 
-    const defaultTab = persistedTabs
-      ? persistedTabs[0]
-      : {
-          ...defaultTabState,
-          ...createTabItem([]),
-        };
-    const allTabs = persistedTabs ?? [defaultTab];
+    // otherwise open the first tab from the Discover Session SO or a new default tab as a fallback
+    const newDefaultTab = {
+      ...defaultTabState,
+      ...createTabItem([]),
+    };
+    let allTabs = [newDefaultTab];
+    let selectedTab = newDefaultTab;
+
+    if (persistedTabs?.length) {
+      allTabs = persistedTabs;
+      selectedTab = persistedTabs[0];
+    }
 
     return {
       allTabs,
-      selectedTabId: defaultTab.id,
-      recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+      selectedTabId: selectedTab.id,
+      recentlyClosedTabs: getNRecentlyClosedTabs({
+        previousOpenTabs,
+        previousRecentlyClosedTabs: closedTabs,
+        nextOpenTabs: allTabs,
+      }),
     };
   };
 
   return {
     startUrlSync,
+    pushSelectedTabIdToUrl,
     persistLocally,
     updateTabStateLocally,
-    updateDiscoverSessionIdLocally,
     loadLocally,
     getNRecentlyClosedTabs,
   };

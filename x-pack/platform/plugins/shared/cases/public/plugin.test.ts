@@ -23,12 +23,14 @@ import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
+import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
 function getConfig(overrides = {}) {
   return {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    incrementalId: { enabled: true },
     ...overrides,
   };
 }
@@ -85,6 +87,7 @@ describe('Cases Ui Plugin', () => {
       },
       triggersActionsUi: triggersActionsUiMock.createStart(),
       fieldFormats: fieldFormatsMock,
+      toastNotifications: toastsServiceMock.createSetupContract(),
     };
   });
 
@@ -151,12 +154,12 @@ describe('Cases Ui Plugin', () => {
           getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
           groupAlertsByRule: expect.any(Function),
+          getObservablesFromEcs: expect.any(Function),
         },
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),
           useCasesAddToNewCaseFlyout: expect.any(Function),
           useIsAddToCaseOpen: expect.any(Function),
-          useRemoveAlertFromCaseModal: expect.any(Function),
         },
         ui: {
           getAllCasesSelectorModal: expect.any(Function),

@@ -58,4 +58,68 @@ describe('transformAssetAggregationToChartData', () => {
     const result = transformAssetAggregationToChartData({ entityType: { buckets: [] } });
     expect(result).toEqual([]);
   });
+
+  it('formats Uncategorized labels with entity type', () => {
+    const input = {
+      entityType: {
+        buckets: [
+          {
+            key: 'Host',
+            doc_count: 5,
+            entityId: { value: 5 },
+            entitySubType: {
+              buckets: [
+                {
+                  key: 'Uncategorized',
+                  doc_count: 3,
+                  entityId: { value: 3 },
+                },
+                {
+                  key: 'Linux',
+                  doc_count: 2,
+                  entityId: { value: 2 },
+                },
+              ],
+              sum_other_doc_count: 0,
+            },
+          },
+          {
+            key: 'Identity',
+            doc_count: 4,
+            entityId: { value: 4 },
+            entitySubType: {
+              buckets: [
+                {
+                  key: 'Uncategorized',
+                  doc_count: 2,
+                  entityId: { value: 2 },
+                },
+              ],
+              sum_other_doc_count: 0,
+            },
+          },
+        ],
+      },
+    };
+
+    const result = transformAssetAggregationToChartData(input);
+
+    expect(result).toEqual([
+      {
+        [ASSET_FIELDS.ENTITY_TYPE]: 'Host',
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Host (uncategorized)',
+        count: 3,
+      },
+      {
+        [ASSET_FIELDS.ENTITY_TYPE]: 'Host',
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Linux',
+        count: 2,
+      },
+      {
+        [ASSET_FIELDS.ENTITY_TYPE]: 'Identity',
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Identity (uncategorized)',
+        count: 2,
+      },
+    ]);
+  });
 });

@@ -135,7 +135,7 @@ FROM index
     test('value and key', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key`');
     });
 
     test('value and target', () => {
@@ -147,7 +147,7 @@ FROM index
     test('value, key, and target', () => {
       const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
 
-      expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      expect(text).toBe('FROM a | CHANGE_POINT value ON `key` AS type, pvalue');
     });
 
     test('example from docs', () => {
@@ -324,6 +324,18 @@ describe('casing', () => {
     expect(text1).toBe('from index | stats fn1(), fn2(), fn3()');
     expect(text2).toBe('FROM index | STATS fn1(), fn2(), fn3()');
     expect(text3).toBe('FROM index | STATS FN1(), FN2(), FN3()');
+  });
+
+  test('parameter function name is printed as specified', () => {
+    const text = reprint('ROW ??functionName(*)').text;
+
+    expect(text).toBe('ROW ??functionName(*)');
+  });
+
+  test('parameter function name is printed as specified (single ?)', () => {
+    const text = reprint('ROW ?functionName(42)').text;
+
+    expect(text).toBe('ROW ?functionName(42)');
   });
 
   test('can choose keyword casing', () => {

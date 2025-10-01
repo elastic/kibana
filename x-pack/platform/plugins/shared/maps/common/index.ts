@@ -42,3 +42,5 @@ export type {
   VectorStyleDescriptor,
   VectorSourceRequestMeta,
 } from './descriptor_types';
+
+export type { MapEmbeddableState, MapByReferenceState, MapByValueState } from './embeddable/types';

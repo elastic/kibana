@@ -199,8 +199,22 @@ describe('extractTokensDangerouslySlow', () => {
     let generators: StreamLogGenerator[];
 
     beforeAll(async () => {
-      generators = await client.getLogGenerators({ rpm: 16 * 2000, distribution: 'uniform' });
-    }, 10_000); // Ensure there's enough time to gather sample logs
+      generators = await client.getLogGenerators({
+        rpm: 16 * 2000,
+        distribution: 'uniform',
+        systems: {
+          loghub: [
+            'HealthApp',
+            'Android',
+            'Thunderbird',
+            'Zookeeper',
+            'Mac',
+            'OpenStack',
+            'Proxifier',
+          ],
+        },
+      });
+    }, 60_000); // Ensure there's enough time to gather sample logs
 
     async function getLogsFrom(name: string) {
       const generator = generators.find((gen) => gen.name === name);

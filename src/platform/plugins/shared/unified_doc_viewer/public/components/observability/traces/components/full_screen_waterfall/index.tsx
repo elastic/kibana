@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,15 +17,17 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { where } from '@kbn/esql-composer';
-import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { Global, css } from '@emotion/react';
-import { SpanFlyout } from './span_flyout';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import React, { useCallback, useRef, useState } from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
+import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
+import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
+import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
+import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -46,23 +46,13 @@ export const FullScreenWaterfall = ({
   serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
-  const [spanId, setSpanId] = useState<string | null>(null);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [docId, setDocId] = useState<string | null>(null);
+  const [activeFlyoutId, setActiveFlyoutId] = useState<
+    typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
+  >(null);
+  const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
-    indexPattern: [indexes.apm.errors, indexes.logs],
-  });
-
-  const generateRelatedErrorsDiscoverUrl = useCallback(
-    (docId: string) => {
-      return generateDiscoverLink(
-        where(`QSTR("${TRACE_ID_FIELD}:${traceId} AND ${SPAN_ID_FIELD}:${docId}")`)
-      );
-    },
-    [generateDiscoverLink, traceId]
-  );
 
   const getParentApi = useCallback(
     () => ({
@@ -73,17 +63,38 @@ export const FullScreenWaterfall = ({
           rangeTo,
           serviceName,
           scrollElement: overlayMaskRef.current,
-          getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
+          onErrorClick: (params: {
+            traceId: string;
+            docId: string;
+            errorCount: number;
+            errorDocId?: string;
+          }) => {
+            if (params.errorCount > 1) {
+              setActiveFlyoutId(spanFlyoutId);
+              setActiveSection('errors-table');
+              setDocId(params.docId);
+            } else if (params.errorDocId) {
+              setActiveFlyoutId(logsFlyoutId);
+              setDocId(params.errorDocId);
+            }
+          },
           onNodeClick: (nodeSpanId: string) => {
-            setSpanId(nodeSpanId);
-            setIsFlyoutVisible(true);
+            setActiveSection(undefined);
+            setDocId(nodeSpanId);
+            setActiveFlyoutId(spanFlyoutId);
           },
           mode: 'full',
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, serviceName, generateRelatedErrorsDiscoverUrl]
+    [traceId, rangeFrom, rangeTo, serviceName]
   );
+
+  function handleCloseFlyout() {
+    setActiveFlyoutId(null);
+    setActiveSection(undefined);
+    setDocId(null);
+  }
 
   return (
     <>
@@ -145,17 +156,19 @@ export const FullScreenWaterfall = ({
           </EuiPanel>
         </EuiFocusTrap>
       </EuiOverlayMask>
-      {isFlyoutVisible && spanId && (
-        <EuiFocusTrap>
+      {docId && activeFlyoutId ? (
+        activeFlyoutId === spanFlyoutId ? (
           <SpanFlyout
-            spanId={spanId}
+            traceId={traceId}
+            spanId={docId}
             dataView={dataView}
-            onCloseFlyout={() => {
-              setIsFlyoutVisible(false);
-            }}
+            onCloseFlyout={handleCloseFlyout}
+            activeSection={activeSection}
           />
-        </EuiFocusTrap>
-      )}
+        ) : (
+          <LogsFlyout onCloseFlyout={handleCloseFlyout} id={docId} dataView={dataView} />
+        )
+      ) : null}
     </>
   );
 };

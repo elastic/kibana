@@ -13,6 +13,8 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { docLinks } from '../common/doc_links';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
@@ -23,7 +25,9 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { createPublicToolContract } from './services/tools';
+
+import { registerLocators } from './locator/register_locators';
 
 export class OnechatPlugin
   implements
@@ -61,6 +65,7 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
     }
 
     try {
@@ -77,7 +82,10 @@ export class OnechatPlugin
     return {};
   }
 
-  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+  start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+    const { http } = core;
+    docLinks.setDocLinks(core.docLinks.links);
+
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
@@ -91,6 +99,8 @@ export class OnechatPlugin
       startDependencies,
     };
 
-    return {};
+    return {
+      tools: createPublicToolContract({ toolsService }),
+    };
   }
 }

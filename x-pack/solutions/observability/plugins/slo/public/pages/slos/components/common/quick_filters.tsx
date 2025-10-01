@@ -106,7 +106,7 @@ export function QuickFilters({
           };
         }}
         timeRange={{ from: 'now-24h', to: 'now' }}
-        compressed={false}
+        compressed
       />
     </div>
   );

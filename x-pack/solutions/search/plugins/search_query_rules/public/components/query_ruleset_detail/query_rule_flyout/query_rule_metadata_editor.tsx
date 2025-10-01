@@ -15,11 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiSelect,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FieldError } from 'react-hook-form';
@@ -60,7 +59,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
+                  <EuiIconTip
                     content={i18n.translate(
                       'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
                       {
@@ -68,18 +67,15 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                           'Metadata is used to match documents based on their query criteria. Metadata is ignored when the type is set to "always".',
                       }
                     )}
-                  >
-                    <EuiIcon
-                      type="question"
-                      color="subdued"
-                      aria-label={i18n.translate(
-                        'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
-                        {
-                          defaultMessage: 'Metadata field tooltip',
-                        }
-                      )}
-                    />
-                  </EuiToolTip>
+                    type="question"
+                    color="subdued"
+                    aria-label={i18n.translate(
+                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
+                      {
+                        defaultMessage: 'Metadata field tooltip',
+                      }
+                    )}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -238,7 +234,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip
+                        <EuiIconTip
                           content={i18n.translate(
                             'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
                             {
@@ -246,18 +242,15 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                                 'Values are used to match documents based on their query criteria. Values are ignored when the type is set to "always".',
                             }
                           )}
-                        >
-                          <EuiIcon
-                            type="question"
-                            color="subdued"
-                            aria-label={i18n.translate(
-                              'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
-                              {
-                                defaultMessage: 'Metadata values tooltip',
-                              }
-                            )}
-                          />
-                        </EuiToolTip>
+                          type="question"
+                          color="subdued"
+                          aria-label={i18n.translate(
+                            'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
+                            {
+                              defaultMessage: 'Metadata values tooltip',
+                            }
+                          )}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   }

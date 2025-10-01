@@ -10,7 +10,6 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 export type DateFormatter = (timestamp?: string) => string;
-
 export function useDateFormat(): DateFormatter {
   const kibanaLocale = i18n.getLocale();
   const clientLocale = navigator.language;
@@ -26,13 +25,5 @@ export function useDateFormat(): DateFormatter {
     if (!timestamp) return '';
     const date = moment(timestamp);
     return `${date.format('ll')} @ ${date.format('LTS')}`;
-  };
-}
-
-export function useUTCDateFormat(): DateFormatter {
-  return (timestamp?: string) => {
-    if (!timestamp) return '';
-    const date = moment.utc(timestamp);
-    return date.toISOString();
   };
 }

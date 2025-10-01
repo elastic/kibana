@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
+import {
+  SecurityPageName,
+  useNavigation,
+  NavigationProvider,
+} from '@kbn/security-solution-navigation';
 import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,10 +43,23 @@ export const getSuccessToast = (
 const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
   migrationStats,
 }) => {
-  const onClick: React.MouseEventHandler = (ev) => {
-    ev.preventDefault();
-    // TODO: need to add navigation once `Translated Dashboards` page complete
-  };
+  const { navigateTo, getAppUrl } = useNavigation();
+
+  const navParams = useMemo(() => {
+    return { deepLinkId: SecurityPageName.siemMigrationsDashboards, path: migrationStats.id };
+  }, [migrationStats.id]);
+
+  const onClick: React.MouseEventHandler = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateTo({
+        deepLinkId: SecurityPageName.siemMigrationsDashboards,
+        path: migrationStats.id,
+      });
+    },
+    [navigateTo, migrationStats.id]
+  );
+  const url = useMemo(() => getAppUrl(navParams), [getAppUrl, navParams]);
 
   return (
     <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="s">
@@ -54,7 +71,7 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton onClick={onClick} color="success">
+        <EuiButton onClick={onClick} href={url} color="success">
           {i18n.translate(
             'xpack.securitySolution.siemMigrations.dashboardsService.polling.successLinkText',
             { defaultMessage: 'Go to translated dashboards' }

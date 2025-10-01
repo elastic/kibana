@@ -32,8 +32,6 @@ export const makeTls = ({ valid = true, commonName = '*.elastic.co', expiry, sha
   return {
     version: '1.3',
     cipher: 'TLS-AES-128-GCM-SHA256',
-    certificate_not_valid_before: '2020-03-01T00:00:00.000Z',
-    certificate_not_valid_after: expiryDate,
     server: {
       x509: {
         not_before: '2020-03-01T00:00:00.000Z',
