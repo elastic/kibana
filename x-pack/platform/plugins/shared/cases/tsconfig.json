@@ -95,13 +95,10 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
-    "@kbn/cases-ai",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/inference-common",
-    "@kbn/inference-plugin",
     "@kbn/licensing-types",
-    "@kbn/cases-ai",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/securitysolution-ecs"
   ],
   "exclude": [
     "target/**/*"

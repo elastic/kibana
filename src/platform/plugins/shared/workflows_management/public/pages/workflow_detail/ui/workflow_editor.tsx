@@ -39,6 +39,7 @@ interface WorkflowEditorProps {
   selectedStepId: string | undefined;
   workflow: WorkflowDetailDto | undefined;
   execution: WorkflowExecutionDto | undefined;
+  highlightDiff?: boolean;
   handleStepRun: (params: { stepId: string; actionType: string }) => Promise<void>;
 }
 
@@ -48,6 +49,7 @@ export function WorkflowEditor({
   selectedStepId,
   workflow,
   execution,
+  highlightDiff,
   handleStepRun,
 }: WorkflowEditorProps) {
   const styles = useMemoCss(componentStyles);
@@ -92,7 +94,7 @@ export function WorkflowEditor({
             highlightStep={selectedStepId}
             stepExecutions={execution?.stepExecutions}
             readOnly={activeTab === 'executions'}
-            activeTab={activeTab}
+            highlightDiff={highlightDiff}
             selectedExecutionId={selectedExecutionId}
             originalValue={workflow?.yaml ?? ''}
             onStepActionClicked={handleStepRun}

@@ -96,7 +96,7 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
   const { panels, sections } = internalApi.layout$.value;
   const panelRenderCount = sections
     ? Object.values(panels).filter((value) => {
-        const sectionId = value.gridData.sectionId;
+        const sectionId = value.grid.sectionId;
         return sectionId ? !sections[sectionId].collapsed : true;
       }).length
     : Object.keys(panels).length;
@@ -218,7 +218,7 @@ describe('DashboardGrid', () => {
 
       const newSection = internalApi.layout$.getValue().sections['54321'];
       expect(newSection).toEqual({
-        gridData: {
+        grid: {
           i: '54321',
           y: 8,
         },
@@ -252,7 +252,7 @@ describe('DashboardGrid', () => {
           {
             title: 'Empty section',
             collapsed: false,
-            gridData: { i: 'emptySection', y: 8 },
+            grid: { i: 'emptySection', y: 8 },
             panels: [],
           },
         ],

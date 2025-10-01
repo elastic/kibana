@@ -21,7 +21,7 @@ interface WorkflowDetailLayoutProps {
   editor: React.ReactNode;
   executionList: React.ReactNode | null;
   executionDetail: React.ReactNode | null;
-  singleStepExecutionDetail: React.ReactNode | null;
+  singleStepExecutionDetail?: React.ReactNode | null;
 }
 type SideBarMode = 'list' | 'detail' | 'step';
 

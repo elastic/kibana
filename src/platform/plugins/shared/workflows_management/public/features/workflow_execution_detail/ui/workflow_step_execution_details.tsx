@@ -20,6 +20,7 @@ import {
   EuiStat,
   EuiPanel,
   EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -75,29 +76,32 @@ export const WorkflowStepExecutionDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepExecution?.stepId, tabs[0].id]);
 
+  if (isLoading || !stepExecution) {
+    return (
+      <EuiPanel hasShadow={false} paddingSize="m">
+        <EuiSkeletonText lines={2} />
+        <EuiSpacer size="l" />
+        <EuiSkeletonText lines={4} />
+      </EuiPanel>
+    );
+  }
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} paddingSize="m">
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem grow={false}>
-              {isLoading || !stepExecution ? (
-                <EuiSkeletonText lines={1} />
-              ) : (
-                <>
-                  <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
-                  <EuiTitle size="m">
-                    <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                      {stepExecution.stepId}
-                    </h2>
-                  </EuiTitle>
-                </>
-              )}
+              <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
+              <EuiTitle size="m">
+                <h2 id={complicatedFlyoutTitleId} css={styles.title}>
+                  {stepExecution.stepId}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                {isLoading && <EuiSkeletonText lines={2} />}
                 {stepExecution && (
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>
@@ -151,23 +155,17 @@ export const WorkflowStepExecutionDetails = ({
         </EuiTabs>
         <EuiHorizontalRule margin="none" />
         <EuiPanel hasShadow={false} paddingSize="m">
-          {isLoading || !stepExecution ? (
-            <EuiSkeletonText lines={2} />
-          ) : (
-            <>
-              {selectedTabId === 'input' && (
-                <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-              )}
-              {selectedTabId === 'output' && (
-                <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-              )}
-              {selectedTabId === 'timeline' && (
-                <StepExecutionTimelineStateful
-                  executionId={workflowExecutionId}
-                  stepExecutionId={stepExecution.id}
-                />
-              )}
-            </>
+          {selectedTabId === 'input' && (
+            <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+          )}
+          {selectedTabId === 'output' && (
+            <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+          )}
+          {selectedTabId === 'timeline' && (
+            <StepExecutionTimelineStateful
+              executionId={workflowExecutionId}
+              stepExecutionId={stepExecution.id}
+            />
           )}
         </EuiPanel>
       </EuiFlexItem>
