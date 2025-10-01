@@ -25,7 +25,7 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
   estimatedRowHeight?: number;
 }
 
-interface CascadeVirtualizerReturnValue
+export interface CascadeVirtualizerReturnValue
   extends Pick<
     ReturnType<typeof useVirtualizer>,
     'getTotalSize' | 'getVirtualItems' | 'measureElement' | 'scrollOffset' | 'scrollElement'

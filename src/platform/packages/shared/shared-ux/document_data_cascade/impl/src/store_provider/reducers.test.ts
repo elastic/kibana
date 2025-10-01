@@ -34,7 +34,7 @@ describe('createStoreReducers', () => {
   });
 
   it('should return the expected correct reducers', () => {
-    expect(Object.keys(reducers)).toHaveLength(6);
+    expect(Object.keys(reducers)).toHaveLength(7);
     expect(reducers).toMatchInlineSnapshot(`
       Object {
         "resetActiveCascadeGroups": [Function],
@@ -43,6 +43,7 @@ describe('createStoreReducers', () => {
         "setInitialState": [Function],
         "setRowGroupLeafData": [Function],
         "setRowGroupNodeData": [Function],
+        "setSelectedRows": [Function],
       }
     `);
   });
