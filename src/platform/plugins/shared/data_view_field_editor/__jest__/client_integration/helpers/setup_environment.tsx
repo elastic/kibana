@@ -86,7 +86,7 @@ class MockCustomFieldFormat extends FieldFormat {
   static id = 'upper';
   static title = 'UpperCaseString';
 
-  // we need to catch possible null values and blocks them before running the transformation
+  // we need to catch possible null values and block them before running the transformation
   // like in the real formatter.
   htmlConvert = (value: unknown) =>
     `<span>${value == null ? NULL_LABEL : String(value).toUpperCase()}</span>`;

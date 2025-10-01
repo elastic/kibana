@@ -71,7 +71,7 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
   return layers.filter<ReferenceLineLayerConfig | CommonXYDataLayerConfig>(
     (layer): layer is ReferenceLineLayerConfig | CommonXYDataLayerConfig => {
       if (!isDataLayer(layer) && !isReferenceLayer(layer)) return false;
-      return layer.accessors.length > 0 && layer.table && layer.table.rows.length > 0;
+      return layer.accessors.length > 0 && layer.table?.rows.length > 0;
     }
   );
 }
