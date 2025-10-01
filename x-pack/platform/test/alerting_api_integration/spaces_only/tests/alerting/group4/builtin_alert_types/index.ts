@@ -9,10 +9,10 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('builtin alertTypes', () => {
-    // loadTestFile(require.resolve('./long_running'));
-    // loadTestFile(require.resolve('./cancellable'));
-    // loadTestFile(require.resolve('./auto_recover'));
-    // loadTestFile(require.resolve('./async_search'));
+    loadTestFile(require.resolve('./long_running'));
+    loadTestFile(require.resolve('./cancellable'));
+    loadTestFile(require.resolve('./auto_recover'));
+    loadTestFile(require.resolve('./async_search'));
 
     /**
      * This tests the expected behavior for the active and recovered alerts generated over

@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../../create_test_data';
 
-const RULE_INTERVAL_SECONDS = 3;
+const RULE_INTERVAL_SECONDS = 6;
 const RULE_INTERVALS_TO_WRITE = 1;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 
@@ -22,7 +22,6 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
-  const log = getService('log');
 
   describe('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -168,26 +167,11 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
         });
       });
 
-      log.info(`recovered events: ${JSON.stringify(recoveredEvents)}`);
-
       // because the "execute" event is written at the end of execution
       // after getting the correct number of recovered-instance events, we're often not
       // getting the final "execute" event. use the execution UUID to grab it directly
 
       const recoveredEventExecutionUuid = recoveredEvents[0]?.kibana?.alert?.rule?.execution?.uuid;
-
-      const allExecuteEvents = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: ruleId,
-          provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
-        });
-      });
-
-      log.info(`all execute events: ${JSON.stringify(allExecuteEvents)}`);
 
       const finalExecuteEvents = await retry.try(async () => {
         return await getEventLog({
@@ -200,8 +184,6 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
           actions: new Map([['execute', { gte: 1 }]]),
         });
       });
-
-      log.info(`final execute events: ${JSON.stringify(finalExecuteEvents)}`);
 
       // get the latest execute event
       const finalExecuteEvent = finalExecuteEvents[0];
