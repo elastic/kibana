@@ -149,13 +149,28 @@ export const getUrlPathCompletionItems = (
     endLineNumber: lineNumber,
     endColumn: column,
   };
+
+  // Check if we should show dot-prefixed autocomplete suggestions
+  // We should only show them when typing "GET ." at the very beginning
+  // Once a term is accepted (e.g., ".alerts-default"), typing a dot after it should NOT show dot-prefixed items
+  // The key is: check if the URL part (after method) matches the pattern of a single dot or dot followed by incomplete word
+  const methodMatch = lineContent.match(/^\s*(GET|POST|PUT|PATCH|DELETE)\s+/i);
+  const urlPart = methodMatch
+    ? lineContent.slice(methodMatch[0].length).trim()
+    : lineContent.trim();
+
+  // Only show dot-prefixed items if we're at the very start: just "." or ".someword" where someword doesn't contain dots
+  const shouldShowDotPrefixed =
+    lineContent.trim().endsWith('.') &&
+    (urlPart === '.' || // Just typed "GET ."
+      (urlPart.startsWith('.') && !urlPart.slice(1).includes('.'))); // Typing "GET .ale" but not "GET .alerts."
+
   return (
     filterTermsWithoutName(autoCompleteSet)
       .filter(
         (term) =>
-          // Only keep dot-prefixed terms if the user typed in a dot
-          !(typeof term.name === 'string' && term.name.startsWith('.')) ||
-          lineContent.trim().endsWith('.')
+          // Only keep dot-prefixed terms if we should show them
+          !(typeof term.name === 'string' && term.name.startsWith('.')) || shouldShowDotPrefixed
       )
       // map autocomplete items to completion items
       .map((item) => {
