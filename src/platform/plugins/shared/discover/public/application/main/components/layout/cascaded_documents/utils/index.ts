@@ -82,8 +82,9 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       })
     );
 
-    if (whereCommandGroupFieldSearch?.length) {
-      // if there is a where command targeting a column on the stats command we are processing in the query,
+    if (!group.definition || whereCommandGroupFieldSearch?.length) {
+      // if query received is malformed without complete grouping definition or
+      // there is a where command targeting a column on the stats command we are processing in the query,
       // then we do not want to classify it as having metadata required for the cascade experience
       return { groupByFields: [], appliedFunctions: [] };
     }
