@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
@@ -118,4 +120,16 @@ export const updatePrivateLocationMonitors = async ({
   ]);
 
   return Promise.all(promises.flat());
+};
+
+export const getAgentPolicyInfo = (agentPolicy: AgentPolicy) => {
+  return {
+    id: agentPolicy.id,
+    name: agentPolicy.name,
+    agents: agentPolicy.agents ?? 0,
+    status: agentPolicy.status,
+    description: agentPolicy.description,
+    namespace: agentPolicy.namespace,
+    spaceIds: agentPolicy.space_ids || [DEFAULT_SPACE_ID],
+  };
 };

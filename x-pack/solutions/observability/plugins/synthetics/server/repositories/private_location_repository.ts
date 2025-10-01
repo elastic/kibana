@@ -65,7 +65,13 @@ export class PrivateLocationRepository {
     return agentPolicySpaces;
   }
 
-  async validatePrivateLocation({ agentPolicySpaces }: { agentPolicySpaces: string[] }) {
+  async validatePrivateLocation({
+    agentPolicySpaces,
+    spaceId,
+  }: {
+    agentPolicySpaces: string[];
+    spaceId: string;
+  }) {
     const { response, request, server } = this.routeContext;
 
     let errorMessages = '';
@@ -80,7 +86,7 @@ export class PrivateLocationRepository {
         perPage: 10000,
         namespaces: this.getLocationSpaces({ locationSpaces: spaces, agentPolicySpaces }),
       }),
-      await getAgentPoliciesAsInternalUser({ server }),
+      await getAgentPoliciesAsInternalUser({ server, spaceId }),
     ]);
 
     const locations = data.saved_objects.map((loc) => ({

@@ -88,7 +88,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     }
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const invalidError = await repo.validatePrivateLocation({ agentPolicySpaces });
+    const invalidError = await repo.validatePrivateLocation({ agentPolicySpaces, spaceId });
     if (invalidError) {
       return invalidError;
     }

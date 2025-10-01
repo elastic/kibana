@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
-import { useSpaceAgentPolicies } from '../../../hooks/use_space_agent_policies';
+import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
@@ -35,7 +36,7 @@ export const PolicyHostsField = ({
   privateLocations: PrivateLocation[];
   isDisabled?: boolean;
 }) => {
-  const { spacePolicies: data } = useSpaceAgentPolicies();
+  const { data } = useSelector(selectAgentPolicies);
   const { basePath } = useSyntheticsSettingsContext();
 
   const {

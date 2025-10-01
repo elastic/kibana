@@ -63,6 +63,7 @@ import { getLocationMonitors } from './settings/private_locations/get_location_m
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
+import { getLegacyAgentPolicyRoute } from './settings/private_locations/get_legacy_agent_policy';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -92,6 +93,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getLocationMonitors,
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,
+  getLegacyAgentPolicyRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
   getSyntheticsSuggestionsRoute,
