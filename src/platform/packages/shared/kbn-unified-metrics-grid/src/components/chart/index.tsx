@@ -66,13 +66,11 @@ export const Chart = ({
       return '';
     }
     return createESQLQuery({
-      metricField: metric.name,
-      instrument: metric.instrument,
-      index: metric.index,
+      metric,
       dimensions,
       filters,
     });
-  }, [metric.type, metric.name, metric.instrument, metric.index, dimensions, filters]);
+  }, [metric, dimensions, filters]);
 
   const lensProps = useLensProps({
     title: metric.name,
