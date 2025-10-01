@@ -168,6 +168,23 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardQuickSaveMenuItem',
         disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
+        secondaryButton: {
+          run:  (anchorElement: HTMLElement) =>
+            showSaveMenu({
+              dashboardApi,
+              anchorElement,
+              coreServices,
+              resetChanges,
+              isResetting,
+              setIsResetting,
+              isSaveInProgress,
+              setIsSaveInProgress,
+              dashboardInteractiveSave,
+            }),
+          ariaLabel: topNavStrings.saveMenu.label,
+          label: topNavStrings.saveMenu.label,
+          iconType: 'arrowDown',
+       },
       } as TopNavMenuData,
 
       interactiveSave: {
@@ -250,28 +267,6 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         run: (anchorElement: HTMLElement) =>
           showAddMenu({ dashboardApi, anchorElement, coreServices }),
-      },
-
-      saveMenu: {
-        ...topNavStrings.saveMenu,
-        id: 'save-menu',
-        iconType: 'arrowDown',
-        iconOnly: true,
-        emphasize: true,
-        testId: 'dashboardAddButton',
-        disableButton: disableTopNav,
-        run: (anchorElement: HTMLElement) =>
-          showSaveMenu({
-            dashboardApi,
-            anchorElement,
-            coreServices,
-            resetChanges,
-            isResetting,
-            setIsResetting,
-            isSaveInProgress,
-            setIsSaveInProgress,
-            dashboardInteractiveSave,
-          }),
       },
     };
   }, [
