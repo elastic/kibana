@@ -369,51 +369,47 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
-    ...(experimentalFeatures.continueSuppressionWindowAdvancedSettingEnabled
-      ? {
-          [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
-              {
-                defaultMessage: 'Default suppression behavior on alert closure',
-              }
-            ),
-            value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
-              {
-                defaultMessage:
-                  'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
-              }
-            ),
-            type: 'select',
-            schema: schema.oneOf([
-              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
-              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
-            ]),
-            options: [
-              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
-              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
-            ],
-            optionLabels: {
-              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
-                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
-                {
-                  defaultMessage: 'Restart suppression',
-                }
-              ),
-              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
-                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
-                {
-                  defaultMessage: 'Continue suppression until window ends',
-                }
-              ),
-            },
-            category: [APP_ID],
-            requiresPageReload: false,
-          },
+    [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+        {
+          defaultMessage: 'Default suppression behavior on alert closure',
         }
-      : {}),
+      ),
+      value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+        {
+          defaultMessage:
+            'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+        }
+      ),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+      ]),
+      options: [
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+      ],
+      optionLabels: {
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+          {
+            defaultMessage: 'Restart suppression',
+          }
+        ),
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+          {
+            defaultMessage: 'Continue suppression until window ends',
+          }
+        ),
+      },
+      category: [APP_ID],
+      requiresPageReload: false,
+    },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',
