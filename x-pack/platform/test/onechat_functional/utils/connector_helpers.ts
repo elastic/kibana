@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type SuperTest from 'supertest';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
-
 /**
  * Creates a basic auth connector for the LLM proxy
  */
-export async function createConnector(proxy: LlmProxy, supertest: any) {
+export async function createConnector(proxy: LlmProxy, supertest: SuperTest.Agent) {
   await supertest
     .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
+    .set('kbn-xsrf', 'llm-proxy')
     .send({
-      name: 'foo',
+      name: 'llm-proxy',
       config: {
         apiProvider: 'OpenAI',
         apiUrl: `http://localhost:${proxy.getPort()}`,
@@ -30,12 +30,12 @@ export async function createConnector(proxy: LlmProxy, supertest: any) {
 /**
  * Deletes all existing connectors
  */
-export async function deleteConnectors(supertest: any) {
+export async function deleteConnectors(supertest: SuperTest.Agent) {
   const connectors = await supertest.get('/api/actions/connectors').expect(200);
   const promises = connectors.body.map((connector: { id: string }) => {
     return supertest
       .delete(`/api/actions/connector/${connector.id}`)
-      .set('kbn-xsrf', 'foo')
+      .set('kbn-xsrf', 'llm-proxy')
       .expect(204);
   });
 
