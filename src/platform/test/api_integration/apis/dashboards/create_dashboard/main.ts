@@ -146,7 +146,6 @@ export default function ({ getService }: FtrProviderContext) {
                 y: 0,
                 w: 24,
                 h: 15,
-                i: 'bizz',
               },
               config: {},
               uid: 'bizz',
