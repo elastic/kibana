@@ -9,27 +9,6 @@
 
 export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
 
-export const openScopeNodes = [
-  'enter-if',
-  'enter-foreach',
-  'enter-condition-branch',
-  'enter-retry',
-  'enter-continue',
-  'enter-try-block',
-  'enter-normal-path',
-  'enter-fallback-path',
-];
-export const closeScopeNodes = [
-  'exit-if',
-  'exit-foreach',
-  'exit-condition-branch',
-  'exit-retry',
-  'exit-continue',
-  'exit-try-block',
-  'exit-normal-path',
-  'exit-fallback-path',
-];
-
 export const mainScopeNodes = [
   'enter-if',
   'exit-if',
@@ -41,6 +20,8 @@ export const mainScopeNodes = [
   'exit-continue',
   'enter-try-block',
   'exit-try-block',
+  'enter-timeout-zone',
+  'exit-timeout-zone',
 ];
 export const secondaryScopeNodes = [
   'enter-condition-branch',
@@ -50,4 +31,4 @@ export const secondaryScopeNodes = [
   'enter-fallback-path',
   'exit-fallback-path',
 ];
-export const atomicNodes = ['atomic'];
+export const atomicNodes = ['atomic', 'http', 'wait'];
