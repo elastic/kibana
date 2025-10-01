@@ -23,7 +23,7 @@ export const useScrollToActive = <T extends HTMLElement = HTMLElement>(condition
     if (!condition || !ref.current) return;
 
     const frameId = requestAnimationFrame(() => {
-      if (!ref.current) return; // Re-check in case component unmounted
+      if (!ref.current) return;
       ref.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
