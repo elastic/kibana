@@ -71,6 +71,7 @@ if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
   if [[ $? -ne 0 || -z "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
     echo "❌ Couldn't expand current serverless release SHA. Skipping check against Serverless baseline."  >&2
     node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
+    exit 1
   else
     node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA" --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
   fi
