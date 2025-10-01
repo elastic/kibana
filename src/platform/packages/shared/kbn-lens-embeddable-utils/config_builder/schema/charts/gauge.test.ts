@@ -46,7 +46,8 @@ describe('Gauge Schema', () => {
         operation: 'sum' as const,
         field: 'performance_score',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        sub_label: 'Score',
+        title: 'Score',
+        sub_title: 'with 80% target',
         color: {
           type: 'dynamic' as const,
           min: 0,
@@ -130,7 +131,7 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'value',
         column: 'score' as const,
-        sub_label: 'Performance',
+        sub_title: 'Performance',
       },
     };
 
