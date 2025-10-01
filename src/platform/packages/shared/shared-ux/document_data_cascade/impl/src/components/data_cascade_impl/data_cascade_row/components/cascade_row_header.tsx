@@ -192,7 +192,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
               >
                 <React.Fragment>
                   {headerMetaSlots?.map((metaSlot, index) => (
-                    <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index} grow>
+                    <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
                       {metaSlot}
                     </EuiFlexItem>
                   ))}
@@ -207,7 +207,6 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                           paddingLeft: euiTheme.size[size],
                         },
                       ]}
-                      grow={false}
                     >
                       <CascadeRowActions headerRowActions={headerActions!} />
                     </EuiFlexItem>
