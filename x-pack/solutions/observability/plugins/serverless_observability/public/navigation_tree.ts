@@ -398,6 +398,7 @@ export const createNavigationTree = ({
                   description:
                     'The title of the ingest and integrations navigation item in the serverless observability nav tree.',
                 }),
+                breadcrumbStatus: 'hidden',
                 children: [
                   { link: 'integrations' },
                   { link: 'fleet' },
