@@ -94,10 +94,8 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/cases-ai",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
-    "@kbn/cases-ai",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/inference-common",
     "@kbn/inference-plugin"
