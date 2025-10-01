@@ -47,10 +47,17 @@ export function transformDashboardOut(
       controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
     );
   }
+  const timeRange =
+    timeRestore && timeFrom && timeTo
+      ? {
+          from: timeFrom,
+          to: timeTo,
+        }
+      : undefined;
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
+    ...(controlGroupOut && { controlGroupInputa: controlGroupOut }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
@@ -65,9 +72,8 @@ export function transformDashboardOut(
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
     ...(tags && tags.length && { tags }),
-    ...(timeFrom && { timeFrom }),
+    ...(timeRange && { timeRange }),
     timeRestore: timeRestore ?? false,
-    ...(timeTo && { timeTo }),
     title,
     ...(version && { version }),
   };

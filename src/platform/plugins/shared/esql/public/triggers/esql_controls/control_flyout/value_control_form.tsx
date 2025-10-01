@@ -277,6 +277,7 @@ export function ValueControlForm({
                 </EuiPanel>
               ) : (
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
                     defaultMessage: 'Your query must return a single column',
                   })}

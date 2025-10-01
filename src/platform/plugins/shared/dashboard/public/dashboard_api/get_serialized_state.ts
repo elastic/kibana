@@ -91,9 +91,8 @@ export const getSerializedState = ({
   /**
    * Parse global time filter settings
    */
-  const { from, to } = timefilter.getTime();
-  const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
-  const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
+  const timeRange = timeRestore ? pick(timefilter.getTime(), ['from', 'to']) : undefined;
+
   const refreshInterval = timeRestore
     ? (pick(timefilter.getRefreshInterval(), [
         'display',
@@ -109,12 +108,11 @@ export const getSerializedState = ({
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
+    timeRange,
     timeRestore,
     options,
     panels,
-    timeFrom,
     title,
-    timeTo,
   };
 
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references

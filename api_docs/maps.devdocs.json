@@ -4039,7 +4039,7 @@
               },
               ", data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4089,12 +4089,12 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4117,7 +4117,7 @@
               },
               ", id: string, data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; uiStateJSON?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -4182,12 +4182,12 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []

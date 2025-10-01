@@ -42,7 +42,6 @@ import {
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
-import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
@@ -90,7 +89,6 @@ export function InternalDashboardTopNav({
 
   const [
     allDataViews,
-    focusedPanelId,
     fullScreenMode,
     hasUnsavedChanges,
     lastSavedId,
@@ -101,7 +99,6 @@ export function InternalDashboardTopNav({
     unpublishedChildFilters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
-    dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId$,
@@ -178,6 +175,7 @@ export function InternalDashboardTopNav({
           ) : (
             dashboardTitle
           ),
+        'aria-label': dashboardTitle,
       },
     ];
 
@@ -398,12 +396,14 @@ export function InternalDashboardTopNav({
         }}
         onSavedQueryIdChange={setSavedQueryId}
         hasDirtyState={hasUnpublishedFilters}
-        useBackgroundSearchButton={dataService.search.isBackgroundSearchEnabled}
+        useBackgroundSearchButton={
+          dataService.search.isBackgroundSearchEnabled &&
+          getDashboardCapabilities().storeSearchSession
+        }
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
 
       <ControlsRenderer parentApi={dashboardApi} />
 

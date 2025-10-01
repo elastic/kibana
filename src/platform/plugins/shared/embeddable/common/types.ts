@@ -10,20 +10,26 @@
 import type { Reference } from '@kbn/content-management-utils';
 
 export type EmbeddableTransforms<
-  StoredState extends object = object,
-  State extends object = object
+  StoredEmbeddableState extends object = object,
+  EmbeddableState extends object = object
 > = {
+  /**
+   * Converts StoredEmbeddableState and injects references into EmbeddableState
+   */
   transformOut?: (
-    state: StoredState,
+    storedState: StoredEmbeddableState,
     references?: Reference[],
     /**
      * @deprecated ID is passed as an argument for legacy reference names that require it
      * to fetch their old references. It should not be used for new reference names.
      */
     id?: string
-  ) => State;
-  transformIn?: (state: State) => {
-    state: StoredState;
+  ) => EmbeddableState;
+  /**
+   * Converts EmbeddableState into StoredEmbeddableState and extracts references
+   */
+  transformIn?: (state: EmbeddableState) => {
+    state: StoredEmbeddableState;
     references?: Reference[];
   };
 };

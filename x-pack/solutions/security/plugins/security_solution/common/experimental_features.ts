@@ -129,10 +129,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: true,
+
   /**
-   * Enables the Risk Score AI Assistant tool.
+   * Enable resetting risk scores to zero for outdated entities
    */
-  riskScoreAssistantToolEnabled: false,
+  enableRiskScoreResetToZero: false,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolDisabled: false,
 
   /**
    * disables ES|QL rules
@@ -157,21 +163,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
-   */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
    * Enables SentinelOne manual host isolation response actions directly through the connector
    * sub-actions framework.
    * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables Response actions telemetry collection
@@ -180,9 +176,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsTelemetryEnabled: true,
 
   /**
-   * Enables experimental JAMF integration data to be available in Analyzer
+   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: true,
+  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
@@ -208,12 +204,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: true,
-
-  /**
-   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
-   */
-
-  continueSuppressionWindowAdvancedSettingEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
@@ -247,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-  /**
+   /**
    * Enables Integrations Sync for Privileged User Monitoring
    */
   integrationsSyncEnabled: false,
@@ -260,7 +250,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsightsPolicyResponseFailure: false,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
@@ -327,7 +317,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
-  microsoftDefenderEndpointCancelEnabled: false,
+  microsoftDefenderEndpointCancelEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
