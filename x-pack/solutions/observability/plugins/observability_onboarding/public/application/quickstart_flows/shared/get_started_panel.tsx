@@ -53,6 +53,10 @@ export function GetStartedPanel({
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     analytics?.reportEvent(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
       {
@@ -63,10 +67,10 @@ export function GetStartedPanel({
       }
     );
     /**
-     * Firing the event only once when the component mounts
+     * Making sure the event is fired only once when the component is loaded
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoading]);
 
   return (
     <>
