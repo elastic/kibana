@@ -8,10 +8,10 @@
  */
 
 import { configureStore, createSlice } from '@reduxjs/toolkit';
-import type { Middleware } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
-import type { StepInfo, WorkflowLookup } from './build_workflow_lookup';
+import type { WorkflowLookup } from './build_workflow_lookup';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../common/lib/yaml_utils';
@@ -22,7 +22,7 @@ export interface WorkflowEditorState {
   yamlDocument?: YAML.Document; // This will be handled specially for serialization
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
-  focusedStepInfo?: StepInfo;
+  focusedStepId?: string;
 }
 
 // Initial state
@@ -31,8 +31,18 @@ const initialState: WorkflowEditorState = {
   yamlDocument: undefined,
   workflowLookup: undefined,
   workflowGraph: undefined,
-  focusedStepInfo: undefined,
+  focusedStepId: undefined,
 };
+
+function findStepByLine(lineNumber: number, workflowMetadata: WorkflowLookup): string | undefined {
+  if (!workflowMetadata) {
+    return;
+  }
+
+  return Object.values(workflowMetadata.steps!).find(
+    (stepIfo) => stepIfo.lineStart <= lineNumber && lineNumber <= stepIfo.lineEnd
+  )?.stepId;
+}
 
 // Slice
 const workflowEditorSlice = createSlice({
@@ -64,11 +74,11 @@ const workflowEditorSlice = createSlice({
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.workflowLookup) {
-        state.focusedStepInfo = undefined;
+        state.focusedStepId = undefined;
         return;
       }
 
-      state.focusedStepInfo = findStepByLine(action.payload.lineNumber, state.workflowLookup);
+      state.focusedStepId = findStepByLine(action.payload.lineNumber, state.workflowLookup);
     },
   },
 });
@@ -79,24 +89,67 @@ export const { setYamlString, clearComputedData, setCursorPosition } = workflowE
 // Internal action for middleware use only
 const { _setComputedDataInternal } = workflowEditorSlice.actions;
 
-function findStepByLine(
-  lineNumber: number,
-  workflowMetadata: WorkflowLookup
-): StepInfo | undefined {
-  if (!workflowMetadata) {
+// Debounced computation function
+let computationTimeoutId: NodeJS.Timeout | null = null;
+const COMPUTATION_DEBOUNCE_MS = 500; // 500ms debounce
+
+const performComputation = (
+  store: MiddlewareAPI<Dispatch<AnyAction>, any>,
+  yamlString: string | undefined
+) => {
+  if (!yamlString) {
+    store.dispatch(clearComputedData());
     return;
   }
 
-  return (
-    Object.values(workflowMetadata.steps!).find((stepIfo) => {
-      if (stepIfo.lineStart <= lineNumber && lineNumber <= stepIfo.lineEnd) {
-        return stepIfo;
-      }
-    }) || undefined
-  );
-}
+  // Compute derived data
+  try {
+    // Parse YAML document
+    const lineCounter = new LineCounter();
+    const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
 
-// Side effects middleware - computes derived data when yamlString changes
+    // Parse workflow JSON for graph creation
+    const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
+
+    // Build workflow lookup
+    const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
+
+    // Create workflow graph
+    const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
+    const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
+
+    // Dispatch computed data
+    store.dispatch(
+      _setComputedDataInternal({
+        yamlDocument: yamlDoc,
+        workflowLookup: lookup,
+        workflowGraph: graph,
+      })
+    );
+  } catch (e) {
+    // Clear computed data on error
+    store.dispatch(clearComputedData());
+  }
+};
+
+const debounceComputation = (
+  store: MiddlewareAPI<Dispatch<AnyAction>, any>,
+  yamlString: string | undefined
+) => {
+  // Clear any pending computation
+  if (computationTimeoutId) {
+    clearTimeout(computationTimeoutId);
+    computationTimeoutId = null;
+  }
+
+  // Debounce the computation
+  computationTimeoutId = setTimeout(() => {
+    performComputation(store, yamlString);
+    computationTimeoutId = null;
+  }, COMPUTATION_DEBOUNCE_MS);
+};
+
+// Side effects middleware - computes derived data when yamlString changes (debounced)
 export const workflowComputationMiddleware: Middleware = (store) => (next) => (action) => {
   const result = next(action);
 
@@ -105,42 +158,19 @@ export const workflowComputationMiddleware: Middleware = (store) => (next) => (a
     const state = store.getState() as { workflow: WorkflowEditorState };
     const { yamlString } = state.workflow;
 
-    // Clear computed data if no yamlString
-    if (!yamlString) {
-      store.dispatch(clearComputedData());
-      return result;
+    // Do computation immidiatly if yaml string is defined and previous state of
+    if (yamlString && !state.workflow.workflowGraph) {
+      performComputation(store, yamlString);
+      return;
     }
 
-    // Compute derived data
-    try {
-      // Parse YAML document
-      const lineCounter = new LineCounter();
-      const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
-
-      // Parse workflow JSON for graph creation
-      const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
-
-      // Build workflow lookup
-      const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
-
-      // Create workflow graph
-      const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
-      const graph = parsedWorkflow
-        ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow)
-        : undefined;
-
-      // Dispatch computed data
-      store.dispatch(
-        _setComputedDataInternal({
-          yamlDocument: yamlDoc,
-          workflowLookup: lookup,
-          workflowGraph: graph,
-        })
-      );
-    } catch (e) {
-      // Clear computed data on error
-      store.dispatch(clearComputedData());
+    // Clear any pending computation
+    if (computationTimeoutId) {
+      clearTimeout(computationTimeoutId);
+      computationTimeoutId = null;
     }
+
+    debounceComputation(store, yamlString);
   }
 
   return result;
@@ -179,4 +209,7 @@ export const selectYamlString = (state: RootState) => state.workflow.yamlString;
 export const selectYamlDocument = (state: RootState) => state.workflow.yamlDocument;
 export const selectWorkflowLookup = (state: RootState) => state.workflow.workflowLookup;
 export const selectWorkflowGraph = (state: RootState) => state.workflow.workflowGraph;
-export const selectFocusedStepInfo = (state: RootState) => state.workflow.focusedStepInfo;
+export const selectFocusedStepInfo = (state: RootState) =>
+  state.workflow.focusedStepId && state.workflow.workflowLookup
+    ? state.workflow.workflowLookup.steps[state.workflow.focusedStepId]
+    : undefined;

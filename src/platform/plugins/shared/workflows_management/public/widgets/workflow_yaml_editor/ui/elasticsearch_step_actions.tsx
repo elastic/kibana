@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -16,8 +15,6 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { RunStepButton } from './run_step_button';
@@ -31,7 +28,6 @@ export interface ElasticsearchStepActionsProps {
 export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> = ({
   onStepActionClicked,
 }) => {
-  const styles = useMemoCss(componentStyles);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
 
@@ -73,7 +69,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   }
 
   return (
-    <EuiFlexGroup css={styles.container} gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {focusedStepInfo && (
         <EuiFlexItem grow={false}>
           <RunStepButton
@@ -102,16 +98,4 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
       )}
     </EuiFlexGroup>
   );
-};
-
-const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      position: 'absolute',
-      zIndex: 1002, // Above the highlighting and pseudo-element
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      padding: euiTheme.size.xs,
-      borderRadius: euiTheme.border.radius.small,
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    }),
 };

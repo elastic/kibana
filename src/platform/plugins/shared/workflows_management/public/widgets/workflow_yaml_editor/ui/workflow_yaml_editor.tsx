@@ -186,6 +186,8 @@ export const WorkflowYAMLEditor = ({
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
+  focusedStepInfoRef.current = focusedStepInfo;
 
   const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
 
@@ -247,14 +249,18 @@ export const WorkflowYAMLEditor = ({
   }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
 
   useEffect(() => {
-    if (!focusedStepInfo) {
+    if (!isEditorMounted) {
       return;
     }
 
-    editorRef.current!.onDidScrollChange(() =>
-      updateContainerPosition(focusedStepInfo, editorRef.current!)
-    );
-  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
+    editorRef.current!.onDidScrollChange(() => {
+      if (!focusedStepInfoRef.current) {
+        return;
+      }
+
+      updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
+    });
+  }, [isEditorMounted, setPositionStyles]);
 
   useEffect(() => {
     if (!isEditorMounted) {

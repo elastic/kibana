@@ -51,7 +51,6 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const workflowEditorStore = useMemo(() => createWorkflowEditorStore(), []);
-  console.log(workflowEditorStore);
   const styles = useMemoCss(componentStyles);
   const { application, uiSettings, notifications } = useKibana().services;
   const {
