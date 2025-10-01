@@ -36,7 +36,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return a warning header', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        const { header } = await securitySolutionApi
+        const { header } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         const username = await utils.getUsername();
 
         // patch both rule names
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: 'rule-1', name: 'some other name' },
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ id: createRuleBody.id, name: 'some other name' }] })
           .expect(200);
 
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         const username = await utils.getUsername();
 
         // patch both rule names
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { id: createRule1.id, name: 'some other name' },
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         ).to.eql([rule1.id, rule2.id].sort());
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { id: rule1.id, enabled: false },
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ id: createdBody.id, name: 'some other name' }] })
           .expect(200);
 
@@ -249,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', enabled: false }] })
           .expect(200);
 
@@ -265,7 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', severity: 'low', enabled: false }] })
           .expect(200);
 
@@ -283,14 +283,14 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
-        await securitySolutionApi
+        await detectionsApi
           .bulkPatchRules({
             body: [{ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' }],
           })
           .expect(200);
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
@@ -306,7 +306,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [{ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' }],
           })
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({ body: [{ rule_id: 'fake_id', name: 'some other name' }] })
           .expect(200);
 
@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: 'rule-1', name: 'some other name' },
@@ -371,7 +371,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { id: createdBody.id, name: 'some other name' },
@@ -412,7 +412,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               {
@@ -445,7 +445,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
         await createRule(supertest, log, getSimpleRule('rule-2'));
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               {
@@ -516,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('errors if trying to patch investigation fields using legacy format', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               {
@@ -536,7 +536,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should patch a rule with a legacy investigation field and migrate field', async () => {
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               { rule_id: ruleWithLegacyInvestigationField.params.ruleId, name: 'some other name' },
@@ -561,7 +561,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should patch a rule with a legacy investigation field - empty array - and transform field in response', async () => {
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               {
@@ -600,7 +600,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkPatchRules({
             body: [
               {

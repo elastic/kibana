@@ -35,7 +35,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/utility-types"
   ]
 }

@@ -8,10 +8,9 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { Storage } from './storage';
 import type { IStorageWrapper, IStorage } from '@kbn/kibana-utils-plugin/public';
+import { LocalStorageWrapper } from './local_storage_wrapper';
 
-const payload = { first: 'john', last: 'smith' };
 const createMockStore = (): MockedKeys<IStorage> => {
   let store: Record<string, any> = {};
   return {
@@ -22,14 +21,14 @@ const createMockStore = (): MockedKeys<IStorage> => {
   };
 };
 
-describe('StorageService', () => {
+describe('LocalStorageWrapper', () => {
   let storage: IStorageWrapper;
   let mockStore: MockedKeys<IStorage>;
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockStore = createMockStore();
-    storage = new Storage(mockStore);
+    storage = new LocalStorageWrapper(mockStore);
   });
 
   describe('expected API', () => {
@@ -64,37 +63,6 @@ describe('StorageService', () => {
       storage.clear();
 
       expect(mockStore.clear).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('json data', () => {
-    test('should parse JSON when reading from the store', () => {
-      mockStore.getItem = jest.fn().mockImplementationOnce(() => JSON.stringify(payload));
-
-      const data = storage.get('name');
-      expect(data).toEqual(payload);
-    });
-
-    test('should write JSON string to the store', () => {
-      const key = 'name';
-      const value = payload;
-
-      storage.set(key, value);
-      expect(mockStore.setItem).toHaveBeenCalledWith(key, JSON.stringify(value));
-    });
-  });
-
-  describe('expected responses', () => {
-    test('should return null when not exists', () => {
-      const data = storage.get('notexists');
-      expect(data).toBe(null);
-    });
-
-    test('should return null when invalid JSON', () => {
-      mockStore.getItem = jest.fn().mockImplementationOnce(() => 'not: json');
-
-      const data = storage.get('name');
-      expect(data).toBe(null);
     });
   });
 });
