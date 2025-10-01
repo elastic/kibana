@@ -770,3 +770,7 @@ export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionIte
         },
   };
 }
+
+export function buildQueryForFieldsFetching(indexPattern: string): string {
+  return `FROM ${indexPattern}`;
+}

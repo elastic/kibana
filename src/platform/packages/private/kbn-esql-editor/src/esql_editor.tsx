@@ -56,7 +56,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import { decorateQueryForFetchFields, fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
   filterDataErrors,
@@ -495,7 +495,7 @@ const ESQLEditorInternal = function ESQLEditor({
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
-            esql: decorateQueryForFetchFields(queryToExecute),
+            esql: `${queryToExecute} | limit 0`,
           };
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
@@ -717,14 +717,10 @@ const ESQLEditorInternal = function ESQLEditor({
     [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
-  // Refresh the index fields cache when a new field has been added to the lookup index
-  const onNewFieldsAddedToLookupIndex = useCallback(
-    (indexName: string) => {
-      const lookupIndexFieldsQuery = decorateQueryForFetchFields(`FROM ${indexName}`);
-      esqlFieldsCache.delete(lookupIndexFieldsQuery);
-    },
-    [esqlFieldsCache]
-  );
+  // Refresh the fields cache when a new field has been added to the lookup index
+  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+    esqlFieldsCache.clear?.();
+  }, [esqlFieldsCache]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
