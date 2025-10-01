@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "uiActions",
       "esql",
       "features",
       "inference",
@@ -28,7 +29,8 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces"
+      "spaces",
+      "workflowsManagement"
     ],
     "extraPublicDirs": []
   }
