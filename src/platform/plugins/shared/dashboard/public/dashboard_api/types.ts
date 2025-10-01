@@ -158,10 +158,6 @@ export type DashboardApi = CanExpandPanels &
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
   };
 
-export interface SerializeControlsResult {
-  controlGroupInput: ControlsGroupState | undefined;
-  controlGroupReferences: DashboardState['references'];
-}
 export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
@@ -173,5 +169,8 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  serializeControls: () => SerializeControlsResult;
+  serializeControls: () => {
+    controlGroupInput: ControlsGroupState | undefined;
+    controlGroupReferences: Reference[];
+  };
 }
