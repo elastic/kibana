@@ -16,6 +16,7 @@ import {
   getInUseTotalCount,
   getTotalCount,
 } from './actions_telemetry';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 let logger: MockedLogger;
 
@@ -357,13 +358,11 @@ describe('actions telemetry', () => {
       },
     });
     const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
-      {
+      createMockInMemoryConnector({
         id: 'test',
         actionTypeId: '.email',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -371,19 +370,13 @@ describe('actions telemetry', () => {
         secrets: {
           clientSecret: 'sdfsdf',
         },
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
@@ -580,28 +573,18 @@ describe('actions telemetry', () => {
       }
     );
     const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
-      {
+      createMockInMemoryConnector({
         id: 'test',
         actionTypeId: '.test',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -638,17 +621,12 @@ describe('actions telemetry', () => {
       }
     );
     const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
-      {
+      createMockInMemoryConnector({
         id: 'system_action:system-connector-test.system-action',
         actionTypeId: 'test.system-action',
         name: 'System connector',
         isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: true,
-        secrets: {},
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -753,17 +731,12 @@ describe('actions telemetry', () => {
       },
     });
     const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
-      {
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);

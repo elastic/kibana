@@ -8,8 +8,9 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { ActionConnectorProps } from '../../types';
+import type { ActionConnector } from '../../types';
 import { fetchConnectors } from './fetch_connectors';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const http = httpServiceMock.createStartContract();
 
@@ -27,25 +28,22 @@ describe('fetchConnectors', () => {
         is_missing_secrets: false,
         is_system_action: false,
         referenced_by_count: 0,
+        is_connector_type_deprecated: false,
         secrets: {},
         config: {},
       },
     ];
 
-    const resolvedValue: Array<ActionConnectorProps<{}, {}>> = [
-      {
+    const resolvedValue: Array<ActionConnector<{}, {}>> = [
+      createMockConnectorForUI({
         id: 'test-connector',
         name: 'Test',
         actionTypeId: 'test',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isMissingSecrets: false,
-        isSystemAction: false,
         referencedByCount: 0,
+        isMissingSecrets: false,
         secrets: {},
         config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ];
 
     http.get.mockResolvedValueOnce(apiResponseValue);
@@ -71,13 +69,12 @@ describe('fetchConnectors', () => {
         is_missing_secrets: false,
         is_system_action: true,
         referenced_by_count: 0,
-        secrets: {},
-        config: {},
+        is_connector_type_deprecated: false,
       },
     ];
 
-    const resolvedValue: Array<ActionConnectorProps<{}, {}>> = [
-      {
+    const resolvedValue: Array<ActionConnector<{}, {}>> = [
+      createMockConnectorForUI({
         id: '.test-system-action',
         name: 'System action name',
         actionTypeId: 'test',
@@ -86,10 +83,8 @@ describe('fetchConnectors', () => {
         isMissingSecrets: false,
         isSystemAction: true,
         referencedByCount: 0,
-        secrets: {},
-        config: {},
         isConnectorTypeDeprecated: false,
-      },
+      }),
     ];
 
     http.get.mockResolvedValueOnce(apiResponseValue);

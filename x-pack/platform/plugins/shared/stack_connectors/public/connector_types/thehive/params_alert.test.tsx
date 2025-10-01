@@ -15,6 +15,7 @@ import type {
   ExecutorSubActionCreateAlertParams,
 } from '../../../common/thehive/types';
 import userEvent from '@testing-library/user-event';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionCreateAlertParams = {
@@ -33,17 +34,11 @@ describe('TheHiveParamsFields renders', () => {
     subAction: SUB_ACTION.CREATE_ALERT,
     subActionParams,
   };
-  const connector: ActionConnector = {
-    secrets: {},
-    config: {},
+  const connector: ActionConnector = createMockConnectorForUI({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
-    isConnectorTypeDeprecated: false,
-  };
+  });
 
   const editAction = jest.fn();
   const defaultProps = {

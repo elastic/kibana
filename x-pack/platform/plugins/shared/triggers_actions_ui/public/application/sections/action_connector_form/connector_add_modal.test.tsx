@@ -13,6 +13,7 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -50,17 +51,11 @@ describe('connector_add_modal', () => {
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: 'my-action-type',
       name: 'test',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
 
     const wrapper = mountWithIntl(
       <ConnectorAddModal
@@ -94,17 +89,12 @@ describe('connector_add_modal', () => {
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       actionTypeRegistry.has.mockReturnValue(true);
 
-      const actionType: ActionType = {
+      const actionType: ActionType = createMockConnectorType({
         id: 'my-action-type',
         name: 'test',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-        isDeprecated: false,
-      };
+      });
       const wrapper = mountWithIntl(
         <ConnectorAddModal
           onClose={() => {}}
@@ -135,17 +125,11 @@ describe('connector_add_modal', () => {
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       actionTypeRegistry.has.mockReturnValue(true);
 
-      const actionType: ActionType = {
+      const actionType: ActionType = createMockConnectorType({
         id: 'my-action-type',
         name: 'test',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-        isDeprecated: false,
-      };
+      });
       const wrapper = mountWithIntl(
         <ConnectorAddModal
           onClose={() => {}}

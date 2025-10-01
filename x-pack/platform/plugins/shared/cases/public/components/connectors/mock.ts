@@ -5,20 +5,16 @@
  * 2.0.
  */
 
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { SwimlaneConnectorType } from '../../../common/types/domain';
 
-export const connector = {
+export const connector = createMockConnectorForUI({
   id: '123',
   name: 'My connector',
   actionTypeId: '.jira',
-  config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
-export const swimlaneConnector = {
+export const swimlaneConnector = createMockConnectorForUI({
   id: '123',
   name: 'My connector',
   actionTypeId: '.swimlane',
@@ -31,22 +27,14 @@ export const swimlaneConnector = {
       commentsConfig: {},
     },
   },
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
-export const theHiveConnector = {
+export const theHiveConnector = createMockConnectorForUI({
   id: '123',
   name: 'My connector',
   actionTypeId: '.thehive',
   config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
 export const issues = [
   { id: 'personId', title: 'Person Task', key: 'personKey' },

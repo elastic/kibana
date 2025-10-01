@@ -19,6 +19,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -46,28 +47,18 @@ describe('actionTypeRegistry', () => {
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'foo',
-          config: {},
           id: 'my-slack1',
           name: 'Slack #xyz',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
     };
   });

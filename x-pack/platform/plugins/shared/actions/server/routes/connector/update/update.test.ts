@@ -12,6 +12,7 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { updateConnectorBodySchema } from '../../../../common/routes/connector/apis/update';
+import { createMockConnector } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -33,16 +34,12 @@ describe('updateConnectorRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -71,6 +68,7 @@ describe('updateConnectorRoute', () => {
         is_preconfigured: false,
         is_deprecated: false,
         is_system_action: false,
+        is_connector_type_deprecated: false,
       },
     });
 
@@ -103,16 +101,12 @@ describe('updateConnectorRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -149,16 +143,12 @@ describe('updateConnectorRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);

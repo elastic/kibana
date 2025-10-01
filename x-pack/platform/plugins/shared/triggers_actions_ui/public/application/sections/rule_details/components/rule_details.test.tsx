@@ -24,6 +24,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -374,17 +375,12 @@ describe('rule_details', () => {
         });
 
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-            isDeprecated: false,
-          },
+          }),
         ];
 
         const wrapper = mountWithIntl(
@@ -419,28 +415,18 @@ describe('rule_details', () => {
           ],
         });
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-            isDeprecated: false,
-          },
-          {
+          }),
+          createMockConnectorType({
             id: '.email',
             name: 'Send email',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-            isDeprecated: false,
-          },
+          }),
         ];
 
         const details = mountWithIntl(
@@ -501,17 +487,12 @@ describe('rule_details', () => {
 
   describe('edit button', () => {
     const actionTypes: ActionType[] = [
-      {
+      createMockConnectorType({
         id: '.server-log',
         name: 'Server log',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-        isDeprecated: false,
-      },
+      }),
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {

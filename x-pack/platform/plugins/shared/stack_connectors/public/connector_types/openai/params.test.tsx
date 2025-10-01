@@ -10,6 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_URL, getDefaultBody } from './constants';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const messageVariables = [
   {
@@ -46,22 +47,18 @@ describe('Gen AI Params Fields renders', () => {
       };
       const editAction = jest.fn();
       const errors = {};
-      const actionConnector = {
+      const actionConnector = createMockConnectorForUI({
         secrets: {
           apiKey: 'apiKey',
         },
         id: 'test',
         actionTypeId: '.gen-ai',
-        isPreconfigured: false,
-        isSystemAction: false as const,
-        isDeprecated: false,
         name: 'My OpenAI Connector',
         config: {
           apiProvider,
           apiUrl: DEFAULT_URL,
         },
-        isConnectorTypeDeprecated: false,
-      };
+      });
       render(
         <ParamsFields
           actionParams={actionParams}

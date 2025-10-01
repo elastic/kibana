@@ -17,6 +17,10 @@ import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 import type { ActionTypeRegistry } from '../action_type_registry';
+import {
+  createMockConnectorFindResult,
+  createMockInMemoryConnector,
+} from '../application/connector/mocks';
 
 jest.mock('../application/connector/methods/get_all/get_all');
 
@@ -30,35 +34,26 @@ const executionEnqueuer = jest.fn();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const clusterClient = elasticsearchServiceMock.createClusterClient();
 const inMemoryConnectors = [
-  {
+  createMockInMemoryConnector({
     id: 'testPreconfigured',
     actionTypeId: '.slack',
     secrets: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
     name: 'test',
     config: {
       foo: 'bar',
     },
-    isConnectorTypeDeprecated: false,
-  },
+  }),
   /**
    * System actions will not
    * be returned from getAllUnsecured
    */
-  {
+  createMockInMemoryConnector({
     id: 'system-connector-.cases',
     actionTypeId: '.cases',
     name: 'System action: .cases',
-    config: {},
-    secrets: {},
-    isDeprecated: false,
-    isMissingSecrets: false,
-    isPreconfigured: false,
     isSystemAction: true,
-    isConnectorTypeDeprecated: false,
-  },
+  }),
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
 
@@ -80,28 +75,20 @@ beforeEach(() => {
 describe('getAll()', () => {
   test('calls getAllUnsecured library method with appropriate parameters', async () => {
     const expectedResult = [
-      {
+      createMockConnectorFindResult({
         actionTypeId: 'test',
         id: '1',
         name: 'test',
-        isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorFindResult({
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
     const result = await unsecuredActionsClient.getAll('default');

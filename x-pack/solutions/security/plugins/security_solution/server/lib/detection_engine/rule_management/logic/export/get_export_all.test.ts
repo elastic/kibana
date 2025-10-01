@@ -25,11 +25,12 @@ import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { Readable } from 'stream';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const exceptionsClient = getExceptionListClientMock();
 
 const connectors = [
-  {
+  createMockConnectorFindResult({
     id: '123',
     actionTypeId: '.slack',
     name: 'slack',
@@ -38,9 +39,8 @@ const connectors = [
     isDeprecated: false,
     isSystemAction: false,
     referencedByCount: 1,
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorFindResult({
     id: '456',
     actionTypeId: '.email',
     name: 'Email (preconfigured)',
@@ -49,8 +49,7 @@ const connectors = [
     isSystemAction: false,
     isDeprecated: false,
     referencedByCount: 1,
-    isConnectorTypeDeprecated: false,
-  },
+  }),
 ];
 describe('getExportAll', () => {
   const exporterMock = savedObjectsExporterMock.create();

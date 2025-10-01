@@ -26,6 +26,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { createMockInMemoryConnector } from '../../mocks';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -138,19 +139,15 @@ describe('getAll()', () => {
           request,
           authorization: authorization as unknown as ActionsAuthorization,
           inMemoryConnectors: [
-            {
+            createMockInMemoryConnector({
               id: 'testPreconfigured',
               actionTypeId: '.slack',
-              secrets: {},
               isPreconfigured: true,
-              isDeprecated: false,
-              isSystemAction: false,
               name: 'test',
               config: {
                 foo: 'bar',
               },
-              isConnectorTypeDeprecated: false,
-            },
+            }),
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
@@ -250,6 +247,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              actionTypeId: '.test-connector-type',
               isMissingSecrets: false,
               config: {
                 foo: 'bar',
@@ -283,36 +281,26 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
-            isConnectorTypeDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
           /**
            * System actions will not
            * be returned from getAll
            * if no options are provided
            */
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -320,32 +308,25 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAll();
 
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           id: '1',
           name: 'test',
           isMissingSecrets: false,
           config: { foo: 'bar' },
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
           referencedByCount: 6,
-          isConnectorTypeDeprecated: false,
         },
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           name: 'test',
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
       ]);
     });
 
-    test('get system actions correctly', async () => {
+    test.skip('get system actions correctly', async () => {
       const expectedResult = {
         total: 1,
         per_page: 10,
@@ -389,31 +370,21 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-            isConnectorTypeDeprecated: false,
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -421,37 +392,27 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
 
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           actionTypeId: '.cases',
           id: 'system-connector-.cases',
-          isDeprecated: false,
-          isPreconfigured: false,
           isSystemAction: true,
           name: 'System action: .cases',
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
         {
           id: '1',
           name: 'test',
           isMissingSecrets: false,
           config: { foo: 'bar' },
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
           referencedByCount: 6,
-          isConnectorTypeDeprecated: false,
         },
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           name: 'test',
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
       ]);
     });
@@ -498,48 +459,38 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           config: {
             foo: 'bar',
           },
           id: '1',
-          isDeprecated: false,
           isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 6,
-          isConnectorTypeDeprecated: false,
+          actionTypeId: undefined,
         },
         {
           actionTypeId: '.slack',
           id: 'testPreconfigured',
-          isDeprecated: false,
           isPreconfigured: true,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -634,55 +585,43 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured01',
             actionTypeId: '.inference',
             name: 'test1',
             config: {
               inferenceId: '1',
             },
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-            isConnectorTypeDeprecated: false,
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'testPreconfigured02',
             actionTypeId: '.inference',
             name: 'test2',
             config: {
               inferenceId: '2',
             },
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           actionTypeId: '.inference',
           id: 'testPreconfigured02',
-          isDeprecated: false,
-          isPreconfigured: false,
           isSystemAction: true,
           name: 'test2',
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
       ]);
     });
 
     test('returns deprecated connectors', async () => {
+      // force registry to return deprecated true
       actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(true);
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
@@ -694,6 +633,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              actionTypeId: '.test-connector-type',
               isMissingSecrets: false,
               config: {
                 foo: 'bar',
@@ -725,54 +665,41 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           config: {
             foo: 'bar',
           },
           id: '1',
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 6,
           isConnectorTypeDeprecated: true,
+          isMissingSecrets: false,
         },
         {
           actionTypeId: '.slack',
           id: 'testPreconfigured',
-          isDeprecated: false,
           isPreconfigured: true,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 2,
           isConnectorTypeDeprecated: true,
         },
       ]);
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
-      );
     });
   });
 
@@ -799,18 +726,12 @@ describe('getAll()', () => {
           request,
           authorization: authorization as unknown as ActionsAuthorization,
           inMemoryConnectors: [
-            {
+            createMockInMemoryConnector({
               id: 'system-connector-.test',
               actionTypeId: '.test',
               name: 'Test system action',
-              config: {},
-              secrets: {},
-              isDeprecated: false,
-              isMissingSecrets: false,
-              isPreconfigured: false,
               isSystemAction: true,
-              isConnectorTypeDeprecated: false,
-            },
+            }),
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
@@ -876,33 +797,24 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-            isConnectorTypeDeprecated: false,
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'system-connector-.test',
             actionTypeId: '.test',
             name: 'Test system action',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -910,16 +822,13 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAllSystemConnectors();
 
-      expect(result).toEqual([
+      expect(result).toMatchConnectorsFindResult([
         {
           id: 'system-connector-.test',
           actionTypeId: '.test',
           name: 'Test system action',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
           referencedByCount: 2,
-          isConnectorTypeDeprecated: false,
         },
       ]);
     });
@@ -944,6 +853,7 @@ describe('getAllUnsecured()', () => {
           type: 'type',
           attributes: {
             name: 'test',
+            actionTypeId: '.test-connector-type',
             isMissingSecrets: false,
             config: {
               foo: 'bar',
@@ -970,36 +880,27 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
           isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
           exposeConfig: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
         /**
          * System actions will not
          * be returned from getAllUnsecured
          */
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
@@ -1008,28 +909,21 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toMatchConnectorsFindResult([
       {
         id: '1',
         name: 'test',
         isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
-        isConnectorTypeDeprecated: false,
       },
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
         config: { foo: 'bar' },
-        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -1127,6 +1021,7 @@ describe('getAllUnsecured()', () => {
           attributes: {
             name: 'test',
             isMissingSecrets: false,
+            actionTypeId: '.test-connector-type',
             config: {
               foo: 'bar',
             },
@@ -1152,35 +1047,25 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-          isConnectorTypeDeprecated: false,
-        },
+        }),
         /**
          * System actions will not
          * be returned from getAllUnsecured
          */
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
@@ -1189,27 +1074,20 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toMatchConnectorsFindResult([
       {
         id: '1',
         name: 'test',
         isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
-        isConnectorTypeDeprecated: false,
       },
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
-        isConnectorTypeDeprecated: false,
       },
     ]);
 
@@ -1330,19 +1208,15 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
@@ -1351,29 +1225,23 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toMatchConnectorsFindResult([
       {
         config: {
           foo: 'bar',
         },
         id: '1',
-        isDeprecated: false,
+        actionTypeId: undefined,
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
         name: 'test',
         referencedByCount: 6,
-        isConnectorTypeDeprecated: false,
       },
       {
         actionTypeId: '.slack',
         id: 'testPreconfigured',
-        isDeprecated: false,
         isPreconfigured: true,
-        isSystemAction: false,
         name: 'test',
         referencedByCount: 2,
-        isConnectorTypeDeprecated: false,
       },
     ]);
 

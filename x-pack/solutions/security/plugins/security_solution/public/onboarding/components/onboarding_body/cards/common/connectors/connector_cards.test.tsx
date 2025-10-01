@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ConnectorCards } from './connector_cards';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { AIConnector } from './types';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types');
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () => ({
@@ -39,28 +40,16 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 }));
 
 const mockConnectors: AIConnector[] = [
-  {
+  createMockConnectorForUI({
     id: '1',
     name: 'Connector 1',
     actionTypeId: 'testType',
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorForUI({
     id: '2',
     name: 'Connector 2',
     actionTypeId: 'testType',
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isConnectorTypeDeprecated: false,
-  },
+  }),
 ];
 
 describe('ConnectorCards', () => {

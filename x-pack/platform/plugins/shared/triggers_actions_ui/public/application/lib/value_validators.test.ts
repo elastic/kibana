@@ -15,6 +15,7 @@ import {
 } from './value_validators';
 import { v4 as uuidv4 } from 'uuid';
 import type { Rule, IErrorObject, UserConfiguredActionConnector, RuleUiAction } from '../../types';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -106,17 +107,13 @@ describe('isValidUrl', () => {
 
 describe('getConnectorWithInvalidatedFields', () => {
   test('set nulls to all required undefined fields in connector secrets', () => {
-    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> = {
-      secrets: {} as any,
-      id: 'test',
-      actionTypeId: '.slack',
-      name: 'slack',
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> =
+      createMockConnectorForUI({
+        secrets: {} as any,
+        id: 'test',
+        actionTypeId: '.slack',
+        name: 'slack',
+      });
     const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
     const configErrors = {};
     const baseConnectorErrors = {};
@@ -125,17 +122,13 @@ describe('getConnectorWithInvalidatedFields', () => {
   });
 
   test('set nulls to all required undefined fields in connector config', () => {
-    const connector: UserConfiguredActionConnector<{ apiUrl: string }, {}> = {
-      secrets: {},
-      id: 'test',
-      actionTypeId: '.jira',
-      name: 'jira',
-      config: {} as any,
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    const connector: UserConfiguredActionConnector<{ apiUrl: string }, {}> =
+      createMockConnectorForUI({
+        id: 'test',
+        actionTypeId: '.jira',
+        name: 'jira',
+        config: {} as any,
+      });
     const secretsErrors = {};
     const configErrors = { apiUrl: ['apiUrl is required'] };
     const baseConnectorErrors = {};
@@ -144,19 +137,15 @@ describe('getConnectorWithInvalidatedFields', () => {
   });
 
   test('do not set nulls to the invalid fields with values in the connector properties, config and secrets', () => {
-    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> = {
-      secrets: {
-        webhookUrl: 'http://test',
-      },
-      id: 'test',
-      actionTypeId: '.slack',
-      name: 'slack',
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> =
+      createMockConnectorForUI({
+        secrets: {
+          webhookUrl: 'http://test',
+        },
+        id: 'test',
+        actionTypeId: '.slack',
+        name: 'slack',
+      });
     const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
     const configErrors = {};
     const baseConnectorErrors = {};

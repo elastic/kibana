@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices } from '../lib/servicenow/use_choices';
 import ServiceNowITOMParamsFields from './servicenow_itom_params';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../lib/servicenow/use_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -34,17 +35,11 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
-  secrets: {},
-  config: {},
+const connector: ActionConnector = createMockConnectorForUI({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
 const editAction = jest.fn();
 const defaultProps = {

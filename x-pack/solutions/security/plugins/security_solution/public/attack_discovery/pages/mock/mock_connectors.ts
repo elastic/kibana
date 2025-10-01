@@ -5,47 +5,32 @@
  * 2.0.
  */
 
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 import type { AIConnector } from '@kbn/elastic-assistant';
 
 export const getMockConnectors = (): AIConnector[] => [
-  {
+  createMockConnectorForUI({
     actionTypeId: '.gen-ai',
     isPreconfigured: true,
-    isDeprecated: false,
-    referencedByCount: 0,
-    isSystemAction: false,
     id: 'gpt41Azure',
     name: 'GPT-4.1',
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorForUI({
     actionTypeId: '.gemini',
     isPreconfigured: true,
-    isDeprecated: false,
-    referencedByCount: 0,
-    isSystemAction: false,
     id: 'gemini_2_5_pro',
     name: 'Gemini 2.5 Pro',
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorForUI({
     actionTypeId: '.bedrock',
     isPreconfigured: true,
-    isDeprecated: false,
-    referencedByCount: 0,
-    isSystemAction: false,
     id: 'pmeClaudeV37SonnetUsEast1',
     name: 'Claude 3.7 Sonnet',
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorForUI({
     actionTypeId: '.inference',
     isPreconfigured: true,
-    isDeprecated: false,
-    referencedByCount: 0,
-    isSystemAction: false,
     id: 'elastic-llm',
     name: 'Elastic LLM',
-    isConnectorTypeDeprecated: false,
-  },
+  }),
 ];

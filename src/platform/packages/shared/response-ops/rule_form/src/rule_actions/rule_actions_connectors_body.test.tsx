@@ -19,6 +19,7 @@ import {
   getActionTypeModel,
   getConnector,
 } from '../common/test_utils/actions_test_utils';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
@@ -71,17 +72,15 @@ describe('ruleActionsConnectorsBody', () => {
 
     await userEvent.click(screen.getByText('connector-1'));
     await waitFor(() =>
-      expect(mockOnSelectConnector).toHaveBeenLastCalledWith({
-        actionTypeId: 'actionType-1',
-        config: { config: 'config-1' },
-        id: 'connector-1',
-        isDeprecated: false,
-        isPreconfigured: false,
-        isSystemAction: false,
-        name: 'connector-1',
-        secrets: { secret: 'secret' },
-        isConnectorTypeDeprecated: false,
-      })
+      expect(mockOnSelectConnector).toHaveBeenLastCalledWith(
+        createMockConnectorForUI({
+          actionTypeId: 'actionType-1',
+          config: { config: 'config-1' },
+          id: 'connector-1',
+          name: 'connector-1',
+          secrets: { secret: 'secret' },
+        })
+      )
     );
 
     await userEvent.click(screen.getByText('connector-2'));

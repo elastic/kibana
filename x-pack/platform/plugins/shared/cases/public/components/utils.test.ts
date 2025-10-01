@@ -32,19 +32,19 @@ import {
   removeEmptyFields,
   customFieldsFormSerializer,
 } from './utils';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('Utils', () => {
-  const connector = {
+  const connector = createMockConnectorForUI({
     id: 'test',
     actionTypeId: '.webhook',
     name: 'Test',
     config: { usesTableApi: false },
-    secrets: {},
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: false,
     isConnectorTypeDeprecated: false,
-  };
+  });
 
   describe('getConnectorIcon', () => {
     const { createMockActionTypeModel } = actionTypeRegistryMock;

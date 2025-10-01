@@ -18,6 +18,7 @@ import type { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -44,17 +45,11 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
-  secrets: {},
-  config: {},
+const connector: ActionConnector = createMockConnectorForUI({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
 const editAction = jest.fn();
 const defaultProps = {

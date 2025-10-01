@@ -13,6 +13,10 @@ import {
   checkActionFormActionTypeEnabled,
   checkActionTypeEnabled,
 } from './check_action_type_enabled';
+import {
+  createMockConnectorForUI,
+  createMockConnectorType,
+} from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('checkActionTypeEnabled', () => {
   test(`returns isEnabled:true when action type isn't provided`, async () => {
@@ -24,17 +28,12 @@ describe('checkActionTypeEnabled', () => {
   });
 
   test('returns isEnabled:true when action type is enabled', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: '1',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       name: 'my action',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
             "isEnabled": true,
@@ -43,7 +42,7 @@ describe('checkActionTypeEnabled', () => {
   });
 
   test('returns isEnabled:false when action type is disabled by license', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: '1',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
@@ -51,9 +50,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: false,
       enabledInConfig: true,
       enabledInLicense: false,
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
       Object {
         "isEnabled": false,
@@ -79,17 +76,14 @@ describe('checkActionTypeEnabled', () => {
   });
 
   test('returns isEnabled:false when action type is disabled by config', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: '1',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: false,
       enabledInConfig: false,
-      enabledInLicense: true,
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
             "isEnabled": false,
@@ -103,17 +97,14 @@ describe('checkActionTypeEnabled', () => {
       `);
   });
   test('checkActionTypeEnabled returns true when actionType is disabled by config', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: '1',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: false,
       enabledInConfig: false,
-      enabledInLicense: true,
-      isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
 
     const isPreconfiguredConnector = true;
 
@@ -127,7 +118,7 @@ describe('checkActionTypeEnabled', () => {
 
 describe('checkActionFormActionTypeEnabled', () => {
   const preconfiguredConnectors: PreConfiguredActionConnector[] = [
-    {
+    createMockConnectorForUI({
       actionTypeId: '1',
       id: 'test1',
       isPreconfigured: true,
@@ -135,9 +126,8 @@ describe('checkActionFormActionTypeEnabled', () => {
       isDeprecated: true,
       name: 'test',
       referencedByCount: 0,
-      isConnectorTypeDeprecated: false,
-    },
-    {
+    }),
+    createMockConnectorForUI({
       actionTypeId: '2',
       id: 'test2',
       isPreconfigured: true,
@@ -145,12 +135,11 @@ describe('checkActionFormActionTypeEnabled', () => {
       isSystemAction: false,
       name: 'test',
       referencedByCount: 0,
-      isConnectorTypeDeprecated: false,
-    },
+    }),
   ];
 
   test('returns isEnabled:true when action type is preconfigured', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: '1',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
@@ -159,8 +148,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`
@@ -171,7 +159,7 @@ describe('checkActionFormActionTypeEnabled', () => {
   });
 
   test('returns isEnabled:false when action type is disabled by config and not preconfigured', async () => {
-    const actionType: ActionType = {
+    const actionType: ActionType = createMockConnectorType({
       id: 'disabled-by-config',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
@@ -180,8 +168,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
-      isDeprecated: false,
-    };
+    });
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`
           Object {

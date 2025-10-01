@@ -18,31 +18,25 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExportByObjectIds } from './get_export_by_object_ids';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const exceptionsClient = getExceptionListClientMock();
 const connectors = [
-  {
+  createMockConnectorFindResult({
     id: 'non-preconfigured-connector',
     actionTypeId: '.slack',
     name: 'slack',
     config: {},
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false,
     referencedByCount: 1,
-    isConnectorTypeDeprecated: false,
-  },
-  {
+  }),
+  createMockConnectorFindResult({
     id: 'preconfigured-connector',
     actionTypeId: '.email',
     name: 'Email (preconfigured)',
     config: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
     referencedByCount: 1,
-    isConnectorTypeDeprecated: false,
-  },
+  }),
 ];
 
 describe('getExportByObjectIds', () => {

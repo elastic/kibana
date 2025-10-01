@@ -11,6 +11,7 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { createMockConnectorFindResult } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -34,18 +35,13 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([
-      {
+      createMockConnectorFindResult({
         id: '.system-action-id',
-        isPreconfigured: false,
         isSystemAction: true,
-        isDeprecated: false,
         name: 'my system action',
         actionTypeId: '.system-action-type',
         isMissingSecrets: false,
-        config: {},
-        referencedByCount: 0,
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);

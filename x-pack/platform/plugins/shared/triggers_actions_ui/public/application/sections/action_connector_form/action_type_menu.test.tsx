@@ -15,6 +15,7 @@ import type { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_connector_api', () => ({
@@ -420,7 +421,7 @@ describe('connector_add_flyout', () => {
       });
       actionTypeRegistry.get.mockReturnValue(actionType);
       loadActionTypes.mockResolvedValue([
-        {
+        createMockConnectorType({
           id: actionType.id,
           enabled: false,
           name: 'Test',
@@ -428,8 +429,7 @@ describe('connector_add_flyout', () => {
           enabledInLicense: false,
           minimumLicenseRequired: 'gold',
           supportedFeatureIds: ['alerting'],
-          isDeprecated: false,
-        },
+        }),
       ]);
 
       const wrapper = mountWithIntl(
@@ -463,7 +463,7 @@ describe('connector_add_flyout', () => {
       });
       actionTypeRegistry.get.mockReturnValue(actionType);
       loadActionTypes.mockResolvedValue([
-        {
+        createMockConnectorType({
           id: actionType.id,
           enabled: true,
           name: 'Test',
@@ -471,8 +471,7 @@ describe('connector_add_flyout', () => {
           enabledInLicense: false,
           minimumLicenseRequired: 'gold',
           supportedFeatureIds: ['alerting'],
-          isDeprecated: true,
-        },
+        }),
       ]);
 
       const wrapper = mountWithIntl(

@@ -12,6 +12,7 @@ import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
 import * as api from './api';
 import { TestProviders } from '../../../common/mock';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('./api');
 jest.mock('../../../common/lib/kibana');
@@ -19,7 +20,7 @@ jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const fields = ['priority'];
 
-const connector = {
+const connector: ActionConnector = createMockConnectorForUI({
   secrets: {
     username: 'user',
     password: 'pass',
@@ -27,15 +28,10 @@ const connector = {
   id: 'test',
   actionTypeId: '.servicenow',
   name: 'ServiceNow',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
-  isConnectorTypeDeprecated: false,
-} as ActionConnector;
-
+});
 describe('useGetChoices', () => {
   const { http } = useKibanaMock().services;
 

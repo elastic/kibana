@@ -8,6 +8,7 @@
 import type { ActionConnectorWithoutId } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateActionConnector } from '.';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const http = httpServiceMock.createStartContract();
 
@@ -21,6 +22,7 @@ describe('updateActionConnector', () => {
       is_preconfigured: false,
       is_deprecated: false,
       is_system_action: false,
+      is_connector_type_deprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -28,16 +30,12 @@ describe('updateActionConnector', () => {
     };
     http.put.mockResolvedValueOnce(apiResponse);
 
-    const connector: ActionConnectorWithoutId<{}, {}> = {
+    const connector: ActionConnectorWithoutId<{}, {}> = createMockConnectorForUI({
       actionTypeId: 'te/st',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
       name: 'My test',
       config: {},
       secrets: {},
-      isConnectorTypeDeprecated: false,
-    };
+    });
     const resolvedValue = { ...connector, id };
 
     const result = await updateActionConnector({ http, connector, id });

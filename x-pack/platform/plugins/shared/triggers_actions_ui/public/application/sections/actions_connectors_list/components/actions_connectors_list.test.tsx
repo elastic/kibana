@@ -18,6 +18,7 @@ import type { ActionConnector, GenericValidationResult } from '../../../../types
 import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -101,77 +102,44 @@ describe('actions_connectors_list', () => {
 
   describe('component with items', () => {
     const mockedActions: ActionConnector[] = [
-      {
+      createMockConnectorForUI({
         id: '1',
         actionTypeId: 'test',
         name: 'Test Connector 1',
-        secrets: {},
-        isSystemAction: false,
-        isPreconfigured: false,
-        isDeprecated: false,
         referencedByCount: 1,
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorForUI({
         id: '2',
         actionTypeId: 'test2',
         name: 'Test Connector 2',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorForUI({
         id: '3',
         actionTypeId: 'test2',
         name: 'Test Connector 3',
-        isSystemAction: false,
         isMissingSecrets: true,
         referencedByCount: 1,
         isPreconfigured: true,
-        isDeprecated: false,
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorForUI({
         id: '4',
         actionTypeId: 'nonexistent',
         name: 'Test Connector 4',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorForUI({
         id: '5',
         actionTypeId: 'test3',
         name: 'Test Connector 5',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
-      {
+      }),
+      createMockConnectorForUI({
         id: '6',
         actionTypeId: 'test4',
         name: 'Test Connector 6',
-        secrets: {},
-        isSystemAction: false,
         referencedByCount: 1,
-        isPreconfigured: false,
-        isDeprecated: false,
-        config: {},
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ];
     let mockedEditItem: jest.Mock;
 
@@ -707,30 +675,24 @@ describe('actions_connectors_list', () => {
 
     it('shows the deprecated badge', async () => {
       const actions = [
-        {
+        createMockConnectorForUI({
           id: '1',
           actionTypeId: 'test',
           name: 'ServiceNow Connector',
-          secrets: {},
-          isSystemAction: false,
           referencedByCount: 1,
           config: { usesTableApi: true },
           isDeprecated: true,
-          isMissingSecrets: false,
           isConnectorTypeDeprecated: true,
-        },
-        {
+        }),
+        createMockConnectorForUI({
           id: '2',
           actionTypeId: 'test2',
           name: 'ServiceNow SIR Connector',
-          secrets: {},
-          isSystemAction: false,
           referencedByCount: 1,
           config: { usesTableApi: true },
           isDeprecated: true,
-          isMissingSecrets: false,
           isConnectorTypeDeprecated: false,
-        },
+        }),
       ] as Array<ActionConnector<{ usesTableApi: boolean }>>;
 
       render(

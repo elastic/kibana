@@ -15,6 +15,7 @@ import {
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
 import { actionsConfigMock } from './actions_config.mock';
+import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createStart();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -43,17 +44,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -157,17 +154,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -283,17 +276,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -433,17 +422,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -477,17 +462,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: mockedConnectorTypeRegistry,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -522,28 +503,19 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: '456',
             actionTypeId: '.index',
-            config: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });
@@ -584,17 +556,13 @@ describe('bulkExecute()', () => {
         taskManager: mockTaskManager,
         connectorTypeRegistry: actionTypeRegistryMock.create(),
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: '123',
             actionTypeId: '.email',
-            config: {},
             isPreconfigured,
-            isDeprecated: false,
             isSystemAction,
             name: 'x',
-            secrets: {},
-            isConnectorTypeDeprecated: false,
-          },
+          }),
         ],
         configurationUtilities: mockActionsConfig,
       });

@@ -10,36 +10,25 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const actionConnector = {
+const actionConnector = createMockConnectorForUI({
   actionTypeId: '.index',
   config: {
     index: 'test-index',
   },
   id: 'es index connector',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
   name: 'test name',
-  secrets: {},
-  isConnectorTypeDeprecated: false,
-};
+});
 
-const preconfiguredActionConnector = {
+const preconfiguredActionConnector = createMockConnectorForUI({
   actionTypeId: '.index',
-  config: {
-    index: 'kibana-alert-history-default',
-  },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
-  isSystemAction: false as const,
-  isDeprecated: false,
   name: 'Alert history Elasticsearch index',
-  secrets: {},
-  isConnectorTypeDeprecated: false,
-};
+});
 
 describe('IndexParamsFields renders', () => {
   test('all params fields are rendered correctly when params are undefined', () => {

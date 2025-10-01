@@ -16,7 +16,6 @@ describe('isConnectorDeprecated', () => {
     secrets: { username: 'test', password: 'test' },
     isPreconfigured: false,
     isSystemAction: false,
-    isConnectorTypeDeprecated: false,
   };
 
   it('returns false if the config is not defined', () => {

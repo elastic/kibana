@@ -17,6 +17,7 @@ import {
 } from './lib/action_execution_source';
 import { actionsConfigMock } from './actions_config.mock';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -316,17 +317,12 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
-          config: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'x',
-          secrets: {},
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -417,17 +413,12 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -518,17 +509,12 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
-          config: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'x',
-          secrets: {},
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -640,17 +626,12 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -933,17 +914,12 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'mock-action',
-          config: {},
           id: 'my-slack1',
           name: 'Slack #xyz',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -996,17 +972,12 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,

@@ -15,6 +15,7 @@ import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { createConnectorRequestBodySchemaV1 } from '../../../../common/routes/connector/apis/create';
+import { createMockConnector } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -36,17 +37,12 @@ describe('createConnectorRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);
 
-    const createResult = {
+    const createResult = createMockConnector({
       id: '1',
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isMissingSecrets: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    };
+    });
 
     const createApiResult = {
       ...omit(createResult, [
@@ -166,17 +162,14 @@ describe('createConnectorRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.create.mockResolvedValueOnce({
-      id: '1',
-      name: 'My name',
-      actionTypeId: 'abc',
-      isMissingSecrets: false,
-      config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    });
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'My name',
+        actionTypeId: 'abc',
+        config: { foo: true },
+      })
+    );
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -208,17 +201,14 @@ describe('createConnectorRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.create.mockResolvedValueOnce({
-      id: '1',
-      name: 'My name',
-      actionTypeId: 'abc',
-      config: { foo: true },
-      isMissingSecrets: false,
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      isConnectorTypeDeprecated: false,
-    });
+    actionsClient.create.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        name: 'My name',
+        actionTypeId: 'abc',
+        config: { foo: true },
+      })
+    );
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },

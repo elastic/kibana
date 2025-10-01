@@ -14,6 +14,10 @@ import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
+import {
+  createMockConnectorForUI,
+  createMockConnectorType,
+} from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('connectors_selection', () => {
   const core = coreMock.createStart();
@@ -51,33 +55,22 @@ describe('connectors_selection', () => {
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
-    '.pagerduty': {
+    '.pagerduty': createMockConnectorType({
       id: '.pagerduty',
-      enabled: true,
       name: 'Test',
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-    },
+    }),
   };
 
   const connectors = [
-    {
+    createMockConnectorForUI({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
       id: 'testId',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
       name: 'test pagerduty',
-      secrets: {},
-      isConnectorTypeDeprecated: false,
-    },
+    }),
   ];
 
   const actionType = actionTypeRegistryMock.createMockActionTypeModel({

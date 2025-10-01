@@ -27,6 +27,10 @@ import { ALERTING_FEATURE_ID, RuleNotifyWhen } from '@kbn/alerting-plugin/common
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import userEvent from '@testing-library/user-event';
+import {
+  createMockConnectorForUI,
+  createMockConnectorType,
+} from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -712,19 +716,14 @@ function getActionTypeForm({
   producerId?: string;
   featureId?: string;
 }) {
-  const actionConnectorDefault = {
+  const actionConnectorDefault = createMockConnectorForUI({
     actionTypeId: '.pagerduty',
     config: {
       apiUrl: 'http:\\test',
     },
     id: 'test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
     name: 'test name',
-    secrets: {},
-    isConnectorTypeDeprecated: false,
-  };
+  });
 
   const actionItemDefault = {
     id: '123',
@@ -737,34 +736,23 @@ function getActionTypeForm({
   };
 
   const connectorsDefault = [
-    {
+    createMockConnectorForUI({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
       id: 'test',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
       name: 'test name',
-      secrets: {},
-      isConnectorTypeDeprecated: false,
-    },
-    {
+    }),
+    createMockConnectorForUI({
       id: '123',
       name: 'Server log',
       actionTypeId: '.server-log',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
-      config: {},
-      secrets: {},
-      isConnectorTypeDeprecated: false,
-    },
+    }),
   ];
 
   const actionTypeIndexDefault: Record<string, ActionType> = {
-    '.pagerduty': {
+    '.pagerduty': createMockConnectorType({
       id: '.pagerduty',
       enabled: true,
       name: 'Test',
@@ -774,8 +762,8 @@ function getActionTypeForm({
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
       isDeprecated: false,
-    },
-    '.server-log': {
+    }),
+    '.server-log': createMockConnectorType({
       id: '.server-log',
       enabled: true,
       name: 'Test SL',
@@ -785,7 +773,7 @@ function getActionTypeForm({
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
       isDeprecated: false,
-    },
+    }),
   };
 
   return (

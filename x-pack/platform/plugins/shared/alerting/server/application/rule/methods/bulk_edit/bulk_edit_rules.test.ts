@@ -36,6 +36,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -179,7 +180,7 @@ describe('bulkEdit()', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -190,13 +191,8 @@ describe('bulkEdit()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
-        isConnectorTypeDeprecated: false,
-      },
+      }),
     ]);
     actionsClient.listTypes.mockReset();
     actionsClient.listTypes.mockResolvedValue([]);
@@ -990,28 +986,19 @@ describe('bulkEdit()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test-1',
           config: {},
-          isMissingSecrets: false,
           name: 'test default connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
           config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const result = await rulesClient.bulkEdit({
@@ -1162,28 +1149,19 @@ describe('bulkEdit()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test-1',
           config: {},
-          isMissingSecrets: false,
           name: 'test default connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
           config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const result = await rulesClient.bulkEdit({
@@ -1326,28 +1304,19 @@ describe('bulkEdit()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test-1',
           config: {},
-          isMissingSecrets: false,
           name: 'test default connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
           config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       await rulesClient.bulkEdit({
@@ -1439,28 +1408,19 @@ describe('bulkEdit()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test-1',
           config: {},
-          isMissingSecrets: false,
           name: 'test default connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
           config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const result = await rulesClient.bulkEdit({
@@ -1491,17 +1451,12 @@ describe('bulkEdit()', () => {
 
       actionsClient.isSystemAction.mockReturnValue(false);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const result = await rulesClient.bulkEdit({
@@ -1543,17 +1498,12 @@ describe('bulkEdit()', () => {
 
       actionsClient.isSystemAction.mockReturnValue(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const res = await rulesClient.bulkEdit({
@@ -1598,17 +1548,12 @@ describe('bulkEdit()', () => {
 
       actionsClient.isSystemAction.mockReturnValue(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const res = await rulesClient.bulkEdit({
@@ -1651,17 +1596,12 @@ describe('bulkEdit()', () => {
 
       actionsClient.isSystemAction.mockReturnValue(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const res = await rulesClient.bulkEdit({
@@ -1701,17 +1641,12 @@ describe('bulkEdit()', () => {
 
       actionsClient.isSystemAction.mockReturnValue(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       const res = await rulesClient.bulkEdit({
@@ -1834,28 +1769,17 @@ describe('bulkEdit()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test-1',
-          config: {},
-          isMissingSecrets: false,
           name: 'test default connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          isConnectorTypeDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test-2',
-          config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-          isConnectorTypeDeprecated: false,
-        },
+        }),
       ]);
 
       actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(

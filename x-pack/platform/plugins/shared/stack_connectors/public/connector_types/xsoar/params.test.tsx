@@ -15,6 +15,7 @@ import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/
 import { SUB_ACTION } from '../../../common/xsoar/constants';
 import type { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
 import * as translations from './translations';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 interface Result {
   isLoading: boolean;
@@ -180,17 +181,11 @@ describe('XSOARParamsFields renders', () => {
     subAction: SUB_ACTION.RUN,
     subActionParams,
   };
-  const connector: ActionConnector = {
-    secrets: {},
-    config: {},
+  const connector: ActionConnector = createMockConnectorForUI({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
-    isConnectorTypeDeprecated: false,
-  };
+  });
 
   const editAction = jest.fn();
   const defaultProps = {

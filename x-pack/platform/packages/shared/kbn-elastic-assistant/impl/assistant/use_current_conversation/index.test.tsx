@@ -15,6 +15,7 @@ import type { Conversation } from '../../..';
 import { find } from 'lodash';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { MOCK_CURRENT_USER } from '../../mock/conversation';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -23,13 +24,9 @@ jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
 const MOCK_DATE = '2025-02-19T23:28:54.962Z';
-const defaultConnectorMock: AIConnector = {
+const defaultConnectorMock: AIConnector = createMockConnectorForUI({
   actionTypeId: '.gen-ai',
-  isPreconfigured: false,
-  isDeprecated: false,
   referencedByCount: 0,
-  isMissingSecrets: false,
-  isSystemAction: false,
   secrets: {},
   id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
   name: 'OpenAI',
@@ -37,8 +34,7 @@ const defaultConnectorMock: AIConnector = {
     apiProvider: 'OpenAI',
     apiUrl: 'https://api.openai.com/v1/chat/completions',
   },
-  isConnectorTypeDeprecated: false,
-};
+});
 const mockData = {
   welcome_id: {
     id: 'welcome_id',

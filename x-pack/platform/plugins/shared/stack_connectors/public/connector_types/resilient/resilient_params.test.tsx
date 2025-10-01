@@ -11,6 +11,7 @@ import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
@@ -32,17 +33,11 @@ const actionParams = {
     comments: [],
   },
 };
-const connector = {
-  secrets: {},
-  config: {},
+const connector = createMockConnectorForUI({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
-  isConnectorTypeDeprecated: false,
-};
+});
 
 const editAction = jest.fn();
 const defaultProps = {
