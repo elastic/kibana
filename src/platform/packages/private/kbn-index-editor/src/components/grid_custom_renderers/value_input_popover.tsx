@@ -65,7 +65,7 @@ export const getValueInputPopover =
         if (event.key === 'Enter') {
           if (error) {
             telemetry.trackEditInteraction({
-              editOp: 'cell_edit',
+              editOp: 'edit_cell',
               outcome: 'error',
               failureReason: 'type',
             });
@@ -78,7 +78,7 @@ export const getValueInputPopover =
 
           if (error) {
             telemetry.trackEditInteraction({
-              editOp: 'cell_edit',
+              editOp: 'edit_cell',
               outcome: 'error',
               failureReason: 'type',
             });

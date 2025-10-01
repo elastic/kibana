@@ -78,9 +78,9 @@ export class IndexEditorTelemetryService {
   }
 
   public trackEditInteraction(eventData: {
-    editOp: 'cell_edit' | 'add_row' | 'add_column' | 'delete_row' | 'delete_column';
+    editOp: 'edit_cell' | 'edit_column' | 'add_row' | 'add_column' | 'delete_row' | 'delete_column';
     outcome?: 'success' | 'error';
-    failureReason?: 'type' | 'unknown';
+    failureReason?: string;
   }) {
     this.reportEvent('index_editor.edit_interaction', {
       flyout_mode: this._flyoutMode,

@@ -855,7 +855,7 @@ export class IndexUpdateService {
     );
     this.addAction('add-doc', { id, value: parsedUpdate });
 
-    this.telemetry.trackEditInteraction({ editOp: 'cell_edit', outcome: 'success' });
+    this.telemetry.trackEditInteraction({ editOp: 'edit_cell', outcome: 'success' });
   }
 
   /** Schedules documents for deletion */
@@ -945,6 +945,8 @@ export class IndexUpdateService {
 
   public editColumn(name: string, previousName: string) {
     this.addAction('edit-column', { name, previousName });
+
+    this.telemetry.trackEditInteraction({ editOp: 'edit_column', outcome: 'success' });
   }
 
   public deleteColumn(name: string) {

@@ -16,6 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isPlaceholderColumn } from '../../utils';
 import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName } from '../../hooks/use_add_column_name';
+import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
 export const getColumnInputRenderer = (
   columnName: string,
@@ -49,9 +50,10 @@ export const getColumnInputRenderer = (
 interface AddColumnHeaderProps {
   initialColumnName: string;
   containerId: string;
+  telemetry: IndexEditorTelemetryService;
 }
 
-export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => {
+export const AddColumnHeader = ({ initialColumnName, telemetry }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
@@ -74,9 +76,15 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
       if (columnName && !validationError) {
         saveColumn();
         setIsEditing(false);
+      } else {
+        telemetry.trackEditInteraction({
+          editOp: 'add_column',
+          outcome: 'error',
+          failureReason: validationError || 'empty_name',
+        });
       }
     },
-    [columnName, validationError, saveColumn]
+    [columnName, validationError, saveColumn, telemetry]
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
