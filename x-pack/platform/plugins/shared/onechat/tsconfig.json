@@ -81,5 +81,7 @@
     "@kbn/workflows",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ]
 }
