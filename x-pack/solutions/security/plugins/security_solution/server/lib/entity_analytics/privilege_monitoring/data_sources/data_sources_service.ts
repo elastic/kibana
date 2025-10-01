@@ -16,7 +16,6 @@ export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {
-  const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const indexSyncService = createIndexSyncService(dataClient);
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
@@ -63,7 +62,7 @@ export const createDataSourcesService = (
 
   const syncAllSources = async () => {
     const jobs = [indexSyncService.plainIndexSync(soClient)];
-    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
+    jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);
     settled
