@@ -60,7 +60,8 @@ export class GetSLOHealth {
       };
     });
 
-    return fetchSLOHealthResponseSchema.encode(results);
+    const mappedResults = Array.from(new Map(results.map((item) => [item.sloId, item])).values());
+    return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 
   private async getSummaryDocsById(
