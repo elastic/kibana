@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { getCountryName, getCountryFlag } from '../../../../node/country_flags/country_codes';
 import { GROUPED_ITEM_IP_TEST_ID, GROUPED_ITEM_GEO_TEST_ID } from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
-import { i18nNamespaceKey } from '../utils';
+import { i18nNamespaceKey } from '../../../constants';
 
-const geoLabel = i18n.translate(`${i18nNamespaceKey}.geoLabel`, {
+const geoLabel = i18n.translate(`${i18nNamespaceKey}.groupedItem.geoLabel`, {
   defaultMessage: 'Geo',
 });
 
