@@ -17,6 +17,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams } from '@kbn/esql-utils';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
@@ -69,7 +70,7 @@ export async function fetchEsqlQuery({
   }
 
   const isGroupAgg = isPerRowAggregation(params.groupBy);
-  const { results, duplicateAlertIds } = getEsqlQueryHits(
+  const { results, duplicateAlertIds } = await getEsqlQueryHits(
     response,
     params.esqlQuery.esql,
     isGroupAgg
@@ -130,6 +131,9 @@ export const getEsqlQuery = (
         filter: rangeFilter,
       },
     },
+    ...(hasStartEndParams(params.esqlQuery.esql)
+      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      : {}),
   };
   return query;
 };
@@ -156,15 +160,14 @@ export function generateLink(
 
 function getPartialResultsWarning(response: EsqlTable) {
   const clusters = response?._clusters?.details ?? {};
-  const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
+  const shardFailures: EsqlEsqlShardFailure[] = [];
+  for (const cluster of Object.keys(clusters)) {
     const failures = clusters[cluster]?.failures ?? [];
 
     if (failures.length > 0) {
-      acc.push(...failures);
+      shardFailures.push(...failures);
     }
-
-    return acc;
-  }, []);
+  }
 
   return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
     defaultMessage:

@@ -46,5 +46,14 @@ export async function generateSignificantEventDefinitions(
     system,
   });
 
-  return queries.map((query) => ({ title: query.title, kql: query.kql }));
+  return queries.map((query) => ({
+    title: query.title,
+    kql: query.kql,
+    system: system
+      ? {
+          name: system?.name,
+          filter: system?.filter,
+        }
+      : undefined,
+  }));
 }

@@ -108,17 +108,17 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
         margin-top: ${euiTheme.size.s};
       `}
     >
-      {analysis.alertsCount > 0 && (
+      {analysis.uniqueAlertsCount > 0 && (
         <Section
           testSubj="label-node-tooltip-alert-section"
-          badge={<AlertBadge count={analysis.alertsCount} />}
+          badge={<AlertBadge count={analysis.uniqueAlertsCount} />}
           label={alertedEventsText}
         />
       )}
-      {analysis.eventsCount > 0 && (
+      {analysis.uniqueEventsCount > 0 && (
         <Section
           testSubj="label-node-tooltip-event-section"
-          badge={<EventBadge count={analysis.eventsCount} />}
+          badge={<EventBadge count={analysis.uniqueEventsCount} />}
           label={defaultEventsText}
         />
       )}

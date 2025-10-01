@@ -45,4 +45,13 @@ export interface IndexSearchToolFormData extends BaseToolFormData {
   pattern: string;
 }
 
-export type ToolFormData = EsqlToolFormData | BuiltinToolFormData | IndexSearchToolFormData;
+export interface WorkflowToolFormData extends BaseToolFormData {
+  type: ToolType.workflow;
+  workflow_id: string;
+}
+
+export type ToolFormData =
+  | EsqlToolFormData
+  | BuiltinToolFormData
+  | IndexSearchToolFormData
+  | WorkflowToolFormData;
