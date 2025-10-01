@@ -134,7 +134,7 @@ export class SyntheticsMonitorTestService {
 
   async testNowMonitor(id: string, user: RoleCredentials) {
     await this.supertest
-      .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${id}`)
+      .post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${id}`)
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())
       .expect(200);
