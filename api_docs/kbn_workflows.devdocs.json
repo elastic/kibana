@@ -334,11 +334,7 @@
         "label": "getJsonSchemaFromYamlSchema",
         "description": [],
         "signature": [
-          "(yamlSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => ",
-          "JsonSchema7Type",
-          " & { $schema?: string | undefined; definitions?: { [key: string]: ",
-          "JsonSchema7Type",
-          "; } | undefined; }"
+          "(yamlSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
         "deprecated": false,
@@ -790,6 +786,53 @@
             "description": [],
             "signature": [
               "{ type: \"foreach\"; name: string; steps: { type: string; name: string; }[]; foreach: string; if?: string | undefined; } | { type: \"if\"; name: string; steps: { type: string; name: string; }[]; condition: string; else?: { type: string; name: string; }[] | undefined; } | { type: \"wait\"; name: string; with: { duration: string; }; } | { type: \"http\"; name: string; with: { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; } | { type: string; name: string; with: { request: { path: string; method: \"GET\" | \"DELETE\" | \"HEAD\" | \"POST\" | \"PUT\" | \"PATCH\"; body?: any; }; } | ({ id?: string | undefined; sort?: any[] | undefined; aggs?: Record<string, any> | undefined; index?: string | undefined; size?: number | undefined; query?: Record<string, any> | undefined; body?: Record<string, any> | undefined; aggregations?: Record<string, any> | undefined; from?: number | undefined; _source?: string | boolean | string[] | undefined; } & Record<string, any>); } | { type: string; name: string; with: { request: { path: string; method: \"GET\" | \"DELETE\" | \"HEAD\" | \"POST\" | \"PUT\" | \"PATCH\"; body?: any; headers?: Record<string, string> | undefined; }; } | ({ id?: string | undefined; page?: number | undefined; connector?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; description?: string | undefined; perPage?: number | undefined; status?: string | undefined; severity?: \"medium\" | \"high\" | \"low\" | \"critical\" | undefined; settings?: Record<string, any> | undefined; owner?: string | undefined; assignees?: string[] | undefined; case_id?: string | undefined; space_id?: string | undefined; } & Record<string, any>); } | { type: \"parallel\"; name: string; branches: { name: string; steps: { type: string; name: string; }[]; }[]; } | { type: \"merge\"; name: string; sources: string[]; steps: { type: string; name: string; }[]; } | { type: string; name: string; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; with?: Record<string, any> | undefined; foreach?: string | undefined; if?: string | undefined; \"connector-id\"?: string | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.isInProgressStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "isInProgressStatus",
+        "description": [],
+        "signature": [
+          "(status: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.ExecutionStatus",
+            "text": "ExecutionStatus"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.isInProgressStatus.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.ExecutionStatus",
+                "text": "ExecutionStatus"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
             "deprecated": false,
@@ -3480,6 +3523,36 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.TestWorkflowCommand",
+        "type": "Type",
+        "tags": [],
+        "label": "TestWorkflowCommand",
+        "description": [],
+        "signature": [
+          "{ inputs: Record<string, any>; workflowYaml: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.TestWorkflowResponseDto",
+        "type": "Type",
+        "tags": [],
+        "label": "TestWorkflowResponseDto",
+        "description": [],
+        "signature": [
+          "{ workflowExecutionId: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.TriggerType",
         "type": "Type",
         "tags": [],
@@ -3519,6 +3592,23 @@
           "{ type: \"wait\"; name: string; with: { duration: string; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID",
+        "description": [
+          "\nFeature flag ID for enabling / disabling the workflow execution stats bar UI"
+        ],
+        "signature": [
+          "\"workflows:executionStatsBar:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
