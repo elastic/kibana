@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { Spaces } from '../../../../../scenarios';
-import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
-import { createEsDocumentsWithGroups } from '../../../create_test_data';
+import { Spaces } from '../../../../scenarios';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../common/lib';
+import { createEsDocumentsWithGroups } from '../../create_test_data';
 
-const RULE_INTERVAL_SECONDS = 6;
+const RULE_INTERVAL_SECONDS = 3;
 const RULE_INTERVALS_TO_WRITE = 1;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 
@@ -22,14 +22,13 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/193876
-  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
+  describe('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
-
       await esTestIndexTool.setup();
     });
 
@@ -72,6 +71,9 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // to recover under normal conditions, they should stay active because the
       // circuit breaker hit
       await createEsDocumentsInGroups(22, getEndDate(), 2);
+
+      // trigger the rule to run
+      await runSoon(ruleId);
 
       // get the events we're expecting
       const events = await retry.try(async () => {
@@ -145,6 +147,12 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // so our active alerts will be groups 2, 3, 4, 5 and 6 with groups 5 and 6 as new alerts
       await createEsDocumentsInGroups(5, getEndDate(), 2);
 
+      // get the first execution to have recovered alerts
+      for (let i = 0; i < 5; i++) {
+        const done = await getRecoveredEvents(ruleId, 3 + i);
+        if (done) break;
+      }
+
       const recoveredEvents = await retry.try(async () => {
         return await getEventLog({
           getService,
@@ -156,11 +164,26 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
         });
       });
 
+      log.info(`recovered events: ${JSON.stringify(recoveredEvents)}`);
+
       // because the "execute" event is written at the end of execution
       // after getting the correct number of recovered-instance events, we're often not
       // getting the final "execute" event. use the execution UUID to grab it directly
 
       const recoveredEventExecutionUuid = recoveredEvents[0]?.kibana?.alert?.rule?.execution?.uuid;
+
+      const allExecuteEvents = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+      });
+
+      log.info(`all execute events: ${JSON.stringify(allExecuteEvents)}`);
 
       const finalExecuteEvents = await retry.try(async () => {
         return await getEventLog({
@@ -173,6 +196,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
           actions: new Map([['execute', { gte: 1 }]]),
         });
       });
+
+      log.info(`final execute events: ${JSON.stringify(finalExecuteEvents)}`);
 
       // get the latest execute event
       const finalExecuteEvent = finalExecuteEvents[0];
@@ -221,7 +246,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: '.index-threshold',
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [],
           notify_when: 'onActiveAlert',
           params: {
@@ -262,6 +287,42 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
         indexName: ES_TEST_INDEX_NAME,
         groupOffset,
       });
+    }
+
+    async function runSoon(ruleId: string) {
+      // wait the desired interval before running the rule again
+      await new Promise((r) => setTimeout(r, RULE_INTERVAL_MILLIS));
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const runSoonResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoonResponse.status).to.eql(204);
+      });
+    }
+
+    async function getRecoveredEvents(ruleId: string, numExecutions: number) {
+      await runSoon(ruleId);
+
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: numExecutions }]]),
+        });
+      });
+
+      // check num recovered events in latest execution
+      if (
+        events[events.length - 1]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts
+          ?.recovered === 17
+      ) {
+        return true;
+      }
+      return false;
     }
 
     function getEndDate() {
