@@ -72,6 +72,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('settings');
         expect(body.settings).to.eql({
           syncAlerts: true,
+          extractObservables: false,
         });
       });
 
@@ -119,6 +120,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           owner: 'securitySolution',
           settings: {
             syncAlerts: true,
+            extractObservables: false,
           },
           severity: 'low',
           status: 'open',

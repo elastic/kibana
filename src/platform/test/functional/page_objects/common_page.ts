@@ -55,6 +55,12 @@ export class CommonPageObject extends FtrService {
     for (const key of tourStorageKeys) {
       await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
     }
+
+    const OTHER_TOUR_STORAGE_ENTRIES = [['solutionNavigationTour:completed', 'true']];
+
+    for (const [key, value] of OTHER_TOUR_STORAGE_ENTRIES) {
+      await this.browser.setLocalStorageItem(key, value);
+    }
   }
 
   /**

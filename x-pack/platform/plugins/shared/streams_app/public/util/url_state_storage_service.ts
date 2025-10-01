@@ -20,9 +20,13 @@ import { datasetQualityDetailsSerializationSchemaV2 as urlSchemaV2 } from '@kbn/
 export const updateUrlFromDatasetQualityDetailsState = ({
   urlStateStorageContainer,
   datasetQualityDetailsState,
+  setTime,
+  setRefreshInterval,
 }: {
   urlStateStorageContainer: IKbnUrlStateStorage;
   datasetQualityDetailsState?: DatasetQualityDetailsPublicState;
+  setTime: (time: { from: string; to: string }) => void;
+  setRefreshInterval: ({ value, pause }: { value: number; pause: boolean }) => void;
 }) => {
   if (!datasetQualityDetailsState) {
     return;
@@ -36,6 +40,14 @@ export const updateUrlFromDatasetQualityDetailsState = ({
   urlStateStorageContainer.set(DATA_QUALITY_URL_STATE_KEY, encodedUrlStateValues, {
     replace: true,
   });
+
+  const { timeRange } = datasetQualityDetailsState;
+  if (timeRange?.from && timeRange?.to) {
+    setTime({ from: timeRange.from, to: timeRange.to });
+  }
+  if (timeRange.refresh) {
+    setRefreshInterval(timeRange.refresh);
+  }
 };
 
 /*
