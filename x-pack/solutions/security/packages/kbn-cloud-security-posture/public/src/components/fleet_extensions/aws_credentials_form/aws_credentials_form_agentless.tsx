@@ -79,48 +79,6 @@ const getSelectorOptions = (
   return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
 };
 
-const updatePolicyCloudConnectorSupport = (
-  awsCredentialsType: string,
-  newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy,
-  input: NewPackagePolicyInput,
-  awsPolicyType: string
-) => {
-  if (!getAwsCredentialsType(input)) {
-    updatePolicy({
-      updatedPolicy: {
-        ...updatePolicyWithInputs(newPolicy, awsPolicyType, {
-          'aws.credentials.type': {
-            value: awsCredentialsType,
-            type: 'text',
-          },
-          'aws.supports_cloud_connectors': {
-            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-            type: 'bool',
-          },
-        }),
-      },
-    });
-    return;
-  }
-
-  if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  } else if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: false,
-      },
-    });
-  }
-};
-
 const getCloudFormationConfig = (
   awsCredentialsType: string,
   automationCredentialTemplate: string | undefined,

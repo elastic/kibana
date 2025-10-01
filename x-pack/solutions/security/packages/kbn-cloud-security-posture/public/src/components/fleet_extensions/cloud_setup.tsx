@@ -152,8 +152,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         <ProviderSelector
           selectedProvider={selectedProvider}
           setSelectedProvider={(provider) => {
-            const showCloudConnectors = isCloudConnectorsEnabledForProvider(provider);
-            setEnabledPolicyInput(provider, showCloudConnectors);
+            setEnabledPolicyInput(provider);
           }}
           disabled={isEditPage}
         />

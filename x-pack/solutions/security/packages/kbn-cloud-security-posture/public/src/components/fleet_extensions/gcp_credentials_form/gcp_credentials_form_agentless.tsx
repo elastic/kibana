@@ -23,6 +23,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   getTemplateUrlFromPackageInfo,
@@ -69,7 +70,10 @@ export const GcpCredentialsFormAgentless = ({
     newPolicy,
     updatePolicy,
     policyType: gcpPolicyType,
-    isCloudConnectorEnabled: false, // GCP doesn't currently use cloud connectors
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENTLESS,
+    isCloudConnectorEnabled: false, // GCP doesn't support cloud connectors yet
   });
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];

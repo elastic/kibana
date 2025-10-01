@@ -334,8 +334,16 @@ export const getDefaultGcpHiddenVars = (
   templateName: string,
   setupTechnology?: SetupTechnology
 ): Record<string, PackagePolicyConfigRecordEntry> => {
+  const baseConfig = {
+    'gcp.account_type': {
+      value: GCP_SINGLE_ACCOUNT,
+      type: 'text' as const,
+    },
+  };
+
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
     return {
+      ...baseConfig,
       'gcp.credentials.type': {
         value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
         type: 'text',
@@ -347,6 +355,7 @@ export const getDefaultGcpHiddenVars = (
 
   if (hasCloudShellUrl) {
     return {
+      ...baseConfig,
       'gcp.credentials.type': {
         value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
         type: 'text',
@@ -355,6 +364,7 @@ export const getDefaultGcpHiddenVars = (
   }
 
   return {
+    ...baseConfig,
     'gcp.credentials.type': {
       value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
       type: 'text',
@@ -597,18 +607,7 @@ const addProviderDefaults = (
       break;
 
     case 'gcp':
-      if (!enhancedVars['gcp.account_type']) {
-        enhancedVars['gcp.account_type'] = {
-          value: GCP_SINGLE_ACCOUNT,
-          type: 'text',
-        };
-      }
-      if (enhancedVars['gcp.supports_cloud_connectors']) {
-        enhancedVars['gcp.supports_cloud_connectors'] = {
-          value: false,
-          type: 'bool',
-        };
-      }
+      // GCP doesn't support cloud connectors, and account_type is handled in getDefaultGcpHiddenVars
       break;
   }
 };
@@ -639,7 +638,7 @@ const isUsingCloudConnectors = (
  * This reduces the number of Fleet policy updates on initial form load by setting
  * all necessary defaults in a single update operation
  */
-export const preloadPolicyWithDefaults = ({
+export const preloadPolicyWithCloudCredentials = ({
   provider,
   input,
   newPolicy,
@@ -665,6 +664,9 @@ export const preloadPolicyWithDefaults = ({
     return;
   }
 
+  // Determine setup technology and cloud connector settings
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
+
   // Check if this policy has already been initialized to avoid unnecessary updates
   const existingCredentialsType =
     provider === 'aws'
@@ -676,11 +678,31 @@ export const preloadPolicyWithDefaults = ({
       : null;
 
   if (existingCredentialsType) {
-    return; // Already initialized, no need to update
+    // If existing credential type is not cloud_connectors, we need to update cloud connector support
+    const credentialTypeKey = `${provider}.credentials.type`;
+    const enhancedVars = {
+      [credentialTypeKey]: { value: existingCredentialsType },
+    };
+
+    const isCloudConnectorType = isUsingCloudConnectors(provider, enhancedVars, isAgentless);
+
+    if (
+      !isCloudConnectorType &&
+      (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
+    ) {
+      const updatedPolicy = {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      };
+
+      updatePolicy({
+        updatedPolicy,
+      });
+    }
+    return; // Already initialized, no need to update further
   }
 
-  // Determine setup technology and cloud connector settings
-  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
   const effectiveCloudConnectorEnabled = isAgentless ? isCloudConnectorEnabled : false;
 
   // Get default configuration values
@@ -703,15 +725,9 @@ export const preloadPolicyWithDefaults = ({
   // Determine cloud connector usage and update policy
   const isCloudConnector = isUsingCloudConnectors(provider, enhancedVars, isAgentless);
   const updatedPolicy = updatePolicyWithInputs(newPolicy, policyType, enhancedVars);
-  updatedPolicy.supports_cloud_connector = isCloudConnector;
+  updatedPolicy.supports_cloud_connector = isCloudConnector || undefined;
 
   updatePolicy({
     updatedPolicy,
   });
 };
-
-/**
- * @deprecated Use preloadPolicyWithDefaults instead
- * Maintained for backward compatibility
- */
-export const preloadPolicyWithCloudCredentials = preloadPolicyWithDefaults;
