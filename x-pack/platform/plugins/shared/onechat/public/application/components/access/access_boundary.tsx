@@ -8,14 +8,14 @@
 import React, { type ReactNode } from 'react';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { AddLlmConnectionPrompt } from './prompts/add_llm_connection_prompt';
+import { UpgradeLicensePrompt } from './prompts/upgrade_license_prompt';
 
 export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { accessChecker } = useOnechatServices();
   const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
 
   if (!hasRequiredLicense) {
-    // TODO: Render "upgrade your license" prompt
-    return null;
+    return <UpgradeLicensePrompt />;
   }
 
   if (!hasLlmConnector) {
