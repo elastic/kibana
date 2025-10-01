@@ -32,7 +32,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 
@@ -70,10 +69,7 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.core.featureFlags.getBooleanValue(
-    TABS_ENABLED_FEATURE_FLAG_KEY,
-    false
-  );
+  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
   const discoverSessionTitle = useInternalStateSelector(
     (state) => state.persistedDiscoverSession?.title
   );
