@@ -73,6 +73,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/workflows",
     "@kbn/spaces-utils",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/licensing-plugin"
   ]
 }
