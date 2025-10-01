@@ -134,7 +134,16 @@ export const useTopNavLinks = ({
       ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
           onClick: () => {
-            services.data.search.showSearchSessionsFlyout({ appId });
+            services.data.search.showSearchSessionsFlyout({
+              appId,
+              onBackgroundSearchOpened: ({ session, event }) => {
+                event?.preventDefault();
+                console.log('Background search started', { session });
+                dispatch(
+                  internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                );
+              },
+            });
           },
         });
         items.push(backgroundSearchFlyoutMenuItem);

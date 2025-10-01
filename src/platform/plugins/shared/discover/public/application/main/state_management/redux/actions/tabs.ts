@@ -11,11 +11,15 @@ import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { createDataSource } from '../../../../../../common/data_sources/utils';
+import {
+  createDataSource,
+  createDataViewDataSource,
+  createEsqlDataSource,
+} from '../../../../../../common/data_sources/utils';
 import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
@@ -39,6 +43,8 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
+import { appendAdHocDataViews } from './data_views';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -447,8 +453,69 @@ export const openInNewTab: InternalStateThunkActionCreator<
       };
     }
 
+    console.log('newDefaultTab', newDefaultTab);
+
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      searchSession: {
+        name: string;
+        restoreState: Record<string, unknown> & { searchSessionId: string };
+      };
+    }
+  ]
+> = ({ searchSession }) =>
+  async function openSearchSessionInNewTabThunkFn(dispatch, getState, { services }) {
+    const restoreState = searchSession.restoreState;
+
+    if (!restoreState.searchSessionId) {
+      return;
+    }
+
+    // TODO: support ad hoc data view in the search session
+    // if (restoreState.dataViewSpec) {
+    //   const dataView = await services.dataViews.create(restoreState.dataViewSpec);
+    //   dispatch(appendAdHocDataViews(dataView));
+    // }
+
+    const appState: Partial<DiscoverAppState> = {};
+    const globalState: GlobalQueryStateFromUrl = {};
+
+    // copied from app_locator_get_location.ts
+    if (restoreState.query) appState.query = restoreState.query;
+    if (restoreState.filters?.length)
+      appState.filters = restoreState.filters.filter((f) => !isFilterPinned(f));
+    if (restoreState.indexPatternId)
+      appState.dataSource = createDataViewDataSource({ dataViewId: restoreState.indexPatternId });
+    if (restoreState.dataViewId)
+      appState.dataSource = createDataViewDataSource({ dataViewId: restoreState.dataViewId });
+    if (isOfAggregateQueryType(restoreState.query)) appState.dataSource = createEsqlDataSource();
+    if (restoreState.columns) appState.columns = restoreState.columns;
+    if (restoreState.grid) appState.grid = restoreState.grid;
+    if (restoreState.savedQuery) appState.savedQuery = restoreState.savedQuery;
+    if (restoreState.sort) appState.sort = restoreState.sort;
+    if (restoreState.interval) appState.interval = restoreState.interval;
+    if (restoreState.timeRange) globalState.time = restoreState.timeRange;
+    if (restoreState.filters?.length)
+      globalState.filters = restoreState.filters.filter((f) => isFilterPinned(f));
+    if (restoreState.refreshInterval) globalState.refreshInterval = restoreState.refreshInterval;
+    if (restoreState.viewMode) appState.viewMode = restoreState.viewMode;
+    if (restoreState.hideAggregatedPreview)
+      appState.hideAggregatedPreview = restoreState.hideAggregatedPreview;
+    if (restoreState.breakdownField) appState.breakdownField = restoreState.breakdownField;
+
+    return dispatch(
+      openInNewTab({
+        tabLabel: searchSession.name,
+        searchSessionId: searchSession.restoreState.searchSessionId,
+        appState,
+        globalState,
+      })
     );
   };
 
