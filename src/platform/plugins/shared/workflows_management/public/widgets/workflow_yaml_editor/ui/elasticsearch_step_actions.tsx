@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { RunStepButton } from './run_step_button';
-import { selectFocusedStepInfo } from '../lib/state/state';
+import { selectFocusedStepInfo } from '../lib/state';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
 export interface ElasticsearchStepActionsProps {
