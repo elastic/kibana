@@ -62,7 +62,7 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
-  const isInlineStats = command.name === 'inlinestats';
+  const isInlineStats = command.name === 'inline stats';
 
   const columnExists = (name: string) => _columnExists(name, context);
 

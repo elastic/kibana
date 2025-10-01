@@ -552,6 +552,57 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       />
                     </EuiText>
                     <EuiSpacer size="m" />
+                    {agents.length === 1 && (
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                            defaultMessage="Replace token"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          fullWidth
+                          data-test-subj="migrateAgentFlyoutReplaceTokenInput"
+                          onChange={(e) => {
+                            if ('id' in formContent) {
+                              setFormContent({
+                                ...formContent,
+                                settings: {
+                                  ...formContent.settings,
+                                  replace_token: e.target.value,
+                                },
+                              });
+                            }
+                          }}
+                        />
+                      </EuiFormRow>
+                    )}
+
+                    {agents.length === 1 && <EuiSpacer size="m" />}
+
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                          defaultMessage="Staging"
+                        />
+                      }
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        fullWidth
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, staging: e.target.value },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="m" />
+
                     <EuiFormRow fullWidth>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
@@ -567,23 +618,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                               setFormContent({
                                 ...formContent,
                                 settings: { ...formContent.settings, insecure: e.target.checked },
-                              })
-                            }
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiSwitch
-                            label={
-                              <FormattedMessage
-                                id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
-                                defaultMessage="Staging"
-                              />
-                            }
-                            checked={formContent.settings?.staging ?? false}
-                            onChange={(e) =>
-                              setFormContent({
-                                ...formContent,
-                                settings: { ...formContent.settings, staging: e.target.checked },
                               })
                             }
                           />
@@ -612,37 +646,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                             }
                           />
                         </EuiFlexItem>
-                        {/* Replace token shouldnt be an option when bulk migrating */}
-                        {agents.length === 1 && (
-                          <EuiFlexItem>
-                            <EuiSwitch
-                              data-test-subj="migrateAgentFlyoutReplaceTokenButton"
-                              label={
-                                <FormattedMessage
-                                  id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                                  defaultMessage="Replace Token"
-                                />
-                              }
-                              checked={
-                                (
-                                  formContent.settings as MigrateSingleAgentRequest['body']['settings']
-                                )?.replace_token ?? false
-                              }
-                              onChange={(e) => {
-                                // Only allow setting replace_token when migrating a single agent
-                                if ('id' in formContent) {
-                                  setFormContent({
-                                    ...formContent,
-                                    settings: {
-                                      ...formContent.settings,
-                                      replace_token: e.target.checked,
-                                    },
-                                  });
-                                }
-                              }}
-                            />
-                          </EuiFlexItem>
-                        )}
                       </EuiFlexGroup>
                     </EuiFormRow>
                   </EuiAccordion>

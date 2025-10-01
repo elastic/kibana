@@ -15,8 +15,10 @@ import type { AggName } from '../../../../../../common/types/aggregations';
 
 import type { PivotGroupByConfig, PivotGroupByConfigWithUiSupportDict } from '../../../../common';
 import { isGroupByDateHistogram, isGroupByHistogram } from '../../../../common';
+import { transformLabelStyles, useIntervalButtonStyles } from '../../styles';
 
 import { PopoverForm } from './popover_form';
+import { groupByStyles } from './styles';
 
 interface Props {
   item: PivotGroupByConfig;
@@ -33,6 +35,7 @@ export const GroupByLabelForm: React.FC<Props> = ({
   onChange,
   options,
 }) => {
+  const intervalButtonStyles = useIntervalButtonStyles();
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
   function update(updateItem: PivotGroupByConfig) {
@@ -50,16 +53,13 @@ export const GroupByLabelForm: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem className="transform__GroupByLabel--text">
+      <EuiFlexItem css={transformLabelStyles}>
         <span className="eui-textTruncate" data-test-subj="transformGroupByEntryLabel">
           {item.aggName}
         </span>
       </EuiFlexItem>
       {interval !== undefined && (
-        <EuiFlexItem
-          grow={false}
-          className="transform__GroupByLabel--text transform__GroupByLabel--interval"
-        >
+        <EuiFlexItem grow={false} css={groupByStyles.interval}>
           <EuiTextColor
             color="subdued"
             className="eui-textTruncate"
@@ -69,7 +69,7 @@ export const GroupByLabelForm: React.FC<Props> = ({
           </EuiTextColor>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
+      <EuiFlexItem grow={false} css={intervalButtonStyles}>
         <EuiPopover
           id="transformIntervalFormPopover"
           ownFocus
@@ -95,7 +95,7 @@ export const GroupByLabelForm: React.FC<Props> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="transform__GroupByLabel--button">
+      <EuiFlexItem grow={false} css={intervalButtonStyles}>
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.transform.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',

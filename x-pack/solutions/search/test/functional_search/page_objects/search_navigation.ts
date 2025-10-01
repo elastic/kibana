@@ -45,10 +45,11 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
     async navigateToIndexDetailPage(indexName: string) {
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+      await solutionNavigation.sidenav.expectLinkExists({ navId: 'data_management' });
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'elasticsearchIndexManagement',
+        navId: 'data_management',
       });
+      await solutionNavigation.sidenav.clickPanelLink('management:index_management');
       const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');
       for (const indexNameLink of indexNamesList) {
         if ((await indexNameLink.getVisibleText()).includes(indexName)) {

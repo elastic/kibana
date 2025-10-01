@@ -36,7 +36,7 @@ export const useBreadcrumb = (breadcrumbs: OnechatBreadcrumb[]) => {
     return [
       {
         text: i18n.translate('xpack.onechat.breadcrumb.onechat', {
-          defaultMessage: 'Chat',
+          defaultMessage: 'Agent Builder',
         }),
         href: appUrl,
       },

@@ -11,6 +11,14 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
   defaultMessage: 'Name',
 });
 
+export const FAILURE_STORE_PERMISSIONS_ERROR = i18n.translate(
+  'xpack.streams.streamsTreeTable.failureStorePermissionsError',
+  {
+    defaultMessage:
+      'Does not include failed documents - user does not have access to failure store',
+  }
+);
+
 export const DOCUMENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.documentsColumnName',
   { defaultMessage: 'Documents' }
