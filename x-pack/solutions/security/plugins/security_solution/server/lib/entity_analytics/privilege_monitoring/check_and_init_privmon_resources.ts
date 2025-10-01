@@ -21,7 +21,13 @@ export const checkAndInitPrivilegeMonitoringResources = async (
   const securityContext = await context.securitySolution;
   const privilegeMonitoringDataClient = securityContext.getPrivilegeMonitoringDataClient();
   const privmonIndexService = createPrivmonIndexService(privilegeMonitoringDataClient);
+  await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
+};
 
+export const checkandInitPrivilegeMonitoringResourcesNoContext = async (
+  privmonIndexService: ReturnType<typeof createPrivmonIndexService>,
+  logger: Logger
+) => {
   const doesIndexExist = await privmonIndexService.doesIndexExist();
   if (!doesIndexExist) {
     logger.info('Privilege monitoring resources are not installed, initialising...');
