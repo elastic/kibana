@@ -506,12 +506,11 @@ export const getPackagePolicyDeleteCallback = (
       }
     }
 
-    // If Endpoint package policies were delete, then also ensure we update response actions to tag them as orphan
-    if (policiesToRemove.length > 0) {
-      policiesToRemove.push(
-        updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
-      );
-    }
+    // Add processing of setting response actions to orphan for integrations (ex. Crowdstrike,
+    // SentinelOne, etc) that support response actions
+    policiesToRemove.push(
+      updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
+    );
 
     await Promise.all(policiesToRemove);
 
