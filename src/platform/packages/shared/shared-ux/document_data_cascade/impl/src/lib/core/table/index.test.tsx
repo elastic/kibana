@@ -161,7 +161,7 @@ describe('table', () => {
           "rowChildren",
           "rowChildrenCount",
           "rowVisibleCells",
-          "rowIsSelected",
+          "isRowSelected",
           "rowHasSelectedChildren",
           "rowCanSelect",
           "rowSelectionFn",
