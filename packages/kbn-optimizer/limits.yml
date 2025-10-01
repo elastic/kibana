@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6917
+  aiAssistantManagementSelection: 8988
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -38,7 +38,7 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 29533
   devTools: 13451
-  discover: 25000
+  discover: 26000
   discoverEnhanced: 10290
   discoverShared: 2322
   elasticAssistant: 338870
@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 13323
+  esql: 14000
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
-  genAiSettings: 4981
+  genAiSettings: 5003
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3074
+  productDocBase: 3083
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -162,10 +162,9 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67975
-  streams: 8494
-  streamsApp: 15500
-  streamsAppWrapper: 5787
+  stackConnectors: 68502
+  streams: 9000
+  streamsApp: 17000
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522

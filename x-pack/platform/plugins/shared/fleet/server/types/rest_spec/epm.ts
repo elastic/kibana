@@ -130,6 +130,7 @@ export const InstallationInfoSchema = schema.object({
     })
   ),
   previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+  rolled_back: schema.maybe(schema.boolean()),
 });
 
 const PackageIconSchema = schema.object({

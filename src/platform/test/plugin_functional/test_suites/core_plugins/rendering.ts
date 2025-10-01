@@ -226,7 +226,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
-        'xpack.cases.unsafe.enableCaseSummary (boolean?)',
+        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -384,13 +384,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
-        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'xpack.observabilityShared.unsafe.investigativeExperienceEnabled (boolean?)',
         'xpack.observability.managedOtlpServiceUrl (string?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
         'xpack.genAiSettings.showSpacesIntegration (boolean?)',
+        'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
         /**
          * Rule form V2 feature flags
          */
