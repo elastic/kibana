@@ -89,14 +89,7 @@ export function DiscoverFlyoutStreamProcessingLink({
                 margin-left: ${euiTheme.size.s};
               `}
             />
-            <EuiText
-              size="xs"
-              css={css`
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-              `}
-            >
+            <EuiText size="xs" className="eui-textTruncate">
               {message}
             </EuiText>
           </EuiFlexGroup>
