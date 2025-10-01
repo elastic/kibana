@@ -21,16 +21,16 @@ type ChangeHandler<T> = (state: T) => void;
 type SetStateFn<T> = Dispatch<SetStateAction<T>>;
 
 export function useControllableState<T>(params: {
-  prop?: T;
+  value?: T;
   onChange?: ChangeHandler<T>;
   defaultValue?: T;
 }): [T, SetStateFn<T>];
 export function useControllableState<T>({
-  prop,
+  value,
   onChange,
   defaultValue,
 }: {
-  prop?: T;
+  value?: T;
   onChange?: ChangeHandler<T | undefined>;
   defaultValue?: undefined;
 }): [T | undefined, SetStateFn<T | undefined>] {
@@ -38,22 +38,22 @@ export function useControllableState<T>({
     initialValue: defaultValue,
     onChange,
   });
-  const isControlled = prop !== undefined && !!onChange;
-  const value = isControlled ? prop : internalState;
+  const isControlled = value !== undefined && !!onChange;
+  const selectedValue = isControlled ? value : internalState;
 
   const setValue = useCallback<SetStateFn<T | undefined>>(
     (nextValue) => {
       if (onChangeRef.current) {
-        const newValue = isFunction(nextValue) ? nextValue(prop) : nextValue;
+        const newValue = isFunction(nextValue) ? nextValue(value) : nextValue;
         onChangeRef.current(newValue);
       } else {
         setInternalState(nextValue);
       }
     },
-    [prop, onChangeRef, setInternalState]
+    [value, onChangeRef, setInternalState]
   );
 
-  return [value, setValue] as const;
+  return [selectedValue, setValue] as const;
 }
 
 function useInternalState<T>({

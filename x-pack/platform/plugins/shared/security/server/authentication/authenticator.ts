@@ -52,6 +52,7 @@ import {
   SessionUnexpectedError,
   type SessionValue,
 } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
@@ -95,6 +96,7 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  uiam?: UiamServicePublic;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
@@ -239,6 +241,7 @@ export class Authenticator {
       }),
       getServerBaseURL: this.options.getServerBaseURL,
       isElasticCloudDeployment: this.options.isElasticCloudDeployment,
+      uiam: this.options.uiam,
     };
 
     this.providers = new Map(

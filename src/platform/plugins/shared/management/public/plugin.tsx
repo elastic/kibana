@@ -8,10 +8,11 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -40,11 +41,14 @@ import type { ManagementSection } from './utils';
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
   share: SharePluginSetup;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
 }
 
 interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  licensing?: LicensingPluginStart;
 }
 
 export class ManagementPlugin
@@ -88,7 +92,7 @@ export class ManagementPlugin
 
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
-    { home, share }: ManagementSetupDependencies
+    { home, share, cloud }: ManagementSetupDependencies
   ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
@@ -125,10 +129,18 @@ export class ManagementPlugin
         const [coreStart, deps] = await core.getStartServices();
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
+        // Check if user has enterprise license
+        const license = deps.licensing
+          ? await deps.licensing.license$.pipe(take(1)).toPromise()
+          : null;
+        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
+
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           coreStart,
+          cloud: deps.cloud,
+          hasEnterpriseLicense,
           setBreadcrumbs: (newBreadcrumbs) => {
             if (deps.serverless) {
               // drop the root management breadcrumb in serverless because it comes from the navigation tree
