@@ -100,6 +100,7 @@ export const selectConnector = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).click();
   cy.get(CONNECTOR_SELECT(connectorName)).click();
   assertConnectorSelected(connectorName);
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(2000);
 };
 export const resetConversation = () => {
