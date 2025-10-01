@@ -12,7 +12,7 @@ describe('utils', () => {
   describe('prepareAdditionalFieldsForCreation', () => {
     it('transforms additional fields correctly', () => {
       const additionalFields = {
-        // custom fields
+        // custom fields on root
         customField1: 'customValue1',
         test_text: 'some text',
         test_text_area: 'some textarea',
@@ -39,6 +39,36 @@ describe('utils', () => {
         },
         resolution_summary: 'some resolution summary',
       });
+      const additionalFields2 = {
+        // custom fields in `properties`
+        properties: {
+          customField1: 'customValue1',
+          test_text: 'some text',
+          test_text_area: 'some textarea',
+          test_boolean: true,
+          test_number: 123,
+          test_select: 100,
+          test_multi_select: [100, 110],
+          test_date_picker: 943983345345,
+          test_date_time_picker: 943983345345,
+        },
+        // non custom field
+        resolution_summary: 'some resolution summary',
+      };
+      expect(prepareAdditionalFieldsForCreation(resilientFields, additionalFields2)).toEqual({
+        properties: {
+          customField1: 'customValue1',
+          test_boolean: true,
+          test_date_picker: 943983345345,
+          test_date_time_picker: 943983345345,
+          test_multi_select: [100, 110],
+          test_number: 123,
+          test_select: 100,
+          test_text: 'some text',
+          test_text_area: 'some textarea',
+        },
+        resolution_summary: 'some resolution summary',
+      });
     });
 
     it('throws an error for invalid values in `select` fields', () => {
@@ -51,6 +81,15 @@ describe('utils', () => {
           1337
         ]. Accepted values: 100 (for \\"Option 1\\"),110 (for \\"Option 2\\"),120 (for \\"Option 3\\"),130 (for \\"Option 4\\")"
       `);
+    });
+
+    it('should not throw for unknown fields', () => {
+      const additionalFields = {
+        unknown123: 'field',
+      };
+      expect(prepareAdditionalFieldsForCreation(resilientFields, additionalFields)).toEqual({
+        unknown123: 'field',
+      });
     });
 
     it('throws an error for invalid values in `multiselect` fields', () => {

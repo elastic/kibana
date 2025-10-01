@@ -190,10 +190,12 @@ export function prepareAdditionalFieldsForCreation(
   fields: ResilientFieldMeta[],
   additionalFields: NonNullable<Incident['additionalFields']>
 ): Partial<CreateIncidentData> {
+  const { properties, ...rest } = additionalFields;
+  const flattenedAdditionalFields = { ...(properties ?? {}), ...rest };
   const data: Partial<CreateIncidentData> = {};
   const fieldsMetaData = transformFieldMetadataToRecord(fields);
 
-  Object.entries(additionalFields).forEach(([key, value]) => {
+  Object.entries(flattenedAdditionalFields).forEach(([key, value]) => {
     const fieldMeta = fieldsMetaData[key];
 
     // validate `select` and `multiselect` values
@@ -202,7 +204,7 @@ export function prepareAdditionalFieldsForCreation(
     }
 
     // Some fields need to be prefixed
-    if (fieldMeta.prefix) {
+    if (fieldMeta && fieldMeta.prefix) {
       if (!data[fieldMeta.prefix]) {
         data[fieldMeta.prefix] = {};
       }
