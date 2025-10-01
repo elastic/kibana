@@ -21,9 +21,7 @@ export const filterMetaObjectSchema = schema.object(
     params: schema.maybe(filterMetaParamsSchema),
     value: schema.maybe(schema.string()),
   },
-  {
-    meta: { id: 'filterMetaSchema' },
-  }
+  { meta: { id: 'filterMetaSchema' } }
 );
 
 export const filterMetaSchema = schema.lazy('filterMetaSchema');

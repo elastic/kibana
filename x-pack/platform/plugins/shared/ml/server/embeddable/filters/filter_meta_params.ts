@@ -17,24 +17,8 @@ const rangeFilterMetaId = 'rangeFilterMetaId';
 export const serializableSchema = schema.lazy<Serializable>(serializableId);
 
 const serializableRecordObjectSchema = schema.object(
-  {
-    value: schema.recordOf(schema.string(), serializableSchema),
-  },
+  { value: schema.recordOf(schema.string(), serializableSchema) },
   { meta: { id: serializableRecordId } }
-);
-
-export const serializableObjectSchema = schema.object(
-  {
-    value: schema.oneOf([
-      schema.string(),
-      schema.number(),
-      schema.boolean(),
-      schema.nullable(schema.any()),
-      schema.arrayOf(serializableSchema),
-      schema.recordOf(schema.string(), serializableSchema),
-    ]),
-  },
-  { meta: { id: serializableId } }
 );
 
 export const rangeFilterParamsSchema = schema.object({
@@ -66,38 +50,27 @@ export const phraseFilterValueSchema = schema.oneOf([
 
 const phraseFilterMetaSchema = schema.object({
   ...filterMetaObjectSchema.getPropSchemas(),
-  params: schema.maybe(
-    schema.object({
-      query: schema.maybe(phraseFilterValueSchema),
-    })
-  ),
+  params: schema.maybe(schema.object({ query: schema.maybe(phraseFilterValueSchema) })),
   field: schema.maybe(schema.string()),
   index: schema.maybe(schema.string()),
 });
-
 const phraseFilterMetaParamsId = 'phraseFilterMetaParamsSchema';
-
 export const phraseFilterMetaParamsSchema = schema.object(
-  {
-    query: phraseFilterValueSchema,
-    values: serializableRecordObjectSchema,
-  },
+  { query: phraseFilterValueSchema, values: serializableRecordObjectSchema },
   { meta: { id: phraseFilterMetaParamsId } }
 );
-
 const phrasesFilterMetaSchema = schema.object({
   ...filterMetaObjectSchema.getPropSchemas(),
   params: schema.maybe(schema.arrayOf(phraseFilterValueSchema)),
   field: schema.maybe(schema.string()),
 });
-
 const matchAllFilterMetaSchema = schema.object({
   ...filterMetaObjectSchema.getPropSchemas(),
   values: schema.recordOf(schema.string(), serializableSchema),
   field: schema.string(),
   formattedValue: schema.string(),
 });
-
+// final params wrapper
 const filterMetaParamsId = 'filterMetaParamsId';
 
 export const filterMetaParamsObjectSchema = schema.object(
