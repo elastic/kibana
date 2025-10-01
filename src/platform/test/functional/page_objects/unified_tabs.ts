@@ -37,6 +37,16 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
+  public async getTabUnsavedIndicatorTestSubj(
+    tabElement: WebElementWrapper | undefined
+  ): Promise<string> {
+    const tab = (await tabElement?.getAttribute('data-test-subj')) || '';
+    const tabId = tab.replace(/^unifiedTabs_tab_/, '');
+    const tabChangesIndicator = `unifiedTabs__tabChangesIndicator-${tabId}`;
+
+    return tabChangesIndicator;
+  }
+
   public async getTabWidths() {
     const tabElements = await this.getTabElements();
     return await Promise.all(
@@ -284,5 +294,12 @@ export class UnifiedTabsPageObject extends FtrService {
       });
     }
     await this.closeTabsBarMenu();
+  }
+
+  public async closeAllTabs() {
+    const numberOfTabs = await this.getNumberOfTabs();
+    for (let i = numberOfTabs - 1; i > 0; i--) {
+      await this.closeTab(i);
+    }
   }
 }

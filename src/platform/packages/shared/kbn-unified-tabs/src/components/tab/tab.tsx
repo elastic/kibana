@@ -235,7 +235,13 @@ export const Tab: React.FC<TabProps> = (props) => {
                     title=""
                   />
                 </EuiText>
-                {isUnsaved && <EuiIcon type="dot" title={unsavedChangesIndicatorTitle} />}
+                {isUnsaved && (
+                  <EuiIcon
+                    data-test-subj={`unifiedTabs__tabChangesIndicator-${item.id}`}
+                    type="dot"
+                    title={unsavedChangesIndicatorTitle}
+                  />
+                )}
               </EuiFlexGroup>
             </div>
           )}
