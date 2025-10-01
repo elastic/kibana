@@ -73,8 +73,7 @@ export const createInitialisationService = (
 
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
-      await IndexService.createIngestPipelineIfDoesNotExist();
-      await IndexService.upsertIndex();
+      await IndexService.initialisePrivmonIndex();
 
       if (deps.apiKeyManager) {
         await deps.apiKeyManager.generate();
