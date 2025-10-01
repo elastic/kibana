@@ -24,12 +24,12 @@ export type NodeType = 'host' | 'pod';
 
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
-    return 'Serverless (fully-managed projects)';
+    return 'Serverless';
   }
   if (isCloudEnv) {
-    return 'Elastic Cloud (we manage)';
+    return 'Elastic Cloud';
   }
-  return 'Self-Managed (you manage)';
+  return 'Self-Managed';
 };
 
 const getMLJobType = (mlJobType: NodeType) =>

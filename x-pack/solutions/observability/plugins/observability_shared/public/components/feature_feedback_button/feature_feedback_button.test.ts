@@ -25,7 +25,7 @@ describe('getSurveyFeedbackURL', () => {
 
   it('should append deployment type parameter correctly for cloud', () => {
     const isCloudEnv = true;
-    const expectedUrl = `${formUrl}?deployment_type=Elastic+Cloud+%28we+manage%29`;
+    const expectedUrl = `${formUrl}?deployment_type=Elastic+Cloud`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, isCloudEnv });
     expect(actualUrl).toBe(expectedUrl);
   });
@@ -55,7 +55,7 @@ describe('getSurveyFeedbackURL', () => {
     const kibanaVersion = '8.0.0';
     const sanitizedPath = '/path/to/something';
     const isCloudEnv = true;
-    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Elastic+Cloud+%28we+manage%29&path=%2Fpath%2Fto%2Fsomething`;
+    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Elastic+Cloud&path=%2Fpath%2Fto%2Fsomething`;
     const actualUrl = getSurveyFeedbackURL({ formUrl, kibanaVersion, sanitizedPath, isCloudEnv });
     expect(actualUrl).toBe(expectedUrl);
   });
@@ -64,7 +64,7 @@ describe('getSurveyFeedbackURL', () => {
     const kibanaVersion = '8.0.0';
     const sanitizedPath = '/path/to/something';
     const isServerlessEnv = true;
-    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Serverless+%28fully-managed+projects%29&path=%2Fpath%2Fto%2Fsomething`;
+    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Serverless&path=%2Fpath%2Fto%2Fsomething`;
     const actualUrl = getSurveyFeedbackURL({
       formUrl,
       kibanaVersion,
@@ -79,7 +79,7 @@ describe('getSurveyFeedbackURL', () => {
     const isServerlessEnv = false;
     const isCloudEnv = false;
     const sanitizedPath = '/path/to/something';
-    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Self-Managed+%28you+manage%29&path=%2Fpath%2Fto%2Fsomething`;
+    const expectedUrl = `${formUrl}?version=8.0.0&deployment_type=Self-Managed&path=%2Fpath%2Fto%2Fsomething`;
     const actualUrl = getSurveyFeedbackURL({
       formUrl,
       kibanaVersion,
