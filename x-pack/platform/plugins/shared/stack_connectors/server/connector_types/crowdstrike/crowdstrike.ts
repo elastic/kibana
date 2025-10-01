@@ -13,7 +13,8 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import { CrowdStrikeTokenManager } from './token_manager';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { isAggregateError, NodeSystemError } from './types';
+import type { NodeSystemError } from './types';
+import {isAggregateError} from './types'
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -59,7 +60,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
   private experimentalFeatures: ExperimentalFeatures;
   private crowdStrikeSessionManager: CrowdStrikeSessionManager;
   private urls: {
-    getToken: string;
     agents: string;
     hostAction: string;
     agentStatus: string;
@@ -78,7 +78,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
     super(params);
     this.experimentalFeatures = experimentalFeatures;
     this.urls = {
-      getToken: `${this.config.url}/oauth2/token`,
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
@@ -375,7 +374,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   // TODO: for now just for testing purposes, will be a part of a following PR
   public async getRTRCloudScripts(
-    payload: CrowdstrikeGetAgentsParams,
     _payload: {},
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
