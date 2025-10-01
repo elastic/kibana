@@ -429,7 +429,8 @@ export function buildComponentTemplates(params: {
       isTimeSeriesEnabledByDefault);
 
   const isPkgConfiguringSubobjects =
-    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.subobjects !== undefined;
+    Object.keys(mappingsRuntimeFields).length > 0 ||
+    indexTemplateMappings?.subobjects !== undefined;
 
   // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
   // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
@@ -475,7 +476,7 @@ export function buildComponentTemplates(params: {
     _meta,
   };
 
-  console.dir(templatesMap[packageTemplateName], {depth: null});
+  console.dir(templatesMap[packageTemplateName], { depth: null });
 
   // Stub custom template
   if (type) {

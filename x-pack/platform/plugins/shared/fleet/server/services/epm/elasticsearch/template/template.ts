@@ -129,7 +129,7 @@ export function getTemplate({
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
-    ...(isOtelInputType? []: [STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS]),
+    ...(isOtelInputType ? [] : [STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS]),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
@@ -143,7 +143,11 @@ export function getTemplate({
   return template;
 }
 
-const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean, isOTelInputType?: boolean): string[] => {
+const getBaseEsComponents = (
+  type: string,
+  isIndexModeTimeSeries: boolean,
+  isOTelInputType?: boolean
+): string[] => {
   if (isOTelInputType) {
     return getOtelBaseComponents(type);
   }
