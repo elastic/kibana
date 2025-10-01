@@ -10,7 +10,7 @@
 import type { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
-import { buildWorkflowLookup } from '../build_workflow_lookup';
+import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
 import { clearComputedData, _setComputedDataInternal } from '../slice';

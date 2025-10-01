@@ -9,7 +9,7 @@
 
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
-import type { WorkflowLookup } from './build_workflow_lookup';
+import type { WorkflowLookup } from './utils/build_workflow_lookup';
 
 // State interface - only serializable data
 export interface WorkflowEditorState {

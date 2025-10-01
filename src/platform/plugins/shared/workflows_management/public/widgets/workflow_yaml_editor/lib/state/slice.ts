@@ -10,7 +10,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
-import type { WorkflowLookup } from './build_workflow_lookup';
+import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowEditorState } from './types';
 import { findStepByLine } from './utils/step_finder';
 
