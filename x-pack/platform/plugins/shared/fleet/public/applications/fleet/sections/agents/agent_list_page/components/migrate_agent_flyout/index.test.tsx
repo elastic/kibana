@@ -195,10 +195,10 @@ describe('MigrateAgentFlyout', () => {
         ]}
       />
     );
-    
+
     const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
     expect(alertPanel).toBeInTheDocument();
-    
+
     // Check that the warning message includes containerized agents
     expect(alertPanel).toHaveTextContent(
       'tamper protected, Fleet Server agents, containerized agents, or unsupported version'

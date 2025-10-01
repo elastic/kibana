@@ -32,7 +32,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should return true for agents with supported version and upgradeable=true', () => {
     const agent = createMockAgent({
-      agent: { version: '9.2.0' },
+      agent: { id: 'test-agent', version: '9.2.0' },
       local_metadata: {
         elastic: {
           agent: {
@@ -48,7 +48,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should return true for agents with higher version and upgradeable=true', () => {
     const agent = createMockAgent({
-      agent: { version: '9.3.0' },
+      agent: { id: 'test-agent', version: '9.3.0' },
       local_metadata: {
         elastic: {
           agent: {
@@ -64,7 +64,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should return false for agents with unsupported version', () => {
     const agent = createMockAgent({
-      agent: { version: '9.1.0' },
+      agent: { id: 'test-agent', version: '9.1.0' },
       local_metadata: {
         elastic: {
           agent: {
@@ -80,7 +80,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should return false for containerized agents (upgradeable=false)', () => {
     const agent = createMockAgent({
-      agent: { version: '9.2.0' },
+      agent: { id: 'test-agent', version: '9.2.0' },
       local_metadata: {
         elastic: {
           agent: {
@@ -96,7 +96,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should return true for agents without local_metadata (backwards compatibility)', () => {
     const agent = createMockAgent({
-      agent: { version: '9.2.0' },
+      agent: { id: 'test-agent', version: '9.2.0' },
       local_metadata: undefined,
     });
 
@@ -135,7 +135,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should handle missing local_metadata.elastic.agent gracefully', () => {
     const agent = createMockAgent({
-      agent: { version: '9.2.0' },
+      agent: { id: 'test-agent', version: '9.2.0' },
       local_metadata: {
         elastic: {},
       },
@@ -146,7 +146,7 @@ describe('isAgentMigrationSupported', () => {
 
   it('should handle missing local_metadata.elastic gracefully', () => {
     const agent = createMockAgent({
-      agent: { version: '9.2.0' },
+      agent: { id: 'test-agent', version: '9.2.0' },
       local_metadata: {},
     });
 
