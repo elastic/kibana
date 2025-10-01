@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { FakeRawRequest, Headers } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { LockManagerService } from '@kbn/lock-manager';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import type { StreamsClient } from '../../streams/client';
 import { StreamsClient as StreamsClientClass } from '../../streams/client';
 import { AssetClient } from '../../streams/assets/asset_client';
 import { SystemClient } from '../../streams/system/system_client';
 import { QueryClient } from '../../streams/assets/query/query_client';
+import type { AssetStorageSettings } from '../../streams/assets/storage_settings';
 import { assetStorageSettings } from '../../streams/assets/storage_settings';
+import type { SystemStorageSettings } from '../../streams/system/storage_settings';
 import { systemStorageSettings } from '../../streams/system/storage_settings';
 import { streamsStorageSettings } from '../../streams/service';
 import { migrateOnRead } from '../../streams/helpers/migrate_on_read';
 import { registerStreamsUsageCollector } from './streams_usage_collector';
+import type { StoredAssetLink } from '../../streams/assets/asset_client';
+import type { StoredSystem } from '../../streams/system/stored_system';
 
 /**
  * Service for collecting Streams usage statistics for telemetry
@@ -81,9 +87,10 @@ export class StatsTelemetryService {
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     // Create a mock scoped cluster client that uses internal user
-    const mockScopedClusterClient = {
+    const mockScopedClusterClient: IScopedClusterClient = {
       asCurrentUser: internalClusterClient,
       asInternalUser: internalClusterClient,
+      asSecondaryAuthUser: internalClusterClient,
     };
 
     const storageAdapter = new StorageIndexAdapter(
@@ -102,7 +109,7 @@ export class StatsTelemetryService {
       queryClient,
       systemClient,
       logger,
-      scopedClusterClient: mockScopedClusterClient as any,
+      scopedClusterClient: mockScopedClusterClient,
       lockManager: new LockManagerService(core, logger),
       storageClient: storageAdapter.getClient(),
       request: mockRequest,
@@ -126,7 +133,7 @@ export class StatsTelemetryService {
     const mockRulesClient = this.createReadOnlyMockRulesClient('AssetClient');
 
     return new AssetClient({
-      storageClient: adapter.getClient() as any,
+      storageClient: adapter.getClient() as IStorageClient<AssetStorageSettings, StoredAssetLink>,
       soClient: coreStart.savedObjects.createInternalRepository(),
       rulesClient: mockRulesClient,
     });
@@ -145,7 +152,7 @@ export class StatsTelemetryService {
     );
 
     return new SystemClient({
-      storageClient: adapter.getClient() as any,
+      storageClient: adapter.getClient() as IStorageClient<SystemStorageSettings, StoredSystem>,
     });
   }
 
@@ -154,7 +161,7 @@ export class StatsTelemetryService {
    */
   private async createMinimalQueryClient(
     core: CoreSetup<StreamsPluginStartDependencies>,
-    assetClient: any
+    assetClient: AssetClient
   ) {
     const isSignificantEventsEnabled = false; // Default to false for telemetry
 
@@ -179,7 +186,12 @@ export class StatsTelemetryService {
    *
    * @param clientType - The type of client using this mock (for logging context)
    */
-  private createReadOnlyMockRulesClient(clientType: string) {
+  private createReadOnlyMockRulesClient(clientType: string): RulesClient {
+    const unimpl = (name: string) => () => {
+      const error = `${name} not supported in read-only telemetry mode (${clientType})`;
+      this.logger.warn(`[Telemetry:${clientType}] ${error}`);
+      throw new Error(error);
+    };
     return {
       // AssetClient uses this - return "not found" error (handled gracefully)
       get: async ({ id }: { id: string }) => {
@@ -200,7 +212,13 @@ export class StatsTelemetryService {
         this.logger.warn(`[Telemetry:${clientType}] ${error} - attempted to update rule: ${id}`);
         throw new Error(error);
       },
-    } as any;
+
+      aggregate: unimpl('aggregate'),
+      clone: unimpl('clone'),
+      delete: unimpl('delete'),
+      find: unimpl('find'),
+      resolve: unimpl('resolve'),
+    } as unknown as RulesClient;
   }
 
   /**

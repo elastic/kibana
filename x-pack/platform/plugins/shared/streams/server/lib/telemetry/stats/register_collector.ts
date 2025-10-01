@@ -6,6 +6,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { StreamsStatsTelemetry } from './types';
 import { streamsStatsSchema } from './schema';
 
@@ -17,7 +18,7 @@ export function registerStreamsUsageCollector(
   usageCollection: UsageCollectionSetup,
   collectorOptions: {
     isReady: () => boolean;
-    fetch: (context: { esClient: any }) => Promise<StreamsStatsTelemetry>;
+    fetch: (context: { esClient: ElasticsearchClient }) => Promise<StreamsStatsTelemetry>;
   }
 ) {
   const streamsUsageCollector = usageCollection.makeUsageCollector<StreamsStatsTelemetry>({

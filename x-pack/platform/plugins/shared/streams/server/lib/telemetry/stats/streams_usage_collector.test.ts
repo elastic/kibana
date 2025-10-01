@@ -8,6 +8,9 @@
 import { registerStreamsUsageCollector } from './streams_usage_collector';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamsClient } from '../../streams/client';
+import type { ResponseError } from '@elastic/transport/lib/errors';
 
 const mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
 const esClient = mockEsClient.asInternalUser;
@@ -15,7 +18,7 @@ const mockLogger = loggingSystemMock.createLogger();
 const mockGetStreamsClient = async () => {
   return {
     listStreams: jest.fn().mockResolvedValue([]),
-  } as any;
+  } as unknown as jest.Mocked<StreamsClient>;
 };
 
 describe('Streams Usage Collector', () => {
@@ -45,7 +48,7 @@ describe('Streams Usage Collector', () => {
         took: 1,
         timed_out: false,
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-      } as any);
+      } as SearchResponse);
 
       registerStreamsUsageCollector(usageCollectionMock, mockLogger, mockGetStreamsClient, false);
       const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
@@ -133,24 +136,24 @@ describe('Streams Usage Collector', () => {
               },
             },
           ]),
-        } as any;
+        } as unknown as jest.Mocked<StreamsClient>;
       };
 
       // Mock search calls - for rules, significant events, and event log (no longer need .kibana_streams)
-      esClient.search.mockImplementation(async (params: any) => {
+      esClient.search.mockImplementation(async (params) => {
         const baseResponse = {
           took: 1,
           timed_out: false,
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         };
-        if (params.index === '.kibana*') {
+        if (params?.index === '.kibana*') {
           // Mock rules count
           return {
             ...baseResponse,
             hits: { hits: [], total: { value: 5, relation: 'eq' } },
-          } as any;
+          } as SearchResponse;
         }
-        if (params.index === '.alerts-streams.alerts-*') {
+        if (params?.index === '.alerts-streams.alerts-*') {
           return {
             ...baseResponse,
             hits: { hits: [], total: { value: 123, relation: 'eq' } },
@@ -162,9 +165,9 @@ describe('Streams Usage Collector', () => {
                 ],
               },
             },
-          } as any;
+          } as SearchResponse;
         }
-        if (params.index === '.kibana-event-log-*') {
+        if (params?.index === '.kibana-event-log-*') {
           return {
             ...baseResponse,
             hits: {
@@ -174,12 +177,12 @@ describe('Streams Usage Collector', () => {
                 { _source: { event: { duration: 3e6 } } }, // 3ms
               ],
             },
-          } as any;
+          } as SearchResponse;
         }
         return {
           ...baseResponse,
           hits: { hits: [], total: { value: 0, relation: 'eq' } },
-        } as any;
+        } as SearchResponse;
       });
 
       registerStreamsUsageCollector(
@@ -217,13 +220,17 @@ describe('Streams Usage Collector', () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
       // Mock circuit breaker error - create proper Error object
-      const circuitBreakerError = new Error('Circuit breaker error');
-      (circuitBreakerError as any).meta = {
+      const circuitBreakerError = new Error('Circuit breaker error') as ResponseError;
+      circuitBreakerError.meta = {
         body: {
           error: {
             type: 'circuit_breaking_exception',
           },
         },
+        statusCode: 429,
+        headers: {},
+        warnings: [],
+        meta: {} as ResponseError['meta']['meta'],
       };
       esClientMock.search.mockRejectedValue(circuitBreakerError);
 
@@ -245,13 +252,17 @@ describe('Streams Usage Collector', () => {
       const esClientMock2 = elasticsearchServiceMock.createElasticsearchClient();
 
       // Mock too long HTTP line error - create proper Error object
-      const httpLineError = new Error('HTTP line too long');
-      (httpLineError as any).meta = {
+      const httpLineError = new Error('HTTP line too long') as ResponseError;
+      httpLineError.meta = {
         body: {
           error: {
             type: 'too_long_http_line_exception',
           },
         },
+        statusCode: 414,
+        headers: {},
+        warnings: [],
+        meta: {} as ResponseError['meta']['meta'],
       };
       esClientMock2.search.mockRejectedValue(httpLineError);
 

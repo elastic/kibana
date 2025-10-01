@@ -8,7 +8,8 @@
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { Streams } from '@kbn/streams-schema';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsClient } from '../../streams/client';
 import { hasChangedRetention, percentiles } from './utils';
 import type { StreamsStatsTelemetry } from './types';
@@ -22,7 +23,7 @@ function createFetchFunction(
   return async function fetchStreamsUsageStats({
     esClient,
   }: {
-    esClient: any;
+    esClient: ElasticsearchClient;
   }): Promise<StreamsStatsTelemetry> {
     try {
       const streamsClient = await getStreamsClient();
@@ -63,7 +64,7 @@ function createFetchFunction(
     let withChangedRetentionCount = 0;
     let wiredCount = 0;
 
-    const streamsCache = new Map();
+    const streamsCache = new Map<string, Streams.all.Definition>();
 
     for (const definition of streamDefinitions) {
       if (Streams.WiredStream.Definition.is(definition)) {
@@ -101,7 +102,7 @@ function createFetchFunction(
     };
   }
 
-  async function fetchSignificantEventsMetrics(esClient: any) {
+  async function fetchSignificantEventsMetrics(esClient: ElasticsearchClient) {
     const [rulesCount, eventsData] = await Promise.all([
       fetchSignificantEventRulesCount(esClient),
       fetchSignificantEventsData(esClient),
@@ -113,7 +114,7 @@ function createFetchFunction(
     };
   }
 
-  async function fetchSignificantEventRulesCount(esClient: any) {
+  async function fetchSignificantEventRulesCount(esClient: ElasticsearchClient) {
     const rulesCountResponse = await esClient.search({
       index: '.kibana*',
       size: 0,
@@ -128,10 +129,10 @@ function createFetchFunction(
       track_total_hits: true,
     });
 
-    return (rulesCountResponse.hits?.total as any)?.value ?? 0;
+    return (rulesCountResponse.hits?.total as { value: number })?.value ?? 0;
   }
 
-  async function fetchSignificantEventsData(esClient: any) {
+  async function fetchSignificantEventsData(esClient: ElasticsearchClient) {
     const significantEventsResponse = await esClient.search({
       index: '.alerts-streams.alerts-*',
       size: 0,
@@ -162,19 +163,21 @@ function createFetchFunction(
       track_total_hits: true,
     });
 
-    const storedCount = (significantEventsResponse.hits?.total as any)?.value ?? 0;
-    const streamTagsAgg = significantEventsResponse.aggregations?.by_stream_tags as any;
+    const storedCount = (significantEventsResponse.hits?.total as { value: number })?.value ?? 0;
+    const streamTagsAgg = significantEventsResponse.aggregations?.by_stream_tags as {
+      buckets: Array<{ key: string }>;
+    };
     const streamTags = streamTagsAgg?.buckets || [];
 
     return {
       stored_count: storedCount,
-      stream_tags: streamTags.map((bucket: any) => bucket.key),
+      stream_tags: streamTags.map((bucket) => bucket.key),
     };
   }
 
   async function categorizeSignificantEvents(
-    significantEventsMetrics: any,
-    streamsCache: Map<string, any>
+    significantEventsMetrics: { rules_count: number; stored_count: number; stream_tags: string[] },
+    streamsCache: Map<string, Streams.all.Definition>
   ) {
     const { stored_count: storedCount, stream_tags: streamTags } = significantEventsMetrics;
 
@@ -200,7 +203,10 @@ function createFetchFunction(
     };
   }
 
-  function categorizeStreamsByTypeFromCache(streamNames: string[], streamsCache: Map<string, any>) {
+  function categorizeStreamsByTypeFromCache(
+    streamNames: string[],
+    streamsCache: Map<string, Streams.all.Definition>
+  ) {
     let wiredCount = 0;
     let classicCount = 0;
 
@@ -225,9 +231,11 @@ function createFetchFunction(
     };
   }
 
-  async function fetchRuleExecutionMetrics(esClient: any) {
+  async function fetchRuleExecutionMetrics(esClient: ElasticsearchClient) {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const eventLogResponse = await esClient.search({
+    const eventLogResponse = await esClient.search<{
+      event: { duration: number | string };
+    }>({
       index: '.kibana-event-log-*',
       size: 10000,
       query: {
@@ -265,22 +273,24 @@ function createFetchFunction(
     };
   }
 
-  function hasProcessingSteps(definition: any): boolean {
+  function hasProcessingSteps(definition: Streams.ClassicStream.Definition): boolean {
     const processors = definition.ingest?.processing?.steps as unknown[] | undefined;
     return Array.isArray(processors) && processors.length > 0;
   }
 
-  function hasFieldOverrides(definition: any): boolean {
+  function hasFieldOverrides(definition: Streams.ClassicStream.Definition): boolean {
     const fieldOverrides = definition.ingest?.classic?.field_overrides ?? {};
     return fieldOverrides && Object.keys(fieldOverrides).length > 0;
   }
 
-  function extractValidDurations(hits: any[]): number[] {
+  function extractValidDurations(
+    hits: Array<SearchHit<{ event: { duration: number | string } }>>
+  ): number[] {
     return hits
-      .map((hit: any) => (hit._source as any)?.event?.duration)
-      .filter((v: any) => v != null)
-      .map((v: any) => (typeof v === 'string' ? parseInt(v, 10) : v))
-      .filter((v: any) => typeof v === 'number' && !isNaN(v));
+      .map((hit) => hit._source?.event?.duration)
+      .filter((v): v is number | string => v != null)
+      .map((v) => (typeof v === 'string' ? parseInt(v, 10) : v))
+      .filter((v): v is number => typeof v === 'number' && !isNaN(v));
   }
 }
 
