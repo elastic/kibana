@@ -25,6 +25,7 @@ import { appPaths } from '../utils/app_paths';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useNavigation } from './use_navigation';
+import { useOnechatServices } from './use_onechat_service';
 
 const pendingRoundId = '__pending__';
 
@@ -32,6 +33,7 @@ export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -46,9 +48,6 @@ export const useConversationActions = () => {
       })
     );
   };
-  const removeNewConversationQuery = () => {
-    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-  };
   const { navigateToOnechatUrl } = useNavigation();
   const shouldAllowConversationRedirectRef = useRef(true);
   useEffect(() => {
@@ -58,8 +57,8 @@ export const useConversationActions = () => {
     };
   }, []);
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
-    // Navigate to the new conversation if user is still on the "new" conversation page
-    if (!conversationId && shouldAllowConversationRedirectRef.current) {
+    // Navigate to the conversation if redirect is allowed
+    if (shouldAllowConversationRedirectRef.current) {
       const path = appPaths.chat.conversation({ conversationId: nextConversationId });
       const params = undefined;
       const state = { shouldStickToBottom: false };
@@ -68,11 +67,13 @@ export const useConversationActions = () => {
   };
 
   return {
+    removeNewConversationQuery: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
+    },
     invalidateConversation: () => {
-      removeNewConversationQuery();
       queryClient.invalidateQueries({ queryKey });
     },
-    addConversationRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
@@ -89,6 +90,13 @@ export const useConversationActions = () => {
           }
 
           draft.rounds.push(nextRound);
+        })
+      );
+    },
+    removeOptimisticRound: () => {
+      setConversation(
+        produce((draft) => {
+          draft?.rounds?.pop();
         })
       );
     },
@@ -177,6 +185,22 @@ export const useConversationActions = () => {
       // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
+    },
+    deleteConversation: async (id: string) => {
+      await conversationsService.delete({ conversationId: id });
+
+      // Check if we're deleting the current conversation
+      const isCurrentConversation = conversationId === id;
+
+      if (isCurrentConversation) {
+        // If deleting current conversation, navigate to new conversation
+        const path = appPaths.chat.new;
+        navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
+      }
+      // If deleting other conversations, stay at current conversation (no navigation needed)
+
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
