@@ -11,7 +11,7 @@ import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
-import type { CasePostRequest } from '../../../../common/types/api';
+import type { CasePostRequest, ObservablePost } from '../../../../common/types/api';
 import * as i18n from '../translations';
 import type { CaseUI } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
@@ -28,10 +28,19 @@ export interface CreateCaseFlyoutProps {
   attachments?: CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
+  observables?: ObservablePost[];
 }
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, attachments, headerContent, initialValue, onClose, onSuccess }) => {
+  ({
+    afterCaseCreated,
+    attachments,
+    headerContent,
+    initialValue,
+    onClose,
+    onSuccess,
+    observables = [],
+  }) => {
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
 
@@ -47,6 +56,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
         <EuiFlyout
           onClose={handleCancel}
           tour-step="create-case-flyout"
+          aria-label={i18n.CREATE_CASE_LABEL}
           data-test-subj="create-case-flyout"
           // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
           maskProps={maskProps}
@@ -83,6 +93,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
                 onSuccess={handleOnSuccess}
                 withSteps={false}
                 initialValue={initialValue}
+                observables={observables}
               />
             </div>
           </EuiFlyoutBody>
