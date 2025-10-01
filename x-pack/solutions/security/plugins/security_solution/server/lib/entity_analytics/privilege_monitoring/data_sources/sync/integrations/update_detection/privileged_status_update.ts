@@ -15,7 +15,7 @@ export const createPrivilegeStatusUpdateService = (dataClient: PrivilegeMonitori
     users: PrivMonBulkUser[],
     source: MonitoringEntitySource
   ) => {
-    dataClient.log('debug', `Updating internal index for users.length ${users.length}`);
+    dataClient.log('debug', `Updating internal index for users ${users.length}`);
     await applyPrivilegedUpdates({ users, dataClient, source });
   };
 
