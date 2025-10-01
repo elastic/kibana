@@ -71,7 +71,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
       title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
         defaultMessage: 'Appearance',
       })}
-      type="titlesAndText"
+      type="visualOptions"
       groupPosition={groupPosition}
       buttonDataTestSubj="lnsTextOptionsButton"
     >

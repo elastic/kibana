@@ -140,12 +140,9 @@ async function validateAst(
    * the full command subsequence that precedes that command.
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
-  for (let i = 0; i < subqueries.length; i++) {
-    const subquery = subqueries[i];
-
-    // gather columns available after previous subquery
-    const columns =
-      i > 0 ? await new QueryColumns(subqueries[i - 1], queryString, callbacks).asMap() : new Map();
+  for (const subquery of subqueries) {
+    const subqueryUpToThisCommand = { ...subquery, commands: subquery.commands.slice(0, -1) };
+    const columns = await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap();
 
     const references: ReferenceMaps = {
       sources,

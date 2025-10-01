@@ -35,10 +35,6 @@ export const pageAttachmentPersistedStateSchema = z.object({
    * can be provided to an LLM to generate a summary or perform analysis
    */
   screenContext: z.array(z.object({ screenDescription: z.string() })).optional(),
-  /**
-   * Optional summary of the page.
-   */
-  summary: z.string().optional(),
 });
 
 export type PageAttachmentPersistedState = z.infer<typeof pageAttachmentPersistedStateSchema>;

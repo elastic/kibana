@@ -41,6 +41,7 @@ export const ConfigureRiskEngineSavedObjectRequestBody = z.object({
     })
     .optional(),
   exclude_alert_tags: z.array(z.string()).optional(),
+  enable_reset_to_zero: z.boolean().optional(),
 });
 export type ConfigureRiskEngineSavedObjectRequestBodyInput = z.input<
   typeof ConfigureRiskEngineSavedObjectRequestBody

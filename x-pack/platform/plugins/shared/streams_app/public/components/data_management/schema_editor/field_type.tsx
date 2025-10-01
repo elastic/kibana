@@ -24,10 +24,13 @@ export const FieldType = ({
       values: { aliasFor },
     });
   }
-  return (
-    <FieldNameWithIcon
-      name={FIELD_TYPE_MAP[type].label}
-      type={type !== 'system' ? type : undefined}
-    />
-  );
+
+  // Handle unknown types gracefully - if type is not in FIELD_TYPE_MAP, show the type name directly
+  // for eg. object, nested, geo_point, binary, etc
+  const typeInfo = FIELD_TYPE_MAP[type as keyof typeof FIELD_TYPE_MAP];
+  if (!typeInfo) {
+    return <FieldNameWithIcon name={type} type={type !== 'system' ? type : undefined} />;
+  }
+
+  return <FieldNameWithIcon name={typeInfo.label} type={type !== 'system' ? type : undefined} />;
 };

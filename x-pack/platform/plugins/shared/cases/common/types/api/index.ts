@@ -18,8 +18,6 @@ export * from './attachment/latest';
 export * from './metrics/latest';
 export * from './custom_field/latest';
 export * from './observable/latest';
-export * from './summary/latest';
-export * from './inference_connectors/latest';
 
 // V1
 export * as configureApiV1 from './configure/v1';
@@ -34,5 +32,3 @@ export * as attachmentApiV1 from './attachment/v1';
 export * as metricsApiV1 from './metrics/v1';
 export * as customFieldsApiV1 from './custom_field/v1';
 export * as observableApiV1 from './observable/v1';
-export * as summaryApiV1 from './summary/v1';
-export * as inferenceConnectorsApiV1 from './inference_connectors/v1';

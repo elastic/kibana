@@ -35,7 +35,7 @@ export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
   }
 
   return (
-    <Panel isAlert={item.type === 'alert'}>
+    <Panel isAlert={item.itemType === 'alert'}>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <HeaderRow item={item} />
@@ -47,7 +47,7 @@ export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
           </EuiFlexItem>
         )}
 
-        {item.type !== 'entity' && item.actor && item.target && (
+        {item.itemType !== 'entity' && item.actor && item.target && (
           <EuiFlexItem>
             <ActorsRow actor={item.actor} target={item.target} />
           </EuiFlexItem>

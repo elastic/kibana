@@ -33,6 +33,7 @@ export interface SimulationSearchParams extends Required<QueryState> {
 export interface SimulationInput {
   steps: StreamlangStepWithUIAttributes[];
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }
 
 export interface SampleDocumentWithUIAttributes {
@@ -74,4 +75,5 @@ export interface SimulationContext {
   samples: SampleDocumentWithUIAttributes[];
   simulation?: Simulation;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }

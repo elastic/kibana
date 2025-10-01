@@ -11,6 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { OverviewTab } from './overview_tab';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('./dimension_badges', () => ({
   DimensionBadges: ({ dimensions }: { dimensions: Dimension[] }) => (
@@ -145,8 +146,8 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('renders dimensions when present', () => {
       const dimensions = [
-        { name: 'host.name', type: 'keyword' },
-        { name: 'service.name', type: 'keyword' },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
       ];
       const metric = createMockMetric({ dimensions });
       const { getByTestId } = render(<OverviewTab metric={metric} />);

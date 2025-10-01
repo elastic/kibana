@@ -31,6 +31,8 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { EsqlQuery } from '@kbn/esql-ast';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
@@ -76,11 +78,20 @@ const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>)
   }
 };
 
+const keepRecommendedWarning = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.keepRecommendedWarning',
+  {
+    defaultMessage:
+      'KEEP processing command is recommended for ES|QL queries to limit the number of columns returned.',
+  }
+);
+
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
+  const isEdit = !!metadata?.isEdit;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -106,6 +117,29 @@ export const EsqlQueryExpression: React.FC<
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
+  const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
+  const [touched, setTouched] = useState<boolean>(false);
+
+  useDebounce(
+    () => {
+      if (isEdit) {
+        return;
+      }
+      const {
+        ast: { commands },
+        tokens,
+      } = EsqlQuery.fromSrc(query.esql);
+
+      if (!commands.some((command) => command.name === 'keep')) {
+        const lastLine = tokens[tokens.length - 1];
+        setKeepWarning(`"Line ${lastLine?.line || 1}:0: ${keepRecommendedWarning}"`);
+      } else {
+        setKeepWarning(undefined);
+      }
+    },
+    500,
+    [isEdit, query]
+  );
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -242,10 +276,12 @@ export const EsqlQueryExpression: React.FC<
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
+            setTouched(true);
             setQuery(q);
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
+          warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
           hideRunQueryText
@@ -254,6 +290,7 @@ export const EsqlQueryExpression: React.FC<
           editorIsInline
           expandToFitQueryOnMount
           hasOutline
+          mergeExternalMessages
         />
       </EuiFormRow>
       <EuiSpacer />

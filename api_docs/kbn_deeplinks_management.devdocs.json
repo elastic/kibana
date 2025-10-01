@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.DATA_MANAGEMENT_NAV_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_MANAGEMENT_NAV_ID",
+        "description": [],
+        "signature": [
+          "\"data_management\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
         "id": "def-common.DeepLinkId",
         "type": "Type",
         "tags": [],
@@ -48,21 +63,6 @@
           "\"fleet\" | \"monitoring\" | \"management\" | \"integrations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:maintenanceWindows\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"management:agentBuilder\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/deep_links.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-management",
-        "id": "def-common.INGEST_AND_MANAGE_DATA_NAV_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INGEST_AND_MANAGE_DATA_NAV_ID",
-        "description": [],
-        "signature": [
-          "\"ingest_and_data\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

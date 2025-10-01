@@ -168,6 +168,17 @@
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/triggers-actions-ui-types",
+            "id": "def-common.RuleType.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

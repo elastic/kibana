@@ -54,12 +54,12 @@ export const calculateScoresWithESQL = async (
     const now = new Date().toISOString();
 
     const filter = getFilters(params);
+
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
       : getEntityAnalyticsEntityTypes();
 
     const compositeQuery = getCompositeQuery(identifierTypes, filter, params);
-
     logger.trace(
       `STEP ONE: Executing ESQL Risk Score composite query:\n${JSON.stringify(compositeQuery)}`
     );
@@ -70,7 +70,20 @@ export const calculateScoresWithESQL = async (
       });
 
     if (!response?.aggregations) {
-      throw new Error('No aggregations in composite response');
+      return {
+        after_keys: {},
+        scores: {
+          host: [],
+          user: [],
+          service: [],
+        },
+        entities: {
+          user: [],
+          service: [],
+          host: [],
+          generic: [],
+        },
+      };
     }
 
     const promises = toEntries(response.aggregations).map<Promise<ESQLResults[number]>>(
@@ -245,7 +258,7 @@ export const getESQL = (
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL input = CONCAT(""" {"risk_score": """", score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(""" {"score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),

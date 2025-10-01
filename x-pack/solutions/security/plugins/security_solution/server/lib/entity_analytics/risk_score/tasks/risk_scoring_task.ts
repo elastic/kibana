@@ -111,6 +111,8 @@ export const registerRiskScoringTask = ({
         auditLogger,
       });
 
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
       return riskScoreServiceFactory({
         assetCriticalityService,
         esClient,
@@ -119,6 +121,7 @@ export const registerRiskScoringTask = ({
         riskScoreDataClient,
         spaceId: namespace,
         experimentalFeatures,
+        uiSettingsClient,
       });
     });
 

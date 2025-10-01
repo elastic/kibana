@@ -32,7 +32,6 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { useAIFeatures } from './review_suggestions_form/generate_suggestions_button';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
@@ -41,6 +40,7 @@ import {
   ReviewSuggestionsFormProvider,
 } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {

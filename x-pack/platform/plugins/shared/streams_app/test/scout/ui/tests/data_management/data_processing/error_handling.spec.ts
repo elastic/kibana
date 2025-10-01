@@ -47,6 +47,7 @@ test.describe(
       });
 
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
@@ -58,6 +59,7 @@ test.describe(
         await route.continue();
       });
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -73,6 +75,7 @@ test.describe(
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
       await pageObjects.streams.closeToasts();
 
       // Edit the processor

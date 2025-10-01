@@ -48,14 +48,16 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient });
+    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
   },
 });
 

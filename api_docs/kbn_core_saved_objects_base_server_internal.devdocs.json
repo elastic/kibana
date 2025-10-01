@@ -78,7 +78,7 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; readonly scrollDuration: string; readonly retryAttempts: number; }"
+              "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
@@ -145,7 +145,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; scrollDuration: string; retryAttempts: number; }>"
+                  "; scrollDuration: string; retryAttempts: number; useCumulativeLogger: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
@@ -1862,7 +1862,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly scrollDuration: string; readonly retryAttempts: number; }"
+          "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
@@ -3404,7 +3404,15 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<string[]>; }>; }>"
+              "<string[]>; }>; useCumulativeLogger: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,

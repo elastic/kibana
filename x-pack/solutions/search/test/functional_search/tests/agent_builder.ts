@@ -13,7 +13,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const searchSpace = getService('searchSpace');
   const appsMenu = getService('appsMenu');
 
-  describe('Agent Builder', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/237043
+  describe.skip('Agent Builder', function () {
     describe('search solution navigation', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };

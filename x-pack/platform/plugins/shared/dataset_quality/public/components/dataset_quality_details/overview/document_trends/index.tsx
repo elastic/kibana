@@ -75,7 +75,6 @@ export default function DocumentTrends({
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
@@ -101,6 +100,7 @@ export default function DocumentTrends({
                 size="s"
                 data-test-subj="datasetQualityDetailsLinkToDiscover"
                 {...redirectLinkProps.linkProps}
+                color="text"
               />
             </EuiToolTip>
             {displayCreateRuleButton && isAlertingAvailable && (
@@ -112,6 +112,7 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsCreateRule"
                   onClick={openAlertFlyout}
+                  color="text"
                 />
               </EuiToolTip>
             )}
@@ -124,6 +125,7 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsEditFailureStore"
                   onClick={openFailureStoreModal}
+                  color="text"
                 />
               </EuiToolTip>
             )}

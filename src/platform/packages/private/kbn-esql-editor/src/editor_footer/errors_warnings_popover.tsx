@@ -72,8 +72,8 @@ function ErrorsWarningsContent({
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
   return (
-    <div style={{ width: 500, padding: euiTheme.size.s }}>
-      <EuiDescriptionList>
+    <div style={{ width: 500, padding: euiTheme.size.s, maxHeight: 300, overflow: 'auto' }}>
+      <EuiDescriptionList data-test-subj="ESQLEditor-errors-warnings-content">
         {items.map((item, index) => {
           return (
             <EuiDescriptionListDescription

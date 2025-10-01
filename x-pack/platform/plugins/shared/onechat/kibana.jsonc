@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "uiActions",
       "esql",
       "features",
       "inference",

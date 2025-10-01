@@ -21,6 +21,7 @@ import type {
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 jest.mock('../store/hooks');
@@ -52,8 +53,8 @@ const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
 const input$ = new Subject<UnifiedHistogramInputMessage>();
 
 const dimensions: Dimension[] = [
-  { name: 'foo', type: 'keyword' },
-  { name: 'qux', type: 'keyword' },
+  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
 ];
 const allFields: MetricField[] = [
   {
