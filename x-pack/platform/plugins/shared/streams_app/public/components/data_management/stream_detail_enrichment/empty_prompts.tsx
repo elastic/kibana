@@ -56,18 +56,17 @@ export const NoStepsEmptyPrompt = () => {
       body={
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiText size='s'>
+            <EuiText size="s">
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
                 {
-                  defaultMessage:
-                    'Create conditions to focus on specific data in your stream.',
+                  defaultMessage: 'Create conditions to focus on specific data in your stream.',
                 }
               )}
             </EuiText>
           </EuiFlexItem>
-                    <EuiFlexItem>
-            <EuiText size='s'>
+          <EuiFlexItem>
+            <EuiText size="s">
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
                 {

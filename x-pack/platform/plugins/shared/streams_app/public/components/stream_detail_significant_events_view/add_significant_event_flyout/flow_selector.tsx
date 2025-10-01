@@ -78,8 +78,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
               {i18n.translate(
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.manualOptionDescription',
                 {
-                  defaultMessage:
-                    "Write a query to find and add a known significant event.",
+                  defaultMessage: 'Write a query to find and add a known significant event.',
                 }
               )}
             </EuiText>

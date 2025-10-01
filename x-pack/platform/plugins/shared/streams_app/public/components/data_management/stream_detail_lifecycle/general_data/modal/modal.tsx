@@ -140,15 +140,14 @@ export function EditLifecycleModal({
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
-                          defaultMessage:
-                            "Use the parent stream’s retention configuration",
+                          defaultMessage: 'Use the parent stream’s retention configuration',
                         }
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
                           defaultMessage:
-                            "/Use the stream’s index template retention configuration",
+                            '/Use the stream’s index template retention configuration',
                         }
                       )
                 }
