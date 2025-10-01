@@ -7,14 +7,14 @@
 
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from './tools_table_filter_option';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
 const toValidSearchQuery = (query: string | null): string => {
   try {
@@ -46,8 +46,9 @@ const getToolsTableSearchConfig = ({
       options: tags.map((tag) => ({
         value: tag,
         name: tag,
-        view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+        view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
       })),
+      autoSortOptions: false,
       searchThreshold: 1,
     },
   ],
@@ -55,13 +56,13 @@ const getToolsTableSearchConfig = ({
 
 export interface ToolsTableSearch {
   searchConfig: Search;
-  results: ToolDefinitionWithSchema[];
+  results: ToolDefinition[];
 }
 
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { tools } = useToolsService();
   const { tags } = useToolsTags();
-  const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
+  const [results, setResults] = useState<ToolDefinition[]>(tools);
   const [searchQuery, setSearchQuery] = useQueryState('search', {
     defaultValue: '',
     parse: toValidSearchQuery,

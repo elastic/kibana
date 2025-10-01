@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavFooterProps {
   children: ReactNode;
@@ -30,7 +30,7 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
   return (
     <footer
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
-        defaultMessage: 'Side navigation footer',
+        defaultMessage: 'Side navigation',
       })}
       css={css`
         align-items: center;

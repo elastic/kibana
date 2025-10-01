@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { IconType } from '@elastic/eui';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
 // TODO: move this to core as part of deep link registration
 export const AppDeepLinkIdToIcon: Record<string, string> = {
+  workflows: 'workflowsApp',
   // analytics
   discover: 'discoverApp',
   dashboards: 'dashboardApp',

@@ -602,9 +602,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "reindexService",
+                "pluginId": "@kbn/upgrade-assistant-pkg-common",
                 "scope": "common",
-                "docId": "kibReindexServicePluginApi",
+                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
                 "section": "def-common.ReindexStatus",
                 "text": "ReindexStatus"
               }
@@ -954,18 +954,6 @@
       }
     ],
     "enums": [
-      {
-        "parentPluginId": "reindexService",
-        "id": "def-common.ReindexStatus",
-        "type": "Enum",
-        "tags": [],
-        "label": "ReindexStatus",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "reindexService",
         "id": "def-common.ReindexStep",

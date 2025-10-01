@@ -14,6 +14,8 @@ import type { StatItemsProps } from './types';
 import { FlexItem, ChartHeight } from './utils';
 import { MetricEmbeddable } from './metric_embeddable';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from, id, to }) => {
   const timerange = useMemo(
@@ -34,6 +36,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
   } = statItems;
 
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   return (
     <FlexItem grow={1} data-test-subj={key}>
@@ -64,6 +67,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                     id={`${id}-bar-embeddable`}
                     height={ChartHeight}
                     inspectTitle={description}
+                    scopeId={
+                      newDataViewPickerEnabled
+                        ? DataViewManagerScopeName.explore
+                        : DataViewManagerScopeName.default
+                    }
                   />
                 </FlexItem>
               )}
@@ -78,6 +86,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                       id={`${id}-area-embeddable`}
                       height={ChartHeight}
                       inspectTitle={description}
+                      scopeId={
+                        newDataViewPickerEnabled
+                          ? DataViewManagerScopeName.explore
+                          : DataViewManagerScopeName.default
+                      }
                     />
                   </FlexItem>
                 </>

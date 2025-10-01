@@ -72,7 +72,7 @@ export const NoDataFound = () => {
                         <strong>
                           <FormattedMessage
                             id="xpack.securitySolution.assetInventory.initializing.exploreTitle"
-                            defaultMessage="Explore Asset Discovery Integrations"
+                            defaultMessage="Explore Asset Inventory Integrations"
                           />
                         </strong>
                       </EuiTitle>

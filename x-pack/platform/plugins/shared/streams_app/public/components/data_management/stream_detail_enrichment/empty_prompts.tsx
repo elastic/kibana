@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../../asset_image';
+import { CreateStepButton } from './create_step_button';
 
 export const RootStreamEmptyPrompt = () => {
   return (
@@ -39,7 +40,7 @@ export const RootStreamEmptyPrompt = () => {
   );
 };
 
-export const NoProcessorsEmptyPrompt = () => {
+export const NoStepsEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -47,22 +48,28 @@ export const NoProcessorsEmptyPrompt = () => {
       icon={<AssetImage type="extractFields" />}
       title={
         <h2>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.title',
-            { defaultMessage: 'Extract useful fields from your data' }
-          )}
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
+            defaultMessage: 'Extract useful fields from your data',
+          })}
         </h2>
       }
       body={
-        <p>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.body',
-            {
-              defaultMessage:
-                'Transform your data before indexing with processors. You can start from scratch or let AI generate a set of processors based on your data.',
-            }
-          )}
-        </p>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <p>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
+                {
+                  defaultMessage:
+                    'Transform your data before indexing with conditions and processors.',
+                }
+              )}
+            </p>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CreateStepButton mode="prominent" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     />
   );

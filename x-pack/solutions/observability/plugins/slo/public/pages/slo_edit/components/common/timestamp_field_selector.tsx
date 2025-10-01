@@ -48,6 +48,7 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
           return (
             <EuiComboBox<string>
               {...field}
+              compressed
               async
               placeholder={placeholder}
               aria-label={placeholder}

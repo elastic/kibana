@@ -9,7 +9,6 @@ import type { Plugin, CoreSetup } from '@kbn/core/server';
 import type { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -122,7 +121,6 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
         { ruleTypeId: 'test.failing', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
       ],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           alerting: {

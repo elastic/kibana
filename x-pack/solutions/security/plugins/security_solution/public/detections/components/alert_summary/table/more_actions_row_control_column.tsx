@@ -65,9 +65,7 @@ export const MoreActionsRowControlColumn = memo(
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: ecsAlert,
       onMenuItemClick: closePopover,
-      isActiveTimelines: false,
       ariaLabel: ADD_TO_CASE_ARIA_LABEL,
-      isInDetections: true,
     });
 
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({

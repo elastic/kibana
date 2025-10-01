@@ -14,12 +14,12 @@ import { GRAPH_IPS_TEXT_ID, GRAPH_IPS_PLUS_COUNT_ID, GRAPH_FLAGS_BADGE_ID } from
 describe('LabelNodeDetails', () => {
   test('renders empty div when no props are provided', () => {
     const { container } = render(<LabelNodeDetails />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders empty div when empty arrays are provided', () => {
     const { container } = render(<LabelNodeDetails ips={[]} countryCodes={[]} />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders Ips component when ips are provided', () => {

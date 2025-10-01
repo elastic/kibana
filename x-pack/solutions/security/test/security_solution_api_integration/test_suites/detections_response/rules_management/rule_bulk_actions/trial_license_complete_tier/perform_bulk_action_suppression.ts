@@ -19,7 +19,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   // skips serverless MKI due to feature flag
   describe('@ess @serverless @skipInServerlessMKI perform_bulk_action suppression', () => {
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
           getCustomQueryRuleParams({ rule_id: ruleId, alert_suppression: existingSuppression })
         );
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: ruleId },
           })
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
           createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'id_2' })),
         ]);
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'id_1' },
           })
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alert_suppression: existingSuppression,
         });
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
           "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
         );
         // Check that the updates did not apply to the rule
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: ruleId },
           })
@@ -198,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
           createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], 'id_2')),
         ]);
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -272,10 +272,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Check that the updates have been persisted
         const updatedRules = await Promise.all([
-          securitySolutionApi.readRule({
+          detectionsApi.readRule({
             query: { rule_id: 'id_1' },
           }),
-          await securitySolutionApi.readRule({
+          await detectionsApi.readRule({
             query: { rule_id: 'id_2' },
           }),
         ]);
@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alert_suppression: existingSuppression,
         });
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: ruleId },
           })
@@ -350,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], ruleId));
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -378,7 +378,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: ruleId },
           })
@@ -392,7 +392,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: ruleId }));
 
-        const { body: bulkEditResponse } = await securitySolutionApi
+        const { body: bulkEditResponse } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -419,7 +419,7 @@ export default ({ getService }: FtrProviderContext): void => {
           "query rule type doesn't support this action. Use 'set_alert_suppression' action instead."
         );
         // Check that the updates did not apply to the rule
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: ruleId },
           })

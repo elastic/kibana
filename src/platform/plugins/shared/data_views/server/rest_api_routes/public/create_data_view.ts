@@ -27,6 +27,7 @@ import {
   CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import type { DataViewSpecRestResponse } from '../route_types';
+import { toApiSpec } from './util/to_api_spec';
 
 interface CreateDataViewArgs {
   dataViewsService: DataViewsService;
@@ -122,7 +123,7 @@ const registerCreateDataViewRouteFactory =
 
             const responseBody: Record<string, DataViewSpecRestResponse> = {
               [serviceKey]: {
-                ...(await dataView.toSpec(toSpecParams)),
+                ...toApiSpec(await dataView.toSpec(toSpecParams)),
                 namespaces: dataView.namespaces,
               },
             };
