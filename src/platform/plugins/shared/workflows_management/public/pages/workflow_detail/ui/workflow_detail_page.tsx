@@ -133,27 +133,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
 
   const handleRunClick = ({ test = false }: { test: boolean }) => {
-    const def = test ? definitionFromCurrentYaml : workflow?.definition;
-    let needInput: boolean | undefined = false;
-    if (def?.triggers) {
-      needInput =
-        def.triggers.some((trigger) => trigger.type === 'alert') ||
-        (def.triggers.some((trigger) => trigger.type === 'manual') &&
-          def.inputs &&
-          Object.keys(def.inputs).length > 0);
-    }
-    if (needInput) {
-      if (test) {
-        setTestWorkflowModalOpen(true);
-      } else {
-        setWorkflowExecuteModalOpen(true);
-      }
+    if (test) {
+      setTestWorkflowModalOpen(true);
     } else {
-      if (test) {
-        handleTestRunWorkflow({});
-      } else {
-        handleRunWorkflow({});
-      }
+      setWorkflowExecuteModalOpen(true);
     }
   };
 
@@ -314,7 +297,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         canSaveWorkflow={canSaveWorkflow}
         isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
-        handleRunClick={() => handleRunClick({ test: false })}
+        handleRunClick={() => handleRunClick({ test: true })}
         handleSave={handleSave}
         handleToggleWorkflow={handleToggleWorkflow}
         canTestWorkflow={canTestWorkflow}
