@@ -15,7 +15,9 @@ export type ResilientActionConnector = UserConfiguredActionConnector<
 
 export interface ResilientActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
+  subActionParams: ExecutorSubActionPushParams & {
+    incident: { additionalFields: string | null };
+  };
 }
 
 export interface ResilientConfig {
