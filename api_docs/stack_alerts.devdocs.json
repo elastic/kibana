@@ -24,7 +24,7 @@
             "id": "def-public.DataViewSelectPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
+            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata,\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
             "description": [],
             "signature": [
               "DataViewSelectPopoverProps"
