@@ -24,7 +24,7 @@ import {
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
-  SECURITY_FEATURE_ID_V4,
+  SECURITY_FEATURE_ID_V5,
   TIMELINE_FEATURE_ID,
   NOTES_FEATURE_ID,
   LISTS_API_SUMMARY,
@@ -72,7 +72,7 @@ export const getSecurityBaseKibanaFeature = ({
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: SERVER_APP_ID,
-          latestId: SECURITY_FEATURE_ID_V4,
+          latestId: SECURITY_FEATURE_ID_V5,
         },
       }
     ),
@@ -108,14 +108,14 @@ export const getSecurityBaseKibanaFeature = ({
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
           { feature: RULES_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           { feature: RULES_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
@@ -167,13 +167,13 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
           { feature: RULES_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           { feature: RULES_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },

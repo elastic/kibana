@@ -45,8 +45,8 @@ export const securityV2SavedObjects = [
 
 export const securityV3SavedObjects = [...securityV2SavedObjects];
 
-export const securityV4SavedObjects = [
-  // The difference between v3 and v4 is that v4 removes the exceptions list SO
+export const securityV5SavedObjects = [
+  // The difference between v4 and v5 is that v4 removes the exceptions list SO
   // type and prebuilt rules which are now managed by the rules product feature
   DATA_VIEW_SAVED_OBJECT_TYPE,
   CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,

@@ -31,7 +31,7 @@ import {
  * Sub-features that will always be available for Security
  * regardless of the product type.
  */
-export const getSecurityV4BaseKibanaSubFeatureIds = (
+export const getSecurityV5BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [];
 
@@ -39,7 +39,7 @@ export const getSecurityV4BaseKibanaSubFeatureIds = (
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getSecurityV4SubFeaturesMap = ({
+export const getSecurityV5SubFeaturesMap = ({
   experimentalFeatures,
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [

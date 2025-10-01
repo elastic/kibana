@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             siemV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV3: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV4: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siemV5: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -297,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
               'workflow_insights_all',
               'workflow_insights_read',
             ],
-            siemV4: [
+            siemV5: [
               'actions_log_management_all',
               'actions_log_management_read',
               'all',

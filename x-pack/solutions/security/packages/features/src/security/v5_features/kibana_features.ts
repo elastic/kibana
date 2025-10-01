@@ -16,7 +16,7 @@ import {
   LISTS_API_ALL,
   LISTS_API_READ,
   LISTS_API_SUMMARY,
-  SECURITY_FEATURE_ID_V4,
+  SECURITY_FEATURE_ID_V5,
   SECURITY_UI_CRUD,
   SECURITY_UI_SHOW,
   USERS_API_READ,
@@ -24,10 +24,10 @@ import {
 import type { BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../types';
 
-export const getSecurityV4BaseKibanaFeature = ({
+export const getSecurityV5BaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
-  id: SECURITY_FEATURE_ID_V4,
+  id: SECURITY_FEATURE_ID_V5,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
     {

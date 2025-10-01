@@ -25,7 +25,7 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
-  SECURITY_FEATURE_ID_V4,
+  SECURITY_FEATURE_ID_V5,
   RULES_FEATURE_ID,
   LISTS_API_SUMMARY,
   LISTS_API_READ,
@@ -71,7 +71,7 @@ export const getSecurityV3BaseKibanaFeature = ({
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: SECURITY_FEATURE_ID_V3,
-          latestId: SECURITY_FEATURE_ID_V4,
+          latestId: SECURITY_FEATURE_ID_V5,
         },
       }
     ),
@@ -103,11 +103,11 @@ export const getSecurityV3BaseKibanaFeature = ({
     all: {
       replacedBy: {
         default: [
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
           { feature: RULES_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           { feature: RULES_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
@@ -144,11 +144,11 @@ export const getSecurityV3BaseKibanaFeature = ({
     read: {
       replacedBy: {
         default: [
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
           { feature: RULES_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           { feature: RULES_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },

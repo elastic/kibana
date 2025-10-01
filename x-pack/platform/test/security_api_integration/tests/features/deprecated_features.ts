@@ -192,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           "siem",
           "siemV2",
           "siemV3",
+          "siemV4",
           "visualize",
         ]
       `);
