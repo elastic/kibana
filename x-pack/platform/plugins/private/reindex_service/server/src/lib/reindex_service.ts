@@ -542,7 +542,7 @@ export const reindexServiceFactory = (
             names,
             allow_restricted_indices: true,
             privileges: ['all'],
-          }
+          },
         ],
       });
 

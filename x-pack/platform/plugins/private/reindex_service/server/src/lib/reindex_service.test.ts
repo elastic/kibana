@@ -109,7 +109,7 @@ describe('reindexService', () => {
             names: ['anIndex'],
             allow_restricted_indices: true,
             privileges: ['all'],
-          }
+          },
         ],
       });
     });
