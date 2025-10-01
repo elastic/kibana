@@ -56,11 +56,6 @@ export const ConfigSchema = schema.object({
     }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  unsafe: schema.maybe(
-    schema.object({
-      enableCaseSummary: schema.boolean({ defaultValue: false }),
-    })
-  ),
   resilient: schema.object({
     additionalFields: schema.object({
       enabled: offeringBasedSchema({
