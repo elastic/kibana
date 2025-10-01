@@ -45,7 +45,7 @@ The EnterNormalPathNode implements sophisticated error catching:
 ### EnterNormalPathNode  
 - **Role**: Primary execution path entry with error monitoring capabilities
 - **Behavior**: Enters execution scope and proceeds to next step
-- **Error Catching**: Implements `StepErrorCatcher` interface to intercept failures
+- **Error Catching**: Implements `NodeWithErrorCatching` interface to intercept failures
 - **State Management**: Stores error information and manages redirection to fallback path
 
 ### ExitNormalPathNode
