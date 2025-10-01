@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
+  throttleTime,
   filter,
   map,
   mergeMap,
@@ -247,6 +248,7 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
+        throttleTime(1000),
         mergeMap(async ({ options }) => {
           const {
             id: currentTabId,
