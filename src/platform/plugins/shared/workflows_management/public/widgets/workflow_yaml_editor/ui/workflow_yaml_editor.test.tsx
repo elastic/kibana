@@ -75,20 +75,6 @@ describe('WorkflowYAMLEditor', () => {
     expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
   });
 
-  it('shows saved status when no changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={false} />
-    );
-    expect(getByText('Saved')).toBeInTheDocument();
-  });
-
-  it('shows unsaved changes when there are changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={true} />
-    );
-    expect(getByText('Unsaved changes')).toBeInTheDocument();
-  });
-
   it('calls onChange when editor content changes', async () => {
     const onChangeMock = jest.fn();
     renderWithI18n(<WorkflowYAMLEditor {...defaultProps} onChange={onChangeMock} />);

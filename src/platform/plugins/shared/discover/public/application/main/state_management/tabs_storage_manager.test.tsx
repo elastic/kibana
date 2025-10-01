@@ -16,7 +16,7 @@ import {
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
-import { TAB_STATE_URL_KEY } from '../../../../common/constants';
+import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
@@ -129,7 +129,77 @@ describe('TabsStorageManager', () => {
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
 
-  it('should persist tabs state to local storage and push to URL', async () => {
+  it('should push tab state to URL', async () => {
+    const { tabsStorageManager, urlStateStorage } = create();
+
+    jest.spyOn(urlStateStorage, 'set');
+
+    await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id');
+
+    expect(urlStateStorage.set).toHaveBeenCalledWith(
+      TAB_STATE_URL_KEY,
+      { tabId: 'my-tab-id' },
+      { replace: false }
+    );
+
+    await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id-2', { replace: true });
+
+    expect(urlStateStorage.set).toHaveBeenCalledWith(
+      TAB_STATE_URL_KEY,
+      { tabId: 'my-tab-id-2' },
+      { replace: true }
+    );
+
+    await urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
+    await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id-3');
+
+    expect(urlStateStorage.set).toHaveBeenCalledWith(
+      TAB_STATE_URL_KEY,
+      { tabId: 'my-tab-id-3' },
+      { replace: true }
+    );
+  });
+
+  it('should call onChanged callback when tab state in URL changes', async () => {
+    const { tabsStorageManager, urlStateStorage } = create();
+
+    const onChanged = jest.fn();
+    const stop = tabsStorageManager.startUrlSync({ onChanged });
+
+    await urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: 'my-tab-id' });
+
+    expect(onChanged).toHaveBeenCalledWith({ tabId: 'my-tab-id' });
+
+    stop();
+  });
+
+  it('should not call onChanged callback when tab state in URL changes but sync is stopped', async () => {
+    const { tabsStorageManager, urlStateStorage } = create();
+
+    const onChanged = jest.fn();
+    const stop = tabsStorageManager.startUrlSync({ onChanged });
+
+    stop();
+
+    await urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: 'my-tab-id' });
+
+    expect(onChanged).not.toHaveBeenCalled();
+  });
+
+  it('should not call onChanged callback when tab state in URL changes via pushSelectedTabIdToUrl', async () => {
+    const { tabsStorageManager } = create();
+
+    const onChanged = jest.fn();
+    const stop = tabsStorageManager.startUrlSync({ onChanged });
+
+    await tabsStorageManager.pushSelectedTabIdToUrl('my-tab-id');
+
+    expect(onChanged).not.toHaveBeenCalled();
+
+    stop();
+  });
+
+  it('should persist tabs state to local storage', async () => {
     const {
       services: { storage },
       tabsStorageManager,
@@ -158,11 +228,6 @@ describe('TabsStorageManager', () => {
       'testDiscoverSessionId'
     );
 
-    expect(urlStateStorage.set).toHaveBeenCalledWith(
-      TAB_STATE_URL_KEY,
-      { tabId: 'tab1' },
-      { replace: false }
-    );
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,

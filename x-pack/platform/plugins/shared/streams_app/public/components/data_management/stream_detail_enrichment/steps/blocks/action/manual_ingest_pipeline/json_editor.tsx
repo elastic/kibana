@@ -17,8 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
 import {
-  deserializeJson,
-  serializeXJson,
+ 
+  serializeXJson, parseXJsonOrString,
   buildProcessorInsertText,
   hasOddQuoteCount,
 } from '../../../../helpers';
@@ -34,40 +34,41 @@ export const JsonEditor = () => {
     name: 'processors',
     rules: {
       validate: (value) => {
-        if (typeof value === 'string') {
+        const parsedValue = typeof value === 'string' ? parseXJsonOrString(value) : value;
+
+        if (typeof value === 'string' && typeof parsedValue === 'string') {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
-            {
-              defaultMessage: 'Invalid JSON format',
-            }
+            { defaultMessage: 'Invalid JSON format' }
           );
         }
-        if (!Array.isArray(value)) {
+
+        if (!Array.isArray(parsedValue)) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
-            {
-              defaultMessage: 'Expected an array',
-            }
+            { defaultMessage: 'Expected an array' }
           );
         }
-        const invalidProcessor = value.find((processor) => {
+
+        const invalidProcessor = parsedValue.find((processor: Record<string, unknown>) => {
           const processorType = Object.keys(processor)[0];
           return (
             processorType &&
             !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
           );
         });
+
         if (invalidProcessor) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
             {
               defaultMessage: 'Invalid processor type: {processorType}',
-              values: {
-                processorType: Object.keys(invalidProcessor)[0],
-              },
+              values: { processorType: Object.keys(invalidProcessor)[0] },
             }
           );
         }
+
+        return undefined;
       },
     },
   });
@@ -77,11 +78,11 @@ export const JsonEditor = () => {
    * we need to avoid the continuous parsing/serialization of the editor value
    * using a parallel state always setting a string make the editor format well the content.
    */
-  const [value, setValue] = React.useState(() => serializeXJson(field.value));
+  const [value, setValue] = React.useState(() => serializeXJson(field.value, '[]'));
 
   const handleChange = (newValue: string) => {
     setValue(newValue);
-    field.onChange(deserializeJson(newValue));
+    field.onChange(parseXJsonOrString(newValue));
   };
 
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {

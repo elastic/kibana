@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import type { JsonValue } from '@kbn/utility-types';
 export type ProcessorSuggestion = { name: string; template?: JsonValue };
@@ -13,15 +14,28 @@ export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
     return defaultVal;
   }
   if (typeof v === 'string') {
-    return formatXJsonString(v);
+    try {
+      const obj = JSON.parse(XJson.collapseLiteralStrings(v));
+      return XJson.expandLiteralStrings(JSON.stringify(obj, null, 2));
+    } catch {
+      return formatXJsonString(v);
+    }
   }
-  return JSON.stringify(v, null, 2);
+  return XJson.expandLiteralStrings(JSON.stringify(v, null, 2));
 };
 
 export const deserializeJson = (input: string) => {
   try {
     return JSON.parse(input);
   } catch (e) {
+    return input;
+  }
+};
+
+export const parseXJsonOrString = (input: string): unknown => {
+  try {
+    return JSON.parse(XJson.collapseLiteralStrings(input));
+  } catch {
     return input;
   }
 };

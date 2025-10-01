@@ -30,7 +30,7 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
+    "optionalPlugins": ["observabilityAIAssistant", "cloud"],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
