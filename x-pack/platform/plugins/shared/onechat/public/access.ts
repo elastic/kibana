@@ -43,7 +43,7 @@ export class AgentBuilderAccessChecker {
 
   private async hasRequiredLicense() {
     const license = await firstValueFrom(this.licensing.license$);
-    return license.hasAtLeast('standard') && license.isActive;
+    return license.hasAtLeast('enterprise') && license.isActive;
   }
 
   private async hasLlmConnector() {
