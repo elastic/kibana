@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { isEmpty } from 'lodash';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -16,7 +17,7 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import type { ConnectorFormSchema } from './types';
+import type { ConnectorFormSchema, InternalConnectorForm } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import { connectorOverrides } from './connector_overrides';
 
@@ -38,6 +39,7 @@ export type ResetForm = (
       }
     | undefined
 ) => void;
+
 interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
@@ -62,7 +64,7 @@ interface Props {
  */
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
   const overrides = connectorOverrides(data.actionTypeId);
   if (overrides?.formDeserializer) {
     return overrides.formDeserializer(data);
@@ -76,23 +78,34 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
     return data;
   }
 
-  const webhookData = data as { config: { headers?: Record<string, string> } };
-  const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
+  const configHeaders = Object.entries(data?.config.headers ?? {}).map(([key, value]) => ({
     key,
     value,
+    type: 'config' as const,
   }));
 
   return {
     ...data,
-    config: {
-      ...data.config,
-      headers: isEmpty(headers) ? undefined : headers,
+    __internal__: {
+      headers: configHeaders,
     },
   };
 };
 
+const buildHeaderRecords = (
+  headers: Array<{ key: string; value: string; type: string }>,
+  type: 'config' | 'secret'
+): Record<string, string> => {
+  return headers
+    .filter((header) => header.type === type && header.key && header.key.trim())
+    .reduce<Record<string, string>>((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+};
+
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
+export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
   const overrides = connectorOverrides(formData.actionTypeId);
   if (overrides?.formSerializer) {
     return overrides.formSerializer(formData);
@@ -106,26 +119,24 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
     return formData;
   }
 
-  const webhookFormData = formData as {
-    config: { headers?: Array<{ key: string; value: string }> };
-  };
-  const headers = (webhookFormData?.config?.headers ?? []).reduce(
-    (acc, header) => ({
-      ...acc,
-      [header.key]: header.value,
-    }),
-    {}
-  );
+  const headers = formData?.__internal__?.headers ?? [];
+
+  const configHeaders = buildHeaderRecords(headers, 'config');
+  const secretHeaders = buildHeaderRecords(headers, 'secret');
 
   return {
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(headers)
+      headers: isEmpty(configHeaders)
         ? formData.actionTypeId !== '.gen-ai'
           ? null
           : undefined
-        : headers,
+        : configHeaders,
+    },
+    secrets: {
+      ...formData.secrets,
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };
 };
@@ -143,6 +154,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
     serializer: formSerializer,
     deserializer: formDeserializer,
   });
+
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting, reset } = form;
   const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
     null
@@ -154,7 +166,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   const isFormModified = useFormIsModified({
     form,
-    discard: ['__internal__'],
+    discard: ['__internal__', '__internal__.headers__array__'],
   });
 
   useEffect(() => {

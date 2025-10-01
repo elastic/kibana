@@ -80,5 +80,6 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/field-formats-common",
+    "@kbn/ai-assistant-management-plugin",
   ]
 }

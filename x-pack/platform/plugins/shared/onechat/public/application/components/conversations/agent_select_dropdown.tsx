@@ -21,8 +21,7 @@ import {
   EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useOnechatAgents } from '../../hooks/agents/use_agents';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { labels } from '../../utils/i18n';
@@ -31,17 +30,11 @@ const agentSelectId = 'agentBuilderAgentSelect';
 
 interface AgentSelectButtonProps {
   selectedAgentName?: string;
-  isLoading: boolean;
   onClick: () => void;
 }
 
-const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
-  selectedAgentName,
-  isLoading,
-  onClick,
-}) => (
+const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
   <EuiButtonEmpty
-    isLoading={isLoading}
     iconSide="right"
     iconType="arrowDown"
     onClick={onClick}
@@ -53,33 +46,29 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
 );
 
 interface AgentSelectDropdownProps {
-  selectedAgentId?: string;
+  selectedAgent?: AgentDefinition;
   onAgentChange: (agentId: string) => void;
+  agents?: AgentDefinition[];
 }
 
 export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
-  selectedAgentId = oneChatDefaultAgentId,
+  selectedAgent,
   onAgentChange,
+  agents = [],
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { agents, isLoading } = useOnechatAgents();
   const { createOnechatUrl } = useNavigation();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const selectedAgent = useMemo(
-    () => agents.find((agent) => agent.id === selectedAgentId),
-    [agents, selectedAgentId]
-  );
 
   const options: EuiSelectableOption[] = useMemo(
     () =>
       agents.map((agent) => ({
         key: agent.id,
         label: agent.name,
-        checked: agent.id === selectedAgentId ? 'on' : undefined,
+        checked: agent.id === selectedAgent?.id ? 'on' : undefined,
       })),
-    [agents, selectedAgentId]
+    [agents, selectedAgent?.id]
   );
 
   const handleAgentChange = useCallback(
@@ -104,7 +93,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       button={
         <AgentSelectButton
           selectedAgentName={selectedAgent?.name}
-          isLoading={isLoading}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
@@ -119,7 +107,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         options={options}
         onChange={handleAgentChange}
         singleSelection
-        isLoading={isLoading}
       >
         {(list) => (
           <>

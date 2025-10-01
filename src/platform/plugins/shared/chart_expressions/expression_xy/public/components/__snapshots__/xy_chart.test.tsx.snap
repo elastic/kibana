@@ -724,6 +724,12 @@ exports[`XYChart component it renders area 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -786,7 +792,7 @@ exports[`XYChart component it renders area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -795,7 +801,7 @@ exports[`XYChart component it renders area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2159,6 +2165,12 @@ exports[`XYChart component it renders bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -2221,7 +2233,7 @@ exports[`XYChart component it renders bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2230,7 +2242,7 @@ exports[`XYChart component it renders bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3594,6 +3606,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -3656,7 +3674,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3665,7 +3683,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5029,6 +5047,12 @@ exports[`XYChart component it renders line 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -5091,7 +5115,7 @@ exports[`XYChart component it renders line 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5100,7 +5124,7 @@ exports[`XYChart component it renders line 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -6464,6 +6488,12 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -6526,7 +6556,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -6535,7 +6565,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -7899,6 +7929,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -7961,7 +7997,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -7970,7 +8006,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -9334,6 +9370,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -9396,7 +9438,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -9405,7 +9447,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10788,6 +10830,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -10850,7 +10898,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10859,7 +10907,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -12313,6 +12361,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -12375,7 +12429,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -12384,7 +12438,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13831,6 +13885,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "visible": false,
                 },
               },
+              "brush": Object {
+                "fill": "#0B64DD",
+                "opacity": 0.1,
+                "stroke": "#0B64DD",
+                "strokeWidth": 1,
+              },
               "bubbleSeriesStyle": Object {
                 "point": Object {
                   "dimmed": Object {
@@ -13893,7 +13953,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13902,7 +13962,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     4,
                     4,
                   ],
-                  "stroke": "#CAD3E2",
+                  "stroke": "#0B64DD",
                   "strokeWidth": 1,
                   "visible": true,
                 },
