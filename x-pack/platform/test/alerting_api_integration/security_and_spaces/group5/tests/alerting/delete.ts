@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
@@ -384,6 +385,8 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           .delete(`/api/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(400);
+
+        await deleteRuleById(es, createdRule.id);
       });
     });
   });
