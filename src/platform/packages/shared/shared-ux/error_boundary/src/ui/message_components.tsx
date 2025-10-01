@@ -15,10 +15,8 @@ import {
   EuiEmptyPrompt,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiLink,
-  EuiTitle,
   useGeneratedHtmlId,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,22 +34,18 @@ interface FatalPromptProps {
 
 const CodePanel: React.FC<CodePanelProps> = (props) => {
   const { error, errorInfo, name: errorComponentName, onClose } = props;
-  const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'simpleFlyoutTitle',
-  });
 
   const errorName = errorComponentName && strings.details.componentName(errorComponentName);
   const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiTitle size="m">
-            <h2>{strings.details.title()}</h2>
-          </EuiTitle>
-        </EuiPanel>
-      </EuiFlyoutHeader>
+    <EuiFlyout
+      onClose={onClose}
+      paddingSize="none"
+      session={true}
+      size="m"
+      flyoutMenuProps={{ title: strings.details.title() }}
+    >
       <EuiFlyoutBody>
         <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
           <p>{(error.stack ?? error.toString()) + '\n\n'}</p>

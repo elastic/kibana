@@ -9,7 +9,6 @@
 
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiDescriptionList,
   EuiTitle,
@@ -20,7 +19,6 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
@@ -37,16 +35,14 @@ interface Props {
 
 export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
   const { filesClient } = useFilesManagementContext();
-  const titleId = useGeneratedHtmlId({
-    prefix: 'fileFlyout',
-  });
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="m" aria-labelledby={titleId}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id={titleId}>{file.name}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="m"
+      session={true}
+      flyoutMenuProps={{ title: file.name }}
+    >
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem>

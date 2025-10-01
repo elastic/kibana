@@ -10,7 +10,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiButton,
   EuiLoadingSpinner,
@@ -21,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Chart, Axis, Position, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
@@ -41,15 +39,15 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();
   });
-  const titleId = useGeneratedHtmlId({ prefix: 'diagnosticsFlyoutTitle' });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s" aria-labelledby={titleId}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>{i18nTexts.diagnosticsFlyoutTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      session={true}
+      flyoutMenuProps={{ title: i18nTexts.diagnosticsFlyoutTitle }}
+    >
       <EuiFlyoutBody>
         {status === 'error' ? (
           <EuiEmptyPrompt

@@ -14,12 +14,10 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFormRow,
   EuiText,
-  EuiTitle,
   EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -59,8 +57,6 @@ interface ManagedFlyoutProps {
   isDirty: boolean;
   onCloseFlyout: () => void;
   publicAPIEnabled?: boolean;
-  shareObjectType: string;
-  shareObjectTypeAlias?: string;
   shareObjectTypeMeta: ReturnType<
     typeof useShareTypeContext<'integration', 'export'>
   >['objectTypeMeta'];
@@ -124,8 +120,6 @@ function ManagedFlyout({
   onCloseFlyout,
   publicAPIEnabled,
   shareObjectTypeMeta,
-  shareObjectType,
-  shareObjectTypeAlias,
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
@@ -146,20 +140,6 @@ function ManagedFlyout({
 
   return (
     <React.Fragment>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="share.export.flyoutTitle"
-              defaultMessage="Export {objectType} as {type}"
-              values={{
-                objectType: shareObjectTypeAlias ?? shareObjectType.toLocaleLowerCase(),
-                type: exportIntegration.config.label,
-              }}
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <Fragment>
@@ -346,6 +326,14 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     canSkipDisplayingPopover,
   ]);
 
+  const flyoutTitle = i18n.translate('share.export.flyoutTitle', {
+    defaultMessage: 'Export {objectType} as {type}',
+    values: {
+      objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
+      type: (selectedMenuItem as ExportShareConfig | undefined)?.config.label,
+    },
+  });
+
   return (
     <Fragment>
       <EuiWrappingPopover
@@ -409,6 +397,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
+          session={true}
+          flyoutMenuProps={{ title: flyoutTitle }}
         >
           {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global
@@ -423,8 +413,6 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           {selectedMenuItemMeta!.group === 'export' ? (
             <ManagedFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
-              shareObjectType={objectType}
-              shareObjectTypeAlias={objectTypeAlias}
               shareObjectTypeMeta={objectTypeMeta}
               isDirty={isDirty}
               publicAPIEnabled={publicAPIEnabled}
