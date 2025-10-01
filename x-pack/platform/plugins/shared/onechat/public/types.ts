@@ -16,6 +16,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { ToolServiceStartContract } from '@kbn/onechat-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -26,6 +27,7 @@ export interface OnechatSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   management: ManagementSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -35,6 +37,7 @@ export interface OnechatStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface OnechatPluginSetup {}

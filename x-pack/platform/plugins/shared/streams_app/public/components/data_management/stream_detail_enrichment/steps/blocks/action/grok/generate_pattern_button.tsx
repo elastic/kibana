@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AIFeatures } from './use_ai_features';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 export interface GeneratePatternButtonProps {
   onClick(connectorId: string): void;
