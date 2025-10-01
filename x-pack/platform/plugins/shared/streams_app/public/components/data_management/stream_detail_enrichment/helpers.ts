@@ -5,19 +5,8 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import type { JsonValue } from '@kbn/utility-types';
-
-const CONSOLE_API_SERVER = '/api/console/api_server';
-
-type ProcessorDef = { __template?: JsonValue };
-type ProcessorEntry = Record<string, ProcessorDef>;
-type DataAutocompleteRules = { processors?: Array<{ __one_of?: ProcessorEntry[] }> };
-type IngestPutPipelineEndpoint = { data_autocomplete_rules?: DataAutocompleteRules };
-
 export type ProcessorSuggestion = { name: string; template?: JsonValue };
-
-let processorsCache: ProcessorSuggestion[] | null = null;
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -66,36 +55,6 @@ const formatXJsonString = (input: string) => {
   return formattedJsonString;
 };
 
-
-
-
-export const loadProcessorSuggestions = async (http: HttpStart): Promise<ProcessorSuggestion[]> => {
-
-  if (processorsCache) {
-    return processorsCache;
-  }
-  try {
-    const res = await http.get<{ es?: { endpoints?: Record<string, unknown> } }>(CONSOLE_API_SERVER);
-    const endpoints = res?.es?.endpoints ?? {};
-    const ingest = endpoints['ingest.put_pipeline'] as IngestPutPipelineEndpoint | undefined;
-    const rules = ingest?.data_autocomplete_rules;
-    const oneOf = rules?.processors?.[0]?.__one_of as ProcessorEntry[] | undefined;
-    if (!oneOf) {
-      processorsCache = [];
-      return processorsCache;
-    }
-    processorsCache = oneOf.map((entry: ProcessorEntry) => {
-      const name = Object.keys(entry)[0];
-      const def = entry[name] as ProcessorDef;
-      const template = def?.__template;
-      return { name, template };
-    });
-    return processorsCache;
-  } catch {
-    processorsCache = [];
-    return processorsCache;
-  }
-};
 
 
 export const hasOddQuoteCount = (text: string) => ((text.match(/\"/g) || []).length % 2) === 1;

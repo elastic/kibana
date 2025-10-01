@@ -19,14 +19,16 @@ import type { ProcessorFormState } from '../../../../types';
 import {
   deserializeJson,
   serializeXJson,
-  loadProcessorSuggestions,
   buildProcessorInsertText,
   hasOddQuoteCount,
 } from '../../../../helpers';
 
 export const JsonEditor = () => {
   const {
-    core: { docLinks, http },
+    core: { docLinks },
+    dependencies: {
+      start: { console: consoleStart },
+    },
   } = useKibana();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
@@ -113,7 +115,7 @@ export const JsonEditor = () => {
         const lastLine = bodyContent.split('\n').pop()!.trim();
         const alreadyOpenedQuote = hasOddQuoteCount(lastLine);
 
-        const terms = await loadProcessorSuggestions(http);
+        const terms = await consoleStart.specClient.getIngestProcessorSuggestions();
         const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
           const label = String(t.name);
           const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
@@ -129,7 +131,7 @@ export const JsonEditor = () => {
         return { suggestions };
       },
     };
-  }, [http]);
+  }, [consoleStart]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);

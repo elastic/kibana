@@ -22,6 +22,7 @@ import type {
   EmbeddedConsoleView,
   AppPluginSetupDependencies,
 } from './types';
+import { ConsoleSpecClient } from './clients/spec_client';
 import {
   AutocompleteInfo,
   setAutocompleteInfo,
@@ -142,7 +143,9 @@ export class ConsoleUIPlugin
     } = this.ctx.config.get<ClientConfigType>();
     const isDevMode = this.ctx.env.mode.dev;
 
-    const consoleStart: ConsolePluginStart = {};
+    const consoleStart: ConsolePluginStart = {
+      specClient: new ConsoleSpecClient(core.http),
+    };
     const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
       ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID
     );
