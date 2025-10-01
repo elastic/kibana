@@ -183,15 +183,15 @@ export const CreateIndexForm = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {isSampleDataPluginAvailable && hasSampleDataRequiredPrivileges && (
+          {isSampleDataPluginAvailable && hasSampleDataRequiredPrivileges && (
+            <EuiFlexItem grow={false}>
               <SampleDataPanel
                 isLoading={isIngestingSampleData}
                 onIngestSampleData={onIngestSampleData}
                 hasRequiredLicense={hasRequiredLicense}
               />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </>
