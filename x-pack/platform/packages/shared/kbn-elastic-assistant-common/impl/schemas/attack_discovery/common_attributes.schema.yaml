@@ -179,67 +179,6 @@ components:
           type: string
           description: The reason for a status of failed.
 
-    AttackDiscoveryUpdateProps:
-      type: object
-      required:
-        - id
-        - backingIndex
-      properties:
-        id:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-        apiConfig:
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
-          description: LLM API configuration.
-        alertsContextCount:
-          type: integer
-          description: The number of alerts in the context.
-        attackDiscoveries:
-          $ref: '#/components/schemas/AttackDiscoveries'
-          description: The attack discoveries.
-        status:
-          $ref: '#/components/schemas/AttackDiscoveryStatus'
-          description: The status of the attack discovery.
-        replacements:
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
-        generationIntervals:
-          type: array
-          description: The most 5 recent generation intervals
-          items:
-            $ref: '#/components/schemas/GenerationInterval'
-        backingIndex:
-          type: string
-          description: The backing index required for update requests.
-        failureReason:
-          type: string
-          description: The reason for a status of failed.
-        lastViewedAt:
-          description: The last time attack discovery was viewed in the browser.
-          type: string
-
-    AttackDiscoveryCreateProps:
-      type: object
-      required:
-        - attackDiscoveries
-        - apiConfig
-        - status
-      properties:
-        id:
-          type: string
-          description: The attack discovery id.
-        status:
-          $ref: '#/components/schemas/AttackDiscoveryStatus'
-          description: The status of the attack discovery.
-        alertsContextCount:
-          type: integer
-          description: The number of alerts in the context.
-        attackDiscoveries:
-          $ref: '#/components/schemas/AttackDiscoveries'
-          description: The attack discoveries.
-        apiConfig:
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
-          description: LLM API configuration.
-        replacements:
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
 
     CreateAttackDiscoveryAlertsParams:
       type: object
@@ -249,7 +188,9 @@ components:
         - apiConfig
         - attackDiscoveries
         - connectorName
+        - enableFieldRendering
         - generationUuid
+        - withReplacements
       properties:
         alertsContextCount:
           description: The number of alerts provided as context to the LLM
@@ -278,15 +219,24 @@ components:
         connectorName:
           description: The name of the connector that generated the attack discovery
           type: string
+        enableFieldRendering:
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          type: boolean
         generationUuid:
           description: The generation ID of the run that created the attack discovery
           type: string
         replacements:
           description: Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        withReplacements:
+          description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+          type: boolean
 
     FindAttackDiscoveryAlertsParams:
       type: object
+      required:
+        - enableFieldRendering
+        - withReplacements
       properties:
         alertIds:
           description: filter by alert IDs within Attack discovery
@@ -298,8 +248,14 @@ components:
           type: array
           items:
             type: string
+        enableFieldRendering:
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          type: boolean
         end:
           description: filter by end date (relative or absolute)
+          type: string
+        executionUuid:
+          description: filter by execution UUID
           type: string
         includeUniqueAlertIds:
           description: whether to include attack alert IDs in the response
@@ -336,6 +292,9 @@ components:
           type: array
           items:
             type: string
+        withReplacements:
+          description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+          type: boolean
 
     AttackDiscoveryGenerationConfig:
       type: object
