@@ -321,17 +321,18 @@ const getSuggestions = (
     endColumn: position.column,
   });
 
-  // Check if we're in the middle of typing a field name with a dot for nested fields
-  const fieldWithDotMatch = lineContentBeforePosition.match(/"([^"]+)\.$/);
-  const parentFieldName = fieldWithDotMatch ? fieldWithDotMatch[1] + '.' : null;
+  // Check if we're typing a nested field name (contains a dot)
+  // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
+  const fieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  const fieldBeingTyped = fieldWithDotMatch ? fieldWithDotMatch[1] : null;
 
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;
-  if (parentFieldName) {
-    // Find where the parent field name starts
-    const parentFieldIndex = lineContentBeforePosition.lastIndexOf('"' + parentFieldName);
-    if (parentFieldIndex >= 0) {
-      startColumn = parentFieldIndex + 2; // +2 to skip the quote and start at the field name
+  if (fieldBeingTyped) {
+    // Find where the field name starts
+    const fieldIndex = lineContentBeforePosition.lastIndexOf('"' + fieldBeingTyped);
+    if (fieldIndex >= 0) {
+      startColumn = fieldIndex + 2; // +2 to skip the quote and start at the field name
     }
   }
 
@@ -345,11 +346,11 @@ const getSuggestions = (
 
   return (
     filterTermsWithoutName(autocompleteSet)
-      // Filter suggestions to only show nested fields when there's a parent field with a dot
+      // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
-        if (parentFieldName) {
-          // Only show fields that start with the parent field name
-          return typeof item.name === 'string' && item.name.startsWith(parentFieldName);
+        if (fieldBeingTyped) {
+          // Only show fields that start with what the user has typed so far
+          return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
         }
         return true;
       })
