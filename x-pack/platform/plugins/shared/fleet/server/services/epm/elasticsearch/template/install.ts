@@ -428,16 +428,12 @@ export function buildComponentTemplates(params: {
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
-  const isPkgConfiguringDynamicSettings =
-    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.dynamic !== undefined;
+  const isPkgConfiguringSubobjects =
+    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.subobjects !== undefined;
 
   // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
   // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
-  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringDynamicSettings;
-
-  // Override `subobjects: false` to avoid conflicts with traces-otel@mappings
-  const shouldOverrideSettingsForOtelInputsTraces =
-    shouldOverrideSettingsForOtelInputs && type === 'traces' && !indexTemplateMappings.runtime;
+  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringSubobjects;
 
   templatesMap[packageTemplateName] = {
     template: {
@@ -472,13 +468,14 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
-        ...(shouldOverrideSettingsForOtelInputs ? { dynamic: true } : {}),
-        ...(shouldOverrideSettingsForOtelInputsTraces ? { subobjects: undefined } : {}),
+        ...(shouldOverrideSettingsForOtelInputs ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
     _meta,
   };
+
+  console.dir(templatesMap[packageTemplateName], {depth: null});
 
   // Stub custom template
   if (type) {
