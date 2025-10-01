@@ -27,7 +27,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { LensApiState } from '../schema';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 import type { LensApiFilterType } from '../schema/filter';
 
@@ -510,7 +510,7 @@ describe('filtersAndQueryToApiFormat', () => {
   });
 
   test('handles non-string query gracefully', () => {
-    const lensState: LensAttributes = {
+    const lensState = {
       state: {
         filters: [] as Filter[],
         query: { language: 'kuery', query: { bool: { must: [] } } } as Query,
@@ -519,11 +519,16 @@ describe('filtersAndQueryToApiFormat', () => {
 
     const result = filtersAndQueryToApiFormat(lensState);
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "filters": Array [],
-        "query": undefined,
-      }
-    `);
+    expect(result).toEqual({});
+  });
+
+  test('should not include filters if empty and query if ES|QL', () => {
+    const lensState = {
+      state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
   });
 });
