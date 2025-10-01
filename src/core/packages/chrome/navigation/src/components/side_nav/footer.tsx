@@ -30,7 +30,7 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
   return (
     <footer
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
-        defaultMessage: 'Side navigation footer',
+        defaultMessage: 'Side navigation',
       })}
       css={css`
         align-items: center;

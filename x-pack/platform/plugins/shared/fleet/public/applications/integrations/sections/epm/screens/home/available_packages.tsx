@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -18,6 +18,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { IntegrationPreference } from '../../components/integration_preference';
+import { AgentlessFilter } from '../../components/agentless_filter';
 
 import { CategoryFacets } from './category_facets';
 
@@ -110,6 +111,9 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     mainCategories,
     preference,
     setPreference,
+    onlyAgentlessFilter,
+    setOnlyAgentlessFilter,
+    isAgentlessEnabled,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
@@ -131,19 +135,57 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
       setCategory(id as ExtendedIntegrationCategory);
       setSearchTerm('');
       setSelectedSubCategory(undefined);
-      setUrlandPushHistory({ searchString: '', categoryId: id, subCategoryId: '' });
+      setUrlandPushHistory({
+        searchString: '',
+        categoryId: id,
+        subCategoryId: '',
+        onlyAgentless: onlyAgentlessFilter,
+      });
     },
-    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory]
+    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
+  );
+
+  const onOnlyAgentlessFilterChange = useCallback(
+    (enabled: boolean) => {
+      setOnlyAgentlessFilter(enabled);
+      setUrlandPushHistory({
+        searchString: searchTerm,
+        categoryId: selectedCategory,
+        subCategoryId: selectedSubCategory || '',
+        onlyAgentless: enabled,
+      });
+    },
+    [
+      setOnlyAgentlessFilter,
+      setUrlandPushHistory,
+      searchTerm,
+      selectedCategory,
+      selectedSubCategory,
+    ]
   );
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
-    setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '', subCategoryId: '' });
+    setUrlandReplaceHistory({
+      searchString: searchTerm,
+      categoryId: '',
+      subCategoryId: '',
+      onlyAgentless: onlyAgentlessFilter,
+    });
     return null;
   }
 
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
+      {isAgentlessEnabled && (
+        <>
+          <AgentlessFilter
+            agentlessFilter={onlyAgentlessFilter}
+            onAgentlessFilterChange={onOnlyAgentlessFilterChange}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <IntegrationPreference
         initialType={preference}
         prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
@@ -190,6 +232,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
       selectedSubCategory={selectedSubCategory}
       setSelectedSubCategory={setSelectedSubCategory}
       showMissingIntegrationMessage
+      onlyAgentlessFilter={onlyAgentlessFilter}
     />
   );
 };

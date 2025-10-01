@@ -13,17 +13,23 @@ import {
   selectCurrentPage,
   selectDimensions,
   selectValueFilters,
+  selectSearchTerm,
+  selectIsFullscreen,
   setCurrentPage,
   setDimensions,
+  setSearchTerm,
   setValueFilters,
+  toggleFullscreen,
 } from '../store/slices';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 
 export const useMetricsGridState = () => {
   const dispatch = useAppDispatch();
   const currentPage = useAppSelector(selectCurrentPage);
   const dimensions = useAppSelector(selectDimensions);
   const valueFilters = useAppSelector(selectValueFilters);
+  const searchTerm = useAppSelector(selectSearchTerm);
+  const isFullscreen = useAppSelector(selectIsFullscreen);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: string[]) => {
@@ -51,14 +57,34 @@ export const useMetricsGridState = () => {
 
   const onPageChange = useCallback((page: number) => dispatch(setCurrentPage(page)), [dispatch]);
 
+  const onClearSearchTerm = useCallback(() => {
+    dispatch(setSearchTerm(''));
+  }, [dispatch]);
+
+  const onSearchTermChange = useCallback(
+    (term: string) => {
+      dispatch(setSearchTerm(term));
+    },
+    [dispatch]
+  );
+
+  const onToggleFullscreen = useCallback(() => {
+    dispatch(toggleFullscreen());
+  }, [dispatch]);
+
   return {
     currentPage,
     dimensions,
     valueFilters,
+    isFullscreen,
+    searchTerm,
+    onClearSearchTerm,
+    onSearchTermChange,
     onDimensionsChange,
     onValuesChange,
     onPageChange,
     onClearAllDimensions,
     onClearValues,
+    onToggleFullscreen,
   };
 };

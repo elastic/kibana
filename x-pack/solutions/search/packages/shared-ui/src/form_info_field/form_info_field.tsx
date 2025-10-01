@@ -37,7 +37,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {label && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -45,17 +45,16 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+      <EuiFlexItem grow={false} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <code
           data-test-subj={dataTestSubj}
           style={{
-            color: euiTheme.colors.successText,
+            color: euiTheme.colors.textParagraph,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-            backgroundColor: euiTheme.colors.lightestShade,
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             borderRadius: euiTheme.border.radius.small,
-            fontWeight: euiTheme.font.weight.bold,
             fontSize: euiTheme.size.m,
           }}
         >
@@ -71,6 +70,8 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
         >
           {(copy) => (
             <EuiButtonIcon
+              size="s"
+              display="base"
               onClick={copy}
               iconType="copy"
               color="text"

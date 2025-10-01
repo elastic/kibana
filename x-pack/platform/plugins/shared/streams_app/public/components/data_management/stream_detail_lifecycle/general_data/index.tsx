@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useState } from 'react';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { css } from '@emotion/react';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
@@ -36,6 +37,7 @@ export const StreamDetailGeneralData = ({
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -76,6 +78,10 @@ export const StreamDetailGeneralData = ({
       refreshDefinition();
       setIsEditModalOpen(false);
 
+      telemetryClient.trackRetentionChanged(
+        lifecycle,
+        getStreamTypeFromDefinition(definition.stream)
+      );
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
           defaultMessage: 'Stream lifecycle updated',
@@ -94,7 +100,7 @@ export const StreamDetailGeneralData = ({
   };
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="m" css={{ flexGrow: 0 }}>
       {isEditModalOpen && (
         <EditLifecycleModal
           definition={definition}
@@ -104,21 +110,21 @@ export const StreamDetailGeneralData = ({
           updateInProgress={updateInProgress}
         />
       )}
-      <EuiText>
+      <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.streams.streamDetailLifecycle.generalData', {
             defaultMessage: 'General data',
           })}
         </h4>
-      </EuiText>
-      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
-        <EuiFlexItem grow={1} css={flexItemCss}>
+      </EuiTitle>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} css={flexItemCss}>
+        <EuiFlexItem>
           <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
-        <EuiFlexItem grow={2} css={flexItemCss}>
+        <EuiFlexItem>
           <IngestionCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -127,22 +133,9 @@ export const StreamDetailGeneralData = ({
           <IlmSummary definition={definition} stats={stats} />
         </EuiPanel>
       ) : null}
-      {definition.privileges.monitor && (
-        <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
-        </EuiPanel>
-      )}
-    </>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
+        <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
+      </EuiPanel>
+    </EuiFlexGroup>
   );
 };
-
-const flexItemCss = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-`;
-
-const flexRowCss = css`
-  flex-grow: 0;
-  align-items: stretch;
-`;

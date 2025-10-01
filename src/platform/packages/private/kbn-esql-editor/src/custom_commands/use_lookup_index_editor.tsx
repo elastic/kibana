@@ -27,12 +27,21 @@ import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
+import type { LookupIndexPrivileges } from './use_lookup_index_privileges';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 
 /**
  * monaco editor command ID for opening the lookup index flyout.
  */
 export const COMMAND_ID = 'esql.lookup_index.create';
+
+export interface IndexEditorCommandArgs {
+  indexName: string;
+  doesIndexExist?: boolean;
+  canEditIndex?: boolean;
+  triggerSource?: string;
+  highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
+}
 
 async function isCurrentAppSupported(
   currentAppId$: ApplicationStart['currentAppId$'] | undefined
@@ -47,7 +56,7 @@ async function isCurrentAppSupported(
 export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
-  indexPrivileges: any
+  indexPrivileges: LookupIndexPrivileges
 ): string | undefined {
   const { canEditIndex, canReadIndex, canCreateIndex } = indexPrivileges;
 
@@ -74,11 +83,15 @@ export function getMonacoCommandString(
     return;
   }
 
+  const highestPrivilege = getHighestPrivilegeLevel(indexPrivileges);
+
   return `[${actionLabel}](command:${COMMAND_ID}?${encodeURIComponent(
     JSON.stringify({
       indexName,
       doesIndexExist: isExistingIndex,
       canEditIndex,
+      triggerSource: 'esql_hover',
+      highestPrivilege,
     })
   )})`;
 }
@@ -254,11 +267,17 @@ export const useLookupIndexCommand = (
   );
 
   const openFlyout = useCallback(
-    async (indexName: string, doesIndexExist?: boolean, canEditIndex = true) => {
+    async (
+      indexName: string,
+      doesIndexExist?: boolean,
+      canEditIndex = true,
+      triggerSource = 'esql_autocomplete'
+    ) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
         canEditIndex,
+        triggerSource,
         onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
           await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },
@@ -275,9 +294,9 @@ export const useLookupIndexCommand = (
   useEffect(function registerCommandOnMount() {
     const disposable = monaco.editor.registerCommand(
       COMMAND_ID,
-      async (_, args: { indexName: string; doesIndexExist?: boolean; canEditIndex?: boolean }) => {
-        const { indexName, doesIndexExist, canEditIndex } = args;
-        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex);
+      async (_, args: IndexEditorCommandArgs) => {
+        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
+        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
       }
     );
     return () => {
@@ -290,3 +309,15 @@ export const useLookupIndexCommand = (
     lookupIndexBadgeStyle,
   };
 };
+
+/**
+ * Determines the highest privilege level.
+ */
+function getHighestPrivilegeLevel(indexPrivileges: LookupIndexPrivileges): string {
+  const { canCreateIndex, canEditIndex, canReadIndex } = indexPrivileges;
+
+  if (canCreateIndex) return 'create';
+  if (canEditIndex) return 'edit';
+  if (canReadIndex) return 'read';
+  return '';
+}

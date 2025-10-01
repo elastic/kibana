@@ -426,6 +426,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
     if (this._definition.ingest.processing.steps.length > 0) {

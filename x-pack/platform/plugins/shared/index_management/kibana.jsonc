@@ -18,7 +18,7 @@
       "home",
       "management",
       "features",
-      "share",
+      "share"
     ],
     "optionalPlugins": [
       "security",
@@ -28,7 +28,8 @@
       "ml",
       "streams",
       "console",
-      "licensing"
+      "licensing",
+      "reindexService"
     ],
     "requiredBundles": [
       "kibanaReact",
