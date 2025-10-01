@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -87,7 +88,7 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    core.rendering.addContext(
+    <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
         <CloudProvider>
           <KibanaContextProvider
@@ -124,7 +125,7 @@ export const renderApp = ({
           </KibanaContextProvider>
         </CloudProvider>
       </ApplicationUsageTrackingProvider>
-    ),
+    </KibanaRenderContextProvider>,
     element
   );
 

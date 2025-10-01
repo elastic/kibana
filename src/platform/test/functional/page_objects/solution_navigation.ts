@@ -83,7 +83,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           isExpanded
         );
         if (isExpanded === 'true') {
-          await moreMenuItem.click();
+          await browser.clickMouseButton({ x: 0, y: 0 }); // click outside to close
         }
         isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         if (isExpanded === 'true') {
@@ -130,6 +130,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           mochaContext.skip();
         }
       },
+      expandMore: expandMoreIfNeeded,
+      collapseMore: collapseMoreIfNeeded,
       async expectLinkExists(
         by:
           | { deepLinkId: AppDeepLinkId }
@@ -138,10 +140,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           | { panelNavLinkId: string }
       ) {
         log.debug('SolutionNavigation.sidenav.expectLinkExists', JSON.stringify(by));
-
-        // TODO: find a better way without expanding every time
-        // https://github.com/elastic/kibana/issues/236242
-        await expandMoreIfNeeded();
 
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
@@ -199,7 +197,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
         // TODO: find a better way without expanding every time
         // https://github.com/elastic/kibana/issues/236242
-        await expandMoreIfNeeded();
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
           await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
@@ -228,7 +225,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectOnlyDefinedLinks(navItemIds: string[], options?: { checkOrder?: boolean }) {
         const navItemIdRegEx = /nav-item-id-[^\s]+/g;
-        await expandMoreIfNeeded();
         const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
         const foundNavItemIds: string[] = [];
         for (const sideNavItem of allSideNavLinks) {
@@ -356,10 +352,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async isPanelOpen(sectionId: NavigationId) {
         if (await this.isV2()) {
           try {
-            await this.expectLinkActive({ navId: sectionId });
-            // TODO: check if panel is actually open
-            // https://github.com/elastic/kibana/issues/236242
-            return true;
+            const panel = await testSubjects.find(
+              `~side-navigation-panel_${sectionId}`,
+              TIMEOUT_CHECK
+            );
+            return !!panel;
           } catch (e) {
             return false;
           }
