@@ -1,7 +1,7 @@
 # Agent Builder - contributor guide
 
-This document is intended for platform contributors to the Agent Builder framework, and
-explains the base concepts, and how to register "platform" tools and agents.
+This document is intended for platform contributors to the Agent Builder framework,
+explains the base concepts and how to register "platform" tools and agents.
 
 (But please also check the [README.md](./README.md) too for more general information about Agent Builder)
 
@@ -9,26 +9,26 @@ explains the base concepts, and how to register "platform" tools and agents.
 
 Platform and user-created tools and agents share the same concepts and API, but have some notable differences:
 
-- **read-only**
+### read-only
 
-Platform tools and agents are read-only, and cannot be modified by the user.
+Platform tools and agents are read-only, and cannot be modified or deleted by the user.
 
-- **space awareness**
+### space awareness
 
 - User-created tools are **space-aware** (accessible exclusively from the space they were created in).
-- Platform tools and agents are **space agnostic**: they are accessible from any space. 
-  - *(as long as the user has access to it and the feature is enabled for that space)*
+- Platform tools and agents are **space agnostic**: they are accessible from any space.
+  - _(as long as the user has access to it and the feature is enabled for that space)_
 
-- **id namespacing**
+### id namespacing
 
 - User-created tools and agents are free to use any id they want, as long as they are unique and not inside platform reserved namespaces.
 - Platform tools and agents should be namespaced, using reserved namespaces (e.g. `platform.core.*`)
 - This is meant both for categorization, and to avoid id collisions (e.g. we introduce in a later version a tool with the same id as a tool a user created)
 
-- **built-in** tool type
+### built-in tool type
 
 Platform tools can use the internal `builtin` tool type, allowing them to register tools executing arbitrary code from
-the Kibana server - where user-created tools can only use the other (serializable) tool types.
+the Kibana server, where user-created tools can only use the other (serializable) tool types.
 
 ## Registering Built tools tools
 
@@ -55,11 +55,15 @@ in `x-pack/platform/packages/shared/onechat/onechat-server/allow_lists.ts`
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
-### "Code" tools
+### Registering built-in tools
+
+#### Basic example
+
+A simple example, with a tool just doing some math:
 
 ```ts
 onechat.tools.register({
-  id: 'my_tool',
+  id: 'platform.examples.add_42',
   type: ToolType.builtin,
   description: 'Returns the sum of the input number and 42.',
   tags: ['example'],
@@ -81,8 +85,8 @@ onechat.tools.register({
 
 #### using scoped services
 
-To let tools use services scoped to the current user, we expose a set of services from the `context` object,
-exposed as the second parameter of the of the handler.
+To let tools use services scoped to the current user during execution, we expose a set of services
+from the `context` object, exposed as the second parameter of the tool's handler.
 
 This context exposes, in addition to the `request` object, a panel of pre-scoped services such as:
 
@@ -92,10 +96,10 @@ This context exposes, in addition to the `request` object, a panel of pre-scoped
 
 ```ts
 onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
+  id: 'platform.examples.scoped_services',
   type: ToolType.builtin,
   description: 'Some example',
+  tags: ['example'],
   schema: z.object({
     indexPattern: z.string().describe('Index pattern to filter on'),
   }),
@@ -122,19 +126,18 @@ have access to the full list of services available from the handler context.
 
 Agentic tool execution (performing LLM calls) can take some time.
 
-To allow the user to know what the tool is currently doing, we expose a progress reporting API, exposed as `events` from the handler context,
-which can be used to report progress updates of the tool.
+To allow the user to know what the tool is currently doing, we expose a progress reporting API accessible via
+the `events` service from the handler context, which can be used to report progress updates of the tool.
 
-Those progress updates will be displayed in the UI in the thinking panel, improving the user experience by increasing
+Those progress updates will be displayed in the UI (inside the thinking panel), improving the user experience by increasing
 the visibility of the tool's progress.
-
-This is for example used for our `index_search` tool, to show the current stage/step the tool is currently performing.
 
 ```ts
 onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
+  id: 'platform.examples.progress_report',
+  type: ToolType.builtin,
   description: 'Some example',
+  tags: ['example'],
   schema: z.object({}),
   handler: async ({}, { events }) => {
     events.reportProgress('Doing something');
@@ -150,7 +153,7 @@ onechat.tools.register({
 });
 ```
 
-## Tool result types
+#### Tool result types
 
 For our framework to understand what kind of data is being returned by a tool, all tools
 must return a list of results following a specific format.
@@ -167,6 +170,29 @@ a tool returned some result which can be rendered as a visualization if we want 
 
 This is also how we render specific type of results differently in the UI, e.g we inline `query` results
 in the thinking panel.
+
+```ts
+onechat.tools.register({
+  id: 'platform.examples.result_types',
+  type: ToolType.builtin,
+  description: 'Some example',
+  tags: ['example'],
+  schema: z.object({
+    indexPattern: z.string().describe('Index pattern to filter on'),
+  }),
+  handler: async ({ indexPattern }, { events, esClient }) => {
+    const esqlQuery = await generateSomeQuery(indexPattern);
+    const data = await executeEsql(esqlQuery, esClient);
+
+    return {
+      results: [
+        { type: ToolResultType.query, data: { esql: esqlQuery } },
+        { type: ToolResultType.tabular_data, data },
+      ],
+    };
+  },
+});
+```
 
 See the `ToolResultType` and corresponding types in `x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_result.ts`
 
@@ -236,5 +262,6 @@ onechat.agents.register({
 ```
 
 At the moment, the `configuration` object is only composed of two attributes:
+
 - `instructions`: The custom text instructions which will be provided to the agent (in addition to the default set of instructions present for all our agents)
 - `tools`: the list of tools which will be available to the agent, following a specific format (see the example above)
