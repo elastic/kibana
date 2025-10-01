@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { useSelector } from 'react-redux';
-import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/state/state';
+import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/state';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
 
 export interface CopyElasticSearchDevToolsOptionProps {
