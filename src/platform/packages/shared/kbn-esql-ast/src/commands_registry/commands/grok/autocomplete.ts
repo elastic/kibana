@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
@@ -51,18 +51,15 @@ export async function autocomplete(
   }
   // GROK field pattern /
   else if (commandArgs.length === 2) {
-    return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+    return [withAutoSuggest(pipeCompleteItem)];
   }
 
   // GROK /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
   return fieldSuggestions.map((sug) => {
-    // if there is already a command, we don't want to override it
-    if (sug.command) return sug;
-    return {
+    return withAutoSuggest({
       ...sug,
       text: `${sug.text} `,
-      command: TRIGGER_SUGGESTION_COMMAND,
-    };
+    });
   });
 }

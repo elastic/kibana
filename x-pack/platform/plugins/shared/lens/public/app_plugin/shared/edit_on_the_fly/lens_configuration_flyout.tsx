@@ -60,6 +60,7 @@ export function LensEditConfigurationFlyout({
   isReadOnly,
   parentApi,
   panelId,
+  applyButtonLabel,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
@@ -292,6 +293,7 @@ export function LensEditConfigurationFlyout({
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
+          applyButtonLabel={applyButtonLabel}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -332,6 +334,7 @@ export function LensEditConfigurationFlyout({
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
+        applyButtonLabel={applyButtonLabel}
       >
         <EuiFlexGroup
           css={css`

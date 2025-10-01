@@ -983,6 +983,10 @@ paths:
 
         > Due to technical limitations, not all updates are guaranteed to appear
         in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time
+        for a document to be present in the  > final index depends on the entity
+        store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -1012,8 +1016,10 @@ paths:
           description: Entity updated or created
         '403':
           description: Operation on a restricted field
-        '404':
-          description: Entity not found
+        '409':
+          description: >-
+            Conflict. The entity was updated while another update was happening
+            in ElasticSearch
         '503':
           description: >-
             Operation on an uninitialized Engine or in a cluster without CRUD
@@ -1973,14 +1979,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
           type: string
@@ -2025,6 +2024,19 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:
