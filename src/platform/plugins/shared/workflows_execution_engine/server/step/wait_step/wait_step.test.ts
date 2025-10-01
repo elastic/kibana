@@ -13,6 +13,7 @@ import { WaitStepImpl } from './wait_step';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;
@@ -21,6 +22,7 @@ describe('WaitStepImpl', () => {
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let workflowTaskManager: WorkflowTaskManager;
+  let stepContext: WorkflowContextManager;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -59,7 +61,15 @@ describe('WaitStepImpl', () => {
     workflowTaskManager = {} as unknown as WorkflowTaskManager;
     workflowTaskManager.scheduleResumeTask = jest.fn();
 
-    underTest = new WaitStepImpl(node, workflowRuntime, workflowLogger, workflowTaskManager);
+    stepContext = {} as unknown as WorkflowContextManager;
+
+    underTest = new WaitStepImpl(
+      node,
+      stepContext,
+      workflowRuntime,
+      workflowLogger,
+      workflowTaskManager
+    );
   });
 
   describe('invalid durations', () => {
@@ -90,6 +100,10 @@ describe('WaitStepImpl', () => {
   });
 
   describe('short duration', () => {
+    beforeEach(() => {
+      (stepContext as any).abortController = new AbortController();
+    });
+
     it('should handle short duration for up to 5 seconds', async () => {
       node.configuration.with.duration = '5s';
       underTest.handleShortDuration = jest.fn();
@@ -134,6 +148,20 @@ describe('WaitStepImpl', () => {
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
         `Finished waiting for 3s in step wait-step`
       );
+    });
+
+    it('should abort wait when abort signal is triggered', async () => {
+      node.configuration.with.duration = '5s';
+      const runPromise = underTest.handleShortDuration();
+
+      await jest.advanceTimersByTimeAsync(2000);
+      (stepContext as any).abortController.abort();
+
+      await expect(runPromise).rejects.toThrow(new Error('Wait step was aborted'));
+
+      expect(workflowRuntime.startStep).toHaveBeenCalledWith();
+      expect(workflowRuntime.finishStep).not.toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
     });
   });
 
