@@ -74,9 +74,8 @@ describe('getSerializedState', () => {
         },
         "panels": Array [],
         "refreshInterval": undefined,
-        "timeFrom": undefined,
+        "timeRange": undefined,
         "timeRestore": false,
-        "timeTo": undefined,
         "title": "My Dashboard",
         "version": 1,
       }
