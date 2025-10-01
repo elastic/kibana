@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiCallOut, EuiSpacer, EuiModal } from '@elastic/eui';
+import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
@@ -16,10 +16,10 @@ import { FormProvider } from './use_review_suggestions_form';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
-import type { AIFeatures } from '../../stream_detail_enrichment/steps/blocks/action/grok/use_ai_features';
 import { useReviewSuggestionsFormContext } from './use_review_suggestions_form';
 import { useStreamsRoutingSelector } from '../state_management/stream_routing_state_machine';
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
 export interface ReviewSuggestionsFormProps {
   definition: Streams.WiredStream.GetResponse;

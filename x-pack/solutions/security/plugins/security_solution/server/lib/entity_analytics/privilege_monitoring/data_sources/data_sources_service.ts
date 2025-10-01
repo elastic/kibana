@@ -14,11 +14,12 @@ import { createIntegrationsSyncService } from './sync/integrations/integrations_
 
 export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  maxUsersAllowed: number
 ) => {
   const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const indexSyncService = createIndexSyncService(dataClient);
+  const indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
   const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
@@ -61,7 +62,6 @@ export const createDataSourcesService = (
       (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
     );
   };
-
   const syncAllSources = async () => {
     const jobs = [indexSyncService.plainIndexSync(soClient)];
     if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
@@ -76,7 +76,7 @@ export const createDataSourcesService = (
     createImportIndex,
     searchPrivilegesIndices,
     syncAllSources,
-    ...createIndexSyncService(dataClient),
+    ...createIndexSyncService(dataClient, maxUsersAllowed),
     ...createIntegrationsSyncService(dataClient, soClient),
   };
 };

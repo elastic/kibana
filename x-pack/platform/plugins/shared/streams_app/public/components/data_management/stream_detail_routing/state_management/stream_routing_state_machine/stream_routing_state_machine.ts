@@ -144,6 +144,14 @@ export const streamRoutingMachine = setup({
           actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
           reenter: true,
         },
+        'routingSamples.setDocumentMatchFilter': {
+          actions: enqueueActions(({ enqueue, event }) => {
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: event.filter,
+            });
+          }),
+        },
         'suggestion.preview': {
           target: '#idle',
           actions: enqueueActions(({ enqueue, event }) => {
@@ -230,7 +238,13 @@ export const streamRoutingMachine = setup({
               on: {
                 'routingRule.cancel': {
                   target: '#idle',
-                  actions: [{ type: 'resetRoutingChanges' }],
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                  ],
                 },
                 'routingRule.change': {
                   actions: enqueueActions(({ enqueue, event }) => {
@@ -253,14 +267,6 @@ export const streamRoutingMachine = setup({
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
-                },
-                'routingSamples.setDocumentMatchFilter': {
-                  actions: enqueueActions(({ enqueue, event }) => {
-                    enqueue.sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.setDocumentMatchFilter',
-                      filter: event.filter,
-                    });
-                  }),
                 },
               },
             },
@@ -309,7 +315,13 @@ export const streamRoutingMachine = setup({
                 },
                 'routingRule.cancel': {
                   target: '#idle',
-                  actions: [{ type: 'resetRoutingChanges' }],
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                  ],
                 },
                 'routingRule.change': {
                   actions: [{ type: 'patchRule', params: ({ event }) => event }],
