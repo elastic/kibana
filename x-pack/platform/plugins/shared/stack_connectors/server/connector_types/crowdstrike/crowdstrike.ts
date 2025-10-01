@@ -14,7 +14,7 @@ import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import { CrowdStrikeTokenManager } from './token_manager';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { NodeSystemError } from './types';
-import {isAggregateError} from './types'
+import { isAggregateError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
