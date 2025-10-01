@@ -64,10 +64,7 @@ describe('MDE validation utilities', () => {
     });
 
     it('should use configurable delay', async () => {
-      const mockFn = jest
-        .fn()
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce('success');
+      const mockFn = jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce('success');
 
       const customDelay = 500;
       const promise = retryWithDelay(mockFn, customDelay, 1);
