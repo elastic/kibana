@@ -87,7 +87,16 @@ export const JsonEditor = () => {
     field.onChange(parseXJsonOrString(newValue));
   };
 
+  const specClient = consoleStart?.specClient;
+
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
+    if (!specClient) {
+      return {
+        triggerCharacters: ['"'],
+        provideCompletionItems: () => ({ suggestions: [] }),
+      };
+    }
+
     const isProcessorTypeKeyContext = (
       model: monaco.editor.ITextModel,
       position: monaco.Position
@@ -99,7 +108,7 @@ export const JsonEditor = () => {
         endColumn: position.column,
       });
       const nearbyContext = model.getValueInRange({
-        startLineNumber: Math.max(1, position.lineNumber - 6),
+        startLineNumber: Math.max(1, position.lineNumber - 12),
         startColumn: 1,
         endLineNumber: position.lineNumber,
         endColumn: position.column,
@@ -131,22 +140,21 @@ export const JsonEditor = () => {
           endColumn: lineContentAfter.startsWith('"') ? position.column + 1 : position.column,
         };
 
-        const beforeRange: monaco.IRange = {
-          startLineNumber: 1,
+        const linePrefix = model.getValueInRange({
+          startLineNumber: position.lineNumber,
           startColumn: 1,
           endLineNumber: position.lineNumber,
           endColumn: position.column,
-        };
-        const bodyContent = model.getValueInRange(beforeRange);
-        const lastLine = bodyContent.split('\n').pop()!.trim();
-        const alreadyOpenedQuote = hasOddQuoteCount(lastLine);
+        });
+        const alreadyOpenedQuote = hasOddQuoteCount(linePrefix);
 
         let terms: Array<{ name: string; template?: JsonValue }> = [];
         try {
-          terms = await consoleStart.specClient.getIngestProcessorSuggestions();
+          terms = await specClient.getIngestProcessorSuggestions();
         } catch {
           terms = [];
         }
+
         const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
           const label = String(t.name);
           const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
@@ -162,8 +170,7 @@ export const JsonEditor = () => {
         return { suggestions };
       },
     };
-  }, [consoleStart]);
-
+  }, [specClient]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);
@@ -217,6 +224,7 @@ export const JsonEditor = () => {
       fullWidth
     >
       <CodeEditor
+        dataTestSubj="streamsManualPipelineJsonEditor"
         value={value}
         onChange={handleChange}
         languageId="xjson"
