@@ -48,10 +48,6 @@ function Lens({
   dataViews: DataViewsServicePublic;
   timeField: string;
 }) {
-  const formulaAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
-
   const dataViewAsync = useAsync(() => {
     return dataViews.create({
       title: indexPattern,
@@ -61,14 +57,13 @@ function Lens({
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
-  if (!formulaAsync.value || !dataViewAsync.value) {
+  if (!dataViewAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
   const attributes = new LensAttributesBuilder({
     visualization: new XYChart({
       layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
       dataView: dataViewAsync.value,
     }),
   }).build();

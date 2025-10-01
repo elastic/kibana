@@ -75,6 +75,10 @@ export function SearchSessionsMgmtTable({
     () => moment.duration(config.management.refreshInterval).asMilliseconds(),
     [config.management.refreshInterval]
   );
+  const enableOpeningInNewTab = useMemo(
+    () => core.featureFlags.getBooleanValue('discover.tabsEnabled', true),
+    [core.featureFlags]
+  );
 
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<UISession>({
     tableId: 'searchSessionsMgmt',
@@ -111,7 +115,12 @@ export function SearchSessionsMgmtTable({
       try {
         const { savedObjects, statuses } = await api.fetchTableData({ appId });
         results = savedObjects.map((savedObject) =>
-          mapToUISession({ savedObject, locators, sessionStatuses: statuses })
+          mapToUISession({
+            savedObject,
+            locators,
+            sessionStatuses: statuses,
+            enableOpeningInNewTab,
+          })
         );
       } catch (e) {} // eslint-disable-line no-empty
 
@@ -125,7 +134,7 @@ export function SearchSessionsMgmtTable({
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api, refreshInterval, locators, appId]);
+  }, [api, refreshInterval, locators, appId, enableOpeningInNewTab]);
 
   // initial data load
   useEffect(() => {

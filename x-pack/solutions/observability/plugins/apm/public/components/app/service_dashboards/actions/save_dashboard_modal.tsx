@@ -18,8 +18,7 @@ import {
   EuiModalBody,
   EuiComboBox,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -186,7 +185,7 @@ export function SaveDashboardModal({
                 {i18n.translate('xpack.apm.dashboard.addDashboard.useContextFilterLabel', {
                   defaultMessage: 'Filter by service and environment',
                 })}{' '}
-                <EuiToolTip
+                <EuiIconTip
                   position="bottom"
                   content={i18n.translate(
                     'xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip',
@@ -195,15 +194,12 @@ export function SaveDashboardModal({
                         'Enabling this option will apply filters to the dashboard based on your chosen service and environment.',
                     }
                   )}
-                >
-                  <EuiIcon
-                    type="question"
-                    title={i18n.translate(
-                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
-                      { defaultMessage: 'Icon with tooltip' }
-                    )}
-                  />
-                </EuiToolTip>
+                  type="question"
+                  title={i18n.translate(
+                    'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                    { defaultMessage: 'Icon with tooltip' }
+                  )}
+                />
               </p>
             }
             onChange={() => setServiceFiltersEnabled(!serviceFiltersEnabled)}

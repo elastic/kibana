@@ -23,4 +23,5 @@ export interface IndexPatternTableItem {
   sort: string;
   namespaces?: string[];
   getName: () => string;
+  managed?: boolean;
 }

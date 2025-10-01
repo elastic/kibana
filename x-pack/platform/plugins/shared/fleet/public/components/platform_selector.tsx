@@ -263,6 +263,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
 
             <EuiCodeBlock
+              data-test-subj="enrollmentInstructionsCodeBlock"
               onClick={onTextAreaClick}
               fontSize="m"
               isCopyable={!fullCopyButton}

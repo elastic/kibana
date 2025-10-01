@@ -28,24 +28,21 @@ export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 export { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 export { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 export { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-export {
-  savedObjectsServiceMock,
-  simpleSavedObjectMock,
-} from '@kbn/core-saved-objects-browser-mocks';
 export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 export { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 function createStorageMock() {
-  const storageMock: jest.Mocked<Storage> = {
+  const storageMock: jest.Mocked<Storage> = lazyObject({
     getItem: jest.fn(),
     setItem: jest.fn(),
     removeItem: jest.fn(),
     clear: jest.fn(),
     key: jest.fn(),
     length: 10,
-  };
+  });
   return storageMock;
 }
 
@@ -55,14 +52,14 @@ function createAppMountParametersMock(appBasePath = '') {
   rawHistory.push(appBasePath);
   const history = new CoreScopedHistory(rawHistory, appBasePath);
 
-  const params: jest.Mocked<AppMountParameters> = {
+  const params: jest.Mocked<AppMountParameters> = lazyObject({
     appBasePath,
     element: document.createElement('div'),
     history,
     theme$: themeServiceMock.createTheme$(),
     onAppLeave: jest.fn(),
     setHeaderActionMenu: jest.fn(),
-  };
+  });
 
   return params;
 }

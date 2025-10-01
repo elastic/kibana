@@ -175,7 +175,7 @@ export interface DiscoverStateContainer {
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
-    onOpenSavedSearch: (savedSearchId: string) => void;
+    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
     /**
      * Triggered when the unified search bar query is updated
      * @param payload
@@ -331,10 +331,10 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const currentSavedSearch = savedSearchContainer.getState();
-    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+    const { persistedDiscoverSession } = internalState.getState();
+    if (persistedDiscoverSession?.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
-      await undoSavedSearchChanges();
+      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
       services.locator.navigate({
@@ -357,11 +357,23 @@ export function getDiscoverStateContainer({
     });
   };
 
+  const clearTimeFieldFromSort = (
+    sort: DiscoverAppState['sort'],
+    timeFieldName: string | undefined
+  ) => {
+    if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+    const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+    return filteredSort;
+  };
+
   const transitionFromDataViewToESQL = (dataView: DataView) => {
     const appState = appStateContainer.get();
-    const { query } = appState;
+    const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
     const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     appStateContainer.update({
       query: { esql: queryString },
@@ -370,6 +382,7 @@ export function getDiscoverStateContainer({
         type: DataSourceType.Esql,
       },
       columns: [],
+      sort: clearedSort,
     });
 
     // clears pinned filters

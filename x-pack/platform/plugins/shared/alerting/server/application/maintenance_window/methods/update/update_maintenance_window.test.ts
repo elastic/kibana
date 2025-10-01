@@ -151,6 +151,79 @@ describe('MaintenanceWindowClient - update', () => {
     `);
   });
 
+  it('should define a new expiration date if the new start time is above the previous expiration date', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const initialExpirationDate = moment(new Date()).tz('UTC').add(2, 'month');
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: initialExpirationDate.toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+
+    const updatedStartTime = initialExpirationDate.add(2, 'month').toISOString();
+    const updatedDuration = 24 * 60 * 60 * 1000; // 24h
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        ...updatedAttributes,
+        rRule: {
+          ...updatedAttributes.rRule,
+          freq: undefined,
+          dtstart: updatedStartTime,
+        } as UpdateMaintenanceWindowParams['data']['rRule'],
+        duration: updatedDuration,
+        categoryIds: ['observability', 'securitySolution'],
+      },
+    });
+
+    const updatedExpirationDate = moment(new Date(updatedStartTime))
+      .tz('UTC')
+      .add(1, 'day')
+      .toISOString(); // updatedStartTime + updatedDuration
+
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      {
+        ...updatedAttributes,
+        duration: updatedDuration,
+        rRule: {
+          ...updatedAttributes.rRule,
+          freq: undefined, // needs to be undefined for the expiration date to be recalculated internally
+          dtstart: updatedStartTime,
+        },
+        events: [{ gte: updatedStartTime, lte: updatedExpirationDate }],
+        expirationDate: updatedExpirationDate,
+        createdAt: '2023-02-26T00:00:00.000Z',
+        createdBy: 'test-user',
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
+        categoryIds: ['observability', 'securitySolution'],
+      },
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
+    );
+  });
+
   it('should not regenerate all events if rrule and duration did not change', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 

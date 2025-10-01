@@ -22,6 +22,10 @@ const configSchemaProps = {
   certType: AuthConfiguration.certType,
   ca: AuthConfiguration.ca,
   verificationMode: AuthConfiguration.verificationMode,
+  accessTokenUrl: AuthConfiguration.accessTokenUrl,
+  clientId: AuthConfiguration.clientId,
+  scope: AuthConfiguration.scope,
+  additionalFields: AuthConfiguration.additionalFields,
 };
 
 export const ConfigSchema = schema.object(configSchemaProps);

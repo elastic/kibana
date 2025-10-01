@@ -11,6 +11,7 @@ import type { Client, TransportResult, TransportRequestOptions } from '@elastic/
 import type { PublicKeys } from '@kbn/utility-types';
 import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
 import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const omittedProps = [
   'diagnostic',
@@ -196,11 +197,11 @@ export interface ScopedClusterClientMock {
 }
 
 const createScopedClusterClientMock = () => {
-  const mock: ScopedClusterClientMock = {
+  const mock: ScopedClusterClientMock = lazyObject({
     asInternalUser: createClientMock(),
     asCurrentUser: createClientMock(),
     asSecondaryAuthUser: createClientMock(),
-  };
+  });
 
   return mock;
 };
@@ -211,12 +212,10 @@ export interface ClusterClientMock {
 }
 
 const createClusterClientMock = () => {
-  const mock: ClusterClientMock = {
+  const mock: ClusterClientMock = lazyObject({
     asInternalUser: createClientMock(),
-    asScoped: jest.fn(),
-  };
-
-  mock.asScoped.mockReturnValue(createScopedClusterClientMock());
+    asScoped: jest.fn().mockReturnValue(createScopedClusterClientMock()),
+  });
 
   return mock;
 };
@@ -224,14 +223,11 @@ const createClusterClientMock = () => {
 export type CustomClusterClientMock = jest.Mocked<ICustomClusterClient> & ClusterClientMock;
 
 const createCustomClusterClientMock = () => {
-  const mock: CustomClusterClientMock = {
+  const mock: CustomClusterClientMock = lazyObject({
     asInternalUser: createClientMock(),
-    asScoped: jest.fn(),
-    close: jest.fn(),
-  };
-
-  mock.asScoped.mockReturnValue(createScopedClusterClientMock());
-  mock.close.mockReturnValue(Promise.resolve());
+    asScoped: jest.fn().mockReturnValue(createScopedClusterClientMock()),
+    close: jest.fn().mockResolvedValue(Promise.resolve()),
+  });
 
   return mock;
 };

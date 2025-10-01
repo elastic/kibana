@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 import type { RangeControl as RangeControlClass } from '../../control/range_control_factory';
@@ -24,19 +25,31 @@ const control: RangeControlClass = {
   },
   type: 'range',
   label: 'range control',
-  value: { min: 0, max: 0 },
+  value: { min: 0, max: 100 },
   min: 0,
   max: 100,
   hasValue: () => {
-    return false;
+    return true;
   },
 } as RangeControlClass;
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(<I18nProvider>{component}</I18nProvider>);
+};
+
 test('renders RangeControl', () => {
-  const component = shallowWithIntl(
-    <RangeControl control={control} controlIndex={0} stageFilter={() => {}} />
-  );
-  expect(component).toMatchSnapshot();
+  renderWithIntl(<RangeControl control={control} controlIndex={0} stageFilter={() => {}} />);
+
+  expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
+  expect(screen.getByText('range control')).toBeInTheDocument();
+
+  // Check for range inputs
+  const rangeInputs = screen.getAllByRole('spinbutton');
+  expect(rangeInputs).toHaveLength(2); // min and max inputs
+
+  // Check that inputs have correct accessibility labels
+  expect(screen.getByLabelText('Range minimum')).toBeInTheDocument();
+  expect(screen.getByLabelText('Range maximum')).toBeInTheDocument();
 });
 
 test('disabled', () => {
@@ -52,14 +65,27 @@ test('disabled', () => {
     type: 'range',
     label: 'range control',
     disabledReason: 'control is disabled to test rendering when disabled',
+    value: { min: 0, max: 100 },
+    min: 0,
+    max: 100,
     hasValue: () => {
-      return false;
+      return true;
     },
   } as RangeControlClass;
-  const component = shallowWithIntl(
+
+  renderWithIntl(
     <RangeControl control={disabledRangeControl} controlIndex={0} stageFilter={() => {}} />
   );
-  expect(component).toMatchSnapshot();
+
+  expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
+  expect(screen.getByText('range control')).toBeInTheDocument();
+
+  // Check for disabled state - ValidatedDualRange should be disabled
+  const rangeInputs = screen.getAllByRole('spinbutton');
+  expect(rangeInputs).toHaveLength(2);
+  rangeInputs.forEach((input) => {
+    expect(input).toBeDisabled();
+  });
 });
 
 test('ceilWithPrecision', () => {

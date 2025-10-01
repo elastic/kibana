@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const spaces = getService('spaces');
+  const searchSpace = getService('searchSpace');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const retry = getService('retry');
 
@@ -48,33 +49,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Search index details page', function () {
     describe('Solution Nav - Search', function () {
-      let cleanUpSpace: () => Promise<unknown>;
+      let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+          'solution-nav-search-index-details-ftr'
+        ));
 
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-          name: 'solution-nav-search-index-details-ftr',
-          solution: 'es',
-        }));
-
+        await esDeleteAllIndices([indexDoesNotExistName]);
         await createIndices();
       });
 
       after(async () => {
         // Clean up space created
-        await cleanUpSpace();
+        await cleanUp();
         await deleteIndices();
       });
       describe('search index details page', () => {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+          await searchSpace.navigateTo(spaceCreated.id);
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
           await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
           await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
@@ -232,6 +227,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 spaceCreated.id
               )}/app/elasticsearch/indices/index_details/${indexDoesNotExistName}/data`
             );
+            await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
           });
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
