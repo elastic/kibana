@@ -3132,6 +3132,9 @@
       "dataViewId": {
         "type": "keyword"
       },
+      "enableResetToZero": {
+        "type": "boolean"
+      },
       "enabled": {
         "type": "boolean"
       },
