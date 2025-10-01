@@ -23,18 +23,16 @@ import { applyPagination } from '../../lib/pagination/apply_pagination';
 export async function getMetricFields({
   indexPattern,
   fields = '*',
-  from,
-  to,
   esClient,
   page,
   size,
   logger,
+  timerange,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  from: number;
-  to: number;
+  timerange: { from: number; to: number };
   page: number;
   size: number;
   logger: Logger;
@@ -44,9 +42,8 @@ export async function getMetricFields({
   const dataStreamFieldCapsMap = await retrieveFieldCaps({
     esClient: esClient.client,
     indexPattern,
-    to,
-    from,
     fields,
+    timerange,
   });
 
   const allMetricFields: MetricField[] = [];
@@ -78,6 +75,7 @@ export async function getMetricFields({
     metricFields: applyPagination({ metricFields: allMetricFields, page, size }),
     dataStreamFieldCapsMap,
     logger,
+    timerange: { from, to },
   });
 
   const finalFields = enrichedMetricFields.map((field) => {
