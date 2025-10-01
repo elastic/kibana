@@ -343,7 +343,7 @@ describe('Walker static methods', () => {
       });
     });
 
-    test('can map and inside map', () => {
+    test('can find map and inside map', () => {
       const query = 'ROW F(1, {"b": ?var, "a": 123})';
       const { root } = parse(query);
       const map = Walker.match(root, {
