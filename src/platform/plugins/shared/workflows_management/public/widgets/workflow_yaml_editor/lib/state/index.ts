@@ -9,7 +9,6 @@
 export {
   clearComputedData,
   createWorkflowEditorStore,
-  setComputedData,
   workflowEditorStore,
   selectWorkflowGraph,
   selectWorkflowLookup,

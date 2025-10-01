@@ -42,7 +42,8 @@ const workflowEditorSlice = createSlice({
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
     },
-    setComputedData: (
+    // Internal action - not for external use
+    _setComputedDataInternal: (
       state,
       action: {
         payload: {
@@ -72,15 +73,20 @@ const workflowEditorSlice = createSlice({
   },
 });
 
-// Export action creators from the slice
-export const { setYamlString, setComputedData, clearComputedData, setCursorPosition } =
-  workflowEditorSlice.actions;
+// Export public action creators from the slice
+export const { setYamlString, clearComputedData, setCursorPosition } = workflowEditorSlice.actions;
+
+// Internal action for middleware use only
+const { _setComputedDataInternal } = workflowEditorSlice.actions;
 
 function findStepByLine(
   lineNumber: number,
   workflowMetadata: WorkflowLookup
 ): StepInfo | undefined {
-  if (!workflowMetadata) return undefined;
+  if (!workflowMetadata) {
+    return;
+  }
+
   return (
     Object.values(workflowMetadata.steps!).find((stepIfo) => {
       if (stepIfo.lineStart <= lineNumber && lineNumber <= stepIfo.lineEnd) {
@@ -125,7 +131,7 @@ export const workflowComputationMiddleware: Middleware = (store) => (next) => (a
 
       // Dispatch computed data
       store.dispatch(
-        setComputedData({
+        _setComputedDataInternal({
           yamlDocument: yamlDoc,
           workflowLookup: lookup,
           workflowGraph: graph,
@@ -155,15 +161,8 @@ export const createWorkflowEditorStore = () => {
             'workflow.workflowGraph',
             'workflow.workflowLookup',
           ],
-          // Ignore these non-serializable fields in actions
-          ignoredActionsPaths: [
-            'payload.yamlDocument',
-            'payload.workflowGraph',
-            'payload.workflowLookup',
-            'meta.arg.yamlDocument',
-            'meta.arg.workflowGraph',
-            'meta.arg.workflowLookup',
-          ],
+          // Ignore these specific action types that contain non-serializable data
+          ignoredActions: ['workflow/_setComputedDataInternal'],
         },
       }).concat(workflowComputationMiddleware),
   });
@@ -173,9 +172,7 @@ export const createWorkflowEditorStore = () => {
 export const workflowEditorStore = createWorkflowEditorStore();
 
 // Types for usage
-export type WorkflowEditorStore = ReturnType<typeof createWorkflowEditorStore>;
-export type RootState = ReturnType<WorkflowEditorStore['getState']>;
-export type AppDispatch = WorkflowEditorStore['dispatch'];
+type RootState = ReturnType<ReturnType<typeof createWorkflowEditorStore>['getState']>;
 
 // Selectors
 export const selectYamlString = (state: RootState) => state.workflow.yamlString;
@@ -183,109 +180,3 @@ export const selectYamlDocument = (state: RootState) => state.workflow.yamlDocum
 export const selectWorkflowLookup = (state: RootState) => state.workflow.workflowLookup;
 export const selectWorkflowGraph = (state: RootState) => state.workflow.workflowGraph;
 export const selectFocusedStepInfo = (state: RootState) => state.workflow.focusedStepInfo;
-
-/*
- * USAGE HINTS:
- *
- * 1. Basic Setup in Component:
- * ```tsx
- * import { Provider, useSelector, useDispatch } from 'react-redux';
- * import { workflowEditorStore, setYamlString, selectYamlString, selectWorkflowGraph } from './__state';
- *
- * function MyApp() {
- *   return (
- *     <Provider store={workflowEditorStore}>
- *       <WorkflowEditor />
- *     </Provider>
- *   );
- * }
- * ```
- *
- * 2. Using in Components:
- * ```tsx
- * function WorkflowEditor() {
- *   const dispatch = useDispatch();
- *   const yamlString = useSelector(selectYamlString);
- *   const workflowGraph = useSelector(selectWorkflowGraph);
- *   const yamlDocument = useSelector(selectYamlDocument);
- *   const workflowLookup = useSelector(selectWorkflowLookup);
- *
- *   const handleYamlChange = (newYaml: string) => {
- *     dispatch(setYamlString(newYaml));
- *     // yamlDocument, workflowLookup, and workflowGraph will be computed automatically
- *   };
- *
- *   const handleCursorChange = (lineNumber: number) => {
- *     dispatch(setCursorPosition({ lineNumber }));
- *     // focusedStepInfo will be updated automatically
- *   };
- *
- *   return (
- *     <div>
- *       <textarea
- *         value={yamlString || ''}
- *         onChange={(e) => handleYamlChange(e.target.value)}
- *       />
- *       {workflowGraph && <div>Graph nodes: {workflowGraph.nodes.length}</div>}
- *     </div>
- *   );
- * }
- * ```
- *
- * 3. With Monaco Editor Integration:
- * ```tsx
- * import { createWorkflowEditorStore } from './__state';
- *
- * function EditorWithMonaco() {
- *   const store = useMemo(() => createWorkflowEditorStore(), []);
- *
- *   return (
- *     <Provider store={store}>
- *       <MonacoEditor
- *         onMount={(editor) => {
- *           // Set up editor change listener
- *           editor.getModel()?.onDidChangeContent(() => {
- *             store.dispatch(setYamlString(editor.getValue()));
- *           });
- *         }}
- *       />
- *     </Provider>
- *   );
- * }
- * ```
- *
- * 4. For Web Worker Support:
- * ```tsx
- * // Store works perfectly in web workers since it no longer depends on Monaco
- * const webWorkerStore = createWorkflowEditorStore();
- *
- * // In web worker:
- * webWorkerStore.dispatch(setYamlString(yamlFromMainThread));
- * // Computed data will be available in store state
- * const state = webWorkerStore.getState();
- * console.log(state.workflow.workflowGraph);
- * ```
- *
- * 5. Custom Hooks (Optional):
- * ```tsx
- * export const useWorkflowEditor = () => {
- *   const dispatch = useDispatch();
- *   const yamlString = useSelector(selectYamlString);
- *   const yamlDocument = useSelector(selectYamlDocument);
- *   const workflowLookup = useSelector(selectWorkflowLookup);
- *   const workflowGraph = useSelector(selectWorkflowGraph);
- *
- *   const updateYaml = useCallback((yaml: string) => {
- *     dispatch(setYamlString(yaml));
- *   }, [dispatch]);
- *
- *   return {
- *     yamlString,
- *     yamlDocument,
- *     workflowLookup,
- *     workflowGraph,
- *     updateYaml
- *   };
- * };
- * ```
- */
