@@ -1104,10 +1104,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         objectRemover.add('default', internalRuleType.id, 'rule', 'alerting');
         objectRemover.add('default', nonInternalRuleType.id, 'rule', 'alerting');
 
-        const bulkEditResponse = await supertest
+        await supertest
           .post('/internal/alerting/rules/_bulk_edit')
           .set('kbn-xsrf', 'foo')
-          .send(payloadWithFilter);
+          .send(payloadWithFilter)
+          .expect(200);
 
         const { body: updatedInternalRuleType } = await supertest
           .get(`/api/alerting/rule/${internalRuleType.id}`)
@@ -1119,7 +1120,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        expect(bulkEditResponse.status).to.eql(200);
         expect(updatedInternalRuleType.tags).to.eql(['internally-managed']);
         expect(updatedNonInternalRuleType.tags).to.eql(['internally-managed', 'tag-A']);
       });
