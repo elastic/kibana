@@ -7,12 +7,18 @@
 
 import Boom from '@hapi/boom';
 import type { RulesClientContext } from '../../../../rules_client';
-import { buildBaseGapsFilter, resolveTimeRange } from './gap_intervals';
+import {
+  buildBaseGapsFilter,
+  resolveTimeRange,
+  extractGapDurationSums,
+  calculateAggregatedGapStatus,
+  COMMON_GAP_AGGREGATIONS,
+  type GapDurationBucket,
+} from './gap_helpers';
 import type { AggregatedGapStatus } from '../../../../../common/constants';
-import { aggregatedGapStatus } from '../../../../../common/constants';
 export interface RuleGapStatusSummary {
   ruleId: string;
-  status: AggregatedGapStatus;
+  status: AggregatedGapStatus | null;
   counts: { filled: number; partially_filled: number; unfilled: number };
   inProgressDocs: number;
   latestUpdate?: string;
@@ -23,13 +29,9 @@ export interface GetAggregatedGapStatusByRuleIdsParams {
   timeRange?: { from: string; to: string };
 }
 
-interface ByRuleBucket {
+interface ByRuleBucket extends GapDurationBucket {
   key: string; // rule.id
   doc_count: number;
-  sum_unfilled_ms: { value: number | null };
-  sum_in_progress_ms: { value: number | null };
-  sum_filled_ms: { value: number | null };
-  sum_total_ms?: { value: number | null };
   latest_update: { value: number | null };
 }
 
@@ -54,45 +56,23 @@ export async function getAggregatedGapStatusByRuleIds(
         by_rule: {
           terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
           aggs: {
-            // sums-only aggregations
-            sum_unfilled_ms: {
-              sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
-            },
-            sum_in_progress_ms: {
-              sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
-            },
-            sum_filled_ms: {
-              sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
-            },
-            // optional total
-            sum_total_ms: {
-              sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
-            },
+            ...COMMON_GAP_AGGREGATIONS,
             latest_update: { max: { field: '@timestamp' } },
           },
         },
       },
     });
 
-    const byRule = (aggs.aggregations?.by_rule?.buckets as unknown as ByRuleBucket[]) ?? [];
+    const byRuleAgg = aggs.aggregations?.by_rule as unknown as
+      | { buckets: ByRuleBucket[] }
+      | undefined;
+    const byRule = byRuleAgg?.buckets ?? [];
 
     const result: Record<string, RuleGapStatusSummary> = {};
 
     for (const bucket of byRule) {
-      const sumUnfilledMs = Math.max(0, bucket.sum_unfilled_ms?.value ?? 0);
-      const sumInProgressMs = Math.max(0, bucket.sum_in_progress_ms?.value ?? 0);
-      const sumFilledMs = Math.max(0, bucket.sum_filled_ms?.value ?? 0);
-      const sumTotalMs = Math.max(0, bucket.sum_total_ms?.value ?? 0);
-
-      // Aggregated status based on sums
-      const status =
-        sumInProgressMs > 0
-          ? aggregatedGapStatus.IN_PROGRESS
-          : sumUnfilledMs > 0
-          ? aggregatedGapStatus.UNFILLED
-          : sumFilledMs > 0
-          ? aggregatedGapStatus.FILLED
-          : null;
+      const sums = extractGapDurationSums(bucket);
+      const status = calculateAggregatedGapStatus(sums);
 
       const latestUpdate = bucket.latest_update?.value
         ? new Date(bucket.latest_update.value).toISOString()
@@ -100,11 +80,11 @@ export async function getAggregatedGapStatusByRuleIds(
 
       // keep legacy fields for backwards compatibility
       const counts = {
-        filled: sumFilledMs > 0 ? 1 : 0,
+        filled: sums.sumFilledMs > 0 ? 1 : 0,
         partially_filled: 0,
-        unfilled: sumUnfilledMs > 0 ? 1 : 0,
+        unfilled: sums.sumUnfilledMs > 0 ? 1 : 0,
       };
-      const inProgressDocs = sumInProgressMs > 0 ? 1 : 0;
+      const inProgressDocs = sums.sumInProgressMs > 0 ? 1 : 0;
 
       const extended: RuleGapStatusSummary & {
         sums?: {
@@ -121,10 +101,10 @@ export async function getAggregatedGapStatusByRuleIds(
         latestUpdate,
       };
       extended.sums = {
-        unfilled_ms: sumUnfilledMs,
-        in_progress_ms: sumInProgressMs,
-        filled_ms: sumFilledMs,
-        total_ms: sumTotalMs,
+        unfilled_ms: sums.sumUnfilledMs,
+        in_progress_ms: sums.sumInProgressMs,
+        filled_ms: sums.sumFilledMs,
+        total_ms: sums.sumTotalMs ?? 0,
       };
       result[bucket.key] = extended;
     }

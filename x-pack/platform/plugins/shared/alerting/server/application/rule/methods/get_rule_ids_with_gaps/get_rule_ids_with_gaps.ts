@@ -14,11 +14,14 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { aggregatedGapStatus } from '../../../../../common/constants';
 import {
   buildBaseGapsFilter,
   resolveTimeRange,
-} from '../get_aggregated_gap_status_by_rule_ids/gap_intervals';
+  extractGapDurationSums,
+  calculateAggregatedGapStatus,
+  COMMON_GAP_AGGREGATIONS,
+  type GapDurationBucket,
+} from '../get_aggregated_gap_status_by_rule_ids/gap_helpers';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 export async function getRuleIdsWithGaps(
@@ -48,7 +51,7 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses } = params;
+    const { start, end } = params;
     const eventLogClient = await context.getEventLogClient();
 
     const { from, to } = resolveTimeRange({ from: start, to: end });
@@ -63,23 +66,14 @@ export async function getRuleIdsWithGaps(
           latest_gap_timestamp: { max: { field: '@timestamp' } },
           by_rule: {
             terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
-            aggs: {
-              sum_unfilled_ms: { sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' } },
-              sum_in_progress_ms: {
-                sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
-              },
-              sum_filled_ms: { sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' } },
-            },
+            aggs: COMMON_GAP_AGGREGATIONS,
           },
         },
       }
     );
 
-    interface ByRuleBucket {
+    interface ByRuleBucket extends GapDurationBucket {
       key: string;
-      sum_unfilled_ms?: { value: number | null };
-      sum_in_progress_ms?: { value: number | null };
-      sum_filled_ms?: { value: number | null };
     }
 
     const byRuleAgg = aggs.aggregations?.by_rule as unknown as
@@ -90,18 +84,8 @@ export async function getRuleIdsWithGaps(
 
     const ruleIds: string[] = [];
     for (const b of buckets) {
-      const sumUnfilledMs = Math.max(0, b.sum_unfilled_ms?.value ?? 0);
-      const sumInProgressMs = Math.max(0, b.sum_in_progress_ms?.value ?? 0);
-      const sumFilledMs = Math.max(0, b.sum_filled_ms?.value ?? 0);
-      // Precedence: IN_PROGRESS > UNFILLED > FILLED (match existing behavior)
-      const status =
-        sumInProgressMs > 0
-          ? aggregatedGapStatus.IN_PROGRESS
-          : sumUnfilledMs > 0
-          ? aggregatedGapStatus.UNFILLED
-          : sumFilledMs > 0
-          ? aggregatedGapStatus.FILLED
-          : null;
+      const sums = extractGapDurationSums(b);
+      const status = calculateAggregatedGapStatus(sums);
       if (status && categories.has(status)) {
         ruleIds.push(b.key);
       }

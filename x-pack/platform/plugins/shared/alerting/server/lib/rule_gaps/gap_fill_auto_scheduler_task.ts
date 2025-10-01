@@ -322,7 +322,7 @@ async function fetchRuleIdsWithGapsPhase(
         {
           start: startDate.toISOString(),
           end: now.toISOString(),
-          aggregatedStatus: [aggregatedGapStatus.UNFILLED],
+          aggregatedStatuses: [aggregatedGapStatus.UNFILLED],
           // add skip erroed gaps
         }
       );
