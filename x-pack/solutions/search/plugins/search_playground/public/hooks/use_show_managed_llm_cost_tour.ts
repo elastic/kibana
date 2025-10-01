@@ -23,7 +23,7 @@ export const useShowManagedLLMCostTour = () => {
 
   useEffect(() => {
     const isTourSkipped = localStorage.getItem(ELASTIC_LLM_COST_TOUR_SKIP_KEY) === 'true';
-    const isCloud = cloud?.isCloudEnabled ?? false;
+    const isCloud = cloud?.isServerlessEnabled ?? false;
 
     if (!isTourSkipped && isCloud && !isTourVisible) {
       setIsTourVisible(true);
