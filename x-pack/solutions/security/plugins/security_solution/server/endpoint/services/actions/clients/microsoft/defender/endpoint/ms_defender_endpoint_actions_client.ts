@@ -691,17 +691,27 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           }
 
           // Fetch and validate the action details to detect MDE throttling
+          if (!reqIndexOptions.actionId) {
+            throw new ResponseActionsClientError(
+              'Action ID is required to validate MDE action details.'
+            );
+          }
+
           const mdeActionValidation = await this.fetchAndValidateActionDetails(
             machineActionId,
             scriptName,
-            reqIndexOptions.actionId!
+            reqIndexOptions.actionId
           );
 
           if (!mdeActionValidation.isValid) {
-            throw new ResponseActionsClientError(mdeActionValidation.error!, 409, {
-              machineActionId,
-              requestedScript: scriptName,
-            });
+            throw new ResponseActionsClientError(
+              mdeActionValidation.error ?? 'Action validation failed.',
+              409,
+              {
+                machineActionId,
+                requestedScript: scriptName,
+              }
+            );
           }
 
           reqIndexOptions.meta = { machineActionId };
