@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiInputPopover,
 } from '@elastic/eui';
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   ConnectorSelectableComponentProps,
   ConnectorSelectableProps,
@@ -105,6 +105,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       },
       [aiConnectors, onConnectorSelectionChange, setModalForceOpen, setOptimisticConnectorId]
     );
+
+    useEffect(() => {
+      const firstConnectorId = aiConnectors?.[0]?.id;
+      if (
+        selectedConnectorId === undefined &&
+        aiConnectors?.length === 1 &&
+        firstConnectorId // ensure the connector has an ID
+      ) {
+        onChange(firstConnectorId);
+      }
+    }, [selectedConnectorId, aiConnectors, onChange]);
 
     const cleanupAndCloseModal = useCallback(() => {
       setIsOpen?.(false);
@@ -216,6 +227,39 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       },
     ];
 
+    const input = useMemo(() => {
+      return (
+        <EuiButton
+          iconType="arrowDown"
+          iconSide="right"
+          size="s"
+          color="text"
+          fullWidth={fullWidth}
+          onClick={() => setModalForceOpen(true)}
+          style={{ borderWidth: fullWidth ? 1 : 0 }}
+          contentProps={{
+            style: {
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            },
+          }}
+          data-test-subj="connector-selector"
+          isDisabled={localIsDisabled}
+        >
+          {displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel}
+        </EuiButton>
+      );
+    }, [
+      fullWidth,
+      localIsDisabled,
+      displayFancy,
+      buttonLabel,
+      selectedOrDefaultConnector,
+      setModalForceOpen,
+    ]);
+
     return (
       <>
         {!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0 ? (
@@ -230,30 +274,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           </EuiButtonEmpty>
         ) : (
           <EuiInputPopover
-            input={
-              <EuiButton
-                iconType="arrowDown"
-                iconSide="right"
-                size="s"
-                color="text"
-                fullWidth={fullWidth}
-                onClick={() => setModalForceOpen(true)}
-                disabled={localIsDisabled}
-                style={{ borderWidth: fullWidth ? 1 : 0 }}
-                contentProps={{
-                  style: {
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  },
-                }}
-                data-test-subj="connector-selector"
-                isDisabled={localIsDisabled}
-              >
-                {displayFancy?.(buttonLabel, selectedOrDefaultConnector) ?? buttonLabel}
-              </EuiButton>
-            }
+            input={input}
             isOpen={modalForceOpen}
             closePopover={() => setModalForceOpen(false)}
             panelPaddingSize="none"
