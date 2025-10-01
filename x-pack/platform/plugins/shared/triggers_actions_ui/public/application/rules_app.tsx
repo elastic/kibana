@@ -37,7 +37,6 @@ import {
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -66,7 +65,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
