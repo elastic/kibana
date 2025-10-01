@@ -72,6 +72,8 @@ import type {
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
 import { catchAndWrapError } from '../../../../../../utils';
+import type { ActionValidationResult } from './utils';
+import { checkActionMatches, retryWithDelay } from './utils';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -378,6 +380,71 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return msDefenderEndpointGetMachineDetailsApiResponse;
   }
 
+  /**
+   * Fetches and validates the details of a specific action from Microsoft Defender for Endpoint.
+   * This method ensures that the action returned by MDE matches our expected script name and action ID,
+   * detecting when MDE throttles/replaces our action with an existing one.
+   *
+   * @param machineActionId - The Microsoft Defender machine action ID returned from sendAction
+   * @param expectedScriptName - The script name we requested to run
+   * @param expectedActionId - The Kibana action ID we included in the comment
+   * @returns Validation result with isValid flag, action details, and error message if validation fails
+   * @internal
+   */
+  private async fetchAndValidateActionDetails(
+    machineActionId: string,
+    expectedScriptName: string,
+    expectedActionId: string
+  ): Promise<ActionValidationResult> {
+    const fetchAction = async () => {
+      const params: MicrosoftDefenderEndpointGetActionsParams = {
+        id: [machineActionId],
+        pageSize: 1,
+      };
+
+      const response = await this.sendAction<
+        MicrosoftDefenderEndpointGetActionsResponse,
+        MicrosoftDefenderEndpointGetActionsParams
+      >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS, params);
+
+      return response.data?.value?.[0];
+    };
+
+    try {
+      this.log.debug(
+        `Fetching action details from MDE API for machineActionId [${machineActionId}]`
+      );
+
+      // Retry once after a short delay if action was not found on first attempt
+      // This handles the case where MDE has slight API indexing lag
+      const actionDetails = await retryWithDelay(fetchAction);
+
+      if (!actionDetails) {
+        this.log.debug(`No existing action found for machineActionId [${machineActionId}].`);
+        return {
+          isValid: false,
+          error: `Action details not found in Microsoft Defender for machineActionId [${machineActionId}]. The action may not have been created successfully.`,
+        };
+      }
+
+      this.log.debug(
+        `Successfully fetched action details for machineActionId [${machineActionId}]: status=${actionDetails.status}, type=${actionDetails.type}`
+      );
+
+      // Validate if the response action matches the MDE action
+      return checkActionMatches(actionDetails, expectedScriptName, expectedActionId);
+    } catch (error) {
+      this.log.error(
+        `Failed to fetch action details from MDE API for machineActionId [${machineActionId}]: ${error.message}`
+      );
+
+      return {
+        isValid: false,
+        error: `Failed to fetch action details from Microsoft Defender: ${error.message}`,
+      };
+    }
+  }
+
   protected async validateRequest(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
@@ -587,6 +654,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
+    const scriptName = (actionRequest.parameters as MSDefenderRunScriptActionRequestParams)
+      .scriptName;
+
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       RunScriptActionRequestBody['parameters'],
       {},
@@ -596,7 +666,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       ...this.getMethodOptions(options),
       command: 'runscript',
     };
-
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
@@ -609,19 +678,33 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             id: reqIndexOptions.endpoint_ids[0],
             comment: this.buildExternalComment(reqIndexOptions),
             parameters: {
-              scriptName: (reqIndexOptions.parameters as MSDefenderRunScriptActionRequestParams)
-                .scriptName,
+              scriptName,
               args: (reqIndexOptions.parameters as MSDefenderRunScriptActionRequestParams).args,
             },
           });
 
-          if (msActionResponse?.data?.id) {
-            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
-          } else {
+          const machineActionId = msActionResponse?.data?.id;
+          if (!machineActionId) {
             throw new ResponseActionsClientError(
               `Run Script request was sent to Microsoft Defender, but Machine Action Id was not provided!`
             );
           }
+
+          // Fetch and validate the action details to detect MDE throttling
+          const mdeActionValidation = await this.fetchAndValidateActionDetails(
+            machineActionId,
+            scriptName,
+            reqIndexOptions.actionId!
+          );
+
+          if (!mdeActionValidation.isValid) {
+            throw new ResponseActionsClientError(mdeActionValidation.error!, 409, {
+              machineActionId,
+              requestedScript: scriptName,
+            });
+          }
+
+          reqIndexOptions.meta = { machineActionId };
         } catch (err) {
           error = err;
         }
