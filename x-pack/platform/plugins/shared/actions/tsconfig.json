@@ -52,6 +52,7 @@
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
     "@kbn/licensing-types",
+    "@kbn/alerts-ui-shared",
   ],
   "exclude": [
     "target/**/*",
