@@ -156,8 +156,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // xpack.lens.xyVisualization.barLabel
         return 'Balkendiagramm';
       case 'line':
-        // visTypeXy.chartTypes.lineText
-        return 'Zeile';
+        // xpack.lens.xyVisualization.lineLabel
+        return 'Liniendiagramm';
       case 'pie':
         // xpack.lens.pie.pielabel
         return 'Kreisdiagramm';
