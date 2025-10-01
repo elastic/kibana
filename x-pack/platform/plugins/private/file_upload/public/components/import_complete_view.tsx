@@ -104,7 +104,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (this.props.failedPermissionCheck) {
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
@@ -149,7 +149,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         : '';
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}

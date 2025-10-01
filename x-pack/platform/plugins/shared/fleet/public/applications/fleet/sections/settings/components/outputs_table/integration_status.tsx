@@ -189,7 +189,7 @@ export const IntegrationStatus: React.FunctionComponent<{
             <>
               <EuiSpacer size="s" />
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 title={
                   <FormattedMessage
                     id="xpack.fleet.integrationSyncStatus.integrationErrorTitle"
@@ -299,7 +299,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
-                      announceOnMount
+                      announceOnMount={false}
                       title={
                         <FormattedMessage
                           id="xpack.fleet.integrationSyncStatus.errorTitle"
