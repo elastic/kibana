@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SearchSessionsFindResponse } from '../../../../../../../common';
 import type { ACTION, LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
@@ -67,7 +66,7 @@ export const mapToUISession = ({
     locatorId,
     enableOpeningInNewTab
       ? {
-          ...omit(restoreState, 'savedSearchId'),
+          ...restoreState,
           tab: { id: 'new', label: name },
         }
       : restoreState
