@@ -22,7 +22,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   },
   overriddenVisContextAfterInvalidation: undefined,
   controlGroupState: undefined,
-  esqlVariables: undefined,
+  esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',
     columns: false,
