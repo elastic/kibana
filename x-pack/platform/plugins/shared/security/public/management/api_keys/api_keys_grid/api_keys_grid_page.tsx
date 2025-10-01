@@ -72,7 +72,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
 
-    // Enhance the query to support partial matches for name field
+    // Enhance the query to support partial matches for name and owner field
     if (queryContainer.bool?.must) {
       queryContainer.bool.must = queryContainer.bool.must.map((clause: KueryNode) => {
         if (clause.simple_query_string) {
