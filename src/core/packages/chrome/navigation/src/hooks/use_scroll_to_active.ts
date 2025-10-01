@@ -20,12 +20,16 @@ export const useScrollToActive = <T extends HTMLElement = HTMLElement>(condition
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (condition && ref?.current) {
-      ref.current.scrollIntoView({
+    if (!condition || !ref.current) return;
+
+    const timeoutId = setTimeout(() => {
+      ref.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
       });
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [condition]);
 
   return ref;
