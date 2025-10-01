@@ -241,11 +241,14 @@ export const esqlLanguagePlugin = () => {
       });
     }
 
-    if (node.type === 'code' && node.lang === 'esql') {
-      node.type = 'esql';
-    } else if (node.type === 'code') {
-      // switch to type that allows us to control rendering
-      node.type = 'codeBlock';
+    if (node.type === 'code') {
+      const codeNode = node as Code;
+      if (codeNode.lang === 'esql') {
+        node.type = 'esql';
+      } else {
+        // switch to type that allows us to control rendering
+        node.type = 'codeBlock';
+      }
     }
   };
 
