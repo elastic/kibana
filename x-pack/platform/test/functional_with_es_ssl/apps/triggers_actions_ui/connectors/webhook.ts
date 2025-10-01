@@ -11,7 +11,6 @@ import { ObjectRemover } from '../../../lib/object_remover';
 import { getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const actions = getService('actions');
@@ -32,15 +31,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should create a connector with config and secret headers', async () => {
       const connectorName = 'web';
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
 
-      await testSubjects.click('webhookViewHeadersSwitch');
-      await testSubjects.click('webhookAddHeaderButton');
-
-      await testSubjects.setValue('nameInput', connectorName);
-      await testSubjects.setValue('webhookUrlText', 'https://www.example.com');
-      await testSubjects.click('authNone');
+      await actions.webhook.openCreateConnectorFlyout();
+      await actions.webhook.setAuthTypeNone();
+      await actions.webhook.setConnectorFields({
+        name: connectorName,
+        webhookUrlText: 'https://www.example.com',
+      });
+      await actions.webhook.toggleHeaders();
+      await actions.webhook.addHeader();
 
       const headerKeys = await find.allByCssSelector('[data-test-subj="webhookHeadersKeyInput"]');
       const headerValues = await find.allByCssSelector(
@@ -50,6 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '[data-test-subj="webhookHeaderTypeSelect"]'
       );
 
+      // default + 1 click
       expect(headerKeys.length).to.eql(2);
       expect(headerValues.length).to.eql(2);
       expect(headerInputTypes.length).to.eql(2);
@@ -64,9 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await headerInputTypes[1].click();
       await (await find.byCssSelector('[data-test-subj="option-secret"]')).click();
 
-      const flyOutSaveButton = await testSubjects.find('create-connector-flyout-save-btn');
-      expect(await flyOutSaveButton.isEnabled()).to.be(true);
-      await flyOutSaveButton.click();
+      await actions.webhook.saveAndCloseFlyout();
 
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
@@ -76,9 +74,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should render the cr and pfx tab for ssl auth', async () => {
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
-      await testSubjects.click('authSSL');
+      await actions.webhook.openCreateConnectorFlyout();
+      await actions.webhook.setAuthTypeSSL();
 
       const certTypeTabs = await find.allByCssSelector(
         '[data-test-subj="webhookCertTypeTabs"] > .euiTab'
