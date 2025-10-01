@@ -10,7 +10,7 @@ export {
   getSecurityFeature,
   getSecurityV2Feature,
   getSecurityV3Feature,
-  getSecurityV4Feature,
+  getSecurityV5Feature as getSecurityV4Feature,
 } from './src/security';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';

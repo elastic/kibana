@@ -96,7 +96,7 @@ const createRestrictedRole = async (roleName) => {
               onechat: ['all'],
               uptime: ['all'],
               observabilityCasesV3: ['all'],
-              siemV4: ['all'],
+              siemV5: ['all'],
               rules: ['all'],
               securitySolutionCasesV3: ['all'],
               securitySolutionTimeline: ['all'],

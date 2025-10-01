@@ -19,7 +19,6 @@ import {
   getCasesV3Feature,
   getSecurityV2Feature,
   getSecurityV3Feature,
-  getSecurityV4Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
@@ -36,7 +35,7 @@ import {
   securityV1SavedObjects,
   securityV2SavedObjects,
   securityV3SavedObjects,
-  securityV4SavedObjects,
+  securityV5SavedObjects,
 } from './security_saved_objects';
 import { registerApiAccessControl } from './product_features_api_access_control';
 import type {
@@ -58,7 +57,7 @@ export class ProductFeaturesService {
       getSecurityFeature({ ...securityFeatureParams, savedObjects: securityV1SavedObjects }),
       getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityV2SavedObjects }),
       getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityV3SavedObjects }),
-      getSecurityV4Feature({ ...securityFeatureParams, savedObjects: securityV4SavedObjects }),
+      getSecurityV5Feature({ ...securityFeatureParams, savedObjects: securityV5SavedObjects }),
     ]);
     this.productFeaturesRegistry.create('cases', [
       getCasesFeature(casesProductFeatureParams),

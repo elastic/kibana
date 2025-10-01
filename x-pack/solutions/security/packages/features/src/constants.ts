@@ -13,13 +13,13 @@ export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
 // New version for 9.1.
 export const SECURITY_FEATURE_ID_V3 = 'siemV3' as const;
-export const SECURITY_FEATURE_ID_V4 = 'siemV4' as const;
+export const SECURITY_FEATURE_ID_V5 = 'siemV5' as const;
 
 // Security UI privileges
 export const SECURITY_UI_SHOW = 'show' as const;
-export const SECURITY_UI_SHOW_PRIVILEGE = `${SECURITY_FEATURE_ID_V4}.${SECURITY_UI_SHOW}` as const;
+export const SECURITY_UI_SHOW_PRIVILEGE = `${SECURITY_FEATURE_ID_V5}.${SECURITY_UI_SHOW}` as const;
 export const SECURITY_UI_CRUD = 'crud' as const;
-export const SECURITY_UI_CRUD_PRIVILEGE = `${SECURITY_FEATURE_ID_V4}.${SECURITY_UI_CRUD}` as const;
+export const SECURITY_UI_CRUD_PRIVILEGE = `${SECURITY_FEATURE_ID_V5}.${SECURITY_UI_CRUD}` as const;
 
 /**
  * @deprecated deprecated in 8.17. Use CASE_FEATURE_ID_V2 instead
@@ -63,7 +63,8 @@ export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_READ}` as
 export const RULES_UI_EDIT = 'edit_rules' as const;
 export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_EDIT}` as const;
 export const RULES_UI_DETECTIONS_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_DETECTIONS}` as const;
-export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
+export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
+  `${RULES_FEATURE_ID}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;
