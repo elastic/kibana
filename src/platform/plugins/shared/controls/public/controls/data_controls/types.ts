@@ -22,6 +22,8 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
+import type { HasCustomPrepend } from '../types';
+
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
 export interface PublishesField {
@@ -30,6 +32,7 @@ export interface PublishesField {
 }
 
 export type DataControlApi = StateManager<DataControlState>['api'] &
+  Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &

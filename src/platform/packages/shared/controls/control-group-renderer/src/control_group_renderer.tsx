@@ -8,7 +8,15 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  combineLatest,
+  distinctUntilChanged,
+  first,
+  map,
+} from 'rxjs';
 
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -78,14 +86,18 @@ export const ControlGroupRenderer = ({
     };
   }, [childrenApi, layoutApi, searchApi, propsApi]);
 
-  const currentState$: BehaviorSubject<{ [id: string]: StickyControlState }> = useMemo(() => {
+  const currentState$: Observable<Partial<ControlGroupRuntimeState>> | undefined = useMemo(() => {
     if (!parentApi) return;
     return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
       map(([currentChildState, currentLayout]) => {
-        const combinedState: { [id: string]: StickyControlState } = {};
+        const combinedState: ControlGroupRuntimeState['initialChildControlState'] = {};
         Object.keys(currentLayout.controls).forEach((id) => {
-          combinedState[id] = { ...currentChildState[id].rawState, ...currentLayout.controls[id] };
+          combinedState[id] = {
+            ...currentChildState[id].rawState,
+            ...currentLayout.controls[id],
+          };
         });
+        return { initialChildControlState: combinedState };
       })
     );
   }, [currentChildState$Ref, parentApi]);
@@ -94,7 +106,6 @@ export const ControlGroupRenderer = ({
     if (!parentApi || !currentState$) return;
 
     const reload$ = new Subject<void>();
-
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
@@ -114,6 +125,25 @@ export const ControlGroupRenderer = ({
           if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
         });
       },
+      // untilInitialized: () => {
+      //   return new Promise((resolve) => {
+      //     combineLatest([parentApi.children$, parentApi.layout$])
+      //       .pipe(
+      //         map(([children, layout]) => {
+      //           // filter out panels that are in collapsed sections, since the APIs will never be available
+      //           const expectedChildCount = Object.values(layout.controls).length;
+      //           const currentChildCount = Object.keys(children).length;
+      //           return expectedChildCount !== currentChildCount;
+      //         }),
+      //         distinctUntilChanged(),
+      //         first()
+      //       )
+      //       .subscribe(() => {
+      //         console.log('RESOLVE');
+      //         resolve(true);
+      //       });
+      //   });
+      // },
     } as unknown as ControlGroupRendererApi);
   }, [parentApi, currentState$, onApiAvailable]);
 

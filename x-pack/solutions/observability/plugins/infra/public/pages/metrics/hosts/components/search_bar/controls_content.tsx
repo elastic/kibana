@@ -14,6 +14,7 @@ import {
   type ControlGroupRendererApi,
   type ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
+import type { DataControlApi } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -55,8 +56,8 @@ export const ControlsContent = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
-      labelPosition: 'oneLine',
-      initialChildControlState: controlPanels,
+      initialChildControlState:
+        controlPanels as ControlGroupRuntimeState['initialChildControlState'],
     };
 
     return { initialState: initialInput };
@@ -67,13 +68,13 @@ export const ControlsContent = ({
     if (!current || !controlConfigs.replace) {
       return;
     }
-
     Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
       current.replacePanel(key, {
         panelType: replaceable.control.type,
         maybePanelId: replaceable.key,
         serializedState: {
           rawState: {
+            id: replaceable.key,
             ...replaceable.control,
             dataViewId: dataView?.id,
           },
@@ -88,19 +89,17 @@ export const ControlsContent = ({
 
       controlGroupAPI.current = controlGroup;
 
-      controlGroup.untilInitialized().then(() => {
-        subscriptions.current.add(
-          controlGroup.children$.subscribe((children) => {
-            Object.keys(children).map((childId) => {
-              const child = children[childId] as DataControlApi;
+      subscriptions.current.add(
+        controlGroup.children$.subscribe((children) => {
+          Object.keys(children).map((childId) => {
+            const child = children[childId] as DataControlApi;
 
-              child.CustomPrependComponent = () => (
-                <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
-              );
-            });
-          })
-        );
-      });
+            child.CustomPrependComponent = () => (
+              <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
+            );
+          });
+        })
+      );
 
       subscriptions.current.add(
         controlGroup.appliedFilters$.subscribe((newFilters = []) => {
@@ -109,9 +108,10 @@ export const ControlsContent = ({
       );
 
       subscriptions.current.add(
-        controlGroup
-          .getInput$()
-          .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
+        controlGroup.getInput$().subscribe(({ initialChildControlState }) => {
+          console.log({ initialChildControlState });
+          setControlPanels(initialChildControlState);
+        })
       );
     },
     [onFiltersChange, setControlPanels]

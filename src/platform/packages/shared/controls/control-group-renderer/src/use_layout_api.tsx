@@ -93,6 +93,30 @@ export const useLayoutApi = (
             },
           },
         });
+        // return (await getChildApi(uuid)) as ApiType;
+      },
+      replacePanel: <State extends StickyControlState = StickyControlState>(
+        idToRemove: string,
+        newPanel: PanelPackage<State>
+      ) => {
+        const { panelType: type, serializedState, maybePanelId } = newPanel;
+        const uuid = maybePanelId ?? uuidv4();
+        if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
+
+        const currentLayout = layout$Ref.current.value;
+        const controls = { ...currentLayout.controls };
+        let newOrder = Math.max(...Object.values(controls).map(({ order }) => order));
+        if (controls[idToRemove]) {
+          newOrder = controls[idToRemove].order;
+          delete controls[idToRemove];
+        }
+        controls[uuid] = {
+          type: type as StickyControlState['type'],
+          ...serializedState,
+          order: newOrder,
+        };
+        layout$Ref.current.next({ ...currentLayout, controls });
+        return uuid;
       },
     };
   }, [state, childrenApi]);

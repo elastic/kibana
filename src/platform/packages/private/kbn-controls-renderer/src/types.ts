@@ -8,7 +8,7 @@
  */
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import type { PublishesDisabledActionIds, PublishesViewMode } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -20,7 +20,11 @@ export interface ControlRendererServices {
   uiActions: UiActionsStart;
 }
 
-export type ControlsRendererParentApi = PublishesViewMode &
+export type ControlsRendererParentApi = Pick<
+  PresentationContainer,
+  'children$' | 'addNewPanel' | 'replacePanel'
+> &
+  PublishesViewMode &
   HasSerializedChildState<object> &
   Partial<PublishesDisabledActionIds> &
   Pick<DashboardApi, 'registerChildApi' | 'layout$'> & {
