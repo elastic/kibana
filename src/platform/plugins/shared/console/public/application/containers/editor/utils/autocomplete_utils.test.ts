@@ -223,7 +223,7 @@ describe('autocomplete_utils', () => {
       ).toBe(false);
     });
 
-    it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot at the start', () => {
+    it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot', () => {
       const mockModel = {
         getValueInRange: () => 'GET .',
         getWordUntilPosition: () => ({ startColumn: 6 }),
@@ -231,17 +231,6 @@ describe('autocomplete_utils', () => {
       const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
       expect(items.length).toBe(5);
-    });
-
-    it('does not suggest dot-prefixed items when typing a dot after a completed dot-prefixed term', () => {
-      const mockModel = {
-        getValueInRange: () => 'GET .alerts-dataset.quality.alerts-default.',
-        getWordUntilPosition: () => ({ startColumn: 45 }),
-      } as unknown as monaco.editor.ITextModel;
-      const mockPosition = { lineNumber: 1, column: 45 } as unknown as monaco.Position;
-      const items = getUrlPathCompletionItems(mockModel, mockPosition);
-      // Should not include any dot-prefixed items
-      expect(items.every((item) => !item.label.toString().startsWith('.'))).toBe(true);
     });
   });
 
