@@ -441,10 +441,9 @@ export const openInNewTab: InternalStateThunkActionCreator<
     }
 
     if (searchSessionId) {
-      newDefaultTab.dataRequestParams = {
-        ...newDefaultTab.dataRequestParams,
+      newDefaultTab.initialInternalState = {
+        ...newDefaultTab.initialInternalState,
         searchSessionId,
-        isSearchSessionRestored: true,
       };
     }
 
