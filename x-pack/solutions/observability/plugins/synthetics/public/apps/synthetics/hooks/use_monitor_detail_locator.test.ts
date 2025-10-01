@@ -13,7 +13,6 @@ import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
-
 jest.mock('../../../hooks/use_kibana_space', () => ({
   useKibanaSpace: jest.fn(),
 }));
