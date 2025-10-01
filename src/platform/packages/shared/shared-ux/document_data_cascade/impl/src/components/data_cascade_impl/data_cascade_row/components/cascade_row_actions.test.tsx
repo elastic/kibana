@@ -8,30 +8,39 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CascadeRowActions } from './cascade_row_actions';
 
-describe('CascadeRowActions', () => {
-  const headerRowActions = [
-    {
-      label: 'Action 1',
-      iconType: 'pencil',
-      onClick: jest.fn(),
-    },
-    {
-      label: 'Action 2',
-      iconType: 'trash',
-      onClick: jest.fn(),
-    },
-    {
-      label: 'Action 3',
-      iconType: 'eye',
-      onClick: jest.fn(),
-    },
-  ];
+const headerRowActions = [
+  {
+    label: 'Action 1',
+    iconType: 'pencil',
+    onClick: jest.fn(),
+  },
+  {
+    label: 'Action 2',
+    iconType: 'trash',
+    onClick: jest.fn(),
+  },
+  {
+    label: 'Action 3',
+    iconType: 'eye',
+    onClick: jest.fn(),
+  },
+];
 
+const renderComponent = () => {
+  render(
+    <EuiThemeProvider>
+      <CascadeRowActions headerRowActions={headerRowActions} />
+    </EuiThemeProvider>
+  );
+};
+
+describe('CascadeRowActions', () => {
   it('will only render the first two actions by default', () => {
-    render(<CascadeRowActions headerRowActions={headerRowActions} />);
+    renderComponent();
 
     // Check that the first two actions are visible
     expect(screen.getByText('Action 1')).toBeInTheDocument();
@@ -41,7 +50,7 @@ describe('CascadeRowActions', () => {
   });
 
   it('clicking the select more options button reveals additional actions', () => {
-    render(<CascadeRowActions headerRowActions={headerRowActions} />);
+    renderComponent();
 
     // Click the "Select more options" button
     fireEvent.click(screen.getByLabelText('Select more options'));
