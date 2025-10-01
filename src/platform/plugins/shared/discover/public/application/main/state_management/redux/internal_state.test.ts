@@ -84,11 +84,8 @@ describe('InternalStateStore', () => {
     expect(tabsState.byId[tabsState.unsafeCurrentId].label).toBe(params.tabLabel);
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialAppState).toEqual(params.appState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
-    expect(tabsState.byId[tabsState.unsafeCurrentId].dataRequestParams).toEqual({
+    expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,
-      isSearchSessionRestored: true,
-      timeRangeAbsolute: undefined,
-      timeRangeRelative: undefined,
     });
   });
 
