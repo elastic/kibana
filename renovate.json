@@ -3431,7 +3431,6 @@
         "require-in-the-middle",
         "tape",
         "tough-cookie",
-        "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
         "@types/js-yaml",
@@ -3439,8 +3438,7 @@
         "@types/minimist",
         "@types/node-forge",
         "@types/object-hash",
-        "@types/tough-cookie",
-        "@types/uuid"
+        "@types/tough-cookie"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3459,7 +3457,9 @@
     {
       "groupName": "platform security modules - ESM required",
       "matchDepNames": [
-        "@kayahr/text-encoding"
+        "@kayahr/text-encoding",
+        "uuid",
+        "@types/uuid"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3502,6 +3502,14 @@
     {
       "matchDepNames": [
         "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
       ],
       "enabled": true
     },
@@ -4079,25 +4087,6 @@
         "Team:Security-Scalability",
         "release_note:skip",
         "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Cloud Defend",
-      "matchDepNames": [
-        "monaco-yaml"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: Cloud Native Integrations",
-        "release_note:skip",
-        "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

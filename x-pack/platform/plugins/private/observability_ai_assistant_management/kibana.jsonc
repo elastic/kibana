@@ -17,7 +17,8 @@
       "management",
       "observabilityAIAssistant",
       "ml",
-      "licensing"
+      "licensing",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "home",
