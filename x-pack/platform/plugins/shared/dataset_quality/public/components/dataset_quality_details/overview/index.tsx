@@ -70,7 +70,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const [selectedQualityCard, setSelectedQualityCard] =
     React.useState<QualityIssueType>('degraded');
 
-  const handleRefresh = useCallback(
+  const handleTimeChange = useCallback(
     (refreshProps: TimeRange) => {
       updateTimeRange({ start: refreshProps.from, end: refreshProps.to });
       setLastReloadTime(Date.now());
@@ -80,7 +80,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   return (
     <>
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
-      <OverviewHeader handleRefresh={handleRefresh} />
+      <OverviewHeader handleTimeChange={handleTimeChange} />
       <EuiSpacer size="m" />
 
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
