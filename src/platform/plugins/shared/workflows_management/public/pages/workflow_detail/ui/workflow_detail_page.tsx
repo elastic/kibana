@@ -118,7 +118,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   };
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
     const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -132,51 +131,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [testStepId, setTestStepId] = useState<string | null>(null);
   const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
 
-  const handleRunClick = ({ test = false }: { test: boolean }) => {
-    if (test) {
-      setTestWorkflowModalOpen(true);
-    } else {
-      setWorkflowExecuteModalOpen(true);
-    }
+  const handleRunClick = () => {
+    setWorkflowExecuteModalOpen(true);
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
-    if (!workflow) {
-      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
-        toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
-          defaultMessage: 'Workflow is not loaded',
-        }),
-      });
-      return;
-    }
-    runWorkflow.mutate(
-      { id, inputs: event },
-      {
-        onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.workflowDetailHeader.success.workflowRunStarted', {
-              defaultMessage: 'Workflow run started',
-            }),
-            {
-              toastLifeTimeMs: 3000,
-            }
-          );
-          setSelectedExecution(workflowExecutionId);
-        },
-        onError: (err: unknown) => {
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: i18n.translate('workflows.workflowDetailHeader.error.workflowRunFailed', {
-              defaultMessage: 'Failed to run workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
-
-  const handleTestRunWorkflow = (event: Record<string, any>) => {
     testWorkflow.mutate(
       { workflowYaml, inputs: event },
       {
@@ -297,7 +256,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         canSaveWorkflow={canSaveWorkflow}
         isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
-        handleRunClick={() => handleRunClick({ test: true })}
+        handleRunClick={handleRunClick}
         handleSave={handleSave}
         handleToggleWorkflow={handleToggleWorkflow}
         canTestWorkflow={canTestWorkflow}
@@ -366,16 +325,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       </EuiFlexGroup>
       {workflowExecuteModalOpen && workflow && (
         <WorkflowExecuteModal
-          definition={workflow.definition}
+          definition={definitionFromCurrentYaml}
           onClose={() => setWorkflowExecuteModalOpen(false)}
           onSubmit={handleRunWorkflow}
-        />
-      )}
-      {testWorkflowModalOpen && definitionFromCurrentYaml && (
-        <WorkflowExecuteModal
-          definition={definitionFromCurrentYaml}
-          onClose={() => setTestWorkflowModalOpen(false)}
-          onSubmit={handleTestRunWorkflow}
         />
       )}
       {testStepId && contextOverride && (
