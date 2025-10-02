@@ -29,7 +29,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
@@ -92,6 +92,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  esqlVariables?: ESQLControlVariable[];
   controlsState?: ControlPanelsState<ESQLControlState>;
 }
 
