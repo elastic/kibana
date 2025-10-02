@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext } from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiLink,
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -42,20 +41,15 @@ export const NewsfeedFlyout = (
         {...rest}
         onClose={closeFlyout}
         size="s"
-        aria-labelledby="flyoutSmallTitle"
         className="kbnNews__flyout"
         data-test-subj="NewsfeedFlyout"
+        session={true}
+        flyoutMenuProps={{
+          title: i18n.translate('newsfeed.flyoutList.whatsNewTitle', {
+            defaultMessage: "What's new at Elastic",
+          }),
+        }}
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id="flyoutSmallTitle">
-              <FormattedMessage
-                id="newsfeed.flyoutList.whatsNewTitle"
-                defaultMessage="What's new at Elastic"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
         <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
           {!newsFetchResult ? (
             <NewsLoadingPrompt showPlainSpinner={props.showPlainSpinner} />
