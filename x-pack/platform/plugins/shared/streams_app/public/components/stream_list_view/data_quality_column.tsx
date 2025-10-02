@@ -14,8 +14,10 @@ import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fe
 
 export function DataQualityColumn({
   histogramQueryFetch,
+  testId,
 }: {
   histogramQueryFetch: StreamDocCountsFetch;
+  testId?: string;
 }) {
   const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
   const failedDocsResult = useAsync(
@@ -61,5 +63,5 @@ export function DataQualityColumn({
   const isLoading =
     histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
-  return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
+  return <DatasetQualityIndicator testId={testId} quality={quality} isLoading={isLoading} />;
 }

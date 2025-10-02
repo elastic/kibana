@@ -57,6 +57,24 @@ export class StreamsApp {
     await expect(this.page.getByTestId('streamsTable')).toBeVisible();
   }
 
+  async verifyDocCount(streamName: string, expectedCount: number) {
+    await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
+      expectedCount.toString()
+    );
+  }
+
+  async verifyDataQuality(streamName: string, expectedQuality: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="dataQualityIndicator-${streamName}"]`)
+    ).toHaveText(expectedQuality);
+  }
+
+  async verifyRetention(streamName: string, expectedIlmPolicy: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="retentionColumn-${streamName}"]`)
+    ).toContainText(expectedIlmPolicy);
+  }
+
   async verifyStreamsAreInTable(streamNames: string[]) {
     for (const name of streamNames) {
       await expect(
