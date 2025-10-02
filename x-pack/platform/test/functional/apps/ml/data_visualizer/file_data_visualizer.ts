@@ -280,7 +280,6 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  // skipping while UX changes are being made
   describe('file based', function () {
     this.tags(['ml']);
     before(async () => {
