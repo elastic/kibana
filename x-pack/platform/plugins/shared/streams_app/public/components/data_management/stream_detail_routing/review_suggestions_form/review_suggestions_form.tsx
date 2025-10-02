@@ -38,8 +38,9 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
     acceptSuggestion,
     rejectSuggestion,
   } = useReviewSuggestionsFormContext();
-
-  const ruleUnderReview = useStreamsRoutingSelector((snapshot) => snapshot.context.suggestedRuleId);
+  const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
+  );
 
   // Reset suggestions when navigating to a different stream
   useUpdateEffect(() => {
