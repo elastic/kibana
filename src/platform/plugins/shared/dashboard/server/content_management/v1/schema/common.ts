@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { filterSchema, querySchema } from '@kbn/es-query-server';
 import { referenceSchema } from '@kbn/content-management-utils';
+import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -233,16 +233,11 @@ export const dashboardState = {
       schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
     )
   ),
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
+  timeRange: schema.maybe(timeRangeSchema),
   timeRestore: schema.boolean({
     defaultValue: false,
     meta: { description: 'Whether to restore time upon viewing this dashboard' },
   }),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
   title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
