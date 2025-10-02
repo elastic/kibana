@@ -15,6 +15,8 @@ import {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { RepositoryEsClient } from '../../repository_es_client';
+import type { PreflightAccessControlResult } from '../helpers';
+import { isFoundGetResponse } from '../utils';
 
 export interface AccessControlPreflightObject {
   /** The type of the object. */
@@ -27,7 +29,7 @@ export interface AccessControlPreflightObject {
   overwrite?: boolean; // Do we need this here? We are relying on the authz check the condition, and normal preflight will check if there is a conflict and overwrite is false
 }
 
-export interface AccessControlPreflightParams {
+export interface AccessControlBulkPreflightParams {
   client: RepositoryEsClient;
   serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
@@ -35,7 +37,11 @@ export interface AccessControlPreflightParams {
   namespace: string | undefined;
 }
 
-export async function accessControlPreflightCheck(params: AccessControlPreflightParams) {
+export type AccessControlPreflightParams = Omit<AccessControlBulkPreflightParams, 'objects'> & {
+  object: AccessControlPreflightObject;
+};
+
+export async function accessControlBulkPreflightCheck(params: AccessControlBulkPreflightParams) {
   const { client, serializer, getIndexForType, objects, namespace } = params;
 
   const getNamespaceId = (objectNamespace?: string) =>
@@ -68,4 +74,44 @@ export async function accessControlPreflightCheck(params: AccessControlPreflight
   }
 
   return bulkGetResponse;
+}
+
+export async function accessControlPreflightCheck(
+  params: AccessControlPreflightParams
+): Promise<PreflightAccessControlResult> {
+  const { client, serializer, getIndexForType, object, namespace } = params;
+
+  const getNamespaceId = (objectNamespace?: string) =>
+    objectNamespace !== undefined
+      ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
+      : namespace;
+
+  const getResponse = await client.get<SavedObjectsRawDocSource>(
+    {
+      id: serializer.generateRawId(getNamespaceId(namespace), object.type, object.id),
+      index: getIndexForType(object.type),
+    },
+    { ignore: [404], meta: true }
+  );
+
+  // throw if we can't verify a 404 response is from Elasticsearch
+
+  if (isFoundGetResponse(getResponse.body)) {
+    return {
+      rawDocSource: getResponse.body,
+    };
+  }
+  if (
+    getResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: getResponse.statusCode,
+      headers: getResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
+
+  return {
+    rawDocSource: undefined,
+  };
 }
