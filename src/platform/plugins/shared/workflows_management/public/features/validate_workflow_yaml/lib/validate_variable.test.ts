@@ -206,7 +206,7 @@ describe('validateVariable', () => {
 
     expect(result).toMatchObject({
       message:
-        'Foreach parameter can be an array or a JSON string. stringVar is unknown string, engine will try to parse it as JSON in runtime, but it might fail',
+        'Foreach parameter should be an array or a JSON string. stringVar is unknown string, engine will try to parse it as JSON in runtime, but it might fail',
       severity: 'warning',
       source: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
