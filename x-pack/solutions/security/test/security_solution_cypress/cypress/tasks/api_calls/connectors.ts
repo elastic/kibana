@@ -51,6 +51,6 @@ export const bedrockConnectorAPIPayload = {
   name: 'Bedrock cypress test e2e connector',
 };
 
-export const createSlackConnector = () => waitForConnectorCreation(slackConnectorAPIPayload);
-export const createAzureConnector = () => waitForConnectorCreation(azureConnectorAPIPayload);
-export const createBedrockConnector = () => waitForConnectorCreation(bedrockConnectorAPIPayload);
+export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
+export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
+export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);
