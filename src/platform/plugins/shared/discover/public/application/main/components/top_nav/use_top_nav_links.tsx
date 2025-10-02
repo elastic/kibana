@@ -134,7 +134,17 @@ export const useTopNavLinks = ({
       ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
           onClick: () => {
-            services.data.search.showSearchSessionsFlyout({ appId });
+            services.data.search.showSearchSessionsFlyout({
+              appId,
+              onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
+                ? ({ session, event }) => {
+                    event?.preventDefault();
+                    dispatch(
+                      internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                    );
+                  }
+                : undefined,
+            });
           },
         });
         items.push(backgroundSearchFlyoutMenuItem);
@@ -185,13 +195,14 @@ export const useTopNavLinks = ({
     }, [
       defaultMenu,
       services,
-      onOpenInspector,
       discoverParams,
+      appId,
+      onOpenInspector,
       state,
+      dispatch,
       isEsqlMode,
       currentDataView,
       hasShareIntegration,
-      appId,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

@@ -21,7 +21,10 @@ import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
-export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createIndexSyncService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  maxUsersAllowed: number
+) => {
   const { deps } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
 
@@ -56,6 +59,12 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
+
+    dataClient.log(
+      'info',
+      `Privilege monitoring sync started - Maximum supported number of privileged users allowed: ${maxUsersAllowed}`
+    );
+
     const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of indexSources) {

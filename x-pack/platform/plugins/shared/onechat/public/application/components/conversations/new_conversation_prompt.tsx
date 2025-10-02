@@ -186,7 +186,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   `;
   return (
     <ConversationContentWithMargins css={fullHeightStyles}>
-      <div css={gridStyles}>
+      <div css={gridStyles} data-test-subj="agentBuilderWelcomePage">
         <MainContainer>
           <WelcomeText />
         </MainContainer>

@@ -23,7 +23,8 @@
       "lens",
       "licensing",
       "management",
-      "share"
+      "share",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"
