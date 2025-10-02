@@ -140,6 +140,7 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       selectEqlRuleType();
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('any where field1');
 
@@ -163,6 +164,7 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       selectEqlRuleType();
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+      cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type('test any where true');
 

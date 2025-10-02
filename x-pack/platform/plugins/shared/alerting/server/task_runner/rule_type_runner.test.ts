@@ -42,6 +42,7 @@ const uiSettingsClient = uiSettingsServiceMock.createClient();
 const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
 const getDataViews = jest.fn().mockResolvedValue(dataViews);
 const getWrappedSearchSourceClient = jest.fn();
+const getAsyncSearchClient = jest.fn();
 
 const fakeRequest = {
   headers: {},
@@ -199,6 +200,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -223,6 +225,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -310,6 +313,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -334,6 +338,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -424,6 +429,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -489,6 +495,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -513,6 +520,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -597,6 +605,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -621,6 +630,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -705,6 +715,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -717,6 +728,7 @@ describe('RuleTypeRunner', () => {
     });
 
     test('should handle reaching alert limit when rule type executor succeeds', async () => {
+      alertsClient.getMaxAlertLimit.mockReturnValueOnce(100);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
 
@@ -744,6 +756,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -768,6 +781,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -832,6 +846,7 @@ describe('RuleTypeRunner', () => {
     });
 
     test('should handle reaching alert limit when rule type executor throws error', async () => {
+      alertsClient.getMaxAlertLimit.mockReturnValueOnce(100);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       const err = new Error('executor error');
@@ -863,6 +878,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -887,6 +903,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -982,6 +999,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1007,6 +1025,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1089,6 +1108,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1114,6 +1134,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1199,6 +1220,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1226,6 +1248,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1311,6 +1334,7 @@ describe('RuleTypeRunner', () => {
             uiSettingsClient,
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
+            getAsyncSearchClient,
           },
           rule: mockedRule,
           ruleType,
@@ -1336,6 +1360,7 @@ describe('RuleTypeRunner', () => {
           share: {},
           shouldStopExecution: expect.any(Function),
           shouldWriteAlerts: expect.any(Function),
+          getAsyncSearchClient: expect.any(Function),
           uiSettingsClient,
         },
         params: mockedRuleParams,
@@ -1419,6 +1444,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
@@ -1463,6 +1489,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -1540,6 +1567,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,
@@ -1599,6 +1627,7 @@ describe('RuleTypeRunner', () => {
           uiSettingsClient,
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
+          getAsyncSearchClient,
         },
         rule: mockedRule,
         ruleType,

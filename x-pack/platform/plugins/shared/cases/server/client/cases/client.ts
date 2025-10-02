@@ -24,6 +24,7 @@ import type {
   CasesSimilarResponse,
   AddObservableRequest,
   UpdateObservableRequest,
+  BulkAddObservablesRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -41,7 +42,12 @@ import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
 import { similar } from './similar';
-import { addObservable, deleteObservable, updateObservable } from './observables';
+import {
+  addObservable,
+  bulkAddObservables,
+  deleteObservable,
+  updateObservable,
+} from './observables';
 
 /**
  * API for interacting with the cases entities.
@@ -128,6 +134,10 @@ export interface CasesSubClient {
    * Removes observable
    */
   deleteObservable(caseId: string, observableId: string): Promise<void>;
+  /**
+   * Bulk adds observables to the case
+   */
+  bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
 }
 
 /**
@@ -164,6 +174,8 @@ export const createCasesSubClient = (
       updateObservable(caseId, observableId, params, clientArgs, casesClient),
     deleteObservable: (caseId: string, observableId: string) =>
       deleteObservable(caseId, observableId, clientArgs, casesClient),
+    bulkAddObservables: (params: BulkAddObservablesRequest) =>
+      bulkAddObservables(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

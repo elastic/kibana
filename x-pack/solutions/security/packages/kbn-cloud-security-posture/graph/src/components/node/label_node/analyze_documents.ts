@@ -6,12 +6,12 @@
  */
 
 interface DocumentAnalysisInput {
-  eventsCount: number;
-  alertsCount: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
 }
 export interface DocumentAnalysisOutput {
-  eventsCount: number;
-  alertsCount: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
   isSingleAlert: boolean;
   isSingleEvent: boolean;
   isGroupOfEvents: boolean;
@@ -23,16 +23,16 @@ export interface DocumentAnalysisOutput {
  * Analyzes the documents data to categorize the label node type
  */
 export const analyzeDocuments = ({
-  eventsCount,
-  alertsCount,
+  uniqueEventsCount,
+  uniqueAlertsCount,
 }: DocumentAnalysisInput): DocumentAnalysisOutput => {
   return {
-    eventsCount,
-    alertsCount,
-    isSingleAlert: alertsCount === 1 && eventsCount === 0,
-    isSingleEvent: eventsCount === 1 && alertsCount === 0,
-    isGroupOfEvents: eventsCount > 1 && alertsCount === 0,
-    isGroupOfAlerts: alertsCount > 1 && eventsCount === 0,
-    isGroupOfEventsAndAlerts: eventsCount > 0 && alertsCount > 0,
+    uniqueEventsCount,
+    uniqueAlertsCount,
+    isSingleAlert: uniqueAlertsCount === 1 && uniqueEventsCount === 0,
+    isSingleEvent: uniqueEventsCount === 1 && uniqueAlertsCount === 0,
+    isGroupOfEvents: uniqueEventsCount > 1 && uniqueAlertsCount === 0,
+    isGroupOfAlerts: uniqueAlertsCount > 1 && uniqueEventsCount === 0,
+    isGroupOfEventsAndAlerts: uniqueEventsCount > 0 && uniqueAlertsCount > 0,
   };
 };

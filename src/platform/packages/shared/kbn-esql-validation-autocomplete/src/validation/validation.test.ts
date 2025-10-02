@@ -255,7 +255,7 @@ describe('validation logic', () => {
     });
 
     // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
+    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/parser/esql_error_listener.ts
     describe('EMPTY query does NOT produce syntax error', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);
@@ -266,7 +266,7 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'ts', 'show'}`,
           ])
       );
     });
@@ -276,7 +276,7 @@ describe('validation logic', () => {
         const { expectErrors } = await setup();
 
         await expectErrors('f', [
-          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}",
+          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'ts', 'show'}",
         ]);
         await expectErrors('from ', [
           "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",

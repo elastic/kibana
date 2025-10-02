@@ -18,5 +18,6 @@
     "@kbn/utility-types",
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-browser-internal",
+    "@kbn/lazy-object",
   ]
 }

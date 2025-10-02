@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { extractControlsReferences, injectControlsReferences } from './controls_references';
-export { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
-
 export {
   extractReferences,
   injectReferences,
-  serializeReferences,
-  deserializeReferences,
   convertSavedObjectAttributesToReferences,
 } from './saved_visualization_references';

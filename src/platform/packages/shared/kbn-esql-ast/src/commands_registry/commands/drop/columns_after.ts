@@ -10,11 +10,7 @@ import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../../types';
 
-export const columnsAfter = (
-  command: ESQLCommand,
-  previousColumns: ESQLColumnData[],
-  query: string
-) => {
+export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
   const columnsToDrop: string[] = [];
 
   walk(command, {

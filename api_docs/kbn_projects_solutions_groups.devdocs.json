@@ -304,7 +304,7 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"oblt\" | \"es\" | \"chat\""
+          "\"security\" | \"chat\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
         "deprecated": false,

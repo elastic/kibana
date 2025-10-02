@@ -8,16 +8,26 @@
 import { i18n } from '@kbn/i18n';
 
 export const labels = {
+  common: {
+    optional: i18n.translate('xpack.onechat.common.optional', {
+      defaultMessage: 'Optional',
+    }),
+  },
   conversations: {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
+    manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
+      defaultMessage: 'Manage agents',
+    }),
+    createAnAgent: i18n.translate('xpack.onechat.agents.createAnAgent', {
+      defaultMessage: 'Create an agent',
+    }),
+    selectAgentAriaLabel: i18n.translate('xpack.onechat.agents.selectAgentAriaLabel', {
+      defaultMessage: 'Select an agent',
+    }),
   },
   tools: {
     // Landing page
     title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
-    description: i18n.translate('xpack.onechat.tools.toolsDescription', {
-      defaultMessage:
-        'Agents use tools — modular, reusable actions — to search, retrieve, and take meaningful steps on your behalf. Start with built-in capabilities from Elastic, or create your own to fit your workflow.',
-    }),
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
@@ -42,6 +52,12 @@ export const labels = {
     ),
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
+    }),
+    testButtonLabel: i18n.translate('xpack.onechat.tools.testButtonLabel', {
+      defaultMessage: 'Test',
+    }),
+    saveAndTestButtonLabel: i18n.translate('xpack.onechat.tools.saveAndTestButtonLabel', {
+      defaultMessage: 'Save & test',
     }),
     cancelButtonLabel: i18n.translate('xpack.onechat.tools.cancelButtonLabel', {
       defaultMessage: 'Cancel',
@@ -220,6 +236,11 @@ export const labels = {
         defaultMessage: "You can't recover deleted data.",
       }
     ),
+    testTool: {
+      backToEditToolButton: i18n.translate('xpack.onechat.tools.testTool.backToEditToolButton', {
+        defaultMessage: 'Back to edit tool',
+      }),
+    },
   },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),
@@ -229,8 +250,8 @@ export const labels = {
       defaultMessage: 'Create Agent',
     }),
     settings: {
-      optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
-        defaultMessage: 'Optional',
+      cancelButtonLabel: i18n.translate('xpack.onechat.agents.form.settings.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
       }),
     },
   },

@@ -23,7 +23,7 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless", "globalSearch"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

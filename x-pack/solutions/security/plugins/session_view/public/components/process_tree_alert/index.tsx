@@ -9,10 +9,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiIcon,
   EuiText,
   EuiButtonIcon,
-  EuiToolTip,
+  EuiIconTip,
   EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -95,9 +94,12 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={alertIconTooltipContent}>
-            <EuiIcon type={alertIconType} color="danger" />
-          </EuiToolTip>
+          <EuiIconTip
+            content={alertIconTooltipContent}
+            position="top"
+            type={alertIconType}
+            color="danger"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div css={styles.processAlertDisplayContainer}>

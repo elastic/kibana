@@ -39,3 +39,12 @@ export const processCondition = (condition?: Condition): Condition | undefined =
     ? undefined
     : convertedCondition;
 };
+
+// Convert SampleDocument[] to DataTableRecordWithIndex[] for flyout compatibility
+export const toDataTableRecordWithIndex = <T>(documents: T[]) =>
+  documents.map((doc, index) => ({
+    raw: doc,
+    flattened: doc,
+    index,
+    id: `${index}-${Date.now()}`,
+  }));

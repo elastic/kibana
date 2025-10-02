@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { ExportApp } from './export_app.component';
 import type { CanvasWorkpad } from '../../../types';
 
@@ -31,16 +31,16 @@ describe('<ExportApp />', () => {
           elements: [3, 4, 5, 6],
         },
       ],
-    } as any as CanvasWorkpad;
+    } as unknown as CanvasWorkpad;
 
-    const page1 = mount(
+    const { container: container1 } = render(
       <ExportApp workpad={sampleWorkpad} selectedPageIndex={0} initializeWorkpad={() => {}} />
     );
-    expect(page1).toMatchSnapshot();
+    expect(container1).toMatchSnapshot();
 
-    const page2 = mount(
+    const { container: container2 } = render(
       <ExportApp workpad={sampleWorkpad} selectedPageIndex={1} initializeWorkpad={() => {}} />
     );
-    expect(page2).toMatchSnapshot();
+    expect(container2).toMatchSnapshot();
   });
 });

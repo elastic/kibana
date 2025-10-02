@@ -29,7 +29,7 @@ export const createUpdatedColumn = (): TableColumn => {
     ),
     sortable: true,
     truncateText: true,
-    align: 'center',
+    align: 'left',
     width: '15%',
   };
 };

@@ -12,10 +12,15 @@ import type { RefObject } from 'react';
 import { getFocusableElements } from './get_focusable_elements';
 
 /**
- * Utility function for focusing the first interactive element
+ * Utility function for focusing the first interactive element.
+ *
+ * @param ref - The ref to the container element.
  */
 export const focusFirstElement = (ref: RefObject<HTMLElement>) => {
-  const elements = getFocusableElements(ref);
+  const container = ref?.current;
+  if (!container) return;
+
+  const elements = getFocusableElements(container);
 
   if (elements.length > 0) {
     elements[0].focus();

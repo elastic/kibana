@@ -14,15 +14,10 @@ import { i18n } from '@kbn/i18n';
 
 export interface SearchSessionNameProps {
   name: string;
-  hasBackgroundSearchEnabled: boolean;
   editName: (newName: string) => Promise<unknown>;
 }
 
-export const SearchSessionName: React.FC<SearchSessionNameProps> = ({
-  name,
-  editName,
-  hasBackgroundSearchEnabled,
-}) => {
+export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, editName }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [newName, setNewName] = React.useState(name);
 
@@ -52,15 +47,9 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({
         autoFocus={true}
         iconType={'pencil'}
         color={'text'}
-        aria-label={
-          hasBackgroundSearchEnabled
-            ? i18n.translate('data.searchSessionName.backgroundSearchEditAriaLabelText', {
-                defaultMessage: 'Edit background search name',
-              })
-            : i18n.translate('data.searchSessionName.editAriaLabelText', {
-                defaultMessage: 'Edit search session name',
-              })
-        }
+        aria-label={i18n.translate('data.searchSessionName.backgroundSearchEditAriaLabelText', {
+          defaultMessage: 'Edit background search name',
+        })}
         data-test-subj={'searchSessionNameEdit'}
         onClick={() => setIsEditing(true)}
       />
@@ -69,28 +58,16 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({
     <EuiFieldText
       autoFocus={true}
       compressed={true}
-      placeholder={
-        hasBackgroundSearchEnabled
-          ? i18n.translate('data.searchSessionName.backgroundSearchPlaceholderText', {
-              defaultMessage: 'Enter a name for the background search',
-            })
-          : i18n.translate('data.searchSessionName.placeholderText', {
-              defaultMessage: 'Enter a name for the search session',
-            })
-      }
+      placeholder={i18n.translate('data.searchSessionName.backgroundSearchPlaceholderText', {
+        defaultMessage: 'Enter a name for the background search',
+      })}
       value={newName}
       onChange={(e) => {
         setNewName(e.target.value);
       }}
-      aria-label={
-        hasBackgroundSearchEnabled
-          ? i18n.translate('data.searchSessionName.backgroundSearchAriaLabelText', {
-              defaultMessage: 'Background search name',
-            })
-          : i18n.translate('data.searchSessionName.ariaLabelText', {
-              defaultMessage: 'Search session name',
-            })
-      }
+      aria-label={i18n.translate('data.searchSessionName.backgroundSearchAriaLabelText', {
+        defaultMessage: 'Background search name',
+      })}
       data-test-subj={'searchSessionNameInput'}
       append={
         <EuiButtonEmpty
