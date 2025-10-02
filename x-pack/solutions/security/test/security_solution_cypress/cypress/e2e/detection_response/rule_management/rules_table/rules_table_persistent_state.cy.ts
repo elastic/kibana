@@ -72,7 +72,7 @@ function setStorageState(storageTableState: Record<string, unknown>): void {
 function changeRulesTableState(): void {
   filterBySearchTerm('rule');
   filterByTags(['tag-b']);
-  filterByCustomRules();
+  filterByCustomRules(); //
   filterByDisabledRules();
   sortByTableColumn('Rule', 'asc');
   setRowsPerPageTo(5);
@@ -348,7 +348,7 @@ describe.skip(
         });
 
         it('persists after clearing the url state', () => {
-          changeRulesTableState();
+          changeRulesTableState(); //
           goToTablePage(2);
 
           visit(RULES_MANAGEMENT_URL);
