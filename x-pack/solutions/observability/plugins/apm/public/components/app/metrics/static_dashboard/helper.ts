@@ -65,9 +65,9 @@ export async function convertSavedDashboardToPanels(
 
     acc.push({
       type: panel.type,
-      gridData,
-      panelIndex,
-      panelConfig: {
+      grid: gridData,
+      uid: panelIndex,
+      config: {
         id: panelIndex,
         ...embeddableConfig,
         title,

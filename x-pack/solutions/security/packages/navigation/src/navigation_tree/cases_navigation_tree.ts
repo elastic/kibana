@@ -22,6 +22,7 @@ export const createCasesNavigationTree = (
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
   renderAs: 'item',
+  // TODO: update icon from EUI
   iconV2: LazyIconBriefcase,
   sideNavVersion,
   children: [

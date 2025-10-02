@@ -52,26 +52,11 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
           breadcrumbStatus: 'hidden',
           children: [
-            {
-              // TODO : update Steams link
-              breadcrumbStatus: 'hidden',
-              link: 'streams:overview',
-            },
+            { link: 'streams' },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:index_management',
             },
-            // TODO: verify if we need to add these links
-            // as they are not visible in the footer items in v1 serverless
-
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:index_lifecycle_management',
-            // },
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:snapshot_restore',
-            // },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:transform',
@@ -80,10 +65,6 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
               link: 'management:jobsListLink',
             },
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:rollup_jobs',
-            // },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:data_quality',

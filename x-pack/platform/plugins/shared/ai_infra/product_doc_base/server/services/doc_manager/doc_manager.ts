@@ -11,7 +11,7 @@ import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plu
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
-import type { InstallationStatus } from '../../../common/install_status';
+import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   INSTALL_ALL_TASK_ID,
@@ -31,6 +31,7 @@ import type {
   DocUpdateAllOptions,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
+import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -110,12 +111,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
-    const { request, wait = false, inferenceId } = options;
+    const { request, wait = false, inferenceId, forceUpdate } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
       logger: this.logger,
       inferenceId,
+      forceUpdate,
     });
 
     if (request) {
@@ -140,14 +142,17 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
   }
+
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { inferenceIds } = options ?? {};
+    const { forceUpdate, inferenceIds } = options ?? {};
     const idsToUpdate: string[] =
-      inferenceIds ?? (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+      Array.isArray(inferenceIds) && inferenceIds?.length > 0
+        ? inferenceIds
+        : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId })));
+    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
     return {
       inferenceIds: idsToUpdate,
     };
@@ -204,6 +209,62 @@ export class DocumentationManager implements DocumentationManagerAPI {
     const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
     const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
     return { status: overallStatus, installStatus };
+  }
+
+  async getStatuses({
+    inferenceIds,
+  }: {
+    inferenceIds: string[];
+  }): Promise<Record<string, PerformUpdateResponse>> {
+    // check status after installation in case of failure
+    const statuses = await Promise.allSettled(
+      inferenceIds.map((inferenceId) =>
+        this.getStatus({
+          inferenceId,
+        })
+      )
+    );
+    const body = statuses.reduce<Record<string, PerformUpdateResponse>>(
+      (acc, installationStatus, index) => {
+        const inferenceId = inferenceIds[index];
+        // Handle internal server error
+        if (installationStatus.status === 'rejected') {
+          const failureReason = installationStatus.reason;
+          return {
+            ...acc,
+            [inferenceId]: {
+              installed: status === 'uninstalled',
+              ...(failureReason ? { failureReason: JSON.stringify(failureReason) } : {}),
+            },
+          };
+        }
+        if (installationStatus.status === 'fulfilled') {
+          const { status, installStatus } = installationStatus.value;
+
+          let failureReason = null;
+          // Check for real reason of previous installation failure
+          if (status === 'error' && installStatus) {
+            failureReason = Object.values(installStatus)
+              .filter(
+                (product: ProductInstallState) =>
+                  product.status === 'error' && product.failureReason
+              )
+              .map((product: ProductInstallState) => product.failureReason)
+              .join('\n');
+          }
+          return {
+            ...acc,
+            [inferenceId]: {
+              installed: status === 'installed',
+              ...(failureReason ? { failureReason } : {}),
+            } as PerformUpdateResponse,
+          };
+        }
+        return acc;
+      },
+      {}
+    );
+    return body;
   }
 }
 

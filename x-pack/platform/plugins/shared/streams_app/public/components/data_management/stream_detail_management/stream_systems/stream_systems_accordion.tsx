@@ -6,22 +6,40 @@
  */
 
 import React from 'react';
-import { EuiAccordion } from '@elastic/eui';
-import type { Streams } from '@kbn/streams-schema';
+import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useStreamSystems } from './hooks/use_stream_systems';
 import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
-export const StreamSystemsAccordion = ({ definition }: { definition: Streams.all.Definition }) => {
-  const { systems, refresh, loading } = useStreamSystems(definition);
-
+export const StreamSystemsAccordion = ({
+  definition,
+  systems,
+  loading,
+  refresh,
+}: {
+  definition: Streams.all.Definition;
+  systems: System[];
+  loading: boolean;
+  refresh: () => void;
+}) => {
   return (
     <EuiAccordion
-      id="steam-systems-accordion"
-      buttonContent={i18n.translate('xpack.streams.streamSystemsAccordion.buttonLabel', {
-        defaultMessage: 'Stream systems',
-      })}
+      initialIsOpen={true}
+      id="stream-systems-accordion"
+      buttonContent={
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.streams.streamSystemsAccordion.buttonLabel', {
+              defaultMessage: 'Existing stream systems',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{systems.length}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
     >
+      <EuiSpacer size="s" />
       <StreamExistingSystemsTable
         isLoading={loading}
         systems={systems}

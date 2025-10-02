@@ -304,6 +304,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly aiAssistant: {
       home: string;
+      knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
@@ -495,6 +496,7 @@ export interface DocLinks {
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
     kibanaDisableLegacyUrlAliasesApi: string;
+    kibanaManageSpaces: string;
   }>;
   readonly watcher: Record<string, string>;
   readonly ccs: Record<string, string>;

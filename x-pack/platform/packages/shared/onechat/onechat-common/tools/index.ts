@@ -31,13 +31,25 @@ export {
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
-} from './esql';
+} from './types/esql';
 export {
   isIndexSearchTool,
   type IndexSearchToolDefinition,
   type IndexSearchToolDefinitionWithSchema,
   type IndexSearchToolConfig,
-} from './index_search';
+} from './types/index_search';
+export {
+  isWorkflowTool,
+  type WorkflowToolConfig,
+  type WorkflowToolDefinition,
+  type WorkflowToolDefinitionWithSchema,
+} from './types/workflow';
+export {
+  isBuiltinTool,
+  type BuiltinToolConfig,
+  type BuiltinToolDefinition,
+  type BuiltinToolDefinitionWithSchema,
+} from './types/builtin';
 export {
   ToolResultType,
   type ToolResult,
@@ -47,9 +59,3 @@ export {
   type TabularDataResult,
   type OtherResult,
 } from './tool_result';
-export {
-  internalNamespaces,
-  protectedNamespaces,
-  isInProtectedNamespace,
-  hasProtectedNamespaceName,
-} from './namespaces';

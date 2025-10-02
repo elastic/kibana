@@ -127,6 +127,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
             {errors.map((error, index) => (
               <EuiFlexItem id={`${index}`} grow={false}>
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.errorTitle',

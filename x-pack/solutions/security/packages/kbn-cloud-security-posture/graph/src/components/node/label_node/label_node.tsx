@@ -49,8 +49,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const {
     id,
     color,
-    eventsCount,
-    alertsCount,
+    uniqueEventsCount,
+    uniqueAlertsCount,
     label,
     interactive,
     ips,
@@ -69,10 +69,10 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     [color, euiTheme]
   );
 
-  const numEvents = eventsCount ?? 0;
-  const numAlerts = alertsCount ?? 0;
+  const numEvents = uniqueEventsCount ?? 0;
+  const numAlerts = uniqueAlertsCount ?? 0;
 
-  const analysis = analyzeDocuments({ eventsCount: numEvents, alertsCount: numAlerts });
+  const analysis = analyzeDocuments({ uniqueEventsCount: numEvents, uniqueAlertsCount: numAlerts });
   const shouldShowTooltip =
     text.length >= MAX_LABEL_LENGTH || numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
 
