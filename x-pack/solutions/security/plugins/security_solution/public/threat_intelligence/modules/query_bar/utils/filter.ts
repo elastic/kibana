@@ -10,6 +10,10 @@ import type { Filter } from '@kbn/es-query';
 export const FilterIn = true;
 export const FilterOut = false;
 
+type Value = string | string[] | null;
+
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
+
 /**
  * Creates a new filter to apply to the KQL bar.
  * @param key A string value mainly representing the field of an indicator
@@ -54,7 +58,8 @@ const filterExistsInFiltersArray = (
 ): Filter | undefined =>
   filters.find(
     (f: Filter) =>
-      f.meta.key === key &&
+      f.meta?.type === 'phrase' &&
+      f.meta?.key === key &&
       typeof f.meta.params === 'object' &&
       'query' in f.meta.params &&
       f.meta.params?.query === value
@@ -65,8 +70,8 @@ const filterExistsInFiltersArray = (
  * @param filter The {@link Filter}
  * @param filterType The type of action ({@link FilterIn} or {@link FilterOut})
  */
-const shouldRemoveFilter = (filter: Filter | undefined, filterType: boolean): boolean =>
-  filter != null && filterType === filter.meta.negate;
+const shouldReplaceNegation = (existing: Filter | undefined, filterType: boolean): boolean =>
+  !!existing && filterType === existing.meta.negate;
 
 /**
  * Takes an array of filters and returns the updated array according to:
@@ -81,19 +86,46 @@ const shouldRemoveFilter = (filter: Filter | undefined, filterType: boolean): bo
 export const updateFiltersArray = (
   existingFilters: Filter[],
   key: string,
-  value: string | null,
+  value: Value,
   filterType: boolean,
   index?: string
 ): Filter[] => {
-  const newFilter = createFilter({ key, value: value as string, negate: !filterType, index });
+  // Normalize to unique list of strings
 
-  const filter: Filter | undefined = filterExistsInFiltersArray(
-    existingFilters,
-    key,
-    value as string
-  );
+  const values: string[] = Array.isArray(value)
+    ? [...new Set(value.filter(isNonEmptyString))]
+    : isNonEmptyString(value)
+    ? [value]
+    : [];
 
-  return shouldRemoveFilter(filter, filterType)
-    ? [...existingFilters.filter((f: Filter) => f !== filter), newFilter]
-    : [...existingFilters, newFilter];
+  if (values.length === 0) return existingFilters;
+
+  // Single value
+  if (values.length === 1) {
+    const v = values[0];
+    const newFilter = createPhraseFilter({ key, value: v, negate: !filterType, index });
+    const existing = findPhraseFilter(existingFilters, key, v);
+
+    return shouldReplaceNegation(existing, filterType)
+      ? [...existingFilters.filter((f) => f !== existing), newFilter]
+      : [...existingFilters, newFilter];
+  }
+
+  // Multi-value: apply the same per-value logic, accumulating results
+  let result = existingFilters.slice();
+
+  for (const v of values) {
+    const existing = findPhraseFilter(result, key, v);
+    const newFilter = createPhraseFilter({ key, value: v, negate: !filterType, index });
+
+    if (shouldReplaceNegation(existing, filterType)) {
+      // Replace opposite-negated filter with the new one
+      result = [...result.filter((f) => f !== existing), newFilter];
+    } else {
+      // Add a new filter
+      result = [...result, newFilter];
+    }
+  }
+
+  return result;
 };
