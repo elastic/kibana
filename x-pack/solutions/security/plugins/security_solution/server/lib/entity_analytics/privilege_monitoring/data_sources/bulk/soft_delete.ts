@@ -43,9 +43,14 @@ export const bulkSoftDeleteOperationsFactory =
             source: `
             ctx._source['@timestamp'] = params.now;
             ctx._source.event.ingested = params.now;
+            
             if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
               ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
             }
+            
+            if (ctx._source.entity_analytics_monitoring != null && ctx._source.entity_analytics_monitoring.labels != null) {
+             ctx._source.entity_analytics_monitoring.labels.removeIf(l -> l != null && l.source == params.source_id);
+          }
 
             if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
               if (ctx._source.labels?.sources != null) {
