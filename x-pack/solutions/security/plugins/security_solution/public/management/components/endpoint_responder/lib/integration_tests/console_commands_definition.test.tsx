@@ -220,5 +220,179 @@ describe('When displaying Endpoint Response Actions', () => {
 
       expect(commandsInPanel).toEqual(['isolate', 'release']);
     });
+
+    describe('cancel command', () => {
+      describe('when microsoftDefenderEndpointCancelEnabled is true', () => {
+        beforeEach(() => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            responseActionsMSDefenderEndpointEnabled: true,
+            microsoftDefenderEndpointCancelEnabled: true,
+          });
+        });
+
+        it('should include cancel command for MDE agent type with action argument', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'microsoft_defender_endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeDefined();
+          expect(cancelCommand?.args?.action).toBeDefined();
+          expect(cancelCommand?.args?.action?.required).toBe(true);
+          expect(cancelCommand?.args?.action?.SelectorComponent).toBeDefined();
+          expect(cancelCommand?.helpDisabled).toBe(false);
+          expect(cancelCommand?.helpHidden).toBe(false);
+        });
+
+        it('should include cancel command for Crowdstrike agent type but without action argument and disabled', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'crowdstrike',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeDefined();
+          expect(cancelCommand?.args?.action).toBeUndefined();
+          expect(cancelCommand?.helpDisabled).toBe(true);
+          expect(cancelCommand?.helpHidden).toBe(true);
+        });
+
+        it('should include cancel command for SentinelOne agent type but without action argument and disabled', () => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            responseActionsSentinelOneV1Enabled: true,
+            microsoftDefenderEndpointCancelEnabled: true,
+          });
+
+          commands = getEndpointConsoleCommands({
+            agentType: 'sentinel_one',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeDefined();
+          expect(cancelCommand?.args?.action).toBeUndefined();
+          expect(cancelCommand?.helpDisabled).toBe(true);
+          expect(cancelCommand?.helpHidden).toBe(true);
+        });
+
+        it('should include cancel command for Endpoint agent type but without action argument and disabled', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeDefined();
+          expect(cancelCommand?.args?.action).toBeUndefined();
+          expect(cancelCommand?.helpDisabled).toBe(true);
+          expect(cancelCommand?.helpHidden).toBe(true);
+        });
+
+        it('should include comment argument for all agent types when cancel is enabled', () => {
+          const agentTypes: Array<{
+            type: 'microsoft_defender_endpoint' | 'crowdstrike' | 'sentinel_one' | 'endpoint';
+            flags: Record<string, boolean>;
+          }> = [
+            {
+              type: 'microsoft_defender_endpoint',
+              flags: {
+                responseActionsMSDefenderEndpointEnabled: true,
+                microsoftDefenderEndpointCancelEnabled: true,
+              },
+            },
+            {
+              type: 'crowdstrike',
+              flags: { microsoftDefenderEndpointCancelEnabled: true },
+            },
+            {
+              type: 'sentinel_one',
+              flags: {
+                responseActionsSentinelOneV1Enabled: true,
+                microsoftDefenderEndpointCancelEnabled: true,
+              },
+            },
+            {
+              type: 'endpoint',
+              flags: { microsoftDefenderEndpointCancelEnabled: true },
+            },
+          ];
+
+          agentTypes.forEach(({ type, flags }) => {
+            (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(flags);
+
+            commands = getEndpointConsoleCommands({
+              agentType: type,
+              endpointAgentId: '123',
+              endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+              endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+              platform: 'linux',
+            });
+
+            const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+            expect(cancelCommand?.args?.comment).toBeDefined();
+            expect(cancelCommand?.args?.comment?.required).toBe(false);
+          });
+        });
+
+        it('should show cancel command in help panel for MDE agent type', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'microsoft_defender_endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          render({ commands });
+          consoleSelectors.openHelpPanel();
+          const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
+            HELP_GROUPS.responseActions.label
+          );
+
+          expect(commandsInPanel).toContain('cancel --action');
+        });
+      });
+
+      describe('when microsoftDefenderEndpointCancelEnabled is false', () => {
+        beforeEach(() => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            responseActionsMSDefenderEndpointEnabled: true,
+            microsoftDefenderEndpointCancelEnabled: false,
+          });
+        });
+
+        it('should NOT include cancel command at all', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'microsoft_defender_endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeUndefined();
+        });
+      });
+    });
   });
 });
