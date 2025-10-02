@@ -123,9 +123,7 @@ export async function catchError(
           params.workflowRuntime.getWorkflowExecution().error &&
           params.workflowExecutionState.getStepExecution(stepContext.stepExecutionId)
         ) {
-          await params.workflowRuntime.failStep(
-            params.workflowRuntime.getWorkflowExecution().error!
-          );
+          await stepContext.failStep(params.workflowRuntime.getWorkflowExecution().error!);
         }
       }
     }

@@ -125,7 +125,12 @@ export class NodesFactory {
           stepLogger
         );
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(node as ExitForeachNode, this.workflowRuntime, stepLogger);
+        return new ExitForeachNodeImpl(
+          node as ExitForeachNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           node as EnterRetryNode,
@@ -135,7 +140,12 @@ export class NodesFactory {
           stepLogger
         );
       case 'exit-retry':
-        return new ExitRetryNodeImpl(node as ExitRetryNode, this.workflowRuntime, stepLogger);
+        return new ExitRetryNodeImpl(
+          node as ExitRetryNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'enter-continue':
         return new EnterContinueNodeImpl(
           node as EnterContinueNode,
@@ -151,10 +161,11 @@ export class NodesFactory {
           this.workflowRuntime
         );
       case 'exit-try-block':
-        return new ExitTryBlockNodeImpl(this.workflowRuntime);
+        return new ExitTryBlockNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'enter-normal-path':
         return new EnterNormalPathNodeImpl(
           node as EnterNormalPathNode,
+          stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
         );
@@ -184,11 +195,11 @@ export class NodesFactory {
         }
       case 'exit-timeout-zone':
         if (isExitWorkflowTimeoutZone(node)) {
-          return new ExitWorkflowTimeoutZoneNodeImpl(this.workflowRuntime);
+          return new ExitWorkflowTimeoutZoneNodeImpl(stepExecutionRuntime, this.workflowRuntime);
         }
 
         if (isExitStepTimeoutZone(node)) {
-          return new ExitStepTimeoutZoneNodeImpl(this.workflowRuntime);
+          return new ExitStepTimeoutZoneNodeImpl(stepExecutionRuntime, this.workflowRuntime);
         }
       case 'enter-if':
         return new EnterIfNodeImpl(
@@ -212,7 +223,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       case 'exit-if':
-        return new ExitIfNodeImpl(this.workflowRuntime);
+        return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
           node as any,
