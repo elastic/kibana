@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiInputPopover,
 } from '@elastic/eui';
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import type {
   ConnectorSelectableComponentProps,
   ConnectorSelectableProps,
