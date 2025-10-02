@@ -66,7 +66,7 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(0);
+      expect(result.current.chartLayers).toHaveLength(0);
     });
   });
 
@@ -94,10 +94,10 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current.chartLayers).toHaveLength(1);
     });
 
-    const layer = result.current[0];
+    const layer = result.current.chartLayers[0];
     expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
     expect(layer.yAxis).toHaveLength(1);
     expect(layer.yAxis[0].label).toBe('value');
@@ -129,10 +129,10 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current.chartLayers).toHaveLength(1);
     });
 
-    expect(result.current[0].xAxis).toStrictEqual({
+    expect(result.current.chartLayers[0].xAxis).toStrictEqual({
       field: 'timestamp_field',
       type: 'dateHistogram',
     });

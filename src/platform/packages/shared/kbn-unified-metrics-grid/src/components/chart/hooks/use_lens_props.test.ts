@@ -28,14 +28,21 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
 };
 
 describe('useLensProps', () => {
-  const mockChartLayers: Array<LensSeriesLayer> = [
-    {
-      type: 'series',
-      seriesType: 'line',
-      xAxis: { field: '@timestamp', type: 'dateHistogram', colorPalette: 'foo' },
-      yAxis: [{ value: 'foo' }],
-    },
-  ];
+  const mockChartLayers: {
+    chartLayers: Array<LensSeriesLayer>;
+    loading: boolean;
+  } = {
+    chartLayers: [
+      {
+        type: 'series',
+        seriesType: 'line',
+        xAxis: { field: '@timestamp', type: 'dateHistogram', colorPalette: 'foo' },
+        yAxis: [{ value: 'foo' }],
+      },
+    ],
+    loading: false,
+  };
+
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
@@ -101,11 +108,11 @@ describe('useLensProps', () => {
       })
     );
 
-    expect(result.current).toBeUndefined();
+    expect(result.current.lensProps).toBeUndefined();
 
     await waitFor(() => {
-      expect(result.current).toBeDefined();
-      expect(result.current?.attributes).toEqual({
+      expect(result.current.lensProps).toBeDefined();
+      expect(result.current?.lensProps?.attributes).toEqual({
         attributes: {},
         state: {},
         visualizationType: 'lnsXY',
@@ -133,7 +140,7 @@ describe('useLensProps', () => {
         {
           chartType: 'xy',
           title: 'Test Chart',
-          layers: mockChartLayers,
+          layers: mockChartLayers.chartLayers,
           axisTitleVisibility: {
             showYRightAxisTitle: false,
             showXAxisTitle: false,
@@ -175,7 +182,7 @@ describe('useLensProps', () => {
     });
 
     await waitFor(() => {
-      expect(result.current).toStrictEqual({
+      expect(result.current.lensProps).toStrictEqual({
         attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
         executionContext: { description: 'metrics experience chart data' },
         id: 'metricsExperienceLensComponent',
@@ -201,7 +208,7 @@ describe('useLensProps', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).not.toBeUndefined();
+      expect(result.current.lensProps).not.toBeUndefined();
     });
   });
 });
