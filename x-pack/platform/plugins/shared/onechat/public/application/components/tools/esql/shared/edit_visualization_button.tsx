@@ -73,3 +73,4 @@ export function EditVisualizationButton({
     </EuiToolTip>
   );
 }
+

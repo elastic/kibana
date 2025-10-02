@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useCallback, useState } from 'react';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import React from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { visualizationWrapper } from './styles';
 import { useLensInput } from './use_lens_input';
-import { VisualizationActions } from './visualization_actions';
-
-const VISUALIZATION_HEIGHT = 240;
+import { BaseVisualization } from '../shared/base_visualization';
 
 export function VisualizeLens({
   lens,
@@ -27,66 +23,19 @@ export function VisualizeLens({
   uiActions: UiActionsStart;
   lensConfig: any;
 }) {
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [lensLoadEvent, setLensLoadEvent] = useState<
-    InlineEditLensEmbeddableContext['lensEvent'] | null
-  >(null);
-
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
     dataViews,
     lensConfig,
   });
 
-  const { euiTheme } = useEuiTheme();
-
-  console.log('lensInput', lensInput);
-  const onLoad = useCallback(
-    (
-      _isLoading: boolean,
-      adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
-      dataLoading$?: InlineEditLensEmbeddableContext['lensEvent']['dataLoading$']
-    ) => {
-      if (!_isLoading && adapters?.tables?.tables) {
-        setLensLoadEvent({ adapters, dataLoading$ });
-      }
-    },
-    []
-  );
-
-  const onOpenSave = useCallback(() => setIsSaveModalOpen(true), []);
-  const onCloseSave = useCallback(() => setIsSaveModalOpen(false), []);
-
   return (
-    <>
-      <div
-        data-test-subj="lensVisualization"
-        css={visualizationWrapper(euiTheme, VISUALIZATION_HEIGHT)}
-      >
-        {!isLoading && lensInput && (
-          <VisualizationActions
-            onSave={onOpenSave}
-            uiActions={uiActions}
-            lensInput={lensInput}
-            lensLoadEvent={lensLoadEvent}
-            setLensInput={setLensInput}
-          />
-        )}
-        {isLoading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          lensInput && (
-            <lens.EmbeddableComponent {...lensInput} style={{ height: '100%' }} onLoad={onLoad} />
-          )
-        )}
-      </div>
-      {isSaveModalOpen && lensInput && (
-        <lens.SaveModalComponent
-          initialInput={lensInput}
-          onClose={onCloseSave}
-          isSaveable={false}
-        />
-      )}
-    </>
+    <BaseVisualization
+      lens={lens}
+      uiActions={uiActions}
+      lensInput={lensInput}
+      setLensInput={setLensInput}
+      isLoading={isLoading}
+    />
   );
 }
