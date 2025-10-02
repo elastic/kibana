@@ -31,7 +31,7 @@ test('Firehose', async ({ page, onboardingHomePage, firehoseFlowPage }) => {
 
   const snippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
-  // Use a unique CloudFormation stack name 
+  // Use a unique CloudFormation stack name
   const uniqueSuffix = Date.now().toString(36).slice(-6);
   const updatedSnippet = snippet.replace(
     /--stack-name\s+Elastic-Firehose(?!-)/,
