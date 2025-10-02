@@ -49,9 +49,6 @@ export async function getEmbeddings({
 
   const pushToDocsWithEmbeddings = (hit: Record<string, any>) => {
     const source = hit._source!;
-    Object.entries(source._inference_fields ?? {}).forEach(([fieldName, config]) => {
-      delete (config as Record<string, any>).inference.model_settings.service;
-    });
     docsWithEmbeddings.push({ ...source, _id: hit._id });
   };
 
