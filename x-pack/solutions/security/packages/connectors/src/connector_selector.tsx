@@ -35,10 +35,9 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     selectedId,
     onNewConnectorClicked,
     isDisabled,
-    mode = 'default',
     settings,
   }) => {
-    const styles = useConnectorSelectorStyles(mode);
+    const styles = useConnectorSelectorStyles();
     const [modalOpen, setModalOpen] = useState(false);
 
     const connectorExists = useMemo(
