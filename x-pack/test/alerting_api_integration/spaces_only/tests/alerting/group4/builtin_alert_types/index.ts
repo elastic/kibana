@@ -14,5 +14,11 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cancellable'));
     loadTestFile(require.resolve('./circuit_breaker'));
     loadTestFile(require.resolve('./auto_recover'));
+
+    /**
+     * This tests the expected behavior for the active and recovered alerts generated over
+     * a sequence of rule executions that hit the alert limit.
+     */
+    loadTestFile(require.resolve('./index_threshold_max_alerts'));
   });
 }
