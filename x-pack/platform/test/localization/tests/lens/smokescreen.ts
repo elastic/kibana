@@ -175,7 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'Linear':
         return 'Linear';
       case 'Records':
-        return 'Aufzeichnungen';
+        // xpack.lens.indexPattern.records
+        return 'Einträge';
       case 'records':
         // xpack.lens.indexPattern.records
         return 'Einträge';
