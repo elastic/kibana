@@ -2467,10 +2467,12 @@ export class CstToAstConverter {
   // -------------------------------------------------------- expression: "map"
 
   private fromMapExpression(ctx: cst.MapExpressionContext): ast.ESQLMap {
+    const location = getPosition(ctx.start, ctx.stop);
     const map = Builder.expression.map(
       {},
       {
-        location: getPosition(ctx.start, ctx.stop),
+        text: this.parser.src.slice(location.min, location.max + 1),
+        location,
         incomplete: Boolean(ctx.exception),
       }
     );
@@ -2523,8 +2525,10 @@ export class CstToAstConverter {
       }
 
       if (value) {
+        const location = getPosition(ctx.start, ctx.stop);
         const entry = Builder.expression.entry(key, value, {
-          location: getPosition(ctx.start, ctx.stop),
+          text: this.parser.src.slice(location.min, location.max + 1),
+          location,
           incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
         });
 
