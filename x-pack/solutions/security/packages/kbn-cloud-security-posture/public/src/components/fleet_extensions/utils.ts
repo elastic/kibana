@@ -251,14 +251,12 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    azure: {
-      'azure.credentials.type': {
-        value: isAgentless
-          ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-          : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-        type: 'text',
-      },
-    },
+    azure: getDefaultAzureCredentialsType(
+      packageInfo,
+      templateName,
+      isAgentless ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED,
+      showCloudConnectors
+    ),
   };
 
   return credentialsTypes[provider];

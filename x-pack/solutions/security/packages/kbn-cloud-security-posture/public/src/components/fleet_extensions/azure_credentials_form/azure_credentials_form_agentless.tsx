@@ -16,7 +16,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
