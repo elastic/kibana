@@ -44,7 +44,9 @@ const CodePanel: React.FC<CodePanelProps> = (props) => {
       paddingSize="none"
       session={true}
       size="m"
-      flyoutMenuProps={{ title: strings.details.title() }}
+      flyoutMenuProps={{
+        title: strings.details.title(),
+      }}
     >
       <EuiFlyoutBody>
         <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
