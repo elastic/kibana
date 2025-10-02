@@ -1646,4 +1646,57 @@ describe('Observability AI Assistant client', () => {
       });
     });
   });
+
+  describe('space-aware links', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (functionClientMock as any).registerInstruction = jest.fn();
+      inferenceClientMock.chatComplete.mockImplementation(
+        () => new Observable((sub) => sub.complete())
+      );
+    });
+
+    const runWithNamespace = async (namespace: string) => {
+      client = createClient();
+      (client as any).dependencies.namespace = namespace;
+
+      (
+        await client.complete({
+          functionClient: functionClientMock,
+          connectorId: 'foo',
+          messages: [],
+          signal: new AbortController().signal,
+          persist: true,
+          kibanaPublicUrl: 'http://localhost:5601',
+          title: 'Generated title',
+        })
+      ).subscribe({});
+
+      await nextTick();
+    };
+
+    it('generates a link without space segment for default space', async () => {
+      await runWithNamespace('default');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining('http://localhost:5601/app/observabilityAIAssistant/conversations/')
+      );
+      expect(functionClientMock.registerInstruction).not.toHaveBeenCalledWith(
+        expect.stringContaining('/s/')
+      );
+    });
+
+    it('generates a link with space segment for non-default space', async () => {
+      await runWithNamespace('myspace');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'http://localhost:5601/s/myspace/app/observabilityAIAssistant/conversations/'
+        )
+      );
+    });
+  });
 });

@@ -206,8 +206,14 @@ export class ObservabilityAIAssistantClient {
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
+        const { namespace } = this.dependencies;
+        const spacePrefix =
+          namespace && namespace !== 'default' ? `/s/${encodeURIComponent(namespace)}` : '';
+
+        const conversationUrl = `${kibanaPublicUrl}${spacePrefix}/app/observabilityAIAssistant/conversations/${conversationId}`;
+
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
+          `This conversation will be persisted in Kibana and available at this url: ${conversationUrl}.`
         );
       }
 
