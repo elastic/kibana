@@ -27,7 +27,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.workflowRuntime.getCurrentStepState()) {
+    if (!this.stepExecutionRuntime.getCurrentStepState()) {
       // If retry state exists, it means we are re-entering the retry step
       await this.initializeRetry();
       return;
@@ -36,7 +36,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public async catchError(): Promise<void> {
-    const retryState = this.workflowRuntime.getCurrentStepState()!;
+    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
 
     if (retryState.attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
@@ -55,7 +55,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    await this.workflowRuntime.failStep(
+    await this.stepExecutionRuntime.failStep(
       new Error(`Retry step "${this.node.stepId}" has exceeded the maximum number of attempts.`)
     );
   }
@@ -64,7 +64,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     // Enter whole retry step scope
     await this.stepExecutionRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
-    await this.workflowRuntime.setCurrentStepState({
+    await this.stepExecutionRuntime.setCurrentStepState({
       attempt: 0,
     });
     // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
@@ -73,10 +73,10 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async advanceRetryAttempt(): Promise<void> {
-    const retryState = this.workflowRuntime.getCurrentStepState()!;
+    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
     const attempt = retryState.attempt + 1;
     this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
-    await this.workflowRuntime.setCurrentStepState({ attempt });
+    await this.stepExecutionRuntime.setCurrentStepState({ attempt });
     // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
     this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
     this.workflowRuntime.navigateToNextNode();
@@ -100,7 +100,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async handleLongDelay(delayMs: number): Promise<void> {
-    const stepState = this.workflowRuntime.getCurrentStepState() || {};
+    const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
     await this.workflowRuntime.setWaitStep();
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
     const runAt = new Date(new Date().getTime() + delayMs);
@@ -114,7 +114,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
         stepState.attempt
       } attempt in step "${this.node.id}".\nExecution will resume at ${runAt.toISOString()}`
     );
-    await this.workflowRuntime.setCurrentStepState({
+    await this.stepExecutionRuntime.setCurrentStepState({
       ...stepState,
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });

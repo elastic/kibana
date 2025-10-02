@@ -85,7 +85,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> imple
       } else {
         await this.stepExecutionRuntime.finishStep(result.output);
       }
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(input, error);
       await this.stepExecutionRuntime.failStep(result.error);

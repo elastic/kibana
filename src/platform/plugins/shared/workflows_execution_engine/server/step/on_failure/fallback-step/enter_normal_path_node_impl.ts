@@ -11,10 +11,12 @@ import type { EnterNormalPathNode } from '@kbn/workflows/graph';
 import type { NodeWithErrorCatching, NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class EnterNormalPathNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
     private node: EnterNormalPathNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
@@ -28,9 +30,9 @@ export class EnterNormalPathNodeImpl implements NodeImplementation, NodeWithErro
     this.workflowLogger.logError(
       'Error caught by the OnFailure zone. Redirecting to the fallback path'
     );
-    const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};
+    const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
 
-    await this.wfExecutionRuntimeManager.setCurrentStepState({
+    await this.stepExecutionRuntime.setCurrentStepState({
       ...stepState,
       error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
     });

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { buildStepExecutionId } from '../utils';
@@ -158,135 +157,6 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.updateWorkflowExecution({
       error: error ? String(error) : undefined,
     });
-  }
-
-  public getCurrentStepResult(): RunStepResult | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(
-      this.getCurrentStepExecutionId()
-    );
-
-    if (!stepExecution) {
-      return undefined;
-    }
-    return {
-      input: stepExecution.input || {},
-      output: stepExecution.output || {},
-      error: stepExecution.error,
-    };
-  }
-
-  public async setCurrentStepResult(result: RunStepResult): Promise<void> {
-    const currentNode = this.getCurrentNode()!;
-
-    if (result.error) {
-      this.setWorkflowError(result.error);
-    }
-
-    this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
-      stepId: currentNode.stepId,
-      input: result.input,
-      output: result.output,
-      error: result.error,
-    });
-  }
-
-  public getCurrentStepState(): Record<string, any> | undefined {
-    return this.workflowExecutionState.getStepExecution(this.getCurrentStepExecutionId())?.state;
-  }
-
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
-      stepId,
-      state,
-    });
-  }
-
-  public async finishStep(): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    const stepExecutionId = this.getCurrentStepExecutionId();
-    const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
-
-    if (startedStepExecution?.error) {
-      await this.failStep(startedStepExecution.error);
-      return;
-    }
-
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.complete`,
-        type: 'workflow',
-        subtype: 'step_completion',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        const stepExecutionUpdate = {
-          id: stepExecutionId,
-          status: ExecutionStatus.COMPLETED,
-          completedAt: new Date().toISOString(),
-        } as Partial<EsWorkflowStepExecution>;
-
-        if (startedStepExecution?.startedAt) {
-          stepExecutionUpdate.executionTimeMs =
-            new Date(stepExecutionUpdate.completedAt as string).getTime() -
-            new Date(startedStepExecution.startedAt).getTime();
-        }
-
-        this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-        this.logStepComplete(stepExecutionUpdate);
-      }
-    );
-  }
-
-  public async failStep(error: Error | string): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.fail`,
-        type: 'workflow',
-        subtype: 'step_failure',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        // if there is a last step execution, fail it
-        // if not, create a new step execution with fail
-        const startedStepExecution = this.workflowExecutionState.getStepExecution(
-          this.getCurrentStepExecutionId()
-        );
-        const stepExecutionUpdate = {
-          id: this.getCurrentStepExecutionId(),
-          status: ExecutionStatus.FAILED,
-          completedAt: new Date().toISOString(),
-          output: null,
-          error: String(error),
-        } as Partial<EsWorkflowStepExecution>;
-
-        if (startedStepExecution && startedStepExecution.startedAt) {
-          stepExecutionUpdate.executionTimeMs =
-            new Date(stepExecutionUpdate.completedAt as string).getTime() -
-            new Date(startedStepExecution.startedAt).getTime();
-        }
-        this.workflowExecutionState.updateWorkflowExecution({
-          error: String(error),
-        });
-        this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-        this.logStepFail(stepExecutionUpdate.id!, error);
-      }
-    );
   }
 
   public async setWaitStep(): Promise<void> {
@@ -555,63 +425,5 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
-  }
-
-  private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
-    const isSuccess = step?.status === ExecutionStatus.COMPLETED;
-    const currentNode = this.getCurrentNode()!;
-    const stepId = currentNode.stepId;
-    this.workflowLogger?.logInfo(`Step '${stepId}' ${isSuccess ? 'completed' : 'failed'}`, {
-      workflow: { step_id: stepId, step_execution_id: step.id },
-      event: {
-        action: 'step-complete',
-        category: ['workflow', 'step'],
-        outcome: isSuccess ? 'success' : 'failure',
-      },
-      tags: ['workflow', 'step', 'complete'],
-      labels: {
-        step_type: currentNode.stepType,
-        connector_type: currentNode.stepType,
-        step_name: currentNode.stepId,
-        step_id: currentNode.stepId,
-        execution_time_ms: step.executionTimeMs,
-      },
-      ...(step.error && {
-        error: {
-          message:
-            typeof step.error === 'string'
-              ? step.error
-              : (step.error as Error)?.message || 'Unknown error',
-          type:
-            typeof step.error === 'string'
-              ? 'WorkflowStepError'
-              : (step.error as Error)?.name || 'Error',
-          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
-        },
-      }),
-    });
-  }
-
-  private logStepFail(stepExecutionId: string, error: Error | string): void {
-    const currentNode = this.getCurrentNode()!;
-    const stepName = currentNode.stepId;
-    const stepType = currentNode.stepType || 'unknown';
-    const _error = typeof error === 'string' ? Error(error) : error;
-
-    // Include error message in the log message
-    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
-    const message = `Step '${stepName}' failed: ${errorMsg}`;
-
-    this.workflowLogger?.logError(message, _error, {
-      workflow: { step_id: currentNode.stepId, step_execution_id: stepExecutionId },
-      event: { action: 'step-fail', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'fail'],
-      labels: {
-        step_type: stepType,
-        connector_type: stepType,
-        step_name: stepName,
-        step_id: currentNode.stepId,
-      },
-    });
   }
 }
