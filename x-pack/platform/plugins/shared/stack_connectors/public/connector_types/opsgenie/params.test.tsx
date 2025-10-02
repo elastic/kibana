@@ -12,7 +12,7 @@ import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();
@@ -26,7 +26,7 @@ describe('OpsgenieParamFields', () => {
     subActionParams: { alias: '456' },
   };
 
-  const connector = createMockConnectorForUI({
+  const connector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',

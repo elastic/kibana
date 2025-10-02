@@ -15,7 +15,7 @@ import {
 } from './value_validators';
 import { v4 as uuidv4 } from 'uuid';
 import type { Rule, IErrorObject, UserConfiguredActionConnector, RuleUiAction } from '../../types';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -108,7 +108,7 @@ describe('isValidUrl', () => {
 describe('getConnectorWithInvalidatedFields', () => {
   test('set nulls to all required undefined fields in connector secrets', () => {
     const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> =
-      createMockConnectorForUI({
+      createMockActionConnector({
         secrets: {} as any,
         id: 'test',
         actionTypeId: '.slack',
@@ -123,7 +123,7 @@ describe('getConnectorWithInvalidatedFields', () => {
 
   test('set nulls to all required undefined fields in connector config', () => {
     const connector: UserConfiguredActionConnector<{ apiUrl: string }, {}> =
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: 'test',
         actionTypeId: '.jira',
         name: 'jira',
@@ -138,7 +138,7 @@ describe('getConnectorWithInvalidatedFields', () => {
 
   test('do not set nulls to the invalid fields with values in the connector properties, config and secrets', () => {
     const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> =
-      createMockConnectorForUI({
+      createMockActionConnector({
         secrets: {
           webhookUrl: 'http://test',
         },

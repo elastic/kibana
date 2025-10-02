@@ -27,10 +27,8 @@ import { ALERTING_FEATURE_ID, RuleNotifyWhen } from '@kbn/alerting-plugin/common
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import userEvent from '@testing-library/user-event';
-import {
-  createMockConnectorForUI,
-  createMockConnectorType,
-} from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -716,7 +714,7 @@ function getActionTypeForm({
   producerId?: string;
   featureId?: string;
 }) {
-  const actionConnectorDefault = createMockConnectorForUI({
+  const actionConnectorDefault = createMockActionConnector({
     actionTypeId: '.pagerduty',
     config: {
       apiUrl: 'http:\\test',
@@ -736,7 +734,7 @@ function getActionTypeForm({
   };
 
   const connectorsDefault = [
-    createMockConnectorForUI({
+    createMockActionConnector({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
@@ -744,7 +742,7 @@ function getActionTypeForm({
       id: 'test',
       name: 'test name',
     }),
-    createMockConnectorForUI({
+    createMockActionConnector({
       id: '123',
       name: 'Server log',
       actionTypeId: '.server-log',

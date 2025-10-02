@@ -10,7 +10,7 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ActionConnector } from '../../types';
 import { fetchConnectors } from './fetch_connectors';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '../../test_utils/connector.mock';
 
 const http = httpServiceMock.createStartContract();
 
@@ -35,7 +35,7 @@ describe('fetchConnectors', () => {
     ];
 
     const resolvedValue: Array<ActionConnector<{}, {}>> = [
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: 'test-connector',
         name: 'Test',
         actionTypeId: 'test',
@@ -74,7 +74,7 @@ describe('fetchConnectors', () => {
     ];
 
     const resolvedValue: Array<ActionConnector<{}, {}>> = [
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '.test-system-action',
         name: 'System action name',
         actionTypeId: 'test',

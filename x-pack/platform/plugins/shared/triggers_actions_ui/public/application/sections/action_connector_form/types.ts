@@ -25,7 +25,7 @@ export type ConnectorFormSchema<
   Secrets = Record<string, unknown>
 > = Pick<
   UserConfiguredActionConnector<Config, Secrets>,
-  'actionTypeId' | 'isDeprecated' | 'config' | 'secrets' | 'isConnectorTypeDeprecated'
+  'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
 > &
   Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
 

@@ -20,7 +20,7 @@ import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__moc
 import { templatesConfigurationMock } from '../../../containers/mock';
 import * as utils from '../../../containers/configure/utils';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -41,7 +41,7 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = createMockConnectorForUI({
+const connector: ActionConnector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',

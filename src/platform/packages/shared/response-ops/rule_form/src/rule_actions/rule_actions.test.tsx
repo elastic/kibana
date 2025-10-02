@@ -22,7 +22,6 @@ import userEvent from '@testing-library/user-event';
 import type { ActionConnector, ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { RuleActionsItemProps } from './rule_actions_item';
-import { createMockConnectorForUI as mockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const http = httpServiceMock.createStartContract();
 
@@ -64,19 +63,17 @@ jest.mock('./rule_actions_connectors_modal', () => ({
       RuleActionsConnectorsModal
       <button
         onClick={() =>
-          onSelectConnector(
-            mockConnectorForUI({
-              id: 'connector-1',
-              secrets: { secret: 'secret' },
-              actionTypeId: 'actionType-1',
-              name: 'connector-1',
-              config: { config: 'config-1' },
-              isPreconfigured: false,
-              isSystemAction: false,
-              isDeprecated: false,
-              isConnectorTypeDeprecated: false,
-            })
-          )
+          onSelectConnector({
+            id: 'connector-1',
+            secrets: { secret: 'secret' },
+            actionTypeId: 'actionType-1',
+            name: 'connector-1',
+            config: { config: 'config-1' },
+            isPreconfigured: false,
+            isSystemAction: false,
+            isDeprecated: false,
+            isConnectorTypeDeprecated: false,
+          })
         }
       >
         select connector

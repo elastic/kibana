@@ -13,7 +13,7 @@ import { EuiButton } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -34,7 +34,7 @@ jest.mock('../../hooks/use_rule_alert_fields', () => ({
   }),
 }));
 
-const actionConnector = createMockConnectorForUI({
+const actionConnector = createMockActionConnector({
   actionTypeId: '.test-system-action',
   id: 'test',
   isSystemAction: true,

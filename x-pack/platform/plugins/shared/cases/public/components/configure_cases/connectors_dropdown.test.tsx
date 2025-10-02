@@ -15,7 +15,7 @@ import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -255,7 +255,7 @@ describe('ConnectorsDropdown', () => {
         <ConnectorsDropdown
           {...props}
           connectors={[
-            createMockConnectorForUI({
+            createMockActionConnector({
               id: 'none',
               actionTypeId: '.none',
               name: 'None',

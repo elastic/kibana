@@ -11,7 +11,7 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/typ
 import TheHiveParamsFields from './params';
 import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
 import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionPushParams = {
@@ -29,7 +29,7 @@ describe('TheHiveParamsFields renders', () => {
     subAction: SUB_ACTION.PUSH_TO_SERVICE,
     subActionParams,
   };
-  const connector: ActionConnector = createMockConnectorForUI({
+  const connector: ActionConnector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',

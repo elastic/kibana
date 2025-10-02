@@ -10,7 +10,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useChoices } from './use_choices';
 import { getChoices } from './api';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('./api');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -18,7 +18,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getChoicesMock = getChoices as jest.Mock;
 
-const actionConnector = createMockConnectorForUI({
+const actionConnector = createMockActionConnector({
   secrets: {
     username: 'user',
     password: 'pass',

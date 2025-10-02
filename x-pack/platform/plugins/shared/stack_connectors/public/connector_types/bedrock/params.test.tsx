@@ -10,7 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const messageVariables = [
   {
@@ -49,7 +49,7 @@ describe('Bedrock Params Fields renders', () => {
     };
     const editAction = jest.fn();
     const errors = {};
-    const actionConnector = createMockConnectorForUI({
+    const actionConnector = createMockActionConnector({
       secrets: {
         accessKey: 'accessKey',
         secret: 'secret',

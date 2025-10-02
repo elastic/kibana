@@ -12,7 +12,7 @@ import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
 import * as api from './api';
 import { TestProviders } from '../../../common/mock';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('./api');
 jest.mock('../../../common/lib/kibana');
@@ -20,7 +20,7 @@ jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const fields = ['priority'];
 
-const connector: ActionConnector = createMockConnectorForUI({
+const connector: ActionConnector = createMockActionConnector({
   secrets: {
     username: 'user',
     password: 'pass',

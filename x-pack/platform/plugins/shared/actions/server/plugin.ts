@@ -275,6 +275,7 @@ export class ActionsPlugin
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
+          isConnectorTypeDeprecated: false,
         });
       } else {
         this.logger.warn(

@@ -15,7 +15,7 @@ import type {
   ExecutorSubActionCreateAlertParams,
 } from '../../../common/thehive/types';
 import userEvent from '@testing-library/user-event';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionCreateAlertParams = {
@@ -34,7 +34,7 @@ describe('TheHiveParamsFields renders', () => {
     subAction: SUB_ACTION.CREATE_ALERT,
     subActionParams,
   };
-  const connector: ActionConnector = createMockConnectorForUI({
+  const connector: ActionConnector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',

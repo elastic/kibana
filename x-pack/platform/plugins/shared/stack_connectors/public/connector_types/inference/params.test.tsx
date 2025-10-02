@@ -10,7 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
 
@@ -27,7 +27,7 @@ describe('Inference Params Fields renders', () => {
           subAction: SUB_ACTION.UNIFIED_COMPLETION,
           subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
         }}
-        actionConnector={createMockConnectorForUI({
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'chat_completion',
@@ -56,7 +56,7 @@ describe('Inference Params Fields renders', () => {
       };
       const editAction = jest.fn();
       const errors = {};
-      const actionConnector = createMockConnectorForUI({
+      const actionConnector = createMockActionConnector({
         secrets: {
           providerSecrets: { apiKey: 'apiKey' },
         },
@@ -115,7 +115,7 @@ describe('Inference Params Fields renders', () => {
         editAction={editAction}
         index={0}
         errors={errors}
-        actionConnector={createMockConnectorForUI({
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'completion',
@@ -144,7 +144,7 @@ describe('Inference Params Fields renders', () => {
         editAction={editAction}
         index={0}
         errors={errors}
-        actionConnector={createMockConnectorForUI({
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'rerank',

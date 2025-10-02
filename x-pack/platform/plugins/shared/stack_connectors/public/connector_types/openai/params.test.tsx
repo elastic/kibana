@@ -10,7 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_URL, getDefaultBody } from './constants';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const messageVariables = [
   {
@@ -47,7 +47,7 @@ describe('Gen AI Params Fields renders', () => {
       };
       const editAction = jest.fn();
       const errors = {};
-      const actionConnector = createMockConnectorForUI({
+      const actionConnector = createMockActionConnector({
         secrets: {
           apiKey: 'apiKey',
         },

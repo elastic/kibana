@@ -15,7 +15,7 @@ import type { Conversation } from '../../..';
 import { find } from 'lodash';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { MOCK_CURRENT_USER } from '../../mock/conversation';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -24,7 +24,7 @@ jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
 const MOCK_DATE = '2025-02-19T23:28:54.962Z';
-const defaultConnectorMock: AIConnector = createMockConnectorForUI({
+const defaultConnectorMock: AIConnector = createMockActionConnector({
   actionTypeId: '.gen-ai',
   referencedByCount: 0,
   secrets: {},

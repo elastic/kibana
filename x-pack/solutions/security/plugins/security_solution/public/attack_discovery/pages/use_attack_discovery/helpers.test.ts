@@ -11,9 +11,9 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 
 import { getGenAiConfig, getRequestBody } from './helpers';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-const connector = createMockConnectorForUI({
+const connector = createMockActionConnector({
   actionTypeId: '.gen-ai',
   config: {
     apiProvider: 'Azure OpenAI',

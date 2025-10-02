@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type {
-  ActionConnector,
-  PreConfiguredActionConnector,
-  SystemAction,
-  UserConfiguredActionConnector,
-} from '@kbn/alerts-ui-shared';
 import type { FindActionResult, InMemoryConnector } from '../..';
 import type { Connector, ConnectorType } from './types';
 import './jest_matchers';
@@ -43,63 +37,6 @@ export function createMockConnectorFindResult(
     referencedByCount: 0,
     ...overrides,
   };
-}
-
-// Overload signatures
-export function createMockConnectorForUI(
-  overrides: Partial<PreConfiguredActionConnector>
-): PreConfiguredActionConnector;
-export function createMockConnectorForUI(overrides: Partial<SystemAction>): SystemAction;
-export function createMockConnectorForUI<
-  Secrets = Record<string, unknown>,
-  Config = Record<string, unknown>
->(
-  overrides: Partial<UserConfiguredActionConnector<Secrets, Config>>
-): UserConfiguredActionConnector<Secrets, Config>;
-
-export function createMockConnectorForUI(
-  overrides: Partial<ActionConnector> = {}
-):
-  | PreConfiguredActionConnector
-  | SystemAction
-  | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>> {
-  if (overrides.isPreconfigured === true) {
-    return {
-      id: 'test',
-      actionTypeId: '.test-connector-type',
-      name: 'Test Connector',
-      isDeprecated: false,
-      isConnectorTypeDeprecated: false,
-      ...overrides,
-      isSystemAction: false,
-      isPreconfigured: true,
-    } as PreConfiguredActionConnector;
-  }
-  if (overrides.isSystemAction === true) {
-    return {
-      id: 'test',
-      actionTypeId: '.test-connector-type',
-      name: 'Test Connector',
-      isDeprecated: false,
-      isConnectorTypeDeprecated: false,
-      ...overrides,
-      isPreconfigured: false,
-      isSystemAction: true,
-    } as SystemAction;
-  }
-
-  return {
-    id: 'test',
-    actionTypeId: '.test-connector-type',
-    name: 'Test Connector',
-    config: {},
-    secrets: {},
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false,
-    isConnectorTypeDeprecated: false,
-    ...overrides,
-  } as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>;
 }
 
 export function createMockConnectorType(overrides: Partial<ConnectorType> = {}): ConnectorType {

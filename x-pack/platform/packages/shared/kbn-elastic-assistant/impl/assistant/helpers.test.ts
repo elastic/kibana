@@ -7,11 +7,11 @@
 
 import { getDefaultConnector, getOptionalRequestParams } from './helpers';
 import type { AIConnector } from '../connectorland/connector_selector';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
-    const defaultConnector: AIConnector = createMockConnectorForUI({
+    const defaultConnector: AIConnector = createMockActionConnector({
       actionTypeId: '.gen-ai',
       secrets: {},
       id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',

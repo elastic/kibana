@@ -18,7 +18,7 @@ import type { ActionConnector, GenericValidationResult } from '../../../../types
 import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -102,19 +102,19 @@ describe('actions_connectors_list', () => {
 
   describe('component with items', () => {
     const mockedActions: ActionConnector[] = [
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '1',
         actionTypeId: 'test',
         name: 'Test Connector 1',
         referencedByCount: 1,
       }),
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '2',
         actionTypeId: 'test2',
         name: 'Test Connector 2',
         referencedByCount: 1,
       }),
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '3',
         actionTypeId: 'test2',
         name: 'Test Connector 3',
@@ -122,19 +122,19 @@ describe('actions_connectors_list', () => {
         referencedByCount: 1,
         isPreconfigured: true,
       }),
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '4',
         actionTypeId: 'nonexistent',
         name: 'Test Connector 4',
         referencedByCount: 1,
       }),
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '5',
         actionTypeId: 'test3',
         name: 'Test Connector 5',
         referencedByCount: 1,
       }),
-      createMockConnectorForUI({
+      createMockActionConnector({
         id: '6',
         actionTypeId: 'test4',
         name: 'Test Connector 6',
@@ -675,7 +675,7 @@ describe('actions_connectors_list', () => {
 
     it('shows the deprecated badge', async () => {
       const actions = [
-        createMockConnectorForUI({
+        createMockActionConnector({
           id: '1',
           actionTypeId: 'test',
           name: 'ServiceNow Connector',
@@ -684,7 +684,7 @@ describe('actions_connectors_list', () => {
           isDeprecated: true,
           isConnectorTypeDeprecated: true,
         }),
-        createMockConnectorForUI({
+        createMockActionConnector({
           id: '2',
           actionTypeId: 'test2',
           name: 'ServiceNow SIR Connector',

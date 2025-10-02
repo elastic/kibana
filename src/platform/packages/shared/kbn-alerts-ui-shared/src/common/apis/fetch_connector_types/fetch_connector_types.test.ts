@@ -10,7 +10,6 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchConnectorTypes } from './fetch_connector_types';
 import type { ActionType } from '@kbn/actions-types';
-import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const http = httpServiceMock.createStartContract();
 
@@ -34,11 +33,17 @@ describe('loadActionTypes', () => {
     http.get.mockResolvedValueOnce(apiResponseValue);
 
     const resolvedValue: ActionType[] = [
-      createMockConnectorType({
+      {
         id: 'test',
         name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
-      }),
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+        isDeprecated: false,
+      },
     ];
 
     const result = await fetchConnectorTypes({ http });
@@ -68,11 +73,17 @@ describe('loadActionTypes', () => {
     http.get.mockResolvedValueOnce(apiResponseValue);
 
     const resolvedValue: ActionType[] = [
-      createMockConnectorType({
+      {
         id: 'test',
         name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
-      }),
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+        isDeprecated: false,
+      },
     ];
 
     const result = await fetchConnectorTypes({ http, featureId: 'alerting' });
@@ -118,17 +129,28 @@ describe('loadActionTypes', () => {
     http.get.mockResolvedValueOnce(apiResponseValue);
 
     const resolvedValue: ActionType[] = [
-      createMockConnectorType({
+      {
         id: '.test-system-action',
         name: 'System action name',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
         isSystemActionType: true,
-      }),
-      createMockConnectorType({
+        isDeprecated: false,
+      },
+      {
         id: 'test',
         name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
-      }),
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+        isDeprecated: false,
+      },
     ];
 
     const result = await fetchConnectorTypes({ http, includeSystemActions: true });
@@ -170,17 +192,28 @@ describe('loadActionTypes', () => {
     http.get.mockResolvedValueOnce(apiResponseValue);
 
     const resolvedValue: ActionType[] = [
-      createMockConnectorType({
+      {
         id: '.test-system-action',
         name: 'System action name',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
         isSystemActionType: true,
-      }),
-      createMockConnectorType({
+        isDeprecated: false,
+      },
+      {
         id: 'test',
         name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
-      }),
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+        isDeprecated: false,
+      },
     ];
 
     const result = await fetchConnectorTypes({

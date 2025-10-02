@@ -308,7 +308,7 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAll();
 
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           id: '1',
           name: 'test',
@@ -392,7 +392,7 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
 
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           actionTypeId: '.cases',
           id: 'system-connector-.cases',
@@ -474,7 +474,7 @@ describe('getAll()', () => {
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           config: {
             foo: 'bar',
@@ -609,7 +609,7 @@ describe('getAll()', () => {
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           actionTypeId: '.inference',
           id: 'testPreconfigured02',
@@ -680,7 +680,7 @@ describe('getAll()', () => {
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           config: {
             foo: 'bar',
@@ -822,7 +822,7 @@ describe('getAll()', () => {
 
       const result = await actionsClient.getAllSystemConnectors();
 
-      expect(result).toMatchConnectorsFindResult([
+      expect(result).toContainConnectorsFindResult([
         {
           id: 'system-connector-.test',
           actionTypeId: '.test',
@@ -909,7 +909,7 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toMatchConnectorsFindResult([
+    expect(result).toContainConnectorsFindResult([
       {
         id: '1',
         name: 'test',
@@ -1074,7 +1074,7 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toMatchConnectorsFindResult([
+    expect(result).toContainConnectorsFindResult([
       {
         id: '1',
         name: 'test',
@@ -1225,7 +1225,7 @@ describe('getAllUnsecured()', () => {
       connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toMatchConnectorsFindResult([
+    expect(result).toContainConnectorsFindResult([
       {
         config: {
           foo: 'bar',

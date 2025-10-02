@@ -6,16 +6,14 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import {
-  createMockConnectorForUI,
-  createMockConnectorType,
-} from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import type { ActionConnector, ActionTypeConnector } from '../../../common/types/domain';
 import { basicPush } from '../../containers/mock';
 import type { CaseConnectors } from '../../containers/types';
 
 export const connectorsMock: ActionConnector[] = [
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
     name: 'My SN connector',
@@ -23,7 +21,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
   }),
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: 'resilient-2',
     actionTypeId: '.resilient',
     name: 'My Resilient connector',
@@ -32,7 +30,7 @@ export const connectorsMock: ActionConnector[] = [
       orgId: '201',
     },
   }),
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: 'jira-1',
     actionTypeId: '.jira',
     name: 'Jira',
@@ -40,7 +38,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
   }),
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: 'servicenow-sir',
     actionTypeId: '.servicenow-sir',
     name: 'My Connector SIR',
@@ -48,7 +46,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
   }),
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: 'servicenow-uses-table-api',
     actionTypeId: '.servicenow',
     name: 'My deprecated SN connector',

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import { SwimlaneConnectorType } from '../../../common/types/domain';
 
-export const connector = createMockConnectorForUI({
+export const connector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.jira',
 });
 
-export const swimlaneConnector = createMockConnectorForUI({
+export const swimlaneConnector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.swimlane',
@@ -29,7 +29,7 @@ export const swimlaneConnector = createMockConnectorForUI({
   },
 });
 
-export const theHiveConnector = createMockConnectorForUI({
+export const theHiveConnector = createMockActionConnector({
   id: '123',
   name: 'My connector',
   actionTypeId: '.thehive',

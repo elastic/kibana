@@ -16,7 +16,7 @@ import { EditConnectorTabs } from '../../../../types';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -33,7 +33,7 @@ const executeConnectorResponse = {
   data: {},
 };
 
-const connector: ActionConnector = createMockConnectorForUI({
+const connector: ActionConnector = createMockActionConnector({
   id: '123',
   name: 'My test',
   actionTypeId: '.test',

@@ -10,15 +10,15 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
 import type { AIConnector } from './types';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const mockConnectors: AIConnector[] = [
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: '1',
     name: 'Connector 1',
     actionTypeId: 'testType',
   }),
-  createMockConnectorForUI({
+  createMockActionConnector({
     id: '2',
     name: 'Connector 2',
     actionTypeId: 'testType',

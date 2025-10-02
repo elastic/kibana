@@ -10,11 +10,11 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const actionConnector = createMockConnectorForUI({
+const actionConnector = createMockActionConnector({
   actionTypeId: '.index',
   config: {
     index: 'test-index',
@@ -23,7 +23,7 @@ const actionConnector = createMockConnectorForUI({
   name: 'test name',
 });
 
-const preconfiguredActionConnector = createMockConnectorForUI({
+const preconfiguredActionConnector = createMockActionConnector({
   actionTypeId: '.index',
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,

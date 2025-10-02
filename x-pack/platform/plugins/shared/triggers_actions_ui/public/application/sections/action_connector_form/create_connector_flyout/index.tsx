@@ -86,6 +86,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     config: {},
     secrets: {},
     isMissingSecrets: false,
+    isConnectorTypeDeprecated: false,
   };
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;

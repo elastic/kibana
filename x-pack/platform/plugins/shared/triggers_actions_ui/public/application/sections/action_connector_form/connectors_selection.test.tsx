@@ -14,10 +14,8 @@ import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
-import {
-  createMockConnectorForUI,
-  createMockConnectorType,
-} from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('connectors_selection', () => {
   const core = coreMock.createStart();
@@ -63,7 +61,7 @@ describe('connectors_selection', () => {
   };
 
   const connectors = [
-    createMockConnectorForUI({
+    createMockActionConnector({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',

@@ -32,10 +32,10 @@ import {
   removeEmptyFields,
   customFieldsFormSerializer,
 } from './utils';
-import { createMockConnectorForUI } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('Utils', () => {
-  const connector = createMockConnectorForUI({
+  const connector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.webhook',
     name: 'Test',

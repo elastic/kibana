@@ -43,7 +43,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     notifications: { toasts },
   } = useKibana().services;
   const { updateFieldValues } = useFormContext();
-  const [{ id, isDeprecated, actionTypeId, name, config, secrets, isConnectorTypeDeprecated }] =
+  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] =
     useFormData<ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>>();
 
   const requiresNewApplication = isDeprecated != null ? !isDeprecated : true;
@@ -126,7 +126,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         await getApplicationInfo({
           ...connectorToUpdate,
           isDeprecated,
-          isConnectorTypeDeprecated,
+          isConnectorTypeDeprecated: false,
           isPreconfigured: false,
           isSystemAction: false,
           actionTypeId,
@@ -153,17 +153,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         setUpdateErrorMessage(err.message);
       }
     },
-    [
-      name,
-      id,
-      getApplicationInfo,
-      isDeprecated,
-      actionTypeId,
-      http,
-      updateFieldValues,
-      toasts,
-      isConnectorTypeDeprecated,
-    ]
+    [name, id, getApplicationInfo, isDeprecated, actionTypeId, http, updateFieldValues, toasts]
   );
 
   return (
