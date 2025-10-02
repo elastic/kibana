@@ -325,6 +325,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         checkMappings(contentPack, { 'resource.attributes.foo.bar': { type: 'keyword' } });
       });
 
+      it('does not export base fields', async () => {
+        const contentPack = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: { mappings: true, queries: [], routing: [] },
+              },
+            })
+          )
+        );
+
+        checkMappings(contentPack, {});
+      });
+
       it('fails when trying to export a stream thats not a descendant', async () => {
         const exportBody = {
           name: 'nonexistent_stream_pack',

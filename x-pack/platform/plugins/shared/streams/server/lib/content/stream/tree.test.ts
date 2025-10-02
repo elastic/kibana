@@ -7,6 +7,7 @@
 
 import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
+import { baseFields } from '../../streams/component_templates/logs_layer';
 
 describe('content pack tree helpers', () => {
   describe('asTree', () => {
@@ -264,6 +265,23 @@ describe('content pack tree helpers', () => {
       expect(() => mergeTrees({ existing, incoming })).toThrow(
         `Query [one | title] already exists on [logs]`
       );
+    });
+
+    it('keeps base fields on root stream', () => {
+      const existing = asTree({
+        root: 'logs',
+        streams: [testContentPackEntry({ name: 'logs', fields: baseFields })],
+        include: { objects: { all: {} } },
+      });
+
+      const incoming = asTree({
+        root: 'logs',
+        streams: [testContentPackEntry({ name: 'logs', fields: {} })],
+        include: { objects: { all: {} } },
+      });
+
+      const merged = mergeTrees({ existing, incoming });
+      expect(merged.request.stream.ingest.wired.fields).toEqual(baseFields);
     });
   });
 });
