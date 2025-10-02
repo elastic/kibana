@@ -69,7 +69,7 @@ export const ConsoleTutorialsGroup = () => {
           'Learn how to use time series data stream (TSDS) to store timestamped metrics data.',
       }),
       request: consoleTutorials.timeSeriesDataStreams,
-      duration: 4,
+      duration: 3,
     },
   ];
 
