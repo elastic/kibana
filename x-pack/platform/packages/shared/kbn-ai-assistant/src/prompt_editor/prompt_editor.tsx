@@ -17,6 +17,7 @@ import { useLastUsedPrompts } from '../hooks/use_last_used_prompts';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
 import { useScopes } from '../hooks/use_scopes';
+import { useGenAIConnectors } from '../hooks';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -42,6 +43,7 @@ export function PromptEditor({
   onSubmit,
 }: PromptEditorProps) {
   const scopes = useScopes();
+  const connectors = useGenAIConnectors();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<'prompt' | 'function'>(
@@ -102,15 +104,19 @@ export function PromptEditor({
 
       setInnerMessage(undefined);
       setMode('prompt');
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
       onSendTelemetry({
         type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
-        payload: { scopes },
+        payload: {
+          scopes,
+          connector,
+        },
       });
     } catch (_) {
       setInnerMessage(oldMessage);
       setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
-  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit, scopes]);
+  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit, scopes, connectors]);
 
   // Submit on Enter
   useEffect(() => {

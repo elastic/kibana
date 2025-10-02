@@ -16,8 +16,6 @@ export const registerWorkflowInsightsRoutes = (
   config: ConfigType,
   endpointContext: EndpointAppContext
 ) => {
-  if (config.experimentalFeatures.defendInsights) {
-    registerGetInsightsRoute(router, endpointContext);
-    registerUpdateInsightsRoute(router, endpointContext);
-  }
+  registerGetInsightsRoute(router, endpointContext);
+  registerUpdateInsightsRoute(router, endpointContext);
 };

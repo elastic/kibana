@@ -11,7 +11,6 @@ import type {
   ChatCompleteCompositeResponse,
   ChatCompleteOptions,
   ChatCompleteResponse,
-  ToolOptions,
 } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../http_apis';
@@ -84,7 +83,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
     } else {
       return lastValueFrom(
         defer(() =>
-          fetch<ChatCompleteResponse<ToolOptions<string>>>('/internal/inference/chat_complete', {
+          fetch<ChatCompleteResponse>('/internal/inference/chat_complete', {
             method: 'POST',
             body: JSON.stringify(body),
             signal: combineSignal(signal, abortSignal),

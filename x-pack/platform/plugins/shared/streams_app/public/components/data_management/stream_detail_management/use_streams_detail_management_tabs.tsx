@@ -21,12 +21,14 @@ export function useStreamsDetailManagementTabs({
 }) {
   const {
     features: { significantEvents, groupStreams },
+    isLoading,
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.available;
 
   return {
-    enrich: {
+    isLoading,
+    processing: {
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),

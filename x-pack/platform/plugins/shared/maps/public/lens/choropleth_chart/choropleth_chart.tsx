@@ -88,7 +88,7 @@ export function ChoroplethChart({
           ],
           // Right join/term is the field in the doc you’re trying to join it to (foreign key - e.g. US)
           term: args.regionAccessor,
-        },
+        } as { id: string; type: string; [key: string]: unknown },
       },
     ],
     sourceDescriptor: {

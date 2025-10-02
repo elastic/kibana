@@ -6,152 +6,94 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import { Parser, synth } from '../../../..';
+import type { ESQLColumnData } from '../../types';
+import { type ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('STATS', () => {
   it('adds the user defined column, when no grouping is given', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
-    const context = {
-      userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
-        [
-          'var0',
-          [
-            {
-              name: 'var0',
-              type: 'double',
-              location: { min: 0, max: 10 },
-            },
-          ],
-        ],
-      ]),
-      fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
-      ]),
-    };
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const result = columnsAfter(synth.cmd`STATS var0=AVG(field2)`, previousCommandFields, context);
+    const result = columnsAfter(synth.cmd`STATS var0=AVG(field2)`, previousCommandFields, '');
 
-    expect(result).toEqual([{ name: 'var0', type: 'double' }]);
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'var0', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
+    ]);
   });
 
   it('adds the escaped column, when no grouping is given', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const context = {
-      userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
-        [
-          'AVG(field2)',
-          [
-            {
-              name: 'AVG(field2)',
-              type: 'double',
-              location: { min: 0, max: 10 },
-            },
-          ],
-        ],
-      ]),
-      fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
-      ]),
-    };
+    const queryString = `FROM index | STATS AVG(field2)`;
 
-    const result = columnsAfter(synth.cmd`STATS AVG(field2)`, previousCommandFields, context);
+    // Can't use synth because it steps on the location information
+    // which is used to determine the name of the new column
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
 
-    expect(result).toEqual([{ name: 'AVG(field2)', type: 'double' }]);
+    const result = columnsAfter(command, previousCommandFields, queryString);
+
+    expect(result).toEqual([
+      { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 19, max: 29 } },
+    ]);
   });
 
   it('adds the escaped and grouping columns', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const context = {
-      userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
-        [
-          'AVG(field2)',
-          [
-            {
-              name: 'AVG(field2)',
-              type: 'double',
-              location: { min: 0, max: 10 },
-            },
-          ],
-        ],
-      ]),
-      fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
-      ]),
-    };
+    const queryString = `FROM a | STATS AVG(field2) BY field1`;
 
-    const result = columnsAfter(
-      synth.cmd`STATS AVG(field2) BY field1`,
-      previousCommandFields,
-      context
-    );
+    // Can't use synth because it steps on the location information
+    // which is used to determine the name of the new column
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+
+    const result = columnsAfter(command, previousCommandFields, queryString);
 
     expect(result).toEqual([
-      { name: 'field1', type: 'keyword' },
-      { name: 'AVG(field2)', type: 'double' },
+      { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
+      { name: 'field1', type: 'keyword', userDefined: true, location: { min: 30, max: 35 } },
     ]);
   });
 
   it('adds the user defined and grouping columns', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-      { name: '@timestamp', type: 'date' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+      { name: '@timestamp', type: 'date', userDefined: false },
+    ];
 
-    const context = {
-      userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
-        [
-          'AVG(field2)',
-          [
-            {
-              name: 'AVG(field2)',
-              type: 'double',
-              location: { min: 0, max: 10 },
-            },
-          ],
-        ],
-        [
-          'buckets',
-          [
-            {
-              name: 'buckets',
-              type: 'unknown',
-              location: { min: 0, max: 10 },
-            },
-          ],
-        ],
-      ]),
-      fields: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword' }],
-        ['count', { name: 'count', type: 'double' }],
-      ]),
-    };
+    const queryString = `FROM a | STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`;
 
-    const result = columnsAfter(
-      synth.cmd`STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`,
-      previousCommandFields,
-      context
-    );
+    // Can't use synth because it steps on the location information
+    // which is used to determine the name of the new column
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
 
-    expect(result).toEqual([
-      { name: 'AVG(field2)', type: 'double' },
-      { name: 'buckets', type: 'unknown' },
+    const result = columnsAfter(command, previousCommandFields, queryString);
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
+      { name: 'buckets', type: 'date', userDefined: true, location: { min: 30, max: 36 } },
     ]);
   });
 });

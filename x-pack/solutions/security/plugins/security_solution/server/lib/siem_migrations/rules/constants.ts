@@ -8,7 +8,6 @@
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { defaultRiskScoreBySeverity } from '../../../../common/detection_engine/constants';
 import type { SplunkSeverity } from './types';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../../../../common/siem_migrations/constants';
 
 export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<SplunkSeverity, Severity> = {
   '1': 'low',
@@ -24,8 +23,3 @@ export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
 
 export const DEFAULT_TRANSLATION_RISK_SCORE =
   ELASTIC_SEVERITY_TO_RISK_SCORE_MAP[DEFAULT_TRANSLATION_SEVERITY];
-
-/** Maximum size for searches, aggregations and terms queries */
-export const MAX_ES_SEARCH_SIZE = 10_000 as const;
-
-export const SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY = `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`;

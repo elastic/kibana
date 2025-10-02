@@ -72,7 +72,7 @@ describe('Change privilege level handlers', () => {
       await changeAgentPrivilegeLevelHandler(mockContext, mockRequest, mockResponse);
 
       expect(changeAgentPrivilegeLevel).toHaveBeenCalledWith(esClientMock, soClientMock, agentId, {
-        userInfo: options.user_info,
+        user_info: options.user_info,
       });
 
       expect(mockResponse.ok).toHaveBeenCalledWith({

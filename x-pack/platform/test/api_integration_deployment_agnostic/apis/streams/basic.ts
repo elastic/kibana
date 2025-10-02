@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
@@ -171,6 +171,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
@@ -195,6 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
@@ -248,10 +250,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:10.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
           }),
+        };
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
+        });
+      });
+
+      it('Index an Nginx access log message with subobjects, should goto logs.nginx', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: 'test',
+          log: {
+            level: 'info',
+            logger: 'nginx',
+          },
         };
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
@@ -277,16 +301,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
       });
 
-      it('Index an Nginx access log message, should goto logs.nginx.access', async () => {
-        const doc = {
+      const accessLogDoc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: JSON.stringify({
           '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: JSON.stringify({
-            'log.level': 'info',
-            'log.logger': 'nginx',
-            message: 'test',
-          }),
-        };
-        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          message: 'test',
+        }),
+      };
+
+      it('Index an Nginx access log message, should goto logs.nginx.access', async () => {
+        const result = await indexAndAssertTargetStream(
+          esClient,
+          'logs.nginx.access',
+          accessLogDoc
+        );
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           body: { text: 'test' },
@@ -296,6 +326,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           stream: { name: 'logs.nginx.access' },
         });
+      });
+
+      it('Does not index to logs.nginx.access if routing is disabled', async () => {
+        await putStream(apiClient, 'logs.nginx', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              settings: {},
+              processing: { steps: [] },
+              wired: {
+                fields: {},
+                routing: [
+                  {
+                    destination: 'logs.nginx.access',
+                    where: { field: 'severity_text', eq: 'info' },
+                    status: 'disabled',
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        await indexAndAssertTargetStream(esClient, 'logs.nginx', accessLogDoc);
       });
 
       it('Fork logs to logs.nginx.error with invalid condition', async () => {
@@ -314,6 +370,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             'log.level': 'error',
             'log.logger': 'nginx',
             message: 'test',
@@ -347,6 +404,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: '500',
             message: 'test',
           }),
@@ -354,6 +412,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: 500,
             message: 'test',
           }),
@@ -383,12 +442,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 500',
           }),
         };
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 400',
           }),
         };
@@ -434,16 +495,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should allow to update field type to incompatible type', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -482,16 +540,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should not allow to update field type to system', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -603,32 +658,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.bar': { type: 'long' },
         };
         await putStream(apiClient, 'logs.one', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields, routing: [] },
             },
           },
         });
 
         await putStream(apiClient, 'logs.one.two.three', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
             },
           },
@@ -654,16 +703,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           index,
           {
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: {
-                  steps: [],
-                },
+                processing: { steps: [] },
+                settings: {},
                 wired: { fields: {}, routing: [] },
               },
             },
@@ -674,16 +720,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('does not allow super deeply nested streams', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
             },
           },

@@ -1,0 +1,128 @@
+{
+  "id": "@kbn/profiler",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/profiler",
+        "id": "def-common.concatenateProfiles",
+        "type": "Function",
+        "tags": [],
+        "label": "concatenateProfiles",
+        "description": [
+          "\nConcatenate multiple CPU profile JSON files sequentially, ensuring contiguous node ids\nand sequential, non-overlapping timing."
+        ],
+        "signature": [
+          "({\n  log,\n  name,\n  out,\n  profilePaths,\n  pollIntervalMs,\n  totalTimeoutMs,\n  inactivityTimeoutMs,\n}: Options) => Promise<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-profiler/src/concatenate_profiles/concatenate_profiles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiler",
+            "id": "def-common.concatenateProfiles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  name,\n  out,\n  profilePaths,\n  pollIntervalMs,\n  totalTimeoutMs,\n  inactivityTimeoutMs,\n}",
+            "description": [],
+            "signature": [
+              "Options"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiler/src/concatenate_profiles/concatenate_profiles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiler",
+        "id": "def-common.withProfiler",
+        "type": "Function",
+        "tags": [],
+        "label": "withProfiler",
+        "description": [
+          "\nRun an async callback while capturing a V8 CPU profile. Writes the file to disk and returns\nthe result of the async callback."
+        ],
+        "signature": [
+          "(cb: () => Promise<T>, options: ",
+          "WithProfilerOptions",
+          ") => Promise<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiler",
+            "id": "def-common.withProfiler.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "() => Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/profiler",
+            "id": "def-common.withProfiler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "WithProfilerOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiler/src/with_profiler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/profiler",
+        "id": "def-common.DEFAULT_SAMPLING_INTERVAL_US",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_SAMPLING_INTERVAL_US",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-profiler/src/default_sampling_interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

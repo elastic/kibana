@@ -32,7 +32,7 @@ export async function initPlugin() {
 }
 
 function createServerCallback() {
-  const payloads: string[] = [];
+  let payloads: string[] = [];
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -52,6 +52,7 @@ function createServerCallback() {
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
+      payloads = [];
       return;
     }
 
@@ -72,9 +73,16 @@ function createServerCallback() {
             return validateRequestUsesMethod(request.method ?? '', 'post', response);
           case 'success_put_method':
             return validateRequestUsesMethod(request.method ?? '', 'put', response);
+          case 'success_config_secret_headers':
+            return validateReceivedHeaders(request.headers, response);
           case 'failure':
             response.statusCode = 500;
             response.end('Error');
+            return;
+          case 'header_as_payload':
+            payloads.push(JSON.stringify(request.headers));
+            response.statusCode = 200;
+            response.end('OK');
             return;
         }
 
@@ -125,5 +133,18 @@ function validateRequestUsesMethod(requestMethod: string, method: string, res: a
   } catch (ex) {
     res.statusCode = 403;
     res.end(`the validateAuthentication operation failed. ${ex.message}`);
+  }
+}
+
+function validateReceivedHeaders(headers: any, res: any) {
+  try {
+    const hasValidHeader = headers.config === 'configValue' && headers.secret === 'secretValue';
+
+    expect(hasValidHeader).to.eql(true);
+    res.statusCode = 200;
+    res.end('OK');
+  } catch (ex) {
+    res.statusCode = 400;
+    res.end(`Header validation failed: ${ex.message}`);
   }
 }

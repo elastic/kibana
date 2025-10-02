@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ElasticRule,
   RuleMigration,
@@ -15,7 +15,8 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
-import type { RuleMigrationsClientDependencies, StoredRuleMigrationRule } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { StoredRuleMigrationRule } from '../types';
 import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
@@ -32,16 +33,18 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   RuleMigrationTaskOutput
 > {
   private retriever: RuleMigrationsRetriever;
+  protected readonly taskConcurrency = 10;
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: RuleMigrationsDataClient,
     protected readonly logger: Logger,
-    protected readonly dependencies: RuleMigrationsClientDependencies
+    protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new RuleMigrationsRetriever(this.migrationId, {
       data: this.data,
       rules: this.dependencies.rulesClient,
@@ -51,7 +54,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
-    const { inferenceClient } = this.dependencies;
+    const { inferenceService } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
@@ -70,7 +73,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
       connectorId,
       this.migrationId,
-      inferenceClient,
+      inferenceService.getClient({ request: this.request }),
       this.logger
     );
 

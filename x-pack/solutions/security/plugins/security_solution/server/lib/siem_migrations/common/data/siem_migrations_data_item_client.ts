@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import type { ItemDocument, Stored } from '../types';
 import {
   SiemMigrationStatus,
@@ -23,7 +24,6 @@ import {
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';
 import type {
-  MigrationType,
   SiemMigrationAllDataStats,
   SiemMigrationDataStats,
   SiemMigrationFilters,

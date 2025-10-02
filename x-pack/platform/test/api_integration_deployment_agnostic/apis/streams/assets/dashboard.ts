@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     expect(response.status).to.be(200);
   }
 
-  describe('Asset links', function () {
+  describe('Dashboard asset linking', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);

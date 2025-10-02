@@ -7,144 +7,179 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import type { EuiFlexGridProps, IconType } from '@elastic/eui';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiFlexGroup,
-  useEuiTheme,
-  euiScrollBarStyles,
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { css } from '@emotion/react';
-import { IconChartBarStacked } from '@kbn/chart-icons';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import type { EuiFlexGridProps } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MetricChart } from './metric_chart';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { Observable } from 'rxjs';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { Chart } from './chart';
+import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
+import { EmptyState } from './empty_state/empty_state';
+import { useGridNavigation } from '../hooks/use_grid_navigation';
+import { FieldsMetadataProvider } from '../context/fields_metadata';
 
-export type MetricsGridProps = {
-  timeRange: { from?: string; to?: string };
-  loading: boolean;
+export type MetricsGridProps = Pick<
+  ChartSectionProps,
+  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+> & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
   columns: EuiFlexGridProps['columns'];
+  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & (
-  | {
-      pivotOn: 'metric';
-      fields: MetricField[];
-    }
-  | {
-      pivotOn: 'dimension';
-      fields: MetricField;
-    }
-);
+    | {
+        pivotOn: 'metric';
+        fields: MetricField[];
+      }
+    | {
+        pivotOn: 'dimension';
+        fields: MetricField;
+      }
+  );
 
 export const MetricsGrid = ({
   fields,
-  timeRange,
-  loading,
+  searchSessionId,
+  onBrushEnd,
+  onFilter,
   dimensions,
   pivotOn,
-  filters = [],
+  services,
   columns,
+  abortController,
+  requestParams,
+  discoverFetch$,
+  filters = [],
 }: MetricsGridProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const [expandedMetric, setExpandedMetric] = useState<
+    | {
+        metric: MetricField;
+        esqlQuery: string;
+      }
+    | undefined
+  >();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
-  if (loading) {
-    return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={css`
-          min-height: 400px;
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingChart size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const colorPalette = useMemo(
+    () => Object.values(euiTheme.colors.vis).slice(0, 10),
+    [euiTheme.colors.vis]
+  );
 
-  if (pivotOn === 'metric' && fields.length === 0) {
-    return (
-      <div
-        css={css`
-          width: 100%;
-          height: 100%;
-        `}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="spaceAround"
-          css={css`
-            height: 100%;
-          `}
-          gutterSize="s"
-        >
-          <EuiFlexItem
-            css={css`
-              justify-content: end;
-            `}
-          >
-            <EuiIcon type={IconChartBarStacked as IconType} size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs">
-              {i18n.translate('metricsExperience.grid.noData', {
-                defaultMessage: 'No results found',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
+  const rows = useMemo(() => {
+    return pivotOn === 'metric'
+      ? fields.map((field, i) => ({ key: `${field.name}-${i}`, metric: field }))
+      : dimensions.map((dim, i) => ({ key: `${dim}-${i}`, metric: fields }));
+  }, [pivotOn, fields, dimensions]);
+
+  const gridColumns = columns || 1;
+  const gridRows = Math.ceil(rows.length / gridColumns);
+
+  const { focusedCell, handleKeyDown, handleCellClick, getRowColFromIndex } = useGridNavigation({
+    gridColumns,
+    gridRows,
+    totalRows: rows.length,
+    gridRef,
+  });
+
+  const handleViewDetails = useCallback((esqlQuery: string, metric: MetricField) => {
+    setExpandedMetric({ metric, esqlQuery });
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
+
+  const handleCloseFlyout = useCallback(() => {
+    setExpandedMetric(undefined);
+  }, []);
+
+  const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
+
+  if (rows.length === 0) {
+    return <EmptyState />;
   }
 
   return (
-    <EuiFlexGrid
-      columns={columns}
-      gutterSize="s"
-      css={css`
-        overflow: auto;
-        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-        ${euiScrollBarStyles(euiThemeContext)}
-      `}
-      data-test-subj="unifiedMetricsExperienceGrid"
-    >
-      {pivotOn === 'metric'
-        ? fields.map((field, index) => (
-            <EuiFlexItem key={field.name}>
-              <MetricChart
-                metric={field}
-                timeRange={timeRange}
-                dimensions={dimensions}
-                filters={filters}
-                colorIndex={index}
-                size={chartSize}
-              />
-            </EuiFlexItem>
-          ))
-        : dimensions.map((dimension, index) => (
-            <EuiFlexItem key={dimension}>
-              <MetricChart
-                metric={fields}
-                timeRange={timeRange}
-                byDimension={dimension}
-                dimensions={[dimension]}
-                filters={filters}
-                colorIndex={index}
-                size={chartSize}
-              />
-            </EuiFlexItem>
-          ))}
-    </EuiFlexGrid>
+    <FieldsMetadataProvider fields={normalizedFields} services={services}>
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        aria-rowcount={gridRows}
+        aria-colcount={gridColumns}
+        onKeyDown={handleKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+        tabIndex={0}
+        style={{
+          outline: 'none',
+        }}
+      >
+        <EuiFlexGrid columns={columns} gutterSize="s">
+          {rows.map(({ key, metric }, index) => {
+            const { rowIndex, colIndex } = getRowColFromIndex(index);
+            const isFocused =
+              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+
+            return (
+              <EuiFlexItem key={key}>
+                <div
+                  role="gridcell"
+                  aria-rowindex={rowIndex + 1} // 1-based for ARIA
+                  aria-colindex={colIndex + 1} // 1-based for ARIA
+                  data-grid-cell={`${rowIndex}-${colIndex}`}
+                  data-chart-index={index}
+                  tabIndex={isFocused ? 0 : -1}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleCellClick(rowIndex, colIndex);
+                    }
+                  }}
+                  style={{
+                    outline: 'none',
+                    cursor: 'pointer',
+                    ...(isFocused && {
+                      boxShadow: `inset 0 0 0 2px ${euiTheme.colors.primary}`,
+                      borderRadius: euiTheme.border.radius.medium,
+                    }),
+                  }}
+                >
+                  <Chart
+                    metric={metric}
+                    size={chartSize}
+                    color={colorPalette[index % colorPalette.length]}
+                    dimensions={dimensions}
+                    discoverFetch$={discoverFetch$}
+                    requestParams={requestParams}
+                    services={services}
+                    abortController={abortController}
+                    searchSessionId={searchSessionId}
+                    filters={filters}
+                    onBrushEnd={onBrushEnd}
+                    onFilter={onFilter}
+                    onViewDetails={handleViewDetails}
+                  />
+                </div>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
+      </div>
+      {expandedMetric && (
+        <MetricInsightsFlyout
+          metric={expandedMetric.metric}
+          esqlQuery={expandedMetric.esqlQuery}
+          isOpen
+          onClose={handleCloseFlyout}
+        />
+      )}
+    </FieldsMetadataProvider>
   );
 };

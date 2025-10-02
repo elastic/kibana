@@ -9,7 +9,7 @@ import { camelCase, isPlainObject, startCase } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type {
   DiffableAllFields,
-  RuleFieldsDiff,
+  ThreeWayRuleFieldsDiff,
   ThreeWayDiff,
 } from '../../../../../common/api/detection_engine';
 import { DataSourceType, ThreeWayDiffOutcome } from '../../../../../common/api/detection_engine';
@@ -54,8 +54,8 @@ export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
  * current per-field rule diff flyout
  */
 export const filterUnsupportedDiffOutcomes = (
-  fields: Partial<RuleFieldsDiff>
-): Partial<RuleFieldsDiff> =>
+  fields: Partial<ThreeWayRuleFieldsDiff>
+): Partial<ThreeWayRuleFieldsDiff> =>
   Object.fromEntries(
     Object.entries(fields).filter(([key, value]) => {
       const diff = value as ThreeWayDiff<unknown>;

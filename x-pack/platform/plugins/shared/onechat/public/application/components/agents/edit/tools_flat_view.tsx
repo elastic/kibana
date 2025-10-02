@@ -12,18 +12,17 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ToolDefinition, ToolType, ToolSelection } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolSelection } from '@kbn/onechat-common';
 import type { ToolSelectionRelevantFields } from '@kbn/onechat-common';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../../tools/tags/tool_tags';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { isToolSelected } from '../../../utils/tool_selection_utils';
-import { toolTypeDisplays } from '../../../utils/constants';
 
 interface ToolsFlatViewProps {
   tools: ToolDefinition[];
   selectedTools: ToolSelection[];
-  onToggleTool: (toolId: string, toolType: ToolType) => void;
+  onToggleTool: (toolId: string) => void;
   disabled: boolean;
   pageIndex: number;
   onPageChange: (pageIndex: number) => void;
@@ -54,21 +53,19 @@ const ToolDetailsColumn: React.FC<ToolDetailsColumnProps> = ({ tool }) => {
 
 const createCheckboxColumn = (
   selectedTools: ToolSelection[],
-  onToggleTool: (toolId: string, toolType: ToolType) => void,
+  onToggleTool: (toolId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
   render: (tool: ToolDefinition) => {
     const toolFields: ToolSelectionRelevantFields = {
       id: tool.id,
-      type: tool.type,
-      tags: tool.tags,
     };
     return (
       <EuiCheckbox
         id={`tool-${tool.id}`}
         checked={isToolSelected(toolFields, selectedTools)}
-        onChange={() => onToggleTool(tool.id, tool.type)}
+        onChange={() => onToggleTool(tool.id)}
         disabled={disabled}
       />
     );
@@ -80,13 +77,6 @@ const createToolDetailsColumn = () => ({
   sortable: (item: ToolDefinition) => item.id,
   width: '60%',
   render: (item: ToolDefinition) => <ToolDetailsColumn tool={item} />,
-});
-
-const createTypeColumn = () => ({
-  field: 'type',
-  name: labels.tools.typeLabel,
-  width: '80px',
-  render: (type: ToolType) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
 });
 
 const createTagsColumn = () => ({
@@ -109,7 +99,6 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
     () => [
       createCheckboxColumn(selectedTools, onToggleTool, disabled),
       createToolDetailsColumn(),
-      createTypeColumn(),
       createTagsColumn(),
     ],
     [selectedTools, onToggleTool, disabled]

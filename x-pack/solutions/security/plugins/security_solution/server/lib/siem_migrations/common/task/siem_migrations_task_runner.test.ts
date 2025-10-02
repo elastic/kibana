@@ -7,7 +7,7 @@
 
 import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
-import type { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { StoredSiemMigrationItem, SiemMigrationsClientDependencies } from '../types';
 import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -27,6 +27,7 @@ const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
   telemetry: {},
 } as unknown as SiemMigrationsClientDependencies;
 
+const mockRequest = {} as unknown as KibanaRequest;
 const mockUser = {} as unknown as AuthenticatedUser;
 const itemId = 'test-item-id';
 
@@ -45,6 +46,7 @@ const mockProcessTaskOutput = jest.fn().mockResolvedValue({});
 const mockInitialize = jest.fn().mockResolvedValue(undefined);
 
 class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
+  protected taskConcurrency = 10;
   protected TaskRunnerClass = SiemMigrationTaskRunner;
   protected EvaluatorClass = undefined;
 
@@ -82,6 +84,7 @@ describe('SiemMigrationTaskRunner', () => {
     abortController = new AbortController();
     taskRunner = new TestMigrationTaskRunner(
       'test-migration-id',
+      mockRequest,
       mockUser,
       abortController,
       mockSiemMigrationsDataClient,

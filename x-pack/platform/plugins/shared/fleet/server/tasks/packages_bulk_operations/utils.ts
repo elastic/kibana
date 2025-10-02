@@ -26,7 +26,7 @@ export interface BulkPackageOperationsTaskState {
 }
 
 export interface BulkPackageOperationsTaskParams {
-  type: 'bulk_upgrade' | 'bulk_uninstall';
+  type: 'bulk_upgrade' | 'bulk_uninstall' | 'bulk_rollback';
 }
 
 export async function scheduleBulkOperationTask(

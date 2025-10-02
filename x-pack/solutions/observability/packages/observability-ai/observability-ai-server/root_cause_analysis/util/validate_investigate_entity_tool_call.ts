@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCallsOf } from '@kbn/inference-common';
+import type { ToolCallOfToolOptions } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { entityQuery } from '@kbn/observability-utils-common/es/queries/entity_query';
 import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
@@ -51,9 +51,9 @@ export async function validateInvestigateEntityToolCalls({
   const investigateEntityToolCalls = toolCalls.filter(
     (
       toolCall
-    ): toolCall is ToolCallsOf<{
+    ): toolCall is ToolCallOfToolOptions<{
       tools: Pick<typeof RCA_TOOLS, typeof RCA_INVESTIGATE_ENTITY_TOOL_NAME>;
-    }>['toolCalls'][number] => toolCall.function.name === RCA_INVESTIGATE_ENTITY_TOOL_NAME
+    }> => toolCall.function.name === RCA_INVESTIGATE_ENTITY_TOOL_NAME
   );
 
   if (!investigateEntityToolCalls.length) {

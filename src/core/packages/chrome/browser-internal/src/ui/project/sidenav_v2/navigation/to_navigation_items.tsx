@@ -22,6 +22,7 @@ import type {
   SecondaryMenuSection,
   SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
@@ -31,6 +32,7 @@ export interface NavigationItems {
   logoItem: SideNavLogo;
   navItems: NavigationStructure;
   activeItemId?: string;
+  solutionId: SolutionId;
 }
 
 /**
@@ -91,13 +93,18 @@ export const toNavigationItems = (
     }
   };
 
-  const getTestSubj = (navNode: ChromeProjectNavigationNode): string => {
+  const getTestSubj = (navNode: ChromeProjectNavigationNode, append: string[] = []): string => {
     const { id, path, deepLink } = navNode;
-    return classnames(`nav-item`, `nav-item-${path}`, {
-      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
-      [`nav-item-id-${id}`]: id,
-      [`nav-item-isActive`]: isActive(navNode),
-    });
+    return classnames(
+      `nav-item`,
+      `nav-item-${path}`,
+      {
+        [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+        [`nav-item-id-${id}`]: id,
+        [`nav-item-isActive`]: isActive(navNode),
+      },
+      ...append
+    );
   };
 
   if (navigationTree.body.length === 1) {
@@ -137,7 +144,7 @@ export const toNavigationItems = (
     iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
-    'data-test-subj': logoNode ? getTestSubj(logoNode) : undefined,
+    'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
@@ -243,7 +250,6 @@ export const toNavigationItems = (
         secondarySections = [
           {
             id: `${navNode.id}-section`,
-            label: null,
             items: validChildren.map(createSecondaryMenuItem),
           },
         ];
@@ -267,11 +273,16 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title ?? null, // Use null for no label
+              label: child.title,
               items: secondaryItems,
             };
           })
         ).filter((section) => section.items.length > 0); // Filter out empty sections;
+      }
+
+      // If after all filtering there are no sections, we skip this menu item
+      if (secondarySections.length === 0) {
+        return null;
       }
     }
 
@@ -314,7 +325,12 @@ export const toNavigationItems = (
   // Check for duplicate icons
   warnAboutDuplicateIcons(logoItem, primaryItems);
 
-  return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
+  return {
+    logoItem,
+    navItems: { primaryItems, footerItems },
+    activeItemId: deepestActiveItemId,
+    solutionId: navigationTree.id,
+  };
 };
 
 // =====================
@@ -467,9 +483,13 @@ const findItemByLastActive = (
  * @returns The first available href, or undefined if none found
  */
 const findFirstAvailableHref = (sections: SecondaryMenuSection[]): string | undefined => {
-  const firstSectionWithItems = sections.find((section) => section.items.length > 0);
-  const firstItemWithHref = firstSectionWithItems?.items.find((item) => item.href);
-  return firstItemWithHref?.href;
+  for (const section of sections) {
+    for (const item of section.items) {
+      if (item.href && !item.isExternal) {
+        return item.href;
+      }
+    }
+  }
 };
 
 /**

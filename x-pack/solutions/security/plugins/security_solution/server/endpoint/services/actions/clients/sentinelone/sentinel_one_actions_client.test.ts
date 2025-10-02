@@ -2013,7 +2013,7 @@ describe('SentinelOneActionsClient class', () => {
       );
     });
 
-    it('should throw an error is script ID is invalid', async () => {
+    it('should throw an error if script ID is invalid', async () => {
       const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
       connectorActionsMock.execute.mockImplementation(async (options) => {
         if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
@@ -2026,6 +2026,29 @@ describe('SentinelOneActionsClient class', () => {
 
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         'Script ID [1466645476786791838] not found'
+      );
+    });
+
+    it('should throw an error if script does not support OS of agent', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
+
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].osTypes = ['windows'];
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].scriptName = 'terminate something';
+
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: scriptsApiResponse,
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
+        'Script [terminate something] not supported for OS type [linux]'
       );
     });
 
@@ -2104,6 +2127,7 @@ describe('SentinelOneActionsClient class', () => {
               data: expect.objectContaining({
                 command: 'runscript',
                 parameters: { scriptId: '1466645476786791838', scriptInput: '--some-option=abc' },
+                comment: '(Script name: Terminate Processes (Linux/macOS)) test comment',
               }),
             }),
           }),

@@ -9,20 +9,25 @@
 
 import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
 
-export interface InitialMenuState {
+export interface ActiveItemsState {
   primaryItem: MenuItem | null;
   secondaryItem: SecondaryMenuItem | null;
   isLogoActive: boolean;
 }
 
 /**
- * Utility function to determine the initial menu item based on the `activeItemId`
+ * Utility function to determine the active menu items based on the `activeItemId`.
+ *
+ * @param items - The navigation structure.
+ * @param activeItemId - The active item ID.
+ * @param logoId - The logo ID.
+ * @returns The active items state including: `primaryItem`, `secondaryItem`, and `isLogoActive`.
  */
-export const getInitialActiveItems = (
+export const getActiveItems = (
   items: NavigationStructure,
   activeItemId?: string,
   logoId?: string
-): InitialMenuState => {
+): ActiveItemsState => {
   if (!activeItemId) {
     return { primaryItem: null, secondaryItem: null, isLogoActive: false };
   }
@@ -32,19 +37,7 @@ export const getInitialActiveItems = (
     return { primaryItem: null, secondaryItem: null, isLogoActive: true };
   }
 
-  // Second, search the primary menu items using their IDs
-  const primaryItem = items.primaryItems.find((item) => item.id === activeItemId);
-  if (primaryItem) {
-    return { primaryItem, secondaryItem: null, isLogoActive: false };
-  }
-
-  // Third, search the footer items using their IDs
-  const footerItem = items.footerItems.find((item) => item.id === activeItemId);
-  if (footerItem) {
-    return { primaryItem: footerItem, secondaryItem: null, isLogoActive: false };
-  }
-
-  // Fourth, search the secondary menu items using their IDs
+  // Second, search the secondary menu items using their IDs (prioritize children over parents)
   for (const primary of items.primaryItems) {
     if (!primary.sections) continue;
 
@@ -56,7 +49,7 @@ export const getInitialActiveItems = (
     }
   }
 
-  // Fifth, search the secondary items of footer items
+  // Third, search the secondary items of footer items
   for (const footer of items.footerItems) {
     if (!footer.sections) continue;
 
@@ -66,6 +59,18 @@ export const getInitialActiveItems = (
         return { primaryItem: footer, secondaryItem, isLogoActive: false };
       }
     }
+  }
+
+  // Fourth, search the primary menu items using their IDs
+  const primaryItem = items.primaryItems.find((item) => item.id === activeItemId);
+  if (primaryItem) {
+    return { primaryItem, secondaryItem: null, isLogoActive: false };
+  }
+
+  // Fifth, search the footer items using their IDs
+  const footerItem = items.footerItems.find((item) => item.id === activeItemId);
+  if (footerItem) {
+    return { primaryItem: footerItem, secondaryItem: null, isLogoActive: false };
   }
 
   return { primaryItem: null, secondaryItem: null, isLogoActive: false };

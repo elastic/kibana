@@ -11,6 +11,9 @@ import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
+export type PrimaryMetricFontSize = ValueFontMode;
+
+export type PrimaryMetricPosition = MetricStyle['valuePosition'];
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
@@ -64,3 +67,9 @@ export interface MetricVisualizationState {
 
   applyColorTo?: 'background' | 'value'; // Used for coordination between dimension editor sections
 }
+
+export type TitleFontWeight = MetricStyle['titleWeight'];
+
+export type IconPosition = MetricStyle['iconAlign'];
+
+export type Alignment = 'left' | 'center' | 'right';

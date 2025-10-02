@@ -100,6 +100,8 @@ export interface ESQLEditorProps {
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
   formLabel?: string;
+  /** Whether to merge external messages into the editor's message list */
+  mergeExternalMessages?: boolean;
 }
 
 interface ESQLVariableService {
@@ -112,7 +114,7 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getEditorExtensionsAutocomplete: (
     queryString: string,

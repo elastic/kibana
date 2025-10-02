@@ -12,6 +12,5 @@ export interface AIForSOCDetailsProps extends FlyoutPanelProps {
   key: typeof IOCPanelKey;
   params?: {
     id: string;
-    indexName: string;
   };
 }

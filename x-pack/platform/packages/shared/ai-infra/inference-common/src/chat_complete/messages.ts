@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ToolCall, ToolCallsOf, ToolNamesOf, ToolOptions, ToolResponsesOf } from './tools';
+import type { ValuesType } from 'utility-types';
+import type { ToolCall, ToolData, ToolOptions, ToolResponse } from './tools';
+import type { ToolCallsOfToolOptions, ToolNamesOf } from './tools_of';
 
 /**
  * Enum for all possible {@link Message} roles.
@@ -48,26 +50,31 @@ export type UserMessage = MessageBase<MessageRole.User> & {
 /**
  * Represents a message from the LLM.
  */
-export type AssistantMessage = MessageBase<MessageRole.Assistant> & {
-  /**
-   * The text content of the message.
-   * Can be null if the LLM called a tool.
-   */
-  content: string | null;
-  /**
-   * A potential list of {@ToolCall} the LLM asked to execute.
-   * Note that LLM with parallel tool invocation can potentially call multiple tools at the same time.
-   */
-  toolCalls?: ToolCall[];
-};
+export type AssistantMessage<TToolCalls extends ToolCall[] | undefined = ToolCall[] | undefined> =
+  MessageBase<MessageRole.Assistant> & {
+    /**
+     * The text content of the message.
+     * Can be null if the LLM called a tool.
+     */
+    content: string | null;
+    // make sure `toolCalls` inherits the optionality from `TToolCalls`
+  } & (TToolCalls extends ToolCall[]
+      ? {
+          /**
+           * A potential list of {@ToolCall} the LLM asked to execute.
+           * Note that LLM with parallel tool invocation can potentially call multiple tools at the same time.
+           */
+          toolCalls: TToolCalls;
+        }
+      : { toolCalls?: TToolCalls });
 
 /**
  * Represents a tool invocation result, following a request from the LLM to execute a tool.
  */
 export type ToolMessage<
   TName extends string = string,
-  TToolResponse extends Record<string, any> | unknown = Record<string, any> | unknown,
-  TToolData extends Record<string, any> | undefined = Record<string, any> | undefined
+  TToolResponse extends ToolResponse = ToolResponse,
+  TToolData extends ToolData | undefined = ToolData | undefined
 > = MessageBase<MessageRole.Tool> & {
   /**
    * The name of the tool called. Used for refining the type of the response.
@@ -81,15 +88,8 @@ export type ToolMessage<
    * The response from the tool invocation.
    */
   response: TToolResponse;
-} & (TToolData extends undefined
-    ? {}
-    : {
-        /**
-         * Additional data from the tool invocation, that is not sent to the LLM
-         * but can be used to attach baggage (such as timeseries or debug data)
-         */
-        data: TToolData;
-      });
+  // make sure `data` inherits the optionality of `TToolData`
+} & (TToolData extends ToolData ? { data: TToolData } : { data?: TToolData });
 
 /**
  * Mixin composed of all the possible types of messages in a chatComplete discussion.
@@ -104,25 +104,32 @@ export type Message = UserMessage | AssistantMessage | ToolMessage;
 /**
  * Utility type to get the Assistant message type of a {@link ToolOptions} type.
  */
-export type AssistantMessageOf<TToolOptions extends ToolOptions> = Omit<
-  AssistantMessage,
-  'toolCalls'
-> &
-  ToolCallsOf<TToolOptions>;
+export type AssistantMessageOf<TToolOptions extends ToolOptions> = AssistantMessage<
+  ToolCallsOfToolOptions<TToolOptions>
+>;
+
+/**
+ * Shape for tool responses
+ */
+export type ToolResponses = Record<string, ToolResponse>;
 
 /**
  * Utility type to get the Tool message type of a {@link ToolOptions} type.
  */
-
-export type ToolMessageOf<TToolOptions extends ToolOptions> = ToolMessage<
-  ToolNamesOf<TToolOptions>,
-  ToolResponsesOf<TToolOptions['tools']>
->;
+export type ToolMessageOf<
+  TToolOptions extends ToolOptions,
+  TToolResponses extends ToolResponses = ToolResponses
+> = ValuesType<{
+  [key in ToolNamesOf<TToolOptions>]: ToolMessage<key, TToolResponses[key], any>;
+}>;
 
 /**
  * Utility type to get the mixin Message type of a {@link ToolOptions} type.
  */
-export type MessageOf<TToolOptions extends ToolOptions> =
-  | UserMessage
-  | AssistantMessageOf<TToolOptions>
-  | ToolMessageOf<TToolOptions>;
+export type MessageOf<
+  TToolOptions extends ToolOptions,
+  TToolResponses extends Record<ToolNamesOf<TToolOptions>, any> = Record<
+    ToolNamesOf<TToolOptions>,
+    unknown
+  >
+> = UserMessage | AssistantMessageOf<TToolOptions> | ToolMessageOf<TToolOptions, TToolResponses>;

@@ -172,6 +172,62 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(1);
   });
 
+  test('keeps a datatable suggestion although it is marked as hidden', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      testVis: {
+        ...mockVis,
+        getSuggestions: () => [
+          {
+            score: 0.8,
+            title: 'Lens datatable',
+            state: {},
+            previewIcon: 'empty',
+            visualizationId: 'lnsDatatable',
+            hide: true,
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+            incomplete: true,
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: {
+        esql: 'FROM "index1" | keep field1, field2',
+      },
+    };
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.Tagcloud,
+    });
+    expect(suggestions?.length).toEqual(1);
+    expect(suggestions?.[0].title).toEqual('Lens datatable');
+  });
+
   test('prioritizes the chart type of the user preference if any', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {
@@ -310,6 +366,90 @@ describe('suggestionsApi', () => {
     `);
   });
 
+  test('returns the suggestion as donut if user asks for it ', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      lnsPie: {
+        ...mockVis,
+        switchVisualizationType(seriesType: string, state: unknown) {
+          return {
+            ...(state as Record<string, unknown>),
+            preferredSeriesType: seriesType,
+          };
+        },
+        getSuggestions: () => [
+          {
+            score: 0.8,
+            title: 'pie',
+            state: {
+              preferredSeriesType: 'pie',
+            },
+            previewIcon: 'empty',
+            visualizationId: 'lnsPie',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+            incomplete: true,
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: {
+        esql: 'FROM "index1" | keep field1, field2',
+      },
+    };
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.Donut,
+    });
+    expect(suggestions?.length).toEqual(1);
+
+    expect(suggestions?.[0]).toMatchInlineSnapshot(`
+      Object {
+        "changeType": "unchanged",
+        "columns": 0,
+        "datasourceId": "textBased",
+        "datasourceState": Object {},
+        "keptLayerIds": Array [
+          "first",
+        ],
+        "previewIcon": "empty",
+        "score": 0.8,
+        "title": "pie",
+        "visualizationId": "lnsPie",
+        "visualizationState": Object {
+          "preferredSeriesType": "donut",
+        },
+      }
+    `);
+  });
+
   test('returns the suggestion with the preferred attributes ', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {
@@ -374,7 +514,6 @@ describe('suggestionsApi', () => {
       dataView,
       datasourceMap,
       visualizationMap,
-      preferredChartType: ChartType.XY,
       preferredVisAttributes: {
         visualizationType: 'lnsXY',
         state: {
@@ -386,6 +525,9 @@ describe('suggestionsApi', () => {
             },
           },
           datasourceStates: { textBased: { layers: {} } },
+          query: {
+            esql: 'FROM "index1" | keep field1',
+          },
         },
       } as unknown as TypedLensByValueInput['attributes'],
     });
