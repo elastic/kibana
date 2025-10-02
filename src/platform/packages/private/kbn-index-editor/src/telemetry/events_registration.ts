@@ -116,7 +116,7 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
             'The mode in which the index editor flyout was opened. Possible values are: create|edit',
         },
       },
-      edit_op: {
+      action_type: {
         type: 'keyword',
         _meta: {
           description:

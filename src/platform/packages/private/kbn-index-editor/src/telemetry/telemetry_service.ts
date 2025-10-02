@@ -78,13 +78,19 @@ export class IndexEditorTelemetryService {
   }
 
   public trackEditInteraction(eventData: {
-    editOp: 'edit_cell' | 'edit_column' | 'add_row' | 'add_column' | 'delete_row' | 'delete_column';
+    actionType:
+      | 'edit_cell'
+      | 'edit_column'
+      | 'add_row'
+      | 'add_column'
+      | 'delete_row'
+      | 'delete_column';
     outcome?: 'success' | 'error';
     failureReason?: string;
   }) {
     this.reportEvent('index_editor.edit_interaction', {
       flyout_mode: this._flyoutMode,
-      edit_op: eventData.editOp,
+      action_type: eventData.actionType,
       validation_outcome: eventData.outcome,
       failure_reason: eventData.failureReason,
     });
