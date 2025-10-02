@@ -89,6 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         {
           id: jiraConnector.id,
@@ -103,6 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         /**
          * Preconfigured connectors are being registered here:
@@ -116,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         {
           id: resilientConnector.id,
@@ -130,6 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         {
           id: snConnector.id,
@@ -148,6 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         {
           id: snOAuthConnector.id,
@@ -166,6 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
         {
           id: sir.id,
@@ -184,6 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           isMissingSecrets: false,
           referencedByCount: 0,
+          is_connector_type_deprecated: false,
         },
       ]);
     });
