@@ -118,6 +118,15 @@ export const useLayoutApi = (
         layout$Ref.current.next({ ...currentLayout, controls });
         return uuid;
       },
+      removePanel: (idToRemove: string) => {
+        const currentLayout = layout$Ref.current.value;
+        const controls = { ...currentLayout.controls };
+        if (controls[idToRemove]) {
+          delete controls[idToRemove];
+          layout$Ref.current.next({ ...currentLayout, controls });
+        }
+        childrenApi?.removeChild(idToRemove);
+      },
     };
   }, [state, childrenApi]);
 

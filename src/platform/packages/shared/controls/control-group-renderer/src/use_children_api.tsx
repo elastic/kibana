@@ -90,6 +90,18 @@ export const useChildrenApi = (
           [child.uuid]: child,
         });
       },
+      removeChild: (id: string) => {
+        const children = { ...children$Ref.current.value };
+        if (children[id]) {
+          delete children[id];
+          children$Ref.current.next(children);
+        }
+        const currentChildState = { ...currentChildState$Ref.current.getValue() };
+        if (currentChildState[id]) {
+          delete currentChildState[id];
+          currentChildState$Ref.current.next(currentChildState);
+        }
+      },
       setSerializedStateForChild: (id: string, childState: SerializedPanelState<object>) => {
         currentChildState$Ref.current.getValue()[id] = childState;
       },

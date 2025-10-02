@@ -112,7 +112,6 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
       autoApplySelections: oldFormat.showApplySelections ?? true,
       ignoreParentSettings: oldFormat.ignoreParentSettings,
       editorConfig: {
-        hideWidthSettings: true,
         hideDataViewSelector: true,
         hideAdditionalSettings: true,
       },

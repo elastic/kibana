@@ -284,12 +284,11 @@ export function initializeLayoutManager(
   const removePanel = (uuid: string) => {
     const currentLayout = layout$.value;
     const panels = { ...currentLayout.panels };
+    const controls = { ...currentLayout.controls };
     if (panels[uuid]) {
       delete panels[uuid];
       layout$.next({ ...layout$.value, panels });
-    }
-    const controls = { ...currentLayout.controls };
-    if (controls[uuid]) {
+    } else if (controls[uuid]) {
       delete controls[uuid];
       layout$.next({ ...layout$.value, controls });
     }

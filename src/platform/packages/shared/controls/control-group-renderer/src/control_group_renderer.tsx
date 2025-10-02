@@ -8,25 +8,16 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import {
-  BehaviorSubject,
-  Observable,
-  Subject,
-  combineLatest,
-  distinctUntilChanged,
-  first,
-  map,
-} from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map, type Observable } from 'rxjs';
 
 import { ControlsRenderer } from '@kbn/controls-renderer';
+import type { StickyControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
-  SerializedPanelState,
   apiPublishesUnsavedChanges,
   useSearchApi,
   type ViewMode,
 } from '@kbn/presentation-publishing';
-import type { StickyControlState } from '@kbn/controls-schemas';
 
 import type {
   ControlGroupCreationOptions,
@@ -38,7 +29,6 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
-import { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -92,7 +82,6 @@ export const ControlGroupRenderer = ({
     if (!parentApi) return;
     return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
       map(([currentChildState, currentLayout]) => {
-        console.log({ currentChildState, currentLayout });
         const combinedState: ControlGroupRuntimeState['initialChildControlState'] = {};
         Object.keys(currentLayout.controls).forEach((id) => {
           combinedState[id] = {
@@ -107,11 +96,8 @@ export const ControlGroupRenderer = ({
 
   useEffect(() => {
     if (!parentApi || !currentState$) return;
-    currentState$.subscribe((test) => {
-      console.log({ test });
-    });
-    const reload$ = new Subject<void>();
 
+    const reload$ = new Subject<void>();
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
@@ -131,27 +117,12 @@ export const ControlGroupRenderer = ({
           if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
         });
       },
-      // untilInitialized: () => {
-      //   return new Promise((resolve) => {
-      //     combineLatest([parentApi.children$, parentApi.layout$])
-      //       .pipe(
-      //         map(([children, layout]) => {
-      //           // filter out panels that are in collapsed sections, since the APIs will never be available
-      //           const expectedChildCount = Object.values(layout.controls).length;
-      //           const currentChildCount = Object.keys(children).length;
-      //           return expectedChildCount !== currentChildCount;
-      //         }),
-      //         distinctUntilChanged(),
-      //         first()
-      //       )
-      //       .subscribe(() => {
-      //         console.log('RESOLVE');
-      //         resolve(true);
-      //       });
-      //   });
-      // },
+      getEditorConfig: () => {
+        console.log('editor config', initialState?.editorConfig);
+        return initialState?.editorConfig;
+      },
     } as unknown as ControlGroupRendererApi);
-  }, [parentApi, currentState$, onApiAvailable]);
+  }, [initialState?.editorConfig, parentApi, currentState$, onApiAvailable]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : <ControlsRenderer parentApi={parentApi} />;

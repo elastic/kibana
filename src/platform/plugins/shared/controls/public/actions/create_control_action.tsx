@@ -26,16 +26,14 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const parentDataViewId = apiPublishesDataViews(embeddable)
       ? embeddable.dataViews$.value?.[0]?.id
-      : undefined;
-
+      : embeddable?.getEditorConfig?.().defaultDataViewId;
+    console.log({ parentDataViewId });
     openDataControlEditor({
       initialState: {
         /** 
           TODO: We probably don't want to hardcode these - in the old version of controls,
           the last used values were persisted. Maybe we could use browser storage? :shrug:
         */
-        grow: true,
-        width: 'medium',
         dataViewId: parentDataViewId,
       },
       parentApi: embeddable,

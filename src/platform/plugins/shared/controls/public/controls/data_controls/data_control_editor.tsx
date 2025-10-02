@@ -30,6 +30,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
@@ -40,7 +41,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 
-import type { ControlGroupEditorConfig, DefaultDataControlState } from '../../../common';
+import type { ControlGroupEditorConfig } from '../../../common';
 import {
   CONTROL_MENU_TRIGGER,
   addControlMenuTrigger,
@@ -50,7 +51,7 @@ import { confirmDeleteControl } from '../../common';
 import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
-type DataControlEditorState = DefaultDataControlState & SerializedTitles;
+type DataControlEditorState = DataControlState & SerializedTitles;
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: Partial<State>;
@@ -209,13 +210,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   // TODO: get editor config from parent?
-  const editorConfig = useMemo<ControlGroupEditorConfig>(
-    () => ({
+  const editorConfig = useMemo<ControlGroupEditorConfig>(() => {
+    console.log('PARENT', parentApi);
+    return {
       hideAdditionalSettings: false,
-      hideWidthSettings: false,
-    }),
-    []
-  );
+      ...parentApi?.getEditorConfig?.(),
+    };
+  }, [parentApi]);
 
   const {
     loading: dataViewListLoading,
@@ -232,6 +233,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     },
     error: fieldListError,
   } = useAsync(async () => {
+    console.log({ editorState });
     if (!editorState.dataViewId) {
       return;
     }
@@ -278,39 +280,42 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm fullWidth>
-          <EuiFormRow
-            data-test-subj="control-editor-data-view-picker"
-            label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
-          >
-            {dataViewListError ? (
-              <EuiCallOut
-                color="danger"
-                iconType="error"
-                title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
-              >
-                <p>{dataViewListError.message}</p>
-              </EuiCallOut>
-            ) : (
-              <DataViewPicker
-                dataViews={dataViewListItems}
-                selectedDataViewId={editorState.dataViewId}
-                onChangeDataViewId={(newDataViewId) => {
-                  setEditorState({ ...editorState, dataViewId: newDataViewId });
-                  setSelectedControlType(undefined);
-                }}
-                trigger={{
-                  label:
-                    selectedDataView?.getName() ??
-                    DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
-                }}
-                selectableProps={{ isLoading: dataViewListLoading }}
-              />
-            )}
-          </EuiFormRow>
-
+          {!editorConfig?.hideDataViewSelector && (
+            <EuiFormRow
+              data-test-subj="control-editor-data-view-picker"
+              label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
+            >
+              {dataViewListError ? (
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="error"
+                  title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
+                >
+                  <p>{dataViewListError.message}</p>
+                </EuiCallOut>
+              ) : (
+                <DataViewPicker
+                  dataViews={dataViewListItems}
+                  selectedDataViewId={editorState.dataViewId}
+                  onChangeDataViewId={(newDataViewId) => {
+                    setEditorState({ ...editorState, dataViewId: newDataViewId });
+                    setSelectedControlType(undefined);
+                  }}
+                  trigger={{
+                    label:
+                      selectedDataView?.getName() ??
+                      DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
+                  }}
+                  selectableProps={{ isLoading: dataViewListLoading }}
+                />
+              )}
+            </EuiFormRow>
+          )}
           <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
             {fieldListError ? (
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 iconType="error"
                 title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}

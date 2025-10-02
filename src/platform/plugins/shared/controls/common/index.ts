@@ -11,8 +11,8 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 // TODO: We will need some way of getting this from the parent
 export interface ControlGroupEditorConfig {
+  defaultDataViewId?: string;
   hideDataViewSelector?: boolean;
-  hideWidthSettings?: boolean;
   hideAdditionalSettings?: boolean;
   fieldFilterPredicate?: (f: DataViewField) => boolean;
 }

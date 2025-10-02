@@ -109,7 +109,6 @@ export const ControlsContent = ({
 
       subscriptions.current.add(
         controlGroup.getInput$().subscribe(({ initialChildControlState }) => {
-          console.log({ initialChildControlState });
           setControlPanels(initialChildControlState);
         })
       );

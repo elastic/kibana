@@ -67,7 +67,6 @@ export interface FilterGroupProps {
   /**
    * The control embeddable renderer
    */
-  ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;

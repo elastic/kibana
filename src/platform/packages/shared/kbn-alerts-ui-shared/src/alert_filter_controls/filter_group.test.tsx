@@ -11,11 +11,11 @@ import { FilterGroup } from './filter_group';
 import type { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
-} from '@kbn/controls-plugin/public';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+} from '@kbn/control-group-renderer';
 import type { ControlGroupOutput } from './mocks/data';
 import { initialInputData, sampleOutputData } from './mocks/data';
 import {
@@ -37,10 +37,6 @@ import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FilterGroupProps } from './types';
 
-const ruleTypeIds = ['.es-query'];
-const spaceId = 'test-space-id';
-const LOCAL_STORAGE_KEY = `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`;
-
 const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newState: ControlGroupRuntimeState) => {
@@ -54,12 +50,21 @@ const updateControlGroupOutputMock = (newOutput: ControlGroupOutput) => {
   controlGroupFilterOutputMock$.next(newOutput.filters);
 };
 
-const MockedControlGroupRenderer = getMockedControlGroupRenderer(
+const mockControlGroupRenderer = getMockedControlGroupRenderer(
   controlGroupMock as unknown as ControlGroupRendererApi
 );
 
+jest.mock('@kbn/control-group-renderer', () => ({
+  ...jest.requireActual('@kbn/control-group-renderer'),
+  ControlGroupRenderer: jest.fn().mockImplementation((props) => mockControlGroupRenderer(props)),
+}));
+
 const onFilterChangeMock = jest.fn();
 const onInitMock = jest.fn();
+
+const ruleTypeIds = ['.es-query'];
+const spaceId = 'test-space-id';
+const LOCAL_STORAGE_KEY = `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`;
 
 const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
   return (
@@ -74,10 +79,8 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
           title: 'Host',
         },
       ]}
-      chainingSystem="HIERARCHICAL"
       onFiltersChange={onFilterChangeMock}
       onInit={onInitMock}
-      ControlGroupRenderer={MockedControlGroupRenderer}
       Storage={Storage}
       {...props}
     />

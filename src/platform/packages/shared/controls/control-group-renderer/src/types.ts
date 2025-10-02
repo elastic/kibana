@@ -59,7 +59,6 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
-  hideWidthSettings?: boolean;
   hideAdditionalSettings?: boolean;
   fieldFilterPredicate?: FieldFilterPredicate;
 }
@@ -67,12 +66,6 @@ export interface ControlGroupEditorConfig {
 export interface ControlGroupRuntimeState {
   initialChildControlState: { [id: string]: StickyControlState & { order: number } };
   ignoreParentSettings?: StoredControlGroupInput['ignoreParentSettings']; // these will be translated to panel-level settings
-
-  /*
-   * Configuration settings that are never persisted
-   * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
-   */
-  editorConfig?: ControlGroupEditorConfig;
 }
 
 export interface ControlGroupCreationOptions {

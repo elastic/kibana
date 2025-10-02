@@ -12,13 +12,11 @@ import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
+import type { DataControlState } from '@kbn/controls-schemas';
 
-import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
 
-export const openDataControlEditor = <
-  State extends DefaultDataControlState = DefaultDataControlState
->({
+export const openDataControlEditor = <State extends DataControlState>({
   initialState,
   parentApi,
   controlId,

@@ -8,19 +8,19 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-  ControlGroupStateBuilder,
+import {
+  ControlGroupRenderer,
+  type ControlGroupCreationOptions,
+  type ControlGroupRendererProps,
+  type ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+  type ControlGroupStateBuilder,
 } from '@kbn/control-group-renderer';
-import type {
-  ControlGroupCreationOptions,
-  ControlGroupRendererProps,
-} from '@kbn/control-group-renderer/src';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -54,15 +54,19 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     controlsUrlState,
     setControlsUrlState,
     maxControls = Infinity,
-    ControlGroupRenderer,
     Storage,
     ruleTypeIds,
     storageKey,
     disableLocalStorageSync = false,
   } = props;
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
-
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
+
+  const {
+    services: { uiActions },
+  } = useKibana<{
+    uiActions: UiActionsStart;
+  }>();
 
   const defaultControlsObj = useMemo(
     () =>
@@ -148,7 +152,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       if (isEqual(getStoredControlState(), newState)) {
         return;
       }
-      console.log({ newState, oldState: getStoredControlState() });
       if (
         !isEqual(
           newState?.initialChildControlState,
@@ -224,7 +227,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     }
 
     const inputSubscription = controlGroup.getInput$().subscribe((test) => {
-      console.log({ test });
       handleStateUpdates(test);
     });
 
@@ -319,7 +321,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialState,
         editorConfig: {
-          hideWidthSettings: true,
+          defaultDataViewId: dataViewId,
           hideDataViewSelector: true,
           hideAdditionalSettings: true,
           fieldFilterPredicate: (f) => f.type !== 'number',
@@ -407,11 +409,16 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   //   [defaultControlsObj]
   // );
 
-  // const addControlsHandler = useCallback(() => {
-  //   controlGroup?.openAddDataControlFlyout({
-  //     controlStateTransform: newControlStateTransform,
-  //   });
-  // }, [controlGroup, newControlStateTransform]);
+  const addControlsHandler = useCallback(async () => {
+    const action = await uiActions.getAction('createControl');
+    console.log('action', action);
+
+    action.execute({ embeddable: controlGroup });
+
+    // controlGroup?.openAddDataControlFlyout({
+    //   controlStateTransform: newControlStateTransform,
+    // });
+  }, [controlGroup, uiActions]);
 
   if (!spaceId) {
     return <FilterGroupLoading />;
@@ -454,7 +461,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           ) : null}
           {!isViewMode && !showFiltersChangedBanner ? (
             <>
-              {/* <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false}>
                 <AddControl
                   onClick={addControlsHandler}
                   isDisabled={
@@ -463,7 +470,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                       maxControls
                   }
                 />
-              </EuiFlexItem> */}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SaveControls onClick={saveChangesHandler} />
               </EuiFlexItem>
