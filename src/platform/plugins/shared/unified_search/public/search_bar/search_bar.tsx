@@ -550,6 +550,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             name,
             link: (chunks: React.ReactNode) => (
               <EuiLink
+                data-test-subj="backgroundSearchToastLink"
                 onClick={() => {
                   this.services.notifications.toasts.remove(toast);
                   this.services.data.search.showSearchSessionsFlyout({
