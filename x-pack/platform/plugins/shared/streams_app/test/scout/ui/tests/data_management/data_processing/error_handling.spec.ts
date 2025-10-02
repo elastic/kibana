@@ -59,6 +59,7 @@ test.describe(
         await route.continue();
       });
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);

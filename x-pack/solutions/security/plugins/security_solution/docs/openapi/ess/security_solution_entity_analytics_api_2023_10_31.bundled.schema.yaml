@@ -410,6 +410,21 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: >-
+                          Maximum number of privileged users allowed to be
+                          monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -983,6 +998,10 @@ paths:
 
         > Due to technical limitations, not all updates are guaranteed to appear
         in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time
+        for a document to be present in the  > final index depends on the entity
+        store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -1012,8 +1031,10 @@ paths:
           description: Entity updated or created
         '403':
           description: Operation on a restricted field
-        '404':
-          description: Entity not found
+        '409':
+          description: >-
+            Conflict. The entity was updated while another update was happening
+            in ElasticSearch
         '503':
           description: >-
             Operation on an uninitialized Engine or in a cluster without CRUD
@@ -1176,6 +1197,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -1973,14 +1996,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
           type: string
@@ -2025,6 +2041,19 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:

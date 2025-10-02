@@ -620,8 +620,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -942,6 +940,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",

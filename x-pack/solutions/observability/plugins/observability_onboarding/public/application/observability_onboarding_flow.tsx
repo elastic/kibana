@@ -17,9 +17,11 @@ import {
   OtelLogsPage,
   OtelKubernetesPage,
   FirehosePage,
+  OtelApmPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
+import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ export function ObservabilityOnboardingFlow() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -55,6 +59,11 @@ export function ObservabilityOnboardingFlow() {
         {(isCloud || isDev) && (
           <Route path="/firehose">
             <FirehosePage />
+          </Route>
+        )}
+        {isManagedOtlpServiceAvailable && (
+          <Route path="/otel-apm">
+            <OtelApmPage />
           </Route>
         )}
         <Route>

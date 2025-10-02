@@ -7,10 +7,11 @@ exports[`Both modes should render the side navigation 1`] = `
     data-test-subj="navigation-root"
   >
     <div
-      class="side-nav css-1ww1r6i-SideNav"
+      class="side-nav css-1j51av1-SideNav"
     >
       <div
         class="css-1aomi1g-wrapperStyles"
+        data-test-subj="side-nav-logo-wrapper"
       >
         <a
           aria-label="Solution homepage"
@@ -30,19 +31,19 @@ exports[`Both modes should render the side navigation 1`] = `
             />
           </div>
           <div
-            class="euiText emotion-euiText-xs-euiTextAlign-center-horizontalStyles-content"
+            class="euiText emotion-euiText-xs-euiTextAlign-center-verticalStyles-content"
           >
             Solution
           </div>
         </a>
       </div>
       <nav
-        aria-label="Main navigation"
+        aria-label="Main"
         class="css-8a235g-SideNavPrimaryMenu"
         id="primary-navigation"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -55,6 +56,7 @@ exports[`Both modes should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-dashboards"
               href="/dashboards"
               label="Dashboards"
+              tabindex="0"
             >
               <div
                 class="iconWrapper"
@@ -66,7 +68,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Dashboards
               </div>
@@ -74,7 +76,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -87,6 +89,7 @@ exports[`Both modes should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-discover"
               href="/discover"
               label="Discover"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"
@@ -98,7 +101,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Discover
               </div>
@@ -106,7 +109,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -120,6 +123,7 @@ exports[`Both modes should render the side navigation 1`] = `
               data-test-subj="sideNavPrimaryMenuItem-apps_overview"
               href="/apps_overview"
               label="Apps"
+              tabindex="-1"
             >
               <div
                 class="iconWrapper"
@@ -131,7 +135,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-horizontalStyles-content"
+                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-verticalStyles-content"
               >
                 Apps
               </div>
@@ -140,11 +144,11 @@ exports[`Both modes should render the side navigation 1`] = `
         </div>
       </nav>
       <footer
-        aria-label="Side navigation footer"
+        aria-label="Side navigation"
         class="css-4kpxr2-SideNavFooter"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -173,7 +177,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -202,7 +206,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -232,7 +236,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -261,7 +265,7 @@ exports[`Both modes should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
