@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { getToolResultId } from '@kbn/onechat-server/tools';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),

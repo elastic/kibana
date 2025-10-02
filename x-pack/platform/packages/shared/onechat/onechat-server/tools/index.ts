@@ -13,3 +13,4 @@ export type {
   StaticIndexSearchTool,
 } from './builtin';
 export type { ToolHandlerFn, ToolHandlerReturn, ToolHandlerContext } from './handler';
+export { getToolResultId } from './utils';

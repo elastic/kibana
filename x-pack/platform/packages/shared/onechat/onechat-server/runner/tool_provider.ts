@@ -9,11 +9,29 @@ import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import { randomInt } from 'crypto';
 import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 
 /**
- * Onechat tool, as exposed by the onechat tool registry.
+ * Common interface shared across all tool providers.
+ */
+export interface ToolProvider {
+  /**
+   * Check if a tool is available in the provider
+   */
+  has(options: ToolProviderHasOptions): Promise<boolean>;
+  /**
+   * Retrieve a tool based on its identifier.
+   * If not found, will throw a toolNotFound error.
+   */
+  get(options: ToolProviderGetOptions): Promise<ExecutableTool>;
+  /**
+   * List all tools based on the provided filters
+   */
+  list(options: ToolProviderListOptions): Promise<ExecutableTool[]>;
+}
+
+/**
+ * Onechat tool, as exposed by tool providers.
  */
 export interface ExecutableTool<
   TConfig extends object = {},
@@ -59,25 +77,6 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>> = (
 ) => Promise<RunToolReturn>;
 
 /**
- * Common interface shared across all tool providers.
- */
-export interface ToolProvider {
-  /**
-   * Check if a tool is available in the provider
-   */
-  has(options: ToolProviderHasOptions): Promise<boolean>;
-  /**
-   * Retrieve a tool based on its identifier.
-   * If not found, will throw a toolNotFound error.
-   */
-  get(options: ToolProviderGetOptions): Promise<ExecutableTool>;
-  /**
-   * List all tools based on the provided filters
-   */
-  list(options: ToolProviderListOptions): Promise<ExecutableTool[]>;
-}
-
-/**
  * Options for {@link ToolProvider.has}
  */
 export interface ToolProviderHasOptions {
@@ -98,9 +97,4 @@ export interface ToolProviderGetOptions {
  */
 export interface ToolProviderListOptions {
   request: KibanaRequest;
-}
-
-const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-export function getToolResultId(len = 4): string {
-  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
 }
