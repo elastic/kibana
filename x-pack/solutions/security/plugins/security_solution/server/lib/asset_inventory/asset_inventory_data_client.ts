@@ -19,7 +19,6 @@ import { installDataView } from './saved_objects/data_view';
 import {
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   ASSET_INVENTORY_DATA_VIEW_NAME,
-  ASSET_INVENTORY_GENERIC_INDEX_PREFIX,
   ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
@@ -260,9 +259,9 @@ export class AssetInventoryDataClient {
 
     // Determine the ready status based on the presence of generic documents
     try {
-      const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
+      const hasAnyEntitiesDocuments = await this.hasAnyEntitiesDocuments(secSolutionContext);
       // check if users don't have entity store privileges but generic documents are present
-      if (hasGenericDocuments) {
+      if (hasAnyEntitiesDocuments) {
         try {
           await this.installAssetInventoryDataView(secSolutionContext);
         } catch (error) {
@@ -271,10 +270,10 @@ export class AssetInventoryDataClient {
         return { status: ASSET_INVENTORY_STATUS.READY };
       }
     } catch (error) {
-      logger.error(`Error checking for generic documents: ${error.message}`);
+      logger.error(`Error checking for the presence of entities documents: ${error.message}`);
     }
 
-    // In case there are no generic documents, Entity Store will need to be enabled.
+    // In case there are no entities documents, Entity Store will need to be enabled.
     // Check if the user has the required privileges to enable the entity store.
     if (!entityStorePrivileges.has_all_required) {
       return {
@@ -290,7 +289,7 @@ export class AssetInventoryDataClient {
 
     const entityEngineStatus = entityStoreStatus.status;
 
-    // Determine the asset inventory status based on the entity engine status
+    // Determine the asset inventory status based on the entity engine status and the presence of entities documents
     if (entityEngineStatus === 'not_installed') {
       return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
@@ -359,15 +358,17 @@ export class AssetInventoryDataClient {
     });
   }
 
-  private async hasGenericDocuments(secSolutionContext: SecuritySolutionApiRequestHandlerContext) {
+  private async hasAnyEntitiesDocuments(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext
+  ) {
     const elasticsearchClient = secSolutionContext.core.elasticsearch.client;
 
     const spaceId = secSolutionContext.getSpaceId();
 
-    const genericIndexCurrentSpace = `${ASSET_INVENTORY_GENERIC_INDEX_PREFIX}${spaceId}`;
+    const entitiesIndexCurrentSpace = `${ASSET_INVENTORY_INDEX_PATTERN}${spaceId}`;
 
     const response = await elasticsearchClient.asInternalUser.count({
-      index: genericIndexCurrentSpace,
+      index: entitiesIndexCurrentSpace,
     });
 
     return response.count > 0;
