@@ -8,7 +8,7 @@
 import { Streams } from '@kbn/streams-schema';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { hasChangedRetention } from './utils';
+import { hasChangedRetention, hasProcessingSteps, hasFieldOverrides } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
 
@@ -79,16 +79,6 @@ function createFetchFunction(logger: Logger, getReader: () => Promise<StreamsUsa
       },
       wiredStreamsCount: wiredCount,
     };
-  }
-
-  function hasProcessingSteps(definition: Streams.ClassicStream.Definition): boolean {
-    const processors = definition.ingest?.processing?.steps as unknown[] | undefined;
-    return Array.isArray(processors) && processors.length > 0;
-  }
-
-  function hasFieldOverrides(definition: Streams.ClassicStream.Definition): boolean {
-    const fieldOverrides = definition.ingest?.classic?.field_overrides ?? {};
-    return fieldOverrides && Object.keys(fieldOverrides).length > 0;
   }
 }
 

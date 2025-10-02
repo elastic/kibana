@@ -6,7 +6,7 @@
  */
 
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isInheritLifecycle } from '@kbn/streams-schema';
+import { isInheritLifecycle, type Streams } from '@kbn/streams-schema';
 
 /**
  * If stream does not have a `IngestStreamLifecycleInherit`, retention has been changed
@@ -16,23 +16,17 @@ export function hasChangedRetention(lifecycle: IngestStreamLifecycle | undefined
 }
 
 /**
- * Calculates percentiles from an array of numbers
- * @param arr - Array of numbers
- * @param p - Array of percentile values (0-100)
- * @returns Array of percentile values
+ * Returns true if a Classic stream has one or more processing steps
  */
-export function percentiles(arr: number[], p: number[]): number[] {
-  const sorted = arr.slice().sort((a, b) => a - b);
-  return p.map((percent) => {
-    if (sorted.length === 0) {
-      return 0;
-    }
-    const pos = (sorted.length - 1) * (percent / 100);
-    const base = Math.floor(pos);
-    const rest = pos - base;
-    if (sorted[base + 1] !== undefined) {
-      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-    }
-    return sorted[base];
-  });
+export function hasProcessingSteps(definition: Streams.ClassicStream.Definition): boolean {
+  const processors = definition.ingest?.processing?.steps as unknown[] | undefined;
+  return Array.isArray(processors) && processors.length > 0;
+}
+
+/**
+ * Returns true if a Classic stream defines any field overrides
+ */
+export function hasFieldOverrides(definition: Streams.ClassicStream.Definition): boolean {
+  const fieldOverrides = definition.ingest?.classic?.field_overrides ?? {};
+  return fieldOverrides && Object.keys(fieldOverrides).length > 0;
 }
