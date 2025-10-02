@@ -7,7 +7,6 @@
 
 import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
-import { baseFields } from '../../streams/component_templates/logs_layer';
 
 describe('content pack tree helpers', () => {
   describe('asTree', () => {
