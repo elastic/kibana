@@ -13,13 +13,9 @@ import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
+import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
-
 /**
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
  */
@@ -47,12 +43,6 @@ export const useLoadConnectors = ({
     }
   }, [inferenceEnabled]);
 
-  const defaultAiConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultAiConnectorOnly = settings.client.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
   return useQuery(
     QUERY_KEY,
     async () => {
@@ -74,17 +64,10 @@ export const useLoadConnectors = ({
         return [];
       });
 
-      const availableConnectors = allAiConnectors.filter((connector) => {
-        if (defaultAiConnectorOnly) {
-          return connector.id === defaultAiConnectorId;
-        }
-        return true;
+      return getAvailableAiConnectors({
+        allAiConnectors,
+        settings,
       });
-
-      if (availableConnectors.length === 0) {
-        return allAiConnectors;
-      }
-      return availableConnectors;
     },
     {
       retry: false,
