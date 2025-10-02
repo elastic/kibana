@@ -71,7 +71,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, runIndividualStep, testWorkflow } = useWorkflowActions();
+  const { updateWorkflow, runIndividualStep, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
