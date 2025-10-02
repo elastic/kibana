@@ -60,6 +60,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorIdSelected,
     onConnectorSelected,
     stats = null,
+    fullWidth = false,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
