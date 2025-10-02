@@ -201,7 +201,7 @@ describe('MigrateAgentFlyout', () => {
 
     // Check that the warning message includes containerized agents
     expect(alertPanel).toHaveTextContent(
-      'tamper protected, Fleet Server agents, containerized agents, or unsupported version'
+      'tamper-protected agents, Fleet Server agents, containerized agents, or agents on an unsupported version'
     );
   });
 });
