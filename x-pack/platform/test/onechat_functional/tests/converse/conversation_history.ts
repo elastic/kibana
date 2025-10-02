@@ -6,6 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 const APP_ID = 'agent_builder';
@@ -35,8 +38,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const es = getService('es');
+  const log = getService('log');
+  const supertest = getService('supertest');
 
   describe('Conversation History', function () {
+    let llmProxy: LlmProxy;
+
+    before(async () => {
+      llmProxy = await createLlmProxy(log);
+      await createConnector(llmProxy, supertest);
+    });
+
+    after(async () => {
+      llmProxy.close();
+      await deleteConnectors(supertest);
+    });
+
     beforeEach(async () => {
       const bulkBody = MOCKED_CONVERSATIONS.flatMap((conv) => [
         { index: { _index: '.chat-conversations', _id: conv.id } },
@@ -131,6 +148,67 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(conversationText).not.to.contain('Conversation1');
         expect(conversationText).to.contain('Conversation2');
         expect(conversationText).to.contain('Conversation3');
+      });
+    });
+
+    it('can continue chatting in an existing conversation', async () => {
+      const MOCKED_INPUT = 'hello conversation 2';
+      const MOCKED_RESPONSE = 'responding from conversation 2';
+
+      await common.navigateToApp(APP_ID, { path: 'conversations/new' });
+
+      // Wait for conversations to load and assert all 3 are present
+      await retry.try(async () => {
+        const conversationList = await testSubjects.find('agentBuilderConversationList');
+        const conversationText = await conversationList.getVisibleText();
+        expect(conversationText).to.contain('Conversation1');
+        expect(conversationText).to.contain('Conversation2');
+        expect(conversationText).to.contain('Conversation3');
+      });
+
+      // Select Conversation2
+      const conv2Button = await testSubjects.find('conversationItem-conv-2');
+      await conv2Button.click();
+
+      // Wait for Conversation2 to load and assert its content
+      await retry.try(async () => {
+        const titleElement = await testSubjects.find('agentBuilderConversationTitle');
+        const titleText = await titleElement.getVisibleText();
+        expect(titleText).to.contain('Conversation2');
+
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain('This is the response for conversation 2');
+      });
+
+      // Set up LLM proxy to respond to the new message
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = messages[messages.length - 1]?.content as string;
+          return lastMessage.includes(MOCKED_INPUT);
+        },
+        response: MOCKED_RESPONSE,
+      });
+
+      // Type and send the new message
+      const inputField = await testSubjects.find('onechatAppConversationInputFormTextArea');
+      await inputField.click();
+      await inputField.type(MOCKED_INPUT);
+
+      const submitTextButton = await testSubjects.find(
+        'onechatAppConversationInputFormSubmitButton'
+      );
+      await submitTextButton.click();
+
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      // Wait for the new message and response to appear
+      await retry.try(async () => {
+        // Find all round responses and get the last one (most recent)
+        const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
+        const lastResponseElement = responseElements[responseElements.length - 1];
+        const responseText = await lastResponseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
     });
   });
