@@ -24,7 +24,7 @@ test.describe('Indices - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 });
 
-test.describe('Indices - Privileged User', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Indices - Privileged User', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
