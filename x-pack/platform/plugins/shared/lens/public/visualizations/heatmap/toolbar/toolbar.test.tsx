@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { HeatmapPopoverToolbar } from './popover_toolbar';
+import { HeatmapPopoverToolbar } from './toolbar';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
