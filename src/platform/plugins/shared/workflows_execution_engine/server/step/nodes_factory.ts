@@ -31,7 +31,6 @@ import {
   isEnterStepTimeoutZone,
   isExitStepTimeoutZone,
 } from '@kbn/workflows/graph';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { NodeImplementation } from './node_implementation';
 // Import schema and inferred types
 import type { ConnectorExecutor } from '../connector_executor';
@@ -68,6 +67,7 @@ import {
 import { WaitStepImpl } from './wait_step/wait_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 export class NodesFactory {
   constructor(
@@ -80,8 +80,8 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph
   ) {}
 
-  public create(contextManager: WorkflowContextManager): NodeImplementation {
-    const node = contextManager.node;
+  public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
+    const node = stepExecutionRuntime.node;
     const stepLogger = this.workflowLogger.createStepLogger(
       this.workflowRuntime.getCurrentStepExecutionId(),
       node.stepId,
@@ -97,7 +97,7 @@ export class NodesFactory {
       });
       return new ElasticsearchActionStepImpl(
         node as any,
-        contextManager,
+        stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
       );
@@ -110,7 +110,7 @@ export class NodesFactory {
       });
       return new KibanaActionStepImpl(
         node as any,
-        contextManager,
+        stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
       );
@@ -121,7 +121,7 @@ export class NodesFactory {
         return new EnterForeachNodeImpl(
           node as EnterForeachNode,
           this.workflowRuntime,
-          contextManager,
+          stepExecutionRuntime,
           stepLogger
         );
       case 'exit-foreach':
@@ -165,7 +165,7 @@ export class NodesFactory {
             node,
             this.workflowRuntime,
             this.workflowExecutionState,
-            contextManager
+            stepExecutionRuntime
           );
         }
 
@@ -174,7 +174,7 @@ export class NodesFactory {
             node,
             this.workflowRuntime,
             this.workflowExecutionState,
-            contextManager
+            stepExecutionRuntime
           );
         }
       case 'exit-timeout-zone':
@@ -190,7 +190,7 @@ export class NodesFactory {
           node as EnterIfNode,
           this.workflowRuntime,
           this.workflowGraph,
-          contextManager,
+          stepExecutionRuntime,
           stepLogger
         );
       case 'enter-then-branch':
@@ -211,7 +211,7 @@ export class NodesFactory {
       case 'wait':
         return new WaitStepImpl(
           node as any,
-          contextManager,
+          stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
           this.workflowTaskManager
@@ -220,7 +220,7 @@ export class NodesFactory {
         // Default atomic step (connector-based)
         return new AtomicStepImpl(
           node as AtomicGraphNode,
-          contextManager,
+          stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
           stepLogger
@@ -228,7 +228,7 @@ export class NodesFactory {
       case 'http':
         return new HttpStepImpl(
           node as HttpGraphNode,
-          contextManager,
+          stepExecutionRuntime,
           stepLogger,
           this.urlValidator,
           this.workflowRuntime

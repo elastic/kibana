@@ -13,14 +13,14 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 
 import { parseDuration } from '../../../utils';
-import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private wfExecutionState: WorkflowExecutionState,
-    private stepContext: WorkflowContextManager
+    private stepContext: StepExecutionRuntime
   ) {}
 
   public async run(): Promise<void> {
@@ -29,7 +29,7 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public monitor(monitoredContext: WorkflowContextManager): Promise<void> {
+  public monitor(monitoredContext: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
     const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();

@@ -8,10 +8,10 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
 import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
+import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -41,20 +41,21 @@ import { catchError } from './catch_error';
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
   const currentNode = params.workflowRuntime.getCurrentNode();
-  const stepContext = new WorkflowContextManager({
+  const stepExecutionRuntime = createStepExecutionRuntime({
     workflowExecutionGraph: params.workflowExecutionGraph,
     workflowExecutionState: params.workflowExecutionState,
+    workflowLogger: params.workflowLogger,
     esClient: params.esClient,
     fakeRequest: params.fakeRequest,
     coreStart: params.coreStart,
     node: currentNode as GraphNodeUnion,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
-  const nodeImplementation = params.nodesFactory.create(stepContext);
+  const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
   const monitorAbortController = new AbortController();
 
   // The order of these promises is important - we want to stop monitoring
-  const runMonitorPromise = runStackMonitor(params, stepContext, monitorAbortController);
+  const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
   let runStepPromise: Promise<void> = Promise.resolve();
 
   // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
@@ -69,7 +70,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     params.workflowRuntime.setWorkflowError(error);
   } finally {
     monitorAbortController.abort();
-    await catchError(params, stepContext);
+    await catchError(params, stepExecutionRuntime);
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }

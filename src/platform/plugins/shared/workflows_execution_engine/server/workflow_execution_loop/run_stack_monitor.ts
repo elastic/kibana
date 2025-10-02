@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { MonitorableNode } from '../step/node_implementation';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 
 /**
  * Runs a monitoring loop that continuously checks workflow execution state and invokes
@@ -50,7 +50,7 @@ import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
  * - Cleanup resources during execution
  *
  *
- * @param monitoredContext - The context manager for the step being monitored,
+ * @param monitoredStepExecutionRuntime - The context manager for the step being monitored,
  *   passed to monitor() methods for context-aware monitoring
  *
  * @param monitorAbortController - AbortController used to signal when monitoring
@@ -66,7 +66,7 @@ import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
  */
 export async function runStackMonitor(
   params: WorkflowExecutionLoopParams,
-  monitoredContext: WorkflowContextManager,
+  monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController: AbortController
 ): Promise<void> {
   const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
@@ -75,8 +75,8 @@ export async function runStackMonitor(
     await cancelWorkflowIfRequested(
       params.workflowExecutionRepository,
       params.workflowExecutionState,
-      monitoredContext,
-      monitoredContext.abortController
+      monitoredStepExecutionRuntime,
+      monitoredStepExecutionRuntime.abortController
     );
 
     let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
@@ -87,20 +87,21 @@ export async function runStackMonitor(
       nodeStack = nodeStack.exitScope();
 
       const nodeImplementation = params.nodesFactory.create(
-        new WorkflowContextManager({
+        createStepExecutionRuntime({
           workflowExecutionGraph: params.workflowExecutionGraph,
           workflowExecutionState: params.workflowExecutionState,
+          workflowLogger: params.workflowLogger,
           esClient: params.esClient,
           fakeRequest: params.fakeRequest,
           coreStart: params.coreStart,
-          node: node as GraphNodeUnion,
-          stackFrames: nodeStack.stackFrames,
+          node,
+          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
         })
       );
 
       if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
         const monitored = nodeImplementation as unknown as MonitorableNode;
-        await monitored.monitor(monitoredContext);
+        await monitored.monitor(monitoredStepExecutionRuntime);
       }
     }
 

@@ -8,7 +8,7 @@
  */
 
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './node_implementation';
@@ -23,16 +23,16 @@ export interface KibanaActionStep extends BaseStep {
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
   constructor(
     step: KibanaActionStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, undefined, workflowRuntime);
+    super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
   public getInput() {
     // Get current context for templating
-    const context = this.contextManager.getContext();
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
     return this.renderObjectTemplate(stepWith, context);
@@ -114,7 +114,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
   private getKibanaUrl(): string {
     // Get Kibana URL from CoreStart if available
-    const coreStart = this.contextManager.getCoreStart();
+    const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     if (coreStart?.http?.basePath?.publicBaseUrl) {
       return coreStart.http.basePath.publicBaseUrl;
     }
@@ -130,7 +130,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     };
 
     // Get fakeRequest for authentication (created by Task Manager from taskInstance.apiKey)
-    const fakeRequest = this.contextManager.getFakeRequest();
+    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
     if (fakeRequest?.headers?.authorization) {
       // Use API key from fakeRequest if available
       headers.Authorization = fakeRequest.headers.authorization.toString();

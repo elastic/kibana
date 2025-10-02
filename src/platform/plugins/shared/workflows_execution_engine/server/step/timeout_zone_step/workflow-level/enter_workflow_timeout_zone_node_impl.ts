@@ -14,14 +14,14 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 
 import { buildStepExecutionId, parseDuration } from '../../../utils';
-import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private wfExecutionState: WorkflowExecutionState,
-    private stepContext: WorkflowContextManager
+    private stepContext: StepExecutionRuntime
   ) {}
 
   public async run(): Promise<void> {
@@ -30,7 +30,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public monitor(monitoredContext: WorkflowContextManager): Promise<void> {
+  public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
     const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
@@ -38,14 +38,14 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
     if (currentStepDuration > timeoutMs) {
-      monitoredContext.abortController.abort();
+      monitoredStepExecutionRuntime.abortController.abort();
 
       this.wfExecutionState.upsertStep({
-        id: monitoredContext.stepExecutionId,
+        id: monitoredStepExecutionRuntime.stepExecutionId,
         status: ExecutionStatus.FAILED,
       });
 
-      let stack = monitoredContext.scopeStack;
+      let stack = monitoredStepExecutionRuntime.scopeStack;
 
       while (!stack.isEmpty()) {
         const currentScope = stack.getCurrentScope()!;

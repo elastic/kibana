@@ -10,8 +10,9 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
+import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy
@@ -51,12 +52,12 @@ import type { WorkflowExecutionLoopParams } from './types';
  *   - fakeRequest: Request context for service interactions
  *   - coreStart: Kibana core services
  *
- * @param failedStepContext - The context manager for the step that originally failed,
+ * @param failedStepExecutionRuntime - The context manager for the step that originally failed,
  *   used to update the step's status and identify the failure point
  */
 export async function catchError(
   params: WorkflowExecutionLoopParams,
-  failedStepContext: WorkflowContextManager
+  failedStepExecutionRuntime: StepExecutionRuntime
 ) {
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
@@ -70,9 +71,11 @@ export async function catchError(
       return;
     }
 
-    if (params.workflowExecutionState.getStepExecution(failedStepContext.stepExecutionId)) {
+    if (
+      params.workflowExecutionState.getStepExecution(failedStepExecutionRuntime.stepExecutionId)
+    ) {
       await params.workflowExecutionState.upsertStep({
-        id: failedStepContext.stepExecutionId,
+        id: failedStepExecutionRuntime.stepExecutionId,
         status: ExecutionStatus.FAILED,
         error: params.workflowRuntime.getWorkflowExecution().error,
       });
@@ -94,9 +97,10 @@ export async function catchError(
 
       if (node) {
         params.workflowRuntime.navigateToNode(node.id);
-        const stepContext = new WorkflowContextManager({
+        const stepContext = createStepExecutionRuntime({
           workflowExecutionGraph: params.workflowExecutionGraph,
           workflowExecutionState: params.workflowExecutionState,
+          workflowLogger: params.workflowLogger,
           esClient: params.esClient,
           fakeRequest: params.fakeRequest,
           coreStart: params.coreStart,

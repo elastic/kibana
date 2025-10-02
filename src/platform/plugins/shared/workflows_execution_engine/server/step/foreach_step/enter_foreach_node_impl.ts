@@ -11,13 +11,13 @@ import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private contextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
@@ -100,7 +100,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     try {
       items = JSON.parse(this.node.configuration.foreach);
     } catch (error) {
-      const { value, pathExists } = this.contextManager.readContextPath(
+      const { value, pathExists } = this.stepExecutionRuntime.contextManager.readContextPath(
         this.node.configuration.foreach
       );
 
