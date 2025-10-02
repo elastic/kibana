@@ -8,7 +8,7 @@
 import { intersectionBy } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
-import { type FieldDefinition } from '@kbn/streams-schema';
+import { isRoot, type FieldDefinition } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
 
@@ -75,6 +75,10 @@ export function getFields(
   include: ContentPackIncludedObjects
 ): FieldDefinition {
   if (isIncludeAll(include) || include.objects.mappings) {
+    if (isRoot(entry.name)) {
+      return entry.request.stream.ingest.wired.fields;
+    }
+
     return Object.keys(entry.request.stream.ingest.wired.fields)
       .filter((key) => !baseFields[key])
       .reduce((fields, key) => {

@@ -150,6 +150,33 @@ describe('content pack tree helpers', () => {
         })
       ).toThrow('Stream [root.child1] does not define query [foo]');
     });
+
+    it('keeps base fields for the root stream', () => {
+      const tree = asTree({
+        root: 'logs',
+        streams: [testContentPackEntry({ name: 'logs', fields: baseFields })],
+        include: { objects: { all: {} } },
+      });
+
+      expect(tree.request.stream.ingest.wired.fields).toEqual(baseFields);
+    });
+
+    it('excludes base fields for child streams', () => {
+      const tree = asTree({
+        root: 'logs.foo',
+        streams: [
+          testContentPackEntry({
+            name: 'logs.foo',
+            fields: { ...baseFields, custom_field: { type: 'keyword' } },
+          }),
+        ],
+        include: { objects: { all: {} } },
+      });
+
+      expect(tree.request.stream.ingest.wired.fields).toEqual({
+        custom_field: { type: 'keyword' },
+      });
+    });
   });
 
   describe('mergeTrees', () => {
@@ -265,25 +292,6 @@ describe('content pack tree helpers', () => {
       expect(() => mergeTrees({ existing, incoming })).toThrow(
         `Query [one | title] already exists on [logs]`
       );
-    });
-
-    it('does not merge root stream fields', () => {
-      const existing = asTree({
-        root: 'logs',
-        streams: [testContentPackEntry({ name: 'logs', fields: baseFields })],
-        include: { objects: { all: {} } },
-      });
-
-      const incoming = asTree({
-        root: 'logs',
-        streams: [
-          testContentPackEntry({ name: 'logs', fields: { custom_field: { type: 'long' } } }),
-        ],
-        include: { objects: { all: {} } },
-      });
-
-      const merged = mergeTrees({ existing, incoming });
-      expect(merged.request.stream.ingest.wired.fields).toEqual(baseFields);
     });
   });
 });
