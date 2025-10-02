@@ -249,7 +249,7 @@ const GapSummaryPanel = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      {filteredGapDataForChart.filter((item) => item.count > 0).length > 0 ? (
+      {filteredGapDataForChart.length > 0 ? (
         <EuiFlexGroup gutterSize="m" alignItems="center">
           {/* Left Column - Chart */}
           <EuiFlexItem grow={false}>
@@ -257,13 +257,13 @@ const GapSummaryPanel = () => {
               <Settings theme={themeOverrides} ariaLabelledBy={gapChartId} />
               <Partition
                 id="gap-summary"
-                data={gapDataForChart}
+                data={filteredGapDataForChart}
                 layout={PartitionLayout.sunburst}
                 valueAccessor={(d) => d.count}
                 valueFormatter={() => ''}
                 layers={[
                   {
-                    groupByRollup: (d: (typeof gapDataForChart)[0]) => d.status,
+                    groupByRollup: (d: (typeof filteredGapDataForChart)[0]) => d.status,
                     shape: {
                       fillColor: (_, sortIndex) =>
                         filteredGapDataForChart[sortIndex % filteredGapDataForChart.length].color,

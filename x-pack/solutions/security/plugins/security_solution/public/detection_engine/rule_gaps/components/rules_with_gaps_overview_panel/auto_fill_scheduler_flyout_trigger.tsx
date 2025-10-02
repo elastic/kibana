@@ -23,6 +23,7 @@ import {
   EuiFilterGroup,
 } from '@elastic/eui';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import * as i18n from './translations';
 import {
   useGetGapAutoFillScheduler,
@@ -55,6 +56,15 @@ export const AutoFillSchedulerFlyoutTrigger = ({
   const [selectedStatuses, setSelectedStatuses] = useState<
     Array<'success' | 'error' | 'warning' | 'skipped'>
   >(['success', 'error', 'warning']);
+
+  // total number of system backfills (no rule filter, only initiator: system)
+  const { data: systemBackfillsRes } = useFindBackfillsForRules({
+    page: 1,
+    perPage: 0,
+    initiator: ['system'],
+  });
+  const systemBackfillsTotal = systemBackfillsRes?.total ?? 0;
+  const SYSTEM_BACKFILLS_THRESHOLD = 100;
 
   const {
     data: logsData,
@@ -173,6 +183,7 @@ export const AutoFillSchedulerFlyoutTrigger = ({
                     aria-hidden
                   />
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <EuiText>
                     <b>{i18n.SCHEDULER_RUN_TITLE}</b>
@@ -216,6 +227,16 @@ export const AutoFillSchedulerFlyoutTrigger = ({
                   </EuiFilterGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              {systemBackfillsTotal >= SYSTEM_BACKFILLS_THRESHOLD && (
+                <EuiBadge
+                  color="warning"
+                  iconType="alert"
+                  data-test-subj="gap-auto-fill-threshold-warning"
+                >
+                  {`The system has reached the limit of scheduled backfill runs (${SYSTEM_BACKFILLS_THRESHOLD}). New automatic runs will be skipped until the currently scheduled runs are completed.`}
+                </EuiBadge>
+              )}
               <EuiSpacer size="m" />
 
               <EuiBasicTable

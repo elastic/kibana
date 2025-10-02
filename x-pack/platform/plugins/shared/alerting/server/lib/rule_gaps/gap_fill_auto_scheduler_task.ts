@@ -411,17 +411,15 @@ export function registerGapFillAutoSchedulerTask({
   logger,
   getRulesClientWithRequest,
   eventLogger,
-  // getActionsClientWithRequest,
-  // getSavedObjectsClientWithRequest,
-  backfillClient,
-}: {
+}: // getActionsClientWithRequest,
+// getSavedObjectsClientWithRequest,
+{
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClient>;
   eventLogger: IEventLogger;
   // getActionsClientWithRequest: (request: KibanaRequest) => Promise<ActionsClient>;
   // getSavedObjectsClientWithRequest: (request: KibanaRequest) => any;
-  backfillClient: BackfillClient;
 }) {
   taskManager.registerTaskDefinitions({
     'gap-fill-auto-scheduler-task': {
@@ -446,6 +444,7 @@ export function registerGapFillAutoSchedulerTask({
               context: RulesClientContext;
             };
             const rulesClientContext = rulesClientWithContext.context;
+            const backfillClient = rulesClientContext.backfillClient;
             const { configId } =
               (taskInstance.params as { configId?: string; spaceId?: string }) || {};
             // Load scheduler SO for config
@@ -489,8 +488,7 @@ export function registerGapFillAutoSchedulerTask({
                     ruleId: gap.ruleId,
                     start: gap.range.gte,
                     end: gap.range.lte,
-                    savedObjectsRepository:
-                      rulesClientContext.internalSavedObjectsRepository as import('@kbn/core/server').ISavedObjectsRepository,
+                    savedObjectsRepository: rulesClientContext.internalSavedObjectsRepository,
                     actionsClient,
                   });
 
@@ -535,8 +533,28 @@ export function registerGapFillAutoSchedulerTask({
                 config,
               });
               const now = new Date();
+              // Threshold guard: skip if too many system-initiated backfills are already queued
+              const systemBackfillsThreshold = 100;
+              try {
+                const systemBackfillsTotal = await backfillClient.countBackfillsByInitiator({
+                  initiator: 'system',
+                  savedObjectsRepository: rulesClientContext.internalSavedObjectsRepository,
+                  spaceId: rulesClientContext.spaceId,
+                });
+                console.log('systemBackfillsTotal', systemBackfillsTotal);
+                if (systemBackfillsTotal >= systemBackfillsThreshold) {
+                  await earlySuccess({
+                    logEvent,
+                    soClient,
+                    schedulerSo,
+                    message: `Gap fill execution skipped - system backfills at limit (${systemBackfillsTotal}/${systemBackfillsThreshold})`,
+                  });
+                  return { state: {} };
+                }
+              } catch (e) {
+                logger.warn(`Failed to check system backfills count: ${e && e.message}`);
+              }
               // Parse the gapFillRange using helper
-
               const startDate: Date = resolveStartDate(config.gapFillRange, logger);
 
               // Step 1: Get all rule IDs with gaps, we get the rule ids sorted from rule which has the oldest gap
@@ -692,6 +710,29 @@ export function registerGapFillAutoSchedulerTask({
                   if (data.length < gapsPerPage) {
                     break;
                   }
+                }
+
+                // After finishing this rule batch, re-check system backfills threshold
+                try {
+                  const systemBackfillsTotal = await backfillClient.countBackfillsByInitiator({
+                    initiator: 'system',
+                    savedObjectsRepository: rulesClientContext.internalSavedObjectsRepository,
+                    spaceId: rulesClientContext.spaceId,
+                  });
+                  if (systemBackfillsTotal >= systemBackfillsThreshold) {
+                    const consolidated = resultsFromMap(aggregatedByRule);
+                    const partialSummary = makeRunSummary(consolidated);
+                    await logExecution({
+                      logEvent,
+                      status: 'success',
+                      results: consolidated,
+                      summary: partialSummary,
+                      message: `Gap fill execution stopped early - system backfills at limit (${systemBackfillsTotal}/${systemBackfillsThreshold})`,
+                    });
+                    return { state: {} };
+                  }
+                } catch (e) {
+                  logger.warn(`Failed to re-check system backfills count: ${e && e.message}`);
                 }
               }
 

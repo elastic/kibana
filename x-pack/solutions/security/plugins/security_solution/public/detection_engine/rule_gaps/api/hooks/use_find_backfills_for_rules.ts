@@ -30,7 +30,7 @@ export const useFindBackfillsForRules = (
     perPage,
     initiator,
   }: {
-    ruleIds: string[];
+    ruleIds?: string[];
     page: number;
     perPage: number;
     initiator?: Array<'user' | 'system'>;
@@ -38,7 +38,13 @@ export const useFindBackfillsForRules = (
   options?: UseQueryOptions<FindBackfillResponseBody>
 ) => {
   return useQuery<FindBackfillResponseBody>(
-    [FIND_BACKFILLS_FOR_RULES, ...ruleIds, page, perPage, (initiator ?? ['user']).join(',')],
+    [
+      FIND_BACKFILLS_FOR_RULES,
+      ...(ruleIds ?? []),
+      page,
+      perPage,
+      (initiator ?? ['user']).join(','),
+    ],
     async ({ signal }) => {
       const response = await findBackfillsForRules({ signal, ruleIds, page, perPage, initiator });
 

@@ -82,7 +82,7 @@ export const findBackfillsForRules = async ({
   sortField = 'createdAt',
   sortOrder = 'desc',
 }: {
-  ruleIds: string[];
+  ruleIds?: string[];
   page: number;
   perPage: number;
   initiator?: Array<'user' | 'system'> | 'user' | 'system';
@@ -95,7 +95,7 @@ export const findBackfillsForRules = async ({
     {
       method: 'POST',
       query: {
-        rule_ids: ruleIds.join(','),
+        ...(ruleIds && ruleIds.length > 0 ? { rule_ids: ruleIds.join(',') } : {}),
         page,
         per_page: perPage,
         ...(initiator

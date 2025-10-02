@@ -475,6 +475,25 @@ export class BackfillClient {
       })
     );
   }
+
+  public async countBackfillsByInitiator({
+    initiator,
+    savedObjectsRepository,
+    spaceId,
+  }: {
+    initiator: 'user' | 'system';
+    savedObjectsRepository: ISavedObjectsRepository;
+    spaceId?: string;
+  }): Promise<number> {
+    const { total } = await savedObjectsRepository.find<AdHocRunSO>({
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      filter: `ad_hoc_run_params.attributes.initiator: ${initiator}`,
+      ...(spaceId ? { namespaces: [spaceId] } : {}),
+    });
+
+    return total;
+  }
 }
 
 interface GetRuleOrErrorOpts {
