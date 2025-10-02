@@ -66,7 +66,6 @@ export const getValueInputPopover =
           if (error) {
             telemetry.trackEditInteraction({
               actionType: 'edit_cell',
-              outcome: 'error',
               failureReason: 'type',
             });
             event.preventDefault();
@@ -79,7 +78,6 @@ export const getValueInputPopover =
           if (error) {
             telemetry.trackEditInteraction({
               actionType: 'edit_cell',
-              outcome: 'error',
               failureReason: 'type',
             });
             return;

@@ -123,14 +123,6 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
             'The type of edit operation performed in the index editor. Possible values are: edit_cell|edit_column|add_row|add_column|delete_row|delete_column',
         },
       },
-      validation_outcome: {
-        type: 'keyword',
-        _meta: {
-          optional: true,
-          description:
-            'The outcome of the validation process in the index editor. Possible values are: success|error',
-        },
-      },
       failure_reason: {
         type: 'keyword',
         _meta: {

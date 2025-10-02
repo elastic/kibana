@@ -85,13 +85,11 @@ export class IndexEditorTelemetryService {
       | 'add_column'
       | 'delete_row'
       | 'delete_column';
-    outcome?: 'success' | 'error';
     failureReason?: string;
   }) {
     this.reportEvent('index_editor.edit_interaction', {
       flyout_mode: this._flyoutMode,
       action_type: eventData.actionType,
-      validation_outcome: eventData.outcome,
       failure_reason: eventData.failureReason,
     });
   }

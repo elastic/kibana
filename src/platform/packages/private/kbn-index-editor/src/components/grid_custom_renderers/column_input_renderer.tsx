@@ -87,7 +87,6 @@ export const AddColumnHeader = ({ initialColumnName, telemetryService }: AddColu
       } else {
         telemetryService.trackEditInteraction({
           actionType: 'add_column',
-          outcome: 'error',
           failureReason: validationError || 'EMPTY_NAME',
         });
       }
