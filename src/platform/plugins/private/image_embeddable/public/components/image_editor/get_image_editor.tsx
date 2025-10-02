@@ -23,12 +23,10 @@ export const getImageEditor = async ({
   initialImageConfig,
   onSave,
   closeFlyout,
-  ariaLabelledBy,
 }: {
   initialImageConfig?: ImageConfig;
   onSave?: (imageConfig: ImageConfig) => void;
   closeFlyout: () => void;
-  ariaLabelledBy: string;
 }) => {
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
   const user = await coreServices.security.authc.getCurrentUser();
@@ -54,7 +52,6 @@ export const getImageEditor = async ({
           }}
           onCancel={closeFlyout}
           initialImageConfig={initialImageConfig}
-          ariaLabelledBy={ariaLabelledBy}
         />
       </ImageViewerContext.Provider>
     </FilesContext>
