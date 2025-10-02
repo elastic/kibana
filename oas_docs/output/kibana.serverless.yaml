@@ -155,7 +155,8 @@ tags:
     description: |
       Enables you to rotate message signing key pairs for secure Fleet communication.
     x-displayName: Fleet Message Signing Service
-  - description: Machine learning
+  - description: |
+      Enables you to synchronize machine learning saved objects.
     name: ml
     x-displayName: Machine learning
   - description: Interact with the Observability AI Assistant resources.
@@ -285,15 +286,19 @@ tags:
   - name: spaces
     x-displayName: Spaces
     description: Manage your Kibana spaces.
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+      description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in the Elastic stack. The API is currently not considered stable and will most likely change significantly before becoming GA. If you consume this API, please take into account that it may break without additional notice period.
+      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
     x-displayName: Streams
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
-  - externalDocs:
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
+    externalDocs:
       description: Task manager
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager

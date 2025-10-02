@@ -26,17 +26,6 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
       x-displayName: 'Alerting'
-  - target: '$.tags[?(@.name=="cases")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Cases are used to open and track issues.
-        You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations.
-        You can also send cases to external incident management systems by configuring connectors.
-      externalDocs:
-        description: Cases documentation
-        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
-      x-displayName: 'Cases'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
@@ -133,12 +122,6 @@ actions:
       description: >
         Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
       x-displayName: 'Fleet Server hosts'
-  - target: '$.tags[?(@.name=="Fleet service tokens")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Enables you to create tokens for Fleet service authentication and authorization.
-      x-displayName: 'Fleet service tokens'
   - target: '$.tags[?(@.name=="Fleet uninstall tokens")]'
     description: Change tag description and displayName
     update:
@@ -151,7 +134,7 @@ actions:
       description: >
         Enables you to rotate message signing key pairs for secure Fleet communication.
       x-displayName: 'Fleet Message Signing Service'
-  - target: '$.tags[?(@.name=="machine learning")]'
+  - target: '$.tags[?(@.name=="ml")]'
     description: Change tag description and displayName
     update:
       description: >
@@ -163,11 +146,46 @@ actions:
       description: >
         Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
       x-displayName: 'Security entity analytics'
-  - target: '$.tags[?(@.name=="user session")]'
-    description: Change tag description
+  - target: '$.tags[?(@.name=="streams")]'
+    description: Change tag description and displayName
     update:
       description: >
-        Enables you to invalidate user sessions for security and session management purposes.
+        Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      x-displayName: "Streams"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="spaces")]'
+    description: Change displayName
+    update:
+      x-displayName: "Spaces"
+      description: Manage your Kibana spaces.
+      externalDocs:
+        url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+        description: Space overview
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, features, and installed plugins.
+  - target: '$.tags[?(@.name=="Fleet cloud connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
+      x-displayName: 'Fleet cloud connectors'
+  - target: '$.tags[?(@.name=="Elastic Package Manager (EPM)")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
+      x-displayName: 'Elastic Package Manager (EPM)'
   # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
