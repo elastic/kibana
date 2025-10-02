@@ -274,7 +274,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                  defaultMessage: 'Indices and data streams',
                 }),
               },
               {

@@ -62,6 +62,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       dataViewFieldEditor,
       indexUpdateService,
+      indexEditorTelemetryService,
       storage,
     },
   } = useKibana<KibanaContextExtra>();
@@ -146,8 +147,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         columns: props.columns,
         onValueChange,
         dataTableRef,
+        telemetryService: indexEditorTelemetryService,
       }),
-    [rows, props.columns, onValueChange, dataTableRef]
+    [rows, props.columns, onValueChange, dataTableRef, indexEditorTelemetryService]
   );
   const CellValueRenderer = useMemo(() => {
     return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);
@@ -161,10 +163,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [CellValueRenderer, renderedColumns]);
 
   // We render an editable header for columns that are not saved in the index.
-  const customGridColumnsConfiguration = useMemo(() => {
-    return renderedColumns.reduce((acc, columnName) => {
+  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
+    return renderedColumns.reduce<CustomGridColumnsConfiguration>((acc, columnName) => {
       if (!props.dataView.fields.getByName(columnName)) {
-        acc[columnName] = getColumnInputRenderer(columnName, indexUpdateService);
+        acc[columnName] = getColumnInputRenderer(
+          columnName,
+          indexUpdateService,
+          indexEditorTelemetryService
+        );
       } else {
         acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
           ...customGridColumnProps.column,
@@ -173,7 +179,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
-  }, [renderedColumns, props.dataView, indexUpdateService]);
+  }, [renderedColumns, props.dataView.fields, indexUpdateService, indexEditorTelemetryService]);
 
   const bulkActions = useMemo<
     React.ComponentProps<typeof UnifiedDataTable>['customBulkActions']
