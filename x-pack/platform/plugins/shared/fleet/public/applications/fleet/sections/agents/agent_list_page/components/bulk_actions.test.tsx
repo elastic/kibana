@@ -49,9 +49,6 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      enableAgentMigrations: true,
-    } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
@@ -214,20 +211,6 @@ describe('AgentBulkActions', () => {
         }),
         expect.anything()
       );
-    });
-
-    it('should not show the migrate button when agent migrations flag is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        enableAgentMigrations: false,
-      } as any);
-
-      const results = render({
-        ...defaultProps,
-        selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
-      });
-
-      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
-      expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
 });

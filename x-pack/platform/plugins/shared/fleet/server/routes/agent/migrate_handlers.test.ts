@@ -34,6 +34,17 @@ jest.mock('../../services/agents', () => {
   };
 });
 
+// Mock the license service
+jest.mock('../../services', () => {
+  const actual = jest.requireActual('../../services');
+  return {
+    ...actual,
+    licenseService: {
+      hasAtLeast: jest.fn(),
+    },
+  };
+});
+
 jest.mock('../../services/app_context', () => {
   const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
@@ -44,6 +55,15 @@ jest.mock('../../services/app_context', () => {
 });
 
 describe('Migrate handlers', () => {
+  let mockLicenseService: any;
+
+  beforeEach(() => {
+    // Get the mocked license service
+    mockLicenseService = jest.requireMock('../../services').licenseService;
+    // Default to having the required license
+    mockLicenseService.hasAtLeast.mockReturnValue(true);
+  });
+
   describe('migrateSingleAgentHandler', () => {
     let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
@@ -163,6 +183,34 @@ describe('Migrate handlers', () => {
         migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
       ).rejects.toThrow(agentError.message);
     });
+
+    it('returns 403 when license does not support agent migration', async () => {
+      // Mock license as not having the required level
+      mockLicenseService.hasAtLeast.mockReturnValue(false);
+
+      await migrateSingleAgentHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: 'Agent migration requires an enterprise license. Please upgrade your license.',
+        },
+      });
+      // Verify that agent services were not called when license is insufficient
+      expect(AgentService.getAgentById).not.toHaveBeenCalled();
+      expect(AgentService.migrateSingleAgent).not.toHaveBeenCalled();
+    });
+
+    it('calls migrateSingleAgent when license supports agent migration', async () => {
+      // Ensure license is valid (default mock)
+      mockLicenseService.hasAtLeast.mockReturnValue(true);
+
+      await migrateSingleAgentHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify that services were called normally
+      expect(AgentService.getAgentById).toHaveBeenCalled();
+      expect(AgentService.migrateSingleAgent).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
   });
 
   // Bulk migrate
@@ -253,6 +301,40 @@ describe('Migrate handlers', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: { actionId: mockActionResponse.id },
       });
+    });
+
+    it('returns 403 when license does not support agent migration', async () => {
+      // Mock license as not having the required level
+      mockLicenseService.hasAtLeast.mockReturnValue(false);
+
+      mockRequest = {
+        body: mockSettings,
+      };
+
+      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: 'Agent migration requires an enterprise license. Please upgrade your license.',
+        },
+      });
+      // Verify that agent services were not called when license is insufficient
+      expect(AgentService.bulkMigrateAgents).not.toHaveBeenCalled();
+    });
+
+    it('calls bulkMigrateAgents when license supports agent migration', async () => {
+      // Ensure license is valid (default mock)
+      mockLicenseService.hasAtLeast.mockReturnValue(true);
+
+      mockRequest = {
+        body: mockSettings,
+      };
+
+      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify that services were called normally
+      expect(AgentService.bulkMigrateAgents).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
   });
 });
