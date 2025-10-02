@@ -5,7 +5,7 @@
     "bucket_span": "60m",
     "detectors": [
       {
-        "detector_description": "Detects rare event actions for a user.",
+        "detector_description": "Detects rare GCP Audit event actions for a user.",
         "function": "rare",
         "by_field_name": "event.action",
         "partition_field_name": "client.user.email",
