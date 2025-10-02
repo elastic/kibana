@@ -35,7 +35,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/state';
+import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({

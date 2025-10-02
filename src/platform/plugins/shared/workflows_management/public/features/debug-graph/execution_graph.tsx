@@ -11,13 +11,14 @@ import React, { useMemo } from 'react';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
+import { useSelector } from 'react-redux';
+
 import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
-import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/state';
-import { useSelector } from 'react-redux';
+import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/store';
 
 export interface ExecutionGraphProps {
   workflowYaml: string | undefined;
