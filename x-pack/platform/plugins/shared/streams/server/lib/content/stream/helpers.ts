@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
+import { intersectionBy, omit } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
 import { type FieldDefinition } from '@kbn/streams-schema';
@@ -77,6 +77,15 @@ export function getFields(
     return entry.request.stream.ingest.wired.fields;
   }
   return {};
+}
+
+export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
+  return Object.keys(fields)
+    .filter((key) => !baseFields[key])
+    .reduce((filtered, key) => {
+      filtered[key] = omit(fields[key], 'from');
+      return filtered;
+    }, {} as FieldDefinition);
 }
 
 export function scopeContentPackStreams({

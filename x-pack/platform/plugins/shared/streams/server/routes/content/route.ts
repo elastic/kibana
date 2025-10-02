@@ -24,6 +24,7 @@ import {
   prepareStreamsForImport,
   scopeContentPackStreams,
   scopeIncludedObjects,
+  withoutBaseFields,
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
@@ -82,14 +83,11 @@ const exportContentRoute = createServerRoute({
       }),
       streams: [root, ...descendants].map((stream) => {
         if (stream.name === params.path.name) {
-          // merge inherited mappings into the exported root
-          const mergedFields = { ...inheritedFields, ...stream.ingest.wired.fields };
-          stream.ingest.wired.fields = Object.keys(mergedFields)
-            .filter((key) => !baseFields[key])
-            .reduce((fields, key) => {
-              fields[key] = omit(mergedFields[key], 'from');
-              return fields;
-            }, {} as FieldDefinition);
+          // merge non-base inherited mappings into the exported root
+          stream.ingest.wired.fields = withoutBaseFields({
+            ...inheritedFields,
+            ...stream.ingest.wired.fields,
+          });
         }
 
         return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });
