@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject, combineLatest, map, type Observable } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
@@ -25,11 +25,14 @@ import type {
   ControlGroupRuntimeState,
   ControlGroupStateBuilder,
   ControlPanelsState,
+  ControlStateTransform,
 } from './types';
 import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -54,10 +57,21 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
+  const {
+    services: { uiActions },
+  } = useKibana<{
+    uiActions: UiActionsStart;
+  }>();
+
   const lastSavedState$Ref = useRef(new BehaviorSubject<{ [id: string]: StickyControlState }>({}));
 
   /** Creation options management */
   const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
+  const input$ = useMemo(() => {
+    if (!initialState) return;
+    return new BehaviorSubject<Partial<ControlGroupRuntimeState>>(initialState.initialState ?? {});
+  }, [initialState]);
+
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
   const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
 
@@ -79,31 +93,42 @@ export const ControlGroupRenderer = ({
     };
   }, [childrenApi, layoutApi, searchApi, propsApi]);
 
-  const currentState$: Observable<Partial<ControlGroupRuntimeState>> | undefined = useMemo(() => {
-    if (!parentApi) return;
-    return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
-      map(([currentChildState, currentLayout]) => {
-        const combinedState: ControlPanelsState = {};
-        Object.keys(currentLayout.controls).forEach((id) => {
-          combinedState[id] = {
-            ...currentChildState[id].rawState,
-            ...currentLayout.controls[id],
-          };
-        });
-        return { initialChildControlState: combinedState };
-      })
-    );
-  }, [currentChildState$Ref, parentApi]);
+  useEffect(() => {
+    if (!parentApi || !input$) return;
+    const currentStateSubscription = combineLatest([
+      currentChildState$Ref.current,
+      parentApi.layout$,
+    ])
+      .pipe(
+        map(([currentChildState, currentLayout]) => {
+          const combinedState: ControlPanelsState = {};
+          Object.keys(currentLayout.controls).forEach((id) => {
+            combinedState[id] = {
+              ...currentChildState[id].rawState,
+              ...currentLayout.controls[id],
+            };
+          });
+          return { initialChildControlState: combinedState };
+        })
+      )
+      .subscribe((currentState) => {
+        input$.next(currentState);
+      });
+
+    return () => {
+      currentStateSubscription.unsubscribe();
+    };
+  }, [input$, currentChildState$Ref, parentApi]);
 
   useEffect(() => {
-    if (!parentApi || !currentState$) return;
+    if (!parentApi || !input$) return;
 
     const reload$ = new Subject<void>();
-    onApiAvailable({
+    const publicApi = {
       ...parentApi,
       reload: () => reload$.next(),
-      getInput$: () => currentState$,
-      getInput: () => currentState$.value,
+      getInput$: () => input$,
+      getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
         /** Set the last saved state to the new input and then reset each child to this state */
         const newState = lastSavedState$Ref.current.getValue();
@@ -118,12 +143,28 @@ export const ControlGroupRenderer = ({
           if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
         });
       },
-      getEditorConfig: () => {
-        console.log('editor config', initialState?.editorConfig);
-        return initialState?.editorConfig;
+    };
+
+    onApiAvailable({
+      ...publicApi,
+      openAddDataControlFlyout: async (options?: {
+        controlStateTransform?: ControlStateTransform;
+      }) => {
+        const action = await uiActions.getAction('createControl');
+        action.execute({
+          embeddable: {
+            ...publicApi,
+            getEditorConfig: () => {
+              return {
+                ...(initialState?.editorConfig ?? {}),
+                controlStateTransform: options?.controlStateTransform,
+              };
+            },
+          },
+        });
       },
     } as unknown as ControlGroupRendererApi);
-  }, [initialState?.editorConfig, parentApi, currentState$, onApiAvailable]);
+  }, [initialState?.editorConfig, parentApi, onApiAvailable, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : <ControlsRenderer parentApi={parentApi} />;

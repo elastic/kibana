@@ -234,11 +234,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0]).not.toMatchObject(
-        expect.objectContaining({
-          placeholder: '',
-        })
-      );
+      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toBe(undefined);
     });
 
     it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
@@ -273,7 +269,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0]).toMatchObject(
+      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toMatchObject(
         expect.objectContaining({
           placeholder: '',
         })

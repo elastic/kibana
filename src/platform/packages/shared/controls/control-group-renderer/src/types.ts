@@ -47,7 +47,17 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
     getInput: () => ControlGroupRuntimeState;
 
     timeslice$: PublishingSubject<TimeSlice | undefined>;
+
+    openAddDataControlFlyout: (options?: { controlStateTransform?: ControlStateTransform }) => void;
   };
+
+interface HasEditorConfig {
+  getEditorConfig: () => ControlGroupEditorConfig | undefined;
+}
+
+export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorConfig => {
+  return Boolean((parentApi as HasEditorConfig).getEditorConfig);
+};
 
 /**
  * ----------------------------------------------------------------
@@ -64,11 +74,12 @@ export type ControlStateTransform<State extends DataControlState = DataControlSt
 ) => Partial<State>;
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
-export interface ControlGroupEditorConfig<State extends DataControlState = DataControlState> {
+export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
+  defaultDataViewId?: string;
   fieldFilterPredicate?: FieldFilterPredicate;
-  controlStateTransform?: ControlStateTransform<State>;
+  controlStateTransform?: ControlStateTransform;
 }
 
 export interface ControlGroupRuntimeState<State extends StickyControlState = StickyControlState> {

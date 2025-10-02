@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { DefaultDataControlState } from '../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ACTION_CREATE_CONTROL } from './constants';
 import type { CreateControlTypeContext } from './control_panel_actions';
@@ -24,10 +25,14 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    const parentDataViewId = apiPublishesDataViews(embeddable)
+    const defaultDataViewId = apiHasEditorConfig(embeddable)
+      ? embeddable.getEditorConfig()?.defaultDataViewId
+      : undefined;
+    const publishedDataViewId = apiPublishesDataViews(embeddable)
       ? embeddable.dataViews$.value?.[0]?.id
-      : embeddable?.getEditorConfig?.().defaultDataViewId;
-    console.log({ parentDataViewId });
+      : undefined;
+    const parentDataViewId = defaultDataViewId ?? publishedDataViewId;
+
     openDataControlEditor({
       initialState: {
         /** 
@@ -50,9 +55,7 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
     }),
 });
 
-export const createDataControlOfType = <
-  State extends DefaultDataControlState = DefaultDataControlState
->(
+export const createDataControlOfType = <State extends DataControlState = DataControlState>(
   type: string,
   { embeddable, state, controlId }: CreateControlTypeContext<State>
 ) => {

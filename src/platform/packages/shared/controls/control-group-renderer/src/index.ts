@@ -17,3 +17,4 @@ export type {
   ControlPanelsState,
   ControlPanelState,
 } from './types';
+export { apiHasEditorConfig } from './types';

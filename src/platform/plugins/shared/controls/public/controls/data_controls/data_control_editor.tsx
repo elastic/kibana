@@ -41,6 +41,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
 
 import {
   CONTROL_MENU_TRIGGER,
@@ -209,13 +210,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
-  // TODO: get editor config from parent?
-  const editorConfig = useMemo<ControlGroupEditorConfig<State>>(() => {
-    console.log('PARENT', parentApi);
-    return {
-      hideAdditionalSettings: false,
-      ...parentApi?.getEditorConfig?.(),
-    };
+  const editorConfig = useMemo<ControlGroupEditorConfig | undefined>(() => {
+    return apiHasEditorConfig(parentApi) ? parentApi.getEditorConfig() : undefined;
   }, [parentApi]);
 
   const {
@@ -233,7 +229,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     },
     error: fieldListError,
   } = useAsync(async () => {
-    console.log({ editorState });
     if (!editorState.dataViewId) {
       return;
     }
@@ -447,9 +442,12 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 onClick={() => {
                   const transformedState: Partial<State> | undefined =
                     selectedControlType && editorConfig && editorConfig.controlStateTransform
-                      ? editorConfig.controlStateTransform(editorState, selectedControlType)
+                      ? (editorConfig.controlStateTransform(
+                          editorState,
+                          selectedControlType
+                        ) as Partial<State>)
                       : undefined;
-                  console.log({ transformedState });
+
                   if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
                     // we need to create a new control from scratch
                     try {
