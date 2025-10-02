@@ -211,5 +211,72 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(responseText).to.contain(MOCKED_RESPONSE);
       });
     });
+
+    it('does not allow continuing to chat if the agent cannot be found', async () => {
+      // Insert a conversation with a deleted agent
+      const bulkBody = [
+        { index: { _index: '.chat-conversations', _id: 'conv-4' } },
+        {
+          user_id: 'test_user',
+          user_name: 'test_user',
+          agent_id: 'deleted_agent',
+          space: 'default',
+          title: 'Conversation4',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          rounds: [
+            {
+              id: 'conv-4-round-1',
+              input: { message: 'Hello, this is conversation 4' },
+              steps: [],
+              response: { message: 'This is the response for conversation 4' },
+            },
+          ],
+        },
+      ];
+
+      await es.bulk({ body: bulkBody, refresh: true });
+
+      await common.navigateToApp(APP_ID, { path: 'conversations/new' });
+
+      // Wait for conversations to load and assert Conversation4 is present
+      await retry.try(async () => {
+        const conversationList = await testSubjects.find('agentBuilderConversationList');
+        const conversationText = await conversationList.getVisibleText();
+        expect(conversationText).to.contain('Conversation4');
+      });
+
+      // Click on Conversation4
+      const conv4Button = await testSubjects.find('conversationItem-conv-4');
+      await conv4Button.click();
+
+      // Wait for Conversation4 to load
+      await retry.try(async () => {
+        const titleElement = await testSubjects.find('agentBuilderConversationTitle');
+        const titleText = await titleElement.getVisibleText();
+        expect(titleText).to.contain('Conversation4');
+      });
+
+      // Assert the input field is disabled and has the correct placeholder
+      const inputField = await testSubjects.find('onechatAppConversationInputFormTextArea');
+
+      // Check if the textarea is disabled by checking the disabled attribute
+      const isDisabled = await inputField.getAttribute('disabled');
+      expect(isDisabled).to.be('true');
+
+      const placeholder = await inputField.getAttribute('placeholder');
+      expect(placeholder).to.contain(
+        'Agent "deleted_agent" has been deleted. Please start a new conversation.'
+      );
+
+      // Clean up the test conversation
+      await es.deleteByQuery({
+        index: '.chat-conversations',
+        query: { term: { _id: 'conv-4' } },
+        wait_for_completion: true,
+        refresh: true,
+        conflicts: 'proceed',
+      });
+    });
   });
 }
