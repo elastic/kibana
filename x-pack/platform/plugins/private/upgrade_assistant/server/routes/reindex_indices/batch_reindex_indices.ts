@@ -58,11 +58,7 @@ export function registerBatchReindexIndicesRoutes(
       const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
 
       const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        soClient,
-        callAsCurrentUser,
-        log
-      );
+      const reindexActions = reindexActionsFactory(soClient, callAsCurrentUser, log);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
