@@ -102,7 +102,6 @@ describe(
 
         expectDefendInsightsApiToBeCalled();
 
-        chooseConnectorButtonExistsWithLabel('Select a connector');
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
 
@@ -115,7 +114,6 @@ describe(
         const failureReason = 'Invalid token';
         loadEndpointDetailsFlyout(endpointId);
 
-        chooseConnectorButtonExistsWithLabel('Select a connector');
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
         stubDefendInsightsApiResponse({ status: 'failed', failureReason }, { times: 1 });
