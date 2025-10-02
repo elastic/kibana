@@ -113,7 +113,7 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
         type: 'keyword',
         _meta: {
           description:
-            'The mode in which the index editor flyout was opened. Possible values are: create|view|edit',
+            'The mode in which the index editor flyout was opened. Possible values are: create|edit',
         },
       },
       edit_op: {
