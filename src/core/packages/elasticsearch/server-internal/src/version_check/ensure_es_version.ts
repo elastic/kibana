@@ -187,7 +187,7 @@ export const pollEsNodesVersion = ({
     exhaustMap(() => {
       return from(
         internalClient.nodes.info({
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'], // already filtered by the client to reduce load on ES
         })
       ).pipe(
         catchError((nodesInfoRequestError) => {

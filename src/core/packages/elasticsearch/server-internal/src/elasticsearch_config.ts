@@ -115,8 +115,10 @@ export const configSchema = schema.object({
       }
     },
   }),
+  // shardTimeout: schema.duration({ defaultValue: '30s' }),
+  // requestTimeout: schema.duration({ defaultValue: '30s' }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '30s' }),
+  requestTimeout: schema.duration({ defaultValue: '60s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
@@ -456,6 +458,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * Set to 0 to disable the cache (default Node.js behavior)
    */
   public readonly dnsCacheTtl: Duration;
+
+  /**
+   * Constructs Elasticsearch configuration.
+   * @param rawConfig
+   */
 
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
