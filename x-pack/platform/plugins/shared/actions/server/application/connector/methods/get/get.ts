@@ -12,6 +12,7 @@ import type { Connector } from '../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
+import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
 
 export async function get({
   context,
@@ -59,21 +60,11 @@ export async function get({
       })
     );
 
-    connector = {
+    connector = connectorFromInMemoryConnector({
       id,
-      actionTypeId: foundInMemoryConnector.actionTypeId,
-      name: foundInMemoryConnector.name,
-      isPreconfigured: foundInMemoryConnector.isPreconfigured,
-      isSystemAction: foundInMemoryConnector.isSystemAction,
-      isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(
-        foundInMemoryConnector.actionTypeId
-      ),
-    };
-
-    if (foundInMemoryConnector.exposeConfig) {
-      connector.config = foundInMemoryConnector.config;
-    }
+      inMemoryConnector: foundInMemoryConnector,
+      actionTypeRegistry,
+    });
   } else {
     const result = await getConnectorSo({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,

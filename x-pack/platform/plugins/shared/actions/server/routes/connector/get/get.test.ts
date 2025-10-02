@@ -37,6 +37,7 @@ describe('getConnectorRoute', () => {
       id: '1',
       actionTypeId: '2',
       name: 'action name',
+      isMissingSecrets: false,
     });
 
     const actionsClient = actionsClientMock.create();

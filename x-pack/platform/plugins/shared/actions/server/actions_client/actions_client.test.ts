@@ -1398,12 +1398,8 @@ describe('getBulk()', () => {
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        secrets: {
-          test: 'test1',
-        },
         isPreconfigured: true,
         name: 'test',
-        config: { foo: 'bar' },
       },
       {
         id: '1',
@@ -1549,20 +1545,15 @@ describe('getBulk()', () => {
     ).toContainConnectors([
       {
         actionTypeId: '.slack',
-        config: { foo: 'bar' },
         id: 'testPreconfigured',
         isPreconfigured: true,
         name: 'test',
-        secrets: {},
       },
       {
         actionTypeId: '.cases',
-        config: {},
         id: 'system-connector-.cases',
-        isMissingSecrets: false,
         isSystemAction: true,
         name: 'System action: .cases',
-        secrets: {},
       },
       {
         actionTypeId: 'test',

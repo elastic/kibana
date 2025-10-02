@@ -41,6 +41,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
         name: 'my system action',
         actionTypeId: '.system-action-type',
         isMissingSecrets: false,
+        config: {},
       }),
     ]);
 
@@ -53,6 +54,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
             "config": Object {},
             "connector_type_id": ".system-action-type",
             "id": ".system-action-id",
+            "is_connector_type_deprecated": false,
             "is_deprecated": false,
             "is_missing_secrets": false,
             "is_preconfigured": false,
@@ -78,6 +80,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
           is_system_action: true,
           name: 'my system action',
           referenced_by_count: 0,
+          is_connector_type_deprecated: false,
         },
       ],
     });

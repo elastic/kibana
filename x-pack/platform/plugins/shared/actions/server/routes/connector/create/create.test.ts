@@ -51,12 +51,14 @@ describe('createConnectorRoute', () => {
         'isDeprecated',
         'isMissingSecrets',
         'isSystemAction',
+        'isConnectorTypeDeprecated',
       ]),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
       is_deprecated: createResult.isDeprecated,
       is_missing_secrets: createResult.isMissingSecrets,
       is_system_action: createResult.isSystemAction,
+      is_connector_type_deprecated: createResult.isConnectorTypeDeprecated,
     };
 
     const actionsClient = actionsClientMock.create();

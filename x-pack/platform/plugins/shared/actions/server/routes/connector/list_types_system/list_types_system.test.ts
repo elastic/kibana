@@ -58,6 +58,7 @@ describe('listTypesWithSystemRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_deprecated": false,
             "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
@@ -82,6 +83,7 @@ describe('listTypesWithSystemRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: true,
           sub_feature: 'endpointSecurity',
+          is_deprecated: false,
         },
       ],
     });
@@ -126,6 +128,7 @@ describe('listTypesWithSystemRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_deprecated": false,
             "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
@@ -159,6 +162,7 @@ describe('listTypesWithSystemRoute', () => {
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
           is_system_action_type: false,
+          is_deprecated: false,
         },
       ],
     });

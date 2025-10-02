@@ -65,6 +65,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_system_action: false,
                 connector_type_id: 'test.index-record',
                 is_deprecated: false,
+                is_connector_type_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My Connector',
                 config: {
