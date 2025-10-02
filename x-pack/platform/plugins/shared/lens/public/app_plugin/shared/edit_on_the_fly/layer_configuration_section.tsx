@@ -95,7 +95,7 @@ export function LayerConfiguration({
       <VisualizationToolbar
         activeVisualization={activeVisualization}
         framePublicAPI={framePublicAPI}
-        usePanel
+        // useFlyoutToolbar
       />
       <EuiSpacer size="m" />
       <ConfigPanelWrapper {...layerPanelsProps} />
