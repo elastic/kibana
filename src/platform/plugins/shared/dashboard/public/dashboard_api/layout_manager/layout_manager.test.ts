@@ -118,7 +118,6 @@ describe('layout manager', () => {
       expect(layout.panels['54321']).toEqual({
         grid: {
           h: 1,
-          sectionId: undefined,
           w: 1,
           x: 1,
           y: 0,
