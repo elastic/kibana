@@ -13,11 +13,13 @@ import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
 import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiPublishesUnsavedChanges,
   useSearchApi,
   type ViewMode,
 } from '@kbn/presentation-publishing';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type {
   ControlGroupCreationOptions,
@@ -31,8 +33,6 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
