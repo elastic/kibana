@@ -19,6 +19,7 @@ import {
 import { createTabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
+import { DiscoverSearchSessionManager } from '../discover_search_session';
 
 interface UseStateManagers {
   customizationContext: DiscoverCustomizationContext;
@@ -29,6 +30,7 @@ interface UseStateManagers {
 interface UseStateManagersReturn {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export const useStateManagers = ({
@@ -48,6 +50,12 @@ export const useStateManagers = ({
   );
 
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
+  const [searchSessionManager] = useState(() => {
+    return new DiscoverSearchSessionManager({
+      history: services.history,
+      session: services.data.search.session,
+    });
+  });
   const [internalState] = useState(() =>
     createInternalStateStore({
       services,
@@ -55,6 +63,7 @@ export const useStateManagers = ({
       runtimeStateManager,
       urlStateStorage,
       tabsStorageManager,
+      searchSessionManager,
     })
   );
 
@@ -77,7 +86,8 @@ export const useStateManagers = ({
     () => ({
       internalState,
       runtimeStateManager,
+      searchSessionManager,
     }),
-    [internalState, runtimeStateManager]
+    [internalState, runtimeStateManager, searchSessionManager]
   );
 };
