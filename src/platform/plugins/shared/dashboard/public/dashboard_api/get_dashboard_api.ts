@@ -12,8 +12,6 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import { controlHasVariableName } from '@kbn/esql-types';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
@@ -39,6 +37,7 @@ import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { mergeControlGroupStates } from './merge_control_group_states';
 
 export function getDashboardApi({
   creationOptions,
@@ -84,38 +83,12 @@ export function getDashboardApi({
     trackPanel,
     getReferences
   );
-  const incomingControlGroupState = incomingControlGroup?.serializedState?.rawState;
-  let finalState: ControlsGroupState | undefined = initialState.controlGroupInput;
+  const mergedControlGroupState = mergeControlGroupStates(
+    initialState.controlGroupInput,
+    incomingControlGroup
+  );
 
-  if (finalState && incomingControlGroupState) {
-    // check if the control exists already
-    const uniqueControls: ControlsGroupState['controls'] = [];
-    const existingControlVariableNames = new Set(
-      finalState.controls.map((control) => {
-        if (controlHasVariableName(control.controlConfig)) {
-          return control.controlConfig.variableName;
-        }
-      })
-    );
-
-    (incomingControlGroupState as ControlsGroupState).controls.forEach((control) => {
-      if (
-        controlHasVariableName(control.controlConfig) &&
-        !existingControlVariableNames.has(control.controlConfig?.variableName)
-      ) {
-        uniqueControls.push(control);
-      }
-    });
-
-    finalState = {
-      ...finalState,
-      controls: [...finalState.controls, ...uniqueControls],
-    };
-  } else if (!finalState && incomingControlGroupState) {
-    finalState = incomingControlGroupState as ControlsGroupState;
-  }
-
-  const controlGroupManager = initializeControlGroupManager(finalState, getReferences);
+  const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupManager.api.controlGroupApi$,
