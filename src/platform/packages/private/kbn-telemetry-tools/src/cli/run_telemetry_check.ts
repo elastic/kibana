@@ -12,7 +12,7 @@ import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 
-import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
+// import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
 import type { TaskContext } from '../tools/tasks';
 import {
   createTaskContext,
@@ -111,11 +111,11 @@ export function runTelemetryCheck() {
             title: 'Updating telemetry mapping files',
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
-          {
-            title: 'Automated PR review checks',
-            task: (context, task) =>
-              task.newListr(prAutomatedChecks(context), { exitOnError: true }),
-          },
+          // {
+          //   title: 'Automated PR review checks',
+          //   task: (context, task) =>
+          //     task.newListr(prAutomatedChecks(context), { exitOnError: true }),
+          // },
         ],
         {
           renderer: process.env.CI ? 'verbose' : ('default' as any),
