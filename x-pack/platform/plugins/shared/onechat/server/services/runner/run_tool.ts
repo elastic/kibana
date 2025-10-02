@@ -12,8 +12,10 @@ import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   ToolHandlerContext,
   ScopedRunnerRunToolsParams,
+  ToolHandlerReturn,
   RunToolReturn,
 } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
@@ -36,10 +38,10 @@ export const runTool = async <TParams = Record<string, unknown>>({
   const toolRegistry = await toolsService.getRegistry({ request });
   const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<any, ZodObject<any>>;
 
-  const toolReturn = await withExecuteToolSpan(
+  const { results } = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
-    async () => {
+    async (): Promise<ToolHandlerReturn> => {
       const schema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -57,14 +59,20 @@ export const runTool = async <TParams = Record<string, unknown>>({
         return await tool.handler(validation.data as Record<string, any>, toolHandlerContext);
       } catch (err) {
         return {
-          results: [{ type: ToolResultType.error, data: { message: err.message } }] as ToolResult[],
+          results: [{ type: ToolResultType.error, data: { message: err.message } }],
         };
       }
     }
   );
 
   return {
-    ...toolReturn,
+    results: results.map<ToolResult>(
+      (result) =>
+        ({
+          ...result,
+          result_id: result.result_id ?? getToolResultId(),
+        } as ToolResult)
+    ),
   };
 };
 

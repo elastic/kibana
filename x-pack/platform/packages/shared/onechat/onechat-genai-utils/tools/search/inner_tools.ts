@@ -20,6 +20,7 @@ import { progressMessages } from './i18n';
 
 const convertMatchResult = (result: MatchResult): ResourceResult => {
   return {
+    result_id: getToolResultId(),
     type: ToolResultType.resource,
     data: {
       reference: {
@@ -113,13 +114,14 @@ export const createNaturalLanguageSearchTool = ({
 
           const results: ToolResult[] = [
             {
+              result_id: getToolResultId(),
               type: ToolResultType.query,
               data: {
                 esql: response.generatedQuery,
               },
             },
             {
-              tool_result_id: getToolResultId(),
+              result_id: getToolResultId(),
               type: ToolResultType.tabularData,
               data: {
                 source: 'esql',

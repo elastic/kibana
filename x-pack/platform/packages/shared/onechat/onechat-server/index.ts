@@ -10,6 +10,7 @@ export type {
   ToolHandlerFn,
   ToolHandlerReturn,
   ToolHandlerContext,
+  ToolHandlerResult,
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,

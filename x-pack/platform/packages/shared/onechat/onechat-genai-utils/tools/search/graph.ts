@@ -10,9 +10,8 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
@@ -34,7 +33,7 @@ const StateAnnotation = Annotation.Root({
   }),
   // outputs
   error: Annotation<string>(),
-  results: Annotation<ToolResult[]>({
+  results: Annotation<ToolHandlerResult[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),
@@ -142,7 +141,7 @@ export const createSearchToolGraph = ({
   return graph;
 };
 
-const extractToolResults = (message: BaseMessage): ToolResult[] => {
+const extractToolResults = (message: BaseMessage): ToolHandlerResult[] => {
   if (!isToolMessage(message)) {
     throw new Error(`Trying to extract tool results for non-tool result`);
   }
@@ -154,7 +153,7 @@ const extractToolResults = (message: BaseMessage): ToolResult[] => {
         )}`
       );
     }
-    return message.artifact.results as ToolResult[];
+    return message.artifact.results as ToolHandlerResult[];
   } else {
     const content = extractTextContent(message);
     if (content.startsWith('Error:')) {

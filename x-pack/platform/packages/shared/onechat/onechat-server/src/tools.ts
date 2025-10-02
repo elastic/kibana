@@ -83,10 +83,15 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>> = (
 ) => Promise<RunToolReturn>;
 
 /**
+ * Tool result as returned by the tool handler.
+ */
+export type ToolHandlerResult = Omit<ToolResult, 'result_id'> & { result_id?: string };
+
+/**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
 export interface ToolHandlerReturn {
-  results: ToolResult[];
+  results: ToolHandlerResult[];
 }
 
 /**
@@ -179,6 +184,6 @@ export interface ToolProviderListOptions {
 }
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-export function getToolResultId(len = 4): string {
+export function getToolResultId(len = 6): string {
   return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
 }
