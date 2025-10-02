@@ -50,6 +50,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
     siemMigrations.rules.connectorIdStorage.key,
     undefined
   );
+
   const setSelectedConnector = useCallback(
     (connector: AIConnector) => {
       setStoredConnectorId(connector.id);
