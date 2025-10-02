@@ -33,7 +33,7 @@ Property1
 :   A short description of this property. 
 
 Property2
-:   A short description of this property. Property2:: A short description of this property with format hints. This can be specified in this specific format.
+:   A short description of this property.
 
 % Add preconfigured settings for this connector type in [alerting-settings.md](https://github.com/elastic/kibana/edit/main/docs/reference/configuration-reference/alerting-settings.md) and an example in [pre-configured-connectors.md](https://github.com/elastic/kibana/edit/main/docs/reference/connectors-kibana/pre-configured-connectors.md).
 
