@@ -7,5 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { inject, extract } from './search_inject_extract';
-export { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
+import type {
+  SearchEmbeddableSerializedState,
+  SearchEmbeddableByValueState,
+  SearchEmbeddableByReferenceState,
+} from './types';
+
+export function isByValueState(
+  state: SearchEmbeddableSerializedState
+): state is SearchEmbeddableByValueState {
+  return 'attributes' in state;
+}
+
+export function isByRefState(
+  state: SearchEmbeddableSerializedState
+): state is SearchEmbeddableByReferenceState {
+  return 'savedObjectId' in state;
+}
