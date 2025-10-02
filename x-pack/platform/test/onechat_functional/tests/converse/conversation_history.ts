@@ -100,5 +100,38 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       }
     });
+
+    it('can delete conversations and updates conversation history', async () => {
+      await common.navigateToApp(APP_ID, { path: 'conversations/new' });
+
+      // Wait for conversations to load
+      await retry.try(async () => {
+        const conversationList = await testSubjects.find('agentBuilderConversationList');
+        const conversationText = await conversationList.getVisibleText();
+        expect(conversationText).to.contain('Conversation1');
+        expect(conversationText).to.contain('Conversation2');
+        expect(conversationText).to.contain('Conversation3');
+      });
+
+      // Delete Conversation1
+      const conv1Button = await testSubjects.find('conversationItem-conv-1');
+      await conv1Button.moveMouseTo(); // Hover to show delete button
+
+      const deleteConv1Button = await testSubjects.find('delete-conversation-button');
+      await deleteConv1Button.click();
+
+      // Confirm deletion in modal
+      const confirmDeleteButton1 = await testSubjects.find('confirmModalConfirmButton');
+      await confirmDeleteButton1.click();
+
+      // Wait for Conversation1 to be removed (deletion to complete) and conversation list to update
+      await retry.try(async () => {
+        const conversationList = await testSubjects.find('agentBuilderConversationList');
+        const conversationText = await conversationList.getVisibleText();
+        expect(conversationText).not.to.contain('Conversation1');
+        expect(conversationText).to.contain('Conversation2');
+        expect(conversationText).to.contain('Conversation3');
+      });
+    });
   });
 }
