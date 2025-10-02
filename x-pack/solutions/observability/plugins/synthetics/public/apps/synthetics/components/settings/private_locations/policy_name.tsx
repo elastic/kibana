@@ -75,7 +75,6 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
                   type="warning"
                   color="warning"
                   size="s"
-                  css={{ marginLeft: '4px' }}
                 />
               )}
             </>
@@ -112,6 +111,7 @@ const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents',
 const LEGACY_POLICY_TOOLTIP = i18n.translate(
   'xpack.synthetics.monitorManagement.legacyPolicyTooltip',
   {
-    defaultMessage: 'This policy can only be found in the default space',
+    defaultMessage:
+      "This policy is only available in the default space. Update the policy's space settings to include this space.",
   }
 );
