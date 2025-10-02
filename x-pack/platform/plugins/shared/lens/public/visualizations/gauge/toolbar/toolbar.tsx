@@ -19,7 +19,7 @@ import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';
 import { TitlesAndTextSettings } from './titles_and_text_settings';
 
-export const PopoverToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
+export const Toolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
