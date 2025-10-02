@@ -9,13 +9,19 @@
 
 import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ReactNode, ReactElement, FocusEventHandler, KeyboardEventHandler } from 'react';
+import type {
+  ReactNode,
+  ReactElement,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  MouseEvent,
+  KeyboardEvent,
+  Ref,
+} from 'react';
 import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
-import { useRovingIndex } from '../../hooks/use_roving_index';
-import { useIsElementReady } from '../../hooks/use_is_element_ready';
 import { usePopoverOpen } from './use_popover_open';
 import { usePopoverHover } from './use_popover_hover';
 import { usePersistentPopover } from './use_persistent_popover';
@@ -25,6 +31,10 @@ import {
   TOP_BAR_HEIGHT,
   TOP_BAR_POPOVER_GAP,
 } from '../../constants';
+import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { updateTabIndices } from '../../utils/update_tab_indices';
 
 export interface SideNavPopoverProps {
   container?: HTMLElement;
@@ -33,9 +43,9 @@ export interface SideNavPopoverProps {
   isSidePanelOpen: boolean;
   label: string;
   trigger: ReactElement<{
-    ref?: React.Ref<HTMLElement>;
-    onClick?: (e: React.MouseEvent) => void;
-    onKeyDown?: (e: React.KeyboardEvent) => void;
+    ref?: Ref<HTMLElement>;
+    onClick?: (e: MouseEvent) => void;
+    onKeyDown?: (e: KeyboardEvent) => void;
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
@@ -54,14 +64,11 @@ export const SideNavPopover = ({
 }: SideNavPopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
-  const popoverRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
 
   const { isOpen, open, close } = usePopoverOpen();
   const { isPersistent, setPersistent, clearPersistent } = usePersistentPopover();
-  const isPopoverReady = useIsElementReady(isOpen, popoverRef);
-
-  useRovingIndex(popoverRef, isPopoverReady);
 
   const handleClose = useCallback(() => {
     close();
@@ -91,12 +98,13 @@ export const SideNavPopover = ({
     (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         trigger.props.onKeyDown?.(e);
-        if (hasContent && !e.defaultPrevented) {
+
+        if (hasContent) {
           // Required for entering the popover with Enter or Space key
           // Otherwise the navigation happens immediately
           e.preventDefault();
           open();
-          setTimeout(() => focusFirstElement(popoverRef), 0);
+          focusFirstElement(popoverRef);
         }
       } else {
         trigger.props.onKeyDown?.(e);
@@ -105,29 +113,43 @@ export const SideNavPopover = ({
     [trigger, hasContent, open]
   );
 
-  const handlePopoverKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+  const handlePopoverKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
+    (e) => {
       if (e.key === 'Escape') {
         handleClose();
         triggerRef.current?.focus();
+        return;
       }
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        handleClose();
+        focusAdjacentTrigger(triggerRef, e.shiftKey ? -1 : 1);
+        return;
+      }
+
+      handleRovingIndex(e);
     },
-    [handleClose, triggerRef]
+    [handleClose]
   );
 
-  const handleBlur: FocusEventHandler = (e) => {
-    clearTimeout();
+  const handleBlur: FocusEventHandler = useCallback(
+    (e) => {
+      clearTimeout();
 
-    const nextFocused = e.relatedTarget as Node;
-    const isStayingInComponent =
-      nextFocused &&
-      (triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused));
+      const nextFocused = e.relatedTarget;
+      const isStayingInComponent =
+        nextFocused &&
+        (triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused));
 
-    if (!isStayingInComponent) {
-      handleClose();
-    }
-  };
+      if (!isStayingInComponent) {
+        handleClose();
+      }
+    },
+    [clearTimeout, handleClose]
+  );
 
+  // Clean up on unmount
   useEffect(() => {
     return () => {
       clearTimeout();
@@ -135,23 +157,13 @@ export const SideNavPopover = ({
     };
   }, [clearTimeout, handleClose]);
 
-  useEffect(() => {
-    const popover = popoverRef.current;
-
-    if (popover && isOpen) {
-      popover.addEventListener('keydown', handlePopoverKeyDown, true);
-
-      return () => popover.removeEventListener('keydown', handlePopoverKeyDown, true);
-    }
-  }, [isOpen, handleClose, triggerRef, handlePopoverKeyDown]);
-
   const enhancedTrigger = useMemo(
     () =>
       cloneElement(trigger, {
         ref: triggerRef,
         'aria-haspopup': hasContent,
         'aria-expanded': hasContent ? isOpen : undefined,
-        onClick: (e: React.MouseEvent) => {
+        onClick: (e: MouseEvent) => {
           trigger.props.onClick?.(e);
           handleTriggerClick();
         },
@@ -200,11 +212,23 @@ export const SideNavPopover = ({
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <div ref={popoverRef} css={popoverContentStyles}>
+        <div
+          ref={(ref) => {
+            if (ref) {
+              const elements = getFocusableElements(ref);
+              updateTabIndices(elements);
+            }
+
+            popoverRef.current = ref;
+          }}
+          onKeyDown={handlePopoverKeyDown}
+          css={popoverContentStyles}
+        >
           {typeof children === 'function' ? children(handleClose) : children}
         </div>
       </EuiPopover>
       {persistent && isPersistent && isOpen && (
+        // The persistent popover does not affect keyboard navigation users
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <div onClick={handleClose} css={maskStyles} />
       )}
