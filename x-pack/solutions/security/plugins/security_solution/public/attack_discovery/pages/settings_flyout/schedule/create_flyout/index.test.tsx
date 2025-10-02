@@ -115,16 +115,9 @@ describe('CreateFlyout', () => {
       fireEvent.click(closeButton);
     });
 
-    // Since the form has unsaved changes during initialization (due to filter manager setup),
-    // clicking close should show the confirmation modal instead of directly calling onClose
     await waitFor(() => {
-      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+      expect(defaultProps.onClose).toHaveBeenCalled();
     });
-
-    // Click discard to actually close the flyout
-    fireEvent.click(screen.getByTestId('discardChanges'));
-
-    expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
   describe('confirmation modal', () => {

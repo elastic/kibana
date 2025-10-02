@@ -6,7 +6,7 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { rootRequest } from './common';
+import { rootRequest, waitForRootRequest } from './common';
 
 export const createConnector = (connector: Record<string, unknown>) =>
   rootRequest<Connector>({
@@ -14,6 +14,9 @@ export const createConnector = (connector: Record<string, unknown>) =>
     url: '/api/actions/connector',
     body: connector,
   });
+
+export const waitForConnectorCreation = (connector: Record<string, unknown>) =>
+  waitForRootRequest<Connector>(createConnector(connector));
 
 const slackConnectorAPIPayload = {
   connector_type_id: '.slack',
@@ -48,6 +51,6 @@ export const bedrockConnectorAPIPayload = {
   name: 'Bedrock cypress test e2e connector',
 };
 
-export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
-export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
-export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);
+export const createSlackConnector = () => waitForConnectorCreation(slackConnectorAPIPayload);
+export const createAzureConnector = () => waitForConnectorCreation(azureConnectorAPIPayload);
+export const createBedrockConnector = () => waitForConnectorCreation(bedrockConnectorAPIPayload);

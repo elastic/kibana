@@ -105,6 +105,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertEmptySystemPrompt();
       typeAndSendMessage('hello');
       assertMessageSent('hello');
+      assertErrorResponse();
     });
 
     it('Last selected system prompt persists in conversation', () => {
@@ -116,6 +117,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       typeAndSendMessage('hello');
       assertSystemPromptSent(customPrompt2.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
       resetConversation();
       assertSystemPromptSelected(customPrompt2.name);
       selectConversation(mockConvo2.title);
@@ -134,6 +136,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       typeAndSendMessage('hello');
       assertSystemPromptSent(testPrompt.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
     });
 
     // due to the missing profile_uid when creating conversations from the API
@@ -160,6 +163,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
       assertSystemPromptSent(testPrompt.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
     });
   });
   describe('Quick Prompts', () => {
@@ -169,6 +173,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       createQuickPrompt(testPrompt.name, testPrompt.content);
       sendQuickPrompt(testPrompt.name);
       assertMessageSent(testPrompt.content);
+      assertErrorResponse();
     });
     it('Add a quick prompt with context and it is only available in the selected context', () => {
       visitGetStartedPage();

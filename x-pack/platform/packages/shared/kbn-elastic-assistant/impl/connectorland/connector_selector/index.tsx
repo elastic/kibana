@@ -106,17 +106,6 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       [aiConnectors, onConnectorSelectionChange, setModalForceOpen, setOptimisticConnectorId]
     );
 
-    useEffect(() => {
-      const firstConnectorId = aiConnectors?.[0]?.id;
-      if (
-        selectedConnectorId === undefined &&
-        aiConnectors?.length === 1 &&
-        firstConnectorId // ensure the connector has an ID
-      ) {
-        onChange(firstConnectorId);
-      }
-    }, [selectedConnectorId, aiConnectors, onChange]);
-
     const cleanupAndCloseModal = useCallback(() => {
       setIsOpen?.(false);
       setIsConnectorModalVisible(false);
