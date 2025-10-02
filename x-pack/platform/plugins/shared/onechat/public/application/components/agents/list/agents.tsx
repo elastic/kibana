@@ -45,6 +45,7 @@ export const OnechatAgents = () => {
           pageTitle={i18n.translate('xpack.onechat.agents.title', {
             defaultMessage: 'Agents',
           })}
+          iconType="flask"
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"

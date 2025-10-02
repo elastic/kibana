@@ -28,6 +28,7 @@ export const OnechatTools = () => {
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
         pageTitle={labels.tools.title}
+        iconType="flask"
         description={
           <FormattedMessage
             id="xpack.onechat.tools.toolsDescription"
