@@ -341,10 +341,6 @@ export class Parser {
     try {
       return this.parseTarget<ESQLAstQueryExpression>(['statements', 'fromStatements']);
     } catch (error) {
-      if (error !== 'Empty Stack')
-        // eslint-disable-next-line no-console
-        console.error(error);
-
       const root = Builder.expression.query();
 
       return {

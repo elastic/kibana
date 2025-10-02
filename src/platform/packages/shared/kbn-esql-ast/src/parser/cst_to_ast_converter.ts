@@ -169,6 +169,7 @@ export class CstToAstConverter {
   }
 
   fromSingleStatement(ctx: cst.SingleStatementContext): ast.ESQLAstQueryExpression | undefined {
+    if (!ctx) return undefined;
     return this.fromAnyQuery(ctx.query());
   }
 
