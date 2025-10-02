@@ -19,7 +19,7 @@ export type ESQLAstCommand =
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
+export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
