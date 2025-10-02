@@ -216,7 +216,6 @@ export const withRulesTableRefresh = (action: () => void, timeout: number = 3000
   let initialTimestamp: number;
 
   cy.get(RULES_MANAGEMENT_TABLE)
-    .should('have.attr', 'data-last-updated')
     .invoke('attr', 'data-last-updated')
     .then((timestamp) => {
       initialTimestamp = parseInt(timestamp as string, 10);
@@ -226,13 +225,17 @@ export const withRulesTableRefresh = (action: () => void, timeout: number = 3000
       // Execute the action that triggers refresh
       action();
 
-      // Wait for the table to refresh (timestamp increases)
+      // Wait for the timestamp to be GREATER than initial (this will retry!)
       cy.get(RULES_MANAGEMENT_TABLE, { timeout })
-        .should('have.attr', 'data-last-updated')
-        .invoke('attr', 'data-last-updated')
-        .then((newTimestampString) => {
-          const newTimestamp = parseInt(newTimestampString as string, 10);
-          expect(newTimestamp).to.be.greaterThan(initialTimestamp);
+        .should(($table) => {
+          const currentTimestampString = $table.attr('data-last-updated');
+          const currentTimestamp = parseInt(currentTimestampString || '0', 10);
+
+          // This assertion will retry until it passes or times out
+          expect(currentTimestamp).to.be.greaterThan(initialTimestamp);
+        })
+        .then(($table) => {
+          const newTimestamp = parseInt($table.attr('data-last-updated') || '0', 10);
           cy.log(`Table refreshed. New timestamp: ${newTimestamp} (was: ${initialTimestamp})`);
         });
     });
