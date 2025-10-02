@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiLoadingSpinner,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import type {
   ApplicationStart,
@@ -127,42 +128,44 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
 
     return (
       <KibanaContextProvider services={dependencies}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="s">
-                <h1 id="inspector-panel-title">{title}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectorViewChooser
-                views={views}
-                onViewSelected={this.onViewSelected}
-                selectedView={selectedView}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody
-          css={css({
-            '.euiFlyoutBody__overflowContent': {
-              height: '100%',
-              display: 'flex',
-              flexWrap: 'nowrap',
-              flexDirection: 'column',
+        <EuiFocusTrap>
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="s">
+                  <h1 id="inspector-panel-title">{title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectorViewChooser
+                  views={views}
+                  onViewSelected={this.onViewSelected}
+                  selectedView={selectedView}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody
+            css={css({
+              '.euiFlyoutBody__overflowContent': {
+                height: '100%',
+                display: 'flex',
+                flexWrap: 'nowrap',
+                flexDirection: 'column',
 
-              '> div': {
-                flexGrow: 0,
-              },
+                '> div': {
+                  flexGrow: 0,
+                },
 
-              '.insRequestCodeViewer': {
-                flexGrow: 1,
+                '.insRequestCodeViewer': {
+                  flexGrow: 1,
+                },
               },
-            },
-          })}
-        >
-          {this.renderSelectedPanel()}
-        </EuiFlyoutBody>
+            })}
+          >
+            {this.renderSelectedPanel()}
+          </EuiFlyoutBody>
+        </EuiFocusTrap>
       </KibanaContextProvider>
     );
   }

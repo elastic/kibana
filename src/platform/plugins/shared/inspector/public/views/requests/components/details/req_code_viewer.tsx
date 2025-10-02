@@ -78,7 +78,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
           languageId={XJsonLang.ID}
           value={value}
           options={{
-            readOnly: true,
+            readOnly: true, // !!!!!!
             lineNumbers: 'off',
             fontSize: 12,
             minimap: {
@@ -89,6 +89,10 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
             wordWrap: 'on',
             wrappingIndent: 'indent',
             automaticLayout: true,
+
+            // tabFocusMode: false,
+            // tabIndex: 0,
+            // accessibilityHelpUrl: '',
           }}
         />
       </EuiFlexItem>
