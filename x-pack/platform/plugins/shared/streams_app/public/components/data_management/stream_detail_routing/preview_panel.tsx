@@ -226,14 +226,13 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        {!isNaN(matchedDocumentPercentage) && (
-          <DocumentMatchFilterControls
-            initialFilter={samplesSnapshot.context.documentMatchFilter}
-            onFilterChange={setDocumentMatchFilter}
-            matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
-            isDisabled={!!documentsError || !condition}
-          />
-        )}
+        <DocumentMatchFilterControls
+          onFilterChange={setDocumentMatchFilter}
+          matchedDocumentPercentage={
+            isNaN(matchedDocumentPercentage) ? undefined : Math.round(matchedDocumentPercentage)
+          }
+          isDisabled={!!documentsError || !condition}
+        />
         {content}
       </EuiFlexGroup>
     </>

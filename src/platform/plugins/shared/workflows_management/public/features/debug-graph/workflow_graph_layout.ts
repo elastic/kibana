@@ -10,7 +10,6 @@
 import dagre from '@dagrejs/dagre';
 import type { Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
-import { openScopeNodes, closeScopeNodes } from './nodes/types';
 
 /**
  * Converts a workflow graph into positioned ReactFlow nodes and edges using Dagre layout algorithm.
@@ -41,7 +40,7 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
   topologySort
     .map((nodeId) => graph.node(nodeId))
     .forEach((node: any) => {
-      if (closeScopeNodes.includes(node.type)) {
+      if (node.type.startsWith('exit')) {
         stack.pop();
       }
 
@@ -53,7 +52,7 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
       if (stack.length > maxDepth) {
         maxDepth = stack.length;
       }
-      if (openScopeNodes.includes(node.type)) {
+      if (node.type.startsWith('enter')) {
         stack.push(node.type);
       }
     });
