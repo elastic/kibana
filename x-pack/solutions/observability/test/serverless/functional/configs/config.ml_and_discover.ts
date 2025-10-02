@@ -15,11 +15,10 @@ export default createTestConfig({
   pageObjects,
   testFiles: [require.resolve('./index.ml_and_discover.ts')],
   junit: {
-    reportName: 'Serverless Observability Functional Tests',
+    reportName: 'Serverless Observability ML and Discover Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
 
-  // include settings from project controller
   esServerArgs: [],
   kbnServerArgs: [],
 });
