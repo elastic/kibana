@@ -140,19 +140,17 @@ export const indexExplorer = async ({
       `index_explorer - found ${indexCount} indices, ${aliasCount} aliases, ${dataStreamCount} datastreams for query="${nlQuery}"`
   );
 
-  if (totalCount === 0) {
-    return { resources: [] };
-  }
-  if (totalCount === 1) {
-    const resource = [...sources.indices, ...sources.aliases, ...sources.data_streams][0];
+  if (totalCount <= limit) {
     return {
-      resources: [
-        {
-          name: resource.name,
-          type: resource.type,
-          reason: 'Index pattern matched exactly one resource',
-        },
-      ],
+      resources: [...sources.indices, ...sources.aliases, ...sources.data_streams].map(
+        (resource) => {
+          return {
+            type: resource.type,
+            name: resource.name,
+            reason: `Index pattern matched less resources that the specified limit of ${limit}.`,
+          };
+        }
+      ),
     };
   }
 
