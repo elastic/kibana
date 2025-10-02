@@ -212,14 +212,38 @@ export const waitForRuleExecution = (name: string) => {
   });
 };
 
+export const withRulesTableRefresh = (action: () => void, timeout: number = 30000) => {
+  let initialTimestamp: number;
+
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .should('have.attr', 'data-last-updated')
+    .invoke('attr', 'data-last-updated')
+    .then((timestamp) => {
+      initialTimestamp = parseInt(timestamp as string, 10);
+      cy.log(`Initial timestamp: ${initialTimestamp}`);
+    })
+    .then(() => {
+      // Execute the action that triggers refresh
+      action();
+
+      // Wait for the table to refresh (timestamp increases)
+      cy.get(RULES_MANAGEMENT_TABLE, { timeout })
+        .should('have.attr', 'data-last-updated')
+        .invoke('attr', 'data-last-updated')
+        .then((newTimestampString) => {
+          const newTimestamp = parseInt(newTimestampString as string, 10);
+          expect(newTimestamp).to.be.greaterThan(initialTimestamp);
+          cy.log(`Table refreshed. New timestamp: ${newTimestamp} (was: ${initialTimestamp})`);
+        });
+    });
+};
+
 export const filterByElasticRules = () => {
-  cy.get(ELASTIC_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
+  withRulesTableRefresh(() => cy.get(ELASTIC_RULES_BTN).click());
 };
 
 export const filterByCustomRules = () => {
-  cy.get(CUSTOM_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
+  withRulesTableRefresh(() => cy.get(CUSTOM_RULES_BTN).click());
 };
 
 export const filterByEnabledRules = () => {
@@ -293,11 +317,6 @@ export const confirmRulesDelete = () => {
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
   cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
-};
-
-export const waitForRulesTableToBeRefreshed = () => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
