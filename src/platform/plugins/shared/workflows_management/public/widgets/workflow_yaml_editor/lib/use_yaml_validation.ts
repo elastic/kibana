@@ -12,6 +12,8 @@ import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
 import { WorkflowGraph, isEnterForeach } from '@kbn/workflows/graph';
+import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
+import { getForeachItemSchema } from '../../../features/workflow_context/lib/get_foreach_state_schema';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   parseWorkflowYamlToJSON,
@@ -138,9 +140,7 @@ const collectAllStepNames = (yamlDocument: any): StepNameInfo[] => {
 export interface UseYamlValidationResult {
   error: Error | null;
   validationErrors: YamlValidationError[] | null;
-  validateVariables: (
-    editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor
-  ) => void;
+  validateVariables: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   handleMarkersChanged: (
     editor: monaco.editor.IStandaloneCodeEditor,
     modelUri: monaco.Uri,
@@ -157,20 +157,12 @@ export function useYamlValidation({
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
-  // Function to validate mustache expressions and apply decorations
   const validateVariables = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor) => {
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
       const model = editor.getModel();
       if (!model) {
         return;
       }
-
-      if ('original' in model) {
-        // TODO: validate diff editor
-        return;
-      }
-
-      editor = editor as monaco.editor.IStandaloneCodeEditor;
 
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
@@ -272,7 +264,7 @@ export function useYamlValidation({
           let severity: YamlValidationErrorSeverity = 'error';
 
           const path = getCurrentPath(yamlDocument, start);
-          let context = null;
+          let context: typeof DynamicStepContextSchema | null = null;
           if (result.success) {
             try {
               context = getContextSchemaForPath(result.data, workflowGraph!, path);
@@ -290,7 +282,18 @@ export function useYamlValidation({
             if (!parsedPath) {
               errorMessage = `Invalid variable path: ${key}`;
             } else if (parsedPath.errors) {
-              errorMessage = parsedPath.errors.join(', ');
+              if (type === 'foreach' && context) {
+                try {
+                  const itemSchema = getForeachItemSchema(context, key);
+                  hoverMessage = `<pre>(property) ${key}: ${getDetailedTypeDescription(
+                    itemSchema
+                  )}</pre>`;
+                } catch (e) {
+                  errorMessage = `Foreach parameter can be an array or a JSON string. ${key} is not valid JSON`;
+                }
+              } else {
+                errorMessage = parsedPath.errors.join(', ');
+              }
             } else if (parsedPath?.propertyPath && !errorMessage) {
               if (!context) {
                 severity = 'warning';
