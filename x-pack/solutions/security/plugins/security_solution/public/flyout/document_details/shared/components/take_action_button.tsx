@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEuiTheme, EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, useEuiTheme } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -25,6 +25,7 @@ import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { IsolateHostPanelHeader } from '../../isolate_host/header';
 import { IsolateHostPanelContent } from '../../isolate_host/content';
+
 interface AlertSummaryData {
   /**
    * Status of the alert (open, closed...)
@@ -53,9 +54,8 @@ interface AlertSummaryData {
  */
 export const TakeActionButton: FC = () => {
   const { euiTheme } = useEuiTheme();
-  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
-  const flyoutZIndex = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
     [euiTheme]
   );
 
@@ -190,7 +190,7 @@ export const TakeActionButton: FC = () => {
           data={dataAsNestedObject}
           onCancel={closeAddEventFilterModal}
           // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={flyoutZIndex} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+          maskProps={maskProps}
         />
       )}
 
@@ -205,7 +205,7 @@ export const TakeActionButton: FC = () => {
 
       {isHostIsolationPanelOpen && (
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={flyoutZIndex}>
+        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={maskProps}>
           <IsolateHostPanelHeader
             isolateAction={isolateAction}
             data={dataFormattedForFieldBrowser}
