@@ -11,8 +11,7 @@ import React, { FC, useMemo } from 'react';
 import {
   EuiInMemoryTable,
   EuiLoadingElastic,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
@@ -165,9 +164,11 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               ),
               width: '50px',
               render: (type, { icon }) => (
-                <EuiToolTip position="top" content={getSavedObjectLabel(type, allowedTypes)}>
-                  <EuiIcon type={icon} />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={getSavedObjectLabel(type, allowedTypes)}
+                  type={icon}
+                />
               ),
             },
             {

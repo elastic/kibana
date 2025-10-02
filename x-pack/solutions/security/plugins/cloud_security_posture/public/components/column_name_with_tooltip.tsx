@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiToolTipProps } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 
 export const ColumnNameWithTooltip = ({
@@ -20,9 +20,7 @@ export const ColumnNameWithTooltip = ({
       <span>{columnName}</span>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiToolTip content={tooltipContent}>
-        <EuiIcon size="m" color="subdued" type="info" />
-      </EuiToolTip>
+      <EuiIconTip content={tooltipContent} type="info" size="m" color="subdued" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

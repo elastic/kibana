@@ -63,7 +63,7 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: HeartbeatConfig, locId: string, spaceId: string) {
+  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
     if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
       return `${config.id}-${locId}`;
     }
