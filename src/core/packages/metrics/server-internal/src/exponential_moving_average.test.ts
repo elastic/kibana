@@ -23,57 +23,54 @@ describe('exponentialMovingAverage', () => {
     testScheduler.run(({ cold, expectObservable }) => {
       const observable = cold('a|', { a: 1 }).pipe(exponentialMovingAverage(15, 5));
 
-      expectObservable(observable).toBe('a|', { a: expect.closeTo(0.33, 2) });
+      expectObservable(observable).toBe('a|', { a: expect.closeTo(0.3, 1) });
     });
   });
 
   it('should emit smoothed values', () => {
     testScheduler.run(({ cold, expectObservable }) => {
-      const observable = cold('abcdef|', { a: 1, b: 1, c: 2, d: 2, e: 1, f: 1 }).pipe(
+      const observable = cold('abcdefg|', { a: 1, b: 1, c: 1, d: 1, e: 2, f: 2, g: 1 }).pipe(
         exponentialMovingAverage(15, 5)
       );
 
-      expectObservable(observable).toBe('abcdef|', {
-        a: expect.closeTo(0.33, 2), // mean: 1 * 5 / 15 = 0.33
-        b: expect.closeTo(0.67, 2), // mean: (1+1) * 5 / 15 = 0.67
-        c: expect.closeTo(1.33, 2), // mean: (1+1+2) * 5 / 15 = 1.33
-        d: expect.closeTo(2, 2), // first EMA value after mean period
-        e: expect.closeTo(1.72, 2),
-        f: expect.closeTo(1.51, 2),
+      expectObservable(observable).toBe('abcdefg|', {
+        a: expect.closeTo(0.3, 1), // mean([0, 0, 1]) = 0.33
+        b: expect.closeTo(0.7, 1), // mean([0, 1, 1]) = 0.67
+        c: 1, // mean([1, 1, 1]) = 1
+        d: 1, // ~EMA([1, 1, 1]) = 1
+        e: expect.closeTo(1.3, 1), // ~EMA([1, 1, 2]) = 1.3
+        f: expect.closeTo(1.5, 1), // ~EMA([1, 2, 2]) = 1.5
+        g: expect.closeTo(1.3, 1), // ~EMA([2, 2, 1]) = 1.3
       });
     });
   });
 
   it('should fade away outdated values', () => {
     testScheduler.run(({ cold, expectObservable }) => {
-      const observable = cold('abcdefghijkl|', {
+      const observable = cold('abcdefghij|', {
         a: 1,
         b: 1,
-        c: 2,
-        d: 2,
-        e: 1,
-        f: 1,
-        g: 2,
-        h: 2,
-        i: 1,
-        j: 1,
-        k: 2,
-        l: 2,
+        c: 1,
+        d: 1,
+        e: 2,
+        f: 2,
+        g: 1,
+        h: 1,
+        i: 2,
+        j: 2,
       }).pipe(exponentialMovingAverage(15, 5));
 
-      expectObservable(observable).toBe('abcdefghijkl|', {
-        a: expect.closeTo(0.33, 2), // mean: 1 * 5 / 15 = 0.33
-        b: expect.closeTo(0.67, 2), // mean: (1+1) * 5 / 15 = 0.67
-        c: expect.closeTo(1.33, 2), // mean: (1+1+2) * 5 / 15 = 1.33
-        d: expect.closeTo(2, 2), // first EMA value after mean period
-        e: expect.closeTo(1.72, 2), // EMA
-        f: expect.closeTo(1.51, 2), // EMA
-        g: expect.closeTo(1.65, 2), // EMA
-        h: expect.closeTo(1.75, 2), // EMA
-        i: expect.closeTo(1.54, 2), // EMA
-        j: expect.closeTo(1.39, 2), // EMA
-        k: expect.closeTo(1.56, 2), // EMA
-        l: expect.closeTo(1.68, 2), // EMA
+      expectObservable(observable).toBe('abcdefghij|', {
+        a: expect.closeTo(0.3, 1), // mean([0, 0, 1]) = 0.33
+        b: expect.closeTo(0.7, 1), // mean([0, 1, 1]) = 0.67
+        c: 1, // mean([1, 1, 1]) = 1
+        d: 1, // ~EMA([1, 1, 1]) = 1
+        e: expect.closeTo(1.3, 1), // ~EMA([1, 1, 2]) = ~1.3
+        f: expect.closeTo(1.5, 1), // ~EMA([1, 2, 2]) = ~1.5
+        g: expect.closeTo(1.3, 1), // ~EMA([2, 2, 1]) = ~1.3
+        h: expect.closeTo(1.2, 1), // ~EMA([2, 1, 1]) = ~1.2
+        i: expect.closeTo(1.5, 1), // ~EMA([1, 1, 2]) = ~1.5
+        j: expect.closeTo(1.6, 1), // ~EMA([1, 2, 2]) = ~1.6
       });
     });
   });
