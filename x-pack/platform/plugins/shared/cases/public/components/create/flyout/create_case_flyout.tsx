@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
@@ -43,7 +43,12 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   }) => {
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
+
     const { euiTheme } = useEuiTheme();
+    const maskProps = useMemo(
+      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
+      [euiTheme.levels.flyout]
+    );
 
     return (
       <>
@@ -54,7 +59,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
           aria-label={i18n.CREATE_CASE_LABEL}
           data-test-subj="create-case-flyout"
           // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+          maskProps={maskProps}
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">

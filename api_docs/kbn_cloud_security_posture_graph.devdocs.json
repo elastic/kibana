@@ -21,7 +21,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ") => \"na\" | \"single-alert\" | \"single-event\" | \"single-entity\" | \"grouped-events\" | \"grouped-entities\""
+          ") => \"na\" | \"grouped-entities\" | \"grouped-events\" | \"single-alert\" | \"single-event\" | \"single-entity\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
         "deprecated": false,
@@ -141,6 +141,62 @@
             ],
             "signature": [
               "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphGroupedNodePreviewPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "GraphGroupedNodePreviewPanel",
+        "description": [
+          "\nPanel to be displayed in the document details expandable flyout on top of right section"
+        ],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.GraphGroupedNodePreviewPanelProps",
+            "text": "GraphGroupedNodePreviewPanelProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanel.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanel.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
@@ -486,6 +542,91 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphGroupedNodePreviewPanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "GraphGroupedNodePreviewPanelProps",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanelProps.showLoadingState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showLoadingState",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanelProps.docMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "docMode",
+            "description": [],
+            "signature": [
+              "\"grouped-entities\" | \"grouped-events\""
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanelProps.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanelProps.documentIds",
+            "type": "Array",
+            "tags": [],
+            "label": "documentIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphGroupedNodePreviewPanelProps.entityItems",
+            "type": "Array",
+            "tags": [],
+            "label": "entityItems",
+            "description": [],
+            "signature": [
+              "EntityItem",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.GraphProps",
         "type": "Interface",
         "tags": [],
@@ -747,6 +888,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphGroupedNodePreviewPanelKey",
+        "type": "string",
+        "tags": [],
+        "label": "GraphGroupedNodePreviewPanelKey",
+        "description": [],
+        "signature": [
+          "\"graphGroupedNodePreviewPanel\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.NodeProps",
         "type": "Type",
         "tags": [],
@@ -818,7 +974,55 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GROUP_PREVIEW_BANNER",
+        "type": "Object",
+        "tags": [],
+        "label": "GROUP_PREVIEW_BANNER",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GROUP_PREVIEW_BANNER.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GROUP_PREVIEW_BANNER.backgroundColor",
+            "type": "string",
+            "tags": [],
+            "label": "backgroundColor",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GROUP_PREVIEW_BANNER.textColor",
+            "type": "string",
+            "tags": [],
+            "label": "textColor",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
