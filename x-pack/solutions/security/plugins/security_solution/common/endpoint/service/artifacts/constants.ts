@@ -34,9 +34,8 @@ export const PROCESS_DESCENDANT_EXTRA_ENTRY: EntryMatch = Object.freeze({
 export const PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT: string = `${
   PROCESS_DESCENDANT_EXTRA_ENTRY.field
 } ${
-  ENDPOINT_ARTIFACT_OPERATORS.find(
-    ({ type }) => type === PROCESS_DESCENDANT_EXTRA_ENTRY.type
-  )?.message
+  ENDPOINT_ARTIFACT_OPERATORS.find(({ type }) => type === PROCESS_DESCENDANT_EXTRA_ENTRY.type)
+    ?.message
 } ${PROCESS_DESCENDANT_EXTRA_ENTRY.value}`;
 
 // TODO: refact all uses of `ALL_ENDPOINT_ARTIFACTS_LIST_IDS to sue new const from shared package

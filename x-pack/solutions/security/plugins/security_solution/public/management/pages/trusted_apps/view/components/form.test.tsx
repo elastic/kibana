@@ -30,7 +30,7 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
@@ -530,7 +530,9 @@ describe('Trusted apps form', () => {
 
       describe.only('Process Descendants', () => {
         beforeEach(() => {
-          mockedContext.setExperimentalFlag({ filterProcessDescendantsForTrustedAppsEnabled: true });
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForTrustedAppsEnabled: true,
+          });
         });
 
         it('should not display button when feature flag is disabled', () => {
@@ -555,7 +557,7 @@ describe('Trusted apps form', () => {
           expect(
             renderResult.queryByTestId('trustedApps-processDescendantsSelector')
           ).not.toBeInTheDocument();
-        })
+        });
 
         it('should add the tag "trust_process_descendants" when the button is selected', async () => {
           const propsItem: Partial<ArtifactFormComponentProps['item']> = {
@@ -564,7 +566,9 @@ describe('Trusted apps form', () => {
 
           formProps.item = { ...formProps.item, ...propsItem };
           render();
-          await userEvent.click(renderResult.getByTestId('trustedApps-filterProcessDescendantsButton'));
+          await userEvent.click(
+            renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
+          );
 
           const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
             tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],

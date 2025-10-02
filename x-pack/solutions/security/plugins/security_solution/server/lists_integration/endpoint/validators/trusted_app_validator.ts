@@ -15,6 +15,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -23,7 +24,6 @@ import {
   isValidHash,
 } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 
 const ProcessHashField = schema.oneOf([
   schema.literal('process.hash.md5'),
@@ -52,11 +52,11 @@ type TrustedAppConditionEntry<
   T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
 > =
   | {
-    field: T;
-    type: TrustedAppEntryTypes;
-    operator: 'included';
-    value: string;
-  }
+      field: T;
+      type: TrustedAppEntryTypes;
+      operator: 'included';
+      value: string;
+    }
   | TypeOf<typeof SignerWindowsEntrySchema>
   | TypeOf<typeof SignerMacEntrySchema>;
 
