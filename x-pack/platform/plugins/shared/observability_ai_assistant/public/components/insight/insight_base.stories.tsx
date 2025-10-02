@@ -47,6 +47,7 @@ const defaultProps: InsightBaseProps = {
         loading: false,
         selectConnector: () => {},
         reloadConnectors: () => {},
+        isConnectorSelectionRestricted: false,
       }}
       onEditPrompt={() => {}}
     />
