@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -109,39 +109,24 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      {lensProps ? (
-        <>
-          <LensWrapperMemo
-            lensProps={lensProps}
-            services={services}
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-            abortController={abortController}
-            onViewDetails={handleViewDetails}
-            onCopyToDashboard={toggleSaveModalVisible}
-            loading={loading}
-          />
-          {isSaveModalVisible && (
-            <SaveModalComponent
-              initialInput={{ attributes: lensProps.attributes }}
-              onClose={toggleSaveModalVisible}
-              // Disables saving ESQL charts to the library.
-              // it will only copy it to a dashboard
-              isSaveable={false}
-            />
-          )}
-        </>
-      ) : (
-        <EuiFlexGroup
-          style={{ height: '100%' }}
-          justifyContent="center"
-          alignItems="center"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <LensWrapperMemo
+        lensProps={lensProps}
+        services={services}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        abortController={abortController}
+        onViewDetails={handleViewDetails}
+        onCopyToDashboard={toggleSaveModalVisible}
+        loading={loading}
+      />
+      {isSaveModalVisible && (
+        <SaveModalComponent
+          initialInput={{ attributes: lensProps?.attributes }}
+          onClose={toggleSaveModalVisible}
+          // Disables saving ESQL charts to the library.
+          // it will only copy it to a dashboard
+          isSaveable={false}
+        />
       )}
     </div>
   );

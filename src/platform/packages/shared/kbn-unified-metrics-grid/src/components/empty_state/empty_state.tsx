@@ -16,6 +16,8 @@ import {
   EuiIcon,
   EuiProgress,
   EuiDelayRender,
+  EuiLoadingChart,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +45,7 @@ export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
       {isLoading ? (
         <EuiFlexItem>
           <EuiDelayRender delay={500}>
-            <ChartLoadingProgress />
+            <GridLoadingProgress />
           </EuiDelayRender>
         </EuiFlexItem>
       ) : (
@@ -68,11 +70,33 @@ export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
   </div>
 );
 
-export const ChartLoadingProgress = () => (
+export const GridLoadingProgress = () => (
   <EuiProgress
     size="xs"
     color="accent"
     position="absolute"
     data-test-subj="metricsExperienceProgressBar"
   />
+);
+
+export const ChartLoadingProgress = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiProgress
+      size="xs"
+      color="accent"
+      position="absolute"
+      css={css`
+        top: ${euiTheme.size.l};
+        z-index: ${Number(euiTheme.levels.menu) + 1};
+      `}
+    />
+  );
+};
+
+export const ChartLoadingIcon = () => (
+  <EuiFlexItem grow={false}>
+    <EuiLoadingChart size="l" />
+  </EuiFlexItem>
 );
