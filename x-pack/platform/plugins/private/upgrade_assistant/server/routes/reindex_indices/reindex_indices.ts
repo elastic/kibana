@@ -102,10 +102,9 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
-
       const soClient = new SavedObjectsClient(
         getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
-    );
+      );
 
       const reindexActions = reindexActionsFactory(soClient, asCurrentUser);
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
