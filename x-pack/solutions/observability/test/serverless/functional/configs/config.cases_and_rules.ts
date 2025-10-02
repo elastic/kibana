@@ -13,9 +13,9 @@ export default createTestConfig({
   serverlessProject: 'oblt',
   services,
   pageObjects,
-  testFiles: [require.resolve('.')],
+  testFiles: [require.resolve('./index.cases_and_rules.ts')],
   junit: {
-    reportName: 'Serverless Observability Functional Tests',
+    reportName: 'Serverless Observability Cases and Rules Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
 

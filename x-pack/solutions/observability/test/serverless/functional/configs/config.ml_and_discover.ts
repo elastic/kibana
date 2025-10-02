@@ -13,7 +13,7 @@ export default createTestConfig({
   serverlessProject: 'oblt',
   services,
   pageObjects,
-  testFiles: [require.resolve('.')],
+  testFiles: [require.resolve('./index.ml_and_discover.ts')],
   junit: {
     reportName: 'Serverless Observability Functional Tests',
   },
