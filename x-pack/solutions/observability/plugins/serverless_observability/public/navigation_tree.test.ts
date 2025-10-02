@@ -11,15 +11,15 @@ import type { GroupDefinition, AppDeepLinkId } from '@kbn/core-chrome-browser';
 describe('Navigation Tree', () => {
   it('should generate tree with overview', () => {
     const navigation = createNavigationTree({});
-    expect((navigation.body[0] as GroupDefinition<AppDeepLinkId, string, string>).children).toEqual(
-      expect.arrayContaining([
-        {
-          title: 'Overview',
-          link: 'observability-overview',
-        },
-      ])
-    );
+    const { body } = navigation;
+    expect(body.length).toBeGreaterThan(0);
+    const firstNavGroup = body[0] as GroupDefinition<AppDeepLinkId, string, string>;
+    expect(firstNavGroup.children[0]).toMatchObject({
+      title: 'Overview',
+      link: 'observability-overview',
+    });
   });
+
   it('should not generate tree with overview', () => {
     const navigation = createNavigationTree({ overviewAvailable: false });
     expect(
