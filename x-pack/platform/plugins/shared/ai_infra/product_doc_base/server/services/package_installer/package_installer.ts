@@ -89,8 +89,8 @@ export class PackageInstaller {
    * Make sure that the currently installed doc packages are up to date.
    * Will not upgrade products that are not already installed
    */
-  async ensureUpToDate(params: { inferenceId: string }) {
-    const { inferenceId } = params;
+  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const { inferenceId, forceUpdate } = params;
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
     const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions({
@@ -112,7 +112,7 @@ export class PackageInstaller {
         return;
       }
       const selectedVersion = selectVersion(this.currentVersion, availableVersions);
-      if (productState.version !== selectedVersion) {
+      if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
         toUpdate.push({
           productName: productName as ProductName,
           productVersion: selectedVersion,
