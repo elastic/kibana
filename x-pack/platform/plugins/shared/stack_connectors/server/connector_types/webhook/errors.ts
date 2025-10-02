@@ -70,10 +70,13 @@ export function errorResultUnexpectedNullResponse(
 
 export function errorInvalidParamsForMethod(
   actionId: string,
-  method: string
+  methodString: string
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.unreachableErrorMessage', {
-    defaultMessage: `error calling webhook, ${method} operation should not define a body`,
+    defaultMessage: 'error calling webhook, {methodString} operation should not define a body',
+    values: {
+      methodString,
+    },
   });
   return {
     status: 'error',
