@@ -210,8 +210,6 @@ export class SyncPrivateLocationMonitorsTask {
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
-    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
-      [];
 
     const { configsBySpaces, paramsBySpace, spaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
