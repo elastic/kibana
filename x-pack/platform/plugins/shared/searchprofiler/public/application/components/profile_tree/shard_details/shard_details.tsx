@@ -7,17 +7,34 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { Index, Operation, Shard } from '../../../types';
 import { msToPretty } from '../../../lib';
 import { ShardDetailTree } from './shard_details_tree';
 import { PercentageBadge } from '../../percentage_badge';
+import { useSharedDetailsStyles } from '../styles';
 
 interface Props {
   index: Index;
   shard: Shard;
   operations: Operation[];
 }
+
+const useStyles = () => {
+  return {
+    // Shard header flex item alignment
+    shardHeaderFlexItem: css`
+      align-self: center;
+    `,
+
+    // Shard details link styling
+    shardDetails: useSharedDetailsStyles().shardDetails,
+
+    // Dim styling for shard details
+    shardDetailsDim: useSharedDetailsStyles().shardDetailsDim,
+  };
+};
 
 const hasVisibleOperation = (ops: Operation[]): boolean => {
   for (const op of ops) {
@@ -33,6 +50,7 @@ const hasVisibleOperation = (ops: Operation[]): boolean => {
 
 export const ShardDetails = ({ index, shard, operations }: Props) => {
   const { relative, time } = shard;
+  const styles = useStyles();
 
   const [shardVisibility, setShardVisibility] = useState<boolean>(() =>
     hasVisibleOperation(operations.map((op) => op.treeRoot ?? op))
@@ -41,9 +59,9 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" direction="row">
-        <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
+        <EuiFlexItem grow={false} css={styles.shardHeaderFlexItem}>
           <EuiLink
-            className="prfDevTool__profileTree__shardDetails"
+            css={styles.shardDetails}
             onClick={() => setShardVisibility(!shardVisibility)}
             data-test-subj="openCloseShardDetails"
           >
@@ -51,8 +69,8 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
             {shard.id[2]}]
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
-          <EuiText className="prfDevTool__shardDetails--dim">
+        <EuiFlexItem grow={false} css={styles.shardHeaderFlexItem}>
+          <EuiText css={styles.shardDetailsDim}>
             <PercentageBadge
               timePercentage={String(relative)}
               label={msToPretty(time as number, 3)}

@@ -12,19 +12,22 @@ import type { QueryLanguageSwitcherProps } from './language_switcher';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 const startMock = coreMock.createStart();
 
-function renderSwitcher(testProps: Omit<QueryLanguageSwitcherProps, 'deps'>) {
-  return renderWithI18n(
+async function renderSwitcher(testProps: Omit<QueryLanguageSwitcherProps, 'deps'>) {
+  const result = renderWithI18n(
     <QueryLanguageSwitcher {...testProps} deps={{ docLinks: startMock.docLinks }} />
   );
+  // Wait for component to be fully rendered
+  await waitFor(() => expect(screen.getByRole('button')).toBeInTheDocument());
+  return result;
 }
 
 describe('LanguageSwitcher', () => {
   it('should select the lucene context menu if language is lucene', async () => {
-    renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
 
     await userEvent.click(screen.getByRole('button'));
     expect(
@@ -33,7 +36,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('should select the kql context menu if language is kuery', async () => {
-    renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
     await userEvent.click(screen.getByRole('button'));
     expect(
       screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
@@ -41,7 +44,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('should select the lucene context menu if language is text', async () => {
-    renderSwitcher({ language: 'text', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'text', onSelectLanguage: jest.fn() });
 
     await userEvent.click(screen.getByRole('button'));
     expect(
@@ -50,7 +53,7 @@ describe('LanguageSwitcher', () => {
   });
   it('it set language on nonKql mode text', async () => {
     const onSelectLanguage = jest.fn();
-    renderSwitcher({
+    await renderSwitcher({
       language: 'kuery',
       nonKqlMode: 'text',
       onSelectLanguage,
@@ -69,7 +72,7 @@ describe('LanguageSwitcher', () => {
   it('it set language on nonKql mode lucene', async () => {
     const onSelectLanguage = jest.fn();
 
-    renderSwitcher({
+    await renderSwitcher({
       language: 'kuery',
       nonKqlMode: 'lucene',
       onSelectLanguage,
@@ -82,7 +85,7 @@ describe('LanguageSwitcher', () => {
   it('it set language on kuery mode with nonKqlMode text', async () => {
     const onSelectLanguage = jest.fn();
 
-    renderSwitcher({
+    await renderSwitcher({
       language: 'text',
       nonKqlMode: 'text',
       onSelectLanguage,
@@ -96,7 +99,7 @@ describe('LanguageSwitcher', () => {
   it('it set language on kuery mode with nonKqlMode lucene', async () => {
     const onSelectLanguage = jest.fn();
 
-    renderSwitcher({
+    await renderSwitcher({
       language: 'lucene',
       nonKqlMode: 'lucene',
       onSelectLanguage,

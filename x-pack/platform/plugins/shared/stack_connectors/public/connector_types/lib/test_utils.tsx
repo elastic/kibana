@@ -18,7 +18,10 @@ import { render as reactRender } from '@testing-library/react';
 import type { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import type {
+  ConnectorFormSchema,
+  InternalConnectorForm,
+} from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
 import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
 import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 
@@ -27,6 +30,8 @@ interface FormTestProviderProps {
   defaultValue?: Record<string, unknown>;
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
   connectorServices?: ConnectorServices;
+  serializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
+  deserializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
 }
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
@@ -38,12 +43,16 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
   connector,
   onSubmit,
   connectorServices,
+  serializer,
+  deserializer,
 }) => {
   return (
     <FormTestProviderComponent
       defaultValue={connector}
       onSubmit={onSubmit}
       connectorServices={connectorServices}
+      serializer={serializer}
+      deserializer={deserializer}
     >
       <ConnectorFormFieldsGlobal canSave={true} />
       {children}
@@ -78,8 +87,10 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
     isWebhookSslWithPfxEnabled: true,
     enabledEmailServices: ['*'],
   },
+  serializer,
+  deserializer,
 }) => {
-  const { form } = useForm({ defaultValue });
+  const { form } = useForm({ defaultValue, serializer, deserializer });
   const { submit } = form;
 
   const onClick = useCallback(async () => {
