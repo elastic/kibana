@@ -27,7 +27,7 @@ export interface LogAlertsParams<
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
-  autoRecoverAlerts: boolean;
+  shouldLogAlerts: boolean;
   shouldPersistAlerts: boolean;
 }
 
@@ -45,7 +45,7 @@ export function logAlerts<
   ruleLogPrefix,
   ruleRunMetricsStore,
   canSetRecoveryContext,
-  autoRecoverAlerts,
+  shouldLogAlerts,
   shouldPersistAlerts,
 }: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
@@ -93,7 +93,7 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
 
-    if (autoRecoverAlerts) {
+    if (shouldLogAlerts) {
       for (const id of recoveredAlertIds) {
         const alert = recoveredAlerts[id];
         const { group: actionGroup } = alert.getLastScheduledActions() ?? {};

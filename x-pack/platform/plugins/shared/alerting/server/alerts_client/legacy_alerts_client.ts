@@ -200,7 +200,8 @@ export class LegacyAlertsClient<
       recoveredAlerts: this.processedAlerts.recovered,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
-      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
+      // don't log alert instance docs to event log if rule type is persistent
+      shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
     });
