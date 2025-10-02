@@ -1398,9 +1398,6 @@ describe('getBulk()', () => {
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        // getBulk method's return type is Connector. Connector doesn't have secrets field but we get it here.
-        // Either we need to change the return type or stop returning secrets
-        // @ts-ignore
         secrets: {
           test: 'test1',
         },
@@ -1556,9 +1553,6 @@ describe('getBulk()', () => {
         id: 'testPreconfigured',
         isPreconfigured: true,
         name: 'test',
-        // getBulk method's return type is Connector. Connector doesn't have secrets field but we get it here.
-        // Either we need to change the return type or stop returning secrets
-        // @ts-ignore
         secrets: {},
       },
       {
@@ -1568,9 +1562,6 @@ describe('getBulk()', () => {
         isMissingSecrets: false,
         isSystemAction: true,
         name: 'System action: .cases',
-        // getBulk method's return type is Connector. Connector doesn't have secrets field but we get it here.
-        // Either we need to change the return type or stop returning secrets
-        // @ts-ignore
         secrets: {},
       },
       {
