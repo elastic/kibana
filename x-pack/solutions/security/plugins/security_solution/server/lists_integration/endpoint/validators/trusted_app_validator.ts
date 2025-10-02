@@ -296,14 +296,22 @@ export class TrustedAppValidator extends BaseValidator {
         this.endpointAppContext.experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled;
       const isAdvancedMode = item.tags.includes('form_mode:advanced');
       const hasProcessDescendants = item.tags.includes(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+      // Validate that the feature flags are enabled if the related features are used
       if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
         throw new Error('Trusted apps advanced mode feature is not enabled');
-      } else if (!isTAProcessDescendantsFeatureFlagEnabled && hasProcessDescendants) {
+      }
+      if (!isTAProcessDescendantsFeatureFlagEnabled && hasProcessDescendants) {
         throw new Error('Trusted apps process descendants feature is not enabled');
-      } else if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
-        TrustedAppAdvancedModeDataSchema.validate(item);
-      } else if (!isAdvancedMode && hasProcessDescendants) {
+      }
+      // Validate that process descendants is only used in advanced mode
+      if (!isAdvancedMode && hasProcessDescendants) {
         throw new Error('Process descendants feature is only allowed on advanced mode');
+      }
+
+      // Validate with the correct schema depending on the mode
+      if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        TrustedAppAdvancedModeDataSchema.validate(item);
       } else {
         TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
       }
