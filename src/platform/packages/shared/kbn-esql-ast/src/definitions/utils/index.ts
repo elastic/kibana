@@ -14,6 +14,7 @@ export {
   getSafeInsertText,
   pushItUpInTheList,
 } from './autocomplete/helpers';
+export { suggestForExpression } from './autocomplete/expression';
 export { getSuggestionsToRightOfOperatorExpression } from './operators';
 export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,

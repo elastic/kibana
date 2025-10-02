@@ -333,6 +333,8 @@ export function buildPartialMatcher(str: string) {
 // Handles: "IS ", "IS N", "IS NU", "IS NUL" with flexible whitespace
 const isNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('nul') + ')?$', 'i');
 const isNotNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('not nul') + ')?$', 'i');
+// Matches IN operator with opening parenthesis: "IN (" or "NOT IN ("
+const inOperatorMatcher = /\b(not\s+)?in\s*\(/i;
 
 // --- Expression types helpers ---
 
@@ -349,12 +351,29 @@ export function isExpressionComplete(
   expressionType: SupportedDataType | 'unknown',
   innerText: string
 ) {
-  return (
-    expressionType !== 'unknown' &&
-    // see https://github.com/elastic/kibana/issues/199401
-    // for the reason we need this string check.
-    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
-  );
+  if (expressionType === 'unknown') {
+    return false;
+  }
+
+  // Check for incomplete IS NULL / IS NOT NULL
+  if (isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText)) {
+    return false;
+  }
+
+  // Check for incomplete IN operator list (unclosed parenthesis)
+  const inOperatorMatch = innerText.match(inOperatorMatcher);
+
+  if (inOperatorMatch) {
+    // Check if parentheses are balanced after "IN ("
+    const afterInParen = innerText.slice(inOperatorMatch.index! + inOperatorMatch[0].length);
+    const openCount = (afterInParen.match(/\(/g) || []).length;
+    const closeCount = (afterInParen.match(/\)/g) || []).length;
+
+    // List is complete if there's at least one closing paren (accounting for nested parens)
+    return closeCount > openCount;
+  }
+
+  return true;
 }
 
 // #endregion expression completeness

@@ -17,12 +17,12 @@ import {
   assignCompletionItem,
 } from '../../complete_items';
 import {
-  suggestForExpression,
   withinQuotes,
   createInferenceEndpointToCompletionItem,
   handleFragment,
   columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';

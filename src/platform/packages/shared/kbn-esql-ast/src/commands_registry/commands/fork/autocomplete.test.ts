@@ -207,7 +207,7 @@ describe('FORK Autocomplete', () => {
           mockFieldsWithTypes(mockCallbacks, expectedFields);
           await forkExpectSuggestions(
             'FROM a | FORK (DISSECT ',
-            getFieldNamesByType(ESQL_STRING_TYPES),
+            getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
             mockCallbacks
           );
           await forkExpectSuggestions(

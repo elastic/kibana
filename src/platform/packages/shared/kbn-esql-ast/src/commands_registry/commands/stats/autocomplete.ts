@@ -31,10 +31,10 @@ import {
 import {
   columnExists as _columnExists,
   getControlSuggestionIfSupported,
-  suggestForExpression,
   buildFunctionParameterContext,
   type FunctionParameterContext,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import {
   getFunctionsToIgnoreForStats,
   isAggFunctionUsedAlready,

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -25,7 +25,7 @@ import {
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
-  suggestForExpression,
+  withAutoSuggest,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {

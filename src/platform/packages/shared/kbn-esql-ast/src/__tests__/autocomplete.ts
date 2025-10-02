@@ -45,7 +45,7 @@ export const DATE_DIFF_TIME_UNITS = (() => {
   );
   const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
 
-  return suggestedValues.map((unit) => `"${unit}"`);
+  return suggestedValues.map((unit) => `"${unit}", `);
 })();
 
 export const mockFieldsWithTypes = (

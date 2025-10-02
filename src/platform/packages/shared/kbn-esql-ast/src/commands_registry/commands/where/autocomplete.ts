@@ -8,7 +8,7 @@
  */
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { suggestForExpression } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../../types';

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import {
-  withAutoSuggest,
-  suggestForExpression,
-} from '../../../definitions/utils/autocomplete/helpers';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
+
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
-import { type ISuggestionItem, type ICommandContext } from '../../types';
+import { Location, type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { isLiteral, isFunctionExpression } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
@@ -30,18 +30,18 @@ export async function autocomplete(
 
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  const functionsSpecificSuggestions = await suggestForExpression({
-    query,
-    expressionRoot,
-    command,
-    cursorPosition,
-    location: undefined,
-    context,
-    callbacks,
-  });
-
-  if (functionsSpecificSuggestions.length > 0) {
-    return functionsSpecificSuggestions;
+  // Only call suggestForExpression for complete expressions (literals, functions)
+  // For simple column references, let the fallback handle field name completion
+  if (expressionRoot && (isLiteral(expressionRoot) || isFunctionExpression(expressionRoot))) {
+    return await suggestForExpression({
+      query,
+      expressionRoot,
+      command,
+      cursorPosition,
+      location: Location.DISSECT, // TODO: Change to Location.GROK when added
+      context,
+      callbacks,
+    });
   }
 
   // GROK field /
@@ -65,9 +65,11 @@ export async function autocomplete(
   // GROK /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
   return fieldSuggestions.map((sug) => {
-    return withAutoSuggest({
+    const withSpace = {
       ...sug,
       text: `${sug.text} `,
-    });
+    };
+
+    return withAutoSuggest(withSpace);
   });
 }

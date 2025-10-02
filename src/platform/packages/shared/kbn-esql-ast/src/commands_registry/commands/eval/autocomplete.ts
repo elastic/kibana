@@ -9,10 +9,9 @@
 import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
 import { isMarkerNode } from '../../../definitions/utils/ast';
-import {
-  getExpressionPosition,
-  suggestForExpression,
-} from '../../../definitions/utils/autocomplete/helpers';
+import { getExpressionPosition } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
+
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import {

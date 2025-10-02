@@ -10,8 +10,8 @@ import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers
 import {
   columnExists as _columnExists,
   getFragmentData,
-  suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';

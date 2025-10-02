@@ -53,7 +53,7 @@ describe('DISSECT Autocomplete', () => {
 
     await dissectExpectSuggestions(
       'from a | DISSECT ',
-      expectedStringFields,
+      expectedStringFields.map((fieldName) => `${fieldName} `),
       mockCallbacks,
       contextWithoutControls
     );
