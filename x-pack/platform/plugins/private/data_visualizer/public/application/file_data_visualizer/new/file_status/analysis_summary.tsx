@@ -20,7 +20,7 @@ interface Props {
 
 export const AnalysisSummary: FC<Props> = ({ results }) => {
   return (
-    <EuiFlexGrid columns={2}>
+    <EuiFlexGrid columns={2} data-test-subj="mlFileUploadFileSummaryPanel">
       <EuiFlexItem>
         <p>
           <FormattedMessage
