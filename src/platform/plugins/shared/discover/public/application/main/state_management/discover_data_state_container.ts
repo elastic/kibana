@@ -248,12 +248,7 @@ export function getDataStateContainer({
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options }) => {
-          const {
-            id: currentTabId,
-            resetDefaultProfileState,
-            dataRequestParams,
-            initialInternalState,
-          } = getCurrentTab();
+          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -265,10 +260,6 @@ export function getDataStateContainer({
           if (options.fetchMore && dataRequestParams.searchSessionId) {
             searchSessionId = dataRequestParams.searchSessionId;
             isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
-          } else if (!dataRequestParams.searchSessionId && initialInternalState?.searchSessionId) {
-            searchSessionId = initialInternalState.searchSessionId;
-            isSearchSessionRestored = true;
-            data.search.session.restore(searchSessionId);
           } else {
             ({ searchSessionId, isSearchSessionRestored } =
               searchSessionManager.getNextSearchSessionId());

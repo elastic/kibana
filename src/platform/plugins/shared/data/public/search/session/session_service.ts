@@ -484,6 +484,7 @@ export class SessionService {
    * @param sessionId
    */
   public restore(sessionId: string) {
+    this.storeSessionSnapshot();
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
   }
