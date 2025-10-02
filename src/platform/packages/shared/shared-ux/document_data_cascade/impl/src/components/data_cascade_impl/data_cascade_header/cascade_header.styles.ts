@@ -12,6 +12,6 @@ import { type UseEuiTheme } from '@elastic/eui';
 
 export const styles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   cascadeHeaderWrapper: css({
-    padding: euiTheme.size.s,
+    padding: `${euiTheme.size.s} 0`,
   }),
 });
