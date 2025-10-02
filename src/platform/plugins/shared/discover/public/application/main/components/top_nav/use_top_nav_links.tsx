@@ -56,6 +56,7 @@ export const useTopNavLinks = ({
   services,
   state,
   onOpenInspector,
+  hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
@@ -66,6 +67,7 @@ export const useTopNavLinks = ({
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
+  hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
@@ -177,6 +179,7 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
+          hasUnsavedChanges,
         });
         items.push(...shareAppMenuItem);
       }
@@ -192,6 +195,7 @@ export const useTopNavLinks = ({
       currentDataView,
       hasShareIntegration,
       appId,
+      hasUnsavedChanges,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

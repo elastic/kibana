@@ -25,11 +25,13 @@ export const getShareAppMenuItem = ({
   services,
   stateContainer,
   hasIntegrations,
+  hasUnsavedChanges,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
+  hasUnsavedChanges: boolean;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -149,7 +151,7 @@ export const getShareAppMenuItem = ({
             defaultMessage: 'Untitled Discover session',
           }),
       },
-      isDirty: !savedSearch.id || stateContainer.appState.hasChanged(),
+      isDirty: hasUnsavedChanges,
       onClose: () => {
         anchorElement?.focus();
       },
