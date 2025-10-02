@@ -12,7 +12,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { ToolbarPopover } from '../../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../../types';
 import type { DatatableVisualizationState } from '../../visualization';
-import { AppearanceSettings } from './appearance_settings';
+import { DatatableAppearanceSettings } from './appearance_settings';
 
 export function Toolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
@@ -28,7 +28,7 @@ export function Toolbar(props: VisualizationToolbarProps<DatatableVisualizationS
         buttonDataTestSubj="lnsVisualOptionsButton"
         data-test-subj="lnsVisualOptionsPopover"
       >
-        <AppearanceSettings state={state} setState={setState} />
+        <DatatableAppearanceSettings state={state} setState={setState} />
       </ToolbarPopover>
     </EuiFlexGroup>
   );
