@@ -41,6 +41,7 @@ export async function getEmbeddings({
     index: indexName,
     scroll: scrollDuration,
     size: scrollSize,
+    fields: ['_inference_fields'],
     query: {
       match_all: {},
     },
