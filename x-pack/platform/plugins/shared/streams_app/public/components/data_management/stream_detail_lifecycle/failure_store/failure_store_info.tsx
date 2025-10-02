@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -32,7 +32,7 @@ export const FailureStoreInfo = ({
 }) => {
   return (
     <>
-      <EuiText>
+      <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.title', {
             defaultMessage: 'Failure store ',
@@ -45,7 +45,7 @@ export const FailureStoreInfo = ({
             position="right"
           />
         </h4>
-      </EuiText>
+      </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <RetentionCard openModal={openModal} definition={definition} failureStore={config} />

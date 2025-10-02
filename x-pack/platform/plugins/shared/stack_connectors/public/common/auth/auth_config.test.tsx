@@ -266,6 +266,68 @@ describe('AuthConfig renders', () => {
       });
     });
 
+    it('deleting the headers and submitting works as expected', async () => {
+      render(
+        <AuthFormTestProvider defaultValue={defaultTestFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('webhookHeadersSecretValueInput'));
+      await userEvent.paste('foobar');
+
+      const deleteButtons = await screen.findAllByTestId('webhookRemoveHeaderButton');
+      expect(deleteButtons).toHaveLength(2);
+
+      await userEvent.click(deleteButtons[0]);
+      await userEvent.click(deleteButtons[1]);
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
+    it('toggling off the headers switch and submitting works as expected', async () => {
+      render(
+        <AuthFormTestProvider defaultValue={defaultTestFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('webhookViewHeadersSwitch'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasCA: false,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+
     it('submits properly when there are only secret headers', async () => {
       const testFormData = {
         ...defaultTestFormData,

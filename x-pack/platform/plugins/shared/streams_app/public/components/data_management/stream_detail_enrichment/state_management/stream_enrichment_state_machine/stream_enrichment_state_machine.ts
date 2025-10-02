@@ -28,6 +28,7 @@ import {
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -282,6 +283,7 @@ export const streamEnrichmentMachine = setup({
       input: {
         steps: [],
         streamName: input.definition.stream.name,
+        streamType: getStreamTypeFromDefinition(input.definition.stream),
       },
     }),
   }),
