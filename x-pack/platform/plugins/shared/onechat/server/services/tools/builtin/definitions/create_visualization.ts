@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type {
   LensMetricConfig,
@@ -23,6 +22,7 @@ import { HumanMessage, AIMessage } from '@langchain/core/messages';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { generateEsql } from '@kbn/onechat-genai-utils';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -218,7 +218,7 @@ This tool will:
     schema: createVisualizationSchema,
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
-      { runner, modelProvider, logger }
+      { esClient, modelProvider, logger }
     ) => {
       try {
         // Step 1: Determine chart type if not provided
@@ -267,30 +267,20 @@ Guidelines:
 
         if (!esql) {
           logger.debug('No ES|QL query or index provided, generating one');
-          const generateEsqlResult = await runner.runTool({
-            toolId: platformCoreTools.generateEsql,
-            toolParams: {
-              query: existingConfig
-                ? `Existing esql query to modify: "${parsedExistingConfig.dataset.query}"\n\nUser query: ${nlQuery}`
-                : nlQuery,
-            },
+          const model = await modelProvider.getDefaultModel();
+          const generateEsqlResponse = await generateEsql({
+            nlQuery: existingConfig
+              ? `Existing esql query to modify: "${parsedExistingConfig.dataset.query}"\n\nUser query: ${nlQuery}`
+              : nlQuery,
+            model,
+            esClient: esClient.asCurrentUser,
           });
 
-          // Extract the ES|QL query from the results
-          const queryResult = generateEsqlResult.results.find(
-            (result: ToolResult) => result.type === ToolResultType.query
-          );
-
-          if (
-            !queryResult ||
-            !queryResult.data ||
-            !('esql' in queryResult.data) ||
-            typeof queryResult.data.esql !== 'string'
-          ) {
+          if (!generateEsqlResponse.queries || generateEsqlResponse.queries.length === 0) {
             throw new Error('Failed to generate ES|QL query');
           }
 
-          esqlQuery = queryResult.data.esql;
+          esqlQuery = generateEsqlResponse.queries[0];
           logger.debug(`Generated ES|QL query: ${esqlQuery}`);
         } else {
           // Looks like an ES|QL query
