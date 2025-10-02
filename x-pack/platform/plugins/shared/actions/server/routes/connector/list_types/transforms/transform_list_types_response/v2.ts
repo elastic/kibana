@@ -6,11 +6,11 @@
  */
 
 import type { ConnectorType } from '../../../../../application/connector/types';
-import type { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ConnectorTypesResponseV2 } from '../../../../../../common/routes/connector/response';
 
 export const transformListTypesResponse = (
   results: ConnectorType[]
-): ConnectorTypesResponseV1[] => {
+): ConnectorTypesResponseV2[] => {
   return results.map(
     ({
       id,

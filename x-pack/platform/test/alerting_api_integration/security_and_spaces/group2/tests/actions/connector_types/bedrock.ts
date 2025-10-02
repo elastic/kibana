@@ -117,6 +117,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
+          is_connector_type_deprecated: false,
           is_missing_secrets: false,
           config,
         });

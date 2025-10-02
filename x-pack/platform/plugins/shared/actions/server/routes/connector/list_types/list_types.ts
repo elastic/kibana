@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
+import type { ConnectorTypesResponseV2 } from '../../../../common/routes/connector/response';
 import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { transformListTypesResponseV2 } from './transforms';
@@ -49,7 +49,7 @@ export const listTypesRoute = (
           featureId: query?.feature_id,
         });
 
-        const responseBody: ConnectorTypesResponseV1[] =
+        const responseBody: ConnectorTypesResponseV2[] =
           transformListTypesResponseV2(connectorTypes);
 
         return res.ok({ body: responseBody });

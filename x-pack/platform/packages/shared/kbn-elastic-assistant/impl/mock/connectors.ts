@@ -19,6 +19,7 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
   } as ActionType,
   {
     id: '.bedrock',
@@ -30,6 +31,7 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
   } as ActionType,
   {
     id: '.gemini',
@@ -41,6 +43,7 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
   } as ActionType,
 ];
 

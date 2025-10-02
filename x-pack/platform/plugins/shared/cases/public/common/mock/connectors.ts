@@ -54,6 +54,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
       usesTableApi: true,
     },
+    isDeprecated: true,
   }),
 ];
 

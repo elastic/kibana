@@ -52,6 +52,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           service: '__json',
           hasAuth: true,
@@ -79,6 +80,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           from: 'bob@example.com',
           service: '__json',
@@ -403,6 +405,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           service: 'other',
           hasAuth: true,
@@ -430,6 +433,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           from: 'bob@example.com',
           service: 'other',
@@ -471,6 +475,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           service: 'hotmail',
           hasAuth: true,
@@ -498,6 +503,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           from: 'bob@example.com',
           service: 'hotmail',
@@ -544,6 +550,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           service: 'exchange_server',
           hasAuth: true,
@@ -573,6 +580,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           from: 'bob@example.com',
           service: 'exchange_server',

@@ -471,6 +471,7 @@ describe('connector_add_flyout', () => {
           enabledInLicense: false,
           minimumLicenseRequired: 'gold',
           supportedFeatureIds: ['alerting'],
+          isDeprecated: true,
         }),
       ]);
 
