@@ -52,13 +52,13 @@ export function generateTriggerSnippet(
             every: '${1|5m,2h,1d,30s|}',
             // Alternative: RRule option
             // rrule:
-            //   freq: '${4|DAILY,WEEKLY,MONTHLY|}',
-            //   interval: '${5:1}',
-            //   tzid: '${6:UTC}',
-            //   byhour: '${7:[9]}',
-            //   byminute: '${8:[0]}',
-            //   byweekday: '${9:[MO,FR]}', // for weekly
-            //   bymonthday: '${10:[1,15]}', // for monthly
+            //   freq: '${2|DAILY,WEEKLY,MONTHLY|}',
+            //   interval: '${3:1}',
+            //   tzid: '${4:UTC}',
+            //   byhour: '${5:[9]}',
+            //   byminute: '${6:[0]}',
+            //   byweekday: '${7:[MO,FR]}', // for weekly
+            //   bymonthday: '${8:[1,15]}', // for monthly
           },
         };
       }
