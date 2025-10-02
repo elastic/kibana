@@ -27,13 +27,13 @@ export const getValueInputPopover =
     columns,
     onValueChange,
     dataTableRef,
-    telemetry,
+    telemetryService: telemetry,
   }: {
     rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
-    telemetry: IndexEditorTelemetryService;
+    telemetryService: IndexEditorTelemetryService;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];

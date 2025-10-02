@@ -147,7 +147,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         columns: props.columns,
         onValueChange,
         dataTableRef,
-        telemetry: indexEditorTelemetryService,
+        telemetryService: indexEditorTelemetryService,
       }),
     [rows, props.columns, onValueChange, dataTableRef, indexEditorTelemetryService]
   );

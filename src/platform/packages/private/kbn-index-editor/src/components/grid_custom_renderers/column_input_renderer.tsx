@@ -21,7 +21,7 @@ import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_serv
 export const getColumnInputRenderer = (
   columnName: string,
   indexUpdateService: IndexUpdateService,
-  telemetry: IndexEditorTelemetryService
+  telemetryService: IndexEditorTelemetryService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
   return ({ column }) => ({
     ...column,
@@ -29,7 +29,7 @@ export const getColumnInputRenderer = (
       <AddColumnHeader
         initialColumnName={columnName}
         containerId={column.id}
-        telemetry={telemetry}
+        telemetryService={telemetryService}
       />
     ),
     actions: {
@@ -57,10 +57,10 @@ export const getColumnInputRenderer = (
 interface AddColumnHeaderProps {
   initialColumnName: string;
   containerId: string;
-  telemetry: IndexEditorTelemetryService;
+  telemetryService: IndexEditorTelemetryService;
 }
 
-export const AddColumnHeader = ({ initialColumnName, telemetry }: AddColumnHeaderProps) => {
+export const AddColumnHeader = ({ initialColumnName, telemetryService }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
@@ -85,14 +85,14 @@ export const AddColumnHeader = ({ initialColumnName, telemetry }: AddColumnHeade
         saveColumn();
         setIsEditing(false);
       } else {
-        telemetry.trackEditInteraction({
+        telemetryService.trackEditInteraction({
           editOp: 'add_column',
           outcome: 'error',
           failureReason: validationError || 'EMPTY_NAME',
         });
       }
     },
-    [columnName, validationError, saveColumn, telemetry]
+    [columnName, validationError, saveColumn, telemetryService]
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
@@ -122,8 +122,6 @@ export const AddColumnHeader = ({ initialColumnName, telemetry }: AddColumnHeade
             fullWidth
             controlOnly
             compressed
-            // required
-            // isInvalid={!!validationError}
             onChange={(e) => {
               setColumnName(e.target.value);
             }}
