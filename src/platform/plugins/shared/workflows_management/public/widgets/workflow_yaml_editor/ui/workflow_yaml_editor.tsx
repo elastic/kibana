@@ -9,18 +9,17 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiIcon,
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   transparentize,
+  EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema, isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
@@ -101,6 +100,7 @@ export interface WorkflowYAMLEditorProps {
   highlightStep?: string;
   stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
+  highlightDiff?: boolean;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
@@ -108,7 +108,6 @@ export interface WorkflowYAMLEditorProps {
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
-  activeTab?: string;
   selectedExecutionId?: string;
   originalValue?: string;
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -122,13 +121,13 @@ export const WorkflowYAMLEditor = ({
   lastUpdatedAt,
   highlightStep,
   stepExecutions,
+  highlightDiff = false,
   onMount,
   onChange,
   onSave,
   onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
-  activeTab,
   selectedExecutionId,
   originalValue,
   onStepActionClicked,
@@ -205,7 +204,6 @@ export const WorkflowYAMLEditor = ({
   });
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
-  const [showDiffHighlight, setShowDiffHighlight] = useState(false);
 
   // Helper to compute diff lines
   const calculateLineDifferences = useCallback((original: string, current: string) => {
@@ -221,7 +219,7 @@ export const WorkflowYAMLEditor = ({
 
   // Apply diff highlight when toggled
   useEffect(() => {
-    if (!showDiffHighlight || !originalValue || !editorRef.current || !isEditorMounted) {
+    if (!highlightDiff || !originalValue || !editorRef.current || !isEditorMounted) {
       if (changesHighlightDecorationCollectionRef.current) {
         changesHighlightDecorationCollectionRef.current.clear();
       }
@@ -247,7 +245,7 @@ export const WorkflowYAMLEditor = ({
     return () => {
       changesHighlightDecorationCollectionRef.current?.clear();
     };
-  }, [showDiffHighlight, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
+  }, [highlightDiff, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
 
   // Add a ref to track if the last change was just typing
   const lastChangeWasTypingRef = useRef(false);
@@ -618,13 +616,13 @@ export const WorkflowYAMLEditor = ({
 
   // Force decoration refresh specifically when switching to readonly mode (executions view)
   useEffect(() => {
-    if (isEditorMounted && readOnly) {
+    if (isEditorMounted) {
       // Small delay to ensure all state is settled
       setTimeout(() => {
         changeSideEffects(false); // Mode change, not typing
       }, 50);
     }
-  }, [readOnly, isEditorMounted, changeSideEffects]);
+  }, [isEditorMounted, changeSideEffects]);
 
   // Step execution provider - managed through provider architecture
   useEffect(() => {
@@ -642,35 +640,32 @@ export const WorkflowYAMLEditor = ({
     // Add a small delay to ensure YAML document is fully updated when switching executions
     const timeoutId = setTimeout(() => {
       try {
-        if (readOnly) {
-          // Ensure yamlDocumentRef is synchronized
-          if (yamlDocument && !yamlDocumentRef.current) {
-            yamlDocumentRef.current = yamlDocument;
-          }
+        // Ensure yamlDocumentRef is synchronized
+        if (yamlDocument && !yamlDocumentRef.current) {
+          yamlDocumentRef.current = yamlDocument;
+        }
 
-          // Additional check: if we have stepExecutions but no yamlDocument,
-          // the document might not be parsed yet - skip and let next update handle it
-          if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
-            // console.warn(
-            //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
-            // );
-            return;
-          }
+        // Additional check: if we have stepExecutions but no yamlDocument,
+        // the document might not be parsed yet - skip and let next update handle it
+        if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
+          // console.warn(
+          //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
+          // );
+          return;
+        }
 
-          const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
-            getYamlDocument: () => {
-              return yamlDocumentRef.current;
-            },
-            getStepExecutions: () => {
-              return stepExecutionsRef.current || [];
-            },
-            getHighlightStep: () => highlightStep || null,
-            isReadOnly: () => readOnly,
-          });
+        const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
+          getYamlDocument: () => {
+            return yamlDocumentRef.current;
+          },
+          getStepExecutions: () => {
+            return stepExecutionsRef.current || [];
+          },
+          getHighlightStep: () => highlightStep || null,
+        });
 
-          if (unifiedProvidersRef.current) {
-            unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
-          }
+        if (unifiedProvidersRef.current) {
+          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
         }
       } catch (error) {
         // console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
@@ -678,7 +673,7 @@ export const WorkflowYAMLEditor = ({
     }, 20); // Small delay to ensure YAML document is ready
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument, readOnly]);
+  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -1424,12 +1419,13 @@ export const WorkflowYAMLEditor = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div
-        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {/* Debug: Download Schema Button - Only show in development */}
-          {isDevelopment && (
+      {isDevelopment && (
+        <div
+          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {/* Debug: Download Schema Button - Only show in development */}
+
             <EuiFlexItem grow={false}>
               <div
                 css={{
@@ -1482,75 +1478,9 @@ export const WorkflowYAMLEditor = ({
                 <span>Schema</span>
               </div>
             </EuiFlexItem>
-          )}
-
-          {/* Status indicator */}
-          <EuiFlexItem grow={false}>
-            {hasChanges ? (
-              <div
-                css={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 6px',
-                  color: euiTheme.colors.accent,
-                  cursor: 'pointer',
-                  borderRadius: euiTheme.border.radius.small,
-                  '&:hover': {
-                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                  },
-                }}
-                onClick={() => setShowDiffHighlight(!showDiffHighlight)}
-                role="button"
-                tabIndex={0}
-                aria-pressed={showDiffHighlight}
-                aria-label={
-                  showDiffHighlight
-                    ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
-                        defaultMessage: 'Hide diff highlighting',
-                      })
-                    : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
-                        defaultMessage: 'Show diff highlighting',
-                      })
-                }
-                onKeyDown={() => {}}
-                title={
-                  showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
-                }
-              >
-                <EuiIcon type="dot" />
-                <span>
-                  <FormattedMessage
-                    id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                    defaultMessage="Unsaved changes"
-                  />
-                </span>
-              </div>
-            ) : (
-              <div
-                css={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 6px',
-                  color: euiTheme.colors.textSubdued,
-                }}
-              >
-                <EuiIcon type="check" />
-                <span>
-                  <FormattedMessage
-                    id="workflows.workflowDetail.yamlEditor.saved"
-                    defaultMessage="Saved"
-                  />{' '}
-                  {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-                </span>
-              </div>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+          </EuiFlexGroup>
+        </div>
+      )}
       <div css={styles.editorContainer}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
@@ -2038,5 +1968,6 @@ const componentStyles = {
   validationErrorsContainer: css({
     flexShrink: 0,
     overflow: 'hidden',
+    zIndex: 2, // to overlay the editor flying action buttons
   }),
 };
