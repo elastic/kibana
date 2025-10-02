@@ -12,6 +12,7 @@ import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
@@ -34,7 +35,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
-  const { timeState, setTime, refreshInterval, setRefreshInterval } = useTimefilter();
+  const { timeState, setTime } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -58,7 +59,7 @@ export const useDatasetQualityController = (
           timeRange: {
             from: timeState.timeRange.from,
             to: timeState.timeRange.to,
-            refresh: refreshInterval,
+            refresh: DEFAULT_DATEPICKER_REFRESH,
           },
         };
       }
@@ -88,7 +89,6 @@ export const useDatasetQualityController = (
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
             setTime,
-            setRefreshInterval,
           });
         }
       );
@@ -111,8 +111,6 @@ export const useDatasetQualityController = (
     timeState.timeRange.from,
     timeState.timeRange.to,
     setTime,
-    refreshInterval,
-    setRefreshInterval,
   ]);
 
   return controller;

@@ -70,7 +70,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const canManageRoutingRules = definition.privileges.manage;
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
-  const CreateButtonComponent = aiFeatures ? EuiButtonEmpty : EuiButton;
+  const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -92,7 +92,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             min-height: 80px;
           `}
         >
-          {aiFeatures && (
+          {aiFeatures && aiFeatures.enabled && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
@@ -208,7 +208,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             </EuiDroppable>
           </EuiDragDropContext>
 
-          {aiFeatures && shouldDisplayCreateButton && (
+          {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
             <>
               <EuiSpacer size="m" />
               {reviewSuggestionForm.isEmpty ? (
