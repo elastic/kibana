@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createPersistedToolSource } from './provider';
+export { createPersistedProviderFn } from './provider';
