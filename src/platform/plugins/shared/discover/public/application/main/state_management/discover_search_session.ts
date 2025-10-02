@@ -8,7 +8,6 @@
  */
 
 import type { History, Location } from 'history';
-import type * as Rx from 'rxjs';
 import { filter } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -29,17 +28,18 @@ export interface DiscoverSearchSessionManagerDeps {
  * Helps with state management of search session and {@link SEARCH_SESSION_ID_QUERY_PARAM} in the URL
  */
 export class DiscoverSearchSessionManager {
-  /**
-   * Notifies about `searchSessionId` changes in the URL,
-   * skips if `searchSessionId` matches current search session id
-   */
-  readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
-
   private readonly deps: DiscoverSearchSessionManagerDeps;
 
   constructor(deps: DiscoverSearchSessionManagerDeps) {
     this.deps = deps;
-    this.newSearchSessionIdFromURL$ = createQueryParamObservable<string>(
+  }
+
+  /**
+   * Notifies about `searchSessionId` changes in the URL,
+   * skips if `searchSessionId` matches current search session id
+   */
+  getNewSearchSessionIdFromURL$() {
+    return createQueryParamObservable<string>(
       this.deps.history,
       SEARCH_SESSION_ID_QUERY_PARAM
     ).pipe(
@@ -74,6 +74,10 @@ export class DiscoverSearchSessionManager {
     };
   }
 
+  /**
+   * Pushes the provided search session ID to the URL
+   * @param searchSessionId - the search session ID to push to the URL
+   */
   pushSearchSessionIdToURL(
     searchSessionId: string,
     { replace = true }: { replace?: boolean } = { replace: true }

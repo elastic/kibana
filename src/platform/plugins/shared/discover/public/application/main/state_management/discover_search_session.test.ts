@@ -66,7 +66,7 @@ describe('DiscoverSearchSessionManager', () => {
     test('notifies about searchSessionId changes in the URL', () => {
       const emits: Array<string | null> = [];
 
-      const sub = searchSessionManager.newSearchSessionIdFromURL$.subscribe((newId) => {
+      const sub = searchSessionManager.getNewSearchSessionIdFromURL$().subscribe((newId) => {
         emits.push(newId);
       });
 
