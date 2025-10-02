@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PopoverToolbar } from './popover_toolbar';
+export { Toolbar } from './toolbar';
+export { GaugeFlyoutToolbar } from './flyout_toolbar';

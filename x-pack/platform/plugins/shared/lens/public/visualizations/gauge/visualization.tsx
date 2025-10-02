@@ -38,7 +38,7 @@ import type {
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
-import { PopoverToolbar } from './toolbar';
+import { Toolbar, GaugeFlyoutToolbar } from './toolbar';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
@@ -413,7 +413,11 @@ export const getGaugeVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <PopoverToolbar {...props} />;
+    return <Toolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <GaugeFlyoutToolbar {...props} />;
   },
 
   getSupportedLayers(state, frame) {
