@@ -34,11 +34,6 @@ export function registerBatchReindexIndicesRoutes(
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
 
-
-  const soClient = new SavedObjectsClient(
-    getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
-  );
-
   // Get the current batch queue
   router.get(
     {
@@ -56,6 +51,10 @@ export function registerBatchReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
       const callAsCurrentUser = esClient.asCurrentUser;
+
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       const reindexActions = reindexActionsFactory(
         soClient,
@@ -100,6 +99,11 @@ export function registerBatchReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
       const { indexNames } = request.body;
+
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
+
       const results: PostBatchResponse = {
         enqueued: [],
         errors: [],
