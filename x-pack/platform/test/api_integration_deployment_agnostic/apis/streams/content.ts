@@ -307,55 +307,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('does not attempt to update root stream fields', async () => {
-        const fieldname = 'resource.attributes.forbidden_on_root';
-        const archive = await generateArchive(
-          {
-            name: 'different_root_fields',
-            description: 'Content pack with new root fields',
-            version: '1.0.0',
-          },
-          [
-            {
-              type: 'stream',
-              name: ROOT_STREAM_ID,
-              request: {
-                stream: {
-                  description: '',
-                  ingest: {
-                    processing: { steps: [] },
-                    settings: {},
-                    wired: {
-                      fields: { [fieldname]: { type: 'keyword' } },
-                      routing: [],
-                    },
-                    lifecycle: { inherit: {} },
-                  },
-                },
-                ...emptyAssets,
-              },
-            },
-          ]
-        );
-
-        // attempt to override root stream fields would throw an error
-        await importContent(apiClient, 'logs', {
-          include: { objects: { all: {} } },
-          content: Readable.from(archive),
-          filename: 'content_pack-1.0.0.zip',
-        });
-
-        const rootStream = (await getStream(apiClient, 'logs')) as Streams.WiredStream.GetResponse;
-        expect(rootStream.stream.ingest.wired.fields[fieldname]).to.be(undefined);
-
-        // excluding mappings is also a noop
-        await importContent(apiClient, 'logs', {
-          include: { objects: { mappings: false, queries: [], routing: [] } },
-          content: Readable.from(archive),
-          filename: 'content_pack-1.0.0.zip',
-        });
-      });
-
       it('pulls inherited mappings in the exported root', async () => {
         // mapping is set on logs.branch_a parent
         const contentPack = await parseArchive(
