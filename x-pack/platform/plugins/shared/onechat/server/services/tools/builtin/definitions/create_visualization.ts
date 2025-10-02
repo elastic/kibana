@@ -24,14 +24,12 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 
-const metricSchema = parse(esqlMetricState.getSchema());
-
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
   existingConfig: z
     .string()
     .optional()
-    .describe('(optional) An existing visualization configuration to modify.'),
+    .describe('An existing visualization configuration to modify.'),
   chartType: z
     .enum(['metric', 'gauge', 'tagcloud', 'pie'])
     .optional()
@@ -67,9 +65,6 @@ const VisualizationStateAnnotation = Annotation.Root({
     reducer: (_, newValue) => newValue,
     default: () => 0,
   }),
-  generatedConfig: Annotation<any>({
-    reducer: (_, newValue) => newValue,
-  }),
 
   validatedConfig: Annotation<any | null>(),
   error: Annotation<string | null>(),
@@ -77,15 +72,8 @@ const VisualizationStateAnnotation = Annotation.Root({
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
-const visualizationConfigSchema = z
-  .record(z.unknown())
-  .describe('Lens visualization configuration');
-
+// Create the langgraph for config generation with validation retry
 const createVisualizationGraph = (model: any, logger: any) => {
-  const structuredModel = model.chatModel.withStructuredOutput(visualizationConfigSchema, {
-    name: 'visualization_config',
-  });
-
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {
     const attemptCount = state.attemptCount + 1;
@@ -103,35 +91,40 @@ ${JSON.stringify(state.schema, null, 2)}
 ${state.existingConfig ? `Existing configuration to modify: ${state.existingConfig}` : ''}
 
 IMPORTANT RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
-2. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-3. All field names must match those available in the ES|QL query result
-4. Make sure to follow schema definition strictly`;
+1. The response must be valid JSON only, no markdown or explanations
+2. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
+3. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
+4. All field names must match those available in the ES|QL query result
+5. Make sure to follow schema definition strictly`;
 
     const messages: BaseMessage[] = [
       new HumanMessage(systemPrompt),
       new HumanMessage(`User query: ${state.nlQuery}
-              
+
 ES|QL query: ${state.esqlQuery}
 
-Generate the ${state.chartType} visualization configuration.`),
+Generate the ${state.chartType} visualization configuration in valid JSON format.`),
       ...state.messages,
     ];
 
-    const config = await structuredModel.invoke(messages);
+    const configResponse = await model.chatModel.invoke(messages);
 
     return {
-      messages: [new AIMessage(JSON.stringify(config))],
+      messages: [new AIMessage(configResponse.content)],
       attemptCount,
-      generatedConfig: config,
     };
   };
 
   const validateConfigNode = async (state: VisualizationState) => {
-    const config = state.generatedConfig as VisualizationConfig;
+    const lastMessage = state.messages[state.messages.length - 1];
+    let configStr = lastMessage.content.toString().trim();
+
+    // Remove markdown code blocks if present
+    configStr = configStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
 
     try {
-      logger.debug(`Configuration: ${JSON.stringify(config)}`);
+      const config = JSON.parse(configStr) as VisualizationConfig;
+      logger.debug(`Configuration: ${configStr}`);
 
       let validatedConfig: any | null = null;
       if (state.chartType === 'metric') {
@@ -168,7 +161,7 @@ Please fix the configuration and provide a corrected version that passes validat
 
     return {
       messages: [feedbackMessage],
-      error: null, 
+      error: null,
     };
   };
 
@@ -206,7 +199,7 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.createVisualization,
     description: `Create a visualization configuration based on a natural language description.
-    
+
 This tool will:
 1. Determine the best chart type if not specified (from: metric, gauge, tagcloud, pie)
 2. Generate an ES|QL query if not provided
@@ -286,7 +279,7 @@ Guidelines:
 
         // Step 3: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        const schema = metricSchema;
+        const schema = parse(esqlMetricState.getSchema());
 
         // Create and invoke the validation retry graph
         const graph = createVisualizationGraph(model, logger);
@@ -299,7 +292,6 @@ Guidelines:
           existingConfig,
           messages: [],
           attemptCount: 0,
-          generatedConfig: null,
           validatedConfig: null,
           error: null,
         });
