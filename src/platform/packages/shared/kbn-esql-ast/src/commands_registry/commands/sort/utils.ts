@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
@@ -15,7 +16,6 @@ import {
   commaCompleteItem,
   isColumn,
 } from '../../../..';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =
@@ -54,38 +54,34 @@ export const getSortPos = (query: string, command: ESQLCommand): SortPosition | 
 };
 
 export const sortModifierSuggestions = {
-  ASC: {
+  ASC: withAutoSuggest({
     label: 'ASC',
     text: 'ASC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-ASC',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  DESC: {
+  }),
+  DESC: withAutoSuggest({
     label: 'DESC',
     text: 'DESC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-DESC',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  NULLS_FIRST: {
+  }),
+  NULLS_FIRST: withAutoSuggest({
     label: 'NULLS FIRST',
     text: 'NULLS FIRST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS FIRST',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  NULLS_LAST: {
+  }),
+  NULLS_LAST: withAutoSuggest({
     label: 'NULLS LAST',
     text: 'NULLS LAST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS LAST',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
+  }),
 };
 
 export const rightAfterColumn = (
@@ -115,11 +111,10 @@ export const getSuggestionsAfterCompleteExpression = (
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem };
-  const commaSuggestion = {
+  const commaSuggestion = withAutoSuggest({
     ...commaCompleteItem,
     text: ', ',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
+  });
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {

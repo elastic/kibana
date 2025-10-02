@@ -105,6 +105,7 @@ export class InterceptPrompter {
               if (isHidden) return Rx.EMPTY;
 
               return Rx.timer(
+                // create a timer that will not exceed the max timer interval
                 Math.min(nextRunId * response.triggerIntervalInMs - diff, this.MAX_TIMER_INTERVAL),
                 Math.min(response.triggerIntervalInMs, this.MAX_TIMER_INTERVAL)
               ).pipe(

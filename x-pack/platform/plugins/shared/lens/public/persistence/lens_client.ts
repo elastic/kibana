@@ -26,11 +26,20 @@ import type {
   LensItemMeta,
   LensUpdateRequestQuery,
 } from '../../server/api/routes/visualizations/types';
+import type { LensSavedObjectAttributes } from '../react_embeddable/types';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;
   meta: LensItemMeta & M;
 }
+
+/**
+ * This type is to allow `visualizationType` to be `null` in the public context.
+ *
+ * The stored attributes must have a `visualizationType`.
+ */
+export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
+  Pick<LensSavedObjectAttributes, 'visualizationType'>;
 
 export class LensClient {
   private builder = new LensConfigBuilder();
@@ -75,15 +84,19 @@ export class LensClient {
   }
 
   async create(
-    { description, visualizationType, state, title, version }: LensAttributes,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
     references: Reference[],
     options: LensCreateRequestQuery = {}
   ): Promise<LensItemResponse> {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
     const useApiFormat = this.builder.isSupported(visualizationType);
     const body: LensCreateRequestBody = useApiFormat
       ? this.builder.toAPIFormat({
           description,
-          visualizationType: visualizationType ?? '',
+          visualizationType,
           state,
           title,
           version,
@@ -135,15 +148,19 @@ export class LensClient {
 
   async update(
     id: string,
-    { description, visualizationType, state, title, version }: LensAttributes,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
     references: Reference[],
     options: LensUpdateRequestQuery = {}
   ): Promise<LensItemResponse> {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
     const useApiFormat = this.builder.isSupported(visualizationType);
     const body: LensUpdateRequestBody = useApiFormat
       ? this.builder.toAPIFormat({
           description,
-          visualizationType: visualizationType ?? '',
+          visualizationType,
           state,
           title,
           version,
