@@ -150,7 +150,6 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
   }, [data]);
   return errors.length > 0 ? (
     <EuiCallOut
-      announceOnMount={false}
       data-test-subj="indexErrorCallout"
       color="danger"
       iconType="error"
