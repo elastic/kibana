@@ -50,6 +50,15 @@ import {
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
 
+const datePickerStyle = css`
+  .euiFormControlLayout {
+    height: 40px;
+  }
+  .euiButton {
+    height: 40px;
+  }
+`;
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -293,14 +302,15 @@ export function StreamsTreeTable({
           field: 'documentsCount',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DOCUMENTS_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
+                  size="s"
                 />
               )}
-              {DOCUMENTS_COLUMN_HEADER}
             </EuiFlexGroup>
           ),
           width: '180px',
@@ -321,14 +331,15 @@ export function StreamsTreeTable({
           field: 'dataQuality',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DATA_QUALITY_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
+                  size="s"
                 />
               )}
-              {DATA_QUALITY_COLUMN_HEADER}
             </EuiFlexGroup>
           ),
           width: '150px',
@@ -396,7 +407,11 @@ export function StreamsTreeTable({
           incremental: true,
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
-        toolsRight: <StreamsAppSearchBar showDatePicker />,
+        toolsRight: (
+          <div className={datePickerStyle}>
+            <StreamsAppSearchBar showDatePicker />
+          </div>
+        ),
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />
