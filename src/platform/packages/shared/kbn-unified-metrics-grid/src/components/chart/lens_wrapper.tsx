@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { LensProps } from './hooks/use_lens_props';
@@ -19,6 +19,7 @@ export type LensWrapperProps = {
   lensProps: LensProps;
   onViewDetails: () => void;
   onCopyToDashboard: () => void;
+  loading: boolean;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
@@ -31,6 +32,7 @@ export function LensWrapper({
   abortController,
   onViewDetails,
   onCopyToDashboard,
+  loading,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -78,6 +80,19 @@ export function LensWrapper({
   return (
     <div css={chartCss}>
       <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
+      {loading && (
+        <div>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            css={css`
+              top: ${euiTheme.size.l};
+              z-index: ${Number(euiTheme.levels.menu) + 1};
+            `}
+          />
+        </div>
+      )}
       <EmbeddableComponent
         {...lensProps}
         title={lensProps.attributes.title}

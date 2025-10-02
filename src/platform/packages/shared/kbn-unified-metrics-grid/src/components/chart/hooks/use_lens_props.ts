@@ -64,7 +64,7 @@ export const useLensProps = ({
   abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const { euiTheme } = useEuiTheme();
-  const chartLayers = useChartLayers({
+  const { chartLayers, loading: chartLayersLoading } = useChartLayers({
     query,
     seriesType,
     services,
@@ -99,7 +99,7 @@ export const useLensProps = ({
     [query, title, chartLayers]
   );
 
-  useAsync(async () => {
+  const { loading: metadataLoading } = useAsync(async () => {
     if (!lensParams) {
       attributes$.current.next(undefined);
       return;
@@ -175,7 +175,7 @@ export const useLensProps = ({
     };
   }, [discoverFetch$, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
-  return lensPropsContext;
+  return { lensProps: lensPropsContext, loading: chartLayersLoading || metadataLoading };
 };
 
 const getLensProps = ({

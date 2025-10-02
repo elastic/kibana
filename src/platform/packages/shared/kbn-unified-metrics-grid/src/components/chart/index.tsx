@@ -72,7 +72,7 @@ export const Chart = ({
     });
   }, [metric, dimensions, filters]);
 
-  const lensProps = useLensProps({
+  const { lensProps, loading } = useLensProps({
     title: metric.name,
     query: esqlQuery,
     unit: metric.unit,
@@ -116,6 +116,7 @@ export const Chart = ({
             abortController={abortController}
             onViewDetails={handleViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
+            loading={loading}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

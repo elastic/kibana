@@ -33,10 +33,13 @@ export const useChartLayers = ({
   seriesType: LensSeriesLayer['seriesType'];
   services: ChartSectionProps['services'];
   abortController?: AbortController;
-} & Pick<ChartSectionProps, 'services'>): Array<LensSeriesLayer> => {
+} & Pick<ChartSectionProps, 'services'>): {
+  chartLayers: Array<LensSeriesLayer>;
+  loading: boolean;
+} => {
   const queryInfo = useEsqlQueryInfo({ query });
 
-  const { value: columns = [] } = useAsync(
+  const { value: columns = [], loading } = useAsync(
     () =>
       getESQLQueryColumns({
         esqlQuery: query,
@@ -86,5 +89,5 @@ export const useChartLayers = ({
     ];
   }, [columns, queryInfo.dimensions, seriesType, color, unit]);
 
-  return layers;
+  return { chartLayers: layers, loading };
 };
