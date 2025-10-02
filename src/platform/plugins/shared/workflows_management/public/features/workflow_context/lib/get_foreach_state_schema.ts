@@ -39,32 +39,36 @@ export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
 ) {
-  const iterateOverPath = parseVariablePath(foreachParam)?.propertyPath;
-  if (!iterateOverPath) {
-    // if we cannot resolve the path, we try to parse the string as JSON
-    return extractForeachItemSchemaFromJson(foreachParam);
-  }
-  let itemSchema: z.ZodType = z.unknown(); // we need this constant to have references in json schema
-  const iterableSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
-  if (!iterableSchema) {
-    // if we cannot resolve the path and cannot parse the string as JSON, we return an unknown schema
-    return itemSchema;
-  }
-  if (iterableSchema instanceof z.ZodArray) {
-    itemSchema = iterableSchema.element;
-    return itemSchema;
-  } else if (iterableSchema instanceof z.ZodLiteral) {
-    // If the resolved path is a known literal string, we need to try to parse it as JSON
-    return extractForeachItemSchemaFromJson(iterableSchema.value);
-  } else if (iterableSchema instanceof z.ZodString) {
-    // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
-    return z.any().describe('Foreach item type is unknown');
+  const parsedPath = parseVariablePath(foreachParam);
+  const iterateOverPath = parsedPath?.propertyPath;
+
+  // If we have a valid variable path syntax (e.g., {{some.path}})
+  if (parsedPath && !parsedPath.errors && iterateOverPath) {
+    let itemSchema: z.ZodType = z.unknown(); // we need this constant to have references in json schema
+    const iterableSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
+    if (!iterableSchema) {
+      // if we cannot resolve the path in the schema, we return an unknown schema
+      return itemSchema;
+    }
+    if (iterableSchema instanceof z.ZodArray) {
+      itemSchema = iterableSchema.element;
+      return itemSchema;
+    } else if (iterableSchema instanceof z.ZodLiteral) {
+      // If the resolved path is a known literal string, we need to try to parse it as JSON
+      return extractForeachItemSchemaFromJson(iterableSchema.value);
+    } else if (iterableSchema instanceof z.ZodString) {
+      // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
+      return z.any().describe('Foreach item type is unknown');
+    } else {
+      throw new Error(
+        `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
+          iterableSchema
+        )}`
+      );
+    }
   } else {
-    throw new Error(
-      `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
-        iterableSchema
-      )}`
-    );
+    // Not a valid variable path syntax or has errors, try to parse as JSON
+    return extractForeachItemSchemaFromJson(foreachParam);
   }
 }
 

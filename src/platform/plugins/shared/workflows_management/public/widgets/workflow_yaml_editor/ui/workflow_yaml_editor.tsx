@@ -48,9 +48,9 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
-import { useYamlValidation } from '../lib/use_yaml_validation';
+import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
-import type { YamlValidationError } from '../model/types';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
@@ -104,7 +104,7 @@ export interface WorkflowYAMLEditorProps {
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
+  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
@@ -1501,7 +1501,7 @@ export const WorkflowYAMLEditor = ({
             if (!editorRef.current) {
               return;
             }
-            navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
+            navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
           }}
           rightSide={<WorkflowYAMLEditorShortcuts />}
         />
