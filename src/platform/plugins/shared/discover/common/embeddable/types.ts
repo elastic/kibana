@@ -9,7 +9,10 @@
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
-import type { SavedSearch, SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type {
+  SavedSearchAttributes,
+  SavedSearchByValueAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 // These are options that are not persisted in the saved object, but can be used by solutions
@@ -24,13 +27,34 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-export type SearchEmbeddableSerializedState = SerializedTitles &
+type SearchEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
   Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
-    // by value
-    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
-    // by reference
-    savedObjectId?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
+
+export type SearchEmbeddableByValueSerializedState = SearchEmbeddableBaseState & {
+  attributes: Omit<SavedSearchByValueAttributes, 'references'>;
+};
+
+export type SearchEmbeddableByReferenceSerializedState = SearchEmbeddableBaseState & {
+  savedObjectId: string;
+};
+
+export type SearchEmbeddableSerializedState =
+  | SearchEmbeddableByValueSerializedState
+  | SearchEmbeddableByReferenceSerializedState;
+
+export type StoredSearchEmbeddableByValueState = SearchEmbeddableBaseState & {
+  attributes: SavedSearchByValueAttributes;
+};
+
+export type StoredSearchEmbeddableByReferenceState = Omit<
+  SearchEmbeddableByReferenceSerializedState,
+  'nonPersistedDisplayOptions' | 'savedObjectId'
+>;
+
+export type StoredSearchEmbeddableState =
+  | StoredSearchEmbeddableByValueState
+  | StoredSearchEmbeddableByReferenceState;

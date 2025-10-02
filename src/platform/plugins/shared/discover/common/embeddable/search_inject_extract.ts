@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/common';
 
 export const inject = (
   state: EmbeddableStateWithType,

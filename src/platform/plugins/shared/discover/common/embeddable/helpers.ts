@@ -9,18 +9,18 @@
 
 import type {
   SearchEmbeddableSerializedState,
-  SearchEmbeddableByValueState,
-  SearchEmbeddableByReferenceState,
+  SearchEmbeddableByReferenceSerializedState,
+  SearchEmbeddableByValueSerializedState,
 } from './types';
 
 export function isByValueState(
   state: SearchEmbeddableSerializedState
-): state is SearchEmbeddableByValueState {
+): state is SearchEmbeddableByValueSerializedState {
   return 'attributes' in state;
 }
 
 export function isByRefState(
   state: SearchEmbeddableSerializedState
-): state is SearchEmbeddableByReferenceState {
+): state is SearchEmbeddableByReferenceSerializedState {
   return 'savedObjectId' in state;
 }
