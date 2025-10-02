@@ -14,7 +14,7 @@ Include a short description of the connector type.
 
 ## Create connectors in {{kib}} [define-connector-name-type]
 
-You can create connectors in {{stack-manage-app}} > {{connectors-ui}} or as needed when you're creating a rule.
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule.
 
 %  Add a screenshot (optional)
 
@@ -33,7 +33,7 @@ Property1
 :   A short description of this property. 
 
 Property2
-:   A short description of this property.
+:   A short description of this property. This can be specified in `this specific format`.
 
 % Add preconfigured settings for this connector type in [alerting-settings.md](https://github.com/elastic/kibana/edit/main/docs/reference/configuration-reference/alerting-settings.md) and an example in [pre-configured-connectors.md](https://github.com/elastic/kibana/edit/main/docs/reference/connectors-kibana/pre-configured-connectors.md).
 
@@ -45,7 +45,7 @@ Property1
 :   A short description of this property.
 
 Property2
-:   A short description of this property with format hints. This can be specified in this specific format.
+:   A short description of this property with format hints. This can be specified in `this specific format`.
 
 
 % Provide additional configuration details here. 
