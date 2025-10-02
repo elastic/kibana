@@ -40,7 +40,7 @@ export async function fetchEsqlQuery({
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, ruleResultService } = services;
   const esClient = scopedClusterClient.asCurrentUser;
-  const query = getEsqlQuery(params, alertLimit);
+  const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
@@ -80,9 +80,32 @@ export async function fetchEsqlQuery({
   };
 }
 
-export const getEsqlQuery = (params: OnlyEsqlQueryRuleParams, alertLimit: number | undefined) => {
+export const getEsqlQuery = (
+  params: OnlyEsqlQueryRuleParams,
+  alertLimit: number | undefined,
+  dateStart: string,
+  dateEnd: string
+) => {
+  const rangeFilter: unknown[] = [
+    {
+      range: {
+        // TODO: What if not @timestamp?
+        '@timestamp': {
+          lte: dateEnd,
+          gt: dateStart,
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ];
+
   const query = {
     query: alertLimit ? `${params.query} | limit ${alertLimit}` : params.query,
+    filter: {
+      bool: {
+        filter: rangeFilter,
+      },
+    },
   };
   return query;
 };

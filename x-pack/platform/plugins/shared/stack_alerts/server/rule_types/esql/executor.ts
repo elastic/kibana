@@ -43,6 +43,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRul
     spaceId,
     logger,
     getTimeRange,
+    startedAt,
+    previousStartedAt,
   } = options;
   const { alertsClient, ruleResultService, scopedClusterClient, share } = services;
 
@@ -58,7 +60,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRul
   // In the next run of the rule, the latestTimestamp will be used to gate the query in order to
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
-  const { dateStart, dateEnd } = getTimeRange(schedule.interval);
+  const { dateStart } = getTimeRange(schedule.interval);
 
   const { parsedResults, link, index } = await fetchEsqlQuery({
     ruleId,
@@ -71,8 +73,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsqlRul
       logger,
       ruleResultService,
     },
-    dateStart,
-    dateEnd,
+    dateStart: previousStartedAt?.toISOString() || dateStart,
+    dateEnd: startedAt.toISOString(),
   });
 
   for (const result of parsedResults.results) {

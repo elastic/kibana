@@ -213,12 +213,13 @@ export const EsqlQueryExpression: React.FC<
           hasOutline
         />
       </EuiFormRow>
-      <EuiSpacer />
+      {/* TODO: Add back */}
+      {/* <EuiSpacer />
       <TestQueryRow
         fetch={onTestQuery}
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         showTable
-      />
+      /> */}
     </Fragment>
   );
 };
