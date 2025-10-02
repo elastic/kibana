@@ -34,6 +34,5 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
-    "@kbn/actions-plugin",
   ]
 }
