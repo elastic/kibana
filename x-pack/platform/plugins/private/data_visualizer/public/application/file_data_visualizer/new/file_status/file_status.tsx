@@ -222,7 +222,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.PREVIEW}
                         onClick={() => setSelectedTab(TAB.PREVIEW)}
-                        data-test-subj={`mlFileUploadFileStatusPreviewTab_${index}"`}
+                        data-test-subj={`mlFileUploadFileStatusPreviewTab_${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.previewTabTitle"
@@ -248,7 +248,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.MAPPINGS}
                         onClick={() => setSelectedTab(TAB.MAPPINGS)}
-                        data-test-subj={`mlFileUploadFileStatusMappingsTab_${index}"`}
+                        data-test-subj={`mlFileUploadFileStatusMappingsTab_${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
@@ -260,7 +260,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.PIPELINE}
                         onClick={() => setSelectedTab(TAB.PIPELINE)}
-                        data-test-subj={`mlFileUploadFileStatusPipelineTab_${index}"`}
+                        data-test-subj={`mlFileUploadFileStatusPipelineTab_${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
