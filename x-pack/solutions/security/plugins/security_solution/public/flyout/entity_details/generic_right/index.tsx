@@ -130,6 +130,26 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
     }
   }, [getGenericEntity.data?._id]);
 
+  if (!getGenericEntity.data?._source?.entity.EngineMetadata.Type) {
+    return (
+      <>
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          data-test-subj="generic-right-flyout-error-prompt-missing-engineMetadataType"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.genericEntityFlyout.missingEngineMetadataType.errorTitle"
+                defaultMessage="Unable to load entity: 'EngineMetadata.Type' is missing or not set."
+              />
+            </h2>
+          }
+        />
+      </>
+    );
+  }
+
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
