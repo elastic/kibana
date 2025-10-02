@@ -8,7 +8,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonEmpty, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelectable,
+  EuiFilterGroup,
+  EuiFilterButton,
+} from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,19 +63,23 @@ export function useEsqlDataCascadeHeaderComponent({ viewModeToggle }: UseTableHe
               closePopover={() => setCascadeSelectOpen(false)}
               panelPaddingSize="none"
               button={
-                <EuiButtonEmpty
-                  aria-label="Change grouping"
-                  size="s"
-                  iconType="inspect"
-                  flush="both"
-                  onClick={() => setCascadeSelectOpen(true)}
-                >
-                  <FormattedMessage
-                    id="discover.esql_data_cascade.change_grouping.button_label"
-                    defaultMessage="Grouped by: {selectedGroup}"
-                    values={{ selectedGroup: currentSelectedColumns[0] }}
-                  />
-                </EuiButtonEmpty>
+                <EuiFilterGroup compressed>
+                  <EuiFilterButton
+                    iconSide="left"
+                    iconType="inspect"
+                    color="text"
+                    badgeColor="subdued"
+                    onClick={() => setCascadeSelectOpen(true)}
+                    hasActiveFilters={true}
+                    numFilters={currentSelectedColumns.length}
+                    data-test-subj="discoverEnableCascadeLayoutSwitch"
+                  >
+                    <FormattedMessage
+                      id="discover.enableCascadeLayoutSwitchLabel"
+                      defaultMessage="Group By"
+                    />
+                  </EuiFilterButton>
+                </EuiFilterGroup>
               }
             >
               <EuiSelectable
