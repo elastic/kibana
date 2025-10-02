@@ -42,6 +42,7 @@ export class GetSLOHealth {
         sloId: item.sloId,
         sloInstanceId: item.sloInstanceId,
         sloRevision: sloById[item.sloId].revision,
+        sloName: sloById[item.sloId].name,
       }));
 
     const transformStatsById = await this.getTransformStats(sloList);
@@ -53,14 +54,22 @@ export class GetSLOHealth {
 
       return {
         sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
         sloRevision: item.sloRevision,
+        sloName: item.sloName,
         state,
         health,
       };
     });
 
-    const mappedResults = Array.from(new Map(results.map((item) => [item.sloId, item])).values());
+    /*
+     * Map results based on SLO ids since transforms represent all instances
+     * Since "state" is not being used in Kibana, we can group by SLO id and return only one result per SLO
+     * If needed in the future, we can return all instances by removing this mapping
+     * and adding sloInstanceId to the response schema
+     */
+    const mappedResults = Array.from(
+      new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
+    );
     return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 

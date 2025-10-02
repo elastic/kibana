@@ -9,9 +9,9 @@ import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
-import { TransformDisplayText } from '../../../slo_details/components/unhealthy_transform_display_text';
+import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
+import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
@@ -34,13 +34,6 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     return null;
   }
 
-  const unhealthyRollupTransforms = results.filter(
-    (result) => result.health.rollup === 'unhealthy'
-  );
-  const unhealthySummaryTransforms = results.filter(
-    (result) => result.health.summary === 'unhealthy'
-  );
-
   const dismiss = () => {
     setShowCallOut(false);
     sessionStorage.setItem('slo_health_callout_hidden', 'true');
@@ -57,7 +50,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
       title={
         <FormattedMessage
           id="xpack.slo.sloList.healthCallout.title"
-          defaultMessage="Transform error detected"
+          defaultMessage="Some SLOs are unhealthy"
         />
       }
     >
@@ -73,26 +66,19 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
           <EuiFlexItem>
             <FormattedMessage
               id="xpack.slo.sloList.healthCallout.description"
-              defaultMessage="The following {count, plural, one {transform is} other {transforms are}
-          } in an unhealthy state:"
+              defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}}
+          in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
               values={{
-                count: unhealthyRollupTransforms.length + unhealthySummaryTransforms.length,
+                count: unhealthySloList.length,
               }}
             />
             <ul>
-              {unhealthyRollupTransforms.map((result) => (
-                <li key={getSLOTransformId(result.sloId, result.sloRevision)}>
-                  <TransformDisplayText
+              {unhealthySloList.map((result) => (
+                <li key={result.sloId}>
+                  <ExternalLinkDisplayText
                     textSize="xs"
-                    transformId={getSLOTransformId(result.sloId, result.sloRevision)}
-                  />
-                </li>
-              ))}
-              {unhealthySummaryTransforms.map((result) => (
-                <li key={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
-                  <TransformDisplayText
-                    textSize="xs"
-                    transformId={getSLOSummaryTransformId(result.sloId, result.sloRevision)}
+                    content={result.sloName}
+                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
                   />
                 </li>
               ))}
