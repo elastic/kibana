@@ -106,6 +106,19 @@ export function getDiscoverStateMock({
     persistedDiscoverSession,
     defaultTabState: DEFAULT_TAB_STATE,
   });
+  if (!persistedDiscoverSession) {
+    const stableTabId = 'stable-test-initial-tab-id';
+    const selectedTab = initialTabsState.allTabs.find(
+      (t) => t.id === initialTabsState.selectedTabId
+    );
+    if (selectedTab) {
+      selectedTab.id = stableTabId;
+    }
+    initialTabsState.selectedTabId = stableTabId;
+  }
+  // TODO: This should really be called async (or preferably the full `initializeTabs` thunk),
+  // but doing so would make the whole function async, which would require a lot of test refactoring
+  void tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId);
   internalState.dispatch(internalStateActions.setTabs(initialTabsState));
   internalState.dispatch(
     internalStateActions.initializeTabs.fulfilled(
