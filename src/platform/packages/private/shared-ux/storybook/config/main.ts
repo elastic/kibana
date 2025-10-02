@@ -14,6 +14,7 @@ module.exports = {
   stories: [
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
+    '../../../../shared/shared-ux/**/doc.mdx',
     '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
   ],
 };
