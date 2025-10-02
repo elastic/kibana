@@ -65,7 +65,12 @@ export function CascadeHeaderPrimitive<G extends GroupNode, L extends LeafNode>(
     <EuiFlexGroup
       justifyContent="spaceBetween"
       alignItems="center"
-      css={styles.cascadeHeaderWrapper}
+      css={[
+        styles.cascadeHeaderWrapper,
+        {
+          padding: euiTheme.size.s,
+        },
+      ]}
     >
       <EuiFlexItem id="treegrid-label">
         <TableTitleSlot />
