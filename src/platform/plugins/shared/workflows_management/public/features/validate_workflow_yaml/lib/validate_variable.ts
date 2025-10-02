@@ -82,6 +82,7 @@ export function validateVariable(
       hoverMessage: null,
     };
   }
+
   if (!context) {
     return {
       ...variableItem,
@@ -109,8 +110,20 @@ export function validateVariable(
   if (zodTypeName === 'string' && type === 'foreach') {
     return {
       ...variableItem,
-      message: `Foreach parameter can be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`,
+      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`,
       severity: 'warning',
+      source: 'variable-validation',
+      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
+        refSchema
+      )}</pre>`,
+    };
+  }
+
+  if (zodTypeName !== 'array' && type === 'foreach') {
+    return {
+      ...variableItem,
+      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is ${zodTypeName}`,
+      severity: 'error',
       source: 'variable-validation',
       hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
         refSchema
