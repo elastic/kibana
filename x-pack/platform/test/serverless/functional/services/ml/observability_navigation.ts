@@ -34,10 +34,10 @@ export function MachineLearningNavigationProviderObservability({
 
   return {
     async navigateToAnomalyDetection() {
-      await navigateViaPanel('management:anomaly_detection', 'ml-jobs-list');
+      await navigateToArea('management:anomaly_detection', 'ml-jobs-list');
     },
     async navigateToDataFrameAnalytics() {
-      await navigateViaPanel('management:analytics', 'mlAnalyticsJobList');
+      await navigateToArea('management:analytics', 'mlAnalyticsJobList');
     },
     async navigateToTrainedModels() {
       await navigateToArea('management:trained_models', 'mlTrainedModelsList');
