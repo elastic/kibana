@@ -40,9 +40,12 @@ export const DeleteListItem = ({ id, value }: { id: string; value: string }) => 
 
   return (
     <EuiButtonIcon
-      aria-label={i18n.translate('xpack.securitySolution.valueLists.deleteListItemButton.ariaLabel', {
-        defaultMessage: 'Delete list item',
-      })}
+      aria-label={i18n.translate(
+        'xpack.securitySolution.valueLists.deleteListItemButton.ariaLabel',
+        {
+          defaultMessage: 'Delete list item',
+        }
+      )}
       color={'danger'}
       onClick={deleteListItem}
       iconType="trash"

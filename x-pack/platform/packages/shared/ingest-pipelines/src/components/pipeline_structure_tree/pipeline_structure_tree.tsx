@@ -68,12 +68,9 @@ export const PipelineStructureTree = React.memo(
             items={[treeNode]}
             showExpansionArrows={true}
             css={styles}
-            aria-label={i18n.translate(
-              'ingestPipelines.pipelineStructureTree.treeAriaLabel',
-              {
-                defaultMessage: 'Pipeline structure',
-              }
-            )}
+            aria-label={i18n.translate('ingestPipelines.pipelineStructureTree.treeAriaLabel', {
+              defaultMessage: 'Pipeline structure',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

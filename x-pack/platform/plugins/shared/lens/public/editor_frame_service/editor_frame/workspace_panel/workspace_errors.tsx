@@ -44,12 +44,9 @@ export function WorkspaceErrors({ errors, title, onRender }: Props) {
                 pageCount={errors.length}
                 activePage={activePage}
                 onPageClick={setActivePage}
-                aria-label={i18n.translate(
-                  'xpack.lens.workspaceErrors.pagination.ariaLabel',
-                  {
-                    defaultMessage: 'Workspace errors pagination',
-                  }
-                )}
+                aria-label={i18n.translate('xpack.lens.workspaceErrors.pagination.ariaLabel', {
+                  defaultMessage: 'Workspace errors pagination',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

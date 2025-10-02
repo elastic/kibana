@@ -176,7 +176,11 @@ export function AlertActions(
     <>
       {!parentAlert && (
         <EuiFlexItem>
-          <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS} disableScreenReaderOutput>
+          <EuiToolTip
+            data-test-subj="expand-event-tool-tip"
+            content={VIEW_DETAILS}
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               data-test-subj="expand-event"
               iconType="expand"

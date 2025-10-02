@@ -9,8 +9,8 @@ import { EuiSelect } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
-import { constants } from '@kbn/security-ui-components';
 import { i18n } from '@kbn/i18n';
+import { constants } from '@kbn/security-ui-components';
 
 interface Props {
   ['data-test-subj']: string;
