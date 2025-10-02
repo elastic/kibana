@@ -29,14 +29,7 @@ export interface ConnectorSelectorProps
 }
 
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({
-    connectors,
-    onChange,
-    selectedId,
-    onNewConnectorClicked,
-    isDisabled,
-    settings,
-  }) => {
+  ({ connectors, onChange, selectedId, onNewConnectorClicked, isDisabled, settings }) => {
     const styles = useConnectorSelectorStyles();
     const [modalOpen, setModalOpen] = useState(false);
 
