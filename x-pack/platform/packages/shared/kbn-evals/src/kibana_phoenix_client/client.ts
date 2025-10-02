@@ -27,6 +27,7 @@ export class KibanaPhoenixClient {
       log: SomeDevLog;
       model: Model;
       runId: string;
+      repetitions?: number;
     }
   ) {
     this.phoenixClient = createClient({
@@ -86,11 +87,9 @@ export class KibanaPhoenixClient {
     {
       dataset,
       task,
-      repetitions,
     }: {
       dataset: TEvaluationDataset;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
-      repetitions?: number;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;
@@ -99,11 +98,9 @@ export class KibanaPhoenixClient {
     {
       dataset,
       task,
-      repetitions = 1,
     }: {
       dataset: EvaluationDataset;
       task: ExperimentTask<Example, TaskOutput>;
-      repetitions?: number;
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
@@ -139,7 +136,7 @@ export class KibanaPhoenixClient {
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
         },
-        repetitions,
+        repetitions: this.options.repetitions ?? 1,
       });
 
       this.experiments.push(ranExperiment);

@@ -38,12 +38,10 @@ export function createEvaluateDataset({
   evaluators,
   phoenixClient,
   chatClient,
-  repetitions,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: OnechatEvaluationChatClient;
-  repetitions: number;
 }): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -93,7 +91,6 @@ export function createEvaluateDataset({
             groundednessAnalysis,
           };
         },
-        repetitions,
       },
       [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
     );

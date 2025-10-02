@@ -120,6 +120,7 @@ export const evaluate = base.extend<
         log,
         model,
         runId: process.env.TEST_RUN_ID!,
+        repetitions,
       });
 
       await use(phoenixClient);
