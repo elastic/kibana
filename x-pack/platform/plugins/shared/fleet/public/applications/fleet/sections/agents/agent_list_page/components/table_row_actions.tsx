@@ -67,9 +67,11 @@ export const TableRowActions: React.FunctionComponent<{
   ];
 
   if (
-    authz.fleet.allAgents && !agentPolicy?.is_protected && !isFleetServerAgent && isAgentMigrationSupported(agent)
+    authz.fleet.allAgents &&
+    !agentPolicy?.is_protected &&
+    !isFleetServerAgent &&
+    isAgentMigrationSupported(agent)
   ) {
-
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
