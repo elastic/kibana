@@ -203,6 +203,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       anomalyTimelineStateService.getViewBySwimLaneOptions()
     );
 
+    const viewByLabel = i18n.translate('xpack.ml.explorer.viewByLabel', {
+      defaultMessage: 'View by',
+    });
+
     const { viewByPerPage, viewByFromPage } = useObservable(
       anomalyTimelineStateService.getSwimLanePagination$(),
       anomalyTimelineStateService.getSwimLanePagination()
@@ -495,9 +499,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <>
                 <EuiFlexItem grow={false}>
                   <EuiSelect
-                    prepend={i18n.translate('xpack.ml.explorer.viewByLabel', {
-                      defaultMessage: 'View by',
-                    })}
+                    prepend={viewByLabel}
+                    aria-label={viewByLabel}
                     compressed
                     id="selectViewBy"
                     options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}

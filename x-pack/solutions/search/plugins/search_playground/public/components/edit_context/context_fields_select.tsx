@@ -82,6 +82,12 @@ export const ContextFieldsSelect = ({
       onChange={onSelectFields}
       isClearable={false}
       fullWidth
+      aria-label={i18n.translate(
+        'xpack.searchPlayground.editContext.contextFieldsSelect.ariaLabel',
+        {
+          defaultMessage: 'Context fields',
+        }
+      )}
     />
   );
 };

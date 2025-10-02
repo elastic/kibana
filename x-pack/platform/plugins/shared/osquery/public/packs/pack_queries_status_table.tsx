@@ -494,6 +494,9 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
             isDisabled={!errorsData?.total}
             onClick={handleErrorsToggle}
             iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+              defaultMessage: 'Error details',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

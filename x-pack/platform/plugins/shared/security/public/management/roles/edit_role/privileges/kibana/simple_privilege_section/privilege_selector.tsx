@@ -10,6 +10,7 @@ import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
 import { constants } from '@kbn/security-ui-components';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   ['data-test-subj']: string;
@@ -49,6 +50,9 @@ export class PrivilegeSelector extends Component<Props, {}> {
         onChange={this.onChange}
         disabled={disabled}
         compressed={compressed}
+        aria-label={i18n.translate('xpack.security.privilegeSelector.select.ariaLabel', {
+          defaultMessage: 'Privilege',
+        })}
       />
     );
   }

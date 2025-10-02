@@ -100,6 +100,9 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
               ]}
               value={pageMode}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
             />
           )}
           {hasChanges ? (

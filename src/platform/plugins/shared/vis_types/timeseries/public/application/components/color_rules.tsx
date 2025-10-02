@@ -145,6 +145,8 @@ class ColorRulesUI extends Component<ColorRulesProps> {
       collectionActions.handleChange(this.props, { ...model, ...part });
     };
     const htmlId = htmlIdGenerator(model.id);
+    const metricSelectId = htmlId('ifMetricIs');
+    const metricLabelId = htmlId('ifMetricIsLabel');
     const selectedOperatorOption = operatorOptions.find(
       (option) => model.operator === option.value
     );
@@ -216,7 +218,7 @@ class ColorRulesUI extends Component<ColorRulesProps> {
         {secondary}
 
         <EuiFlexItem grow={false}>
-          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>
+          <EuiFormLabel style={labelStyle} htmlFor={metricSelectId} id={metricLabelId}>
             <FormattedMessage
               id="visTypeTimeseries.colorRules.ifMetricIsLabel"
               defaultMessage="if metric is"
@@ -227,7 +229,8 @@ class ColorRulesUI extends Component<ColorRulesProps> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiComboBox
-            id={htmlId('ifMetricIs')}
+            id={metricSelectId}
+            aria-labelledby={metricLabelId}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleOperatorChange(model)}

@@ -42,6 +42,10 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
   const [destinationId, setDestinationId] = useState(initialDestinationId);
 
   if (error.type === 'ambiguous_conflict') {
+    const selectControlLabel = i18n.translate(
+      'savedObjectsManagement.objectsTable.overwriteModal.selectControlLabel',
+      { defaultMessage: 'Object ID' }
+    );
     const selectProps = {
       options: error.destinations.map((destination) => {
         const header = destination.title ?? `${type} [id=${destination.id}]`;
@@ -76,10 +80,8 @@ export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteMo
         options={selectProps.options}
         valueOfSelected={destinationId}
         onChange={selectProps.onChange}
-        prepend={i18n.translate(
-          'savedObjectsManagement.objectsTable.overwriteModal.selectControlLabel',
-          { defaultMessage: 'Object ID' }
-        )}
+        prepend={selectControlLabel}
+        aria-label={selectControlLabel}
         hasDividers
         fullWidth
         compressed

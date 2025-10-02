@@ -128,6 +128,12 @@ export function WaterfallWithSummary<TSample extends {}>({
                 activePage={samplePageIndex}
                 onPageClick={goToSample}
                 compressed
+                aria-label={i18n.translate(
+                  'xpack.apm.transactionDetails.traceSamplePaginationLabel',
+                  {
+                    defaultMessage: 'Trace sample pages',
+                  }
+                )}
               />
             )}
           </EuiFlexItem>

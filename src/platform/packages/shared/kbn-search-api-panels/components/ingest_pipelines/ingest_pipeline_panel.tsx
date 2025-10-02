@@ -39,6 +39,12 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
     () => createIngestPipelineOptions(ingestPipelinesData, defaultIngestPipeline),
     [ingestPipelinesData, defaultIngestPipeline]
   );
+  const selectPipelineLabel = i18n.translate(
+    'searchApiPanels.welcomeBanner.ingestPipelinePanel.selectPipelinePlaceholder',
+    {
+      defaultMessage: 'Select a pipeline',
+    }
+  );
 
   return (
     <>
@@ -73,12 +79,8 @@ export const IngestPipelinePanel: React.FC<IngestPipelinePanelProps> = ({
       <EuiSuperSelect
         options={options}
         valueOfSelected={selectedPipeline}
-        placeholder={i18n.translate(
-          'searchApiPanels.welcomeBanner.ingestPipelinePanel.selectPipelinePlaceholder',
-          {
-            defaultMessage: 'Select a pipeline',
-          }
-        )}
+        placeholder={selectPipelineLabel}
+        aria-label={selectPipelineLabel}
         onChange={setSelectedPipeline}
         itemLayoutAlign="top"
         hasDividers

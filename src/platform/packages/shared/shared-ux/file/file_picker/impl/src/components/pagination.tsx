@@ -11,6 +11,7 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import { EuiPagination } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useFilePickerContext } from '../context';
 
@@ -29,6 +30,9 @@ export const Pagination: FunctionComponent = () => {
       onPageClick={isUploading ? () => {} : state.setPage}
       pageCount={pageCount}
       activePage={page}
+      aria-label={i18n.translate('filePicker.paginationControls.ariaLabel', {
+        defaultMessage: 'Files pagination',
+      })}
     />
   );
 };

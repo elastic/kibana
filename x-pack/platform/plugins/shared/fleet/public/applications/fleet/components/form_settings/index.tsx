@@ -78,6 +78,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
           fullWidth
           disabled={disabled}
           onChange={handleChange}
+          aria-label={
+            settingsConfig.label ??
+            i18n.translate('xpack.fleet.configuredSettings.selectOptionsAriaLabel', {
+              defaultMessage: 'Setting options',
+            })
+          }
           options={
             settingsConfig.options
               ? settingsConfig.options

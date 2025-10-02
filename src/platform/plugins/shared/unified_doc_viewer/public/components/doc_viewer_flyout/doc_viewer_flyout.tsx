@@ -305,7 +305,7 @@ export function UnifiedDocViewerFlyout({
               <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
-                    defaultMessage: 'Document navigation',
+                    defaultMessage: 'Document pagination',
                   })}
                   pageCount={pageCount}
                   activePage={activePage}

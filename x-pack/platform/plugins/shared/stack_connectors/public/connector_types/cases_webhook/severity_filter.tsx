@@ -10,6 +10,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
 
 import * as i18n from './translations';
+import { CASE_SEVERITY_ARIA_LABEL } from './translations';
 
 export enum CaseSeverity {
   LOW = 'low',
@@ -72,6 +73,7 @@ export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityCh
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
+      aria-label={CASE_SEVERITY_ARIA_LABEL}
     />
   );
 };

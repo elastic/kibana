@@ -242,6 +242,12 @@ export const ConnectorsTable: React.FC = () => {
             data-test-subj="serverlessSearchConnectorsTableSelect"
             onChange={(e) => setFilter(e.currentTarget.value as Filter)}
             options={filterOptions}
+            aria-label={i18n.translate(
+              'xpack.serverlessSearch.connectorsTable.filterSelect.ariaLabel',
+              {
+                defaultMessage: 'Filter',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

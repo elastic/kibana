@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlyout,
@@ -165,7 +166,14 @@ export const WorkflowStepExecutionFlyout = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" color="text" onClick={closeFlyout} />
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              onClick={closeFlyout}
+              aria-label={i18n.translate('workflowStepExecutionFlyout.closeButtonAriaLabel', {
+                defaultMessage: 'Close step details',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

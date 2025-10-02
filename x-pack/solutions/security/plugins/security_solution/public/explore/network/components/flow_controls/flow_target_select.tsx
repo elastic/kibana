@@ -69,6 +69,9 @@ const FlowTargetSelectComponent: React.FC<FlowTargetSelectProps> = ({
     valueOfSelected={selectedTarget}
     onChange={updateFlowTargetAction}
     isLoading={isLoading}
+    aria-label={i18n.translate('xpack.securitySolution.flowTargetSelect.target.ariaLabel', {
+      defaultMessage: 'Flow target',
+    })}
   />
 );
 

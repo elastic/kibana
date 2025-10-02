@@ -89,16 +89,18 @@ export const RoleComboBox = (props: Props) => {
     return acc;
   }, {});
 
+  const roleComboBoxPlaceholder =
+    props.placeholder ||
+    i18n.translate('xpack.security.management.users.roleComboBox.placeholder', {
+      defaultMessage: 'Select roles',
+    });
+
   return (
     <EuiComboBox
       data-test-subj="rolesDropdown"
       id={props.id}
-      placeholder={
-        props.placeholder ||
-        i18n.translate('xpack.security.management.users.roleComboBox.placeholder', {
-          defaultMessage: 'Select roles',
-        })
-      }
+      placeholder={roleComboBoxPlaceholder}
+      aria-label={roleComboBoxPlaceholder}
       onChange={onRolesChange}
       isLoading={props.isLoading}
       isDisabled={props.isDisabled}

@@ -113,7 +113,7 @@ export const AlertsSummary: React.FC = () => {
               aria-label={i18n.translate(
                 'xpack.ml.explorer.alertsPanel.summary.paginationAreaLabel',
                 {
-                  defaultMessage: 'Pagination for alerting rules summary',
+                  defaultMessage: 'Alerting rules pagination',
                 }
               )}
               pageCount={Math.ceil(sortedAlertsByRule.length / PAGE_SIZE)}

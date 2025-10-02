@@ -47,6 +47,7 @@ export const SelectInterval: React.FC<{
       options={OPTIONS}
       value={interval}
       onChange={onChangeCb}
+      aria-label={i18n.INTERVAL}
     />
   );
 };
