@@ -529,7 +529,7 @@ describe('MS Defender response actions client', () => {
             })
           )
         ).rejects.toMatchObject({
-          message: expect.stringContaining('script name mismatched'),
+          message: expect.stringContaining('Cannot run script'),
           statusCode: 409,
         });
       });
@@ -597,7 +597,7 @@ describe('MS Defender response actions client', () => {
             })
           )
         ).rejects.toMatchObject({
-          message: expect.stringContaining('not found in requestor comment'),
+          message: expect.stringContaining('Cannot run script'),
           statusCode: 409,
         });
       });
@@ -635,7 +635,7 @@ describe('MS Defender response actions client', () => {
             })
           )
         ).rejects.toMatchObject({
-          message: expect.stringContaining('Action details not found in Microsoft Defender'),
+          message: expect.stringContaining('Action details not found'),
           statusCode: 409,
         });
       });
@@ -743,7 +743,7 @@ describe('MS Defender response actions client', () => {
             })
           )
         ).rejects.toMatchObject({
-          message: expect.stringContaining('has no command information'),
+          message: expect.stringContaining('Unable to verify action details'),
           statusCode: 409,
         });
       });
@@ -811,7 +811,7 @@ describe('MS Defender response actions client', () => {
             })
           )
         ).rejects.toMatchObject({
-          message: expect.stringContaining('Unable to extract script name'),
+          message: expect.stringContaining('Unable to verify which script is running'),
           statusCode: 409,
         });
       });

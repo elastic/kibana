@@ -16,34 +16,6 @@ export interface ActionValidationResult {
 }
 
 /**
- * Retries a function that may initially fail due to indexing delays.
- * This helper provides a simple retry mechanism with a configurable delay.
- *
- * Default values chosen based on MDE API behavior:
- * - 300ms delay: Observed indexing lag for newly created actions
- * - 1 retry: Single retry is sufficient as persistent failures indicate real errors
- *
- * @param fn - The async function to retry
- * @param delayMs - Delay in milliseconds between retries (default: 300ms)
- * @param maxRetries - Maximum number of retry attempts (default: 1)
- * @returns The result of the function, or undefined if all retries fail
- */
-export async function retryWithDelay<T>(
-  fn: () => Promise<T | undefined>,
-  delayMs: number = 300,
-  maxRetries: number = 1
-): Promise<T | undefined> {
-  let result = await fn();
-
-  for (let attempt = 0; attempt < maxRetries && !result; attempt++) {
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-    result = await fn();
-  }
-
-  return result;
-}
-
-/**
  * Validates that an MDE action matches the expected script name and action ID.
  * This detects when MDE throttles/replaces our action with an existing one.
  *
@@ -61,7 +33,7 @@ export function checkActionMatches(
   if (!expectedScriptName || !expectedActionId) {
     return {
       isValid: false,
-      error: 'Invalid validation parameters: script name and action ID are required',
+      error: 'Unable to validate action. Missing required parameters.',
     };
   }
 
@@ -69,7 +41,7 @@ export function checkActionMatches(
   if (!commandEntry) {
     return {
       isValid: false,
-      error: `Microsoft Defender action (ID: ${actionDetails.id}) has no command information.`,
+      error: 'Unable to verify action details. The action information is incomplete.',
     };
   }
 
@@ -80,7 +52,7 @@ export function checkActionMatches(
   if (!actualScriptName) {
     return {
       isValid: false,
-      error: `Unable to extract script name from Microsoft Defender action (ID: ${actionDetails.id}).`,
+      error: 'Unable to verify which script is running. The action information is incomplete.',
     };
   }
 
@@ -88,7 +60,7 @@ export function checkActionMatches(
   if (actualScriptName !== expectedScriptName) {
     return {
       isValid: false,
-      error: `Microsoft Defender action verified (action ID: ${expectedActionId}), but script name mismatched. Expected '${expectedScriptName}', found '${actualScriptName}'. (MDE action ID: ${actionDetails.id})`,
+      error: `Cannot run script '${expectedScriptName}' because another script ('${actualScriptName}') is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
     };
   }
 
@@ -96,7 +68,7 @@ export function checkActionMatches(
   if (!actionDetails.requestorComment?.includes(expectedActionId)) {
     return {
       isValid: false,
-      error: `Microsoft Defender returned an existing action that was not created by this request. Expected action ID '${expectedActionId}' not found in requestor comment. Action is running script '${actualScriptName}' (MDE action ID: ${actionDetails.id}).`,
+      error: `Cannot run script '${actualScriptName}' because an identical script is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
     };
   }
 

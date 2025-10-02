@@ -72,8 +72,9 @@ import type {
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
 import { catchAndWrapError } from '../../../../../../utils';
+import pRetry from 'p-retry';
 import type { ActionValidationResult } from './utils';
-import { checkActionMatches, retryWithDelay } from './utils';
+import { checkActionMatches } from './utils';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -396,36 +397,55 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     expectedScriptName: string,
     expectedActionId: string
   ): Promise<ActionValidationResult> {
-    const fetchAction = async () => {
-      const params: MicrosoftDefenderEndpointGetActionsParams = {
-        id: [machineActionId],
-        pageSize: 1,
-      };
-
-      const response = await this.sendAction<
-        MicrosoftDefenderEndpointGetActionsResponse,
-        MicrosoftDefenderEndpointGetActionsParams
-      >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS, params);
-
-      return response.data?.value?.[0];
-    };
+    this.log.debug(`Fetching action details from MDE API for machineActionId [${machineActionId}]`);
 
     try {
-      this.log.debug(
-        `Fetching action details from MDE API for machineActionId [${machineActionId}]`
+      // Retry fetching action details to handle MDE API indexing lag.
+      // When MDE accepts a new action, there's a delay before it appears in their GET actions API.
+      // We retry with exponential backoff (300ms → 450ms → 675ms → 1012ms → 1518ms) up to 5 times
+      // to give MDE's internal indexing sufficient time to make the action available.
+      const actionDetails = await pRetry(
+        async () => {
+          this.log.debug(`Attempting to fetch MDE action [${machineActionId}]`);
+
+          const params: MicrosoftDefenderEndpointGetActionsParams = {
+            id: [machineActionId],
+            pageSize: 1,
+          };
+
+          const response = await this.sendAction<
+            MicrosoftDefenderEndpointGetActionsResponse,
+            MicrosoftDefenderEndpointGetActionsParams
+          >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS, params);
+
+          const action = response.data?.value?.[0];
+
+          if (!action) {
+            throw new Error(
+              `Action not yet available in MDE API for machineActionId [${machineActionId}]`
+            );
+          }
+
+          return action;
+        },
+        {
+          retries: 5,
+          minTimeout: 300,
+          maxTimeout: 1500,
+          factor: 1.5,
+          onFailedAttempt: (error) => {
+            if (error.retriesLeft) {
+              this.log.debug(
+                `Attempt ${error.attemptNumber} to fetch MDE action [${machineActionId}] failed. ${error.retriesLeft} retries left. [ERROR: ${error.message}]`
+              );
+            } else {
+              this.log.warn(
+                `All retry attempts exhausted for fetching MDE action [${machineActionId}]. [ERROR: ${error.message}]`
+              );
+            }
+          },
+        }
       );
-
-      // Retry once after a short delay if action was not found on first attempt
-      // This handles the case where MDE has slight API indexing lag
-      const actionDetails = await retryWithDelay(fetchAction);
-
-      if (!actionDetails) {
-        this.log.debug(`No existing action found for machineActionId [${machineActionId}].`);
-        return {
-          isValid: false,
-          error: `Action details not found in Microsoft Defender for machineActionId [${machineActionId}]. The action may not have been created successfully.`,
-        };
-      }
 
       this.log.debug(
         `Successfully fetched action details for machineActionId [${machineActionId}]: status=${actionDetails.status}, type=${actionDetails.type}`
@@ -440,7 +460,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       return {
         isValid: false,
-        error: `Failed to fetch action details from Microsoft Defender: ${error.message}`,
+        error: `Action details not found in Microsoft Defender for machineActionId [${machineActionId}]. The action may not have been created successfully.`,
       };
     }
   }
