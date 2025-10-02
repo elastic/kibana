@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ToolbarPopoverProps } from '../../../shared_components';
 import { ToolbarPopover } from '../../../shared_components';
 import type { MetricVisualizationState } from '../types';
-import { AppearanceSettings } from './appearance_settings';
+import { MetricAppearanceSettings } from './appearance_settings';
 
 interface AppearancePopoverProps {
   state: MetricVisualizationState;
@@ -33,7 +33,7 @@ export function AppearanceSettingsPopover({
       groupPosition={groupPosition}
       buttonDataTestSubj="lnsTextOptionsButton"
     >
-      <AppearanceSettings state={state} setState={setState} />
+      <MetricAppearanceSettings state={state} setState={setState} />
     </ToolbarPopover>
   );
 }

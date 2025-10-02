@@ -33,7 +33,7 @@ import {
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
-import { PopoverToolbar, FlyoutToolbar } from './toolbar';
+import { Toolbar, MetricFlyoutToolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
@@ -664,12 +664,11 @@ export const getMetricVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <PopoverToolbar {...props} />;
+    return <Toolbar {...props} />;
   },
 
-  // TODO: Rename this
-  SettingsPanelToolbar(props) {
-    return <FlyoutToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <MetricFlyoutToolbar {...props} />;
   },
 
   DimensionEditorDataExtraComponent(props) {

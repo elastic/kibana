@@ -52,7 +52,7 @@ const getDefaultLayoutConfig = (
  * This component contains the actual settings UI.
  * It is reused by both the Popover and the Flyout.
  */
-export function AppearanceSettings({
+export function MetricAppearanceSettings({
   state,
   setState,
 }: {

@@ -11,7 +11,7 @@ import type { VisualizationToolbarProps } from '../../../types';
 import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import type { MetricVisualizationState } from '../types';
 
-export function PopoverToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
+export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;
 
   return (
