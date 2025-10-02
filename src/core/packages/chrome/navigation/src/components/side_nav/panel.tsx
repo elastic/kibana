@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiSplitPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
+import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +18,7 @@ import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { useScroll } from '../../hooks/use_scroll';
 
 export interface SideNavPanelProps {
   children: ReactNode;
@@ -31,6 +32,7 @@ export interface SideNavPanelProps {
  */
 export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const scrollStyles = useScroll();
 
   const wrapperStyles = css`
     // > For instance, only plain or transparent panels can have a border and/or shadow.
@@ -43,10 +45,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
   `;
 
   const navigationPanelStyles = css`
-    ${useEuiOverflowScroll('y')}
-
-    // Account for fixed header when scrolling to elements
-    scroll-padding-top: var(--header-height);
+    ${scrollStyles}
   `;
 
   return (

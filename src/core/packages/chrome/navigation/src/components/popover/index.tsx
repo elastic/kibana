@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   ReactNode,
@@ -35,6 +35,7 @@ import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
+import { useScroll } from '../../hooks/use_scroll';
 
 export interface SideNavPopoverProps {
   container?: HTMLElement;
@@ -69,6 +70,7 @@ export const SideNavPopover = ({
 
   const { isOpen, open, close } = usePopoverOpen();
   const { isPersistent, setPersistent, clearPersistent } = usePersistentPopover();
+  const scrollStyles = useScroll(true);
 
   const handleClose = useCallback(() => {
     close();
@@ -178,9 +180,8 @@ export const SideNavPopover = ({
 
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
-
     max-height: var(--popover-max-height);
-    ${useEuiOverflowScroll('y', true)}
+    ${scrollStyles};
   `;
 
   const maskStyles = css`
