@@ -23,6 +23,10 @@ import { getToolResultId } from '@kbn/onechat-server/src/tools';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
+  existingConfig: z
+    .string()
+    .optional()
+    .describe('An existing visualization configuration to modify.'),
   chartType: z
     .enum(['metric', 'gauge', 'tagcloud', 'pie'])
     .optional()
@@ -56,7 +60,10 @@ This tool will:
 4. Validate the configuration and retry if needed
 5. Return a validated configuration ready to be used`,
     schema: createVisualizationSchema,
-    handler: async ({ query: nlQuery, chartType, esql }, { runner, modelProvider, logger }) => {
+    handler: async (
+      { query: nlQuery, chartType, esql, existingConfig },
+      { runner, modelProvider, logger }
+    ) => {
       try {
         // Step 1: Determine chart type if not provided
         let selectedChartType: SupportedChartType = chartType || 'metric';
@@ -140,6 +147,8 @@ Guidelines:
 
 Schema for ${selectedChartType}:
 ${JSON.stringify(schema, null, 2)}
+
+${existingConfig ? `Existing configuration to modify: ${existingConfig}` : ''}
 
 IMPORTANT RULES:
 1. The response must be valid JSON only, no markdown or explanations
