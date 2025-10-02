@@ -22,26 +22,26 @@ const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-s
 
 export const createTracesDataSourceProfileProvider = ({
   tracesContextService,
+  apmErrorsContextService,
+  logsContextService,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...prev(params),
-      columns: [
-        {
-          name: '@timestamp',
-          width: 212,
-        },
-        {
-          name: '_source',
-        },
-      ],
+      columns: [{ name: '@timestamp', width: 212 }, { name: '_source' }],
       rowHeight: 5,
     }),
     getCellRenderers,
     getColumnsConfiguration,
-    getChartSectionConfiguration: createChartSection(),
+    getChartSectionConfiguration: createChartSection({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern(),
+    }),
   },
   resolve: (params) => {
     if (

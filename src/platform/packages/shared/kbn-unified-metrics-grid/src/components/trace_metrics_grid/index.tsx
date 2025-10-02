@@ -6,19 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import React, { useMemo } from 'react';
-import { Subject } from 'rxjs';
 import { Provider } from 'react-redux';
-import { ChartSizes } from '../chart';
-import { useLensProps } from '../chart/hooks/use_lens_props';
-import { LensWrapper } from '../chart/lens_wrapper';
+import { Subject } from 'rxjs';
+import { useEsqlQueryInfo } from '../../hooks';
 import { store } from '../../store';
+import { ErrorRateChart } from './error_rate';
+import { LatencyChart } from './latency';
+import { ThroughputChart } from './throughput';
 
-const LensWrapperMemo = React.memo(LensWrapper);
+export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
 function TraceMetricsGrid({
   requestParams,
@@ -28,19 +30,27 @@ function TraceMetricsGrid({
   onBrushEnd,
   onFilter,
   abortController,
-  dataView,
-}: ChartSectionProps) {
-  const { EmbeddableComponent } = services.lens;
-  const { euiTheme } = useEuiTheme();
+  indexes,
+  query,
+}: ChartSectionProps & {
+  indexes: TraceIndexes;
+}) {
+  const esqlQuery = useEsqlQueryInfo({
+    query: query && 'esql' in query ? query.esql : '',
+  });
+
+  const kqlFilters = useMemo(() => {
+    if (query && 'query' in query) {
+      return [`KQL("${query.query.replaceAll('"', '\\"')}")`];
+    }
+    return [];
+  }, [query]);
+
+  const filters = useMemo(() => {
+    return [...esqlQuery.filters, ...kqlFilters];
+  }, [esqlQuery.filters, kqlFilters]);
 
   const { getTimeRange, updateTimeRange } = requestParams;
-  const timeRange = getTimeRange();
-
-  const esql = useMemo(
-    () =>
-      `FROM traces-* | where processor.event  == "transaction"| EVAL duration_ms = ROUND(transaction.duration.us)/1000 | STATS avg_duration = AVG(duration_ms) BY timestamp = BUCKET(@timestamp, 100, "${timeRange.from}", "${timeRange.to}") | KEEP avg_duration, timestamp | SORT timestamp`,
-    [timeRange]
-  );
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -52,39 +62,63 @@ function TraceMetricsGrid({
     beforeFetch: updateTimeRange,
   });
 
-  const lensProps = useLensProps({
-    title: 'Trace Metrics Grid',
-    query: esql,
-    getTimeRange: () => timeRange,
-    seriesType: 'line',
-    services,
-    unit: 'ms',
-    discoverFetch$,
-    searchSessionId,
-  });
+  if (!indexes.apm.traces) {
+    return undefined;
+  }
 
   return (
     <Provider store={store}>
-      <div
+      <EuiSpacer size="m" />
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
         css={css`
-          height: ${ChartSizes}px;
-          outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-          border-radius: ${euiTheme.border.radius.medium};
-          figcaption {
-            display: none;
-          }
+          height: 100%;
         `}
       >
-        {lensProps && (
-          <EmbeddableComponent
-            {...lensProps}
-            abortController={abortController}
-            withDefaultActions
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-          />
-        )}
-      </div>
+        <EuiFlexGrid columns={3}>
+          <EuiFlexItem>
+            <LatencyChart
+              indexes={indexes.apm.traces}
+              getTimeRange={getTimeRange}
+              services={services}
+              discoverFetch$={discoverFetch$}
+              searchSessionId={searchSessionId}
+              abortController={abortController}
+              onBrushEnd={onBrushEnd}
+              onFilter={onFilter}
+              filters={filters}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ErrorRateChart
+              indexes={indexes.apm.traces}
+              getTimeRange={getTimeRange}
+              services={services}
+              discoverFetch$={discoverFetch$}
+              searchSessionId={searchSessionId}
+              abortController={abortController}
+              onBrushEnd={onBrushEnd}
+              onFilter={onFilter}
+              filters={filters}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThroughputChart
+              indexes={indexes.apm.traces}
+              getTimeRange={getTimeRange}
+              services={services}
+              discoverFetch$={discoverFetch$}
+              searchSessionId={searchSessionId}
+              abortController={abortController}
+              onBrushEnd={onBrushEnd}
+              onFilter={onFilter}
+              filters={filters}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGrid>
+      </EuiPanel>
     </Provider>
   );
 }

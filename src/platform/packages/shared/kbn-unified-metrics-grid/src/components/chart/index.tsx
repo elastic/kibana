@@ -15,9 +15,9 @@ import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useBoolean } from '@kbn/react-hooks';
 import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
+import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
-import { useLensProps } from './hooks/use_lens_props';
 
 export const ChartSizes = {
   s: 230,

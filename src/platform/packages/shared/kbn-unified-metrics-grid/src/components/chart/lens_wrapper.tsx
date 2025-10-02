@@ -17,7 +17,7 @@ import { useMetricsGridState } from '../../hooks';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
-  onViewDetails: () => void;
+  onViewDetails?: () => void;
   onCopyToDashboard: () => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
