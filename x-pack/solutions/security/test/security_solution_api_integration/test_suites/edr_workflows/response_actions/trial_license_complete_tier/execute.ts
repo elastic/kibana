@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     let agentId = '';
     let t1AnalystSupertest: TestAgent;
     let endpointOperationsAnalystSupertest: TestAgent;
+    const log = getService('log');
 
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
@@ -42,7 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       if (indexedData) {
-        await endpointTestResources.unloadEndpointData(indexedData);
+        // Delete data loaded and suppress any errors (no point in failing test suite on data
+        // cleanup, since all test already ran)
+        await endpointTestResources.unloadEndpointData(indexedData).catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
       }
     });
 
