@@ -53,14 +53,12 @@ const MAX_RETRY_ATTEMPTS = 5;
 
 // Langgraph state definition
 const VisualizationStateAnnotation = Annotation.Root({
-  // Inputs
   nlQuery: Annotation<string>(),
   esqlQuery: Annotation<string>(),
   chartType: Annotation<SupportedChartType>(),
   schema: Annotation<any>(),
   existingConfig: Annotation<string | undefined>(),
 
-  // Internal state
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
@@ -73,21 +71,17 @@ const VisualizationStateAnnotation = Annotation.Root({
     reducer: (_, newValue) => newValue,
   }),
 
-  // Outputs
   validatedConfig: Annotation<any | null>(),
   error: Annotation<string | null>(),
 });
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
-// Generic Zod schema for visualization config structure (for structured output)
 const visualizationConfigSchema = z
   .record(z.unknown())
   .describe('Lens visualization configuration');
 
-// Create the langgraph for config generation with validation retry
 const createVisualizationGraph = (model: any, logger: any) => {
-  // Create a model with structured output to ensure we get valid JSON
   const structuredModel = model.chatModel.withStructuredOutput(visualizationConfigSchema, {
     name: 'visualization_config',
   });
@@ -114,7 +108,6 @@ IMPORTANT RULES:
 3. All field names must match those available in the ES|QL query result
 4. Make sure to follow schema definition strictly`;
 
-    // Build messages array - include previous messages for retry context
     const messages: BaseMessage[] = [
       new HumanMessage(systemPrompt),
       new HumanMessage(`User query: ${state.nlQuery}
@@ -125,20 +118,16 @@ Generate the ${state.chartType} visualization configuration.`),
       ...state.messages,
     ];
 
-    // Use structured output to get JSON directly (no manual parsing needed)
     const config = await structuredModel.invoke(messages);
 
     return {
       messages: [new AIMessage(JSON.stringify(config))],
       attemptCount,
-      // Store the parsed config directly in state for validation
       generatedConfig: config,
     };
   };
 
-  // Node: Validate configuration
   const validateConfigNode = async (state: VisualizationState) => {
-    // Get the config from state (already parsed by structured output)
     const config = state.generatedConfig as VisualizationConfig;
 
     try {
@@ -168,7 +157,6 @@ Generate the ${state.chartType} visualization configuration.`),
     }
   };
 
-  // Node: Add validation feedback for retry
   const addValidationFeedbackNode = async (state: VisualizationState) => {
     const feedbackMessage = new HumanMessage(
       `The configuration you provided failed JOI schema validation with the following error:
@@ -180,27 +168,22 @@ Please fix the configuration and provide a corrected version that passes validat
 
     return {
       messages: [feedbackMessage],
-      error: null, // Clear error for next attempt
+      error: null, 
     };
   };
 
-  // Router: Decide whether to continue or end based on validation result
   const shouldRetryRouter = (state: VisualizationState) => {
-    // If validation succeeded, end the flow
     if (state.validatedConfig) {
       return '__end__';
     }
 
-    // If max attempts reached, end with error
     if (state.attemptCount >= MAX_RETRY_ATTEMPTS) {
       return '__end__';
     }
 
-    // Otherwise, add feedback and retry
     return 'add_feedback';
   };
 
-  // Build the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     .addNode('generate_config', generateConfigNode)
     .addNode('validate_config', validateConfigNode)
