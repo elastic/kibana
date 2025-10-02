@@ -23,7 +23,6 @@ function setup(props: Partial<React.ComponentProps<typeof SearchSessionIndicator
   render(
     <IntlProvider locale="en">
       <SearchSessionIndicator
-        hasBackgroundSearchEnabled={false}
         state={SearchSessionState.Loading}
         onCancel={onCancel}
         onSaveResults={onSaveResults}
@@ -39,7 +38,7 @@ describe('<SearchSessionIndicator />', () => {
   test('Loading state', async () => {
     const { onCancel, userEvent } = setup();
 
-    await userEvent.click(screen.getByLabelText('Search session loading'));
+    await userEvent.click(screen.getByLabelText('Background search loading'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByText('Stop session'));
 
@@ -49,7 +48,7 @@ describe('<SearchSessionIndicator />', () => {
   test('Completed state', async () => {
     const { onSaveResults, userEvent } = setup({ state: SearchSessionState.Completed });
 
-    await userEvent.click(screen.getByLabelText('Search session complete'));
+    await userEvent.click(screen.getByLabelText('Background search complete'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByText('Save session'));
 
@@ -59,7 +58,7 @@ describe('<SearchSessionIndicator />', () => {
   test('Loading in the background state', async () => {
     const { onCancel, userEvent } = setup({ state: SearchSessionState.BackgroundLoading });
 
-    await userEvent.click(screen.getByLabelText(/Saved session in progress/));
+    await userEvent.click(screen.getByLabelText(/Background search in progress/));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByText('Stop session'));
 
@@ -72,7 +71,7 @@ describe('<SearchSessionIndicator />', () => {
       viewSearchSessionsLink: '__link__',
     });
 
-    await userEvent.click(screen.getByLabelText(/Saved session complete/));
+    await userEvent.click(screen.getByLabelText(/Background search complete/));
     expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
       '__link__'
     );
@@ -84,7 +83,7 @@ describe('<SearchSessionIndicator />', () => {
       viewSearchSessionsLink: '__link__',
     });
 
-    await userEvent.click(screen.getByLabelText(/Saved session restored/));
+    await userEvent.click(screen.getByLabelText(/Background search restored/));
 
     expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
       '__link__'
@@ -97,7 +96,7 @@ describe('<SearchSessionIndicator />', () => {
       viewSearchSessionsLink: '__link__',
     });
 
-    await userEvent.click(screen.getByLabelText(/Search session stopped/));
+    await userEvent.click(screen.getByLabelText(/Background search stopped/));
     expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
       '__link__'
     );
@@ -107,8 +106,8 @@ describe('<SearchSessionIndicator />', () => {
     const saveDisabled = true;
 
     describe.each([
-      { state: SearchSessionState.Loading, text: 'Search session loading' },
-      { state: SearchSessionState.Completed, text: 'Search session complete' },
+      { state: SearchSessionState.Loading, text: 'Background search loading' },
+      { state: SearchSessionState.Completed, text: 'Background search complete' },
     ])('when the state is $state', ({ state, text }) => {
       it('the button should be disabled', async () => {
         const { userEvent } = setup({ state, saveDisabled });

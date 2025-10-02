@@ -27,6 +27,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
@@ -56,6 +57,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
+import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
@@ -126,6 +128,7 @@ const ESQLEditorInternal = function ESQLEditor({
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
+  mergeExternalMessages,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -139,6 +142,11 @@ const ESQLEditorInternal = function ESQLEditor({
     kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -483,6 +491,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
+  const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
+    () => ({
+      onDecorationHoverShown: (hoverMessage: string) =>
+        telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+    }),
+    [telemetryService]
+  );
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -678,17 +694,31 @@ const ESQLEditorInternal = function ESQLEditor({
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+
+      let allErrors = parserErrors;
+      let allWarnings = parserWarnings;
+
+      // Only merge external messages if the flag is enabled
+      if (mergeExternalMessages) {
+        const externalErrorsParsedErrors = serverErrors ? parseErrors(serverErrors, code) : [];
+        const externalErrorsParsedWarnings = serverWarning ? parseWarning(serverWarning) : [];
+
+        allErrors = [...parserErrors, ...externalErrorsParsedErrors];
+        allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
+      }
+
       const markers = [];
 
-      if (parserErrors.length) {
+      if (allErrors.length) {
         if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(parserErrors));
+          markers.push(...filterDataErrors(allErrors));
         } else {
-          markers.push(...parserErrors);
+          markers.push(...allErrors);
         }
       }
+
       if (active) {
-        setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
+        setEditorMessages({ errors: allErrors, warnings: allWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',
@@ -699,7 +729,14 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
     },
-    [parseMessages, dataErrorsControl?.enabled]
+    [
+      parseMessages,
+      serverErrors,
+      code,
+      serverWarning,
+      dataErrorsControl?.enabled,
+      mergeExternalMessages,
+    ]
   );
 
   const onLookupIndexCreate = useCallback(
@@ -757,7 +794,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks]
   );
 
-  const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
+  const hoverProvider = useMemo(
+    () =>
+      ESQLLang.getHoverProvider?.({
+        ...esqlCallbacks,
+        telemetry: telemetryCallbacks,
+      }),
+    [esqlCallbacks, telemetryCallbacks]
+  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {

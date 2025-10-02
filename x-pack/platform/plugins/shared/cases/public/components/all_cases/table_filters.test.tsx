@@ -166,6 +166,7 @@ describe('CasesTableFilters ', () => {
         "searchFields": Array [
           "title",
           "description",
+          "incremental_id.text",
         ],
         "severity": Array [],
         "status": Array [],
@@ -267,6 +268,7 @@ describe('CasesTableFilters ', () => {
         "searchFields": Array [
           "title",
           "description",
+          "incremental_id.text",
         ],
         "severity": Array [],
         "status": Array [],

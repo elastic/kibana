@@ -295,3 +295,9 @@ xpack.product_intercept.interval: '90d'
 xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
+  showAiAssistantsVisibilitySetting: false
+
+## Feature flags overrides
+feature_flags.overrides:
+  # Serverless uses old side nav for now, while classic already rolling out new side nav
+  core.chrome.projectSideNav: 'v1'

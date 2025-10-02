@@ -3801,15 +3801,15 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/security_browser_fields_manager.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/security_browser_fields_manager.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/security_browser_fields_manager.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
           },
           {
             "plugin": "securitySolution",

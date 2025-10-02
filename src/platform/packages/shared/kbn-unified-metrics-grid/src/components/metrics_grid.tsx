@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
@@ -17,6 +18,8 @@ import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
+import { useGridNavigation } from '../hooks/use_grid_navigation';
+import { FieldsMetadataProvider } from '../context/fields_metadata';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -52,6 +55,7 @@ export const MetricsGrid = ({
   filters = [],
 }: MetricsGridProps) => {
   const { euiTheme } = useEuiTheme();
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
@@ -74,7 +78,17 @@ export const MetricsGrid = ({
       : dimensions.map((dim, i) => ({ key: `${dim}-${i}`, metric: fields }));
   }, [pivotOn, fields, dimensions]);
 
-  const handleViewDetails = useCallback((metric: MetricField, esqlQuery: string) => {
+  const gridColumns = columns || 1;
+  const gridRows = Math.ceil(rows.length / gridColumns);
+
+  const { focusedCell, handleKeyDown, handleCellClick, getRowColFromIndex } = useGridNavigation({
+    gridColumns,
+    gridRows,
+    totalRows: rows.length,
+    gridRef,
+  });
+
+  const handleViewDetails = useCallback((esqlQuery: string, metric: MetricField) => {
     setExpandedMetric({ metric, esqlQuery });
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
   }, []);
@@ -82,42 +96,90 @@ export const MetricsGrid = ({
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
   }, []);
+
+  const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
+
   if (rows.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <>
-      <EuiFlexGrid columns={columns} gutterSize="s" data-test-subj="unifiedMetricsExperienceGrid">
-        {rows.map(({ key, metric }, index) => (
-          <EuiFlexItem key={key}>
-            <Chart
-              metric={metric}
-              size={chartSize}
-              color={colorPalette[index % colorPalette.length]}
-              dimensions={dimensions}
-              discoverFetch$={discoverFetch$}
-              requestParams={requestParams}
-              services={services}
-              abortController={abortController}
-              searchSessionId={searchSessionId}
-              filters={filters}
-              onBrushEnd={onBrushEnd}
-              onFilter={onFilter}
-              onViewDetails={handleViewDetails}
-              metricName={metric.name}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+    <FieldsMetadataProvider fields={normalizedFields} services={services}>
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        aria-rowcount={gridRows}
+        aria-colcount={gridColumns}
+        onKeyDown={handleKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+        tabIndex={0}
+        style={{
+          outline: 'none',
+        }}
+      >
+        <EuiFlexGrid columns={columns} gutterSize="s">
+          {rows.map(({ key, metric }, index) => {
+            const { rowIndex, colIndex } = getRowColFromIndex(index);
+            const isFocused =
+              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+
+            return (
+              <EuiFlexItem key={key}>
+                <div
+                  role="gridcell"
+                  aria-rowindex={rowIndex + 1} // 1-based for ARIA
+                  aria-colindex={colIndex + 1} // 1-based for ARIA
+                  data-grid-cell={`${rowIndex}-${colIndex}`}
+                  data-chart-index={index}
+                  tabIndex={isFocused ? 0 : -1}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleCellClick(rowIndex, colIndex);
+                    }
+                  }}
+                  style={{
+                    outline: 'none',
+                    cursor: 'pointer',
+                    ...(isFocused && {
+                      boxShadow: `inset 0 0 0 2px ${euiTheme.colors.primary}`,
+                      borderRadius: euiTheme.border.radius.medium,
+                    }),
+                  }}
+                >
+                  <Chart
+                    metric={metric}
+                    size={chartSize}
+                    color={colorPalette[index % colorPalette.length]}
+                    dimensions={dimensions}
+                    discoverFetch$={discoverFetch$}
+                    requestParams={requestParams}
+                    services={services}
+                    abortController={abortController}
+                    searchSessionId={searchSessionId}
+                    filters={filters}
+                    onBrushEnd={onBrushEnd}
+                    onFilter={onFilter}
+                    onViewDetails={handleViewDetails}
+                  />
+                </div>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
+      </div>
       {expandedMetric && (
         <MetricInsightsFlyout
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen={!!expandedMetric}
+          isOpen
           onClose={handleCloseFlyout}
         />
       )}
-    </>
+    </FieldsMetadataProvider>
   );
 };
