@@ -16,6 +16,8 @@ export const selectYamlDocument = (state: RootState) => state.workflow.computed?
 export const selectWorkflowLookup = (state: RootState) => state.workflow.computed?.workflowLookup;
 export const selectWorkflowGraph = (state: RootState) => state.workflow.computed?.workflowGraph;
 export const selectFocusedStepId = (state: RootState) => state.workflow.focusedStepId;
+export const selectHighlightedStepId = (state: RootState) => state.workflow.highlightedStepId;
+export const selectStepExecutions = (state: RootState) => state.workflow.stepExecutions;
 
 export const selectFocusedStepInfo = createSelector(
   selectFocusedStepId,

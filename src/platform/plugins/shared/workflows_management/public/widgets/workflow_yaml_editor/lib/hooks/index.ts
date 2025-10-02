@@ -8,3 +8,4 @@
  */
 
 export { useFocusedStepOutline } from './use_focused_step_outline';
+export { useStepDecorationsInExecution } from './use_step_decorations_in_execution';

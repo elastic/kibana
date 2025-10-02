@@ -10,6 +10,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowEditorState } from './types';
 import { findStepByLine } from './utils/step_finder';
@@ -19,6 +20,8 @@ const initialState: WorkflowEditorState = {
   yamlString: undefined,
   computed: undefined,
   focusedStepId: undefined,
+  stepExecutions: undefined,
+  highlightedStepId: undefined,
 };
 
 // Slice
@@ -64,11 +67,26 @@ const workflowEditorSlice = createSlice({
         state.computed.workflowLookup
       );
     },
+    setStepExecutions: (
+      state,
+      action: { payload: { stepExecutions?: WorkflowStepExecutionDto[] } }
+    ) => {
+      state.stepExecutions = action.payload.stepExecutions;
+    },
+    setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
+      state.highlightedStepId = action.payload.stepId;
+    },
   },
 });
 
 // Export public action creators from the slice
-export const { setYamlString, clearComputedData, setCursorPosition } = workflowEditorSlice.actions;
+export const {
+  setYamlString,
+  clearComputedData,
+  setCursorPosition,
+  setStepExecutions,
+  setHighlightedStepId,
+} = workflowEditorSlice.actions;
 
 // Internal action for middleware use only
 export const { _setComputedDataInternal } = workflowEditorSlice.actions;

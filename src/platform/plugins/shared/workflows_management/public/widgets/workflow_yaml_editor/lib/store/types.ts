@@ -10,6 +10,7 @@
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
 import type { EnhancedStore } from '@reduxjs/toolkit';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 
 // State interface - only serializable data
@@ -21,6 +22,8 @@ export interface WorkflowEditorState {
     workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   };
   focusedStepId?: string;
+  highlightedStepId?: string;
+  stepExecutions?: WorkflowStepExecutionDto[];
 }
 
 // Store types (will be properly typed when store.ts is imported)

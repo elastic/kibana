@@ -35,6 +35,4 @@ export {
   registerUnifiedHoverProvider,
 } from './unified_hover_provider';
 
-export { StepExecutionProvider, createStepExecutionProvider } from './step_execution_provider';
-
 // REMOVED: UnifiedDecorationsProvider - no longer needed in new architecture

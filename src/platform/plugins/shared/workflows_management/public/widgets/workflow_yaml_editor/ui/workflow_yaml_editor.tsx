@@ -45,7 +45,6 @@ import {
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import {
-  createStepExecutionProvider,
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
@@ -65,9 +64,10 @@ import {
   selectFocusedStepInfo,
   selectYamlDocument,
   setCursorPosition,
+  setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import { useFocusedStepOutline } from '../lib/hooks';
+import { useFocusedStepOutline, useStepDecorationsInExecution } from '../lib/hooks';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -173,7 +173,6 @@ export const WorkflowYAMLEditor = ({
   }, [stepExecutions]);
 
   // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
-  // REMOVED: stepExecutionsDecorationCollectionRef - now handled by StepExecutionProvider
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const triggerTypeDecorationCollectionRef =
@@ -198,6 +197,7 @@ export const WorkflowYAMLEditor = ({
   focusedStepInfoRef.current = focusedStepInfo;
 
   const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
+  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   // Memoize the schema to avoid re-generating it on every render
   const workflowYamlSchemaLoose = useMemo(() => {
@@ -265,6 +265,10 @@ export const WorkflowYAMLEditor = ({
       updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
     });
   }, [isEditorMounted, setPositionStyles]);
+
+  useEffect(() => {
+    dispatch(setStepExecutions({ stepExecutions }));
+  }, [stepExecutions, dispatch]);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -651,57 +655,6 @@ export const WorkflowYAMLEditor = ({
       }, 50);
     }
   }, [isEditorMounted, changeSideEffects]);
-
-  // Step execution provider - managed through provider architecture
-  useEffect(() => {
-    if (!isEditorMounted || !editorRef.current) {
-      return;
-    }
-
-    // Always dispose existing provider when dependencies change to prevent stale decorations
-    if (unifiedProvidersRef.current?.stepExecution) {
-      unifiedProvidersRef.current.stepExecution.dispose();
-      unifiedProvidersRef.current.stepExecution = null;
-    }
-
-    // Create step execution provider if needed and we're in readonly mode
-    // Add a small delay to ensure YAML document is fully updated when switching executions
-    const timeoutId = setTimeout(() => {
-      try {
-        // Ensure yamlDocumentRef is synchronized
-        if (yamlDocument && !yamlDocumentRef.current) {
-          yamlDocumentRef.current = yamlDocument;
-        }
-
-        // Additional check: if we have stepExecutions but no yamlDocument,
-        // the document might not be parsed yet - skip and let next update handle it
-        if (stepExecutions && stepExecutions.length > 0 && !yamlDocumentRef.current) {
-          // console.warn(
-          //   '🎯 StepExecutions present but no YAML document - waiting for document parse'
-          // );
-          return;
-        }
-
-        const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
-          getYamlDocument: () => {
-            return yamlDocumentRef.current || null;
-          },
-          getStepExecutions: () => {
-            return stepExecutionsRef.current || [];
-          },
-          getHighlightStep: () => highlightStep || null,
-        });
-
-        if (unifiedProvidersRef.current) {
-          unifiedProvidersRef.current.stepExecution = stepExecutionProvider;
-        }
-      } catch (error) {
-        // console.error('🎯 WorkflowYAMLEditor: Error creating StepExecutionProvider:', error);
-      }
-    }, 20); // Small delay to ensure YAML document is ready
-
-    return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -1412,7 +1365,7 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <div css={css([styles.container, stepOutlineStyles])} ref={containerRef}>
+    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
@@ -1547,31 +1500,6 @@ const componentStyles = {
       '.dimmed': {
         opacity: 0.5,
       },
-      '.step-execution-skipped': {
-        backgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
-      },
-      '.step-execution-waiting_for_input': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
-      },
-      '.step-execution-running': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
-      },
-      '.step-execution-completed': {
-        backgroundColor: euiTheme.colors.backgroundLightSuccess,
-      },
-      '.step-execution-failed': {
-        backgroundColor: euiTheme.colors.backgroundLightDanger,
-      },
-      '.step-execution-skipped-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledText,
-          borderRadius: '50%',
-        },
-      },
       // Enhanced Monaco hover styling for better readability - EXCLUDE glyph and contrib widgets
       // Only target our custom hover widgets, not Monaco's internal ones (especially glyph hovers)
       '&, & .monaco-editor, & .monaco-hover:not([class*="contrib"]):not([class*="glyph"]), & .monaco-editor-hover:not([class*="contrib"]):not([class*="glyph"])':
@@ -1649,46 +1577,6 @@ const componentStyles = {
         fontSize: '12px',
         overflow: 'auto',
         maxHeight: '120px',
-      },
-      '.step-execution-waiting_for_input-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledWarning,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-running-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledPrimary,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-completed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.vis.euiColorVis0,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-failed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.danger,
-          borderRadius: '50%',
-        },
       },
       '.alert-trigger-glyph': {
         '&:before': {
