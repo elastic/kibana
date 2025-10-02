@@ -15,7 +15,7 @@ import { once } from 'lodash';
  */
 export const INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE = 'index_editor.flyout_opened';
 export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitted';
-export const INDEX_EDITOR_EDIT_INTERACTION_EVENT_TYPE = 'index_editor.edit_interaction';
+export const INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE = 'index_editor.data_interaction';
 
 /**
  * Registers the index editor analytics events.
@@ -107,7 +107,7 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
   });
 
   analytics.registerEventType({
-    eventType: INDEX_EDITOR_EDIT_INTERACTION_EVENT_TYPE,
+    eventType: INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE,
     schema: {
       flyout_mode: {
         type: 'keyword',

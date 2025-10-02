@@ -10,6 +10,7 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE,
   INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE,
+  INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE,
 } from './events_registration';
 import { getBucket } from './utils';
 
@@ -87,7 +88,7 @@ export class IndexEditorTelemetryService {
       | 'delete_column';
     failureReason?: string;
   }) {
-    this.reportEvent('index_editor.edit_interaction', {
+    this.reportEvent(INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE, {
       flyout_mode: this._flyoutMode,
       action_type: eventData.actionType,
       failure_reason: eventData.failureReason,
