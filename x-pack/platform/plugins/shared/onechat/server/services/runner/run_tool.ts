@@ -74,7 +74,7 @@ export const runTool = async <TParams = Record<string, unknown>>({
     (result) =>
       ({
         ...result,
-        result_id: result.tool_result_id ?? getToolResultId(),
+        tool_result_id: result.tool_result_id ?? getToolResultId(),
       } as ToolResult)
   );
 

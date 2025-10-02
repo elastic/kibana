@@ -30,9 +30,12 @@ import {
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 
 jest.mock('../agents/modes/create_handler');
+jest.mock('@kbn/onechat-server/tools/utils');
 
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
 describe('Onechat runner', () => {
@@ -41,6 +44,7 @@ describe('Onechat runner', () => {
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
+    getToolResultIdMock.mockReturnValue('some-result-id');
   });
 
   describe('runTool', () => {
@@ -54,7 +58,7 @@ describe('Onechat runner', () => {
       } = runnerDeps;
       getRegistry.mockResolvedValue(registry);
 
-      toolHandler = jest.fn();
+      toolHandler = jest.fn().mockReturnValue({ results: [] });
 
       tool = createMockedTool({});
       tool.getSchema.mockReturnValue(
@@ -83,7 +87,13 @@ describe('Onechat runner', () => {
       expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
 
@@ -107,7 +117,13 @@ describe('Onechat runner', () => {
       expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
   });
