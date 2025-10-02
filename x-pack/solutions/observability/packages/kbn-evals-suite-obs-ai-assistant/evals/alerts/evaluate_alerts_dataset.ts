@@ -9,13 +9,14 @@ import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
+import { createCriteriaEvaluator } from '../../src/common_evaluators';
 
 interface AlertsExample extends Example {
   input: {
     question: string;
   };
   output: {
-    criteria?: string[];
+    criteria: string[];
   };
 }
 
@@ -68,17 +69,9 @@ export function createEvaluateAlertsDataset({
         },
       },
       [
-        {
-          name: 'alerts-evaluator',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
-              .criteria(expected.criteria ?? [])
-              .evaluate({ input, expected, output, metadata });
-
-            return result;
-          },
-        },
+        createCriteriaEvaluator({
+          evaluators,
+        }),
       ]
     );
   };

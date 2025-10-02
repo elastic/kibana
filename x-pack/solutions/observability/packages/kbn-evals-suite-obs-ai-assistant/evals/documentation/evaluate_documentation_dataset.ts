@@ -10,6 +10,7 @@ import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
+import { createCriteriaEvaluator } from '../../src/common_evaluators';
 
 interface DocumentationExample extends Example {
   input: {
@@ -71,17 +72,9 @@ export function createEvaluateDocumentationDataset({
         },
       },
       [
-        {
-          name: 'documentation-evaluator',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
-              .criteria(expected.criteria ?? [])
-              .evaluate({ input, expected, output, metadata });
-
-            return result;
-          },
-        },
+        createCriteriaEvaluator({
+          evaluators,
+        }),
       ]
     );
   };

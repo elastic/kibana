@@ -10,13 +10,14 @@ import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
 import type { KnowledgeBaseClient } from '../../src/clients/knowledge_base_client';
+import { createCriteriaEvaluator } from '../../src/common_evaluators';
 
 interface KnowledgeBaseExample extends Example {
   input: {
     question: string;
   };
   output: {
-    criteria?: string[];
+    criteria: string[];
   };
 }
 
@@ -75,17 +76,9 @@ export function createEvaluateKnowledgeBaseDataset({
         },
       },
       [
-        {
-          name: 'kb-evaluator',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
-              .criteria(expected.criteria ?? [])
-              .evaluate({ input, expected, output, metadata });
-
-            return result;
-          },
-        },
+        createCriteriaEvaluator({
+          evaluators,
+        }),
       ]
     );
   };
