@@ -33,7 +33,7 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   intl?: InjectedIntl;
-  secondaryButton?: EuiButtonProps & {run:TopNavMenuAction, ariaLabel?: string, label?: string};
+  secondaryButton?: EuiButtonProps & { run: TopNavMenuAction; ariaLabel?: string; label?: string };
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

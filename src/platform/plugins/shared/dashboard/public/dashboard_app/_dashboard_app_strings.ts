@@ -268,7 +268,8 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
       defaultMessage: 'Open background searches',
-    })},
+    }),
+  },
   saveMenu: {
     label: i18n.translate('dashboard.topNave.saveMenuButtonAriaLabel', {
       defaultMessage: 'Save options',

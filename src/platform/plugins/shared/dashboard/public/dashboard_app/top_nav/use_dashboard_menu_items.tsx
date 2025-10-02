@@ -169,7 +169,7 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
         secondaryButton: {
-          run:  (anchorElement: HTMLElement) =>
+          run: (anchorElement: HTMLElement) =>
             showSaveMenu({
               dashboardApi,
               anchorElement,
@@ -184,7 +184,7 @@ export const useDashboardMenuItems = ({
           ariaLabel: topNavStrings.saveMenu.label,
           label: topNavStrings.saveMenu.label,
           iconType: 'arrowDown',
-       },
+        },
       } as TopNavMenuData,
 
       interactiveSave: {
