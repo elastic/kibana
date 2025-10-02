@@ -52,7 +52,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
     schema: {
-      command_names: {
+      command_ids: {
         type: 'array',
         items: {
           type: 'keyword',

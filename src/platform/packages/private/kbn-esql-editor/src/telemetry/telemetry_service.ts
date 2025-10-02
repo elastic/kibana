@@ -70,7 +70,7 @@ export class ESQLEditorTelemetryService {
 
   public trackSuggestionsWithCustomCommandShown(commandIds: string[]) {
     this._reportEvent(ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN, {
-      command_names: commandIds,
+      command_ids: commandIds,
     });
   }
 
