@@ -80,7 +80,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
             />
             <ul>
               {unhealthyRollupTransforms.map((result) => (
-                <li key={result.sloId}>
+                <li key={getSLOTransformId(result.sloId, result.sloRevision)}>
                   <TransformDisplayText
                     textSize="xs"
                     transformId={getSLOTransformId(result.sloId, result.sloRevision)}
@@ -88,7 +88,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 </li>
               ))}
               {unhealthySummaryTransforms.map((result) => (
-                <li key={result.sloId}>
+                <li key={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
                   <TransformDisplayText
                     textSize="xs"
                     transformId={getSLOSummaryTransformId(result.sloId, result.sloRevision)}

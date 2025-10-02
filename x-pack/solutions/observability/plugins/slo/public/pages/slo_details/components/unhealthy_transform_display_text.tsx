@@ -7,13 +7,16 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import kbnRison from '@kbn/rison';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const getTransformUrlQueryState = (transformId: string) => {
   return kbnRison.encode({
-    queryText: transformId,
+    transform: {
+      queryText: transformId,
+    },
   });
 };
 
@@ -24,7 +27,18 @@ export function TransformDisplayText({
   textSize: 's' | 'xs';
   transformId: string;
 }) {
-  const { http } = useKibana().services;
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useKibana().services;
+
+  const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
+
+  const url = managementLocator?.getRedirectUrl({
+    sectionId: 'data',
+    appId: `transform?_a=${getTransformUrlQueryState(transformId)}`,
+  });
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -32,12 +46,7 @@ export function TransformDisplayText({
         <EuiText size={textSize}>{transformId}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink
-          data-test-subj="sloHealthCalloutInspectTransformLink"
-          href={http?.basePath.prepend(
-            `/app/management/data/transform/?_a=${getTransformUrlQueryState(transformId)}`
-          )}
-        >
+        <EuiLink data-test-subj="sloHealthCalloutInspectTransformLink" href={url}>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="inspect" color="danger" />
