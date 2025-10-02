@@ -25,6 +25,7 @@ interface Props {
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
   stats?: AttackDiscoveryStats | null;
+  fullWidth?: boolean;
 }
 
 const inputContainerClassName = css`
