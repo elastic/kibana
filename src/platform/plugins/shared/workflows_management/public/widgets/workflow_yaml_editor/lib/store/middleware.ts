@@ -8,7 +8,7 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
-import type { RootState, WorkflowEditorState } from './types';
+import type { RootState } from './types';
 import { setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 
