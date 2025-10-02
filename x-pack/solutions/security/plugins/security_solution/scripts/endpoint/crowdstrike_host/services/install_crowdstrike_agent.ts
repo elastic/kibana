@@ -26,14 +26,14 @@ export interface OnboardVmHostWithCrowdStrikeOptions {
   customerId: string;
   log?: ToolingLog;
   vmName?: string;
-  forceNewHost?: boolean;
+  forceNewCrowdStrikeHost?: boolean;
 }
 
 export const onboardVmHostWithCrowdStrike = async ({
   kbnClient,
   log = createToolingLogger(),
   vmName: _vmName,
-  forceNewHost,
+  forceNewCrowdStrikeHost,
   sensorInstaller,
   customerId,
 }: OnboardVmHostWithCrowdStrikeOptions): Promise<HostVm> => {
@@ -46,9 +46,9 @@ export const onboardVmHostWithCrowdStrike = async ({
     )
   ).data[0];
 
-  if (!forceNewHost && hostVmNameAlreadyRunning) {
+  if (!forceNewCrowdStrikeHost && hostVmNameAlreadyRunning) {
     log?.info(
-      `A host VM with CrowdStrike Falcon sensor is already running - will reuse it.\nTIP: Use 'forceNewHost' to force the creation of a new one if desired`
+      `A host VM with CrowdStrike Falcon sensor is already running - will reuse it.\nTIP: Use 'forceNewCrowdStrikeHost' to force the creation of a new one if desired`
     );
 
     return createMultipassHostVmClient(hostVmNameAlreadyRunning, log);

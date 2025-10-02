@@ -81,7 +81,7 @@ for response actions to be performed on hosts.`,
       --clientSecret      Required. The client secret created for the registered application's API access.
       --customerId        Required. The CrowdStrike Customer ID (CID) used for sensor enrollment. This is different from
                           clientId and can be found in your CrowdStrike Falcon console under "Host Setup and Management".
-      --apiUrl            Required. The URL for making API calls to CrowdStrike Falcon management system.
+      --apiUrl            Optional. The URL for making API calls to CrowdStrike Falcon management system.
                           Must match your CrowdStrike cloud region (e.g., https://api.us-2.crowdstrike.com for US-2,
                           https://api.eu-1.crowdstrike.com for EU-1, https://api.us-gov-1.crowdstrike.com for GovCloud).
                           (Default: https://api.crowdstrike.com)
@@ -142,7 +142,6 @@ const runCli: RunFn = async ({ log, flags }) => {
   ok(clientId, getRequiredArgMessage('clientId'));
   ok(clientSecret, getRequiredArgMessage('clientSecret'));
   ok(customerId, getRequiredArgMessage('customerId'));
-  ok(apiUrl, getRequiredArgMessage('apiUrl'));
 
   // Validate sensor installer file exists
   ok(
@@ -171,7 +170,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     kbnClient,
     log,
     vmName,
-    forceNewHost: forceNewCrowdStrikeHost,
+    forceNewCrowdStrikeHost,
     sensorInstaller,
     customerId,
   });

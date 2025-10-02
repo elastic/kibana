@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_API_URL = 'https://api.crowdstrike.com';
+export const DEFAULT_API_URL = 'https://api.us-2.crowdstrike.com';
