@@ -233,12 +233,7 @@ export const AzureCredentialsForm = ({
   }
 
   // This sets the Fleet wrapper's isValid to false if Azure is not enabled for this version of the integration
-  if (
-    isValidAzureRef.current &&
-    isValid &&
-    !azureEnabled // &&
-    // setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
-  ) {
+  if (isValidAzureRef.current && isValid && !azureEnabled) {
     isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
@@ -247,7 +242,7 @@ export const AzureCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"

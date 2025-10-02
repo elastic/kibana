@@ -734,12 +734,55 @@ const addProviderSpecificUpdates = (
         setupTechnology
       );
       break;
-    // AWS doesn't need additional policy-level updates beyond vars
+    case 'aws':
+      updatedPolicy = addAwsCloudFormationUpdates(
+        updatedPolicy,
+        packageInfo,
+        templateName,
+        setupTechnology
+      );
+      break;
     default:
       break;
   }
 
   return updatedPolicy;
+};
+
+const addAwsCloudFormationUpdates = (
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology: SetupTechnology
+): NewPackagePolicy => {
+  // Only set CloudFormation template for agent-based setup
+  if (setupTechnology === SetupTechnology.AGENTLESS) {
+    return policy;
+  }
+
+  // Get CloudFormation template URL from package if available
+  const templateUrl = getCloudFormationDefaultValue(packageInfo, templateName);
+  if (!templateUrl) {
+    return policy;
+  }
+
+  // Find the AWS policy input and set the CloudFormation template URL
+  return {
+    ...policy,
+    inputs: policy.inputs.map((input) => {
+      // Check if this is an AWS input (this logic might need refinement based on actual policy types)
+      if (input.type && input.type.includes('aws')) {
+        return {
+          ...input,
+          config: {
+            ...input.config,
+            cloud_formation_template_url: { value: templateUrl },
+          },
+        };
+      }
+      return input;
+    }),
+  };
 };
 
 const addAzureArmTemplateUpdates = (
