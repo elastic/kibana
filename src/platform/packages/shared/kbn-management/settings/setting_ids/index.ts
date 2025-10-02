@@ -61,6 +61,7 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 
 // Agent builder settings
 export const AGENT_BUILDER_ENABLED_SETTING_ID = 'agentBuilder:enabled';
+export const AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID = 'agentBuilder:createVisualizations';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';

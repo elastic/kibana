@@ -5,45 +5,72 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiSettingsServiceStart, SavedObjectsServiceStart } from '@kbn/core/server';
 import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common/tools/constants';
+import { AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { InternalToolDefinition, ToolSource, ReadonlyToolTypeClient } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 
 export const createBuiltInToolSource = ({
   registry,
+  uiSettings,
+  savedObjects,
 }: {
   registry: BuiltinToolRegistry;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }): ToolSource<ToolType.builtin> => {
   return {
     id: 'builtin',
     toolTypes: [ToolType.builtin],
     readonly: true,
-    getClient: ({ request }) => createBuiltinToolClient({ registry, request }),
+    getClient: async ({ request }) => {
+      const soClient = savedObjects.getScopedClient(request);
+      const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+      const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
+        AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID
+      );
+      return createBuiltinToolClient({ registry, createVisualizationsEnabled });
+    },
   };
 };
 
 export const createBuiltinToolClient = ({
   registry,
+  createVisualizationsEnabled,
 }: {
   registry: BuiltinToolRegistry;
-  request: KibanaRequest;
+  createVisualizationsEnabled: boolean;
 }): ReadonlyToolTypeClient<{}> => {
+  const isToolEnabled = (toolId: string): boolean => {
+    if (toolId === platformCoreTools.createVisualization) {
+      return createVisualizationsEnabled;
+    }
+    return true;
+  };
+
   return {
     has(toolId: string) {
-      return registry.has(toolId);
+      if (!registry.has(toolId)) {
+        return false;
+      }
+      return isToolEnabled(toolId);
     },
     get(toolId) {
       const tool = registry.get(toolId);
       if (!tool) {
         throw createToolNotFoundError({ toolId });
       }
+      if (!isToolEnabled(toolId)) {
+        throw createToolNotFoundError({ toolId });
+      }
       return convertTool(tool);
     },
     list() {
       const tools = registry.list();
-      return tools.map(convertTool);
+      return tools.filter((tool) => isToolEnabled(tool.id)).map(convertTool);
     },
   };
 };
