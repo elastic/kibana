@@ -204,42 +204,6 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public async startStep(): Promise<void> {
-    const currentNode = this.getCurrentNode()!;
-    const stepId = currentNode.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}`,
-        type: 'workflow',
-        subtype: 'step',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(), // Ensure consistent traceId
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        const stepStartedAt = new Date();
-
-        const stepExecution = {
-          id: this.getCurrentStepExecutionId(),
-          stepId: currentNode.stepId,
-          stepType: currentNode.stepType,
-          scopeStack: this.workflowExecution.scopeStack,
-          topologicalIndex: this.topologicalOrder.indexOf(currentNode.id),
-          status: ExecutionStatus.RUNNING,
-          startedAt: stepStartedAt.toISOString(),
-        } as Partial<EsWorkflowStepExecution>;
-
-        this.workflowExecutionState.upsertStep(stepExecution);
-        this.logStepStart(stepId, stepExecution.id!);
-        await this.workflowExecutionState.flushStepChanges();
-      }
-    );
-  }
-
   public async finishStep(): Promise<void> {
     const stepId = this.getCurrentNode()!.stepId;
     const stepExecutionId = this.getCurrentStepExecutionId();
@@ -591,21 +555,6 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
-  }
-
-  private logStepStart(stepId: string, stepExecutionId: string): void {
-    const currentNode = this.getCurrentNode()!;
-    this.workflowLogger?.logInfo(`Step '${stepId}' started`, {
-      workflow: { step_id: stepId, step_execution_id: stepExecutionId },
-      event: { action: 'step-start', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'start'],
-      labels: {
-        step_type: currentNode.stepType,
-        connector_type: currentNode.stepType,
-        step_name: currentNode.stepId,
-        step_id: stepId,
-      },
-    });
   }
 
   private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {

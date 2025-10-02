@@ -74,18 +74,21 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> imple
   }
 
   public async run(): Promise<void> {
-    await this.workflowExecutionRuntime.startStep();
-
     const input = this.getInput();
+    await this.stepExecutionRuntime.startStep(input);
 
     try {
       const result = await this._run(input);
+
+      if (result.error) {
+        await this.stepExecutionRuntime.failStep(result.error);
+      } else {
+        await this.stepExecutionRuntime.finishStep(result.output);
+      }
       await this.workflowExecutionRuntime.setCurrentStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
-    } finally {
-      await this.workflowExecutionRuntime.finishStep();
+      await this.stepExecutionRuntime.failStep(result.error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();

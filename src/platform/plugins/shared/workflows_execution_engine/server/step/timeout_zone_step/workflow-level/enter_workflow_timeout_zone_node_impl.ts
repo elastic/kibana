@@ -21,18 +21,20 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private wfExecutionState: WorkflowExecutionState,
-    private stepContext: StepExecutionRuntime
+    private stepExecutionRuntime: StepExecutionRuntime
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
+    await this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
-    const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
+    const stepExecution = this.wfExecutionState.getStepExecution(
+      this.stepExecutionRuntime.stepExecutionId
+    )!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;

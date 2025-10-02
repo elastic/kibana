@@ -10,15 +10,17 @@
 import type { EnterTryBlockNode } from '@kbn/workflows/graph';
 import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class EnterTryBlockNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterTryBlockNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
+    await this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 }

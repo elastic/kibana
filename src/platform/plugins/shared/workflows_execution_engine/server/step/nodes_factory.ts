@@ -129,6 +129,7 @@ export class NodesFactory {
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           node as EnterRetryNode,
+          stepExecutionRuntime,
           this.workflowRuntime,
           this.workflowTaskManager,
           stepLogger
@@ -144,7 +145,11 @@ export class NodesFactory {
       case 'exit-continue':
         return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-try-block':
-        return new EnterTryBlockNodeImpl(node as EnterTryBlockNode, this.workflowRuntime);
+        return new EnterTryBlockNodeImpl(
+          node as EnterTryBlockNode,
+          stepExecutionRuntime,
+          this.workflowRuntime
+        );
       case 'exit-try-block':
         return new ExitTryBlockNodeImpl(this.workflowRuntime);
       case 'enter-normal-path':

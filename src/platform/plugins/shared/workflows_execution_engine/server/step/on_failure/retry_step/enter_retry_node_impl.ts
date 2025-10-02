@@ -13,12 +13,14 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import { parseDuration } from '../../../utils';
 import type { WorkflowTaskManager } from '../../../workflow_task_manager/workflow_task_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   private static readonly SHORT_DELAY_THRESHOLD = 1000 * 5; // 5 seconds
 
   constructor(
     private node: EnterRetryNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowTaskManager: WorkflowTaskManager,
     private workflowLogger: IWorkflowEventLogger
@@ -60,7 +62,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
 
   private async initializeRetry(): Promise<void> {
     // Enter whole retry step scope
-    await this.workflowRuntime.startStep();
+    await this.stepExecutionRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
     await this.workflowRuntime.setCurrentStepState({
       attempt: 0,
