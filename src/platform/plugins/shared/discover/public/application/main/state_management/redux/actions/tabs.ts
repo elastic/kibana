@@ -279,6 +279,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true });
         await urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true });
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
+        services.data.search.session.reset();
       }
 
       dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
