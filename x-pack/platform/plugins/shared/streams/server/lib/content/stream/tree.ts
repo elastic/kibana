@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
+import { isRoot, type FieldDefinition } from '@kbn/streams-schema';
 import { filterQueries, filterRouting, getFields, includedObjectsFor } from './helpers';
 import { ContentPackConflictError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
@@ -76,15 +76,18 @@ export function mergeTrees({
     ...existing.request.stream.ingest.wired.routing,
     ...incoming.request.stream.ingest.wired.routing,
   ];
-  const mergedFields = {
-    ...existing.request.stream.ingest.wired.fields,
-    ...Object.keys(incoming.request.stream.ingest.wired.fields)
-      .filter((field) => !baseFields[field])
-      .reduce((fields, field) => {
-        fields[field] = incoming.request.stream.ingest.wired.fields[field];
-        return fields;
-      }, {} as FieldDefinition),
-  };
+  // root stream fields are immutable
+  const mergedFields = isRoot(existing.name)
+    ? existing.request.stream.ingest.wired.fields
+    : {
+        ...existing.request.stream.ingest.wired.fields,
+        ...Object.keys(incoming.request.stream.ingest.wired.fields)
+          .filter((field) => !baseFields[field])
+          .reduce((fields, field) => {
+            fields[field] = incoming.request.stream.ingest.wired.fields[field];
+            return fields;
+          }, {} as FieldDefinition),
+      };
   const mergedQueries = [...existing.request.queries, ...incoming.request.queries];
   const mergedChildren = [...existing.children, ...incoming.children];
 
