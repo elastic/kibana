@@ -32,8 +32,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
-      expect(await svlCommonNavigation.sidenav.isPanelOpen('project_settings_project_nav')).to.be(
-        false
+      await svlCommonNavigation.sidenav.expectSectionClosed(
+        'observability_project_nav_footer.project_settings_project_nav'
       );
 
       // navigate to the logs explorer tab by default
@@ -50,20 +50,37 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
       // navigate to a different section
-      await svlCommonNavigation.sidenav.openPanel('project_settings_project_nav');
-      expect(await svlCommonNavigation.sidenav.isPanelOpen('project_settings_project_nav')).to.be(
-        true
+      await svlCommonNavigation.sidenav.openSection(
+        'observability_project_nav_footer.project_settings_project_nav'
       );
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Tags']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless oblt overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
+      await svlCommonNavigation.sidenav.expectSectionOpen(
+        'observability_project_nav_footer.project_settings_project_nav'
+      ); // remains open
 
       await expectNoPageReload();
+    });
+
+    it('active sidenav section is auto opened on load', async () => {
+      await svlCommonNavigation.sidenav.openSection(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await browser.refresh();
+      await svlCommonNavigation.expectExists();
+      await svlCommonNavigation.sidenav.expectSectionOpen(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
     });
 
     it('shows cases in sidebar navigation', async () => {
@@ -101,14 +118,22 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigates to alerts app', async () => {
-      await svlCommonNavigation.sidenav.openPanel('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickPanelLink('observability-overview:rules');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
+      await testSubjects.click('manageRulesPageButton');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
     });
 
     it('navigates to integrations', async () => {
-      await svlCommonNavigation.sidenav.openPanel('ingest_and_manage_data');
-      await svlCommonNavigation.sidenav.clickPanelLink('integrations');
+      await svlCommonNavigation.sidenav.openSection(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'integrations' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
         'Integrations',
         'Browse integrations',
@@ -116,15 +141,23 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigates to fleet', async () => {
-      await svlCommonNavigation.sidenav.openPanel('ingest_and_manage_data');
-      await svlCommonNavigation.sidenav.clickPanelLink('fleet');
+      await svlCommonNavigation.sidenav.openSection(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'fleet' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Fleet', 'Agents']);
     });
 
     it('navigates to maintenance windows', async () => {
-      await svlCommonNavigation.sidenav.openPanel('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.openSection(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Maintenance Windows']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Management',
+        'Maintenance Windows',
+      ]);
     });
   });
 }
