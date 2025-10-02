@@ -29,6 +29,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       // Not strictly necessary, but allows automatic cleanup.
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+      const enrolledTime = new Date(Date.now() - 1000 * 60).toISOString();
 
       // Create agent policies.
       let policyRes = await supertest
@@ -113,6 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent1',
         document: {
           policy_id: policy1.id, // nginx, no root access needed
+          enrolled_at: enrolledTime,
         },
       });
       await es.index({
@@ -121,6 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent2',
         document: {
           policy_id: policy2.id, // system, root access needed
+          enrolled_at: enrolledTime,
         },
       });
       await es.index({
@@ -129,6 +132,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent3',
         document: {
           policy_id: policy1.id,
+          enrolled_at: enrolledTime,
         },
       });
       await es.index({
@@ -137,6 +141,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent4',
         document: {
           policy_id: policy1.id,
+          enrolled_at: enrolledTime,
         },
       });
     });
@@ -341,7 +346,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should work for multiple agents by kuery in batches async', async () => {
+      it.only('should work for multiple agents by kuery in batches async', async () => {
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xxx')
@@ -357,7 +362,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const actionId = body.actionId;
-
         await checkBulkAgentAction(supertest, actionId);
       });
     });

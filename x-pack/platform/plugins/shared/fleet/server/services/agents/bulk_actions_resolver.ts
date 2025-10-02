@@ -33,7 +33,11 @@ import { ChangePrivilegeActionRunner } from './change_privilege_runner';
 export class BulkActionsResolver {
   private taskManager?: TaskManagerStartContract;
 
-  createTaskRunner(core: CoreSetup, taskType: BulkActionTaskType) {
+  createTaskRunner(
+    core: CoreSetup,
+    taskType: BulkActionTaskType,
+    abortController?: AbortController
+  ) {
     return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
       const getDeps = async () => {
         const [coreStart] = await core.getStartServices();
@@ -67,12 +71,17 @@ export class BulkActionsResolver {
             soClient,
             actionParams,
             retryParams
-          ).runActionAsyncWithRetry()
+          ).runActionAsyncWithRetry(),
+        abortController
       );
     };
   }
 
-  constructor(taskManager: TaskManagerSetupContract, core: CoreSetup) {
+  constructor(
+    taskManager: TaskManagerSetupContract,
+    core: CoreSetup,
+    abortController?: AbortController
+  ) {
     const definitions = Object.values(BulkActionTaskType)
       .map((type) => {
         return [
@@ -81,7 +90,7 @@ export class BulkActionsResolver {
             title: 'Bulk Action Retry',
             timeout: '1m',
             maxAttempts: 1,
-            createTaskRunner: this.createTaskRunner(core, type),
+            createTaskRunner: this.createTaskRunner(core, type, abortController),
           },
         ];
       })
@@ -133,7 +142,8 @@ export function createRetryTask(
     soClient: SavedObjectsClient,
     actionParams: ActionParams,
     retryParams: RetryParams
-  ) => void
+  ) => void,
+  abortController?: AbortController
 ) {
   return {
     async run() {
@@ -146,6 +156,10 @@ export function createRetryTask(
         taskInstance.params.retryParams
       );
 
+      if (abortController?.signal.aborted) {
+        appContextService.getLogger().info(`Task id ${taskInstance.id} canceled!`);
+        abortController.signal.throwIfAborted();
+      }
       appContextService
         .getLogger()
         .debug(
