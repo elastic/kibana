@@ -63,6 +63,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     >
       {isOpen && (
         <EuiFlexGroup
+          gutterSize="xs"
           direction="column"
           alignItems="flexStart"
           onClick={(e) => {
@@ -97,7 +98,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
               ))}
             </ul>
           </EuiFlexItem>
-          <EuiFlexGroup direction="row">
+          <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="sloHealthCalloutDimissButton"
