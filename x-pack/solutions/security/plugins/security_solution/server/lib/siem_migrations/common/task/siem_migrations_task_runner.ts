@@ -269,12 +269,9 @@ export abstract class SiemMigrationTaskRunner<
             });
           }
           this.logger.debug(`Awaiting backoff task for migration item "${migrationItem.id}"`);
-          try {
-            await backoffPromise;
-          } catch (backoffError) {
-            // If the backoff promise fails, throw the original error to maintain error context
-            throw error;
-          }
+          await backoffPromise.catch(() => {
+            throw error; // throw the original error
+          });
           recoverAttemptsLeft--;
         }
       }

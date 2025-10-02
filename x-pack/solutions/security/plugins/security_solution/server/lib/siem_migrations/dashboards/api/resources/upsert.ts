@@ -84,7 +84,6 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
                   migration_id: migrationId,
                 }));
 
-              // Run both operations in parallel
               await Promise.all([
                 dashboardMigrationsClient.data.resources.upsert(resourcesUpsert),
                 dashboardMigrationsClient.data.resources.create(resourcesToCreate),

@@ -57,13 +57,11 @@ export abstract class SiemMigrationsDataItemClient<
     const allItems = structuredClone(items);
     const createdAt = new Date().toISOString();
 
-    // Split items into batches
     const batches: CreateMigrationItemInput<I>[][] = [];
     for (let i = 0; i < allItems.length; i += BULK_MAX_SIZE) {
       batches.push(allItems.slice(i, i + BULK_MAX_SIZE));
     }
 
-    // Process all batches in parallel
     await Promise.all(
       batches.map((itemsSlice) =>
         this.esClient
