@@ -138,7 +138,6 @@ export const useTopNavLinks = ({
               appId,
               onBackgroundSearchOpened: ({ session, event }) => {
                 event?.preventDefault();
-                console.log('Background search started', { session });
                 dispatch(
                   internalStateActions.openSearchSessionInNewTab({ searchSession: session })
                 );

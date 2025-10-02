@@ -459,8 +459,6 @@ export const openInNewTab: InternalStateThunkActionCreator<
       };
     }
 
-    console.log('newDefaultTab', newDefaultTab);
-
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
     );
