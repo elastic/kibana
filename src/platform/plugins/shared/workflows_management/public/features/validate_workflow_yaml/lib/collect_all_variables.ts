@@ -53,9 +53,9 @@ export function collectAllVariables(
     const startPosition = model.getPositionAt(startOffset);
     const endPosition = model.getPositionAt(endOffset);
     variableItems.push({
-      id: `${match.groups?.key ?? null}-${match.index ?? 0}-${match.index ?? 0}-${
-        match.index ?? 0
-      }-${match.index ?? 0}`,
+      id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
+        endPosition.lineNumber
+      }-${endPosition.column}`,
       startLineNumber: startPosition.lineNumber,
       startColumn: startPosition.column,
       endLineNumber: endPosition.lineNumber,
