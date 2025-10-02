@@ -119,8 +119,8 @@ describe('extractPanelsState', () => {
                 gridData: {},
                 type: 'map',
               },
-            ]
-          }
+            ],
+          },
         ],
       });
       expect(panels).toEqual([
@@ -137,9 +137,9 @@ describe('extractPanelsState', () => {
               },
               grid: {},
               type: 'map',
-            }
+            },
           ],
-        }
+        },
       ]);
     });
   });
