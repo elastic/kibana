@@ -6,6 +6,9 @@
  */
 import type { MatcherFunction } from 'expect';
 import type { Connector, ConnectorWithExtraFindData } from './types';
+import type { InMemoryConnector } from '../..';
+
+type Connectors = Connector | InMemoryConnector;
 
 export const toContainConnector: MatcherFunction<[expected: Connector]> = function (
   this: jest.MatcherContext,
@@ -46,10 +49,10 @@ export const toContainConnector: MatcherFunction<[expected: Connector]> = functi
 };
 
 export const toContainConnectors: MatcherFunction<
-  [expected: Partial<Connector>[], actual: Connector[]]
+  [expected: Partial<Connectors>[], actual: Connectors[]]
 > = function (this: jest.MatcherContext, actual, expected) {
-  const actualConnectors = actual as Connector[];
-  const expectedConnectors = expected as Partial<Connector>[];
+  const actualConnectors = actual as Connectors[];
+  const expectedConnectors = expected as Partial<Connectors>[];
 
   if (actualConnectors.length !== expectedConnectors.length) {
     return {
@@ -62,7 +65,7 @@ export const toContainConnectors: MatcherFunction<
   for (let i = 0; i < actualConnectors.length; i++) {
     const expectedConnector = expectedConnectors[i];
     const actualConnector = actualConnectors[i];
-    const expectedConnectorWithDefaultData: Connector = {
+    const expectedConnectorWithDefaultData: Connectors = {
       id: 'test',
       actionTypeId: '.test-connector-type',
       name: 'Test Connector',
@@ -159,7 +162,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toContainConnector(entry: Partial<Connector>): R;
-      toContainConnectors(entry: Partial<Connector>[]): R;
+      toContainConnectors(entry: Partial<Connectors>[]): R;
       toContainConnectorsFindResult(entries: Partial<ConnectorWithExtraFindData>[]): R;
     }
   }

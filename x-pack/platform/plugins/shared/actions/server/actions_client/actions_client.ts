@@ -210,7 +210,7 @@ export class ActionsClient {
   }: {
     ids: string[];
     throwIfSystemAction?: boolean;
-  }): Promise<ActionResult[]> {
+  }): Promise<(ActionResult | InMemoryConnector)[]> {
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
