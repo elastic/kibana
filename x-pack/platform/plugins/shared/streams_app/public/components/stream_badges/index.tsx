@@ -125,8 +125,8 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     badge = (
       <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         {lifecycle.dsl.data_retention ??
-          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
-            defaultMessage: 'Forever',
+          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
+            defaultMessage: 'Indefinite',
           })}
       </EuiBadge>
     );
