@@ -14,7 +14,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { WorkflowExecutionDetail } from '@kbn/workflows-management-plugin/public/features/workflow_execution_detail';
+import { WorkflowExecutionDetail } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
