@@ -194,13 +194,14 @@ export const useTopNavLinks = ({
     }, [
       defaultMenu,
       services,
-      onOpenInspector,
       discoverParams,
+      appId,
+      onOpenInspector,
       state,
+      dispatch,
       isEsqlMode,
       currentDataView,
       hasShareIntegration,
-      appId,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

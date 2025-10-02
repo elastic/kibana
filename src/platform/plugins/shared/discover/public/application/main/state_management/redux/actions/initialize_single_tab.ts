@@ -226,7 +226,12 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       services,
     });
 
-    if (tabInitialInternalState?.searchSessionId) {
+    // Push the tab's initial search session ID to the URL if one exists,
+    // unless it should be overridden by a search session ID already in the URL
+    if (
+      tabInitialInternalState?.searchSessionId &&
+      !searchSessionManager.hasSearchSessionIdInURL()
+    ) {
       searchSessionManager.pushSearchSessionIdToURL(tabInitialInternalState.searchSessionId, {
         replace: true,
       });
