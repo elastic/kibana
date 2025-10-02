@@ -47,9 +47,7 @@ export default {
 } satisfies Meta;
 
 function useCustomTableHeader({ headerTitle }: { headerTitle: React.ReactNode }) {
-  return useCallback<
-    NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['customTableHeader']>
-  >(
+  return useCallback<NonNullable<DataCascadeProps<MockGroupData, LeafNode>['customTableHeader']>>(
     ({ currentSelectedColumns, availableColumns, onGroupSelection }) => (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>{headerTitle}</EuiFlexItem>
@@ -80,7 +78,7 @@ function useCustomTableHeader({ headerTitle }: { headerTitle: React.ReactNode })
 
 function useRowHeaderTitleSlot() {
   return useCallback<
-    NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']>
+    NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderTitleSlot']>
   >(({ rowData, nodePath }) => {
     const rowGroup = nodePath[nodePath.length - 1];
     return (
@@ -421,7 +419,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     }, []);
 
     const onCascadeGroupNodeExpanded = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['onCascadeGroupNodeExpanded']
+      DataCascadeRowProps<MockGroupData, LeafNode>['onCascadeGroupNodeExpanded']
     >(
       async ({ row, nodePath, nodePathMap }) => {
         // Simulate a data fetch on row expansion
@@ -443,7 +441,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     );
 
     const rowHeaderTitleSlot = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderTitleSlot']>
     >(({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
       return (
@@ -454,7 +452,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     }, []);
 
     const rowHeaderMetaSlots = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
     >(({ rowData }) => {
       return [
         <EuiStat
@@ -474,7 +472,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     }, []);
 
     const rowHeaderActions = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderActions']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>
     >(
       () => [
         {
@@ -670,7 +668,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     }, []);
 
     const onCascadeGroupNodeExpanded = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['onCascadeGroupNodeExpanded']
+      DataCascadeRowProps<MockGroupData, LeafNode>['onCascadeGroupNodeExpanded']
     >(
       async ({ row, nodePath, nodePathMap }) => {
         // Simulate a data fetch on row expansion
@@ -692,7 +690,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     );
 
     const rowHeaderMetaSlots = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
     >(({ rowData }) => {
       return [
         <EuiStat
@@ -797,7 +795,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     []);
 
     const rowHeaderActions = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderActions']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>
     >(
       ({ rowData, nodePath }) => {
         const rowGroup = nodePath[nodePath.length - 1];
@@ -840,7 +838,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
             customTableHeader={customTableHeader}
             onCascadeGroupingChange={onCascadeGroupingChange}
           >
-            <DataCascadeRow<MockGroupData>
+            <DataCascadeRow<MockGroupData, LeafNode>
               onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
               rowHeaderTitleSlot={rowHeaderTitleSlot}
               rowHeaderMetaSlots={rowHeaderMetaSlots}
@@ -931,14 +929,14 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     const rowHeaderTitleSlot = useRowHeaderTitleSlot();
 
     const onCascadeGroupingChange = useCallback<
-      NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['onCascadeGroupingChange']>
+      NonNullable<DataCascadeProps<MockGroupData, LeafNode>>['onCascadeGroupingChange']
     >((groupBy) => {
       // eslint-disable-next-line no-console -- Handle group by change if needed
       console.log('Group By Changed:', groupBy);
     }, []);
 
     const onCascadeGroupNodeExpanded = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['onCascadeGroupNodeExpanded']
+      DataCascadeRowProps<MockGroupData, LeafNode>['onCascadeGroupNodeExpanded']
     >(
       async ({ row, nodePath, nodePathMap }) => {
         // Simulate a data fetch on row expansion
@@ -960,7 +958,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     );
 
     const rowHeaderMetaSlots = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
     >(({ rowData }) => {
       return [
         <EuiStat
@@ -1037,7 +1035,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     );
 
     const rowHeaderActions = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderActions']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>
     >(({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
 
@@ -1117,7 +1115,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
             customTableHeader={customTableHeader}
             onCascadeGroupingChange={onCascadeGroupingChange}
           >
-            <DataCascadeRow<MockGroupData>
+            <DataCascadeRow<MockGroupData, LeafNode>
               onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
               rowHeaderTitleSlot={rowHeaderTitleSlot}
               rowHeaderMetaSlots={rowHeaderMetaSlots}
@@ -1255,7 +1253,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     }, []);
 
     const onCascadeGroupNodeExpanded = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['onCascadeGroupNodeExpanded']
+      DataCascadeRowProps<MockGroupData, LeafNode>['onCascadeGroupNodeExpanded']
     >(
       async ({ row, nodePath, nodePathMap }) => {
         // Simulate a data fetch on row expansion
@@ -1277,7 +1275,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     );
 
     const rowHeaderTitleSlot = useCallback<
-      ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderTitleSlot']
+      DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderTitleSlot']
     >(({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
 
@@ -1289,7 +1287,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     }, []);
 
     const rowHeaderMetaSlots = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderMetaSlots']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
     >(({ rowData }) => {
       return [
         <EuiStat
@@ -1366,7 +1364,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     );
 
     const rowHeaderActions = useCallback<
-      NonNullable<ComponentProps<typeof DataCascadeRow<MockGroupData>>['rowHeaderActions']>
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>
     >(({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
 
@@ -1447,7 +1445,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
             onCascadeGroupingChange={onCascadeGroupingChange}
             enableRowSelection
           >
-            <DataCascadeRow<MockGroupData>
+            <DataCascadeRow<MockGroupData, LeafNode>
               onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
               rowHeaderTitleSlot={rowHeaderTitleSlot}
               rowHeaderMetaSlots={rowHeaderMetaSlots}
