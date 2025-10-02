@@ -44,7 +44,7 @@ export type {
   StaticWorkflowTool,
   StaticIndexSearchTool,
 } from './tools';
-export { getToolResultId } from './tools';
+export { getToolResultId, createErrorResult } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,

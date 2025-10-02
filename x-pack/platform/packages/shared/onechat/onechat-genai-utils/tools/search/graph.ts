@@ -11,8 +11,8 @@ import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ToolResultType } from '@kbn/onechat-common/tools';
 import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
@@ -157,7 +157,7 @@ const extractToolResults = (message: BaseMessage): ToolHandlerResult[] => {
   } else {
     const content = extractTextContent(message);
     if (content.startsWith('Error:')) {
-      return [{ type: ToolResultType.error, data: { message: content } }];
+      return [createErrorResult(content)];
     } else {
       throw new Error(`No artifact attached to tool message. Content was ${message.content}`);
     }

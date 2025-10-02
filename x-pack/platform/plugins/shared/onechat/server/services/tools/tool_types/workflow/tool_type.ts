@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolResultType, ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';
@@ -52,15 +53,12 @@ export const getWorkflowToolType = ({
             } catch (e) {
               return {
                 results: [
-                  {
-                    type: ToolResultType.error,
-                    data: {
-                      message: `Error executing workflow: ${e}`,
-                      metadata: {
-                        workflowId,
-                      },
+                  createErrorResult({
+                    message: `Error executing workflow: ${e}`,
+                    metadata: {
+                      workflowId,
                     },
-                  },
+                  }),
                 ],
               };
             }

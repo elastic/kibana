@@ -6,6 +6,8 @@
  */
 
 import { randomInt } from 'crypto';
+import type { ErrorResult } from '@kbn/onechat-common';
+import { ToolResultType } from '@kbn/onechat-common';
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -15,3 +17,11 @@ const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 export function getToolResultId(): string {
   return Array.from({ length: 6 }, () => charset[randomInt(charset.length)]).join('');
 }
+
+export const createErrorResult = (message: string | ErrorResult['data']): ErrorResult => {
+  return {
+    tool_result_id: getToolResultId(),
+    type: ToolResultType.error,
+    data: typeof message === 'string' ? { message } : message,
+  };
+};

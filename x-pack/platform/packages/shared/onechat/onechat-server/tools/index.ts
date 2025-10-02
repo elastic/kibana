@@ -18,4 +18,4 @@ export type {
   ToolHandlerContext,
   ToolHandlerResult,
 } from './handler';
-export { getToolResultId } from './utils';
+export { getToolResultId, createErrorResult } from './utils';

@@ -7,7 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/onechat-common';
-import { createBadRequestError, ToolResultType } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   ToolHandlerContext,
@@ -15,6 +15,7 @@ import type {
   ToolHandlerReturn,
   RunToolReturn,
 } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
@@ -64,7 +65,7 @@ export const runTool = async <TParams = Record<string, unknown>>({
         return await toolHandler(validation.data as Record<string, any>, toolHandlerContext);
       } catch (err) {
         return {
-          results: [{ type: ToolResultType.error, data: { message: err.message } }],
+          results: [createErrorResult(err.message)],
         };
       }
     }

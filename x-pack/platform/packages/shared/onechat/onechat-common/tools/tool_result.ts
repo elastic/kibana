@@ -65,6 +65,26 @@ export type ToolResult =
   | OtherResult
   | ErrorResult;
 
+export const isResourceResult = (result: ToolResult): result is ResourceResult => {
+  return result.type === ToolResultType.resource;
+};
+
+export const isTabularDataResult = (result: ToolResult): result is TabularDataResult => {
+  return result.type === ToolResultType.tabularData;
+};
+
+export const isQueryResult = (result: ToolResult): result is QueryResult => {
+  return result.type === ToolResultType.query;
+};
+
+export const isOtherResult = (result: ToolResult): result is OtherResult => {
+  return result.type === ToolResultType.other;
+};
+
+export const isErrorResult = (result: ToolResult): result is ErrorResult => {
+  return result.type === ToolResultType.error;
+};
+
 export interface VisualizationElementAttributes {
   toolResultId?: string;
   chartType?: ChartType;
