@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { REINDEX_OP_TYPE, ReindexStatus } from '../../../common/types';
@@ -26,11 +27,14 @@ export function registerBatchReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
+    getSavedObjectsService
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
+
+  const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
 
   // Get the current batch queue
   router.get(
@@ -51,12 +55,10 @@ export function registerBatchReindexIndicesRoutes(
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
-        savedObjects,
       } = await core;
-      const { getClient } = savedObjects;
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+        soClient,
         callAsCurrentUser
       );
       try {
@@ -99,7 +101,6 @@ export function registerBatchReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indexNames } = request.body;
@@ -110,7 +111,7 @@ export function registerBatchReindexIndicesRoutes(
       for (const indexName of indexNames) {
         try {
           const result = await reindexHandler({
-            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+            savedObjects: soClient,
             dataClient: esClient,
             indexName,
             log,
