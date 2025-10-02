@@ -106,7 +106,6 @@ import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../com
 import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ProcessDescendantsTooltip } from '../../../event_filters/view/components/process_descendant_tooltip';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface FieldValidationState {
