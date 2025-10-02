@@ -19,7 +19,7 @@ function assertHas(actual: unknown, expected: object) {
 }
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe.skip('AddEditParams', function () {
+  describe('AddEditParams', function () {
     const samlAuth = getService('samlAuth');
     const supertest = getService('supertestWithoutAuth');
     let adminRoleAuthc: RoleCredentials;
@@ -51,7 +51,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      assertHas(getResponse.body[0], testParam);
+      expect(getResponse.body[0].key).eql(testParam.key);
+      expect(getResponse.body[0].value).eql(undefined);
     });
 
     it('handles tags and description', async () => {
@@ -76,13 +77,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      assertHas(getResponse.body[0], testParam2);
+      assertHas(getResponse.body[0], { key: testParam2.key, ...tagsAndDescription });
+      expect(getResponse.body[0].value).eql(undefined);
     });
 
     it('handles editing a param', async () => {
       const expectedUpdatedParam = {
         key: 'testUpdated',
-        value: 'testUpdated',
         tags: ['a tag'],
         description: 'test description',
       };
@@ -100,7 +101,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
-      assertHas(param, testParam);
+      expect(param.key).eql(testParam.key);
+      expect(param.value).eql(undefined);
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
@@ -113,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
+        .send({ ...expectedUpdatedParam, value: 'testUpdated' })
         .expect(200);
 
       const updatedGetResponse = await supertest
@@ -122,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
       assertHas(actualUpdatedParam, expectedUpdatedParam);
+      expect(actualUpdatedParam.value).eql(undefined);
     });
 
     it('handles partial editing a param', async () => {
@@ -145,7 +149,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(adminRoleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
-      assertHas(getResponse.body, newParam);
+      assertHas(getResponse.body, {
+        key: newParam.key,
+        tags: newParam.tags,
+        description: newParam.description,
+      });
+      expect(getResponse.body.value).eql(undefined);
 
       await supertest
         .put(SYNTHETICS_API_URLS.PARAMS + '/' + paramId)
@@ -172,10 +181,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       assertHas(updatedGetResponse.body, {
-        ...newParam,
         key: 'testUpdatedAgain',
-        value: 'testUpdatedAgain',
+        tags: newParam.tags,
+        description: newParam.description,
       });
+      expect(updatedGetResponse.body.value).eql(undefined);
     });
 
     it('handles spaces', async () => {
@@ -198,7 +208,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
 
       expect(getResponse.body[0].namespaces).eql([SPACE_ID]);
-      assertHas(getResponse.body[0], testParam);
+      expect(getResponse.body[0].key).eql(testParam.key);
+      expect(getResponse.body[0].value).eql(undefined);
     });
 
     it('handles editing a param in spaces', async () => {
@@ -209,7 +220,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const expectedUpdatedParam = {
         key: 'testUpdated',
-        value: 'testUpdated',
         tags: ['a tag'],
         description: 'test description',
       };
@@ -227,13 +237,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
-      assertHas(param, testParam);
+      expect(param.key).eql(testParam.key);
+      expect(param.value).eql(undefined);
 
       await supertest
         .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}/${param.id}`)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(expectedUpdatedParam)
+        .send({ ...expectedUpdatedParam, value: 'testUpdated' })
         .expect(200);
 
       const updatedGetResponse = await supertest
@@ -243,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
       assertHas(actualUpdatedParam, expectedUpdatedParam);
+      expect(actualUpdatedParam.value).eql(undefined);
     });
 
     it('does not allow editing a param in created in one space in a different space', async () => {
@@ -274,7 +286,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
-      assertHas(param, testParam);
+      expect(param.key).eql(testParam.key);
+      expect(param.value).eql(undefined);
 
       // space does exist so get request should be 200
       await supertest
@@ -296,7 +309,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const actualUpdatedParam = updatedGetResponse.body[0];
-      assertHas(actualUpdatedParam, testParam);
+      expect(actualUpdatedParam.key).eql(testParam.key);
+      expect(actualUpdatedParam.value).eql(undefined);
     });
 
     it('handles invalid spaces', async () => {
@@ -333,7 +347,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const param = getResponse.body[0];
-      assertHas(param, testParam);
+      expect(param.key).eql(testParam.key);
+      expect(param.value).eql(undefined);
 
       await supertest
         .put(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
@@ -363,7 +378,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
 
       expect(getResponse.body[0].namespaces).eql(['*']);
-      assertHas(getResponse.body[0], testParam);
+      expect(getResponse.body[0].key).eql(testParam.key);
+      expect(getResponse.body[0].value).eql(undefined);
     });
 
     it('should not return values for non admin user', async () => {
