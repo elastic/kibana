@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Agent Builder', function () {
     describe('converse', function () {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
+      loadTestFile(require.resolve('./converse/conversation_history.ts'));
     });
   });
 }
