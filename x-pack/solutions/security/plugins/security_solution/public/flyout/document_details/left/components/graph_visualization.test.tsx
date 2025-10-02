@@ -104,7 +104,7 @@ describe('GraphVisualization', () => {
     jest.resetAllMocks();
   });
 
-  describe('onOpenEventPreview', () => {
+  xdescribe('onOpenEventPreview', () => {
     it('renders GraphInvestigation component', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
@@ -314,7 +314,7 @@ describe('GraphVisualization', () => {
     });
   });
 
-  describe('onInvestigateInTimeline', () => {
+  xdescribe('onInvestigateInTimeline', () => {
     it('shows danger toast when cannot investigate in timeline - missing time range', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();

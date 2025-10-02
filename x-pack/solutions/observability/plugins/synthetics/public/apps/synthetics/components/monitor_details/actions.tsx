@@ -47,10 +47,10 @@ export function Actions() {
       <EuiContextMenuPanel
         size="m"
         items={[
-          <EditMonitorContextItem key="edit-monitor" />,
-          <RefreshContextItem key="refresh-monitor" />,
-          <RunTestManuallyContextItem key="run-test-manually" />,
-        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem key="add-to-case" />] : [])}
+          <EditMonitorContextItem />,
+          <RefreshContextItem />,
+          <RunTestManuallyContextItem />,
+        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem />] : [])}
       />
     </EuiPopover>
   );

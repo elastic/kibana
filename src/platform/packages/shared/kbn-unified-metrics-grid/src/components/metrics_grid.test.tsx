@@ -15,6 +15,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 jest.mock('./chart', () => ({
@@ -39,13 +40,13 @@ describe('MetricsGrid', () => {
   const fields: MetricsGridProps['fields'] = [
     {
       name: 'system.cpu.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },
     {
       name: 'system.memory.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },
@@ -223,13 +224,13 @@ describe('MetricsGrid', () => {
         ...fields,
         {
           name: 'system.disk.utilization',
-          dimensions: [{ name: 'host.name', type: 'keyword' }],
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: 'long',
         },
         {
           name: 'system.network.utilization',
-          dimensions: [{ name: 'host.name', type: 'keyword' }],
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: 'long',
         },
