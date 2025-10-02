@@ -210,6 +210,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
       });
     });
   });
+
   evaluate('returns cluster license', async ({ evaluateElasticsearchDataset }) => {
     await evaluateElasticsearchDataset({
       dataset: {

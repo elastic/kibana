@@ -989,14 +989,6 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts"
           },
           {
@@ -1010,158 +1002,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1382,50 +1222,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1632,30 +1428,6 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/create.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/create.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/bulk_update.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/bulk_update.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -1953,6 +1725,18 @@
           {
             "plugin": "controls",
             "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "canvas",

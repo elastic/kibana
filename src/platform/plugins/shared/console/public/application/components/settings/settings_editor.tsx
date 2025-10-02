@@ -21,11 +21,18 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
 import type { DevToolsSettings } from '../../../services';
 import type { EsHostService } from '../../lib';
+
+const styles = {
+  minWidthControl: css`
+    min-width: 220px;
+  `,
+};
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
@@ -268,7 +275,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       >
         <EuiSuperSelect
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           disabled={availableHosts.length < 2}
           options={availableHosts.map((host) => ({
@@ -292,7 +299,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       >
         <EuiFieldNumber
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           data-test-subj="setting-font-size-input"
           value={fontSize}
@@ -370,7 +377,7 @@ export const SettingsEditor = (props: Props) => {
             })}
           >
             <EuiSuperSelect
-              css={{ minWidth: '220px' }}
+              css={styles.minWidthControl}
               compressed
               options={intervalOptions}
               valueOfSelected={pollInterval.toString()}

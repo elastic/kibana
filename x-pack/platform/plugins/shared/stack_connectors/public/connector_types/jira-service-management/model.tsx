@@ -44,8 +44,6 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => {
   return {
     id: '.jira-service-management',
-    // Hidden while in intermediate release
-    hideInUi: true,
     iconClass: lazy(() => import('./jsm_logo')),
     selectMessage: SELECT_MESSAGE,
     actionTypeTitle: TITLE,

@@ -137,6 +137,16 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
             data: createMicrosoftGetLibraryFilesApiResponseMock(),
           });
 
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftMachineActionMock({ type: 'LiveResponse' }),
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftGetActionResultsApiResponseMock(),
+          });
+
         default:
           return responseActionsClientMock.createConnectorActionExecuteResponse();
       }

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -17,20 +17,23 @@ import {
   pipeCompleteItem,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
+  withCompleteItem,
 } from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
   columnExists,
+  createInferenceEndpointToCompletionItem,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
   type ISuggestionItem,
   Location,
   type ICommandContext,
   type ICommandCallbacks,
 } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
+import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
@@ -84,41 +87,8 @@ function getPosition(
 
   return undefined;
 }
-
-const defaultPrompt: ISuggestionItem = {
-  detail: '',
-  kind: 'Constant',
-  asSnippet: true,
-  label: 'Your prompt to the LLM',
-  sortText: '1',
-  text: '"${0:Your prompt to the LLM.}"',
-};
-
-const withCompletionItem: ISuggestionItem = {
-  detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
-    defaultMessage: 'Provide additional parameters for the LLM prompt.',
-  }),
-  kind: 'Reference',
-  label: 'WITH',
-  sortText: '1',
-  asSnippet: true,
-  text: 'WITH { $0 }',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
-function inferenceEndpointToCompletionItem(
-  inferenceEndpoint: InferenceEndpointAutocompleteItem
-): ISuggestionItem {
-  return {
-    detail: i18n.translate('kbn-esql-ast.esql.definitions.completionInferenceIdDoc', {
-      defaultMessage: 'Inference endpoint used for the completion',
-    }),
-    kind: 'Reference',
-    label: inferenceEndpoint.inference_id,
-    sortText: '1',
-    text: inferenceEndpoint.inference_id,
-  };
-}
+const promptText = 'Your prompt to the LLM.';
+const promptSnippetText = `"$\{0:${promptText}}"`;
 
 export async function autocomplete(
   query: string,
@@ -130,6 +100,7 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
   const position = getPosition(innerText, command, context);
@@ -171,12 +142,11 @@ export async function autocomplete(
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
-            return {
+            return withAutoSuggest({
               ...suggestion,
               text: `${suggestion.text} `,
-              command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
-            };
+            });
           });
         },
         () => []
@@ -185,7 +155,11 @@ export async function autocomplete(
       const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
-        suggestions.push(defaultPrompt);
+        suggestions.push({
+          ...buildConstantsDefinitions([promptSnippetText], '', '1')[0],
+          label: promptText,
+          asSnippet: true,
+        });
       }
 
       if (position !== CompletionPosition.AFTER_TARGET_ID) {
@@ -198,7 +172,14 @@ export async function autocomplete(
     }
 
     case CompletionPosition.AFTER_PROMPT:
-      return [withCompletionItem];
+      return [
+        {
+          ...withCompleteItem,
+          detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
+            defaultMessage: 'Provide additional parameters for the LLM prompt.',
+          }),
+        },
+      ];
 
     case CompletionPosition.AFTER_PROMPT_OR_TARGET: {
       const lastWord = findFinalWord(query);
@@ -211,12 +192,19 @@ export async function autocomplete(
         return [assignCompletionItem];
       }
 
-      return [withCompletionItem];
+      return [
+        {
+          ...withCompleteItem,
+          detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
+            defaultMessage: 'Provide additional parameters for the LLM prompt.',
+          }),
+        },
+      ];
     }
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
       const availableParameters = {
-        inference_id: endpoints?.map(inferenceEndpointToCompletionItem) || [],
+        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);

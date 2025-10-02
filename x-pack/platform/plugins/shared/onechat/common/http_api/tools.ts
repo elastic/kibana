@@ -11,9 +11,10 @@ import type {
   SerializedOnechatError,
 } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolTypeInfo } from '../tools';
 
 export interface ListToolsResponse {
-  results: ToolDefinitionWithSchema[];
+  results: ToolDefinition[];
 }
 
 export type GetToolResponse = ToolDefinitionWithSchema;
@@ -53,7 +54,7 @@ export interface BulkDeleteToolResponse {
 }
 
 export interface ExecuteToolResponse {
-  result: ToolResult[];
+  results: ToolResult[];
 }
 
 export interface ResolveSearchSourcesRequest {
@@ -68,4 +69,24 @@ export interface ResolveSearchSourceItem {
 export interface ResolveSearchSourcesResponse {
   results: ResolveSearchSourceItem[];
   total: number;
+}
+
+export interface WorkflowItem {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface GetWorkflowResponse {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface ListWorkflowsResponse {
+  results: WorkflowItem[];
+}
+
+export interface GetToolTypeInfoResponse {
+  toolTypes: ToolTypeInfo[];
 }

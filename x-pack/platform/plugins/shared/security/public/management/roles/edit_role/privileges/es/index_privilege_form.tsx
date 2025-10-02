@@ -231,7 +231,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 isDisabled={this.props.isRoleReadOnly}
                 placeholder={i18n.translate(
                   'xpack.security.management.editRole.indexPrivilegeForm.privilegesPlaceholder',
-                  { defaultMessage: 'Add an action…' }
+                  { defaultMessage: 'Add a privilege…' }
                 )}
                 fullWidth
               />

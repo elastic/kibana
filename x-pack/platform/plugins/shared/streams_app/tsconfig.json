@@ -80,8 +80,13 @@
     "@kbn/utility-types",
     "@kbn/apm-synthtrace-client",
     "@kbn/streamlang",
+    "@kbn/failure-store-modal",
     "@kbn/data-quality",
     "@kbn/core-notifications-browser",
     "@kbn/io-ts-utils",
+    "@kbn/otel-semantic-conventions",
+    "@kbn/storage-adapter",
+    "@kbn/cloud-plugin",
+    "@kbn/es-ui-shared-plugin",
   ]
 }

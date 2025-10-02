@@ -9,6 +9,8 @@ export const AWS_PROVIDER = 'aws';
 export const GCP_PROVIDER = 'gcp';
 export const AZURE_PROVIDER = 'azure';
 
+export const CLOUD_CONNECTOR_TYPE = 'cloud_connectors';
+
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
@@ -21,6 +23,16 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   ARM_TEMPLATE: 'arm_template_url',
   CLOUD_SHELL_URL: 'cloud_shell_url',
   CLOUD_FORMATION_CLOUD_CONNECTORS: 'cloud_formation_cloud_connectors_template',
+  ARM_TEMPLATE_CLOUD_CONNECTORS: 'arm_template_cloud_connectors_url',
+};
+
+export const ProviderAccountTypeInputNames: Record<
+  typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER,
+  string
+> = {
+  aws: 'aws.account_type',
+  azure: 'azure.account_type',
+  gcp: 'gcp.account_type',
 };
 
 // Azure constants
@@ -31,6 +43,7 @@ export const AZURE_SETUP_FORMAT = {
 
 export const AZURE_CREDENTIALS_TYPE = {
   ARM_TEMPLATE: 'arm_template',
+  CLOUD_CONNECTORS: 'cloud_connectors',
   MANUAL: 'manual',
   SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
   SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',

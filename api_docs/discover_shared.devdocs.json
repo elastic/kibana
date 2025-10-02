@@ -487,6 +487,8 @@
           " | ",
           "ObservabilityTracesSpanLinksFeature",
           " | ",
+          "ObservabilityTracesFetchErrorsFeature",
+          " | ",
           "SecuritySolutionFeature"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
