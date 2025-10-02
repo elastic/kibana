@@ -17,7 +17,8 @@ import type {
   LensSerializedState,
 } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { createEmptyLensState } from '../helper';
+import { createEmptyLensState, transformOutputState } from '../helper';
+import type { LensParentApi } from './types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change
@@ -146,30 +147,32 @@ export function LensRenderer({
     <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
-      // TODO type this ParentApi, all these are untyped and some unused
-      getParentApi={() => ({
-        // forward the Lens components to the embeddable
-        ...props,
-        // forward the unified search context
-        ...searchApi,
-        searchSessionId$,
-        disabledActionIds$,
-        setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-        viewMode$,
-        // pass the sync* settings with the unified settings interface
-        settings,
-        // make sure to provide the initial state (useful for the comparison check)
-        getSerializedStateForChild: () => ({ rawState: initialStateRef.current, references: [] }),
-        // update the runtime state on changes
-        getRuntimeStateForChild: () => ({
-          ...initialStateRef.current,
-          attributes: props.attributes,
-        }),
-        forceDSL,
-        esqlVariables$,
-        hideTitle$,
-        reload$, // trigger a reload (replacement for deprepcated searchSessionId)
-      })}
+      getParentApi={() =>
+        ({
+          // forward the Lens components to the embeddable
+          ...props,
+          // forward the unified search context
+          ...searchApi,
+          searchSessionId$,
+          disabledActionIds$,
+          setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
+          viewMode$,
+          // pass the sync* settings with the unified settings interface
+          settings,
+          // make sure to provide the initial state (useful for the comparison check)
+          getSerializedStateForChild: () => {
+            const transformedState = transformOutputState({
+              rawState: initialStateRef.current,
+              references: [],
+            });
+            return transformedState;
+          },
+          forceDSL,
+          esqlVariables$,
+          hideTitle$,
+          reload$, // trigger a reload (replacement for deprecated searchSessionId)
+        } satisfies LensParentApi)
+      }
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
       panelProps={panelProps}
