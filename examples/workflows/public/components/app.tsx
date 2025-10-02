@@ -14,7 +14,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
+import { WorkflowExecutionDetail } from '@kbn/workflows-management-plugin/public/features/workflow_execution_detail';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
@@ -113,6 +113,7 @@ workflow:
   }, [currentUser, getWorkflowInputs]);
 
   const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
+  const onClose = () => setWorkflowExecutionId(null);
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
@@ -239,9 +240,10 @@ workflow:
                     />
                   </EuiButton>
                   {workflowExecutionId && (
-                    <WorkflowExecution
+                    <WorkflowExecutionDetail
                       workflowExecutionId={workflowExecutionId}
                       workflowYaml={workflowYaml}
+                      onClose={onClose}
                     />
                   )}
                 </EuiFlexItem>
