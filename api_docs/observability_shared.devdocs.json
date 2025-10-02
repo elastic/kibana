@@ -315,40 +315,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.AddPageAttachmentToCaseModal",
-        "type": "Function",
-        "tags": [],
-        "label": "AddPageAttachmentToCaseModal",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "AddPageAttachmentToCaseModalProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/add_page_attachment_to_case_modal/add_page_attachment_to_case_modal_lazy.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.AddPageAttachmentToCaseModal.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.allCasesPermissions",
         "type": "Function",
         "tags": [],
