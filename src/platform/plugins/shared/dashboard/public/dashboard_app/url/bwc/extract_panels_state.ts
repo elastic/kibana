@@ -42,7 +42,6 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   savedObjectReferences?: DashboardState['references'];
 } {
   const panels = Array.isArray(state.panels) ? state.panels : [];
-
   if (panels.length === 0) {
     return {};
   }
@@ -55,6 +54,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   const savedObjectReferences: Reference[] = [];
   const standardizedPanels: DashboardState['panels'] = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
+
+    if (panel.panels) {
+      const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } = extractPanelsState({ panels: panel.panels });
+      savedObjectReferences.push(...(sectionPanelReferences ?? []));
+      panel.panels = sectionPanels;
+    }
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
     if (panel?.embeddableConfig) {
