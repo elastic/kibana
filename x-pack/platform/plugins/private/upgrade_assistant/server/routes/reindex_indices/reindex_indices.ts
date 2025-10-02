@@ -102,7 +102,7 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
-      const reindexActions = reindexActionsFactory( soClient, asCurrentUser);
+      const reindexActions = reindexActionsFactory(soClient, asCurrentUser);
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
       try {
