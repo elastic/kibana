@@ -299,7 +299,8 @@ export type LensByRefSerializedState = Simplify<LensSerializedSharedState & Lens
 export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
 
 type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
-  attributes: LensApiState;
+  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
+  attributes: LensApiState | LensByValueBase['attributes'];
 };
 
 export type LensByValueSerializedAPIConfig = Simplify<
