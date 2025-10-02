@@ -154,6 +154,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_preconfigured: true,
                 is_system_action: false,
                 is_deprecated: false,
+                is_connector_type_deprecated: false,
               });
               break;
             default:

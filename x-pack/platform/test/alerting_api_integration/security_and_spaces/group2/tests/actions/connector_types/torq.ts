@@ -98,6 +98,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         config: {
           webhookIntegrationUrl: torqSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
