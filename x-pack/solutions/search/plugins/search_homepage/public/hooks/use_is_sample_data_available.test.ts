@@ -29,6 +29,8 @@ const mockUseObservable = useObservable as jest.MockedFunction<typeof useObserva
 const makeLicense = (hasAtLeastResult: boolean): ILicense =>
   ({
     hasAtLeast: jest.fn(() => hasAtLeastResult),
+    isAvailable: jest.fn(() => hasAtLeastResult),
+    isActive: jest.fn(() => hasAtLeastResult),
   } as unknown as ILicense);
 
 describe('useIsSampleDataAvailable', () => {

@@ -6,11 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import type { ILicense } from '@kbn/licensing-types';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import useObservable from 'react-use/lib/useObservable';
 import { generateRandomIndexName } from '../utils/indices';
 import { useUserPrivilegesQuery } from './api/use_user_permissions';
 import { useKibana } from './use_kibana';
+
+const hasRequiredLicense = (minimumLicenseType: LicenseType, license: ILicense): boolean =>
+  license.isAvailable && license.isActive && license.hasAtLeast(minimumLicenseType);
 
 export const useIsSampleDataAvailable = () => {
   const { licensing, sampleDataIngest } = useKibana().services;
@@ -20,8 +23,8 @@ export const useIsSampleDataAvailable = () => {
   const license = useObservable<ILicense | null>(licensing.license$, null);
   const hasLicense = useMemo(
     () =>
-      sampleDataIngest?.minimumLicenseType
-        ? license?.hasAtLeast(sampleDataIngest?.minimumLicenseType)
+      sampleDataIngest?.minimumLicenseType && license
+        ? hasRequiredLicense(sampleDataIngest?.minimumLicenseType, license)
         : true,
     [sampleDataIngest, license]
   );
