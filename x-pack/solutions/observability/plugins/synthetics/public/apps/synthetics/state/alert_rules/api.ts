@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type {
   StatusRuleInspect,
   TLSRuleInspect,
@@ -31,9 +32,22 @@ export async function getDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
 }
 
 export async function enableDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+  return pRetry(async () => apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING), {
+    retries: 3,
+    onFailedAttempt,
+  });
 }
 
 export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+  return pRetry(() => apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING), {
+    retries: 3,
+    onFailedAttempt,
+  });
+}
+
+function onFailedAttempt(error: pRetry.FailedAttemptError) {
+  // eslint-disable-next-line no-console
+  console.error(
+    `Attempted to update default alerting API. Attempt ${error.attemptNumber} failed. Remaining retries: ${error.retriesLeft}.`
+  );
 }

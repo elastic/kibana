@@ -120,7 +120,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/page-attachment-schema",
     "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }
