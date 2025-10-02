@@ -13,7 +13,7 @@ import { SubSteps, useMigrationNameStep } from '../../../../../../common/compone
 import { useCopyExportQueryStep } from './copy_export_query';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
-import { useCheckResourcesStep } from './check_resources';
+import { useCheckResourcesStep } from '../../common/check_resources';
 interface DashboardsUploadSubStepsProps {
   migrationStats?: DashboardMigrationStats;
   onMissingResourcesFetched: OnMissingResourcesFetched;
