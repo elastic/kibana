@@ -49,7 +49,7 @@ const selectedIdsToTimelineItemMapper = (
       ...alert,
     }).map(([key, value]) => ({
       field: key,
-      value: value ? (value as string[]) : [],
+      value: value && value.length > 0 ? (value as string[]) : [],
     }));
     return {
       _id: alert._id,
