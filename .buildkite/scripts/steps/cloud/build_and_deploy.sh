@@ -22,7 +22,14 @@ ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
-CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
+
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  PR_NUMBER="$GITHUB_PR_NUMBER"
+else
+  PR_NUMBER="$BUILDKITE_PULL_REQUEST"
+fi
+
+CLOUD_DEPLOYMENT_NAME="kibana-pr-$PR_NUMBER"
 
 set +e
 DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
