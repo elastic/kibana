@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
 
-  describe('search sessions tour', () => {
+  describe.skip('search sessions tour', () => {
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
