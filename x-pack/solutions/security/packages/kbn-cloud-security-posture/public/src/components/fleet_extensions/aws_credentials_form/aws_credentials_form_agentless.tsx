@@ -129,6 +129,7 @@ export const AwsCredentialsFormAgentless = ({
     shortName,
     awsCloudConnectorRemoteRoleTemplate,
     isAwsCloudConnectorEnabled,
+    awsOrganizationEnabled,
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
@@ -144,6 +145,7 @@ export const AwsCredentialsFormAgentless = ({
     templateName: templateName || '',
     setupTechnology,
     isCloudConnectorEnabled: isAwsCloudConnectorEnabled,
+    organizationEnabled: awsOrganizationEnabled,
   });
 
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);

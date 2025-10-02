@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -153,20 +153,6 @@ export const useAwsCredentialsForm = ({
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
   const fieldsSnapshot = useRef({});
-
-  useEffect(() => {
-    // This should ony set the credentials after the initial render
-    if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
-      updatePolicy({
-        updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
-          'aws.credentials.type': {
-            value: awsCredentialsType,
-            type: 'text',
-          },
-        }),
-      });
-    }
-  }, [awsCredentialsType, awsPolicyType, input, newPolicy, updatePolicy]);
 
   if (isValid && setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate) {
     updatePolicy({

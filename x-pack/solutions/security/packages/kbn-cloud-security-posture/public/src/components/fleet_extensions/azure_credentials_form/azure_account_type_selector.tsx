@@ -16,10 +16,10 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
-import { updatePolicyWithInputs } from '../utils';
+import { updatePolicyWithInputs, getAccountType } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
-import type { AzureAccountType, UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getAzureAccountTypeOptions = (
@@ -56,9 +56,6 @@ const getAzureAccountTypeOptions = (
   },
 ];
 
-const getAzureAccountType = (input: NewPackagePolicyInput): AzureAccountType | undefined =>
-  input.streams[0].vars?.['azure.account_type']?.value;
-
 interface AzureAccountTypeSelectProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -76,13 +73,13 @@ export const AzureAccountTypeSelect = ({
   const organizationDisabled = !azureOrganizationEnabled;
   const azureAccountTypeOptions = getAzureAccountTypeOptions(organizationDisabled);
 
-  const accountType = getAzureAccountType(input);
+  const accountType = getAccountType('azure', input, newPolicy);
 
-  if (!accountType || (accountType === AZURE_ORGANIZATION_ACCOUNT && organizationDisabled)) {
+  if (accountType === AZURE_ORGANIZATION_ACCOUNT && organizationDisabled) {
     updatePolicy({
       updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
         'azure.account_type': {
-          value: organizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
+          value: AZURE_SINGLE_ACCOUNT,
           type: 'text',
         },
       }),
@@ -100,7 +97,7 @@ export const AzureAccountTypeSelect = ({
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
-        idSelected={getAzureAccountType(input) || ''}
+        idSelected={getAccountType('azure', input, newPolicy) || ''}
         options={azureAccountTypeOptions}
         onChange={(newAccountType) => {
           updatePolicy({
@@ -115,7 +112,7 @@ export const AzureAccountTypeSelect = ({
         size="m"
         name="azureAccountType"
       />
-      {getAzureAccountType(input) === AZURE_ORGANIZATION_ACCOUNT && (
+      {getAccountType('azure', input, newPolicy) === AZURE_ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -126,7 +123,7 @@ export const AzureAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getAzureAccountType(input) === AZURE_SINGLE_ACCOUNT && (
+      {getAccountType('azure', input, newPolicy) === AZURE_SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">

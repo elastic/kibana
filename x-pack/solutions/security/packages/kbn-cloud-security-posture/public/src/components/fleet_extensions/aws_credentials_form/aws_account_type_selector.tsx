@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -17,14 +17,11 @@ import {
   AWS_ORGANIZATION_ACCOUNT,
   AWS_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
-import { updatePolicyWithInputs } from '../utils';
+import { updatePolicyWithInputs, getAccountType } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
-import type { AwsAccountType, UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-
-const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
-  input.streams[0].vars?.['aws.account_type']?.value;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -78,26 +75,6 @@ export const AwsAccountTypeSelect = ({
     [awsOrganizationEnabled]
   );
 
-  const awsAccountType = useMemo(() => getAwsAccountType(input), [input]);
-
-  useEffect(() => {
-    if (!awsAccountType) {
-      updatePolicy({
-        updatedPolicy: updatePolicyWithInputs(
-          newPolicy,
-          awsPolicyType,
-
-          {
-            'aws.account_type': {
-              value: awsOrganizationEnabled ? AWS_ORGANIZATION_ACCOUNT : AWS_SINGLE_ACCOUNT,
-              type: 'text',
-            },
-          }
-        ),
-      });
-    }
-  }, [awsAccountType, awsOrganizationEnabled, awsPolicyType, input, newPolicy, updatePolicy]);
-
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -109,7 +86,7 @@ export const AwsAccountTypeSelect = ({
       <EuiSpacer size="l" />
       {!awsOrganizationEnabled && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut color="warning" announceOnMount>
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationNotSupportedMessage"
               defaultMessage="AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration."
@@ -120,7 +97,7 @@ export const AwsAccountTypeSelect = ({
       )}
       <RadioGroup
         disabled={disabled}
-        idSelected={getAwsAccountType(input) || ''}
+        idSelected={getAccountType('aws', input, newPolicy) || ''}
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
@@ -135,7 +112,7 @@ export const AwsAccountTypeSelect = ({
         size="m"
         name="accountType"
       />
-      {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
+      {getAccountType('aws', input, newPolicy) === AWS_ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -146,7 +123,7 @@ export const AwsAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getAwsAccountType(input) === AWS_SINGLE_ACCOUNT && (
+      {getAccountType('aws', input, newPolicy) === AWS_SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">

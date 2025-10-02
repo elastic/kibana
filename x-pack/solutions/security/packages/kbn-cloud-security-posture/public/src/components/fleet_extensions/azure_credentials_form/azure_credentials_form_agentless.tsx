@@ -80,6 +80,7 @@ export const AzureCredentialsFormAgentless = ({
     isAzureCloudConnectorEnabled,
     azureCloudConnectorRemoteRoleTemplate,
     templateName,
+    azureOrganizationEnabled,
   } = useCloudSetup();
 
   // Preload policy with default Azure credentials to reduce Fleet updates
@@ -93,6 +94,7 @@ export const AzureCredentialsFormAgentless = ({
     templateName: templateName || '',
     setupTechnology,
     isCloudConnectorEnabled: isAzureCloudConnectorEnabled,
+    organizationEnabled: azureOrganizationEnabled,
   });
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);

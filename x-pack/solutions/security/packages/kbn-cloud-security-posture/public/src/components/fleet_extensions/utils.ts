@@ -18,8 +18,11 @@ import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import {
   AWS_SINGLE_ACCOUNT,
+  AWS_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
+  AZURE_ORGANIZATION_ACCOUNT,
   GCP_SINGLE_ACCOUNT,
+  GCP_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
 import {
   AWS_CREDENTIALS_TYPE,
@@ -634,6 +637,179 @@ const isUsingCloudConnectors = (
 };
 
 /**
+ * Helper functions for account type and provider-specific initialization
+ */
+
+export const getAccountType = (
+  provider: string,
+  input: NewPackagePolicyInput,
+  newPolicy?: NewPackagePolicy
+) => {
+  const accountTypeKey = `${provider}.account_type`;
+
+  // First try to get from the updated policy, then fall back to input
+  if (newPolicy) {
+    const policyInput = newPolicy.inputs.find((inp) => inp.type === input.type);
+    if (policyInput?.streams?.[0]?.vars?.[accountTypeKey]?.value) {
+      return policyInput.streams[0].vars[accountTypeKey].value;
+    }
+  }
+
+  return input.streams?.[0]?.vars?.[accountTypeKey]?.value;
+};
+
+const addAccountTypeDefaults = (
+  provider: string,
+  input: NewPackagePolicyInput,
+  enhancedVars: Record<string, PackagePolicyConfigRecordEntry>,
+  organizationEnabled: boolean
+) => {
+  const accountTypeKey = `${provider}.account_type`;
+  const currentAccountType = getAccountType(provider, input);
+
+  // Set organization-based default unless there's already a user-selected value
+  // We consider it user-selected if it doesn't match the basic single-account defaults
+  const isDefaultValue =
+    !currentAccountType ||
+    currentAccountType === AWS_SINGLE_ACCOUNT ||
+    currentAccountType === AZURE_SINGLE_ACCOUNT ||
+    currentAccountType === GCP_SINGLE_ACCOUNT;
+
+  // Check if we should override the existing value in enhancedVars
+  // Override if: 1) it's a default value in input, OR 2) enhancedVars has a single-account default
+  const currentEnhancedVarValue = enhancedVars[accountTypeKey]?.value;
+  const shouldOverride =
+    isDefaultValue ||
+    currentEnhancedVarValue === AWS_SINGLE_ACCOUNT ||
+    currentEnhancedVarValue === AZURE_SINGLE_ACCOUNT ||
+    currentEnhancedVarValue === GCP_SINGLE_ACCOUNT;
+
+  if (shouldOverride) {
+    let defaultAccountType;
+    switch (provider) {
+      case 'aws':
+        defaultAccountType = organizationEnabled ? AWS_ORGANIZATION_ACCOUNT : AWS_SINGLE_ACCOUNT;
+        break;
+      case 'azure':
+        defaultAccountType = organizationEnabled
+          ? AZURE_ORGANIZATION_ACCOUNT
+          : AZURE_SINGLE_ACCOUNT;
+        break;
+      case 'gcp':
+        defaultAccountType = organizationEnabled ? GCP_ORGANIZATION_ACCOUNT : GCP_SINGLE_ACCOUNT;
+        break;
+      default:
+        return; // Unknown provider
+    }
+
+    enhancedVars[accountTypeKey] = {
+      value: defaultAccountType,
+      type: 'text',
+    };
+  }
+  // else: keep existing value (user-selected)
+};
+
+const addProviderSpecificUpdates = (
+  provider: string,
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology: SetupTechnology
+): NewPackagePolicy => {
+  let updatedPolicy = { ...policy };
+
+  switch (provider) {
+    case 'azure':
+      updatedPolicy = addAzureArmTemplateUpdates(
+        updatedPolicy,
+        packageInfo,
+        templateName,
+        setupTechnology
+      );
+      break;
+    case 'gcp':
+      updatedPolicy = addGcpCloudShellUpdates(
+        updatedPolicy,
+        packageInfo,
+        templateName,
+        setupTechnology
+      );
+      break;
+    // AWS doesn't need additional policy-level updates beyond vars
+    default:
+      break;
+  }
+
+  return updatedPolicy;
+};
+
+const addAzureArmTemplateUpdates = (
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology: SetupTechnology
+): NewPackagePolicy => {
+  // Only process for agent-based setup (ARM template logic)
+  if (setupTechnology === SetupTechnology.AGENTLESS) {
+    return policy;
+  }
+
+  // Get ARM template URL from package if available
+  const templateUrl = getArmTemplateUrlFromPackage(packageInfo, templateName);
+  if (!templateUrl) {
+    return policy;
+  }
+
+  // Find the Azure policy input and set ARM template URL in its config
+  return {
+    ...policy,
+    inputs: policy.inputs.map((input) => {
+      if (input.type === 'cloudbeat/cis_azure') {
+        return {
+          ...input,
+          config: {
+            ...input.config,
+            arm_template_url: { value: templateUrl },
+          },
+        };
+      }
+      return input;
+    }),
+  };
+};
+
+const addGcpCloudShellUpdates = (
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology: SetupTechnology
+): NewPackagePolicy => {
+  // Only process for agent-based setup (Cloud Shell logic)
+  if (setupTechnology === SetupTechnology.AGENTLESS) {
+    return policy;
+  }
+
+  // Get Cloud Shell URL from package if available
+  const templateUrl = getCloudShellDefaultValue(packageInfo, templateName);
+  if (!templateUrl) {
+    return policy;
+  }
+
+  // Set Cloud Shell URL in policy vars
+  return {
+    ...policy,
+    vars: {
+      ...policy.vars,
+      cloud_shell_url: {
+        value: templateUrl,
+        type: 'text',
+      },
+    },
+  };
+};
+
+/**
  * Consolidated function to preload policy with all default values for cloud providers
  * This reduces the number of Fleet policy updates on initial form load by setting
  * all necessary defaults in a single update operation
@@ -648,6 +824,7 @@ export const preloadPolicyWithCloudCredentials = ({
   templateName,
   setupTechnology,
   isCloudConnectorEnabled = false,
+  organizationEnabled = false,
 }: {
   provider: 'aws' | 'azure' | 'gcp';
   input: NewPackagePolicyInput;
@@ -658,6 +835,7 @@ export const preloadPolicyWithCloudCredentials = ({
   templateName: string;
   setupTechnology: SetupTechnology;
   isCloudConnectorEnabled?: boolean;
+  organizationEnabled?: boolean;
 }): void => {
   // Early return if required parameters are missing
   if (!packageInfo || !templateName) {
@@ -686,19 +864,22 @@ export const preloadPolicyWithCloudCredentials = ({
 
     const isCloudConnectorType = isUsingCloudConnectors(provider, enhancedVars, isAgentless);
 
-    if (
-      !isCloudConnectorType &&
-      (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
-    ) {
-      const updatedPolicy = {
-        ...newPolicy,
-        supports_cloud_connector: false,
-        cloud_connector_id: undefined,
-      };
+    if (!isCloudConnectorType) {
+      // Only update if the policy values actually need to be changed
+      if (
+        newPolicy.supports_cloud_connector !== false ||
+        newPolicy.cloud_connector_id !== undefined
+      ) {
+        const updatedPolicy = {
+          ...newPolicy,
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        };
 
-      updatePolicy({
-        updatedPolicy,
-      });
+        updatePolicy({
+          updatedPolicy,
+        });
+      }
     }
     return; // Already initialized, no need to update further
   }
@@ -722,10 +903,23 @@ export const preloadPolicyWithCloudCredentials = ({
   const enhancedVars = { ...defaultVars };
   addProviderDefaults(provider, enhancedVars, isAgentless);
 
+  // Add account type initialization if missing
+  addAccountTypeDefaults(provider, input, enhancedVars, organizationEnabled);
+
   // Determine cloud connector usage and update policy
   const isCloudConnector = isUsingCloudConnectors(provider, enhancedVars, isAgentless);
-  const updatedPolicy = updatePolicyWithInputs(newPolicy, policyType, enhancedVars);
+
+  let updatedPolicy = updatePolicyWithInputs(newPolicy, policyType, enhancedVars);
   updatedPolicy.supports_cloud_connector = isCloudConnector || undefined;
+
+  // Add provider-specific policy updates (ARM template, Cloud Shell, etc.)
+  updatedPolicy = addProviderSpecificUpdates(
+    provider,
+    updatedPolicy,
+    packageInfo,
+    templateName,
+    setupTechnology
+  );
 
   updatePolicy({
     updatedPolicy,
