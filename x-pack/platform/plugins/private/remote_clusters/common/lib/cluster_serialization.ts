@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { extractHostAndPort } from './validate_address';
 import { PROXY_MODE, SNIFF_MODE, SECURITY_MODEL } from '../constants';
 
 // Values returned from ES GET /_remote/info
@@ -143,19 +144,21 @@ export function deserializeCluster(
     };
   }
 
+  const deprecatedProxyHost = deprecatedProxyAddress
+    ? extractHostAndPort(deprecatedProxyAddress)?.host
+    : undefined;
+
   // If a user has a remote cluster with the deprecated proxy setting,
   // we transform the data to support the new implementation and also flag the deprecation
-  if (deprecatedProxyAddress) {
-    // Cloud-specific logic: Create default server name, since field doesn't exist in deprecated implementation
-    const defaultServerName = deprecatedProxyAddress.split(':')[0];
-
+  if (deprecatedProxyAddress && deprecatedProxyHost) {
     deserializedClusterObject = {
       ...deserializedClusterObject,
       proxyAddress: deprecatedProxyAddress,
       seeds: undefined,
       hasDeprecatedProxySetting: true,
       mode: PROXY_MODE,
-      serverName: isCloudEnabled ? defaultServerName : undefined,
+      // Cloud-specific logic: Create default server name, since this field doesn't exist in deprecated implementation
+      serverName: isCloudEnabled ? deprecatedProxyHost : undefined,
     };
   }
 

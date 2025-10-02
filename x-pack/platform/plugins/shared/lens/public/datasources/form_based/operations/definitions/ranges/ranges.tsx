@@ -39,7 +39,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     type: MODES_TYPES;
     maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
-    format?: { id: string; params?: { decimals: number } };
+    format?: { id: string; params?: { decimals: number; compact?: boolean } };
     includeEmptyRows?: boolean;
     parentFormat?: {
       id: string;

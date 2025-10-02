@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { evaluateDefendInsights } from '.';
-import { runDefendInsightsEvaluations } from './run_evaluations';
-import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { getLlmType } from '../../../routes/utils';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+
+import { getLlmType } from '../../../routes/utils';
+import { runDefendInsightsEvaluations } from './run_evaluations';
+import { evaluateDefendInsights } from '.';
 
 jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
@@ -25,6 +27,18 @@ jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
 }));
 jest.mock('../../../routes/utils', () => ({
   getLlmType: jest.fn().mockReturnValue('mock-llm-type'),
+}));
+jest.mock('../graphs/default_defend_insights_graph/prompts', () => ({
+  getDefendInsightsPrompt: jest.fn().mockReturnValue({
+    default: 'default',
+    refine: 'refine',
+    continue: 'continue',
+    group: 'group',
+    events: 'events',
+    eventsId: 'eventsId',
+    eventsEndpointId: 'eventsEndpointId',
+    eventsValue: 'eventsValue',
+  }),
 }));
 
 const mockLogger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn(), info: jest.fn() };
@@ -42,6 +56,7 @@ describe('evaluateDefendInsights', () => {
       {
         getDefaultDefendInsightsGraph: mockGetDefaultDefendInsightsGraph,
         graphType: 'defend-insights' as const,
+        insightType: DefendInsightType.Enum.incompatible_antivirus,
       },
     ];
 
@@ -70,6 +85,7 @@ describe('evaluateDefendInsights', () => {
 
     const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;
     const mockEsClient = {} as unknown as ElasticsearchClient;
+    const mockSoClient = savedObjectsClientMock.create();
     const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
 
     await evaluateDefendInsights({
@@ -80,6 +96,7 @@ describe('evaluateDefendInsights', () => {
       connectorTimeout: 1000,
       datasetName: 'test-dataset',
       esClient: mockEsClient,
+      soClient: mockSoClient,
       esClientInternalUser: mockEsClientInternalUser,
       evaluationId: 'eval-1',
       evaluatorConnectorId: 'eval-connector',
@@ -114,6 +131,7 @@ describe('evaluateDefendInsights', () => {
       endpointIds: [],
       esClient: mockEsClient,
       llm: expect.any(Object),
+      kbDataClient: null,
       logger: mockLogger,
       size: 10,
       anonymizationFields: [],

@@ -62,10 +62,14 @@ export function ensureMultiTurn(messages: Message[]): Message[] {
 
     const result = checkMessageRoleSequenceValid(prevMessage, message);
     if (!result.roleSequenceValid) {
-      next.push({
-        content: '-',
-        role: result.intermediaryRole,
-      });
+      const content = '-';
+      next.push(
+        // UserMessage is not assignable to AssistantMessage, so we need
+        // to help TypeScript a bit
+        result.intermediaryRole === MessageRole.User
+          ? { content, role: result.intermediaryRole }
+          : { content, role: result.intermediaryRole }
+      );
     }
 
     next.push(message);

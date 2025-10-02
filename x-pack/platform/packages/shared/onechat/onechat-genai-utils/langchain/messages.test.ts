@@ -9,8 +9,9 @@ import type { ToolMessage } from '@langchain/core/messages';
 
 import { extractToolReturn } from './messages';
 
-const createMessage = (artifact: unknown): ToolMessage => {
+const createMessage = (artifact: unknown, content: string = ''): ToolMessage => {
   return {
+    content,
     artifact,
   } as ToolMessage;
 };
@@ -25,12 +26,27 @@ describe('extractToolReturn', () => {
     expect(result).toEqual(message.artifact);
   });
 
-  it('should throw an error if the message does not contain an artifact', () => {
+  it('should throw an error if the message does not contain an artifact and is not an error message', () => {
     const mockMessage = createMessage(undefined);
 
     expect(() => extractToolReturn(mockMessage)).toThrowError(
       'No artifact attached to tool message'
     );
+  });
+
+  it('should return an error artifact if the message does not contain an artifact and is an error message', () => {
+    const mockMessage = createMessage(undefined, 'Error: foo');
+    const result = extractToolReturn(mockMessage);
+    expect(result).toEqual({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message: 'Error: foo',
+          },
+        },
+      ],
+    });
   });
 
   it('should throw an error if the artifact does not have an array of results', () => {

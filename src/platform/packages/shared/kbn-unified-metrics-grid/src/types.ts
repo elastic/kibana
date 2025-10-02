@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface MetricField {
-  name: string;
-  index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
-  type: string;
-  timeSeriesMetric?: string;
-  unit?: string;
-  description?: string;
-  source?: string;
-  stability?: string;
-  display?: string;
-  noData?: boolean;
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+
+export interface MetricsExperienceService {
+  client: MetricsExperienceClient;
 }

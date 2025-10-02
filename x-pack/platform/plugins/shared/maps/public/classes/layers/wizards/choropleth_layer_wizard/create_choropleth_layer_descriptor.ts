@@ -22,7 +22,7 @@ import type {
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
-  JoinDescriptor,
+  ESTermSourceDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
@@ -100,8 +100,8 @@ function createChoroplethLayerDescriptor({
         applyGlobalQuery: true,
         applyGlobalTime: true,
         applyForceRefresh: true,
-      },
-    } as JoinDescriptor,
+      } as ESTermSourceDescriptor,
+    },
   ];
 
   return layerType === LAYER_TYPE.MVT_VECTOR

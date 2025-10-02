@@ -11,6 +11,19 @@ import type { MapsXPackConfig } from './config';
 import { configSchema } from './config';
 
 export type {
+  //
+  // Layer types
+  //
+  Attribution,
+  StoredEMSVectorTileLayer,
+  StoredHeatmapLayer,
+  StoredLayerGroup,
+  StoredRasterLayer,
+  StoredVectorLayer,
+
+  //
+  // Source types
+  //
   CountAggDescriptor,
   FieldedAggDescriptor,
   PercentileAggDescriptor,
@@ -34,6 +47,50 @@ export type {
   TiledSingleLayerVectorSourceDescriptor,
   JoinSourceDescriptor,
   SourceDescriptor,
+
+  //
+  // Style types
+  //
+  Category,
+  CategoryColorStop,
+  ColorDynamicOptions,
+  ColorStaticOptions,
+  ColorDynamicStylePropertyDescriptor,
+  ColorStaticStylePropertyDescriptor,
+  ColorStylePropertyDescriptor,
+  CustomIcon,
+  DynamicStyleProperties,
+  DynamicStylePropertyOptions,
+  EMSVectorTileStyleDescriptor,
+  FieldMetaOptions,
+  HeatmapStyleDescriptor,
+  IconDynamicOptions,
+  IconStaticOptions,
+  IconStop,
+  IconStylePropertyDescriptor,
+  LabelDynamicOptions,
+  LabelBorderSizeOptions,
+  LabelPositionStylePropertyDescriptor,
+  LabelStaticOptions,
+  LabelStylePropertyDescriptor,
+  LabelZoomRangeStylePropertyDescriptor,
+  OrdinalColorStop,
+  OrientationDynamicOptions,
+  OrientationStaticOptions,
+  OrientationStylePropertyDescriptor,
+  PercentilesFieldMeta,
+  SizeDynamicOptions,
+  SizeStaticOptions,
+  SizeStylePropertyDescriptor,
+  StaticStylePropertyOptions,
+  StyleDescriptor,
+  StyleMetaDescriptor,
+  StylePropertyField,
+  StylePropertyOptions,
+  SymbolizeAsOptions,
+  RangeFieldMeta,
+  VectorStyleDescriptor,
+  VectorStylePropertiesDescriptor,
 } from './content_management';
 export { MapsStorage } from './content_management';
 

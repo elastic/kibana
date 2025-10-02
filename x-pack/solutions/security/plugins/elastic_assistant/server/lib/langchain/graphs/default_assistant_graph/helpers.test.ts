@@ -55,6 +55,7 @@ describe('streamGraph', () => {
     assistantGraph: mockAssistantGraph,
     inputs: {
       connectorId: '123',
+      threadId: 'thread-123',
       messages: [new HumanMessage('input')],
       responseLanguage: 'English',
       isRegeneration: false,

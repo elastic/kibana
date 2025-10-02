@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AssetClient } from '../lib/streams/assets/asset_client';
 import type { AssetService } from '../lib/streams/assets/asset_service';
@@ -18,6 +20,7 @@ import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
 import type { StreamsTelemetryClient } from '../lib/telemetry/client';
 import type { StreamsServer } from '../types';
+import type { SystemClient } from '../lib/streams/system/system_client';
 
 type GetScopedClients = ({
   request,
@@ -30,10 +33,13 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   assetClient: AssetClient;
   streamsClient: StreamsClient;
+  systemClient: SystemClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;
   licensing: LicensingPluginStart;
+  uiSettingsClient: IUiSettingsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface RouteDependencies {

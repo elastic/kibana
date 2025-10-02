@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { catchError, defer, filter, map, of, combineLatest } from 'rxjs';
+import { catchError, defer, filter, map, of, combineLatest, from, switchMap } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -35,7 +35,7 @@ export function maybeAddCloudLinks({
     // If user is not defined due to an unexpected error, then fail *open*.
     catchError(() => of(true)),
     filter((isElasticCloudUser) => isElasticCloudUser === true),
-    map(() => {
+    switchMap(() => {
       if (cloud.deploymentUrl) {
         core.chrome.setCustomNavLink({
           title: i18n.translate('xpack.cloudLinks.deploymentLinkLabel', {
@@ -45,13 +45,20 @@ export function maybeAddCloudLinks({
           href: cloud.deploymentUrl,
         });
       }
-      const userMenuLinks = createUserMenuLinks({
-        core,
-        cloud,
-        security,
-        isServerless,
-      });
-      security.navControlService.addUserMenuLinks(userMenuLinks);
+
+      // Convert the promise to an observable and handle it properly
+      return from(
+        createUserMenuLinks({
+          core,
+          cloud,
+          security,
+          isServerless,
+        })
+      ).pipe(
+        map((userMenuLinks) => {
+          security.navControlService.addUserMenuLinks(userMenuLinks);
+        })
+      );
     })
   );
 
@@ -63,6 +70,7 @@ export function maybeAddCloudLinks({
         const helpMenuLinks = createHelpMenuLinks({
           docLinks: core.docLinks,
           helpSupportUrl,
+          isServerless,
         });
 
         core.chrome.setHelpMenuLinks(helpMenuLinks);

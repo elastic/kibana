@@ -72,6 +72,14 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+const toolCountSchema: SchemaValue<number | undefined> = {
+  type: 'long',
+  _meta: {
+    description: 'Number of times tool was invoked.',
+    optional: true,
+  },
+};
+
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
@@ -87,6 +95,8 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     SecurityLabsKnowledgeBaseTool?: number;
     ProductDocumentationTool?: number;
     CustomTool?: number;
+    EntityRiskScoreTool?: number;
+    IntegrationKnowledgeTool?: number;
   };
   model?: string;
   isOssModel?: boolean;
@@ -133,69 +143,17 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     },
     toolsInvoked: {
       properties: {
-        AlertCountsTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        GenerateESQLTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        AskAboutESQLTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        ProductDocumentationTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        KnowledgeBaseRetrievalTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        KnowledgeBaseWriteTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        OpenAndAcknowledgedAlertsTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        SecurityLabsKnowledgeBaseTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        CustomTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
+        AlertCountsTool: toolCountSchema,
+        GenerateESQLTool: toolCountSchema,
+        AskAboutESQLTool: toolCountSchema,
+        ProductDocumentationTool: toolCountSchema,
+        KnowledgeBaseRetrievalTool: toolCountSchema,
+        KnowledgeBaseWriteTool: toolCountSchema,
+        OpenAndAcknowledgedAlertsTool: toolCountSchema,
+        SecurityLabsKnowledgeBaseTool: toolCountSchema,
+        CustomTool: toolCountSchema,
+        EntityRiskScoreTool: toolCountSchema,
+        IntegrationKnowledgeTool: toolCountSchema,
       },
     },
   },
@@ -631,6 +589,83 @@ export type ElasticAssistantTelemetryEvents =
   | AttackDiscoveryErrorTelemetryEvent
   | AttackDiscoverySuccessTelemetryEvent;
 
+// Conversation sharing
+
+export const CONVERSATION_SHARED_SUCCESS_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+  total?: number;
+}> = {
+  eventType: 'conversation_shared_success',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'If restricted, how many users can access',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const CONVERSATION_SHARED_ERROR_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+  errorMessage: string;
+}> = {
+  eventType: 'conversation_shared_error',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message',
+      },
+    },
+  },
+};
+// only reported when a non-owner accesses a shared conversation
+export const SHARED_CONVERSATION_ACCESSED_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+}> = {
+  eventType: 'shared_conversation_accessed',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+  },
+};
+
+export const CONVERSATION_DUPLICATED_EVENT: EventTypeOpts<{
+  isSourceConversationOwner: boolean;
+}> = {
+  eventType: 'conversation_duplicated',
+  schema: {
+    isSourceConversationOwner: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether the conversation being duplicated is owned by the user duplicating it',
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<ElasticAssistantTelemetryEvents>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
@@ -642,4 +677,8 @@ export const events: Array<EventTypeOpts<ElasticAssistantTelemetryEvents>> = [
   ATTACK_DISCOVERY_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
   DEFEND_INSIGHT_ERROR_EVENT,
+  CONVERSATION_DUPLICATED_EVENT,
+  CONVERSATION_SHARED_SUCCESS_EVENT,
+  CONVERSATION_SHARED_ERROR_EVENT,
+  SHARED_CONVERSATION_ACCESSED_EVENT,
 ];

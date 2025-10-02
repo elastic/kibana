@@ -8,10 +8,10 @@ import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
@@ -24,7 +24,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const retryOnStale = getService('retryOnStale');
   const esClient = getService('es');
-  const supertest = getService('supertest');
   const find = getService('find');
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
@@ -63,16 +62,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const lastField = fields[fields.length - 1];
       await lastField.click();
 
-      await retry.try(
-        async () => {
+      await retry.try(async () => {
+        try {
           await comboBox.setElement(lastField, value);
-        },
-        async () => {
+        } catch (error) {
           // If the above fails due to an option not existing, create the value custom instead
           await comboBox.setFilterValue(lastField, value);
           await pageObjects.common.pressEnterKey();
         }
-      );
+      });
     };
 
     const setLastEntry = async ({
@@ -143,19 +141,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     beforeEach(async () => {
       this.timeout(2 * MINUTE);
 
-      const deleteEndpointExceptions = async () => {
-        const { body } = await supertest
-          .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=endpoint_list&namespace_type=agnostic`)
-          .set('kbn-xsrf', 'true');
-
-        for (const exceptionListItem of (body as FoundExceptionListItemSchema).data) {
-          await supertest
-            .delete(`${EXCEPTION_LIST_ITEM_URL}?id=${exceptionListItem.id}&namespace_type=agnostic`)
-            .set('kbn-xsrf', 'true');
-        }
-      };
-
-      await deleteEndpointExceptions();
+      await endpointArtifactTestResources.deleteList(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+      await endpointArtifactTestResources.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION);
 
       clearPrefilledEntries = retryOnStale.wrap(async () => {
         const entriesContainer = await testSubjects.find('exceptionEntriesContainer');

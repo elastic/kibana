@@ -45,7 +45,7 @@ describe('Data quality Locators', () => {
 
       expect(location).toMatchObject({
         app: '',
-        path: 'management/data/data_quality?pageState=(v:2)',
+        path: 'management/data/data_quality?pageState=(v:1)',
         state: {},
       });
     });
@@ -69,7 +69,7 @@ describe('Data quality Locators', () => {
 
       expect(location).toMatchObject({
         app: '',
-        path: 'management/data/data_quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(pause:!f,value:0),to:now)),v:2)',
+        path: 'management/data/data_quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(pause:!f,value:0),to:now)),v:1)',
         state: {},
       });
     });

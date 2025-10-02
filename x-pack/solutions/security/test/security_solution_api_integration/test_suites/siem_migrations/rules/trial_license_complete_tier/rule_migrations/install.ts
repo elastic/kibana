@@ -11,7 +11,7 @@ import type {
   ElasticRule,
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 import {
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Install API', () => {
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         return {
           migration_id: migrationId,
           elastic_rule: elasticRule,
-          translation_result: index < 2 ? RuleTranslationResult.FULL : undefined,
+          translation_result: index < 2 ? MigrationTranslationResult.FULL : undefined,
         };
       };
 
@@ -75,9 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installedMigrationRules.length).toEqual(2);
 
       // fetch installed rules
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       const expectedRulesData = expect.arrayContaining(
         installedMigrationRules.map((migrationRule) =>
@@ -107,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
         return {
           migration_id: migrationId,
           elastic_rule: index < 2 ? { ...rest, prebuilt_rule_id: 'rule-1' } : undefined,
-          translation_result: index < 2 ? RuleTranslationResult.FULL : undefined,
+          translation_result: index < 2 ? MigrationTranslationResult.FULL : undefined,
         };
       };
       const migrationRuleDocuments = getMigrationRuleDocuments(4, overrideCallback);
@@ -117,9 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({ installed: 2 });
 
       // fetch installed rules
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       const expectedInstalledRules = expect.arrayContaining([
         expect.objectContaining(ruleAssetSavedObject['security-rule']),
@@ -151,9 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({ installed: 2 });
 
       // fetch installed rules
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       expect(rulesResponse.data.length).toEqual(2);
 
@@ -184,9 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({ installed: 3 });
 
       // fetch installed rules
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       expect(rulesResponse.data.length).toEqual(3);
 

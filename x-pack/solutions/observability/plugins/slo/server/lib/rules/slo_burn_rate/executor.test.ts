@@ -34,7 +34,6 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import { sloDefinitionSchema } from '@kbn/slo-schema';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -74,6 +73,7 @@ import type {
   BurnRateRuleParams,
 } from './types';
 import { AlertStates } from './types';
+import { toStoredSLO } from '../../../services/slo_repository';
 
 const commonEsResponse = {
   took: 100,
@@ -96,13 +96,16 @@ function createFindResponse(
     page: 1,
     per_page: 25,
     total: sloList.length,
-    saved_objects: sloList.map((slo) => ({
-      id: slo.id,
-      attributes: sloDefinitionSchema.encode(slo),
-      type: SO_SLO_TYPE,
-      references: [],
-      score: 1,
-    })),
+    saved_objects: sloList.map((slo) => {
+      const { storedSLO } = toStoredSLO(slo);
+      return {
+        id: slo.id,
+        attributes: storedSLO,
+        type: SO_SLO_TYPE,
+        references: [],
+        score: 1,
+      };
+    }),
   };
 }
 
@@ -187,6 +190,7 @@ describe('BurnRateRuleExecutor', () => {
       share: {} as SharePluginStart,
       getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
       getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+      getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
     };
   });
 

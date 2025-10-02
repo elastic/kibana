@@ -138,14 +138,14 @@ export const productInterceptRegistrationConfig = ({
       });
     },
     onFinish: ({ response: feedbackResponse, runId }) => {
-      eventReporter.reportInterceptInteraction({
+      eventReporter.reportInterceptInteractionTermination({
         interactionType: 'completion',
         interceptRunId: runId,
       });
     },
     onDismiss: ({ runId }) => {
       // still update user profile run count, a dismissal is still an interaction
-      eventReporter.reportInterceptInteraction({
+      eventReporter.reportInterceptInteractionTermination({
         interactionType: 'dismissal',
         interceptRunId: runId,
       });

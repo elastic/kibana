@@ -53,6 +53,19 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
+interface ManagedFlyoutProps {
+  exportIntegration: ExportShareConfig;
+  intl: InjectedIntl;
+  isDirty: boolean;
+  onCloseFlyout: () => void;
+  publicAPIEnabled?: boolean;
+  shareObjectType: string;
+  shareObjectTypeAlias?: string;
+  shareObjectTypeMeta: ReturnType<
+    typeof useShareTypeContext<'integration', 'export'>
+  >['objectTypeMeta'];
+}
+
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -113,18 +126,7 @@ function ManagedFlyout({
   shareObjectTypeMeta,
   shareObjectType,
   shareObjectTypeAlias,
-}: {
-  exportIntegration: ExportShareConfig;
-  intl: InjectedIntl;
-  isDirty: boolean;
-  onCloseFlyout: () => void;
-  publicAPIEnabled?: boolean;
-  shareObjectType: string;
-  shareObjectTypeAlias?: string;
-  shareObjectTypeMeta: ReturnType<
-    typeof useShareTypeContext<'integration', 'export'>
-  >['objectTypeMeta'];
-}) {
+}: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const getReport = useCallback(async () => {

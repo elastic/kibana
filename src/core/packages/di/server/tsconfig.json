@@ -16,9 +16,12 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-capabilities-server",
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-server",
     "@kbn/core-plugins-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
     "@kbn/core-di-internal",
   ]
 }

@@ -9,10 +9,7 @@ import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import {
-  ENDPOINT_ARTIFACT_LIST_IDS,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import type {
@@ -33,21 +30,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
-  const supertest = getService('supertest');
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
 
-  const removeAllArtifacts = async () => {
+  const removeAllArtifactLists = async () => {
     for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
-      await removeExceptionsList(listId);
+      await endpointArtifactsTestResources.deleteList(listId);
     }
-  };
-
-  const removeExceptionsList = async (listId: string) => {
-    await supertest
-      .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
-      .set('kbn-xsrf', 'true');
   };
 
   describe('For each artifact list under management', function () {
@@ -219,17 +209,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/219465
       describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
-          await removeAllArtifacts();
+          await removeAllArtifactLists();
           await browser.refresh();
           await pageObjects.artifactEntriesList.navigateToList(testData.urlPath);
         });
 
         afterEach(async () => {
-          await removeAllArtifacts();
+          await removeAllArtifactLists();
           if (policyInfo) {
             await policyInfo.cleanup();
           }
@@ -321,13 +310,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       beforeEach(async () => {
         firstPolicy = await policyTestResources.createPolicy();
         secondPolicy = await policyTestResources.createPolicy();
-        await removeAllArtifacts();
+        await removeAllArtifactLists();
         await browser.refresh();
         await pageObjects.artifactEntriesList.navigateToList(testData.urlPath);
       });
 
       afterEach(async () => {
-        await removeAllArtifacts();
+        await removeAllArtifactLists();
         if (firstPolicy) {
           await firstPolicy.cleanup();
         }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
+import type { AnonymizationRegexWorkerTaskPayload } from './types';
 import { executeRegexRulesTask } from './execute_regex_rule_task';
 
 // eslint-disable-next-line import/no-default-export

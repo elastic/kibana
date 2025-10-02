@@ -13,6 +13,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./import_export'));
     loadTestFile(require.resolve('./install_prebuilt_rules'));
     loadTestFile(require.resolve('./prebuilt_rules_package'));
+    loadTestFile(require.resolve('./non_customizable_fields'));
     loadTestFile(require.resolve('./revert_prebuilt_rules'));
     loadTestFile(require.resolve('./status'));
   });

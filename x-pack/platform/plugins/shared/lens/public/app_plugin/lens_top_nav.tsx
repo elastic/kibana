@@ -394,7 +394,6 @@ export const LensTopNavMenu = ({
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -482,11 +481,15 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
+  const hasShareIntegration = useMemo(() => {
+    if (!share) return false;
+    return share.availableIntegrations('lens', 'export').length > 0;
+  }, [share]);
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
-      closeDataViewEditor.current?.();
     };
   }, []);
 
@@ -783,7 +786,7 @@ export const LensTopNavMenu = ({
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         export: {
           // Only show the export button if the current user meets the requirements for at least one registered export integration
-          visible: Boolean(share?.availableIntegrations('lens', 'export')?.length),
+          visible: hasShareIntegration,
           enabled: showShareMenu,
           tooltip: () => {
             if (!showShareMenu) {
@@ -916,7 +919,7 @@ export const LensTopNavMenu = ({
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
     initialContext,
-    initialInput,
+    initialInput?.savedObjectId,
     isLinkedToOriginatingApp,
     initialContextIsEmbedded,
     activeData,
@@ -926,15 +929,12 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    hasShareIntegration,
     layerMetaInfo,
     additionalMenuEntries,
-    lensInspector,
-    title,
     share,
     visualization,
     visualizationMap,
-    shortUrlService,
-    data,
     filters,
     query,
     activeDatasourceId,
@@ -942,9 +942,13 @@ export const LensTopNavMenu = ({
     datasourceMap,
     currentDoc,
     adHocDataViews,
+    data,
     isCurrentStateDirty,
     dataViews.indexPatterns,
+    title,
     defaultLensTitle,
+    shortUrlService,
+    lensInspector,
     onAppLeave,
     runSave,
     setIsSaveModalVisible,
@@ -1101,32 +1105,24 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          if (isOnTextBasedMode) {
-            dispatch(
-              switchAndCleanDatasource({
-                newDatasourceId: 'formBased',
-                visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataView?.id,
-              })
-            );
-          }
-          dispatchChangeIndexPattern(dataView);
-          setCurrentIndexPattern(dataView);
+  const createNewDataView = useCallback(
+    async (dataView: DataView) => {
+      if (dataView.id) {
+        if (isOnTextBasedMode) {
+          dispatch(
+            switchAndCleanDatasource({
+              newDatasourceId: 'formBased',
+              visualizationId: visualization?.activeId,
+              currentIndexPatternId: dataView?.id,
+            })
+          );
         }
-      },
-      allowAdHocDataView: true,
-    });
-  }, [
-    dataViewEditor,
-    dispatch,
-    dispatchChangeIndexPattern,
-    isOnTextBasedMode,
-    visualization?.activeId,
-  ]);
+        dispatchChangeIndexPattern(dataView);
+        setCurrentIndexPattern(dataView);
+      }
+    },
+    [dispatch, dispatchChangeIndexPattern, isOnTextBasedMode, visualization?.activeId]
+  );
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {

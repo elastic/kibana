@@ -221,3 +221,22 @@ export const ANOTHER_1024_CHARS =
 export const CONSISTENT_TAGS = [
   'this_is_here_to_remove_variance_introduced_by_the_geoip_processor',
 ];
+
+export const processors = [
+  {
+    geoip: {
+      field: 'host.ip',
+      target_field: 'geoip',
+      database_file: 'GeoLite2-City.mmdb',
+      properties: ['country_name', 'region_name', 'city_name'],
+    },
+  },
+  {
+    geoip: {
+      field: 'cloud.provider',
+      target_field: 'cloud.geoip',
+      database_file: 'GeoLite2-Country.mmdb',
+      properties: ['country_name'],
+    },
+  },
+];

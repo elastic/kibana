@@ -12,7 +12,6 @@ import type {
 import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { refreshSavedObjectIndices } from '../../refresh_index';
 
 /**
  * Installs available prebuilt rules in Kibana. Rules are
@@ -46,8 +45,6 @@ export const installPrebuiltRules = async (
     .set('x-elastic-internal-origin', 'foo')
     .send(payload)
     .expect(200);
-
-  await refreshSavedObjectIndices(es);
 
   return response.body;
 };

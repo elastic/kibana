@@ -15,6 +15,7 @@ import { DiveDeeperWithElasticsearch } from './dive_deeper/dive_deeper_with_elas
 import { Footer } from './footer/footer';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../analytics/constants';
+import { GetStartedWithElasticsearch } from './get_started_with_elasticsearch';
 
 export const SearchHomepageBody = () => {
   const usageTracker = useUsageTracker();
@@ -33,13 +34,19 @@ export const SearchHomepageBody = () => {
           <EuiHorizontalRule />
         </EuiFlexItem>
         <EuiFlexItem>
-          <AlternateSolutions />
+          <GetStartedWithElasticsearch />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />
         </EuiFlexItem>
         <EuiFlexItem>
           <DiveDeeperWithElasticsearch />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AlternateSolutions />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />

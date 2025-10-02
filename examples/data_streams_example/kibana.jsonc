@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-streams-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Testing the data streams core service",
+  "plugin": {
+    "id": "dataStreamsExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["developerExamples"]
+  }
+}

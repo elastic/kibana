@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibanaFeatureFlags } from '../../attack_discovery/pages/use_kibana_feature_flags';
 import { getRawData } from '../../assistant/helpers';
 import { AIAssistantSection } from './components/ai_assistant_section';
 import { AttackDiscoverySection } from './components/attack_discovery_section';
@@ -34,7 +33,6 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     async () => getRawData(dataFormattedForFieldBrowser),
     [dataFormattedForFieldBrowser]
   );
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   return (
     <>
@@ -54,11 +52,9 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
               showCellActions={false}
             />
           </EuiFlexItem>
-          {attackDiscoveryAlertsEnabled && (
-            <EuiFlexItem>
-              <AttackDiscoverySection />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <AttackDiscoverySection />
+          </EuiFlexItem>
           <EuiFlexItem>
             <AIAssistantSection getPromptContext={getPromptContext} />
           </EuiFlexItem>

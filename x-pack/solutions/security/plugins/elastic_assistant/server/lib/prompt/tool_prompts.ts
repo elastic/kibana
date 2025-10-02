@@ -137,10 +137,26 @@ If no relevant information is found, inform the user you could not locate the re
     },
   },
   {
+    promptId: 'EntityRiskScoreTool',
+    promptGroupId,
+    prompt: {
+      default:
+        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.",
+    },
+  },
+  {
     promptId: 'defendInsightsTool',
     promptGroupId,
     prompt: {
       default: 'Call this for Elastic Defend insights.',
+    },
+  },
+  {
+    promptId: 'IntegrationKnowledgeTool',
+    promptGroupId,
+    prompt: {
+      default:
+        'Call this for knowledge from Fleet-installed integrations, which contains information on how to configure and use integrations for data ingestion.',
     },
   },
 ];

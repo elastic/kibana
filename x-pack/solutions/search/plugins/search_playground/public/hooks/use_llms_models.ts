@@ -15,6 +15,7 @@ import { SearchPlaygroundQueryKeys } from '../../common';
 import { LLMs } from '../../common/types';
 import type { LLMModel } from '../types';
 import { MODELS } from '../../common/models';
+import { isElasticConnector } from '../utils/playground_connectors';
 import { useKibana } from './use_kibana';
 import { LoadConnectorsQuery } from './use_load_connectors';
 
@@ -145,6 +146,7 @@ export const LLMsQuery =
           disabled: !connector,
           connectorId: connector.id,
           promptTokenLimit,
+          isElasticConnector: isElasticConnector(connector),
         }))
         .forEach((model) => result.push(model));
 

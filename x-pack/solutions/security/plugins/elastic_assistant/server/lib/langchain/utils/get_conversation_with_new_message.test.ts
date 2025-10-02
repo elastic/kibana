@@ -21,6 +21,40 @@ describe('getConversationWithNewMessage', () => {
       if (id === 'empty') {
         return null;
       }
+      if (id === 'withCreatedBy') {
+        return {
+          createdBy: { name: 'elastic' },
+          messages: [
+            {
+              content: 'first human message anonymized-value',
+              role: 'user',
+              timestamp: '2023-10-01T00:00:00Z',
+            },
+            {
+              content: 'first assistant message anonymized-value',
+              role: 'assistant',
+              timestamp: '2023-10-01T00:00:00Z',
+            },
+          ],
+        };
+      }
+      if (id === 'withUsers') {
+        return {
+          users: [{ name: 'elastic' }],
+          messages: [
+            {
+              content: 'first human message anonymized-value',
+              role: 'user',
+              timestamp: '2023-10-01T00:00:00Z',
+            },
+            {
+              content: 'first assistant message anonymized-value',
+              role: 'assistant',
+              timestamp: '2023-10-01T00:00:00Z',
+            },
+          ],
+        };
+      }
       return {
         messages: [
           {
@@ -133,6 +167,78 @@ describe('getConversationWithNewMessage', () => {
           content: 'Second human message original-value',
           role: 'user',
           timestamp: expect.any(String),
+        }),
+      ]),
+    });
+  });
+
+  it('when createdBy exists in conversation, update conversation messages with user', async () => {
+    const newMessages = [new HumanMessage('Second human message anonymized-value')];
+    await getConversationWithNewMessage({
+      logger,
+      newMessages,
+      conversationId: 'withCreatedBy',
+      conversationsDataClient,
+      replacements,
+    });
+    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledWith({
+      existingConversation: {
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: 'first human message anonymized-value',
+            role: 'user',
+            timestamp: expect.any(String),
+          }),
+          expect.objectContaining({
+            content: 'first assistant message anonymized-value',
+            role: 'assistant',
+            timestamp: expect.any(String),
+          }),
+        ]),
+        createdBy: { name: 'elastic' },
+      },
+      messages: expect.arrayContaining([
+        expect.objectContaining({
+          content: 'Second human message original-value',
+          role: 'user',
+          timestamp: expect.any(String),
+          user: { name: 'elastic' },
+        }),
+      ]),
+    });
+  });
+
+  it('when legacy conversation exists, update conversation messages with user', async () => {
+    const newMessages = [new HumanMessage('Second human message anonymized-value')];
+    await getConversationWithNewMessage({
+      logger,
+      newMessages,
+      conversationId: 'withUsers',
+      conversationsDataClient,
+      replacements,
+    });
+    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledWith({
+      existingConversation: {
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: 'first human message anonymized-value',
+            role: 'user',
+            timestamp: expect.any(String),
+          }),
+          expect.objectContaining({
+            content: 'first assistant message anonymized-value',
+            role: 'assistant',
+            timestamp: expect.any(String),
+          }),
+        ]),
+        users: [{ name: 'elastic' }],
+      },
+      messages: expect.arrayContaining([
+        expect.objectContaining({
+          content: 'Second human message original-value',
+          role: 'user',
+          timestamp: expect.any(String),
+          user: { name: 'elastic' },
         }),
       ]),
     });

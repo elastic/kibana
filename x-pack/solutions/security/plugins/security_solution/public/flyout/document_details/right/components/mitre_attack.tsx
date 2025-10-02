@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { buildThreatDescription } from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -21,13 +21,16 @@ const getMitreComponentParts = (searchHit?: SearchHit) => {
   const ruleParameters = searchHit?.fields
     ? searchHit?.fields['kibana.alert.rule.parameters']
     : null;
-  const threat = ruleParameters ? (ruleParameters[0]?.threat as Threats) : null;
-  return threat && threat.length > 0
-    ? buildThreatDescription({
-        label: threat[0].framework,
-        threat,
-      })
-    : null;
+  const threat: Threat = ruleParameters ? ruleParameters[0]?.threat : null;
+  if (!threat) {
+    return null;
+  }
+
+  const threats: Threats = Array.isArray(threat) ? (threat as Threats) : ([threat] as Threats);
+  return buildThreatDescription({
+    label: threats[0].framework,
+    threat: threats,
+  });
 };
 
 export const MitreAttack: FC = () => {

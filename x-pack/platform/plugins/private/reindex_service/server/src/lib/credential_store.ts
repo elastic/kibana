@@ -11,8 +11,8 @@ import stringify from 'json-stable-stringify';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject } from './types';
 
 export type Credential = Record<string, any>;
 

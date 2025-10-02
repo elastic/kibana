@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { Dimension } from '../dimensions/types';
 
+export type MetricFieldType = 'metric' | 'dimension';
 export interface MetricField {
   name: string;
   index: string;
-  dimensions: Array<Dimension>;
+  dimensions: Dimension[];
   type: string;
-  time_series_metric?: string;
-  unit?: string;
-  description?: string;
-  source?: string;
-  stability?: string;
+  instrument?: MappingTimeSeriesMetricType;
+  unit?: MetricUnit;
   display?: string;
-  no_data?: boolean;
+  noData?: boolean;
 }
 
 export interface MetricFieldsResponse {
@@ -28,3 +27,16 @@ export interface MetricFieldsResponse {
   total: number;
   error?: string;
 }
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

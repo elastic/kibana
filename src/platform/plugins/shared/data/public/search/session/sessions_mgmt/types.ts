@@ -57,3 +57,8 @@ export interface SearchSessionSavedObject {
   id: string;
   attributes: PersistedSearchSessionSavedObjectAttributes;
 }
+
+export type BackgroundSearchOpenedHandler = (attrs: {
+  session: UISession;
+  event: React.MouseEvent<HTMLAnchorElement>;
+}) => void;

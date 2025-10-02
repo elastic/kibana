@@ -42,5 +42,8 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
     refresh: DEFAULT_DATEPICKER_REFRESH,
   },
   showCurrentQualityIssues: false,
+  selectedIssueTypes: [],
+  selectedFields: [],
   qualityIssuesChart: 'degraded' as QualityIssueType,
+  view: 'dataQuality',
 };

@@ -195,8 +195,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         <EuiButton
           fill
           iconType="plusInCircle"
-          data-test-subj="createPipelineButton"
-          key="createPipelineButton"
+          data-test-subj="createComponentTemplateButton"
+          key="createComponentTemplateButton"
           {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {

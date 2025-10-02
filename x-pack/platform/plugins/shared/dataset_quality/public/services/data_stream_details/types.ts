@@ -17,12 +17,14 @@ import type {
   GetDataStreamDegradedFieldValuesPathParams,
   GetDataStreamFailedDocsDetailsParams,
   GetDataStreamFailedDocsErrorsParams,
+  GetDataStreamNonAggregatableParams,
 } from '../../../common/data_streams_stats';
 import type {
   AnalyzeDegradedFieldsParams,
   IntegrationType,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
+  UpdateFailureStoreParams,
 } from '../../../common/data_stream_details/types';
 import type {
   Dashboard,
@@ -32,7 +34,10 @@ import type {
   FailedDocsDetails,
   FailedDocsErrorsResponse,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
+import type { ITelemetryClient } from '../telemetry';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -42,6 +47,7 @@ export interface DataStreamDetailsServiceStart {
 
 export interface DataStreamDetailsServiceStartDeps {
   http: HttpStart;
+  telemetryClient: ITelemetryClient;
 }
 
 export interface IDataStreamDetailsClient {
@@ -62,4 +68,8 @@ export interface IDataStreamDetailsClient {
   analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
   setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;
   rolloverDataStream(params: { dataStream: string }): Promise<DataStreamRolloverResponse>;
+  updateFailureStore(params: UpdateFailureStoreParams): Promise<UpdateFailureStoreResponse>;
+  getNonAggregatableDatasets(
+    params: GetDataStreamNonAggregatableParams
+  ): Promise<NonAggregatableDatasets>;
 }

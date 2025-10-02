@@ -59,7 +59,6 @@ interface TableProps {
   setSortBy: (s: SortBy) => void;
   clearSearchBar: () => void;
   schema: DataSchemaFormat | null;
-  isHostOtelEnabled?: boolean;
 }
 
 function useSortableProperties<T>(
@@ -95,7 +94,6 @@ export const ProcessesTable = ({
   setSortBy,
   clearSearchBar,
   schema,
-  isHostOtelEnabled,
 }: TableProps) => {
   const { updateSortableProperties } = useSortableProperties<Process>(
     [
@@ -127,7 +125,7 @@ export const ProcessesTable = ({
     [processList]
   );
 
-  const hideStateColumn = schema === 'semconv' && isHostOtelEnabled;
+  const hideStateColumn = schema === 'semconv';
   const visibleColumns = useMemo(
     () => (hideStateColumn ? columns.filter((col) => col.field !== 'state') : columns),
     [hideStateColumn]

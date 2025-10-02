@@ -44,7 +44,7 @@ export const createTracesDataSourceProfileProvider = ({
   resolve: (params) => {
     if (
       params.rootContext.solutionType === SolutionType.Observability &&
-      tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
+      tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params))
     ) {
       return {
         isMatch: true,

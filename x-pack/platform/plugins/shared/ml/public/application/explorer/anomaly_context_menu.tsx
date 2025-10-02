@@ -184,7 +184,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   );
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {

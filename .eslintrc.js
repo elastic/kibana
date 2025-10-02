@@ -185,7 +185,7 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
@@ -773,7 +773,6 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/platform/test/*api_integration*/**/*',
@@ -784,20 +783,14 @@ module.exports = {
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
         'x-pack/solutions/*/test/serverless/*/configs/**/*',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
-        'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/platform/test/upgrade_assistant_integration/**/*',
-        'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
-        'x-pack/test_serverless/**/config*.ts',
         'x-pack/platform/test/serverless/shared/config*.ts',
         'x-pack/platform/test/serverless/*/test_suites/**/*',
         'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/test_serverless/*/test_suites/**/*',
-        'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
@@ -1144,22 +1137,13 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-unified-metrics-grid/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
         '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-      ],
-      rules: {
-        '@kbn/eui-a11y/eui_elements_should_have_aria_label_or_aria_labelledby_props': 'warn',
       },
     },
     {
@@ -1577,9 +1561,8 @@ module.exports = {
       files: [
         'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'src/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'x-pack/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+        'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
@@ -1599,9 +1582,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1642,6 +1625,10 @@ module.exports = {
         'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
+        'playwright/valid-describe-callback': 'error',
+        'playwright/valid-title': 'error',
+        // Scout has a its own runtime validator for test tags
+        'playwright/valid-test-tags': 'off',
       },
     },
     {
@@ -1811,9 +1798,11 @@ module.exports = {
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
         'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/reporting_api_integration/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
-        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
+        'x-pack/platform/test/api_integration/apis/cases/**/*.{ts, tsx}',
+        'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
     },
 
@@ -1850,6 +1839,19 @@ module.exports = {
         'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
         'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
       ],
+    },
+
+    /**
+     * Search overrides
+     */
+
+    {
+      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
+      excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
     },
 
     /**
@@ -1902,8 +1904,6 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
@@ -2185,8 +2185,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/security/**/*.{ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/security/**/*.{ts,tsx}',
-        'x-pack/test/security_api_integration/**/*.{ts,tsx}',
-        'x-pack/test/security_functional/**/*.{ts,tsx}',
+        'x-pack/platform/test/security_api_integration/**/*.{ts,tsx}',
+        'x-pack/platform/test/security_functional/**/*.{ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}',
         'x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}',
@@ -2308,10 +2308,8 @@ module.exports = {
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
 
-        // For now, we keep the exception to let tests depend on anythying.
+        // For now, we keep the exception to let tests depend on anything.
         // Ideally, we need to classify the solution specific ones to reduce CI times
-        'x-pack/test_serverless/**',
-        'x-pack/test/**',
         'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
@@ -2427,6 +2425,29 @@ module.exports = {
             ],
           },
         ],
+      },
+    },
+    {
+      // Custom rules for scout tests
+      files: [
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/test/scout/**/*.ts',
+      ],
+      rules: {
+        '@kbn/eslint/scout_no_describe_configure': 'error',
+      },
+    },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/deployment_agnostic_test_context': 'error',
       },
     },
   ],

@@ -195,7 +195,14 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
         label={i18n.BODY}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: JSON.parse(json) });
+          let parsedJson;
+          try {
+            parsedJson = JSON.parse(json);
+          } catch (e) {
+            // If the JSON is invalid, we keep the original string so it can go through validation
+          }
+          // Update with parsedJson, when valid, to ensure the body is sent as an object when action params are submitted
+          editSubActionParams({ body: parsedJson ?? json });
         }}
         onBlur={() => {
           if (!subActionParams.body) {

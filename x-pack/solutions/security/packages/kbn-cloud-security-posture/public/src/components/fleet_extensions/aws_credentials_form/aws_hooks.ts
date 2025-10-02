@@ -137,8 +137,8 @@ export const useAwsCredentialsForm = ({
 }: UseAwsCredentialsFormProps) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value, so we fall back to the default option.
-  const { awsPolicyType, awsOverviewPath, templateName } = useCloudSetup();
-  const options = getAwsCredentialsFormOptions();
+  const { awsPolicyType, awsOverviewPath, awsInputFieldMapping, templateName } = useCloudSetup();
+  const options = getAwsCredentialsFormOptions(awsInputFieldMapping);
 
   const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
 
@@ -176,9 +176,9 @@ export const useAwsCredentialsForm = ({
   }
 
   useCloudFormationTemplate({
+    updatePolicy,
     packageInfo,
     newPolicy,
-    updatePolicy,
     setupFormat,
     awsPolicyType,
     templateName,

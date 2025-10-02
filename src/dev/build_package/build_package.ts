@@ -95,7 +95,6 @@ async function buildPackage(
     path.resolve(packageRoot, 'webpack.config.js'),
     '--output-path',
     outPath,
-    '--stats=errors-only',
   ];
 
   const isDist =
@@ -105,7 +104,9 @@ async function buildPackage(
   const env = isDist ? envOptions.dist : envOptions.default;
 
   if (watch) {
-    webpackArgs.push('--watch');
+    webpackArgs.push('--watch', '--stats=minimal');
+  } else {
+    webpackArgs.push('--stats=errors-only');
   }
 
   await copySources({

@@ -405,7 +405,7 @@ export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
   {
     defaultMessage:
-      'When you save the changes, the maintenance window will affect rules in all solutions.',
+      'When you save the changes, the maintenance window will affect all rules that meet the filtering criteria.',
   }
 );
 
@@ -442,21 +442,6 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
   {
     defaultMessage:
       'Upcoming maintenance window events will be canceled, and the window will be queued for deletion. Any other changes made here will not be saved. Are you sure you want to discard changes and archive this maintenance window?',
-  }
-);
-
-export const EXPERIMENTAL_LABEL = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }
 );
 

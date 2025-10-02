@@ -42,6 +42,7 @@ interface ESQLControlsFlyoutProps {
   initialState?: ESQLControlState;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
 }
 
 export function ESQLControlsFlyout({
@@ -56,6 +57,7 @@ export function ESQLControlsFlyout({
   initialState,
   closeFlyout,
   ariaLabelledBy,
+  currentApp,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -138,12 +140,12 @@ export function ESQLControlsFlyout({
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !controlState?.availableOptions.length
+        !controlState?.availableOptions?.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.availableOptions.length,
+    controlState?.availableOptions?.length,
     esqlVariables,
     variableName,
     variableType,
@@ -154,7 +156,7 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.availableOptions.length) {
+    if (controlState && controlState.availableOptions?.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
@@ -189,6 +191,7 @@ export function ESQLControlsFlyout({
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
+        currentApp={currentApp}
       />
     ) : (
       <IdentifierControlForm
@@ -200,6 +203,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
@@ -222,8 +226,6 @@ export function ESQLControlsFlyout({
         {formBody}
       </EuiFlyoutBody>
       <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}

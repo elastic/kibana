@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/*
+ * THESE TESTS ARE SPECIFIC TO KIBANA'S SECURITY DOMAIN
+ * DO NOT ADD TESTS TO THIS SUITE WITHOUT FIRST CONSULTING WITH THE KIBANA-SECURITY TEAM
+ */
+
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
@@ -17,5 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     }
 
     loadTestFile(require.resolve('./bulk_update'));
+    loadTestFile(require.resolve('./find'));
   });
 }

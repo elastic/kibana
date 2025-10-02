@@ -98,7 +98,6 @@ const CellValue = (props: CellValueProps) => {
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
-
   if (columnId === fieldColumnId) {
     return <FieldCellValue field={field} fieldName={fieldName} />;
   }

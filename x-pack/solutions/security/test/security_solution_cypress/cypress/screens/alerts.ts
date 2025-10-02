@@ -37,9 +37,9 @@ export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
-export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
+export const CLOSE_ALERT_BTN = '[data-test-subj="alert-close-context-menu-item"]';
 
-export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
+export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="alert-close-context-menu-item"]';
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
@@ -276,3 +276,11 @@ export const HOVER_ACTIONS = {
 export const ADD_TO_NEW_CASE_BUTTON = '[data-test-subj="attach-new-case"]';
 
 export const ADD_TO_EXISTING_CASE_BUTTON = '[data-test-subj="attach-existing-case"]';
+
+export const GROUP_ALERTS_BY_BTN = '[data-test-subj="alerts-table-group-selector"]';
+
+export const TAKE_ACTION_GROUPED_ALERTS_BTN = '[data-test-subj="take-action-button"]';
+
+export const ALERT_STATUS_BADGE_BUTTON = '[data-test-subj="rule-status-badge"]';
+
+export const ALERTS_PAGE_KQL_BAR = '[data-test-subj="alerts-page-search-bar"]';

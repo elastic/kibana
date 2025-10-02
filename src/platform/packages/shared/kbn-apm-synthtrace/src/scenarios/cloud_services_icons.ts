@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates traces with spans targeting various AWS and Azure services to test service map icons.
+ */
+
 import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

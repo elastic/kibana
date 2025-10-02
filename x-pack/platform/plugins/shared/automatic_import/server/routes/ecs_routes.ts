@@ -13,7 +13,6 @@ import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../..
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
@@ -45,76 +44,75 @@ export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerCon
           },
         },
       },
-      withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const {
-          packageName,
-          dataStreamName,
-          samplesFormat,
-          rawSamples,
-          additionalProcessors,
-          mapping,
-          langSmithOptions,
-        } = req.body;
-        const { getStartServices, logger } = await context.automaticImport;
-
-        const [, { actions: actionsPlugin }] = await getStartServices();
-        try {
-          const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-          const connector = await actionsClient.get({ id: req.body.connectorId });
-
-          const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-
-          const actionTypeId = connector.actionTypeId;
-          const llmType = getLLMType(actionTypeId);
-          const llmClass = getLLMClass(llmType);
-
-          const model = new llmClass({
-            actionsClient,
-            connectorId: connector.id,
-            logger,
-            llmType,
-            model: connector.config?.defaultModel,
-            temperature: 0.05,
-            maxTokens: 4096,
-            signal: abortSignal,
-            streaming: false,
-            telemetryMetadata: {
-              pluginId: 'automatic_import',
-            },
-          });
-
-          const parameters = {
+      withAvailability(
+        async (context, request, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
+          const {
             packageName,
             dataStreamName,
-            rawSamples,
             samplesFormat,
+            rawSamples,
             additionalProcessors,
-            ...(mapping && { mapping }),
-          };
-
-          const options = {
-            callbacks: [
-              new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
-              ...getLangSmithTracer({ ...langSmithOptions, logger }),
-            ],
-          };
-
-          const graph = await getEcsGraph({ model });
-          const results = await graph
-            .withConfig({ runName: 'ECS Mapping' })
-            .invoke(parameters, options);
-
-          return res.ok({ body: EcsMappingResponse.parse(results) });
-        } catch (err) {
+            mapping,
+            langSmithOptions,
+          } = request.body;
+          const { getStartServices, logger } = await context.automaticImport;
+          const [, startPlugins] = await getStartServices();
           try {
-            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
-          } catch (e) {
-            if (isErrorThatHandlesItsOwnResponse(e)) {
-              return e.sendResponse(res);
+            const inference = await startPlugins.inference;
+            const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+            const connectorId = request.body.connectorId;
+
+            const model = await inference.getChatModel({
+              request,
+              connectorId,
+              chatModelOptions: {
+                // not passing specific `model`, we'll always use the connector default model
+                // temperature may need to be parametrized in the future
+                temperature: 0.05,
+                // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+                maxRetries: 1,
+                // Disable streaming explicitly
+                disableStreaming: true,
+                // Set a hard limit of 50 concurrent requests
+                maxConcurrency: 50,
+                telemetryMetadata: { pluginId: 'automatic_import' },
+                signal: abortSignal,
+              },
+            });
+
+            const parameters = {
+              packageName,
+              dataStreamName,
+              rawSamples,
+              samplesFormat,
+              additionalProcessors,
+              ...(mapping && { mapping }),
+            };
+
+            const options = {
+              callbacks: [
+                new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
+                ...getLangSmithTracer({ ...langSmithOptions, logger }),
+              ],
+            };
+
+            const graph = await getEcsGraph({ model });
+            const results = await graph
+              .withConfig({ runName: 'ECS Mapping' })
+              .invoke(parameters, options);
+
+            return res.ok({ body: EcsMappingResponse.parse(results) });
+          } catch (err) {
+            try {
+              handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+            } catch (e) {
+              if (isErrorThatHandlesItsOwnResponse(e)) {
+                return e.sendResponse(res);
+              }
             }
+            return res.badRequest({ body: err });
           }
-          return res.badRequest({ body: err });
         }
-      })
+      )
     );
 }

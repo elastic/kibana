@@ -173,6 +173,7 @@ const getCasesSavedObjectTelemetry = async (
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
           ...getAssigneesAggregations(),
+          ...getStatusAggregation(),
         },
       },
     }),
@@ -188,16 +189,12 @@ const getCasesSavedObjectTelemetry = async (
       ...caseByOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
+      ...getStatusAggregation(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
       syncAlerts: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.syncAlerts` },
-      },
-      status: {
-        terms: {
-          field: `${CASE_SAVED_OBJECT}.attributes.status`,
-        },
       },
       users: {
         cardinality: {
@@ -241,6 +238,14 @@ const getAssigneesAggregations = () => ({
           },
         },
       },
+    },
+  },
+});
+
+const getStatusAggregation = () => ({
+  status: {
+    terms: {
+      field: `${CASE_SAVED_OBJECT}.attributes.status`,
     },
   },
 });

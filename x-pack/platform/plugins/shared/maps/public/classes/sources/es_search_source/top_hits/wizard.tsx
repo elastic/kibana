@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { Writable } from '@kbn/utility-types';
 import { CreateSourceEditor } from './create_source_editor';
 import type { LayerWizard, RenderWizardArguments } from '../../../layers';
 import { GeoJsonVectorLayer } from '../../../layers/vector_layer';
@@ -17,7 +18,10 @@ import {
   WIZARD_ID,
 } from '../../../../../common/constants';
 import { TopHitsLayerIcon } from '../../../layers/wizards/icons/top_hits_layer_icon';
-import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import type {
+  ESSearchSourceDescriptor,
+  VectorStylePropertiesDescriptor,
+} from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../es_search_source';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {
@@ -42,7 +46,9 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
       const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
       const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       if (isPointsOnly) {
-        layerDescriptor.style.properties[VECTOR_STYLES.LINE_WIDTH] = {
+        (layerDescriptor.style.properties as Writable<VectorStylePropertiesDescriptor>)[
+          VECTOR_STYLES.LINE_WIDTH
+        ] = {
           type: STYLE_TYPE.STATIC,
           options: {
             size: 0,

@@ -17,6 +17,8 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import type { WiredIngestStreamEffectiveSettings } from './settings';
+import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -58,6 +60,7 @@ export namespace WiredStream {
   export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
+    effective_settings: WiredIngestStreamEffectiveSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -78,6 +81,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       z.object({
         inherited_fields: inheritedFieldDefinitionSchema,
         effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+        effective_settings: wiredIngestStreamEffectiveSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

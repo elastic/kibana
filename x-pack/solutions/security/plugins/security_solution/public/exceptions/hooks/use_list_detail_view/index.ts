@@ -14,6 +14,7 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
@@ -28,6 +29,7 @@ import {
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { useEndpointExceptionsCapability } from '../use_endpoint_exceptions_capability';
 
 interface ReferenceModalState {
   contentText: string;
@@ -53,7 +55,12 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
-  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canUserWriteCurrentList =
+    exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ? canWriteEndpointExceptions
+      : canUserCRUD;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -114,7 +121,10 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const initializeList = useCallback(async () => {
     try {
-      if ((ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[]).includes(exceptionListId))
+      const endpointArtifactIds = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      );
+      if ((endpointArtifactIds as string[]).includes(exceptionListId))
         return setInvalidListId(true);
       setIsLoading(true);
 
@@ -401,7 +411,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading: isLoading || userInfoLoading,
     invalidListId,
-    isReadOnly: !!(!canUserCRUD && canUserREAD),
+    isReadOnly: !canUserWriteCurrentList,
     list,
     listName: list?.name,
     listDescription: list?.description,

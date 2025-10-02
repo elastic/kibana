@@ -315,40 +315,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.AddPageAttachmentToCaseModal",
-        "type": "Function",
-        "tags": [],
-        "label": "AddPageAttachmentToCaseModal",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "AddPageAttachmentToCaseModalProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/add_page_attachment_to_case_modal/add_page_attachment_to_case_modal_lazy.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.AddPageAttachmentToCaseModal.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.allCasesPermissions",
         "type": "Function",
         "tags": [],
@@ -836,13 +802,7 @@
                     "text": "FrequentCompatibilityChangeAction"
                   },
                   "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.UiActionsService",
-                    "text": "UiActionsService"
-                  },
+                  "UiActionsService",
                   "; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
@@ -3873,7 +3833,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "KibanaPageTemplateProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-template-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaTemplateTypesPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
           ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
@@ -3942,7 +3908,13 @@
           "Omit<",
           "ObservabilityPageTemplateDependencies",
           ", \"isSidebarEnabled$\"> & Pick<",
-          "KibanaPageTemplateProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-template-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaTemplateTypesPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
           ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
@@ -5878,9 +5850,9 @@
                 "section": "def-common.AlertStatus",
                 "text": "AlertStatus"
               },
-              " | undefined; schema?: ",
+              " | undefined; preferredSchema?: ",
               "DataSchemaFormat",
-              " | null | undefined; } | undefined"
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,

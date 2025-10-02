@@ -426,10 +426,34 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               <div
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                Google, Inc
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.organization.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        Google, Inc
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
                  
-                15169
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.number"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        15169
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
               </div>
             </td>
@@ -535,10 +559,34 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               <div
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                TM Net, Internet Service Provider
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.organization.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        TM Net, Internet Service Provider
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
                  
-                4788
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.number"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        4788
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
               </div>
             </td>
@@ -1219,10 +1267,34 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               <div
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                Google, Inc
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.organization.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        Google, Inc
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
                  
-                15169
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.number"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        15169
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
               </div>
             </td>
@@ -1337,10 +1409,34 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               <div
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                TM Net, Internet Service Provider
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.organization.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        TM Net, Internet Service Provider
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
                  
-                4788
+                <div
+                  data-test-subj="cellActions-renderContent-source.as.number"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        4788
+                      </div>
+                    </div>
+                  </div>
+                </div>
                  
               </div>
             </td>

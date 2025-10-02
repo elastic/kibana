@@ -60,6 +60,12 @@ jest.mock('./hooks/use_add_suggested_dashboard', () => ({
   }),
 }));
 
+jest.mock('./hooks/use_discover_url', () => ({
+  useDiscoverUrl: () => ({
+    discoverUrl: null,
+  }),
+}));
+
 jest.mock('./hooks/use_related_dashboards', () => ({
   useRelatedDashboards: () => ({
     isLoadingSuggestedDashboards: false,
@@ -164,6 +170,15 @@ const MOCK_RULE = {
   name: 'ruleName',
   ruleTypeId: MOCK_RULE_TYPE_ID,
   consumer: 'logs',
+  params: {
+    searchConfiguration: {
+      index: 'index',
+      query: {
+        query: 'tags: tag1',
+      },
+    },
+    criteria: [],
+  },
   artifacts: {
     dashboards: [
       {

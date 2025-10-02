@@ -104,7 +104,7 @@ describe(
       // Verify that an error modal is displayed
       cy.get('[data-test-subj="bulkActionRejectModal"]').should(
         'have.text',
-        `Unable to schedule gap fills for a disabled ruleEnable the rule to schedule gap fills.Close`
+        `Unable to schedule gap fills for a disabled ruleEnable the rule to schedule gap fills.CloseYou are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.`
       );
 
       cy.get(MODAL_CONFIRMATION_BTN).click();

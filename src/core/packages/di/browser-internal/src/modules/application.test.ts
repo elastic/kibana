@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container } from 'inversify';
+import { type Container, ContainerModule } from 'inversify';
 import { inject, injectable } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
 import type { App, AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-browser';
-import { application as applicationModule } from './application';
+import { loadApplication } from './application';
 
 @injectable()
 export class TestApplication {
@@ -45,10 +45,9 @@ describe('application', () => {
     application = { register: jest.fn() } as unknown as typeof application;
     container = injection.getContainer();
 
-    container.loadSync(applicationModule);
+    container.loadSync(new ContainerModule(loadApplication));
     container.bind(CoreSetup('application')).toConstantValue(application);
     container.bind(CoreStart('injection')).toConstantValue(injection);
-    container.bind(TestApplication).toSelf().inRequestScope();
     container.bind(Application).toConstantValue(TestApplication);
   });
 

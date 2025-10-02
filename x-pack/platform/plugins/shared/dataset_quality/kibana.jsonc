@@ -30,6 +30,7 @@
       "share",
       "taskManager",
       "triggersActionsUi",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "alerting",
@@ -39,6 +40,7 @@
     "requiredBundles": [
       "charts",
       "discover",
+      "esUiShared",
       "stackAlerts",
     ],
     "extraPublicDirs": [

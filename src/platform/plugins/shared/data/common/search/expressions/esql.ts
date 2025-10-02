@@ -171,7 +171,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         descriptionForInspector,
         ignoreGlobalFilters,
       },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -195,7 +195,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query: fixedQuery,
             // time_zone: timezone,
             locale,
-            include_ccs_metadata: true,
+            include_execution_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -272,7 +272,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -356,11 +356,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
               return {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  type: kibanaFieldType,
                   esType: type,
                   sourceParams:
                     type === 'date'
@@ -374,6 +377,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           indexPattern,
                           sourceField: name,
                         },
+                  params: {
+                    id: kibanaFieldType,
+                  },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
               };

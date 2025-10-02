@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -50,7 +50,7 @@ describe('useKibanaFeatureFlags', () => {
     mockGetBooleanValueFn.mockReturnValue(false);
   });
 
-  it('returns false when the attack discovery alerts feature flag is disabled', async () => {
+  it('returns false when the attack discovery public API feature flag is disabled', async () => {
     mockGetBooleanValueFn.mockReturnValue(false);
 
     const { result } = renderHook(() => useKibanaFeatureFlags(), {
@@ -58,11 +58,11 @@ describe('useKibanaFeatureFlags', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.attackDiscoveryAlertsEnabled).toBe(false);
+      expect(result.current.attackDiscoveryPublicApiEnabled).toBe(false);
     });
   });
 
-  it('returns true when the attack discovery alerts feature flag is enabled', async () => {
+  it('returns true when the attack discovery public API feature flag is enabled', async () => {
     mockGetBooleanValueFn.mockReturnValue(true);
 
     const { result } = renderHook(() => useKibanaFeatureFlags(), {
@@ -70,11 +70,11 @@ describe('useKibanaFeatureFlags', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.attackDiscoveryAlertsEnabled).toBe(true);
+      expect(result.current.attackDiscoveryPublicApiEnabled).toBe(true);
     });
   });
 
-  it('calls getBooleanValue with the expected default value (true)', async () => {
+  it('calls getBooleanValue with the expected default value (false)', async () => {
     mockGetBooleanValueFn.mockReturnValue(false);
 
     renderHook(() => useKibanaFeatureFlags(), {
@@ -83,8 +83,8 @@ describe('useKibanaFeatureFlags', () => {
 
     await waitFor(() => {
       expect(mockGetBooleanValueFn).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-        true // <-- expected default when the feature flag is not configured
+        ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG,
+        false // <-- expected default when the feature flag is not configured
       );
     });
   });

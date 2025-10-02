@@ -38,7 +38,6 @@ const findGapsBaseParamsSchema = schema.object(
   {
     end: schema.maybe(schema.string()),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
-    ruleId: schema.string(),
     start: schema.maybe(schema.string()),
     sortField: schema.maybe(
       schema.oneOf([
@@ -71,6 +70,7 @@ const findGapsBaseParamsSchema = schema.object(
 );
 
 export const findGapsParamsSchema = findGapsBaseParamsSchema.extends({
+  ruleId: schema.string(),
   page: schema.number({ defaultValue: 1, min: 1 }),
 });
 
@@ -82,6 +82,7 @@ export const findGapsByIdParamsSchema = schema.object({
 });
 
 export const findGapsSearchAfterParamsSchema = findGapsBaseParamsSchema.extends({
+  ruleIds: schema.arrayOf(schema.string()),
   pitId: schema.maybe(schema.string()),
   searchAfter: schema.maybe(
     schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))

@@ -12,7 +12,13 @@ import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleDisabled,
 } from '@kbn/streams-schema';
-import { Streams, isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  Streams,
+  isDisabledLifecycle,
+  isDslLifecycle,
+  isIlmLifecycle,
+  emptyAssets,
+} from '@kbn/streams-schema';
 import type { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import {
   disableStreams,
@@ -107,14 +113,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: {
-            steps: [],
-          },
+          settings: {},
+          processing: { steps: [] },
           wired: { fields: {}, routing: [] },
         },
       },
-      dashboards: [],
-      queries: [],
+      ...emptyAssets,
     };
 
     describe('Wired streams update', () => {
@@ -122,8 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const rootDefinition = await getStream(apiClient, 'logs');
 
         const response = await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -155,8 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs',
           {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -172,8 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('inherits on creation', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
         await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -198,8 +199,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rootDefinition = await getStream(apiClient, 'logs');
         await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -209,15 +209,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         await putStream(apiClient, 'logs.overrides', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.overrides.lifecycle', where: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.overrides.lifecycle',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
@@ -237,8 +242,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('applies the nearest parent lifecycle when deleted', async () => {
         await putStream(apiClient, 'logs.10d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -248,8 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         await putStream(apiClient, 'logs.10d.20d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -262,15 +265,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // delete lifecycle of the 20d override
         await putStream(apiClient, 'logs.10d.20d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.10d.20d.inherits', where: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.10d.20d.inherits',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
             },
           },
@@ -284,8 +292,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('handles no retention dsl', async () => {
         await putStream(apiClient, 'logs.no', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -296,8 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, 'logs.no.retention', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -319,8 +325,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             apiClient,
             'logs.ilm',
             {
-              dashboards: [],
-              queries: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -336,15 +341,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('inherits ilm', async () => {
           await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
           await putStream(apiClient, 'logs.ilm', {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
-                  routing: [{ destination: 'logs.ilm.stream', where: { never: {} } }],
+                  routing: [
+                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                  ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
@@ -360,8 +366,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('updates when transitioning from ilm to dsl', async () => {
           const name = 'logs.ilm-with-backing-indices';
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -375,8 +380,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await esClient.indices.rollover({ alias: name });
 
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -396,8 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('updates when transitioning from dsl to ilm', async () => {
           const name = 'logs.dsl-with-backing-indices';
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -415,8 +418,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await esClient.indices.rollover({ alias: name });
 
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -441,14 +443,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       };
 
       let clean: () => Promise<void>;
@@ -499,8 +499,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // update lifecycle
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -521,8 +520,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -544,8 +542,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             apiClient,
             indexName,
             {
-              dashboards: [],
-              queries: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -563,8 +560,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -582,8 +578,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await createDataStream(indexName, { dsl: { data_retention: '10d' } });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -608,8 +603,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           // update lifecycle
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -652,8 +646,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           // update lifecycle to dsl
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -666,8 +659,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           // update lifecycle to ilm
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -689,8 +681,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('is not enabled for streams with dsl', async () => {
         const indexName = 'logs.dslnostats';
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -710,8 +701,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns not found when the policy does not exist', async () => {
           const indexName = 'logs.ilmpolicydontexists';
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -742,8 +732,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {

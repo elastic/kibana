@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/core-base-common",
     "@kbn/core-di",
+    "@kbn/logging",
   ]
 }

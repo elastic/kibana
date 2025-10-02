@@ -33,15 +33,11 @@ describe('KEEP Autocomplete', () => {
   });
 
   it('suggests available fields after KEEP', async () => {
-    const fieldsMap = mockContext.fields;
-    const userDefinedColumns = mockContext.userDefinedColumns;
-    const allFields = [
-      ...Array.from(fieldsMap.values()),
-      ...Array.from(userDefinedColumns.values()).flat(),
-    ];
+    const columns = mockContext.columns;
+
     keepExpectSuggestions(
       'FROM a | KEEP ',
-      allFields.map((field) => field.name)
+      Array.from(columns.values()).map((column) => column.name)
     );
   });
 

@@ -32,10 +32,6 @@ jest.mock('../../use_attack_discovery_bulk', () => ({
   useAttackDiscoveryBulk: jest.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
 }));
 
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(() => ({ attackDiscoveryAlertsEnabled: true })),
-}));
-
 jest.mock('./use_add_to_case', () => ({
   useAddToNewCase: jest.fn(() => ({ disabled: false, onAddToNewCase: jest.fn() })),
 }));
@@ -55,6 +51,13 @@ jest.mock('./use_update_alerts_status', () => ({
 jest.mock('../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
     ad?.alertWorkflowStatus !== undefined,
+}));
+
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 /** helper function to open the popover */
@@ -99,9 +102,6 @@ describe('TakeAction', () => {
             useCasesAddToNewCaseFlyout: jest.fn(),
           },
           ui: {},
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
         },
       },
     });
@@ -424,44 +424,6 @@ describe('TakeAction', () => {
     });
   });
 
-  describe('when attackDiscoveryAlertsEnabled is disabled', () => {
-    beforeEach(() => {
-      // Mock useKibanaFeatureFlags to return false
-      const { useKibanaFeatureFlags } = jest.requireMock('../../use_kibana_feature_flags');
-      useKibanaFeatureFlags.mockReturnValue({ attackDiscoveryAlertsEnabled: false });
-    });
-
-    it('does not render workflow status actions', () => {
-      const alert = { ...getMockAttackDiscoveryAlerts()[0], alertWorkflowStatus: 'open' };
-
-      render(
-        <TestProviders>
-          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
-        </TestProviders>
-      );
-
-      openPopover();
-
-      expect(screen.queryByTestId('markAsOpen')).toBeNull();
-      expect(screen.queryByTestId('markAsAcknowledged')).toBeNull();
-      expect(screen.queryByTestId('markAsClosed')).toBeNull();
-    });
-
-    it('renders case actions and view in AI assistant', () => {
-      render(
-        <TestProviders>
-          <TakeAction {...defaultProps} />
-        </TestProviders>
-      );
-
-      openPopover();
-
-      expect(screen.getByTestId('addToCase')).toBeInTheDocument();
-      expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
-      expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
-    });
-  });
-
   describe('case interactions', () => {
     const mockOnAddToNewCase = jest.fn();
     const mockOnAddToExistingCase = jest.fn();
@@ -541,9 +503,6 @@ describe('TakeAction', () => {
               useCasesAddToNewCaseFlyout: jest.fn(),
             },
             ui: {},
-          },
-          featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(true),
           },
           application: {
             capabilities: {

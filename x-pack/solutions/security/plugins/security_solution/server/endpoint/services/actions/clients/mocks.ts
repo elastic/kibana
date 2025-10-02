@@ -55,6 +55,7 @@ import type {
   UploadActionApiRequestBody,
   ScanActionRequestBody,
   RunScriptActionRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../common/api/endpoint';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -84,6 +85,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     scan: jest.fn().mockReturnValue(Promise.resolve()),
     runscript: jest.fn().mockReturnValue(Promise.resolve()),
     getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+    cancel: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -365,6 +367,18 @@ const createRunScriptOptionsMock = <
   return merge(options, overrides);
 };
 
+const createCancelActionOptionsMock = (
+  overrides: Partial<CancelActionRequestBody> = {}
+): CancelActionRequestBody => {
+  const options: CancelActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      id: 'test-action-id-123',
+    },
+  };
+  return merge(options, overrides);
+};
+
 const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
@@ -527,6 +541,9 @@ const getOptionsForResponseActionMethod = (method: ResponseActionsClientMethods)
     case 'getFile':
       return createGetFileOptionsMock();
 
+    case 'cancel':
+      return createCancelActionOptionsMock();
+
     default:
       throw new Error(`Mock options are not defined for response action method [${method}]`);
   }
@@ -549,6 +566,7 @@ export const responseActionsClientMock = Object.freeze({
   createUploadOptions: createUploadOptionsMock,
   createScanOptions: createScanOptionsMock,
   createRunScriptOptions: createRunScriptOptionsMock,
+  createCancelActionOptions: createCancelActionOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 

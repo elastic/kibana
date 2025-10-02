@@ -15,15 +15,23 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
+import type { FieldDefinition } from '../../fields';
+import { fieldDefinitionSchema } from '../../fields';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export interface IngestClassic {
-  classic: {};
+  classic: {
+    field_overrides?: FieldDefinition;
+  };
 }
 
 export const IngestClassic: z.Schema<IngestClassic> = z.object({
-  classic: z.object({}),
+  classic: z.object({
+    field_overrides: z.optional(fieldDefinitionSchema),
+  }),
 });
 
 export type ClassicIngest = IngestBase & IngestClassic;
@@ -44,6 +52,7 @@ export namespace ClassicStream {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+    effective_settings: IngestStreamSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -71,6 +80,7 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+        effective_settings: ingestStreamSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

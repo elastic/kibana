@@ -110,6 +110,7 @@ export const AlertDefaultsForm = () => {
               defaultStatusRuleEnabled: !(formFields.defaultStatusRuleEnabled ?? true),
             });
           }}
+          disabled={isDisabled}
         />
         <EuiSpacer size="m" />
         <EuiSwitch
@@ -123,6 +124,7 @@ export const AlertDefaultsForm = () => {
               defaultTLSRuleEnabled: !(formFields.defaultTLSRuleEnabled ?? true),
             });
           }}
+          disabled={isDisabled}
         />
       </EuiDescribedFormGroup>
       <EuiSpacer size="m" />

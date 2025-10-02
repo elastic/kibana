@@ -11,7 +11,7 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonRectangle,
   EuiTableHeader,
@@ -28,7 +28,7 @@ import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
   DEGRADED_DOCS_QUERY,
-  WARNING_QUALITY_MINIMUM_PERCENTAGE,
+  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   FAILURE_STORE_SELECTOR,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
@@ -144,10 +144,10 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              quality="warning"
+              quality="degraded"
               description={` ${degradedDocsDescription(
                 'Degraded',
-                WARNING_QUALITY_MINIMUM_PERCENTAGE,
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
                 ' greater than'
               )}`}
             />
@@ -157,7 +157,7 @@ const datasetQualityColumnTooltip = (
               quality="good"
               description={` ${degradedDocsDescription(
                 'Good',
-                WARNING_QUALITY_MINIMUM_PERCENTAGE
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
               )}`}
             />
           </EuiFlexItem>
@@ -284,14 +284,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
-          <EuiToolTip content={datasetQualityColumnTooltip}>
-            <span>
-              {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>{datasetQualityColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: datasetQualityColumnTooltip,
+        icon: 'question',
+      },
       field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -305,14 +304,13 @@ export const getDatasetQualityTableColumns = ({
     {
       name: (
         <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
-          <EuiToolTip content={degradedDocsColumnTooltip}>
-            <span>
-              {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <span>{degradedDocsColumnName}</span>
         </EuiTableHeader>
       ),
+      nameTooltip: {
+        content: degradedDocsColumnTooltip,
+        icon: 'question',
+      },
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -340,14 +338,13 @@ export const getDatasetQualityTableColumns = ({
           {
             name: (
               <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <EuiToolTip content={failedDocsColumnTooltip}>
-                  <span>
-                    {`${failedDocsColumnName} `}
-                    <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-                  </span>
-                </EuiToolTip>
+                <span>{failedDocsColumnName}</span>
               </EuiTableHeader>
             ),
+            nameTooltip: {
+              content: failedDocsColumnTooltip,
+              icon: 'question',
+            },
             field: 'failedDocs.percentage',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
@@ -439,9 +436,12 @@ export const getDatasetQualityTableColumns = ({
                 {!isActiveDataset(timestamp) ? (
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="info" size="s" />
-                    </EuiToolTip>
+                    <EuiIconTip
+                      position="top"
+                      content={inactiveDatasetActivityColumnTooltip}
+                      type="info"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 ) : (
                   fieldFormats
@@ -480,7 +480,7 @@ const RedirectLink = ({
 }) => {
   const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: `${dataStreamStat.rawName},${dataStreamStat.rawName}${FAILURE_STORE_SELECTOR}`,
     sendTelemetry,
     timeRangeConfig: timeRange,
   });

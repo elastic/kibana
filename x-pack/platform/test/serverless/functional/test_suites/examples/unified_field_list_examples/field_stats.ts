@@ -37,7 +37,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram'
@@ -58,7 +58,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
       await esArchiver.unload(
         'x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram'

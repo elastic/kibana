@@ -16,6 +16,14 @@ const configSchema = schema.object({
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
+  http: schema.object({
+    allowedHosts: schema.arrayOf(
+      schema.oneOf([schema.string({ hostname: true }), schema.literal('*')]),
+      {
+        defaultValue: ['*'],
+      }
+    ),
+  }),
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;

@@ -83,17 +83,17 @@ paths:
                     bcc:
                       type: array
                       items:
-                        - type: string
+                        type: string
                       default: []
                     cc:
                       type: array
                       items:
-                        - type: string
+                        type: string
                       default: []
                     to:
                       type: array
                       items:
-                        - type: string
+                        type: string
                       default: []
                 heartbeatIndices:
                   type: string

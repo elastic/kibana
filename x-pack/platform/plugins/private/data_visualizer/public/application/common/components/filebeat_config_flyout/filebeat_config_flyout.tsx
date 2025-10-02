@@ -22,7 +22,7 @@ import {
   EuiCode,
   EuiCopy,
 } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { createFilebeatConfig } from './filebeat_config';
 import { useDataVisualizerKibana } from '../../../kibana_context'; // copy context?
 

@@ -83,6 +83,60 @@ describe('Search Sessions Management API', () => {
       expect(statuses['hello-pizza-123']).toEqual({ status: 'complete' });
     });
 
+    test('fetchDataTable returns saved objects for a specific appId', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+            {
+              id: 'hello-burguer-123',
+              attributes: {
+                name: 'Cheeseburguer',
+                appId: 'burguer',
+                initialState: {},
+                restoreState: {},
+                idMapping: [],
+              },
+            },
+          ],
+          statuses: {
+            'hello-pizza-123': { status: 'complete' },
+            'hello-burguer-123': { status: 'complete' },
+          },
+        };
+      });
+
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
+      });
+
+      const { savedObjects: results, statuses } = await api.fetchTableData({ appId: 'burguer' });
+      expect(results).toEqual([
+        {
+          id: 'hello-burguer-123',
+          attributes: {
+            name: 'Cheeseburguer',
+            appId: 'burguer',
+            initialState: {},
+            restoreState: {},
+            idMapping: [],
+          },
+        },
+      ]);
+      expect(statuses['hello-burguer-123']).toEqual({ status: 'complete' });
+    });
+
     test('expired session is showed as expired', async () => {
       sessionsClient.find = jest.fn().mockImplementation(async () => {
         return {
@@ -155,7 +209,7 @@ describe('Search Sessions Management API', () => {
       await api.fetchTableData();
 
       expect(mockCoreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Fetching the Search Session info timed out after 1 seconds'
+        'Fetching the Background Search info timed out after 1 seconds'
       );
     });
   });
@@ -183,7 +237,7 @@ describe('Search Sessions Management API', () => {
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was deleted.',
+        title: 'The background search was deleted.',
       });
     });
 
@@ -199,7 +253,7 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to delete the search session!' }
+        { title: 'Failed to delete the background search!' }
       );
     });
   });

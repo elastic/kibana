@@ -11,7 +11,9 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
+  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
@@ -104,6 +106,7 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -133,6 +136,24 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
+          if (conversationId) {
+            const conversation = await conversationsDataClient?.getConversation({
+              id: conversationId,
+            });
+            if (
+              conversation &&
+              !getIsConversationOwner(conversation, {
+                name: checkResponse.currentUser?.username,
+                id: checkResponse.currentUser?.profile_uid,
+              })
+            ) {
+              return resp.error({
+                body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                statusCode: 403,
+              });
+            }
+          }
+
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
@@ -199,6 +220,7 @@ export const postActionsConnectorExecuteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               contentReferencesStore,
               isOssModel,
               inferenceChatModelDisabled,

@@ -57,7 +57,7 @@ export const getUserFilter = ({
 };
 
 export const getAdditionalFilter = (filter?: string): string =>
-  filter != null ? ` AND ${filter}` : '';
+  filter != null && filter.trim().length > 0 ? ` AND ${filter}` : '';
 
 export const getCombinedFilter = ({
   authenticatedUser,

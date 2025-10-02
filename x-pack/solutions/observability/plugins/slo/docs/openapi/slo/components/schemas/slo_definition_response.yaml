@@ -69,6 +69,8 @@ properties:
     type: array
     items:
       type: string
+  artifacts:
+    $ref: "artifacts.yaml"
   createdAt:
     description: The creation date
     type: string

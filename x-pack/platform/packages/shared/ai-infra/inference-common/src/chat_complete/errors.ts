@@ -54,6 +54,7 @@ export type ChatCompletionToolValidationError = InferenceTaskError<
     arguments?: string;
     errorsText?: string;
     toolCalls?: UnvalidatedToolCall[];
+    content?: string;
   }
 >;
 

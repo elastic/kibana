@@ -171,6 +171,20 @@ export function translate(
 }
 
 /**
+ * Formats a list of values using the current locale.
+ * @param type - The type of list formatting (e.g., 'conjunction', 'disjunction', 'unit').
+ * @param value - The array of string values to format.
+ * @returns The formatted list string.
+ */
+export function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: string[]): string {
+  try {
+    return intl.formatList(value, { type });
+  } catch (e) {
+    throw new Error(`[I18n] Error formatting list ${JSON.stringify(value)}: ${e}`);
+  }
+}
+
+/**
  * Initializes the engine
  * @param newTranslation
  */

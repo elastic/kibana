@@ -26,7 +26,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
@@ -44,6 +43,7 @@ import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { deleteComponentTemplates } from '../elasticsearch/template/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 import { auditLoggingService } from '../../audit_logging';
@@ -55,6 +55,7 @@ import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
+import { deletePackageKnowledgeBase } from './knowledge_base_index';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -154,7 +155,9 @@ export async function deleteKibanaAssets({
   spaceId?: string;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository([KibanaSavedObjectType.alert])
+    appContextService
+      .getSavedObjects()
+      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
@@ -234,7 +237,7 @@ export const deleteESAsset = async (
   } else if (assetType === ElasticsearchAssetType.indexTemplate) {
     return deleteIndexTemplate(esClient, id);
   } else if (assetType === ElasticsearchAssetType.componentTemplate) {
-    return deleteComponentTemplate(esClient, id);
+    return deleteComponentTemplates(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.transform) {
     return deleteTransforms(esClient, [id], true);
   } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
@@ -390,6 +393,8 @@ async function deleteAssets(
           packageSpecConditions: packageInfo?.conditions,
         })
       ),
+      // Delete knowledge base content for this package
+      deletePackageKnowledgeBase(esClient, name),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -406,17 +411,6 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch (error) {
       throw new FleetError(`Error deleting index template ${name}: ${error.message}`);
-    }
-  }
-}
-
-async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
-  // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
-    try {
-      await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
-    } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
     }
   }
 }
@@ -499,9 +493,9 @@ export function cleanupComponentTemplate(
   esClient: ElasticsearchClient
 ) {
   const idsToDelete = installedObjects
-    .filter((asset) => asset.type === ElasticsearchAssetType.mlModel)
+    .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
     .map((asset) => asset.id);
-  return deleteComponentTemplate(esClient, idsToDelete[0]);
+  return deleteComponentTemplates(esClient, idsToDelete);
 }
 
 export function cleanupTransforms(

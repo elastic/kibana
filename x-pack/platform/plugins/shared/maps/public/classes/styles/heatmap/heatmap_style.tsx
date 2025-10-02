@@ -22,15 +22,19 @@ const MIN_RANGE = 0.1; // 0 to 0.1 is displayed as transparent color stop
 const MAX_RANGE = 1;
 
 export class HeatmapStyle implements IStyle {
-  readonly _descriptor: HeatmapStyleDescriptor;
+  readonly _descriptor: Required<HeatmapStyleDescriptor>;
 
   constructor(
-    descriptor: { colorRampName: string } = { colorRampName: DEFAULT_HEATMAP_COLOR_RAMP_NAME }
+    descriptor: { colorRampName?: HeatmapStyleDescriptor['colorRampName'] } = {
+      colorRampName: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+    }
   ) {
     this._descriptor = HeatmapStyle.createDescriptor(descriptor.colorRampName);
   }
 
-  static createDescriptor(colorRampName?: string) {
+  static createDescriptor(
+    colorRampName?: HeatmapStyleDescriptor['colorRampName']
+  ): Required<HeatmapStyleDescriptor> {
     return {
       type: LAYER_STYLE_TYPE.HEATMAP,
       colorRampName: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,
@@ -43,7 +47,9 @@ export class HeatmapStyle implements IStyle {
 
   renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
     const onHeatmapColorChange = ({ colorRampName }: { colorRampName: string }) => {
-      const styleDescriptor = HeatmapStyle.createDescriptor(colorRampName);
+      const styleDescriptor = HeatmapStyle.createDescriptor(
+        colorRampName as HeatmapStyleDescriptor['colorRampName']
+      );
       onStyleDescriptorChange(styleDescriptor);
     };
 

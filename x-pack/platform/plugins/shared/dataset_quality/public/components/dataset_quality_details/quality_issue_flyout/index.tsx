@@ -72,7 +72,7 @@ export default function QualityIssueFlyout() {
   });
 
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     timeRangeConfig: timeRange,
     query: {
       language: 'kuery',
@@ -90,7 +90,8 @@ export default function QualityIssueFlyout() {
 
   return (
     <EuiFlyout
-      maxWidth={450}
+      type="push"
+      size="s"
       onClose={closeDegradedFieldFlyout}
       aria-labelledby={pushedFlyoutTitleId}
       data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}

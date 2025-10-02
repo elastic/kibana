@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import type { BasicConsoleProps } from '../../hooks/use_with_show_responder';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
@@ -12,12 +13,21 @@ import type { ManagedConsoleExtensionComponentProps } from '../console';
 import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  EndpointPrivileges,
+  MaybeImmutable,
 } from '../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../console/types';
 
+/**
+ * Each Console command can store `meta` data for use by the command's logic. This type defines
+ * the data that is defined for all commands (see `lib/console_commands_definition.ts`).
+ */
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;
   agentType: ResponseActionAgentType;
+  capabilities: MaybeImmutable<string[]>;
+  privileges: EndpointPrivileges;
+  platform: SupportedHostOsType;
 }
 
 export type EndpointResponderExtensionComponentProps =

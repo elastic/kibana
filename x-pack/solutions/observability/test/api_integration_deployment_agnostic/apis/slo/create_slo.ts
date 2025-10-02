@@ -66,6 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(definitions.total).eql(1);
 
       expect(omit(definitions.results[0], ['createdBy', 'updatedBy'])).eql({
+        artifacts: { dashboards: [] },
         budgetingMethod: 'occurrences',
         updatedAt: definitions.results[0].updatedAt,
         createdAt: definitions.results[0].createdAt,
@@ -122,6 +123,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(summaryTransformResponse.transforms[0].dest).eql({
         index: '.slo-observability.summary-v3.5',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
+      });
+    });
+
+    it('persists dashboard artifacts and returns them in the definition', async () => {
+      const ARTIFACTS_SLO = {
+        ...DEFAULT_SLO,
+        artifacts: { dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }] },
+      };
+
+      const { id } = await sloApi.create(ARTIFACTS_SLO, adminRoleAuthc);
+
+      const retrieved = await sloApi.get(id, adminRoleAuthc);
+      expect(retrieved.artifacts).eql({
+        dashboards: [{ id: 'dashboard-abc' }, { id: 'dashboard-def' }],
       });
     });
 

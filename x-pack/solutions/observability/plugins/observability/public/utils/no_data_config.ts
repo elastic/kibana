@@ -20,9 +20,6 @@ export function getNoDataConfig({
 }): NoDataConfig | undefined {
   if (hasData === false) {
     return {
-      solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {
-        defaultMessage: 'Observability',
-      }),
       action: {
         elasticAgent: {
           title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {
@@ -33,9 +30,9 @@ export function getNoDataConfig({
               'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
           }),
           href: basePath.prepend(`/app/integrations/browse`),
+          docsLink,
         },
       },
-      docsLink,
     };
   }
 }

@@ -10,6 +10,10 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SpanLinks, ErrorsByTraceId } from '@kbn/apm-types';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
+
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -42,12 +46,53 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityTracesSpanLinksFeature {
+  id: 'observability-traces-fetch-span-links';
+  fetchSpanLinks: (
+    params: {
+      traceId: string;
+      docId: string;
+      start: string;
+      end: string;
+      processorEvent?: ProcessorEvent;
+    },
+    signal: AbortSignal
+  ) => Promise<SpanLinks>;
+}
+
+export interface ObservabilityTracesFetchErrorsFeature {
+  id: 'observability-traces-fetch-errors';
+  fetchErrorsByTraceId: (
+    params: {
+      traceId: string;
+      docId?: string;
+      start: string;
+      end: string;
+    },
+    signal: AbortSignal
+  ) => Promise<ErrorsByTraceId>;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
     onClose: () => void;
     initialValues: Record<string, unknown>;
   }) => React.ReactNode;
+}
+
+export interface ObservabilityLogEventsFeature {
+  id: 'observability-log-events';
+  render: (props: {
+    query: Query;
+    timeRange: TimeRange;
+    index: string;
+    displayOptions?: {
+      solutionNavIdOverride: 'oblt';
+      enableDocumentViewer: false;
+      enableFilters: false;
+    };
+  }) => JSX.Element;
 }
 
 /** **************** Security Solution ****************/
@@ -75,6 +120,9 @@ export type DiscoverFeature =
   | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityLogEventsFeature
+  | ObservabilityTracesSpanLinksFeature
+  | ObservabilityTracesFetchErrorsFeature
   | SecuritySolutionFeature;
 
 /**

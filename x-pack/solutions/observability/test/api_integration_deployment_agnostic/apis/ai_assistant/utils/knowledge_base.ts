@@ -150,6 +150,7 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const log = getService('log');
 

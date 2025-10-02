@@ -125,6 +125,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
+        contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
       },
       secrets: {
         providerSecrets: {},
@@ -161,9 +162,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
           <InferenceServiceFormFields
             http={http}
             toasts={toasts}
-            isEdit={isEdit}
-            enforceAdaptiveAllocations={enforceAdaptiveAllocations}
-            isPreconfigured={isPreconfigured}
+            config={{ isEdit, enforceAdaptiveAllocations, isPreconfigured }}
           />
           <EuiSpacer size="m" />
           {isPreconfigured ? null : (

@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('tryESQLLink');
 
       await PageObjects.discover.expectOnDiscover();
-      await esql.expectEsqlStatement('FROM logs* | LIMIT 10');
+      await esql.expectEsqlStatement('FROM logs*');
     });
   });
 }

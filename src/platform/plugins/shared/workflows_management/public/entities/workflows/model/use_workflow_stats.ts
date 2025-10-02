@@ -16,6 +16,7 @@ export function useWorkflowStats() {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowStatsDto>({
+    networkMode: 'always',
     queryKey: ['workflows', 'stats'],
     queryFn: () => http!.get(`/api/workflows/stats`),
   });
@@ -25,6 +26,7 @@ export function useWorkflowFiltersOptions(fields: string[]) {
   const { http } = useKibana().services;
 
   return useQuery<Record<string, Array<EuiSelectableOption>>>({
+    networkMode: 'always',
     queryKey: ['workflows', 'aggs', fields],
     queryFn: () => http!.get(`/api/workflows/aggs`, { query: { fields } }),
   });

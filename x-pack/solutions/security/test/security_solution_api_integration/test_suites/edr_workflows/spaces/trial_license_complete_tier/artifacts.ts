@@ -63,16 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
         { name: 'artifactManager' }
       );
 
-      if (
-        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
-          'global_artifact_management_all'
-        )
-      ) {
-        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID] =
-          artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].filter(
-            (privilege) => privilege !== 'global_artifact_management_all'
-          );
-      }
+      const siemFeatureId =
+        Object.keys(artifactManagerRole.kibana[0].feature).find((featureId) =>
+          featureId.startsWith('siem')
+        ) ?? SECURITY_FEATURE_ID;
+
+      artifactManagerRole.kibana[0].feature[siemFeatureId] = artifactManagerRole.kibana[0].feature[
+        siemFeatureId
+      ].filter((privilege) => privilege !== 'global_artifact_management_all');
 
       globalArtifactManagerRole = Object.assign(
         rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
@@ -80,11 +78,11 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       if (
-        !globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
+        !globalArtifactManagerRole.kibana[0].feature[siemFeatureId].includes(
           'global_artifact_management_all'
         )
       ) {
-        globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].push(
+        globalArtifactManagerRole.kibana[0].feature[siemFeatureId].push(
           'global_artifact_management_all'
         );
       }
@@ -141,8 +139,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).filter(
-      (k) => k !== 'trustedDevices'
-    ); // Todo: Enable once trustedDevices are implemented.
+      (k) =>
+        k !== 'trustedDevices' && // Todo: remove once trustedDevices are implemented.
+        k !== 'endpointExceptions' // todo: remove once endpointExceptions are per policy and space aware
+    );
 
     for (const artifactList of artifactLists) {
       const listInfo =

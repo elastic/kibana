@@ -13,7 +13,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExportShare } from '@kbn/share-plugin/public/types';
+import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
@@ -109,12 +109,11 @@ export const downloadCsvLensShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-}: DownloadPanelShareOpts): ExportShare => {
+}: DownloadPanelShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   return {
-    shareType: 'integration',
     id: 'csvDownloadLens',
     groupId: 'export',
-    config({ sharingData }) {
+    getShareIntegrationConfig: async ({ sharingData }) => {
       // TODO fix sharingData types
       const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
 

@@ -19,6 +19,14 @@ export enum ToolType {
    * Tools based on ES|QL templates
    */
   esql = 'esql',
+  /**
+   * Workflow tools
+   */
+  workflow = 'workflow',
+  /**
+   * Index search tools
+   */
+  index_search = 'index_search',
 }
 
 /**
@@ -26,7 +34,10 @@ export enum ToolType {
  *
  * Use as a common base for browser-side and server-side tool types.
  */
-export interface ToolDefinition<TConfig extends object = Record<string, unknown>> {
+export interface ToolDefinition<
+  TType extends ToolType = ToolType,
+  TConfig extends object = Record<string, unknown>
+> {
   /**
    * A unique id for this tool.
    */
@@ -34,14 +45,17 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
   /**
    * The type of the tool
    */
-  type: ToolType;
+  type: TType;
   /**
    * The description for this tool, which will be exposed to the LLM.
    */
   description: string;
   /**
+   * Indicate whether this tool is editable by users or not.
+   */
+  readonly: boolean;
+  /**
    * Optional list of tags attached to this tool.
-   * For built-in tools, this is specified during registration.
    */
   tags: string[];
   /**
@@ -50,8 +64,10 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
   configuration: TConfig;
 }
 
-export interface ToolDefinitionWithSchema<TConfig extends object = Record<string, unknown>>
-  extends ToolDefinition<TConfig> {
+export interface ToolDefinitionWithSchema<
+  TType extends ToolType = ToolType,
+  TConfig extends object = Record<string, unknown>
+> extends ToolDefinition<TType, TConfig> {
   /**
    * the JSON schema associated with this tool's input parameters.
    */

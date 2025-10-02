@@ -149,3 +149,44 @@ export const getAnomalyRecordsSchema = schema.object({
   interval: schema.string(),
   functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
+
+export const getTopInfluencersSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  maxFieldValues: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  page: schema.maybe(schema.number()),
+  influencers: schema.maybe(
+    schema.arrayOf(schema.object({ fieldName: schema.string(), fieldValue: schema.string() }))
+  ),
+  influencersFilterQuery: schema.maybe(schema.any()),
+});
+
+export const getScoresByBucketSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  intervalMs: schema.number(),
+  perPage: schema.maybe(schema.number()),
+  fromPage: schema.maybe(schema.number()),
+  swimLaneSeverity: schema.maybe(
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+  ),
+});
+
+export const getInfluencerValueMaxScoreByTimeSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  influencerFieldName: schema.string(),
+  influencerFieldValues: schema.maybe(schema.arrayOf(schema.string())),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  intervalMs: schema.number(),
+  maxResults: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  fromPage: schema.maybe(schema.number()),
+  influencersFilterQuery: schema.maybe(schema.any()),
+  swimLaneSeverity: schema.maybe(
+    schema.arrayOf(schema.object({ min: schema.number(), max: schema.maybe(schema.number()) }))
+  ),
+});

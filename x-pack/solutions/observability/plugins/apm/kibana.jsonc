@@ -36,7 +36,8 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "actions",

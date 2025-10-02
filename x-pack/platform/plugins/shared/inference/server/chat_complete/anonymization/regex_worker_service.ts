@@ -7,7 +7,7 @@
 
 import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
+import type { AnonymizationRegexWorkerTaskPayload } from './types';
 import type { AnonymizationWorkerConfig } from '../../config';
 import type { DetectedMatch } from './types';
 import { executeRegexRulesTask } from './execute_regex_rule_task';

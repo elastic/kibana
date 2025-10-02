@@ -49,13 +49,16 @@
       "fieldsMetadata",
       "logsDataAccess",
       "embeddableEnhanced",
-      "apmSourcesAccess"
+      "apmSourcesAccess",
+      "fileUpload",
+      "metricsExperience"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects"
+      "savedObjects",
+      "controls",
     ],
     "extraPublicDirs": [
       "common"

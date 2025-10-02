@@ -102,7 +102,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
 
   const selectedDataViewId = useMemo(
     () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
@@ -161,9 +161,14 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   ]);
 
   useEffect(() => {
+    // NOTE: dont dispatch sourcerer events until the status is ready - for the new picker
+    if (newDataViewPickerEnabled && status !== 'ready') {
+      return;
+    }
+
     onSourcererChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewId, selectedPatterns]);
+  }, [selectedDataViewId, selectedPatterns, newDataViewPickerEnabled, status]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(

@@ -26,6 +26,30 @@ export const findAllRules = () => {
   });
 };
 
+type ReadRuleParams =
+  | {
+      id: string;
+      ruleId?: never;
+    }
+  | {
+      id?: never;
+      ruleId: string;
+    };
+
+export const readRule = ({
+  id,
+  ruleId,
+}: ReadRuleParams): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'GET',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      qs: { ...(id ? { id } : {}), ...(ruleId ? { rule_id: ruleId } : {}) },
+      failOnStatusCode: true,
+    })
+  );
+};
+
 export const createRule = (
   rule: RuleCreateProps
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> => {

@@ -109,14 +109,13 @@ export const createExternalService = (
         pushedDate: new Date(res.data.createdDate).toISOString(),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create record in application with id ${appId}. Status: ${
-            error.response?.status ?? 500
-          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to create record in application with id ${appId}. Status: ${
+          error.response?.status ?? 500
+        }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
       );
+      throw error;
     }
   };
 
@@ -150,14 +149,13 @@ export const createExternalService = (
         pushedDate: new Date(res.data.modifiedDate).toISOString(),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to update record in application with id ${appId}. Status: ${
-            error.response?.status ?? 500
-          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to update record in application with id ${appId}. Status: ${
+          error.response?.status ?? 500
+        }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
       );
+      throw error;
     }
   };
 
@@ -197,14 +195,13 @@ export const createExternalService = (
         pushedDate: createdDate,
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create comment in application with id ${appId}. Status: ${
-            error.response?.status ?? 500
-          }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to create comment in application with id ${appId}. Status: ${
+          error.response?.status ?? 500
+        }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
       );
+      throw error;
     }
   };
 

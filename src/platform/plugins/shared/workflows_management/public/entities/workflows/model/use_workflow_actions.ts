@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CreateWorkflowCommand, EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
+import type {
+  CreateWorkflowCommand,
+  EsWorkflow,
+  RunWorkflowCommand,
+  WorkflowDetailDto,
+  RunWorkflowResponseDto,
+  RunStepCommand,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+} from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -16,6 +25,7 @@ export function useWorkflowActions() {
   const { http } = useKibana().services;
 
   const createWorkflow = useMutation<WorkflowDetailDto, Error, CreateWorkflowCommand>({
+    networkMode: 'always',
     mutationKey: ['POST', 'workflows'],
     mutationFn: (workflow) => {
       return http!.post('/api/workflows', {
@@ -51,17 +61,34 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useMutation({
+  const runWorkflow = useMutation<
+    RunWorkflowResponseDto,
+    Error,
+    RunWorkflowCommand & { id: string }
+  >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }: { id: string; inputs: Record<string, any> }) => {
+    mutationFn: ({ id, inputs }) => {
       return http!.post(`/api/workflows/${id}/run`, {
         body: JSON.stringify({ inputs }),
       });
     },
     onSuccess: (_, { id }) => {
+      // FIX: ensure workflow execution document is created at the end of the mutation
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id, 'executions'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+    },
+  });
+
+  const runIndividualStep = useMutation<RunWorkflowResponseDto, Error, RunStepCommand>({
+    mutationKey: ['POST', 'workflows', 'stepId', 'run'],
+    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
+      return http!.post(`/api/workflows/testStep`, {
+        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
+      });
+    },
+    onSuccess: ({ workflowExecutionId }, {}) => {
+      queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
     },
   });
 
@@ -75,11 +102,28 @@ export function useWorkflowActions() {
     },
   });
 
+  const testWorkflow = useMutation<TestWorkflowResponseDto, Error, TestWorkflowCommand>({
+    mutationKey: ['POST', 'workflows', 'test'],
+    mutationFn: ({
+      workflowYaml,
+      inputs,
+    }: {
+      workflowYaml: string;
+      inputs: Record<string, any>;
+    }) => {
+      return http!.post(`/api/workflows/test`, {
+        body: JSON.stringify({ workflowYaml, inputs }),
+      });
+    },
+  });
+
   return {
     createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
     deleteWorkflows,
     runWorkflow,
+    runIndividualStep,
     cloneWorkflow,
+    testWorkflow,
   };
 }

@@ -27,66 +27,36 @@ spec:
       provider_settings:
         trigger_mode: none
       schedules:
-        "[ubuntu20.04] Daily Base Image Build":
-          branch: main
-          cronline: '0 0 * * *'
-          env:
-            IMAGES_CONFIG: kibana/base_image.yml
-          message: [20.04] Daily build of Kibana base VM image
-
-        "[ubuntu20.04] Daily Cache Layer Build":
-          branch: main
-          cronline: '0 1 * * *'
-          env:
-            IMAGES_CONFIG: kibana/image_cache.yml
-            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-          message: [20.04] Daily build of Kibana cache-warmed VM image
-
-        "[ubuntu20.04] Daily FIPS Image Build":
-          branch: main
-          cronline: '0 4 * * *'
-          env:
-            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/image_cache.yml'
-            IMAGES_CONFIG: kibana/fips.yml
-          message: [20.04] Daily build of Kibana FIPS VM image
-
         "[ubuntu24.04] Weekly Base Image Build":
-          branch: kibana-upgrade-ubuntu
+          branch: main
           cronline: '0 0 * * 0'
           env:
             IMAGES_CONFIG: kibana/base_image.yml
-            FORCE_PROMOTE: "true"
-          message: [24.04] Weekly build of Kibana base VM image
+          message: '[24.04] Weekly build of Kibana base VM image'
 
         "[ubuntu24.04] Weekly Packages Layer Build":
-          branch: kibana-upgrade-ubuntu
+          branch: main
           cronline: '0 1 * * 0'
           env:
             IMAGES_CONFIG: kibana/packages_layer.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-            KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: "true"
-          message: [24.04] Weekly build of Kibana packages layer VM image
+          message: '[24.04] Weekly build of Kibana packages layer VM image'
 
         "[ubuntu24.04] Daily Cache Layer Build":
-          branch: kibana-upgrade-ubuntu
+          branch: main
           cronline: '0 2 * * *'
           env:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
-            KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: "true"
-          message: [24.04] Daily build of Kibana cache-warmed VM image
+          message: '[24.04] Daily build of Kibana cache-warmed VM image'
 
         "[ubuntu24.04] Daily FIPS Image Build":
-          branch: kibana-upgrade-ubuntu
+          branch: main
           cronline: '0 4 * * *'
           env:
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml,kibana/image_cache.tpl.yml'
             IMAGES_CONFIG: kibana/fips.yml
-            KIBANA_BRANCH: 'adopt-moon-clean'
-            FORCE_PROMOTE: "true"
-          message: [24.04] Daily build of Kibana FIPS VM image
+          message: '[24.04] Daily build of Kibana FIPS VM image'
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

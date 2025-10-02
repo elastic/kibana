@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a complex, multi-service distributed trace specifically for populating the service map.
+ */
+
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { serviceMap } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

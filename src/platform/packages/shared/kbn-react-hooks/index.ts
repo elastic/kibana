@@ -14,5 +14,6 @@ export { useThrottleFn } from './src/use_throttle_fn';
 export { useAbortController } from './src/use_abort_controller';
 export { useAbortableAsync } from './src/use_abortable_async';
 export { useTruncateText } from './src/use_truncate_text';
+export { useResizeChecker } from './src/use_resize_checker';
 export type { UseAbortableAsync, AbortableAsyncState } from './src/use_abortable_async';
 export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';

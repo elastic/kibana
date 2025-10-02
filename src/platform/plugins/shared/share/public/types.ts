@@ -60,7 +60,10 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C;
+      /**
+       * callback that yields the share configuration for the share as a promise, enables the possibility to dynamically fetch the share configuration
+       */
+      config: (ctx: ShareActionConfigArgs) => Promise<C>;
       /**
        * when provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
@@ -78,7 +81,7 @@ type ShareImplementationFactory<
 
 // New type definition to extract the config return type
 type ShareImplementation<T> = Omit<T, 'config'> & {
-  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+  config: T extends ShareImplementationFactory<ShareTypes, infer R> ? R : never;
 };
 
 /**
@@ -250,11 +253,21 @@ export interface SharingData {
   };
 }
 
-interface ShareRegistryInternalApi {
-  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
-  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+export type ShareIntegrationMapKey = `integration-${string}`;
 
-  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+export interface RegisterShareIntegrationArgs<I extends ShareIntegration = ShareIntegration>
+  extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
+  getShareIntegrationConfig: I['config'];
+}
+
+export interface ShareRegistryInternalApi {
+  registerShareIntegration<I extends ShareIntegration>(
+    shareObject: string,
+    arg: RegisterShareIntegrationArgs<I>
+  ): void;
+  registerShareIntegration<I extends ShareIntegration>(arg: RegisterShareIntegrationArgs<I>): void;
+
+  resolveShareItemsForShareContext(args: ShareContext): Promise<ShareConfigs[]>;
 }
 
 export abstract class ShareRegistryPublicApi {

@@ -257,8 +257,7 @@ export function assertRuleUpgradeAfterReview({
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220081
-  describe.skip('customized field w/ an upgrade resulting in a non-solvable conflict (ABC)', () => {
+  describe('customized field w/ an upgrade resulting in a non-solvable conflict (ABC)', () => {
     it('upgrades rule to suggested value', async () => {
       mockRuleUpgradeReviewData({
         ruleType,

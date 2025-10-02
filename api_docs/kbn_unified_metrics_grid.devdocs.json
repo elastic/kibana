@@ -2,7 +2,44 @@
   "id": "@kbn/unified-metrics-grid",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unified-metrics-grid",
+        "id": "def-public.LazyUnifiedMetricsExperienceGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyUnifiedMetricsExperienceGrid",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "ChartSectionProps",
+          " & { client?: { getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+          "MetricField",
+          "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/lazy_unified_metrics_experience_grid.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-metrics-grid",
+            "id": "def-public.LazyUnifiedMetricsExperienceGrid.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -18,45 +55,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/unified-metrics-grid",
-        "id": "def-common.MetricsGridSection",
-        "type": "Function",
-        "tags": [],
-        "label": "MetricsGridSection",
-        "description": [],
-        "signature": [
-          "({ fields, timeRange, headerActions }: { indexPattern: string; timeRange: { from?: string | undefined; to?: string | undefined; }; fields: ",
-          "MetricField",
-          "[]; headerActions?: { hasExploreAction?: boolean | undefined; hasMetricsInsightsAction?: boolean | undefined; } | undefined; }) => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metrics_grid_section.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-metrics-grid",
-            "id": "def-common.MetricsGridSection.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ fields, timeRange, headerActions }",
-            "description": [],
-            "signature": [
-              "{ indexPattern: string; timeRange: { from?: string | undefined; to?: string | undefined; }; fields: ",
-              "MetricField",
-              "[]; headerActions?: { hasExploreAction?: boolean | undefined; hasMetricsInsightsAction?: boolean | undefined; } | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metrics_grid_section.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a high volume of APM transaction data across multiple services and endpoints.
+ */
+
 import { random } from 'lodash';
 import type { Instance, ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';

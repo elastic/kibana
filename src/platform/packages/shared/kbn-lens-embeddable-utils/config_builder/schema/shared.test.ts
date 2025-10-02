@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { sharedPanelInfoSchema, layerSettingsSchema, collapseBySchema } from './shared';
 
 describe('Shared Schemas', () => {
@@ -17,7 +18,7 @@ describe('Shared Schemas', () => {
         description: 'This is a sample chart',
       };
 
-      const validated = sharedPanelInfoSchema.validate(input);
+      const validated = schema.object(sharedPanelInfoSchema).validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -26,7 +27,7 @@ describe('Shared Schemas', () => {
         title: 'My Chart',
       };
 
-      const validated = sharedPanelInfoSchema.validate(input);
+      const validated = schema.object(sharedPanelInfoSchema).validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -35,14 +36,14 @@ describe('Shared Schemas', () => {
         description: 'This is a sample chart',
       };
 
-      const validated = sharedPanelInfoSchema.validate(input);
+      const validated = schema.object(sharedPanelInfoSchema).validate(input);
       expect(validated).toEqual(input);
     });
 
     it('validates empty panel info', () => {
       const input = {};
 
-      const validated = sharedPanelInfoSchema.validate(input);
+      const validated = schema.object(sharedPanelInfoSchema).validate(input);
       expect(validated).toEqual(input);
     });
   });
@@ -54,14 +55,14 @@ describe('Shared Schemas', () => {
         ignore_global_filters: true,
       };
 
-      const validated = layerSettingsSchema.validate(input);
+      const validated = schema.object(layerSettingsSchema).validate(input);
       expect(validated).toEqual(input);
     });
 
     it('validates layer settings with default values', () => {
       const input = {};
 
-      const validated = layerSettingsSchema.validate(input);
+      const validated = schema.object(layerSettingsSchema).validate(input);
       expect(validated).toEqual({
         sampling: 1,
         ignore_global_filters: false,
@@ -73,7 +74,9 @@ describe('Shared Schemas', () => {
         sampling: -0.1,
       };
 
-      expect(() => layerSettingsSchema.validate(input)).toThrow(/\[sampling\]: Value must be/);
+      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+        /\[sampling\]: Value must be/
+      );
     });
 
     it('throws on invalid sampling value above maximum', () => {
@@ -81,14 +84,16 @@ describe('Shared Schemas', () => {
         sampling: 1.1,
       };
 
-      expect(() => layerSettingsSchema.validate(input)).toThrow(/\[sampling\]: Value must be/);
+      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+        /\[sampling\]: Value must be/
+      );
     });
 
     it('validates sampling edge cases', () => {
       const inputs = [{ sampling: 0 }, { sampling: 1 }, { sampling: 0.5 }];
 
       inputs.forEach((input) => {
-        const validated = layerSettingsSchema.validate(input);
+        const validated = schema.object(layerSettingsSchema).validate(input);
         expect(validated).toEqual({ ignore_global_filters: false, ...input });
       });
     });
@@ -96,7 +101,7 @@ describe('Shared Schemas', () => {
 
   describe('collapseBySchema', () => {
     it('validates all allowed collapse by values', () => {
-      const validValues = ['avg', 'sum', 'max', 'min', 'none'] as const;
+      const validValues = ['avg', 'sum', 'max', 'min'] as const;
 
       validValues.forEach((value) => {
         const validated = collapseBySchema.validate(value);
@@ -126,8 +131,8 @@ describe('Shared Schemas', () => {
       };
 
       const validated = {
-        panelInfo: sharedPanelInfoSchema.validate(input.panelInfo),
-        layerSettings: layerSettingsSchema.validate(input.layerSettings),
+        panelInfo: schema.object(sharedPanelInfoSchema).validate(input.panelInfo),
+        layerSettings: schema.object(layerSettingsSchema).validate(input.layerSettings),
         collapseBy: collapseBySchema.validate(input.collapseBy),
       };
 
@@ -138,13 +143,11 @@ describe('Shared Schemas', () => {
       const input = {
         panelInfo: {},
         layerSettings: {},
-        collapseBy: 'none' as const,
       };
 
       const validated = {
-        panelInfo: sharedPanelInfoSchema.validate(input.panelInfo),
-        layerSettings: layerSettingsSchema.validate(input.layerSettings),
-        collapseBy: collapseBySchema.validate(input.collapseBy),
+        panelInfo: schema.object(sharedPanelInfoSchema).validate(input.panelInfo),
+        layerSettings: schema.object(layerSettingsSchema).validate(input.layerSettings),
       };
 
       expect(validated).toEqual({
@@ -153,7 +156,6 @@ describe('Shared Schemas', () => {
           sampling: 1,
           ignore_global_filters: false,
         },
-        collapseBy: 'none',
       });
     });
   });

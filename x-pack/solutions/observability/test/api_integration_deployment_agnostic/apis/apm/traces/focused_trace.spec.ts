@@ -14,7 +14,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateTrace } from './generate_trace';
 
-type FocusedTraceResponseType = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
+type FocusedTraceResponseType = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>;
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -60,12 +60,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         return undefined;
       }
       return apmApiClient.readUser({
-        endpoint: `GET /internal/apm/traces/{traceId}/{docId}`,
+        endpoint: `GET /internal/apm/unified_traces/{traceId}/summary`,
         params: {
-          path: { traceId, docId },
+          path: { traceId },
           query: {
             start: new Date(start).toISOString(),
             end: new Date(endWithOffset).toISOString(),
+            docId,
           },
         },
       });

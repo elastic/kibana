@@ -343,7 +343,9 @@ export class ServiceAPIClient {
   ) {
     const reason = err.response?.data?.reason ?? '';
 
-    err.message = `Failed to call service location ${url}${err.request?.path} with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
+    err.message = `Failed to call service location ${url}${
+      err.request?.path ?? ''
+    } with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
     this.logger.error(err);
     sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
       reason: err.response?.data?.reason,

@@ -233,7 +233,6 @@ export const useLoadFleetExtension = ({
           posture: { value: getPostureType(selectedInput.type) },
         }),
       };
-
       onChange({
         isValid,
         updatedPolicy: newUpdatedPolicy,

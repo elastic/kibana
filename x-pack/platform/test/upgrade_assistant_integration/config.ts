@@ -6,6 +6,7 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { EsVersion } from '@kbn/test';
 import path from 'node:path';
@@ -30,6 +31,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   }
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackApiTestsConfig.get('servers'),
     services: {

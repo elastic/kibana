@@ -30,6 +30,9 @@ const updateSLOParamsSchema = t.type({
     settings: optionalSettingsSchema,
     tags: tagsSchema,
     groupBy: allOrAnyStringOrArray,
+    artifacts: t.partial({
+      dashboards: t.array(t.type({ id: t.string })),
+    }),
   }),
 });
 

@@ -12,9 +12,17 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { Position } from '@xyflow/react';
 import { getTriggerLabel } from '../../../shared/lib/graph_utils';
 
-export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
+export type NodeType =
+  | 'if'
+  | 'merge'
+  | 'parallel'
+  | 'action'
+  | 'foreach'
+  | 'atomic'
+  | 'http'
+  | 'trigger';
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 export function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

@@ -7,8 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { ReindexStatusResponse } from '../../../common/types';
-import { ReindexStatus, ReindexStep } from '../../../common/types';
+import type { ReindexStatusResponse } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { setupEnvironment } from '../helpers';
 import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
@@ -21,7 +22,6 @@ import {
 
 const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   indexName: 'foo',
-  reindexName: 'reindexed-foo',
   aliases: [],
   isFrozen: false,
   isReadonly: false,

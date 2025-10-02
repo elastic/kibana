@@ -250,8 +250,13 @@ describe('PluginModule', () => {
     });
 
     it('should call the hook function from the parent scope', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      let lastCalled = '';
+      const handler1 = jest.fn(() => {
+        lastCalled = 'handler1';
+      });
+      const handler2 = jest.fn(() => {
+        lastCalled = 'handler2';
+      });
 
       root.bind(hook).toConstantValue(handler1);
       plugin.bind(hook).toConstantValue(handler2);
@@ -259,6 +264,7 @@ describe('PluginModule', () => {
 
       expect(handler1).toHaveBeenCalledWith(plugin);
       expect(handler2).toHaveBeenCalledWith(plugin);
+      expect(lastCalled).toBe('handler1');
     });
 
     it('should call the hook function only once per scope', () => {

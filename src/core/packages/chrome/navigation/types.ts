@@ -23,7 +23,7 @@ export interface SecondaryMenuItem {
 export interface SecondaryMenuSection {
   id: string;
   items: SecondaryMenuItem[];
-  label: string | null;
+  label?: string;
 }
 
 export interface MenuItem {
@@ -64,4 +64,8 @@ export interface SideNavLogo {
    * The logo type, e.g. `appObservability`, `appSecurity`, etc.
    */
   iconType: string;
+  /**
+   * Optional data-test-subj attribute
+   */
+  'data-test-subj'?: string;
 }

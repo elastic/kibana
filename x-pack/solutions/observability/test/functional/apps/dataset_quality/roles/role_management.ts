@@ -87,6 +87,27 @@ const datasetQualityRoles = {
       },
     ],
   },
+  canNotReadFailureStore: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [
+        {
+          names: ['logs-*'],
+          privileges: ['read'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          dataQuality: ['minimal_all', 'manage_rules'],
+          discover: ['all'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
 };
 
 const getDatasetQualityRole = (

@@ -5,17 +5,39 @@
  * 2.0.
  */
 
+import {
+  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+  ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+  API_VERSIONS,
+} from '@kbn/elastic-assistant-common';
 import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import * as ReactQuery from '@tanstack/react-query';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-const mockHttpFetch = jest.fn();
 const mockAddSuccessToast = jest.fn();
 const mockAddError = jest.fn();
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: (): MockUseAppToasts => ({
+    addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+    addError: (...args: unknown[]) => mockAddError(...args),
+  }),
+}));
+
 const mockInvalidateGenerations = jest.fn();
-const mockUseKibanaFeatureFlags = jest.fn();
+jest.mock('../use_get_attack_discovery_generations', () => ({
+  useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+}));
+
+const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
+  attackDiscoveryPublicApiEnabled: true,
+});
+jest.mock('../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -52,6 +74,7 @@ interface MockUseKibanaReturn {
   };
 }
 
+const mockHttpFetch = jest.fn();
 jest.mock(
   '../../../common/lib/kibana',
   (): {
@@ -94,10 +117,6 @@ jest.mock('../use_get_attack_discovery_generations', () => ({
   useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
 }));
 
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 describe('useDismissAttackDiscoveryGeneration', () => {
   beforeEach(() => {
     // Reset mocks before each test
@@ -105,66 +124,120 @@ describe('useDismissAttackDiscoveryGeneration', () => {
     mockAddSuccessToast.mockReset();
     mockAddError.mockReset();
     mockInvalidateGenerations.mockReset();
-    mockUseKibanaFeatureFlags.mockReset();
 
-    // Default mock implementations
-    mockUseKibanaFeatureFlags.mockReturnValue({
-      attackDiscoveryAlertsEnabled: true, // Default to true
-    });
     // Default successful response for http.fetch
     mockHttpFetch.mockResolvedValue({} as PostAttackDiscoveryGenerationsDismissResponse);
   });
 
-  describe('when attackDiscoveryAlertsEnabled is false', () => {
+  describe('when attackDiscoveryPublicApiEnabled is false', () => {
+    const spy = jest.spyOn(ReactQuery, 'useMutation');
+
     beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({
-        attackDiscoveryAlertsEnabled: false,
-      });
-    });
+      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+      mockHttpFetch.mockResolvedValue({});
 
-    it('returns isLoading as false', () => {
       const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
         wrapper: TestProviders,
       });
-      expect(result.current.isLoading).toBe(false);
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
     });
 
-    it('returns isSuccess as false', () => {
-      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
-        wrapper: TestProviders,
+    afterEach(() => spy.mockClear());
+
+    it('calls POST with the internal API route', async () => {
+      const expectedInternalUrl = replaceParams(
+        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+        {
+          execution_uuid: 'gen1',
+        }
+      );
+
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(expectedInternalUrl, expect.any(Object));
       });
-      expect(result.current.isSuccess).toBe(false);
     });
 
-    it('returns isError as false', () => {
-      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
-        wrapper: TestProviders,
+    it('calls POST with the internal API version', async () => {
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            version: API_VERSIONS.internal.v1,
+          })
+        );
       });
-      expect(result.current.isError).toBe(false);
     });
 
-    it('returns error as null', () => {
-      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.error).toBeNull();
+    it('uses the internal route in the mutation key', () => {
+      const calledArgs = spy.mock.calls[0][1] as unknown;
+      expect((calledArgs as { mutationKey: unknown }).mutationKey).toEqual([
+        'POST',
+        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+      ]);
     });
   });
 
-  describe('when mutate is called and feature flag is true and mutation succeeds', () => {
+  describe('when attackDiscoveryPublicApiEnabled is true', () => {
+    const spy = jest.spyOn(ReactQuery, 'useMutation');
+
     beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({
-        attackDiscoveryAlertsEnabled: true,
+      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true });
+      mockHttpFetch.mockResolvedValue({});
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
+        wrapper: TestProviders,
+      });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
       });
     });
 
+    afterEach(() => spy.mockClear());
+
+    it('calls POST with the public API route', async () => {
+      const expectedPublicUrl = replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, {
+        execution_uuid: 'gen1',
+      });
+
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(expectedPublicUrl, expect.any(Object));
+      });
+    });
+
+    it('calls POST with the public API version', async () => {
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ version: API_VERSIONS.public.v1 })
+        );
+      });
+    });
+
+    it('uses the public route in the mutation key', () => {
+      renderHook(() => useDismissAttackDiscoveryGeneration(), {
+        wrapper: TestProviders,
+      });
+
+      const calledArgs = spy.mock.calls[0][1] as unknown;
+      expect((calledArgs as { mutationKey: unknown }).mutationKey).toEqual([
+        'POST',
+        ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+      ]);
+    });
+  });
+
+  describe('when mutate is called and mutation succeeds', () => {
     it('sets isSuccess to true', async () => {
       const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
         wrapper: TestProviders,
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -176,7 +249,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(mockHttpFetch).toHaveBeenCalled());
@@ -188,7 +261,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(mockInvalidateGenerations).toHaveBeenCalled());
@@ -200,7 +273,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(mockAddError).not.toHaveBeenCalled());
@@ -212,7 +285,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -224,7 +297,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isError).toBe(false));
@@ -236,19 +309,16 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.error).toBeNull());
     });
   });
 
-  describe('when mutate is called and feature flag is true and mutation fails', () => {
+  describe('when mutate is called and mutation fails', () => {
     const error = new Error('Mutation failed');
     beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({
-        attackDiscoveryAlertsEnabled: true,
-      });
       mockHttpFetch.mockRejectedValue(error);
     });
 
@@ -258,7 +328,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
@@ -270,7 +340,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(mockAddError).toHaveBeenCalled());
@@ -282,7 +352,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -294,18 +364,19 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(false));
     });
+
     it('returns error as the thrown error after failure', async () => {
       const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
         wrapper: TestProviders,
       });
 
       act(() => {
-        result.current.mutate({ executionUuid: 'gen1', attackDiscoveryAlertsEnabled: true });
+        result.current.mutate({ executionUuid: 'gen1' });
       });
 
       await waitFor(() => expect(result.current.error).toBe(error));

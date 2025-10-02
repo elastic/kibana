@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import type { MapAttributes } from '../content_management';
 import type { LayerDescriptor } from '../descriptor_types';
 
@@ -21,7 +22,7 @@ export function moveAttribution({ attributes }: { attributes: MapAttributes }): 
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layer: LayerDescriptor) => {
+  layerList.forEach((layer: Writable<LayerDescriptor>) => {
     const sourceDescriptor = layer.sourceDescriptor as {
       attributionText?: string;
       attributionUrl?: string;

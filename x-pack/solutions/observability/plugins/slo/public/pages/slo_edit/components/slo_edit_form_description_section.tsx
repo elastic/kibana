@@ -17,6 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { DashboardsSelector } from '@kbn/dashboards-selector';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import type { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
@@ -29,6 +31,7 @@ export function SloEditFormDescriptionSection() {
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
 
   const { suggestions } = useFetchSLOSuggestions();
+  const { services } = useKibana();
 
   return (
     <EuiPanel
@@ -98,6 +101,7 @@ export function SloEditFormDescriptionSection() {
         label={i18n.translate('xpack.slo.sloEdit.tags.label', {
           defaultMessage: 'Tags',
         })}
+        labelAppend={<OptionalText />}
       >
         <Controller
           name="tags"
@@ -146,6 +150,27 @@ export function SloEditFormDescriptionSection() {
           )}
         />
       </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {
+          defaultMessage: 'Linked dashboards',
+        })}
+        labelAppend={<OptionalText />}
+      >
+        <Controller
+          name="artifacts.dashboards"
+          control={control}
+          defaultValue={undefined}
+          render={({ field }) => (
+            <DashboardsSelector
+              contentManagement={services.contentManagement}
+              dashboardsFormData={field.value ?? []}
+              placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
+              onChange={(selected) => field.onChange(selected.map((d) => ({ id: d.value })))}
+            />
+          )}
+        />
+      </EuiFormRow>
     </EuiPanel>
   );
 }
@@ -157,3 +182,7 @@ function generateTagOptions(tags: string[] = []) {
     'data-test-subj': `${tag}Option`,
   }));
 }
+
+const DASHBOARDS_COMBOBOX_PLACEHOLDER = i18n.translate('xpack.slo.sloEdit.dashboards.placeholder', {
+  defaultMessage: 'Add dashboards',
+});

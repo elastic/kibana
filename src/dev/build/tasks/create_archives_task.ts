@@ -53,7 +53,7 @@ export const CreateArchives: Task = {
                   },
                 },
                 createRootDirectory: true,
-                rootDirectoryName: build.getRootDirectory(),
+                rootDirectoryName: build.getRootDirectory(platform),
               }),
             });
             break;
@@ -72,7 +72,7 @@ export const CreateArchives: Task = {
                   },
                 },
                 createRootDirectory: true,
-                rootDirectoryName: build.getRootDirectory(),
+                rootDirectoryName: build.getRootDirectory(platform),
               }),
             });
             break;

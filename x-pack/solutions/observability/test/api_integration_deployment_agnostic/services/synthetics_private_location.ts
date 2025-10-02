@@ -10,6 +10,7 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
 import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export const INSTALLED_VERSION = '1.4.2';
@@ -19,6 +20,8 @@ export class PrivateLocationTestService {
   private readonly retry: RetryService;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     this.supertestWithAuth = getService('supertest');
     this.retry = getService('retry');
   }
@@ -61,6 +64,13 @@ export class PrivateLocationTestService {
         });
       return response;
     });
+  }
+
+  async getPackagePolicies(): Promise<PackagePolicy[]> {
+    const apiResponse = await this.supertestWithAuth.get(
+      '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+    );
+    return apiResponse.body.items;
   }
 
   async setTestLocations(testFleetPolicyIds: string[], spaceId?: string | string[]) {

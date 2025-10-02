@@ -9,9 +9,8 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
+import type { HttpStart } from '@kbn/core/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensPluginStartDependencies } from './plugin';
-import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
@@ -32,7 +31,7 @@ export interface LensAttributesService {
     managed: boolean;
   }>;
   saveToLibrary: (
-    attributes: LensSavedObjectAttributesWithoutReferences,
+    attributes: LensSavedObjectAttributes,
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
@@ -48,19 +47,18 @@ export interface LensAttributesService {
 }
 
 export const savedObjectToEmbeddableAttributes = (
-  savedObject: SavedObjectCommon<LensSavedObjectAttributesWithoutReferences>
+  savedObject: SavedObjectCommon<LensSavedObjectAttributes>
 ): LensSavedObjectAttributes => {
   return {
     ...savedObject.attributes,
+    visualizationType: savedObject.attributes.visualizationType ?? null,
     state: savedObject.attributes.state as LensSavedObjectAttributes['state'],
     references: savedObject.references,
   };
 };
 
-export function getLensAttributeService({
-  contentManagement,
-}: LensPluginStartDependencies): LensAttributesService {
-  const lensDocumentService = new LensDocumentService(contentManagement);
+export function getLensAttributeService(http: HttpStart): LensAttributesService {
+  const lensDocumentService = new LensDocumentService(http);
 
   return {
     loadFromLibrary: async (
@@ -70,12 +68,11 @@ export function getLensAttributeService({
       sharingSavedObjectProps: SharingSavedObjectProps;
       managed: boolean;
     }> => {
-      const { meta, item } = await lensDocumentService.load(savedObjectId);
+      const { item, meta } = await lensDocumentService.load(savedObjectId);
       return {
         attributes: {
-          ...item.attributes,
-          state: item.attributes.state as LensSavedObjectAttributes['state'],
-          references: item.references,
+          ...item,
+          state: item.state as LensSavedObjectAttributes['state'],
         },
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,
@@ -83,11 +80,11 @@ export function getLensAttributeService({
           aliasPurpose: meta.aliasPurpose,
           sourceId: item.id,
         },
-        managed: Boolean(item.managed),
+        managed: Boolean(meta.managed),
       };
     },
     saveToLibrary: async (
-      attributes: LensSavedObjectAttributesWithoutReferences,
+      attributes: LensSavedObjectAttributes,
       references: Reference[],
       savedObjectId?: string
     ) => {

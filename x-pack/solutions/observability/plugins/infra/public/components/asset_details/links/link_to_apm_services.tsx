@@ -10,21 +10,22 @@ import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HOST_NAME } from '@kbn/apm-types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { APM_HOST_FILTER_FIELD } from '../constants';
 
 export interface LinkToApmServicesProps {
   entityId: string;
-  apmField: string;
 }
 
-export const LinkToApmServices = ({ entityId, apmField }: LinkToApmServicesProps) => {
+export const LinkToApmServices = ({ entityId }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const queryString = new URLSearchParams(
     encode(
       stringify({
-        kuery: `${apmField}:"${entityId}"`,
+        kuery: `${APM_HOST_FILTER_FIELD}:"${entityId}" OR ${HOST_NAME}:"${entityId}"`,
       })
     )
   );

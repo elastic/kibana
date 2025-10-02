@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates mobile APM data, including crashes and device metadata for both Android and iOS.
+ */
+
 import { apm } from '@kbn/apm-synthtrace-client';
 import type {
   DeviceInfo,

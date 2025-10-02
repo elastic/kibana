@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
@@ -200,19 +199,12 @@ const bulkDeleteWithOCC = async (
   const ruleIds = rulesToDelete.map((rule) => rule.id);
   try {
     const eventLogClient = await context.getEventLogClient();
-    await pMap(
+    await softDeleteGaps({
       ruleIds,
-      (ruleId) =>
-        softDeleteGaps({
-          ruleId,
-          logger: context.logger,
-          eventLogClient,
-          eventLogger: context.eventLogger,
-        }),
-      {
-        concurrency: 10,
-      }
-    );
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
   } catch (error) {
     // Failing to soft delete gaps should not block the rule deletion
     context.logger.error(

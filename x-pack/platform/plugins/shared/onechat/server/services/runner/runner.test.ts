@@ -11,19 +11,20 @@ import type {
   ScopedRunnerRunAgentParams,
   RunToolParams,
   RunAgentParams,
+  ToolHandlerFn,
 } from '@kbn/onechat-server';
 import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
   MockedAgent,
-  AgentClientMock,
+  AgentRegistryMock,
   ToolRegistryMock,
 } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
   createMockedAgent,
-  createMockedAgentClient,
+  createMockedAgentRegistry,
   createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
@@ -36,6 +37,7 @@ const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof create
 
 describe('Onechat runner', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
@@ -52,16 +54,20 @@ describe('Onechat runner', () => {
       } = runnerDeps;
       getRegistry.mockResolvedValue(registry);
 
-      tool = createMockedTool({
-        schema: z.object({
+      toolHandler = jest.fn();
+
+      tool = createMockedTool({});
+      tool.getSchema.mockReturnValue(
+        z.object({
           foo: z.string(),
-        }),
-      });
+        })
+      );
+      tool.getHandler.mockReturnValue(toolHandler);
       registry.get.mockResolvedValue(tool);
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
@@ -73,17 +79,16 @@ describe('Onechat runner', () => {
       const runner = createScopedRunner(runnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
@@ -98,11 +103,10 @@ describe('Onechat runner', () => {
       const runner = createRunner(otherRunnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -110,19 +114,19 @@ describe('Onechat runner', () => {
 
   describe('runAgent', () => {
     let agent: MockedAgent;
-    let agentClient: AgentClientMock;
+    let agentClient: AgentRegistryMock;
     let agentHandler: jest.MockedFn<any>;
 
     beforeEach(() => {
       agent = createMockedAgent();
 
-      agentClient = createMockedAgentClient();
+      agentClient = createMockedAgentRegistry();
       agentClient.get.mockResolvedValue(agent);
 
       const {
-        agentsService: { getScopedClient },
+        agentsService: { getRegistry },
       } = runnerDeps;
-      getScopedClient.mockResolvedValue(agentClient);
+      getRegistry.mockResolvedValue(agentClient);
 
       agentHandler = jest.fn();
       agentHandler.mockResolvedValue({
@@ -156,7 +160,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });
@@ -185,7 +188,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });

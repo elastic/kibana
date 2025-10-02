@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import {
+  MonitoringEngineComponentResourceEnum,
+  type MonitoringEngineDescriptor,
+} from '../../../../../common/api/entity_analytics';
 import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
@@ -27,7 +30,7 @@ export const createEngineStatusService = (
 
   const get = descriptorClient.get.bind(descriptorClient);
 
-  const disable = async () => {
+  const disable = async (): Promise<MonitoringEngineDescriptor> => {
     dataClient.log('info', 'Disabling Privileged Monitoring Engine');
 
     // Check the current status of the engine
@@ -37,10 +40,7 @@ export const createEngineStatusService = (
         'info',
         'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
       );
-      return {
-        status: currentEngineStatus.status,
-        error: null,
-      };
+      return currentEngineStatus;
     }
     if (!deps.taskManager) {
       throw new Error('Task Manager is not available');
@@ -64,21 +64,18 @@ export const createEngineStatusService = (
 
       dataClient.audit(
         PrivilegeMonitoringEngineActions.DISABLE,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Privilege Monitoring Engine disabled'
       );
       dataClient.log('info', 'Privileged Monitoring Engine disabled successfully');
-      return {
-        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
-        error: null,
-      };
+      return descriptorClient.get(); // return the updated state
     } catch (e) {
       const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
       dataClient.log('error', msg);
 
       dataClient.audit(
         PrivilegeMonitoringEngineActions.DISABLE,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Failed to disable Privileged Monitoring Engine',
         e
       );
@@ -100,7 +97,7 @@ export const createEngineStatusService = (
 
     dataClient.audit(
       PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
-      EngineComponentResourceEnum.privmon_engine,
+      MonitoringEngineComponentResourceEnum.privmon_engine,
       'Privilege Monitoring Engine scheduled for immediate run'
     );
 
@@ -111,5 +108,17 @@ export const createEngineStatusService = (
     });
   };
 
-  return { get, disable, scheduleNow: _scheduleNow };
+  const getCurrentUserCount = async () => {
+    const esClient = dataClient.deps.clusterClient.asCurrentUser;
+    return esClient.count({
+      index: dataClient.index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
+  };
+
+  return { get, disable, scheduleNow: _scheduleNow, getCurrentUserCount };
 };

@@ -23,7 +23,6 @@ import {
   selectCreateNoteStatus,
   selectNotesTablePendingDeleteIds,
 } from '../store/notes.slice';
-import { useUserPrivileges } from '../../common/components/user_privileges';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'added a note',
@@ -59,9 +58,6 @@ export interface NotesListProps {
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
-  const { notesPrivileges } = useUserPrivileges();
-  const canDeleteNotes = notesPrivileges.crud;
-
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
@@ -89,7 +85,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
                   <OpenTimelineButtonIcon note={note} index={index} />
                 )}
-                {canDeleteNotes && <DeleteNoteButtonIcon note={note} index={index} />}
+                <DeleteNoteButtonIcon note={note} index={index} />
               </>
             }
             timelineAvatar={

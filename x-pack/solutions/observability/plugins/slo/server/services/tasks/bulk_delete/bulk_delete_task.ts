@@ -35,7 +35,6 @@ interface TaskSetupContract {
 }
 
 export class BulkDeleteTask {
-  private abortController = new AbortController();
   private logger: Logger;
 
   constructor(setupContract: TaskSetupContract) {
@@ -49,7 +48,7 @@ export class BulkDeleteTask {
         title: 'SLO bulk delete',
         timeout: '10m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
@@ -66,7 +65,6 @@ export class BulkDeleteTask {
                 return;
               }
 
-              this.abortController = new AbortController();
               const [coreStart, pluginStart] = await core.getStartServices();
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
@@ -78,13 +76,13 @@ export class BulkDeleteTask {
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,
                 this.logger,
-                this.abortController
+                abortController
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
                 new DefaultSummaryTransformGenerator(),
                 scopedClusterClient,
                 this.logger,
-                this.abortController
+                abortController
               );
 
               const deleteSLO = new DeleteSLO(
@@ -93,7 +91,7 @@ export class BulkDeleteTask {
                 summaryTransformManager,
                 scopedClusterClient,
                 rulesClient,
-                this.abortController
+                abortController
               );
 
               try {
@@ -104,7 +102,7 @@ export class BulkDeleteTask {
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
-                  abortController: this.abortController,
+                  abortController,
                 });
 
                 return {
@@ -125,10 +123,7 @@ export class BulkDeleteTask {
                 };
               }
             },
-
-            cancel: async () => {
-              this.abortController.abort('Timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

@@ -24,10 +24,12 @@ export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
+  hasIntegrations,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
+  hasIntegrations: boolean;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -68,6 +70,8 @@ export const getShareAppMenuItem = ({
       timeRange,
       refreshInterval,
     };
+
+    // TODO: for a persisted saved search, add the current tab ID to the params
     const relativeUrl = locator.getRedirectUrl(params);
 
     // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
@@ -170,7 +174,7 @@ export const getShareAppMenuItem = ({
     },
   ];
 
-  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+  if (hasIntegrations) {
     menuItems.unshift({
       id: AppMenuActionId.export,
       type: AppMenuActionType.primary,

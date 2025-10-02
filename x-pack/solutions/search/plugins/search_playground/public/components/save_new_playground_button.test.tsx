@@ -32,7 +32,7 @@ jest.mock('./saved_playground/save_playground_modal', () => ({
         data-test-subj="modal-save-button"
         onClick={() => onNavigateToNewPlayground('test-playground-id')}
       >
-        Save RAG Playground
+        Save Playground
       </button>
       <button data-test-subj="modal-close-button" onClick={onClose}>
         Close

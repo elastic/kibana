@@ -125,31 +125,25 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('chartTitle-0').textContent).toBe(
       'Equation result for count (host.name: host-1)'
     );
-    expect((result.getByTestId('viewLogs-0') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-1').textContent).toBe(
       'Equation result for max (system.cpu.user.pct)'
     );
-    expect((result.getByTestId('viewLogs-1') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-2').textContent).toBe(
       'Equation result for min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-2') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-3').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct...'
     );
-    expect((result.getByTestId('viewLogs-3') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-4').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-4') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-5').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-5') as any).href).toBe('http://localhost/view-in-app-url');
   });
 });

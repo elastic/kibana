@@ -72,6 +72,10 @@ export class TsProject {
 
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
 
+    if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
+      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+    }
+
     const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
     const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
 

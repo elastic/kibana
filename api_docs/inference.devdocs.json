@@ -2,7 +2,75 @@
   "id": "inference",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-public.getDefaultConnector",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultConnector",
+        "description": [],
+        "signature": [
+          "({ connectors, }: { connectors: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          "[]; }) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-public.getDefaultConnector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectors,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-public.getDefaultConnector.$1.connectors",
+                "type": "Array",
+                "tags": [],
+                "label": "connectors",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.InferenceConnector",
+                    "text": "InferenceConnector"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -237,17 +305,42 @@
           },
           {
             "parentPluginId": "inference",
-            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "id": "def-server.EsqlDocumentBase.getPrompts",
             "type": "Function",
             "tags": [],
+            "label": "getPrompts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EsqlPrompts"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
             "label": "getSystemMessage",
             "description": [],
             "signature": [
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/ai-tools",
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -259,7 +352,7 @@
             "label": "getDocumentation",
             "description": [],
             "signature": [
-              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
+              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, resolveAliases, }?: ",
               "GetDocsOptions",
               ") => Record<string, string>"
             ],
@@ -287,7 +380,7 @@
                 "id": "def-server.EsqlDocumentBase.getDocumentation.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      addOverview = true,\n      resolveAliases = true,\n    }",
+                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      resolveAliases = true,\n    }",
                 "description": [],
                 "signature": [
                   "GetDocsOptions"
@@ -313,7 +406,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "(options: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -330,11 +423,105 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}",
+            "label": "options",
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
               "<TToolOptions>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.naturalLanguageToEsql",
+        "type": "Function",
+        "tags": [],
+        "label": "naturalLanguageToEsql",
+        "description": [],
+        "signature": [
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "NlToEsqlTaskParams",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>) => ",
+          "Observable",
+          "<",
+          "NlToEsqlTaskEvent",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.naturalLanguageToEsql.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "NlToEsqlTaskParams",
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
             "deprecated": false,
@@ -355,23 +542,9 @@
         "signature": [
           "({\n  query,\n  client,\n}: { query: string; client: ",
           "ElasticsearchClient",
-          "; }) => Promise<{ columns?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[] | undefined; rows?: ",
-          {
-            "pluginId": "@kbn/es-types",
-            "scope": "common",
-            "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESQLRow",
-            "text": "ESQLRow"
-          },
-          "[] | undefined; error?: Error | undefined; errorMessages?: string[] | undefined; }>"
+          "; }) => Promise<",
+          "QueryValidateRunOutput",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
         "deprecated": false,
@@ -1535,6 +1708,172 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorList",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorList",
+          "description": [
+            "\nReturns a list of all available inference connectors.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            "[]>"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to an array of inference connectors"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getDefaultConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "getDefaultConnector",
+          "description": [
+            "\nRetrieves the default inference connector configured for the system.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getDefaultConnector.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the default inference connector"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorById",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "getConnectorById",
+          "description": [
+            "\nRetrieves a specific inference connector by its ID.\n"
+          ],
+          "signature": [
+            "(id: string, request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [
+                "- The unique identifier of the connector to retrieve"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the requested inference connector"
+          ]
         }
       ],
       "lifecycle": "start",
@@ -1945,7 +2284,17 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
         "deprecated": false,
@@ -1978,14 +2327,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>, \"input\">; prevMessages?: ",
+          "ToolDefinitions",
+          " | undefined>[]>, \"input\">; prevMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

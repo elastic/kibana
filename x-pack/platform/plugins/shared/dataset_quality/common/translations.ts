@@ -177,7 +177,7 @@ export const summaryPanelQualityPoorText = i18n.translate(
 export const summaryPanelQualityDegradedText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityDegradedText',
   {
-    defaultMessage: 'Warning',
+    defaultMessage: 'Degraded',
   }
 );
 
@@ -331,6 +331,13 @@ export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
   }
 );
 
+export const overviewPanelDatasetQualityIndicatorNoFailureStore = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.noFailureStore',
+  {
+    defaultMessage: 'No failure store',
+  }
+);
+
 export const overviewDegradedFieldsTableLoadingText = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsTableLoadingText',
   {
@@ -355,7 +362,7 @@ export const overviewQualityIssuesSectionTitle = i18n.translate(
 export const currentIssuesToggleSwitch = i18n.translate(
   'xpack.datasetQuality.details.currentIssuesToggleSwitch',
   {
-    defaultMessage: 'Current quality issues only',
+    defaultMessage: 'Current issues only',
   }
 );
 
@@ -412,6 +419,11 @@ export const integrationVersionText = i18n.translate(
     defaultMessage: 'Version',
   }
 );
+
+export const issuesTableName = i18n.translate('xpack.datasetQuality.details.qualityIssues.issues', {
+  defaultMessage: 'Issues',
+});
+
 export const issueColumnName = i18n.translate('xpack.datasetQuality.details.qualityIssues.issue', {
   defaultMessage: 'Issue',
 });
@@ -423,10 +435,21 @@ export const countColumnName = i18n.translate(
   }
 );
 
+export const fieldColumnName = i18n.translate('xpack.datasetQuality.details.qualityIssues.field', {
+  defaultMessage: 'Field',
+});
+
+export const documentsColumnName = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.documents',
+  {
+    defaultMessage: 'Documents',
+  }
+);
+
 export const lastOccurrenceColumnName = i18n.translate(
   'xpack.datasetQuality.details.qualityIssues.lastOccurrence',
   {
-    defaultMessage: 'Last occurrence',
+    defaultMessage: 'Last occurred',
   }
 );
 
@@ -434,6 +457,27 @@ export const documentIndexFailed = i18n.translate(
   'xpack.datasetQuality.details.qualityIssues.documentIndexFailed',
   {
     defaultMessage: 'Documents indexing failed',
+  }
+);
+
+export const degradedField = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssues.degradedField',
+  {
+    defaultMessage: 'Field ignored',
+  }
+);
+
+export const fieldsFilterLabel = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.fieldsFilterlabel',
+  {
+    defaultMessage: 'Fields',
+  }
+);
+
+export const issuesFilterLabel = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.issuesFilterLabel',
+  {
+    defaultMessage: 'Issues',
   }
 );
 
@@ -726,3 +770,56 @@ export const readLess = i18n.translate(
 export const createAlertText = i18n.translate('xpack.datasetQuality.createAlert', {
   defaultMessage: 'Create rule',
 });
+
+export const editFailureStoreText = i18n.translate('xpack.datasetQuality.editFailureStore', {
+  defaultMessage: 'Edit failure store',
+});
+
+export const issueTypeFilterSearchPlaceholder = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.issueTypeFilterSearchPlaceholder',
+  {
+    defaultMessage: 'Filter issue types',
+  }
+);
+
+export const issueTypeFilterNoneAvailable = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.issueTypeFilterNoneAvailable',
+  {
+    defaultMessage: 'No issue types available',
+  }
+);
+
+export const issueTypeFilterNoneMatching = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.issueTypeFilterNoneMatching',
+  {
+    defaultMessage: 'No issue types found',
+  }
+);
+
+export const fieldFilterSearchPlaceholder = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterSearchPlaceholder',
+  {
+    defaultMessage: 'Filter fields',
+  }
+);
+
+export const fieldFilterNoneAvailable = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterNoneAvailable',
+  {
+    defaultMessage: 'No fields available',
+  }
+);
+
+export const fieldFilterNoneMatching = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterNoneMatching',
+  {
+    defaultMessage: 'No fields found',
+  }
+);
+
+export const enableFailureStoreButtonLabel = i18n.translate(
+  'xpack.datasetQuality.enableFailureStore',
+  {
+    defaultMessage: 'Enable failure store',
+  }
+);

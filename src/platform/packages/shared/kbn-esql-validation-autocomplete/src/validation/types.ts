@@ -8,15 +8,14 @@
  */
 
 import type { ESQLMessage } from '@kbn/esql-ast';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLPolicy, ESQLUserDefinedColumn } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { EditorError } from '../types';
 
 export interface ReferenceMaps {
   sources: Set<string>;
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  fields: Map<string, ESQLFieldWithMetadata>;
+  columns: Map<string, ESQLColumnData>;
   policies: Map<string, ESQLPolicy>;
   query: string;
   joinIndices: IndexAutocompleteItem[];

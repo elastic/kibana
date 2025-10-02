@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { IScopedClusterClient, Logger, CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
@@ -18,15 +19,24 @@ import { installDataView } from './saved_objects/data_view';
 import {
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   ASSET_INVENTORY_DATA_VIEW_NAME,
-  ASSET_INVENTORY_GENERIC_INDEX_PREFIX,
   ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
+import type {
+  SecuritySolutionPluginStart,
+  SecuritySolutionPluginStartDependencies,
+} from '../../plugin_contract';
+import { registerAssetInventoryUsageCollector } from './telemetry/collectors/register';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
+
+  usageCollection?: UsageCollectionSetup;
+  coreStartPromise: Promise<
+    [CoreStart, SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart]
+  >;
 }
 
 type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
@@ -52,13 +62,27 @@ export const ASSET_INVENTORY_STATUS: Record<string, string> = {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  constructor(private readonly options: AssetInventoryClientOpts) {}
+  private static usageCollectorRegistered = false;
+  constructor(private readonly options: AssetInventoryClientOpts) {
+    this.init().catch((e) => this.options.logger.error(`Init error: ${e.message}`));
+  }
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { logger } = this.options;
+    const { logger, coreStartPromise, usageCollection } = this.options;
 
     logger.debug(`Initializing asset inventory`);
+
+    if (!AssetInventoryDataClient.usageCollectorRegistered && usageCollection) {
+      try {
+        logger.debug('Registering Asset Inventory Telemetry');
+        registerAssetInventoryUsageCollector(logger, coreStartPromise, usageCollection);
+        AssetInventoryDataClient.usageCollectorRegistered = true;
+        logger.debug('Asset Inventory Telemetry Registered');
+      } catch (e) {
+        logger.error(`Failed to register usage collector: ${e.message}`);
+      }
+    }
 
     this.asyncSetup().catch((e) =>
       logger.error(`Error during async setup of asset inventory: ${e.message}`)
@@ -235,9 +259,9 @@ export class AssetInventoryDataClient {
 
     // Determine the ready status based on the presence of generic documents
     try {
-      const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
+      const hasAnyEntitiesDocuments = await this.hasAnyEntitiesDocuments(secSolutionContext);
       // check if users don't have entity store privileges but generic documents are present
-      if (hasGenericDocuments) {
+      if (hasAnyEntitiesDocuments) {
         try {
           await this.installAssetInventoryDataView(secSolutionContext);
         } catch (error) {
@@ -246,10 +270,10 @@ export class AssetInventoryDataClient {
         return { status: ASSET_INVENTORY_STATUS.READY };
       }
     } catch (error) {
-      logger.error(`Error checking for generic documents: ${error.message}`);
+      logger.error(`Error checking for the presence of entities documents: ${error.message}`);
     }
 
-    // In case there are no generic documents, Entity Store will need to be enabled.
+    // In case there are no entities documents, Entity Store will need to be enabled.
     // Check if the user has the required privileges to enable the entity store.
     if (!entityStorePrivileges.has_all_required) {
       return {
@@ -265,7 +289,7 @@ export class AssetInventoryDataClient {
 
     const entityEngineStatus = entityStoreStatus.status;
 
-    // Determine the asset inventory status based on the entity engine status
+    // Determine the asset inventory status based on the entity engine status and the presence of entities documents
     if (entityEngineStatus === 'not_installed') {
       return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
@@ -334,15 +358,17 @@ export class AssetInventoryDataClient {
     });
   }
 
-  private async hasGenericDocuments(secSolutionContext: SecuritySolutionApiRequestHandlerContext) {
+  private async hasAnyEntitiesDocuments(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext
+  ) {
     const elasticsearchClient = secSolutionContext.core.elasticsearch.client;
 
     const spaceId = secSolutionContext.getSpaceId();
 
-    const genericIndexCurrentSpace = `${ASSET_INVENTORY_GENERIC_INDEX_PREFIX}${spaceId}`;
+    const entitiesIndexCurrentSpace = `${ASSET_INVENTORY_INDEX_PATTERN}${spaceId}`;
 
     const response = await elasticsearchClient.asInternalUser.count({
-      index: genericIndexCurrentSpace,
+      index: entitiesIndexCurrentSpace,
     });
 
     return response.count > 0;

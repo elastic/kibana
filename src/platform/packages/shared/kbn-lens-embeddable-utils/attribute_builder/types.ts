@@ -38,8 +38,7 @@ export interface ChartColumn extends BaseChartColumn<FormulaValueConfig> {
   getData(
     id: string,
     baseLayer: PersistedIndexPatternLayer,
-    dataView: DataView,
-    formulaAPI: FormulaPublicApi
+    dataView: DataView
   ): PersistedIndexPatternLayer;
 }
 
@@ -55,8 +54,7 @@ export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getLayer(
     layerId: string,
     accessorId: string,
-    dataView: DataView,
-    formulaAPI: FormulaPublicApi
+    dataView: DataView
   ): FormBasedPersistedState['layers'];
   getReference(layerId: string, dataView: DataView): SavedObjectReference[];
   getLayerConfig(layerId: string, acessorId: string): TLayerConfig;
@@ -76,7 +74,6 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
 export interface ChartConfig<
   TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
 > {
-  formulaAPI: FormulaPublicApi;
   dataView: DataView;
   layers: TLayer;
   title?: string;

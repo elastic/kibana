@@ -41,7 +41,7 @@ export interface SearchSessionDependencies {
 }
 
 export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
-  internalElasticsearchClient: ElasticsearchClient;
+  asCurrentUserElasticsearchClient: ElasticsearchClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -161,7 +161,7 @@ export class SearchSessionService implements ISearchSessionService {
   };
 
   public find = async (
-    { savedObjectsClient, internalElasticsearchClient }: SearchSessionStatusDependencies,
+    { savedObjectsClient, asCurrentUserElasticsearchClient }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ): Promise<SearchSessionsFindResponse> => {
@@ -191,7 +191,9 @@ export class SearchSessionService implements ISearchSessionService {
     const sessionStatuses = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
-          { internalClient: internalElasticsearchClient },
+          {
+            esClient: asCurrentUserElasticsearchClient,
+          },
           so.attributes,
           this.sessionConfig
         );
@@ -370,7 +372,9 @@ export class SearchSessionService implements ISearchSessionService {
     const session = await this.get(deps, user, sessionId);
 
     const sessionStatus = await getSessionStatus(
-      { internalClient: deps.internalElasticsearchClient },
+      {
+        esClient: deps.asCurrentUserElasticsearchClient,
+      },
       session.attributes,
       this.sessionConfig
     );
@@ -390,13 +394,13 @@ export class SearchSessionService implements ISearchSessionService {
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
     if (!this.sessionConfig.enabled) {
-      throw new Error('Search sessions are disabled');
+      throw new Error('Background search is disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
-      throw new Error('Cannot get search ID from a session that is not stored');
+      throw new Error('Cannot get search ID from a search that is not stored');
     } else if (!isRestore) {
-      throw new Error('Get search ID is only supported when restoring a session');
+      throw new Error('Get search ID is only supported when restoring a background search');
     }
 
     const session = await this.get(deps, user, sessionId);
@@ -422,8 +426,12 @@ export class SearchSessionService implements ISearchSessionService {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
 
-      const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const deps = { savedObjectsClient, internalElasticsearchClient };
+      const asCurrentUserElasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
+      const deps = {
+        savedObjectsClient,
+        asCurrentUserElasticsearchClient,
+      };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),

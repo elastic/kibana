@@ -24,7 +24,7 @@ import {
   KibanaRenderContextProvider,
   NotAuthorizedSection,
 } from '../shared_imports';
-import type { AppDependencies } from '../types';
+import type { RootComponentDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
 import { EsDeprecations, KibanaDeprecations, Overview } from './components';
 
@@ -153,7 +153,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = (dependencies: AppDependencies) => {
+export const RootComponent = (dependencies: RootComponentDependencies) => {
   const {
     history,
     core: { application, http, executionContext, ...startServices },

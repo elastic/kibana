@@ -17,6 +17,9 @@ disabled:
   # Playwright
   - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
 
+  # QA suites that are run out-of-band
+  - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.cloud.ts
+
   # MKI only configs files
   - x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts
 
@@ -84,7 +87,9 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/serverless_essentials_tier.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_disabled/configs/serverless_essentials_tier.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/customization/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_notifications/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/serverless_essentials_tier.config.ts
@@ -108,6 +113,8 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts

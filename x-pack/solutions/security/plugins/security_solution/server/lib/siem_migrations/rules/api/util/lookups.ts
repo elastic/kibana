@@ -6,18 +6,18 @@
  */
 
 import Papa from 'papaparse';
+import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
-import type { RuleMigrationResourceData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
+import type { SiemMigrationsDataLookupsClient } from '../../../common/data/siem_migrations_data_lookups_client';
 
-interface LookupWithData extends RuleMigrationResourceData {
+interface LookupWithData extends SiemMigrationResourceData {
   data: object[] | null;
 }
 
 export const processLookups = async (
-  resources: RuleMigrationResourceData[],
-  ruleMigrationsClient: SiemRuleMigrationsClient
-): Promise<RuleMigrationResourceData[]> => {
+  resources: SiemMigrationResourceData[],
+  migrationsClient: SiemMigrationsDataLookupsClient
+): Promise<SiemMigrationResourceData[]> => {
   const lookupsData: Record<string, LookupWithData> = {};
 
   resources.forEach((resource) => {
@@ -25,12 +25,12 @@ export const processLookups = async (
       try {
         lookupsData[resource.name] = { ...resource, data: parseContent(resource.content) };
       } catch (error) {
-        throw new Error(`Invalid content for lookup ${name}: ${error.message}`);
+        throw new Error(`Invalid content for lookup ${resource.name}: ${error.message}`);
       }
     }
   });
 
-  const lookups: RuleMigrationResourceData[] = [];
+  const lookups: SiemMigrationResourceData[] = [];
   const result = await initPromisePool({
     concurrency: 10,
     items: Object.entries(lookupsData),
@@ -39,7 +39,7 @@ export const processLookups = async (
         lookups.push({ ...resource, content: '' }); // empty content will make lookup be ignored during translation
         return;
       }
-      const indexName = await ruleMigrationsClient.data.lookups.create(name, data);
+      const indexName = await migrationsClient.create(name, data);
       lookups.push({ ...resource, content: indexName }); // lookup will be translated using the index name
     },
   });
@@ -53,7 +53,7 @@ export const processLookups = async (
 
 const parseContent = (fileContent: string): object[] | null => {
   const trimmedContent = fileContent.trim();
-  if (fileContent === '') {
+  if (trimmedContent === '') {
     return null;
   }
   let arrayContent: object[];

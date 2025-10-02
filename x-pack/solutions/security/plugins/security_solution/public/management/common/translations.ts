@@ -16,6 +16,11 @@ export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab',
   defaultMessage: 'Policies',
 });
 
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.endpointExceptionsTab',
+  { defaultMessage: 'Endpoint exceptions' }
+);
+
 export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAppsTab', {
   defaultMessage: 'Trusted applications',
 });
@@ -52,6 +57,58 @@ export const getLoadPoliciesError = (error: Error) => {
     defaultMessage: 'There was an error loading policies: "{error}"',
     values: { error: error.message },
   });
+};
+
+export const ERROR_LOADING_CUSTOM_SCRIPTS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.customScripts.errorLoading',
+  {
+    defaultMessage: 'Error loading custom scripts',
+  }
+);
+
+export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.pendingActions.errorLoading',
+  {
+    defaultMessage: 'Error loading pending actions',
+  }
+);
+
+export const getGenericErrorMessage = (errorTitlePrefix: string, code: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.genericError', {
+    defaultMessage: '{prefix}Error {code}',
+    values: { prefix: errorTitlePrefix ? `${errorTitlePrefix}: ` : '', code },
+  });
+};
+
+export const getCancelPermissionDeniedMessage = (displayCommand: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.cancel.permissionDenied', {
+    defaultMessage: "You don't have permission to run {displayCommand} action.",
+    values: { displayCommand },
+  });
+};
+
+export const getPendingActionDescription = (
+  action: string,
+  createdBy: string,
+  timeStamp: string
+) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.pendingAction.description',
+    {
+      defaultMessage: 'Action id {action} submitted by {createdBy} on {timeStamp}',
+      values: { action, createdBy, timeStamp },
+    }
+  );
+};
+
+export const getPermissionVerificationErrorMessage = (displayCommand: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.cancel.permissionVerificationError',
+    {
+      defaultMessage: 'Unable to verify permissions for {displayCommand} action cancellation.',
+      values: { displayCommand },
+    }
+  );
 };
 
 export const CONSOLE_COMMANDS = {
@@ -226,6 +283,11 @@ export const CONSOLE_COMMANDS = {
   runscript: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
+    }),
+  },
+  cancel: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
+      defaultMessage: 'Cancel a pending action on the host',
     }),
   },
 };

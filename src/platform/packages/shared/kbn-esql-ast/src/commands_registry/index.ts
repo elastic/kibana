@@ -31,6 +31,7 @@ import { showCommand } from './commands/show';
 import { timeseriesCommand } from './commands/timeseries';
 import { whereCommand } from './commands/where';
 import { fuseCommand } from './commands/fuse';
+import { rerankCommand } from './commands/rerank';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 
 const esqlCommandRegistry = new CommandRegistry();
@@ -59,6 +60,7 @@ const baseCommands = [
   timeseriesCommand,
   whereCommand,
   fuseCommand,
+  rerankCommand,
 ];
 
 baseCommands.forEach((command) => {

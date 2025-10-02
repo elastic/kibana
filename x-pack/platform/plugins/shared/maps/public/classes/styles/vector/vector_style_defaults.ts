@@ -51,7 +51,7 @@ export const POLYGON_STYLES = [
 
 export function getDefaultStaticProperties(
   mapColors: string[] = []
-): VectorStylePropertiesDescriptor {
+): Required<VectorStylePropertiesDescriptor> {
   let nextColorIndex = 0;
   if (mapColors.length) {
     const lastColor = mapColors[mapColors.length - 1];
@@ -150,7 +150,7 @@ export function getDefaultStaticProperties(
   };
 }
 
-export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
+export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDescriptor> {
   return {
     [VECTOR_STYLES.ICON]: {
       type: STYLE_TYPE.DYNAMIC,

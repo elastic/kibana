@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
@@ -27,6 +35,7 @@ export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
+  const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {
@@ -38,8 +47,8 @@ export const MonitorSummary = () => {
       <MonitorMWsCallout />
       <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" wrap={true} responsive={false}>
-        <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
+      <EuiFlexGroup gutterSize="m" wrap={true} direction={isMediumDevice ? 'column' : 'row'}>
+        <EuiFlexItem grow={false} css={{ minWidth: 260 }}>
           <MonitorDetailsPanelContainer />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
