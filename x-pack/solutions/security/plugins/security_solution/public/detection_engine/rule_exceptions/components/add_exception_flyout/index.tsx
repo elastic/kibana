@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import {
-  EuiFlyout,
-  EuiTitle,
-  EuiFlyoutBody,
   EuiButton,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiSkeletonText,
   EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiHorizontalRule,
+  EuiSkeletonText,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  hasWrongOperatorWithWildcard,
-  hasPartialCodeSignatureEntry,
-} from '@kbn/securitysolution-list-utils';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import {
+  hasPartialCodeSignatureEntry,
+  hasWrongOperatorWithWildcard,
+} from '@kbn/securitysolution-list-utils';
 
 import {
-  WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -45,12 +45,12 @@ import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import {
   defaultEndpointExceptionItems,
-  retrieveAlertOsTypes,
   getPrepopulatedRuleExceptionWithHighlightFields,
+  retrieveAlertOsTypes,
 } from '../../utils/helpers';
-import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
+import { ENDPOINT_EXCEPTION, RULE_EXCEPTION } from '../../utils/translations';
 import type { AlertData } from '../../utils/types';
-import { initialState, createExceptionItemsReducer } from './reducer';
+import { createExceptionItemsReducer, initialState } from './reducer';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -114,6 +114,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onConfirm,
 }: AddExceptionFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
+    [euiTheme.levels.flyout]
+  );
+
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -516,7 +521,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       data-test-subj="addExceptionFlyout"
       aria-labelledby={exceptionFlyoutTitleId}
       // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-      maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+      maskProps={maskProps}
     >
       <ExceptionFlyoutHeader
         listType={listType}
@@ -536,6 +541,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         {errorSubmitting != null && (
           <>
             <EuiCallOut
+              announceOnMount
               data-test-subj="addExceptionErrorCallOut"
               title={i18n.SUBMIT_ERROR_TITLE}
               color="danger"
