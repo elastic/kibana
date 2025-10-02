@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiSuperSelect,
   EuiTextArea,
   EuiText,
@@ -712,7 +713,21 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiText size="s">Process Descendants</EuiText>
-              <ProcessDescendantsTooltip data-test-subj="trustedApps-filterProcessDescendantsTooltip" />
+              <EuiIconTip
+                content={
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.securitySolution.trustedApps.filterProcessDescendants.tooltip"
+                        defaultMessage="When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+."
+                      />
+                    </p>
+                  </EuiText>
+                }
+                data-test-subj="trustedAppsProcessDescendantsTooltip"
+                iconProps={{ 'data-test-subj': 'trustedAppsProcessDescendantsTooltipIcon' }}
+                type="info"
+              />
             </EuiFlexGroup>
           ),
           iconType: isProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
@@ -852,7 +867,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        {filterTypeSubsection}
         {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
           <>
             <EuiSpacer size="s" />
