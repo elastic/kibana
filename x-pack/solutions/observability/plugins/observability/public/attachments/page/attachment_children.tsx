@@ -62,7 +62,7 @@ export function PageAttachmentChildren({
   if (!isInternalUrl(href)) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={i18n.translate(
           'xpack.observability.caseView.pageAttachment.externalUrlWarningTitle',
           {
@@ -87,7 +87,7 @@ export function PageAttachmentChildren({
   if (!url || !href || !label) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={i18n.translate('xpack.observability.caseView.pageAttachment.noUrlProvidedTitle', {
           defaultMessage: 'No URL provided',
         })}

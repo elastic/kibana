@@ -42,7 +42,7 @@ export const SearchIndexOverview: React.FC = () => {
       {isConnectorIndex(indexData) && error && (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             iconType="warning"
             color="danger"
             title={i18n.translate(
@@ -62,7 +62,7 @@ export const SearchIndexOverview: React.FC = () => {
         <>
           {isModalVisible && <ConvertConnectorModal />}
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             iconType="warning"
             color="warning"
             title={i18n.translate(

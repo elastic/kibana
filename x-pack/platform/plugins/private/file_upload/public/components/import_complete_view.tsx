@@ -165,7 +165,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (this.props.importResults.failures?.length) {
       return (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {
             defaultMessage: 'File upload complete with failures',
           })}
