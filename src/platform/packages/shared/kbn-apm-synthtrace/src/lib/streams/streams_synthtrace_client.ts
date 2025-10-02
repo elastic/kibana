@@ -133,10 +133,7 @@ function streamsRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      // 50-50 send to logs or to logs-generic-default
-      if (Math.random() > 0.5) {
-        document._index = 'logs-generic-default';
-      } else {
+      if (!document._index) {
         document._index = 'logs';
       }
       callback(null, document);

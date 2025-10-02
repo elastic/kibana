@@ -6,4 +6,5 @@
  */
 
 export * from './src/constants';
+export * from './src/types';
 export { Version } from './src/version';

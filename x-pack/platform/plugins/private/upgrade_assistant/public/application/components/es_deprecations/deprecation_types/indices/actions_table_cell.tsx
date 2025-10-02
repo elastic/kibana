@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   IndicesResolutionType,
   ReindexAction,

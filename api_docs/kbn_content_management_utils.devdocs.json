@@ -2288,6 +2288,22 @@
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.SavedObjectCreateOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the object is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3555,6 +3571,27 @@
                 "text": "Type"
               },
               "<string[] | undefined>"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.createOptionsSchemas.managed",
+            "type": "Object",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
