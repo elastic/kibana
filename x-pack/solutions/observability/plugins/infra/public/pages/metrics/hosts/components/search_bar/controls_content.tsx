@@ -11,6 +11,7 @@ import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import {
   ControlGroupRenderer,
+  type ControlPanelsState,
   type ControlGroupRendererApi,
   type ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
@@ -56,8 +57,7 @@ export const ControlsContent = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
-      initialChildControlState:
-        controlPanels as ControlGroupRuntimeState['initialChildControlState'],
+      initialChildControlState: controlPanels as ControlPanelsState,
     };
 
     return { initialState: initialInput };

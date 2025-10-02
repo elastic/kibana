@@ -8,9 +8,6 @@
  */
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { ControlWidth, ControlsChainingSystem } from '@kbn/controls-schemas';
-import type { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import type { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 

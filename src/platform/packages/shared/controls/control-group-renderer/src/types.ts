@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
 import type { StickyControlState } from '@kbn/controls-schemas';
-import type { TimeSlice } from '@kbn/controls-schemas/src/types';
+import type { DataControlState, TimeSlice } from '@kbn/controls-schemas/src/types';
 import type { StoredControlGroupInput } from '@kbn/dashboard-plugin/server/dashboard_saved_object';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
@@ -55,16 +55,24 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
  * ----------------------------------------------------------------
  */
 
-export type FieldFilterPredicate = (f: DataViewField) => boolean;
+/**
+ *
+ */
+export type ControlStateTransform<State extends DataControlState = DataControlState> = (
+  newState: Partial<State>,
+  controlType: string
+) => Partial<State>;
 
-export interface ControlGroupEditorConfig {
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
+export interface ControlGroupEditorConfig<State extends DataControlState = DataControlState> {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
   fieldFilterPredicate?: FieldFilterPredicate;
+  controlStateTransform?: ControlStateTransform<State>;
 }
 
-export interface ControlGroupRuntimeState {
-  initialChildControlState: { [id: string]: StickyControlState & { order: number } };
+export interface ControlGroupRuntimeState<State extends StickyControlState = StickyControlState> {
+  initialChildControlState: ControlPanelsState<State>;
   ignoreParentSettings?: StoredControlGroupInput['ignoreParentSettings']; // these will be translated to panel-level settings
 }
 
@@ -74,3 +82,19 @@ export interface ControlGroupCreationOptions {
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group panel state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlPanelsState<State extends StickyControlState = StickyControlState> {
+  [panelId: string]: ControlPanelState<State>;
+}
+
+export type ControlPanelState<ControlState extends StickyControlState = StickyControlState> =
+  ControlState & {
+    type: string;
+    order: number;
+  };

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, map, pairwise } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
@@ -18,7 +17,7 @@ import type { StickyControlState } from '@kbn/controls-schemas';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import type { PanelPackage } from '@kbn/presentation-containers';
 
-import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './types';
+import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
@@ -133,9 +132,7 @@ export const useLayoutApi = (
   return layoutApi;
 };
 
-const getControlsLayout = (
-  initialChildControlState: ControlGroupRuntimeState['initialChildControlState'] | undefined
-) => {
+const getControlsLayout = (initialChildControlState: ControlPanelsState | undefined) => {
   return Object.entries(initialChildControlState ?? {}).reduce((prev, [id, control], index) => {
     const { type, width, grow, order } = control;
     return {

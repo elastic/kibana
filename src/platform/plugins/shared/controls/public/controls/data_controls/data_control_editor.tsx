@@ -40,8 +40,8 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
+import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
 
-import type { ControlGroupEditorConfig } from '../../../common';
 import {
   CONTROL_MENU_TRIGGER,
   addControlMenuTrigger,
@@ -210,7 +210,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   // TODO: get editor config from parent?
-  const editorConfig = useMemo<ControlGroupEditorConfig>(() => {
+  const editorConfig = useMemo<ControlGroupEditorConfig<State>>(() => {
     console.log('PARENT', parentApi);
     return {
       hideAdditionalSettings: false,
@@ -445,13 +445,18 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 color="primary"
                 disabled={!(controlOptionsValid && Boolean(selectedControlType))}
                 onClick={() => {
+                  const transformedState: Partial<State> | undefined =
+                    selectedControlType && editorConfig && editorConfig.controlStateTransform
+                      ? editorConfig.controlStateTransform(editorState, selectedControlType)
+                      : undefined;
+                  console.log({ transformedState });
                   if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
                     // we need to create a new control from scratch
                     try {
                       controlActionRegistry[selectedControlType]?.execute({
                         trigger: addControlMenuTrigger,
                         embeddable: parentApi,
-                        state: editorState,
+                        state: transformedState ?? editorState,
                         controlId,
                       });
                     } catch (e) {
@@ -461,7 +466,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     }
                   } else {
                     // the control already exists with the expected type, so just update it
-                    onUpdate(editorState);
+                    onUpdate(transformedState ?? editorState);
                   }
                   onSave();
                 }}

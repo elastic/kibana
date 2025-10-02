@@ -15,7 +15,9 @@ import {
   type ControlGroupRendererApi,
   type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
+  type ControlStateTransform,
 } from '@kbn/control-group-renderer';
+import type { DataControlState } from '@kbn/controls-schemas';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -40,6 +42,7 @@ import {
   mergeControls,
   reorderControlsWithDefaultControls,
 } from './utils';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
@@ -289,6 +292,31 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [getStoredControlState, controlsFromUrl, defaultControlsObj, defaultControls]);
 
+  const newControlStateTransform: ControlStateTransform = useCallback(
+    (newInput, controlType) => {
+      // for any new controls, we want to avoid
+      // default placeholder
+      let result = newInput;
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        result = {
+          ...newInput,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        };
+
+        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
+          result = {
+            ...result,
+            ...defaultControlsObj[(newInput as DataControlState).fieldName],
+            //  title should not be overridden by the initial controls, hence the hardcoding
+            title: newInput.title ?? result.title,
+          };
+        }
+      }
+      return result;
+    },
+    [defaultControlsObj]
+  );
+
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async ({ addOptionsListControl }: ControlGroupStateBuilder) => {
       const initialState: ControlGroupRuntimeState = {
@@ -325,10 +353,11 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           hideDataViewSelector: true,
           hideAdditionalSettings: true,
           fieldFilterPredicate: (f) => f.type !== 'number',
+          controlStateTransform: newControlStateTransform,
         },
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, selectControlsWithPriority]
+    [dataViewId, selectControlsWithPriority, newControlStateTransform]
   );
 
   const discardChangesHandler = useCallback(async () => {
@@ -383,31 +412,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
-
-  // const newControlStateTransform: ControlStateTransform<DefaultDataControlState> = useCallback(
-  //   (newInput, controlType) => {
-  //     // for any new controls, we want to avoid
-  //     // default placeholder
-  //     let result = newInput;
-  //     if (controlType === OPTIONS_LIST_CONTROL) {
-  //       result = {
-  //         ...newInput,
-  //         ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-  //       };
-
-  //       if ((newInput as DefaultDataControlState).fieldName in defaultControlsObj) {
-  //         result = {
-  //           ...result,
-  //           ...defaultControlsObj[(newInput as DefaultDataControlState).fieldName],
-  //           //  title should not be overridden by the initial controls, hence the hardcoding
-  //           title: newInput.title ?? result.title,
-  //         };
-  //       }
-  //     }
-  //     return result;
-  //   },
-  //   [defaultControlsObj]
-  // );
 
   const addControlsHandler = useCallback(async () => {
     const action = await uiActions.getAction('createControl');

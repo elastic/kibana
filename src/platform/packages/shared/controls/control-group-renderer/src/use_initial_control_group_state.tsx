@@ -14,7 +14,7 @@ import type { StickyControlState } from '@kbn/controls-schemas';
 
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { controlGroupStateBuilder } from './control_group_state_builder';
-import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './types';
+import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
@@ -42,7 +42,7 @@ export const useInitialControlGroupState = (
           ...prev,
           [id]: controlState,
         };
-      }, {} as ControlGroupRuntimeState['initialChildControlState']);
+      }, {} as ControlPanelsState);
 
       lastSavedState$Ref.current.next(controls);
       setInitialState({

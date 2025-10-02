@@ -49,7 +49,7 @@ export const getMockedControlGroupRenderer = (
     useEffect(() => {
       onApiAvailable(controlGroupMock as unknown as ControlGroupRendererApi);
     }, [onApiAvailable]);
-    console.log('HERE!!!!');
+
     return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
   };
 

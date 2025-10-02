@@ -13,4 +13,8 @@ export type {
   ControlGroupCreationOptions,
   ControlGroupRuntimeState,
   ControlGroupStateBuilder,
+  ControlGroupEditorConfig,
+  ControlStateTransform,
+  ControlPanelsState,
+  ControlPanelState,
 } from './src/types';

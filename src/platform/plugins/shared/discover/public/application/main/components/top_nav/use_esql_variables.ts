@@ -10,10 +10,7 @@ import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-} from '@kbn/control-group-renderer';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
@@ -55,7 +52,7 @@ export const useESQLVariables = ({
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  getActivePanels: () => ControlGroupRuntimeState['initialChildControlState'] | undefined;
+  getActivePanels: () => ControlPanelsState | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
@@ -124,7 +121,6 @@ export const useESQLVariables = ({
         console.error('controlGroupApi is not available when attempting to save control.');
         return;
       }
-      console.log({ controlGroupApi });
       // add a new control
       controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,

@@ -23,14 +23,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import {
-  ACTION_DELETE_CONTROL,
-  ACTION_EDIT_CONTROL,
-  ControlGroupRenderer,
-  type ControlStateTransform,
-} from '@kbn/controls-plugin/public';
+import type {
+  ControlGroupRuntimeState,
+  ControlGroupRendererApi,
+  ControlStateTransform,
+} from '@kbn/control-group-renderer';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 

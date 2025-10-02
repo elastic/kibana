@@ -24,6 +24,7 @@ import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
   ControlGroupStateBuilder,
+  ControlPanelsState,
 } from './types';
 import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
@@ -82,7 +83,7 @@ export const ControlGroupRenderer = ({
     if (!parentApi) return;
     return combineLatest([currentChildState$Ref.current, parentApi.layout$]).pipe(
       map(([currentChildState, currentLayout]) => {
-        const combinedState: ControlGroupRuntimeState['initialChildControlState'] = {};
+        const combinedState: ControlPanelsState = {};
         Object.keys(currentLayout.controls).forEach((id) => {
           combinedState[id] = {
             ...currentChildState[id].rawState,

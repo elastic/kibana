@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",
@@ -41,7 +40,7 @@
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/presentation-util",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

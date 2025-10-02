@@ -9,4 +9,11 @@
 
 export type { ControlGroupRendererProps } from './control_group_renderer';
 export { LazyControlGroupRenderer as ControlGroupRenderer } from './control_group_renderer_lazy';
-export type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
+export type {
+  ControlGroupCreationOptions,
+  ControlGroupRendererApi,
+  ControlStateTransform,
+  ControlGroupEditorConfig,
+  ControlPanelsState,
+  ControlPanelState,
+} from './types';

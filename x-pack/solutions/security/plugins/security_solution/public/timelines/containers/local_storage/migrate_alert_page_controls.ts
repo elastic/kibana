@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DefaultControlState, ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
 import type { StartPlugins } from '../../../types';
 
 export const GET_PAGE_FILTER_STORAGE_KEY = (spaceId: string = 'default') =>
@@ -82,13 +82,15 @@ interface NewFormatExplicitInput {
   dataViewId: string;
   fieldName: string;
   title: string;
-  hideExclude: boolean;
-  hideSort: boolean;
-  placeholder: string;
   selectedOptions: string[];
-  hideActionBar: boolean;
   persist: boolean;
-  hideExists: boolean;
+  displaySettings: {
+    hideSort: boolean;
+    hideActionBar: boolean;
+    hideExists: boolean;
+    hideExclude: boolean;
+    placeholder: string;
+  };
 }
 
 /**
@@ -105,33 +107,33 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
   const oldFormat: OldFormat = storage.get(GET_PAGE_FILTER_STORAGE_KEY(spaceId));
   if (oldFormat && Object.keys(oldFormat).includes('panels')) {
     // Only run when it is old format
-    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & DefaultControlState> = {
+    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
       initialChildControlState: {},
-      labelPosition: oldFormat.controlStyle as ControlGroupRuntimeState['labelPosition'],
-      chainingSystem: oldFormat.chainingSystem as ControlGroupRuntimeState['chainingSystem'],
-      autoApplySelections: oldFormat.showApplySelections ?? true,
+      // autoApplySelections: oldFormat.showApplySelections ?? true,
       ignoreParentSettings: oldFormat.ignoreParentSettings,
-      editorConfig: {
-        hideDataViewSelector: true,
-        hideAdditionalSettings: true,
-      },
+      // editorConfig: {
+      //   hideDataViewSelector: true,
+      //   hideAdditionalSettings: true,
+      // },
     };
 
     for (const [key, value] of Object.entries(oldFormat.panels)) {
       newFormat.initialChildControlState[key] = {
         type: 'optionsListControl',
         order: value.order,
-        hideExclude: value.explicitInput.hideExclude ?? true,
-        hideSort: value.explicitInput.hideSort ?? true,
-        placeholder: value.explicitInput.placeholder ?? '',
-        width: value.width as DefaultControlState['width'],
+        displaySettings: {
+          hideExclude: value.explicitInput.hideExclude ?? true,
+          hideSort: value.explicitInput.hideSort ?? true,
+          placeholder: value.explicitInput.placeholder ?? '',
+          hideActionBar: value.explicitInput.hideActionBar,
+          hideExists: value.explicitInput.hideExists,
+        },
+        width: value.width as ControlPanelState['width'],
         dataViewId: value.explicitInput.dataViewId ?? 'security_solution_alerts_dv',
         title: value.explicitInput.title,
         fieldName: value.explicitInput.fieldName,
         selectedOptions: value.explicitInput.selectedOptions,
-        hideActionBar: value.explicitInput.hideActionBar,
         persist: value.explicitInput.persist,
-        hideExists: value.explicitInput.hideExists,
       };
     }
 
