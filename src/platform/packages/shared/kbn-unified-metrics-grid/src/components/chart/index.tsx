@@ -26,7 +26,10 @@ const ChartSizes = {
 
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
-  Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
+  Omit<
+    LensWrapperProps,
+    'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description' | 'loading'
+  > & {
     dimensions: string[];
     color?: string;
     size?: ChartSize;
