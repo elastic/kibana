@@ -24,6 +24,7 @@ export function registerReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
+    getSavedObjectsService,
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
@@ -48,13 +49,15 @@ export function registerReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indexName } = request.params;
+      const soClient = getSavedObjectsService().getUnsafeInternalClient({
+        includedHiddenTypes: [REINDEX_OP_TYPE],
+      });
       try {
         const result = await reindexHandler({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          savedObjects: soClient,
           dataClient: esClient,
           indexName,
           log,
@@ -97,17 +100,14 @@ export function registerReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
-      const { getClient } = savedObjects;
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser,
-        log
-      );
+      const soClient = getSavedObjectsService().getUnsafeInternalClient({
+        includedHiddenTypes: [REINDEX_OP_TYPE],
+      });
+      const reindexActions = reindexActionsFactory(soClient, asCurrentUser, log);
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
       try {

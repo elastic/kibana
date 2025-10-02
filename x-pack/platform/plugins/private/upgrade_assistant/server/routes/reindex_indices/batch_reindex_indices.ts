@@ -26,6 +26,7 @@ export function registerBatchReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
+    getSavedObjectsService,
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
@@ -47,15 +48,13 @@ export function registerBatchReindexIndicesRoutes(
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
-        savedObjects,
       } = await core;
-      const { getClient } = savedObjects;
+
+      const soClient = getSavedObjectsService().getUnsafeInternalClient({
+        includedHiddenTypes: [REINDEX_OP_TYPE],
+      });
       const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser,
-        log
-      );
+      const reindexActions = reindexActionsFactory(soClient, callAsCurrentUser, log);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
