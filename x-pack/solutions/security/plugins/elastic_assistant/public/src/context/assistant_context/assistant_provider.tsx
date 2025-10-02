@@ -12,6 +12,8 @@ import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assi
 import type { IToasts } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { Observable } from 'rxjs';
+import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { getComments } from '../../components/get_comments';
 import { useKibana } from '../typed_kibana_context/typed_kibana_context';
 import { useInferenceEnabled } from '../../hooks/inference_enabled/use_inference_enabled';
@@ -29,7 +31,17 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export function AssistantProvider({ children }: { children: React.ReactElement }) {
+export function AssistantProvider({
+  children,
+  isServerless,
+  openChatTrigger$,
+  completeOpenChat,
+}: {
+  children: React.ReactElement;
+  isServerless?: boolean;
+  openChatTrigger$: Observable<{ assistant: AIAssistantType }>;
+  completeOpenChat: () => void;
+}) {
   const {
     application: { navigateToApp, currentAppId$, getUrlForApp },
     http,
@@ -45,7 +57,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
-  const { isVisible } = useIsNavControlVisible();
+  const { isVisible } = useIsNavControlVisible(isServerless);
   const assistantAvailability = useAssistantAvailability();
 
   const assistantTelemetry = useAssistantTelemetry();
@@ -105,7 +117,9 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    openChatTrigger$,
     settings,
+    completeOpenChat,
   });
 
   useEffect(() => {
