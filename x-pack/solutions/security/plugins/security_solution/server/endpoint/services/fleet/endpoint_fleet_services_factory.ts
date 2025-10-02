@@ -196,7 +196,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         sortOrder: 'asc',
       });
 
-      return installedEndpointPackages.items.some((pkg) => pkg.name === 'endpoint'));
+      return installedEndpointPackages.items.some((pkg) => pkg.name === 'endpoint');
     };
 
     return {
