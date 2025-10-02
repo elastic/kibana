@@ -68,6 +68,8 @@ const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
 const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
 
+const EMPTY_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
+
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
 
@@ -118,6 +120,7 @@ function buildEuiGridColumn({
   columnDisplay,
   onResize,
   sortedColumns,
+  disableCellActions = false,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -142,6 +145,7 @@ function buildEuiGridColumn({
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  disableCellActions?: boolean;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -183,27 +187,32 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (columnCellActions?.length && cellActionsHandling === 'replace') {
-    cellActions = columnCellActions;
+  if (disableCellActions) {
+    cellActions = EMPTY_CELL_ACTIONS;
   } else {
-    cellActions = dataViewField
-      ? buildCellActions(
-          dataViewField,
-          isPlainRecord,
-          toastNotifications,
-          valueToStringConverter,
-          onFilter
-        )
-      : [];
+    if (columnCellActions?.length && cellActionsHandling === 'replace') {
+      cellActions = columnCellActions;
+    } else {
+      cellActions = dataViewField
+        ? buildCellActions(
+            dataViewField,
+            isPlainRecord,
+            toastNotifications,
+            valueToStringConverter,
+            onFilter
+          )
+        : EMPTY_CELL_ACTIONS;
 
-    if (columnCellActions?.length && cellActionsHandling === 'append') {
-      cellActions.push(...columnCellActions);
+      if (columnCellActions?.length && cellActionsHandling === 'append') {
+        cellActions.push(...columnCellActions);
+      }
     }
   }
 
   const columnType = dataViewField?.type;
   const columnSchema = getSchemaByKbnType(columnType);
 
+  // EUI columns
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: columnSchema,
@@ -302,6 +311,11 @@ function buildEuiGridColumn({
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
+
+  if (disableCellActions) {
+    column.isExpandable = false;
+  }
+
   return column;
 }
 
@@ -322,6 +336,7 @@ export function getEuiGridColumns({
   dataView,
   defaultColumns,
   isSortEnabled,
+  disableCellActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -345,6 +360,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
+  disableCellActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -390,6 +406,7 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
+      disableCellActions,
     })
   );
 }

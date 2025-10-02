@@ -11,6 +11,8 @@ export enum DiscoverFlyouts {
   lensEdit = 'lensEdit',
   docViewer = 'docViewer',
   esqlDocs = 'esqlDocs',
+  metricInsights = 'metricInsights',
+  esqlControls = 'esqlControls',
 }
 
 const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
@@ -37,6 +39,20 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
         () =>
           document.querySelector(
             '[data-test-subj="esqlInlineDocumentationFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.metricInsights:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="metricInsightsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.esqlControls:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="esqlControlsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
           ),
       ];
   }

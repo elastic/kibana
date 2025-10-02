@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '../common';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -81,7 +80,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1300,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
@@ -118,7 +116,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1500,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['advanced_settings'],
       management: {
@@ -159,7 +156,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['indexPatterns'],
       management: {
@@ -200,7 +196,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       management: {
@@ -240,7 +235,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
@@ -274,7 +268,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1700,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['saved_objects'],
       management: {
@@ -316,7 +309,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1750,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
@@ -376,7 +368,6 @@ const getBaseDiscoverFeature = ({
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['discover', 'kibana'],
     catalogue: ['discover'],
     privileges: {
@@ -458,7 +449,7 @@ const getBaseDiscoverFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -469,7 +460,7 @@ const getBaseDiscoverFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',
@@ -524,7 +515,6 @@ const getBaseVisualizeFeature = ({
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['visualize', 'lens', 'kibana'],
     catalogue: ['visualize'],
     privileges: {
@@ -650,7 +640,6 @@ const getBaseDashboardFeature = ({
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['dashboards', 'kibana'],
     catalogue: ['dashboard'],
     privileges: {
@@ -742,7 +731,7 @@ const getBaseDashboardFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -753,7 +742,7 @@ const getBaseDashboardFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',

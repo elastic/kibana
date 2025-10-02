@@ -31,6 +31,7 @@ export enum ServiceProviderKeys {
   watsonxai = 'watsonxai',
   ai21 = 'ai21',
   llama = 'llama',
+  contextualai = 'contextualai',
 }
 
 export const GEMINI_REGION_DOC_LINK = (
@@ -74,7 +75,12 @@ export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
+// OpenAI override can be removed when header support has been added to the connector https://github.com/elastic/kibana/issues/235687
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
+  [ServiceProviderKeys.openai]: {
+    hidden: ['headers'],
+    serverlessOnly: false,
+  },
   [ServiceProviderKeys.elasticsearch]: {
     hidden: ['num_allocations', 'num_threads'],
     additional: [
@@ -92,5 +98,6 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
         },
       },
     ],
+    serverlessOnly: true,
   },
 };

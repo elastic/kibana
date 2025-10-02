@@ -10,12 +10,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTextColor,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -101,9 +101,7 @@ export function SummaryItem({
                   <Title title={title} size={textSize} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={titleHint}>
-                    <EuiIcon type="question" />
-                  </EuiToolTip>
+                  <EuiIconTip content={titleHint} type="question" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (

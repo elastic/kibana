@@ -23,7 +23,7 @@ const createTool = (
     configuration: {},
     readonly: false,
     tags: [],
-    schema: z.object({}),
+    getSchema: () => z.object({}),
     execute: jest.fn(),
     ...parts,
   };
@@ -32,28 +32,31 @@ const createTool = (
 const logger = loggerMock.create();
 
 describe('toolToLangchain', () => {
-  it('converts the tool to langchain', () => {
+  it('converts the tool to langchain', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
     });
 
-    const langchainTool = toolToLangchain({ tool, toolId: tool.id, logger });
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
     expect(langchainTool.name).toEqual('toolA');
     expect(langchainTool.description).toEqual('desc');
     expect(langchainTool.responseFormat).toEqual('content_and_artifact');
-    expect(langchainTool.schema).toEqual(tool.schema);
+
+    const toolKeys = Object.keys((langchainTool.schema as any).shape);
+    expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
   });
 
   it('wraps the tool handler', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
-      schema: z.object({ hello: z.string() }),
+      getSchema: () => z.object({ hello: z.string() }),
       execute: jest
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
 
-    const langchainTool = toolToLangchain({ tool, toolId: tool.id, logger });
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
     const results = await langchainTool.invoke({ hello: 'world' });
 
     expect(tool.execute).toHaveBeenCalledTimes(1);

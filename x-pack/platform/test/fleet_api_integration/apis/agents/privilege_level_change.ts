@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { enableActionSecrets } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -120,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /api/fleet/agents/{agentId}/privilege_level_change', () => {
-      it('should return 200 if the PRIVILEGE_LEVEL_CHANGE action was created', async () => {
+      it('should return 200 if the PRIVILEGE_LEVEL_CHANGE action was created without secrets', async () => {
         await supertest
           .post(`/api/fleet/agents/agent1/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
@@ -140,9 +141,46 @@ export default function (providerContext: FtrProviderContext) {
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
         expect(action.data).to.eql({
-          userInfo: { username: 'user1', groupname: 'group1', password: 'password' },
+          user_info: { username: 'user1', groupname: 'group1', password: 'password' },
           unprivileged: true,
         });
+      });
+
+      it('should return 200 if the PRIVILEGE_LEVEL_CHANGE action was created with secrets', async () => {
+        await enableActionSecrets(providerContext);
+        await supertest
+          .post(`/api/fleet/agents/agent1/privilege_level_change`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            user_info: {
+              username: 'user1',
+              groupname: 'group1',
+              password: 'password',
+            },
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: AGENT_ACTIONS_INDEX,
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+        // Check type.
+        expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
+        // Check data and that password was replaced by a secret reference.
+        expect(Object.keys(action.data)).to.eql(['unprivileged', 'user_info']);
+        expect(action.data.unprivileged).to.eql(true);
+        expect(Object.keys(action.data.user_info)).to.eql(['username', 'groupname', 'password']);
+        expect(action.data.user_info.username).to.eql('user1');
+        expect(action.data.user_info.groupname).to.eql('group1');
+        expect(action.data.user_info.password).to.match(/^\$co\.elastic\.secret{.+}$/);
+        // Check secret references.
+        expect(Object.keys(action)).to.contain('secret_references');
+        expect(action.secret_references).to.have.length(1);
+        expect(Object.keys(action.secret_references[0])).to.eql(['id']);
+        expect(action.secret_references[0].id).to.be.a('string');
+        // Check that secrets is not stored in the action.
+        expect(Object.keys(action)).to.not.contain(['secrets']);
       });
 
       it('should return 403 if agent needs root access', async () => {

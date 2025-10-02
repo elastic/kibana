@@ -21,7 +21,10 @@ exports[`ValueWithSpaceWarning should render if showSpaceWarning is truthy 1`] =
         color="warning"
         data-euiicon-type="info"
         data-test-subj="value_with_space_warning_tooltip"
-      />
+        tabindex="0"
+      >
+        Info
+      </span>
     </span>
   </div>
 </div>

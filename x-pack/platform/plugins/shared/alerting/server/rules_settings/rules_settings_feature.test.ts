@@ -16,7 +16,6 @@ test('returns rule settings feature with query delay subfeature if serverless', 
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
       insightsAndAlerting: ['triggersActions'],
@@ -158,7 +157,6 @@ test('returns rule settings feature without query delay subfeature if not server
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
       insightsAndAlerting: ['triggersActions'],

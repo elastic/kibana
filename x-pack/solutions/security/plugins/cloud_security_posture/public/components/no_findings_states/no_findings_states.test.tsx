@@ -61,9 +61,9 @@ describe('NoFindingsStates', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('link', { name: /add wiz integration/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /add integration/i })).toHaveAttribute(
         'href',
-        '/app/fleet/integrations/wiz/add-integration'
+        '/app/integrations/browse/security/misconfiguration_workflow'
       );
     });
   });
