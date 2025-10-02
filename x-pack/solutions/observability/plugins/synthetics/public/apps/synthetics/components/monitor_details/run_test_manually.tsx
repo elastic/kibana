@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -13,6 +12,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../contexts';
