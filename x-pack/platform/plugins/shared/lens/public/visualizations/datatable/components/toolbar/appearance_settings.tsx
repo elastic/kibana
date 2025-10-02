@@ -25,7 +25,7 @@ type LineCounts = {
 
 const LEGACY_SINGLE_ROW_HEIGHT_MODE = 'single';
 
-export function AppearanceSettings({
+export function DatatableAppearanceSettings({
   state,
   setState,
 }: {
@@ -142,6 +142,7 @@ export function AppearanceSettings({
           defaultMessage: 'Paginate table',
         })}
         display="columnCompressed"
+        fullWidth
       >
         <EuiToolTip
           content={i18n.translate('xpack.lens.table.visualOptionsPaginateTableTooltip', {
@@ -217,6 +218,7 @@ const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensity, onCh
       aria-label={densityLabel}
       display="columnCompressed"
       data-test-subj="lnsDensitySettings"
+      fullWidth
     >
       <EuiButtonGroup
         legend={densityLabel}

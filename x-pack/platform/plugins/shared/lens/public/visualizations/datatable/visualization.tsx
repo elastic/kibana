@@ -47,7 +47,7 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { Toolbar } from './components/toolbar';
+import { DatatableFlyoutToolbar, Toolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
@@ -708,6 +708,10 @@ export const getDatatableVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <DatatableFlyoutToolbar {...props} />;
   },
 
   onEditAction(state, event) {

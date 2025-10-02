@@ -6,3 +6,4 @@
  */
 
 export { Toolbar } from './toolbar';
+export { DatatableFlyoutToolbar } from './flyout_toolbar';
