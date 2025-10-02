@@ -293,7 +293,7 @@ describe('RRule Scheduling Integration', () => {
       };
 
       expect(() => convertWorkflowScheduleToTaskSchedule(trigger)).toThrow(
-        'Invalid schedule configuration. Must have either "rrule", "every" (e.g., "5m", "2h", "1d"), "every", or "rrule"'
+        'Invalid schedule configuration. Must have either "rrule" or "every" (e.g., "5m", "2h", "1d")'
       );
     });
   });
