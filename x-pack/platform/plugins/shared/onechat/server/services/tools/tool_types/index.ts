@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltinProviderFn } from './builtin_provider';
+export type {
+  ToolTypeDefinition,
+  DisabledToolTypeDefinition,
+  AnyToolTypeDefinition,
+  ToolHandlerDynamicProps,
+  ToolHandlerDynamicPropsFn,
+} from './definitions';
+export { getToolTypeDefinitions } from './get_tool_types';

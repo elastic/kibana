@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createEsqlToolType } from './esql_tool_type';
+export { getBuiltinToolType } from './tool_type';

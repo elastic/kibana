@@ -5,17 +5,29 @@
  * 2.0.
  */
 
+import type { ZodObject } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
-import type { EsqlToolConfig } from '@kbn/onechat-common';
-import type { PersistedToolTypeDefinition } from '../types';
-import { toToolDefinition } from './to_tool_definition';
+import type { EsqlToolConfig } from '@kbn/onechat-common/tools/types/esql';
+import type { ToolTypeDefinition } from '../definitions';
+import { createHandler } from './create_handler';
+import { createSchemaFromParams } from './create_schema';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-export const createEsqlToolType = (): PersistedToolTypeDefinition<EsqlToolConfig> => {
+export const getEsqlToolType = (): ToolTypeDefinition<
+  ToolType.esql,
+  EsqlToolConfig,
+  ZodObject<any>
+> => {
   return {
     toolType: ToolType.esql,
-    toToolDefinition,
+    getDynamicProps: (config) => {
+      return {
+        getHandler: () => createHandler(config),
+        getSchema: () => createSchemaFromParams(config.params),
+      };
+    },
+
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
     validateForCreate: async ({ config }) => {

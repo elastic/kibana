@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { createIndexSearchToolType } from './index_search_tool_type';
+import { ToolType } from '@kbn/onechat-common';
+import type { BuiltinToolTypeDefinition } from '../definitions';
+
+export const getBuiltinToolType = (): BuiltinToolTypeDefinition => {
+  return {
+    toolType: ToolType.builtin,
+    builtin: true,
+  };
+};

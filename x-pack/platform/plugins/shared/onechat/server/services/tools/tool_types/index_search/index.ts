@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createWorkflowToolType } from './workflow_tool_type';
+export { getIndexSearchToolType } from './tool_type';

@@ -14,9 +14,7 @@ import {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider } from '../src/model_provider';
-import type { ToolProvider } from '../src/tools';
-import type { ScopedRunner } from '../src/runner';
+import type { ModelProvider, ScopedRunner, ToolProvider } from '../runner';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
