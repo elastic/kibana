@@ -45,21 +45,21 @@ const authorizeDelete = async ({
 
   let name;
   let accessControl;
+  const doc = preflightResult?.rawDocSource?._source;
 
   // Extract data from preflight result based on its type
   if ('savedObjectNamespaces' in preflightResult) {
     // This is a PreflightCheckNamespacesResult (multinamespace)
-    accessControl = preflightResult.rawDocSource?._source.accessControl;
+    accessControl = doc?.accessControl;
     if (securityExtension.includeSavedObjectNames()) {
-      const saveObject = { attributes: preflightResult.rawDocSource?._source[type] };
+      const saveObject = { attributes: doc?.[type] };
       name = SavedObjectsUtils.getName(registry.getNameAttribute(type), saveObject);
     }
   } else {
     // This is an access control preflight result (from accessControlPreflightCheck)
-    const doc = preflightResult?.rawDocSource?._source;
-    accessControl = doc?._source?.accessControl;
+    accessControl = doc?.accessControl;
     if (securityExtension.includeSavedObjectNames()) {
-      const saveObject = { attributes: doc?._source?.[type] };
+      const saveObject = { attributes: doc?.[type] };
       name = SavedObjectsUtils.getName(registry.getNameAttribute(type), saveObject);
     }
   }
