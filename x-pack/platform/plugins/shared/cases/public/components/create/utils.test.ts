@@ -36,6 +36,7 @@ describe('utils', () => {
         description: '',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -59,6 +60,7 @@ describe('utils', () => {
         owner: 'foobar',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -79,7 +81,7 @@ describe('utils', () => {
         category: 'categorty',
         severity: CaseSeverity.HIGH as const,
         description: 'Cool description',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         customFields: [{ key: 'key', type: CustomFieldTypes.TEXT as const, value: 'text' }],
       };
 
@@ -150,6 +152,7 @@ describe('utils', () => {
       fields: { incidentTypes: null, severityCode: null },
       customFields: {},
       syncAlerts: false,
+      extractObservables: false,
     };
     const serializedFormData = {
       title: 'title',
@@ -157,6 +160,7 @@ describe('utils', () => {
       customFields: [],
       settings: {
         syncAlerts: false,
+        extractObservables: false,
       },
       tags: [],
       connector: {
@@ -177,6 +181,7 @@ describe('utils', () => {
         description: '',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -284,6 +289,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
           tags: [],
           connector: {
@@ -303,6 +309,7 @@ describe('utils', () => {
         title: 'title',
         description: 'description',
         syncAlerts: false,
+        extractObservables: false,
         tags: [],
         owner: casesConfigurationsMock.owner,
         connectorId: 'foobar',
@@ -322,6 +329,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
           tags: [],
           connector: {
@@ -357,6 +365,7 @@ describe('utils', () => {
         title: 'title',
         description: 'description',
         syncAlerts: false,
+        extractObservables: false,
         tags: [],
         owner: casesConfigurationsMock.owner,
         connectorId: 'foobar',

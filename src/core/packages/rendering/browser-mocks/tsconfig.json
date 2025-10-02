@@ -13,7 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/core-rendering-browser",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*"

@@ -36,7 +36,9 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
-import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -81,8 +83,10 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+  const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -90,6 +94,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
+
+  const hasChanges = canUpdate && !isSimulating;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -110,8 +116,9 @@ export function StreamDetailEnrichmentContentImpl() {
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={detectedFields}
-            stream={definition.stream.name}
-            storedFields={[]}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
+            definition={definition}
+            storedFields={definitionFields}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}
           />
@@ -125,7 +132,7 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false}>
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -140,17 +147,17 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <StepsEditor />
               </EuiResizablePanel>
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+              <EuiResizableButton indicator="border" />
               <EuiResizablePanel
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="s"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <MemoSimulationPlayground />
@@ -159,15 +166,19 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
+      {hasChanges && (
         <ManagementBottomBar
           onCancel={resetChanges}
-          onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
+          onConfirm={
+            detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
+              ? openConfirmationModal
+              : saveChanges
+          }
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
         />
-      </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 }

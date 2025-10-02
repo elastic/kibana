@@ -95,6 +95,7 @@ const ruleType: RuleType = {
   enabledInLicense: true,
   category: 'my-category',
   isExportable: true,
+  isInternallyManaged: false,
 };
 
 describe('rule_details', () => {
@@ -122,16 +123,16 @@ describe('rule_details', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       renderComponent({ autoRecoverAlerts: true });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
       await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
 
       await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
         expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
       });
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
@@ -143,16 +144,16 @@ describe('rule_details', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
       await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
 
       await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
         expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
       });
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
@@ -164,12 +165,12 @@ describe('rule_details', () => {
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       renderComponent({ autoRecoverAlerts: false });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
       await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
 
       await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
 
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
@@ -246,6 +247,7 @@ describe('rule_details', () => {
         enabledInLicense: true,
         category: 'my-category',
         isExportable: true,
+        isInternallyManaged: false,
       };
 
       const wrapper = shallowWithIntl(
@@ -319,6 +321,27 @@ describe('rule_details', () => {
               />
             </EuiLink>
           </EuiText>
+          <EuiLiveAnnouncer>
+            Cannot run rule, 
+            <EuiText
+              size="xs"
+            >
+              test
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
+          </EuiLiveAnnouncer>
         </EuiPanel>
       `);
     });
@@ -468,6 +491,7 @@ describe('rule_details', () => {
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
           <React.Fragment>
             <EuiButtonEmpty
+              aria-label="Edit"
               data-test-subj="openEditRuleFlyoutButton"
               disabled={false}
               iconType="pencil"
@@ -531,6 +555,7 @@ describe('rule_details', () => {
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"
@@ -594,6 +619,7 @@ describe('rule_details', () => {
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"

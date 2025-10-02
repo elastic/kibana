@@ -387,6 +387,42 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
     });
 
+    it('should activate user profile with UIAM access token grant', async () => {
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(
+        startContract.activate({
+          type: 'uiamAccessToken',
+          accessToken: 'some-token',
+          sharedSecret: 'some-shared-secret',
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "data": Object {},
+          "enabled": true,
+          "labels": Object {},
+          "uid": "some-profile-uid",
+          "user": Object {
+            "email": "some@email",
+            "full_name": undefined,
+            "realm_domain": "some-realm-domain",
+            "realm_name": "some-realm",
+            "roles": Array [],
+            "username": "some-username",
+          },
+        }
+      `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({
+        grant_type: 'access_token',
+        access_token: 'some-token',
+        client_authentication: { scheme: 'SharedSecret', value: 'some-shared-secret' },
+      });
+    });
+
     it('fails if activation fails with non-409 error', async () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 500, body: 'some message' })

@@ -26,7 +26,7 @@ export const BulkActionsCell = memo(
     visibleRowIndex: number;
   }) => {
     const {
-      bulkActionsStore: [{ rowSelection }, updateSelectedRows],
+      bulkActionsStore: [{ rowSelection, isAllSelected }, updateSelectedRows],
     } = useAlertsTableContext();
     const isChecked = rowSelection.has(rowIndex);
     const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
@@ -53,6 +53,7 @@ export const BulkActionsCell = memo(
         checked={isChecked}
         onChange={onChange}
         data-test-subj="bulk-actions-row-cell"
+        disabled={isAllSelected}
       />
     );
   }

@@ -12,7 +12,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -50,6 +50,7 @@ import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
+import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
 const DOCS_PER_FETCH = 1000;
 
@@ -118,6 +119,7 @@ export class IndexUpdateService {
     private readonly http: HttpStart,
     private readonly data: DataPublicPluginStart,
     private readonly notifications: NotificationsStart,
+    private readonly telemetry: IndexEditorTelemetryService,
     public readonly canEditIndex: boolean
   ) {
     this.listenForUpdates();
@@ -403,32 +405,24 @@ export class IndexUpdateService {
           });
         });
 
-      return (
-        dataView.fields
-          .concat(unsavedFields)
-          // Exclude metadata fields. TODO check if this is the right way to do it
-          // @ts-ignore
-          .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
-          .map((field) => {
-            return {
-              name: field.name,
-              id: field.name,
-              isNull: field.isNull,
-              meta: {
-                type: field.type,
-                params: {
-                  id: field.name,
-                  sourceParams: {
-                    fieldName: field.name,
-                  },
-                },
-                aggregatable: field.aggregatable,
-                searchable: field.searchable,
-                esTypes: field.esTypes,
+      return dataView.fields
+        .concat(unsavedFields)
+        .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
+        .map((field) => {
+          const datatableColumn: DatatableColumn = {
+            name: field.name,
+            id: field.name,
+            isNull: field.isNull,
+            meta: {
+              type: field.type as DatatableColumnType,
+              params: {
+                id: field.name,
               },
-            } as DatatableColumn;
-          })
-      );
+              esType: field.esTypes?.at(0),
+            },
+          };
+          return datatableColumn;
+        });
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -515,11 +509,12 @@ export class IndexUpdateService {
           map(([, updates]) => updates),
           skipWhile(() => !this.isIndexCreated()),
           filter((updates) => updates.length > 0),
+          map((updates) => ({ updates, startTime: Date.now() })),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap((updates) => {
+          exhaustMap(({ updates, startTime }) => {
             return from(this.bulkUpdate(updates)).pipe(
               catchError((errors) => {
                 return of({
@@ -532,6 +527,7 @@ export class IndexUpdateService {
                   updates,
                   response: response.bulkResponse,
                   bulkOperations: response.bulkOperations,
+                  startTime,
                 };
               })
             );
@@ -539,7 +535,7 @@ export class IndexUpdateService {
           withLatestFrom(this._flush$, this._docs$, this.dataView$, this._savingDocs$),
           switchMap(
             ([
-              { updates, response, bulkOperations },
+              { updates, response, bulkOperations, startTime },
               { exitAfterFlush },
               docs,
               dataView,
@@ -547,13 +543,43 @@ export class IndexUpdateService {
             ]) =>
               // Refresh the data view fields to get new columns types if any
               from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
-                map(() => ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }))
+                map(() => ({
+                  updates,
+                  response,
+                  bulkOperations,
+                  exitAfterFlush,
+                  docs,
+                  savingDocs,
+                  startTime,
+                }))
               )
           )
         )
         .subscribe({
-          next: ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }) => {
+          next: ({
+            updates,
+            response,
+            bulkOperations,
+            exitAfterFlush,
+            docs,
+            savingDocs,
+            startTime,
+          }) => {
             this._isSaving$.next(false);
+
+            // Send telemetry about the save event
+            const { newRowsCount, newColumnsCount, cellsEditedCount } = this.summarizeSavingUpdates(
+              savingDocs,
+              updates
+            );
+            this.telemetry.trackSaveSubmitted({
+              pendingRowsAdded: newRowsCount,
+              pendingColsAdded: newColumnsCount,
+              pendingCellsEdited: cellsEditedCount,
+              action: exitAfterFlush ? 'save_and_exit' : 'save',
+              outcome: response.errors ? 'error' : 'success',
+              latency: Date.now() - startTime,
+            });
 
             if (!response.errors) {
               if (exitAfterFlush) {
@@ -753,6 +779,22 @@ export class IndexUpdateService {
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+  }
+
+  private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
+    const newRowsCount = Array.from(savingDocs.keys()).filter((id) =>
+      id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    const newColumnsCount = this._pendingColumnsToBeSaved$
+      .getValue()
+      .filter((col) => !isPlaceholderColumn(col.name)).length;
+
+    const cellsEditedCount = updates.filter(
+      (update) => isDocUpdate(update) && !update.payload.id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    return { newRowsCount, newColumnsCount, cellsEditedCount };
   }
 
   private completeWithPlaceholders(currentColumnsCount: number) {

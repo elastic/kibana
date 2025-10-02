@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TODO(kuba): File contains a single, unused function upgradeBuiltInEntityDefinitions()
+
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { startTransforms } from './start_transforms';
@@ -42,6 +44,7 @@ export async function upgradeBuiltInEntityDefinitions({
   const upgradedDefinitions = await installBuiltInEntityDefinitions({
     esClient,
     soClient,
+    isServerless: false,
     definitions,
     logger,
   });
