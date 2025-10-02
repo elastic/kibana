@@ -397,5 +397,50 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(param.key).to.not.empty();
       });
     });
+
+    it('should read the param key with read-only synthetics custom role', async () => {
+      const syntheticsReadOnlyRole = {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['*'],
+              privileges: ['read'],
+            },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              uptime: ['read'],
+            },
+          },
+        ],
+      };
+
+      await samlAuth.setCustomRole(syntheticsReadOnlyRole);
+      const syntheticsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      // Create a param first as admin
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(testParam)
+        .expect(200);
+
+      // Read params as read-only user
+      const getResponse = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsOnlyRole.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      expect(getResponse.body[0].key).eql(testParam.key);
+      expect(getResponse.body[0].value).eql(undefined);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsOnlyRole);
+      await samlAuth.deleteCustomRole();
+    });
   });
 }
