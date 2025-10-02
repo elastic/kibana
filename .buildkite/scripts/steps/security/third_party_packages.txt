@@ -12,3 +12,4 @@ canvas-confetti
 undici
 @tanstack/react-table
 @tanstack/react-virtual
+@storybook/addon-docs
