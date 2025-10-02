@@ -37,6 +37,7 @@ import {
 } from '.';
 import type { MockGroupData } from './src/__fixtures__/types';
 import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
+import mdx from './doc.mdx';
 
 /**
  * @description story for data document cascade component which allows rendering of data in a quasi tree structure',
@@ -44,6 +45,11 @@ import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
  */
 export default {
   title: 'Data Cascade/Configuration Examples',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
   tags: ['autodocs'],
 } satisfies Meta;
 
@@ -603,6 +609,8 @@ export const CascadeCustomHeaderImplementation: StoryObj<
   },
 };
 
+CascadeCustomHeaderImplementation.parameters = { docs: { disable: true } };
+
 export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -872,6 +880,8 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     size: 'm',
   },
 };
+
+CascadeCustomHeaderWithCustomRowActionsImplementation.parameters = { docs: { disable: true } };
 
 export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
@@ -1149,6 +1159,8 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     size: 'm',
   },
 };
+
+CascadeCustomHeaderWithHiddenRowActions.parameters = { docs: { disable: true } };
 
 export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
@@ -1479,3 +1491,5 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     size: 'm',
   },
 };
+
+CascadeCustomHeaderWithRowSelectionActionEnabled.parameters = { docs: { disable: true } };
