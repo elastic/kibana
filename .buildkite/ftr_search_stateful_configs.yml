@@ -1,6 +1,7 @@
 disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/solutions/search/test/api_integration/config.ts
+  - x-pack/platform/test/onechat_api_integration/eval/config.stateful.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
