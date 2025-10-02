@@ -88,7 +88,7 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
 
     if (!unit) {
       throw new Error(
-        `Invalid schedule configuration: unsupported unit "${config.unit}". Supported units: s, m, h, d}`
+        `Invalid schedule configuration: unsupported unit "${unit}". Supported units: s, m, h, d`
       );
     }
 
