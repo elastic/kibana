@@ -58,6 +58,7 @@ export const renderApp = ({
 
   const appWrapperClassName = css`
     overflow: auto;
+    height: 0;
   `;
   const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
   appWrapperElement.classList.add(appWrapperClassName);
@@ -90,8 +91,11 @@ export class StreamsAppPlugin
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
 
+  private readonly version: string;
+
   constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.version = context.env.packageInfo.version;
   }
   setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
@@ -134,6 +138,7 @@ export class StreamsAppPlugin
             .start({ http: coreStart.http })
             .getClient(),
           telemetryClient: this.telemetry.getClient(),
+          version: this.version,
         };
 
         // Trigger fetch to ensure the time filter has an up-to-date time range when the app mounts.
