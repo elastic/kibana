@@ -105,13 +105,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 // Export custom APM login methods for direct use in tests
 // These roles match the ones defined in server/test_helpers/create_apm_users/authentication.ts
 //
-// Usage example:
-// import { test, apmAuth } from '../../fixtures';
-//
-// test.beforeEach(async ({ browserAuth }) => {
-//   await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
-// });
-//
 // Roles:
 // - apmAllPrivilegesWithoutWriteSettings: Has APM 'minimal_all' + ML 'all', but cannot save settings
 // - apmReadPrivilegesWithWriteSettings: Has APM 'minimal_read' + 'settings_save' + advanced settings access
