@@ -45,7 +45,7 @@ import {
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
-import { PieToolbar } from './toolbar';
+import { PieToolbar, PartitionFlyoutToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
@@ -541,6 +541,10 @@ export const getPieVisualization = ({
 
   ToolbarComponent(props) {
     return <PieToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <PartitionFlyoutToolbar {...props} />;
   },
 
   hasLayerSettings(props) {

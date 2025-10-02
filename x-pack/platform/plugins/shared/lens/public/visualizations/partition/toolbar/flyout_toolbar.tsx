@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
+import type { VisualizationToolbarProps } from '../../../types';
+import type { PieVisualizationState } from '../../../../common/types';
+import { PartitionAppearanceSettings, PartitionTitlesAndTextSettings } from './toolbar';
+
+export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
+  const datatableToolbarContentMap: ContentMap<PieVisualizationState> = {
+    style: PartitionStyleSettings,
+  };
+  return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
+}
+
+function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizationState>) {
+  return (
+    <>
+      <EuiAccordion
+        id={''}
+        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.appearance', {
+          defaultMessage: 'Appearance',
+        })}
+        paddingSize="s"
+        initialIsOpen
+      >
+        <PartitionAppearanceSettings {...props} />
+      </EuiAccordion>
+      <EuiHorizontalRule margin="m" />
+      <EuiAccordion
+        id={''}
+        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
+          defaultMessage: 'Titles and text',
+        })}
+        paddingSize="s"
+        initialIsOpen
+      >
+        <PartitionTitlesAndTextSettings {...props} />
+      </EuiAccordion>
+    </>
+  );
+}
