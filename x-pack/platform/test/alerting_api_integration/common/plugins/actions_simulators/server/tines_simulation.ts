@@ -91,6 +91,8 @@ export class TinesSimulator extends Simulator {
       body = tinesAgentsResponse;
     } else if (request.url?.match('/webhook')) {
       body = tinesWebhookSuccessResponse;
+    } else if (request.url?.match('/actions/1')) {
+      body = tinesAgentWebhook;
     }
     response.end(JSON.stringify(body, null, 4));
   }
@@ -123,6 +125,29 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       return res.ok({ body: tinesStoriesResponse });
+    }
+  );
+
+  router.get(
+    {
+      path: `${path}/api/v1/actions/1`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return res.ok({ body: tinesAgentWebhook });
     }
   );
 
