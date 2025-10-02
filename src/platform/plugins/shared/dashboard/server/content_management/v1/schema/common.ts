@@ -6,9 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
+import { referenceSchema } from '@kbn/content-management-utils';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 
 import {
@@ -24,15 +26,6 @@ const apiError = schema.object({
   statusCode: schema.number(),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
-
-export const referenceSchema = schema.object(
-  {
-    name: schema.string(),
-    type: schema.string(),
-    id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const panelGridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
