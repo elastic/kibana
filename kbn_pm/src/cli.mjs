@@ -22,6 +22,7 @@ import { createFlagError, isCliError } from './lib/cli_error.mjs';
 import { checkIfRunningNativelyOnWindows } from './lib/windows.mjs';
 import { getCmd } from './commands/index.mjs';
 import { Log } from './lib/log.mjs';
+import { handleKnownError } from './lib/handle_known_errors.mjs';
 import External from './lib/external_packages.js';
 
 const start = Date.now();
@@ -128,6 +129,8 @@ try {
   if (error.showHelp) {
     log._write('');
     log._write(await getHelp(cmdName));
+  } else {
+    handleKnownError(error, cmdName);
   }
 
   process.exit(error.exitCode ?? 1);
