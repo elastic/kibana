@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
 import { lensItemDataSchema, lensSavedObjectSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
-import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
 
 /**
  * The Lens item meta returned from the server
@@ -35,7 +34,7 @@ export const lensItemMetaSchema = schema.object(
 export const lensResponseItemSchema = schema.object(
   {
     id: lensSavedObjectSchema.getPropSchemas().id,
-    data: schema.oneOf([lensApiStateSchema, lensItemDataSchema, lensItemDataSchemaV0]),
+    data: schema.oneOf([lensApiStateSchema, lensItemDataSchema]),
     meta: lensItemMetaSchema,
   },
   { unknowns: 'forbid' }
