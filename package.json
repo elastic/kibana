@@ -789,7 +789,6 @@
     "@kbn/osquery-plugin": "link:x-pack/platform/plugins/shared/osquery",
     "@kbn/otel-semantic-conventions": "link:src/platform/packages/shared/kbn-otel-semantic-conventions",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
-    "@kbn/page-attachment-schema": "link:x-pack/platform/packages/shared/kbn-page-attachment-schema",
     "@kbn/painless-lab-plugin": "link:x-pack/platform/plugins/private/painless_lab",
     "@kbn/palettes": "link:src/platform/packages/shared/kbn-palettes",
     "@kbn/panel-loader": "link:src/platform/packages/private/kbn-panel-loader",
