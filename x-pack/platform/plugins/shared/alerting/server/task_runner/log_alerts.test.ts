@@ -44,7 +44,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -70,7 +70,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -103,7 +103,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -128,7 +128,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -158,7 +158,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -261,7 +261,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: false,
     });
 
@@ -295,7 +295,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: false,
+      shouldLogAlerts: false,
       shouldPersistAlerts: true,
     });
 
@@ -327,7 +327,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
@@ -428,7 +428,7 @@ describe('logAlerts', () => {
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
-      autoRecoverAlerts: true,
+      shouldLogAlerts: true,
       shouldPersistAlerts: true,
     });
 
