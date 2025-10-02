@@ -54,6 +54,10 @@ import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLlmType } from '../utils';
 import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';
 
+const KB_REQUIRED_TYPES: Set<DefendInsightType> = new Set([
+  DefendInsightType.Enum.policy_response_failure,
+]);
+
 function addGenerationInterval(
   generationIntervals: DefendInsightGenerationInterval[],
   generationInterval: DefendInsightGenerationInterval
@@ -453,6 +457,10 @@ export const invokeDefendInsightsGraph = async ({
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
 }> => {
+  if (KB_REQUIRED_TYPES.has(insightType)) {
+    await waitForKB(kbDataClient);
+  }
+
   const llmType = getLlmType(apiConfig.actionTypeId);
   const model = apiConfig.model;
   const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
@@ -642,3 +650,44 @@ export const throwIfErrorCountsExceeded = ({
     throw new Error(generationAttemptsError);
   }
 };
+
+async function waitForKB(kbDataClient: AIAssistantKnowledgeBaseDataClient | null): Promise<void> {
+  if (!kbDataClient) {
+    return Promise.resolve();
+  }
+
+  if (await kbDataClient?.isDefendInsightsDocsLoaded()) {
+    return Promise.resolve();
+  }
+
+  if (kbDataClient?.isSetupInProgress) {
+    return new Promise<void>((resolve, reject) => {
+      const interval = 30000;
+      const maxTimeout = 10 * 60 * 1000;
+      const startTime = Date.now();
+
+      const checkKBStatus = async () => {
+        try {
+          const elapsedTime = Date.now() - startTime;
+
+          if (elapsedTime > maxTimeout) {
+            reject(new Error(`Knowledge base setup timed out after ${maxTimeout / 1000} seconds`));
+            return;
+          }
+
+          if (await kbDataClient.isDefendInsightsDocsLoaded()) {
+            resolve();
+          } else {
+            setTimeout(checkKBStatus, interval);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      void checkKBStatus();
+    });
+  }
+
+  return Promise.resolve();
+}

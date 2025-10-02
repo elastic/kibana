@@ -257,7 +257,7 @@ const CustomChartSectionWrapper = ({
   const isComponentVisible =
     !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
 
-  if (!isComponentVisible || !hasValidSession) {
+  if (!hasValidSession) {
     return null;
   }
 
@@ -268,6 +268,7 @@ const CustomChartSectionWrapper = ({
       renderToggleActions={renderCustomChartToggleActions}
       input$={input$}
       requestParams={requestParams}
+      isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
     />
   );
