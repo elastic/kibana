@@ -241,7 +241,6 @@ describe('ESQLLang', () => {
           getFieldsMetadata: Promise.resolve({} as any),
           telemetry: {
             onDecorationHoverShown: jest.fn(),
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
@@ -263,7 +262,6 @@ describe('ESQLLang', () => {
         const mockDeps: ESQLDependencies = {
           telemetry: {
             onDecorationHoverShown: mockOnDecorationHoverShown,
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
@@ -298,7 +296,6 @@ describe('ESQLLang', () => {
         const mockDeps: ESQLDependencies = {
           telemetry: {
             onDecorationHoverShown: mockOnDecorationHoverShown,
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
@@ -338,7 +335,6 @@ describe('ESQLLang', () => {
         const mockDeps: ESQLDependencies = {
           telemetry: {
             onDecorationHoverShown: mockOnDecorationHoverShown,
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
@@ -385,7 +381,6 @@ describe('ESQLLang', () => {
         const mockDeps: ESQLDependencies = {
           telemetry: {
             onDecorationHoverShown: mockOnDecorationHoverShown,
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
@@ -412,7 +407,6 @@ describe('ESQLLang', () => {
         const mockDeps: ESQLDependencies = {
           telemetry: {
             onDecorationHoverShown: mockOnDecorationHoverShown,
-            onSuggestionsWithCustomCommandShown: jest.fn(),
           },
         };
 
