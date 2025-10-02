@@ -30,12 +30,15 @@ export type {
   ToolEventHandlerFn,
   ToolEventEmitter,
   ToolProgressEmitterFn,
+  ToolResultStore,
+  WritableToolResultStore,
 } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,
   ToolHandlerContext,
   ToolHandlerResult,
+  BuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,

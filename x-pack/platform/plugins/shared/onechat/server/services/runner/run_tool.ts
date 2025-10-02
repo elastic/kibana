@@ -15,7 +15,7 @@ import type {
   ToolHandlerReturn,
   RunToolReturn,
 } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { getToolResultId } from '@kbn/onechat-server/tools';
 import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
@@ -33,7 +33,7 @@ export const runTool = async <TParams = Record<string, unknown>>({
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
   const manager = parentManager.createChild(context);
-  const { toolsService, request } = manager.deps;
+  const { toolsService, request, resultStore } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
   const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
@@ -70,14 +70,20 @@ export const runTool = async <TParams = Record<string, unknown>>({
     }
   );
 
+  const resultsWithIds = results.map<ToolResult>(
+    (result) =>
+      ({
+        ...result,
+        result_id: result.tool_result_id ?? getToolResultId(),
+      } as ToolResult)
+  );
+
+  resultsWithIds.forEach((result) => {
+    resultStore.add(result);
+  });
+
   return {
-    results: results.map<ToolResult>(
-      (result) =>
-        ({
-          ...result,
-          result_id: result.result_id ?? getToolResultId(),
-        } as ToolResult)
-    ),
+    results: resultsWithIds,
   };
 };
 
@@ -89,8 +95,15 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
-    manager.deps;
+  const {
+    request,
+    defaultConnectorId,
+    elasticsearch,
+    modelProviderFactory,
+    toolsService,
+    resultStore,
+    logger,
+  } = manager.deps;
   return {
     request,
     logger,
@@ -102,6 +115,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       getRunner: manager.getRunner,
       request,
     }),
+    resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

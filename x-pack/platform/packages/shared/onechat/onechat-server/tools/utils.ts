@@ -12,6 +12,6 @@ const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 /**
  * Generate a random id which can be used for tool result id.
  */
-export function getToolResultId(len = 4): string {
-  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
+export function getToolResultId(): string {
+  return Array.from({ length: 6 }, () => charset[randomInt(charset.length)]).join('');
 }

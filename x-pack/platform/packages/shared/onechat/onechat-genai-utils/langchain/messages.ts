@@ -8,7 +8,7 @@
 import type { BaseMessage, MessageContentComplex, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { getToolResultId } from '@kbn/onechat-server/tools';
 import { isArray } from 'lodash';
 import { ToolResultType } from '@kbn/onechat-common';
 
@@ -78,7 +78,11 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
     if (content.startsWith('Error:')) {
       return {
         results: [
-          { result_id: getToolResultId(), type: ToolResultType.error, data: { message: content } },
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: content },
+          },
         ],
       };
     } else {

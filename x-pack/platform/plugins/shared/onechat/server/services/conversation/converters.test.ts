@@ -175,7 +175,9 @@ describe('conversation model converters', () => {
           tool_call_id: 'tool_call_id',
           tool_id: 'tool_id',
           params: { param1: 'value1' },
-          results: [{ type: ToolResultType.other, data: { someData: 'someValue' } }],
+          results: [
+            { tool_result_id: 'foo', type: ToolResultType.other, data: { someData: 'someValue' } },
+          ],
         },
         {
           type: ConversationRoundStepType.reasoning,
@@ -192,7 +194,7 @@ describe('conversation model converters', () => {
           params: {
             param1: 'value1',
           },
-          results: '[{"type":"other","data":{"someData":"someValue"}}]',
+          results: '[{"tool_result_id":"foo","type":"other","data":{"someData":"someValue"}}]',
         },
         {
           type: ConversationRoundStepType.reasoning,

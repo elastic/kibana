@@ -17,7 +17,7 @@ export enum ToolResultType {
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
-  result_id: string;
+  tool_result_id: string;
   type: TType;
   data: TData;
 }

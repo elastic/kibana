@@ -12,5 +12,10 @@ export type {
   StaticWorkflowTool,
   StaticIndexSearchTool,
 } from './builtin';
-export type { ToolHandlerFn, ToolHandlerReturn, ToolHandlerContext } from './handler';
+export type {
+  ToolHandlerFn,
+  ToolHandlerReturn,
+  ToolHandlerContext,
+  ToolHandlerResult,
+} from './handler';
 export { getToolResultId } from './utils';
