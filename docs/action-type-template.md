@@ -6,6 +6,8 @@ applies_to:
 description: Instructions and best practices for creating <CONNECTOR_NAME> in Elastic.
 ---
 
+% For each new connector, also update the connector TOC at https://github.com/elastic/kibana/blob/main/docs/reference/toc.yml and the list of available connectors at https://github.com/elastic/kibana/blob/main/docs/reference/connectors-kibana.md
+
 # {{CONNECTOR_NAME}} connector and action [connector-name-action-type]
 
 Include a short description of the connector type.
@@ -25,7 +27,7 @@ You can create connectors in {{stack-manage-app}} > {{connectors-ui}} or as need
 
 {{CONNECTOR-NAME}} connectors have the following configuration properties:
 
-%  List of user-facing connector configurations. This should align with the fields available in the Create connector flyout form for this connector type. To include these configuration details in the API documentation, add appropriate files in x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml 
+% List of user-facing connector configurations. This should align with the fields available in the Create connector flyout form for this connector type. To include these configuration details in the API documentation, add appropriate files in x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml 
 
 Property1
 :   A short description of this property. 
