@@ -146,6 +146,8 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '*,_none',
+          // @ts-expect-error state parameter is supported in ES 9.1.0+
+          state: searchField === 'state' ? searchValue : undefined,
           order: sortDirection,
           // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,
