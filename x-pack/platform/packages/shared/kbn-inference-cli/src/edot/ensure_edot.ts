@@ -1,0 +1,145 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ToolingLog } from '@kbn/tooling-log';
+import execa from 'execa';
+import Path from 'path';
+import chalk from 'chalk';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { assertDockerAvailable } from '../util/assert_docker_available';
+import { getDockerComposeYaml } from './get_docker_compose_yaml';
+import { getEdotCollectorConfig } from './get_edot_collector_config';
+import { writeFile } from '../util/file_utils';
+import { readKibanaConfig } from './read_kibana_config';
+import { untilContainerReady } from '../util/until_container_ready';
+
+const DATA_DIR = Path.join(REPO_ROOT, 'data', 'edot');
+const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
+const COLLECTOR_CONFIG_FILE_PATH = Path.join(DATA_DIR, 'otel-collector-config.yml');
+
+/**
+ * Stops the EDOT Docker containers.
+ *
+ * @param cleanup - Whether to perform cleanup after stopping
+ */
+async function down(cleanup: boolean = true) {
+  await execa
+    .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup })
+    .catch(() => {});
+}
+
+/**
+ * Normalizes Elasticsearch host URL to ensure it's a valid endpoint.
+ * Converts localhost references to host.docker.internal for Docker connectivity.
+ *
+ * @param host - The Elasticsearch host (can be string or array)
+ * @returns Normalized endpoint URL
+ */
+function normalizeElasticsearchHost(host: string): string {
+  let hostStr = host.toString();
+
+  // Convert localhost to host.docker.internal for Docker connectivity
+  hostStr = hostStr.replace(/localhost/g, 'host.docker.internal');
+
+  // If it's already a full URL, return it
+  if (hostStr.startsWith('http://') || hostStr.startsWith('https://')) {
+    return hostStr;
+  }
+
+  // Otherwise, assume it's localhost with a port
+  return `http://${hostStr}`;
+}
+
+/**
+ * Ensures EDOT (Elastic Distribution of OpenTelemetry) is running.
+ * Reads configuration from kibana.dev.yml, generates EDOT collector config,
+ * and starts the Docker container.
+ *
+ * @param log - Tooling logger for output
+ * @param signal - Abort signal for cleanup
+ */
+export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
+  log.info(`Ensuring EDOT is available`);
+
+  await assertDockerAvailable();
+
+  // Read Kibana configuration to get Elasticsearch credentials
+  const kibanaConfig = readKibanaConfig();
+
+  const elasticsearchHost = normalizeElasticsearchHost(
+    kibanaConfig['elasticsearch.hosts'] || 'http://localhost:9200'
+  );
+  const elasticsearchUsername = kibanaConfig['elasticsearch.username'] || 'elastic';
+  const elasticsearchPassword = kibanaConfig['elasticsearch.password'] || 'changeme';
+
+  log.debug(`Elasticsearch endpoint: ${elasticsearchHost}`);
+  log.debug(`Using username: ${elasticsearchUsername}`);
+
+  log.debug(`Stopping existing containers`);
+  await down();
+
+  // Generate EDOT collector configuration
+  const collectorConfig = getEdotCollectorConfig({
+    elasticsearchEndpoint: elasticsearchHost,
+    username: elasticsearchUsername,
+    password: elasticsearchPassword,
+  });
+
+  log.debug(`Writing collector config to ${COLLECTOR_CONFIG_FILE_PATH}`);
+  await writeFile(COLLECTOR_CONFIG_FILE_PATH, collectorConfig);
+
+  // Generate Docker Compose configuration
+  const dockerComposeYaml = getDockerComposeYaml({
+    collectorConfigPath: COLLECTOR_CONFIG_FILE_PATH,
+  });
+
+  log.debug(`Writing docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
+  await writeFile(DOCKER_COMPOSE_FILE_PATH, dockerComposeYaml);
+
+  // Wait for container to be running
+  untilContainerReady({
+    containerName: 'kibana-dev-edot',
+    signal,
+    log,
+    dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
+    condition: ['.State.Status', 'running'],
+  })
+    .then(() => {
+      log.write('');
+
+      log.write(
+        `${chalk.green(
+          '✔'
+        )} EDOT collector started successfully and connected to ${elasticsearchHost}`
+      );
+
+      log.write('');
+
+      log.write(`${chalk.green('📊')} Next steps:`);
+      log.write('');
+      log.write('  1. Instrument your applications to send OTLP data to the collector');
+      log.write('  2. Go to Kibana Observability → Applications to view traces and APM data');
+      log.write('');
+      log.write(`${chalk.green('🔌')} OTLP endpoints available for application instrumentation:`);
+      log.write('');
+      log.write(`  ${chalk.dim('gRPC:')} http://localhost:4317`);
+      log.write(`  ${chalk.dim('HTTP:')} http://localhost:4318`);
+      log.write('');
+      log.write(`${chalk.dim('Container name:')} kibana-dev-edot`);
+      log.write(`${chalk.dim('To stop:')} docker stop kibana-dev-edot`);
+      log.write(`${chalk.dim('To remove:')} docker rm kibana-dev-edot`);
+    })
+    .catch((error) => {
+      log.error(error);
+    });
+
+  // Start the Docker Compose services
+  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
+    stdio: 'inherit',
+    cleanup: true,
+  });
+}
