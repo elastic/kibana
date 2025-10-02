@@ -56,7 +56,13 @@ function createServerCallback() {
       return;
     }
 
-    if (request.method === 'POST' || request.method === 'PUT') {
+    if (request.method === 'DELETE') {
+      response.statusCode = 200;
+      response.end('OK');
+      return;
+    }
+
+    if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
       let data = '';
       request.on('data', (chunk) => {
         data += chunk;
@@ -73,6 +79,8 @@ function createServerCallback() {
             return validateRequestUsesMethod(request.method ?? '', 'post', response);
           case 'success_put_method':
             return validateRequestUsesMethod(request.method ?? '', 'put', response);
+          case 'success_patch_method':
+            return validateRequestUsesMethod(request.method ?? '', 'patch', response);
           case 'success_config_secret_headers':
             return validateReceivedHeaders(request.headers, response);
           case 'failure':
