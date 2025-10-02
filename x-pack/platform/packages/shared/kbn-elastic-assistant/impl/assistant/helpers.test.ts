@@ -22,7 +22,7 @@ describe('helpers', () => {
         apiProvider: 'OpenAI',
         apiUrl: 'https://api.openai.com/v1/chat/completions',
       },
-    };
+    });
 
     const connector2: AIConnector = {
       ...defaultConnector,
