@@ -200,7 +200,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getRenderCustomToolbarWithElements({
           leftSide: (
             <React.Fragment>
-              <EuiText size="xs">
+              <EuiText size="s">
                 <b>
                   <FormattedMessage
                     id="discover.esql_data_cascade.row.cell.toolbar.heading"

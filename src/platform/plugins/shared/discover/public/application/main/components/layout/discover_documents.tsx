@@ -16,7 +16,8 @@ import {
   EuiSpacer,
   EuiText,
   type UseEuiTheme,
-  EuiButton,
+  EuiFilterButton,
+  EuiFilterGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -405,24 +406,27 @@ function DiscoverDocumentsComponent({
 
   const renderCascadeLayoutCallout = useCallback(() => {
     return !supportsCascadeLayout && Boolean(cascadeGroups?.length) ? (
-      <EuiButton
-        iconType="inspect"
-        color="text"
-        size="s"
-        onClick={() => {
-          dispatch(
-            setLayoutUiState({
-              layoutUiState: { supportsCascade: true },
-            })
-          );
-        }}
-        data-test-subj="discoverEnableCascadeLayoutSwitch"
-      >
-        <FormattedMessage
-          id="discover.enableCascadeLayoutSwitchLabel"
-          defaultMessage="Try cascade layout"
-        />
-      </EuiButton>
+      <EuiFilterGroup compressed>
+        <EuiFilterButton
+          iconSide="left"
+          iconType="inspect"
+          color="text"
+          badgeColor="subdued"
+          onClick={() => {
+            dispatch(
+              setLayoutUiState({
+                layoutUiState: { supportsCascade: true },
+              })
+            );
+          }}
+          data-test-subj="discoverEnableCascadeLayoutSwitch"
+        >
+          <FormattedMessage
+            id="discover.enableCascadeLayoutSwitchLabel"
+            defaultMessage="Group By"
+          />
+        </EuiFilterButton>
+      </EuiFilterGroup>
     ) : null;
   }, [cascadeGroups?.length, dispatch, setLayoutUiState, supportsCascadeLayout]);
 
