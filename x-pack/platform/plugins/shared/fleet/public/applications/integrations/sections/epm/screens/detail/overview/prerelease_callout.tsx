@@ -86,7 +86,7 @@ export const OtelPackageCallout: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.fleet.epm.otelPackageWarningMessage"
-            defaultMessage="The {packageTitle} integration is available in technical preview and collects {OTelExternalLink} data adhering to {semanticConventionsLink}. You must be running the EDOT Collector in agent mode to use this integration. For more information, see the {fleetUserGuide}."
+            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. You must be running the EDOT Collector in agent mode to use this integration. For more information, see the {fleetUserGuide}."
             values={{
               packageTitle,
               OTelExternalLink: (
@@ -105,7 +105,7 @@ export const OtelPackageCallout: React.FC<{
                   {i18n.translate(
                     'xpack.fleet.settings.otelPackageWarning.semanticConventionsLinkLabel',
                     {
-                      defaultMessage: 'Semantic Conventions',
+                      defaultMessage: 'semantic conventions',
                     }
                   )}
                 </EuiLink>
