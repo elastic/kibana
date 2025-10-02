@@ -9,13 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { useKibana } from '../../../../hooks/use_kibana';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/store';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
 
 export interface CopyElasticSearchDevToolsOptionProps {
   onClick: () => void;
