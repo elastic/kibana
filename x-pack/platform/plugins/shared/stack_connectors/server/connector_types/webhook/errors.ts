@@ -72,12 +72,15 @@ export function errorInvalidParamsForMethod(
   actionId: string,
   methodString: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.stackConnectors.webhook.unreachableErrorMessage', {
-    defaultMessage: 'error calling webhook, {methodString} operation should not define a body',
-    values: {
-      methodString,
-    },
-  });
+  const errMessage = i18n.translate(
+    'xpack.stackConnectors.webhook.invalidParamsForMethodErrorMessage',
+    {
+      defaultMessage: 'error calling webhook, {methodString} operation should not define a body',
+      values: {
+        methodString,
+      },
+    }
+  );
   return {
     status: 'error',
     message: errMessage,
