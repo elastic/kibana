@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
-          spaceIds: ['default', spaceId],
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
-          spaceIds: ['default', spaceId],
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
-          spaceIds: ['default', spaceId],
+          spaceIds: [spaceId, 'default'],
         })
       );
     });
@@ -243,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
-          spaceIds: ['default', spaceId],
+          spaceIds: [spaceId, 'default'],
         })
       );
     });

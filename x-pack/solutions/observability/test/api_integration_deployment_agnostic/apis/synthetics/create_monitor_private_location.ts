@@ -355,7 +355,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       monitorId = apiResponse.body.id;
 
       const policyResponse = await supertestWithAuth.get(
-        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        `/s/${SPACE_ID}/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics`
       );
 
       const packagePolicy = policyResponse.body.items.find(

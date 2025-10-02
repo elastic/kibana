@@ -201,7 +201,7 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
-              meta: { space_id: spaceIds ? spaceIds[1] : 'default' },
+              meta: { space_id: spaceIds ? spaceIds[0] : 'default' },
               'monitor.project.name': projectId,
               'monitor.project.id': projectId,
             },
@@ -304,7 +304,7 @@ export const getHttpInput = ({
           fields: {
             config_id: id,
             meta: {
-              space_id: spaceIds ? spaceIds[1] : 'default',
+              space_id: spaceIds ? spaceIds[0] : 'default',
             },
             'monitor.fleet_managed': true,
             ...(projectId
