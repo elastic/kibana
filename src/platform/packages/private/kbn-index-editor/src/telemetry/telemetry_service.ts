@@ -10,6 +10,7 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE,
   INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE,
+  INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE,
 } from './events_registration';
 import { getBucket } from './utils';
 
@@ -74,6 +75,23 @@ export class IndexEditorTelemetryService {
         { label: '1s-3s', to: 3000 },
         { label: '3s-5s', to: 5000 },
       ]),
+    });
+  }
+
+  public trackEditInteraction(eventData: {
+    actionType:
+      | 'edit_cell'
+      | 'edit_column'
+      | 'add_row'
+      | 'add_column'
+      | 'delete_row'
+      | 'delete_column';
+    failureReason?: string;
+  }) {
+    this.reportEvent(INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE, {
+      flyout_mode: this._flyoutMode,
+      action_type: eventData.actionType,
+      failure_reason: eventData.failureReason,
     });
   }
 
