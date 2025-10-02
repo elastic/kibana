@@ -40,4 +40,8 @@ export type OverlayFlyoutOpenOptions = Omit<
    */
   onClose?: (flyout: OverlayRef) => void;
   isResizable?: boolean;
+  /**
+   * Title of the flyout to use in the top menu bar and for the aria-label.
+   */
+  flyoutTitle: string | Promise<string>;
 };

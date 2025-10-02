@@ -8,7 +8,6 @@
  */
 import React from 'react';
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
@@ -17,17 +16,18 @@ import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
-const htmlId = htmlIdGenerator('modalTitleId');
-
 interface LoadContentArgs {
   closeFlyout: () => void;
-  ariaLabelledBy: string;
 }
 
 interface OpenLazyFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
+  /**
+   * Title of the flyout to use in the top menu bar and for the aria-label.
+   */
+  flyoutTitle: string | Promise<string>;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
 
@@ -47,15 +47,21 @@ interface OpenLazyFlyoutParams {
  *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
  *                             Supports `OverlayFlyoutOpenOptions`.
+ * @param params.title - Title for the flyout, used for flyout top menu and aria-label.
  * @param params.parentApi - Optional parent API to track opened overlays (e.g. dashboardsApi).
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
-  const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
+  const { core, parentApi, loadContent, flyoutTitle: _title, flyoutProps: allFlyoutProps } = params;
+
+  let flyoutTitle = _title;
+  if (!flyoutTitle) {
+    flyoutTitle = 'Lazy Flyout';
+  }
+
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
 
-  const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   const onClose = () => {
@@ -75,16 +81,9 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   });
 
   const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(
-      <LazyFlyout
-        closeFlyout={onClose}
-        loadContent={loadContent}
-        core={core}
-        ariaLabelledBy={ariaLabelledBy}
-      />,
-      core
-    ),
+    toMountPoint(<LazyFlyout closeFlyout={onClose} loadContent={loadContent} core={core} />, core),
     {
+      flyoutTitle,
       size: 500,
       type: 'push',
       paddingSize: 'm',
@@ -93,7 +92,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
-      'aria-labelledby': ariaLabelledBy,
       onClose,
       ...flyoutProps,
     }
@@ -106,11 +104,10 @@ function LazyFlyout({
   core,
   loadContent,
   closeFlyout,
-  ariaLabelledBy,
 }: LoadContentArgs & Pick<OpenLazyFlyoutParams, 'core' | 'loadContent'>) {
   const [LoadedFlyout, setLoadedFlyout] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
-    const editFlyoutContent = await loadContent?.({ closeFlyout, ariaLabelledBy });
+    const editFlyoutContent = await loadContent?.({ closeFlyout });
     if (editFlyoutContent) {
       setLoadedFlyout(editFlyoutContent);
     } else {
