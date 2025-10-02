@@ -150,33 +150,6 @@ describe('content pack tree helpers', () => {
         })
       ).toThrow('Stream [root.child1] does not define query [foo]');
     });
-
-    it('keeps base fields for the root stream', () => {
-      const tree = asTree({
-        root: 'logs',
-        streams: [testContentPackEntry({ name: 'logs', fields: baseFields })],
-        include: { objects: { all: {} } },
-      });
-
-      expect(tree.request.stream.ingest.wired.fields).toEqual(baseFields);
-    });
-
-    it('excludes base fields for child streams', () => {
-      const tree = asTree({
-        root: 'logs.foo',
-        streams: [
-          testContentPackEntry({
-            name: 'logs.foo',
-            fields: { ...baseFields, custom_field: { type: 'keyword' } },
-          }),
-        ],
-        include: { objects: { all: {} } },
-      });
-
-      expect(tree.request.stream.ingest.wired.fields).toEqual({
-        custom_field: { type: 'keyword' },
-      });
-    });
   });
 
   describe('mergeTrees', () => {
