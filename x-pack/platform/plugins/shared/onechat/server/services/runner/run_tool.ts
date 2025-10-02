@@ -6,7 +6,7 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
-import type { ToolResult } from '@kbn/onechat-common';
+import type { ToolResult, ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, ToolResultType } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
@@ -34,13 +34,18 @@ export const runTool = async <TParams = Record<string, unknown>>({
   const { toolsService, request } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<any, ZodObject<any>>;
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
+    ToolType,
+    any,
+    ZodObject<any>
+  >;
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
     async () => {
-      const validation = tool.schema.safeParse(toolParams);
+      const schema = await tool.getSchema();
+      const validation = schema.safeParse(toolParams);
       if (validation.error) {
         throw createBadRequestError(
           `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
@@ -53,7 +58,8 @@ export const runTool = async <TParams = Record<string, unknown>>({
       });
 
       try {
-        return await tool.handler(validation.data as Record<string, any>, toolHandlerContext);
+        const toolHandler = await tool.getHandler();
+        return await toolHandler(validation.data as Record<string, any>, toolHandlerContext);
       } catch (err) {
         return {
           results: [{ type: ToolResultType.error, data: { message: err.message } }] as ToolResult[],

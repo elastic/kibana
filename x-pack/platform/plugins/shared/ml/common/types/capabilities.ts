@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
+import { AlertConsumers, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { PLUGIN_ID } from '../constants/app';
 import {
@@ -113,7 +113,12 @@ export function getDefaultCapabilities(): MlCapabilities {
 
 export const alertingFeatures = Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
+  consumers: [
+    PLUGIN_ID,
+    ALERTING_FEATURE_ID,
+    ...DEPRECATED_ALERTING_CONSUMERS,
+    AlertConsumers.STACK_ALERTS,
+  ],
 }));
 
 export function getPluginPrivileges() {
