@@ -476,8 +476,6 @@ export function buildComponentTemplates(params: {
     _meta,
   };
 
-  console.dir(templatesMap[packageTemplateName], { depth: null });
-
   // Stub custom template
   if (type) {
     const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
