@@ -55,7 +55,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          'Classic streams are based on existing data streams and may not support all Streams features like partitioning.',
+          'Classic streams are based on existing data streams and don't support all Streams features like partitioning.',
       })}
       anchorProps={{
         css: css`
