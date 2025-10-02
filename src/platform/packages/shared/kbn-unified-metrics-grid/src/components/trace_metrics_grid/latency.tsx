@@ -9,11 +9,14 @@
 
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React from 'react';
+import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
+import { AT_TIMESTAMP, DURATION, PROCESSOR_EVENT, TRANSACTION_DURATION } from '@kbn/apm-types';
+import type { DataSource } from '.';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
 import { LensWrapper } from '../chart/lens_wrapper';
+import { ChartContainer } from '../chart_container';
 interface Props {
   indexes: string;
   getTimeRange: ChartSectionProps['requestParams']['getTimeRange'];
@@ -24,6 +27,26 @@ interface Props {
   onBrushEnd: ChartSectionProps['onBrushEnd'];
   onFilter: ChartSectionProps['onFilter'];
   filters: string[];
+  dataSource: DataSource;
+}
+
+function getQuery(dataSource: DataSource, indexes: string, filters: string[]) {
+  const whereClauses = [...filters, `${PROCESSOR_EVENT} == "transaction"`].map((filter) =>
+    where(filter)
+  );
+  return from(indexes)
+    .pipe(
+      ...whereClauses,
+      dataSource === 'apm'
+        ? evaluate(`duration_ms = ROUND(${TRANSACTION_DURATION})/1000`) // apm duration is in us
+        : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+      stats(
+        `avg_duration = AVG(duration_ms) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+      ),
+      keep('avg_duration, timestamp'),
+      sort('timestamp')
+    )
+    .toString();
 }
 
 export const LatencyChart = ({
@@ -36,22 +59,11 @@ export const LatencyChart = ({
   onBrushEnd,
   onFilter,
   filters,
+  dataSource,
 }: Props) => {
-  const whereClauses = [...filters, 'processor.event == "transaction"'].map((filter) =>
-    where(filter)
-  );
-  const query = from(indexes)
-    .pipe(
-      ...whereClauses,
-      evaluate('duration_ms = ROUND(transaction.duration.us)/1000'),
-      stats(
-        'avg_duration = AVG(duration_ms) BY timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend) '
-      ),
-      keep('avg_duration, timestamp'),
-      sort('timestamp')
-    )
-    .toString();
-  console.log('### caue ~ LatencyChart ~ query:', query);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const query = getQuery(dataSource, indexes, filters);
 
   const latencyLensProps = useLensProps({
     title: 'Latency',
@@ -64,21 +76,24 @@ export const LatencyChart = ({
     searchSessionId,
     color: chartPalette[2],
     abortController,
+    chartRef,
   });
 
   if (!latencyLensProps) {
-    return null;
+    return undefined;
   }
 
   return (
-    <LensWrapper
-      size="s"
-      lensProps={latencyLensProps}
-      metricName={'Latency'}
-      services={services}
-      onBrushEnd={onBrushEnd}
-      onFilter={onFilter}
-      abortController={abortController}
-    />
+    <ChartContainer size="s" ref={chartRef}>
+      <LensWrapper
+        lensProps={latencyLensProps}
+        services={services}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        abortController={abortController}
+        syncCursor
+        syncTooltips
+      />
+    </ChartContainer>
   );
 };

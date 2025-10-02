@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -18,6 +17,7 @@ import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+import { ChartContainer } from '../chart_container';
 
 export const ChartSizes = {
   s: 230,
@@ -52,7 +52,6 @@ export const Chart = ({
   size = 'm',
   filters = [],
 }: ChartProps) => {
-  const { euiTheme } = useEuiTheme();
   const chartRef = useRef<HTMLDivElement>(null);
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
@@ -91,21 +90,7 @@ export const Chart = ({
   }, [onViewDetails, esqlQuery, metric]);
 
   return (
-    <div
-      css={css`
-        height: ${ChartSizes[size]}px;
-        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-        border-radius: ${euiTheme.border.radius.medium};
-
-        &:hover {
-          .metricsExperienceChartTitle {
-            z-index: ${Number(euiTheme.levels.menu) + 1};
-            transition: none;
-          }
-        }
-      `}
-      ref={chartRef}
-    >
+    <ChartContainer size={size} ref={chartRef}>
       {lensProps ? (
         <>
           <LensWrapperMemo
@@ -139,6 +124,6 @@ export const Chart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </div>
+    </ChartContainer>
   );
 };

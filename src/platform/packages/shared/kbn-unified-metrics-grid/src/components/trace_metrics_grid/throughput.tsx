@@ -9,11 +9,13 @@
 
 import { from, keep, sort, stats, where } from '@kbn/esql-composer';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React from 'react';
+import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
+import { AT_TIMESTAMP, PROCESSOR_EVENT } from '@kbn/apm-types';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
 import { LensWrapper } from '../chart/lens_wrapper';
+import { ChartContainer } from '../chart_container';
 
 interface Props {
   indexes: string;
@@ -38,18 +40,18 @@ export const ThroughputChart = ({
   onFilter,
   filters,
 }: Props) => {
-  const whereClauses = [...filters, 'processor.event == "transaction"'].map((filter) =>
+  const chartRef = useRef<HTMLDivElement>(null);
+  const whereClauses = [...filters, `${PROCESSOR_EVENT} == "transaction"`].map((filter) =>
     where(filter)
   );
   const query = from(indexes)
     .pipe(
       ...whereClauses,
-      stats('throughput = COUNT(*) BY timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)'),
+      stats(`throughput = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`),
       keep('timestamp, throughput'),
       sort('timestamp')
     )
     .toString();
-  console.log('### caue ~ ThroughputChart ~ query:', query);
 
   const throughputLensProps = useLensProps({
     title: 'Throughput',
@@ -62,6 +64,7 @@ export const ThroughputChart = ({
     searchSessionId,
     color: chartPalette[0],
     abortController,
+    chartRef,
   });
 
   if (!throughputLensProps) {
@@ -69,14 +72,16 @@ export const ThroughputChart = ({
   }
 
   return (
-    <LensWrapper
-      size="s"
-      lensProps={throughputLensProps}
-      metricName={'Throughput'}
-      services={services}
-      onBrushEnd={onBrushEnd}
-      onFilter={onFilter}
-      abortController={abortController}
-    />
+    <ChartContainer size="s" ref={chartRef}>
+      <LensWrapper
+        lensProps={throughputLensProps}
+        services={services}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        abortController={abortController}
+        syncCursor
+        syncTooltips
+      />
+    </ChartContainer>
   );
 };

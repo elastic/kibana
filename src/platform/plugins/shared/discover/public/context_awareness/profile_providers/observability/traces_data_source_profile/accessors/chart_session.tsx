@@ -9,22 +9,26 @@
 
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { TraceMetricsGrid } from '@kbn/unified-metrics-grid';
+import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
 import React from 'react';
 import { once } from 'lodash';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection = (
-  indexes: TraceIndexes
+  indexes: TraceIndexes,
+  dataSource: DataSource
 ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   // prevents unmounting the component when the query changes but the index pattern is still valid
   once((prev: () => ChartSectionConfiguration) =>
     once((): ChartSectionConfiguration => {
       return {
         ...(prev ? prev() : {}),
-        Component: (props: ChartSectionProps) => <TraceMetricsGrid {...props} indexes={indexes} />,
+        Component: (props: ChartSectionProps) => (
+          <TraceMetricsGrid {...props} indexes={indexes} dataSource={dataSource} />
+        ),
         replaceDefaultChart: true,
+        defaultTopPanelHeight: 'max-content',
       };
     })
   );

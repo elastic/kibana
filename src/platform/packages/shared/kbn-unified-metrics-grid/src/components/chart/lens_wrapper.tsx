@@ -18,7 +18,9 @@ import { useMetricsGridState } from '../../hooks';
 export type LensWrapperProps = {
   lensProps: LensProps;
   onViewDetails?: () => void;
-  onCopyToDashboard: () => void;
+  onCopyToDashboard?: () => void;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
@@ -31,6 +33,8 @@ export function LensWrapper({
   abortController,
   onViewDetails,
   onCopyToDashboard,
+  syncTooltips,
+  syncCursor,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -71,7 +75,7 @@ export function LensWrapper({
   `;
 
   const extraActions = useLensExtraActions({
-    copyToDashboard: { onClick: onCopyToDashboard },
+    copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
   });
 
@@ -87,6 +91,8 @@ export function LensWrapper({
         withDefaultActions
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
+        syncTooltips={syncTooltips}
+        syncCursor={syncCursor}
       />
     </div>
   );

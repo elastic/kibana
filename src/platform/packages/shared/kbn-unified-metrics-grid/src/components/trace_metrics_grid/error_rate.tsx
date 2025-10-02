@@ -9,11 +9,14 @@
 
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React from 'react';
+import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
+import { AT_TIMESTAMP, EVENT_OUTCOME, PROCESSOR_EVENT, STATUS_CODE } from '@kbn/apm-types';
+import type { DataSource } from '.';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
 import { LensWrapper } from '../chart/lens_wrapper';
+import { ChartContainer } from '../chart_container';
 
 interface Props {
   indexes: string;
@@ -25,6 +28,28 @@ interface Props {
   onBrushEnd: ChartSectionProps['onBrushEnd'];
   onFilter: ChartSectionProps['onFilter'];
   filters: string[];
+  dataSource: DataSource;
+}
+
+function getQuery(dataSource: DataSource, indexes: string, filters: string[]) {
+  const whereClauses = [...filters, `${PROCESSOR_EVENT} == "transaction"`].map((filter) =>
+    where(filter)
+  );
+  return from(indexes)
+    .pipe(
+      ...whereClauses,
+      dataSource === 'apm'
+        ? stats(
+            `failure = COUNT(*) WHERE ${EVENT_OUTCOME} == "failure", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+          )
+        : stats(
+            `failure = COUNT(*) WHERE ${STATUS_CODE} == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+          ),
+      evaluate('error_rate = TO_DOUBLE(failure) / all'),
+      keep('timestamp, error_rate'),
+      sort('timestamp')
+    )
+    .toString();
 }
 
 export const ErrorRateChart = ({
@@ -37,22 +62,10 @@ export const ErrorRateChart = ({
   onBrushEnd,
   onFilter,
   filters,
+  dataSource,
 }: Props) => {
-  const whereClauses = [...filters, 'processor.event == "transaction"'].map((filter) =>
-    where(filter)
-  );
-  const query = from(indexes)
-    .pipe(
-      ...whereClauses,
-      stats(
-        'failure = COUNT(*) WHERE event.outcome == "failure", all = COUNT(*)  BY timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
-      ),
-      evaluate('error_rate = TO_DOUBLE(failure) / all'),
-      keep('timestamp, error_rate'),
-      sort('timestamp')
-    )
-    .toString();
-  console.log('### caue ~ ErrorRateChart ~ query:', query);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const query = getQuery(dataSource, indexes, filters);
 
   const errorRateLensProps = useLensProps({
     title: 'Error Rate',
@@ -65,6 +78,7 @@ export const ErrorRateChart = ({
     searchSessionId,
     color: chartPalette[6],
     abortController,
+    chartRef,
   });
 
   if (!errorRateLensProps) {
@@ -72,14 +86,16 @@ export const ErrorRateChart = ({
   }
 
   return (
-    <LensWrapper
-      size="s"
-      lensProps={errorRateLensProps}
-      metricName={'Error Rate'}
-      services={services}
-      onBrushEnd={onBrushEnd}
-      onFilter={onFilter}
-      abortController={abortController}
-    />
+    <ChartContainer size="s" ref={chartRef}>
+      <LensWrapper
+        lensProps={errorRateLensProps}
+        services={services}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        abortController={abortController}
+        syncCursor
+        syncTooltips
+      />
+    </ChartContainer>
   );
 };

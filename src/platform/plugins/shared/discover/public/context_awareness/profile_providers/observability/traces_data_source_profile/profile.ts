@@ -16,14 +16,11 @@ import {
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getCellRenderers, getColumnsConfiguration } from './accessors';
-import { createChartSection } from './accessors/chart_session';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
 export const createTracesDataSourceProfileProvider = ({
   tracesContextService,
-  apmErrorsContextService,
-  logsContextService,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
@@ -35,13 +32,6 @@ export const createTracesDataSourceProfileProvider = ({
     }),
     getCellRenderers,
     getColumnsConfiguration,
-    getChartSectionConfiguration: createChartSection({
-      apm: {
-        errors: apmErrorsContextService.getErrorsIndexPattern(),
-        traces: tracesContextService.getAllTracesIndexPattern(),
-      },
-      logs: logsContextService.getAllLogsIndexPattern(),
-    }),
   },
   resolve: (params) => {
     if (

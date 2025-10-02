@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
@@ -22,6 +22,8 @@ import { ThroughputChart } from './throughput';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
+export type DataSource = 'apm' | 'otel';
+
 function TraceMetricsGrid({
   requestParams,
   services,
@@ -32,8 +34,10 @@ function TraceMetricsGrid({
   abortController,
   indexes,
   query,
+  dataSource,
 }: ChartSectionProps & {
   indexes: TraceIndexes;
+  dataSource: DataSource;
 }) {
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
@@ -68,12 +72,12 @@ function TraceMetricsGrid({
 
   return (
     <Provider store={store}>
-      <EuiSpacer size="m" />
       <EuiPanel
         hasBorder={false}
         hasShadow={false}
         css={css`
           height: 100%;
+          align-content: center;
         `}
       >
         <EuiFlexGrid columns={3}>
@@ -88,6 +92,7 @@ function TraceMetricsGrid({
               onBrushEnd={onBrushEnd}
               onFilter={onFilter}
               filters={filters}
+              dataSource={dataSource}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -101,6 +106,7 @@ function TraceMetricsGrid({
               onBrushEnd={onBrushEnd}
               onFilter={onFilter}
               filters={filters}
+              dataSource={dataSource}
             />
           </EuiFlexItem>
           <EuiFlexItem>
