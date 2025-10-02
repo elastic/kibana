@@ -15,12 +15,12 @@ import { DimensionBadges } from './dimension_badges';
 import { categorizeDimensions } from '../../common/utils/dimensions';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
-
 interface OverviewTabProps {
   metric: MetricField;
+  description?: string;
 }
 
-export const OverviewTab = ({ metric }: OverviewTabProps) => {
+export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const { requiredDimensions, optionalDimensions } = categorizeDimensions(
     metric.dimensions || [],
     metric.name
@@ -30,51 +30,7 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
 
   return (
     <>
-      <TabTitleAndDescription metric={metric} />
-      {metric.source === 'otel' && metric.stability && (
-        <>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate(
-                'metricsExperience.overviewTab.strong.opentelemetrySemanticConventionsLabel',
-                { defaultMessage: 'OpenTelemetry Semantic Conventions' }
-              )}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiDescriptionList
-            type="column"
-            data-test-subj="metricsExperienceFlyoutOverviewTabOtelDescriptionList"
-            compressed
-            listItems={[
-              {
-                title: (
-                  <EuiText size="xs">
-                    {i18n.translate('metricsExperience.overviewTab.stabilityTextLabel', {
-                      defaultMessage: 'Stability',
-                    })}
-                  </EuiText>
-                ),
-                description: (
-                  <EuiBadge
-                    color={
-                      metric.stability === 'stable'
-                        ? 'success'
-                        : metric.stability === 'experimental'
-                        ? 'warning'
-                        : 'default'
-                    }
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {metric.stability}
-                  </EuiBadge>
-                ),
-              },
-            ]}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <TabTitleAndDescription metric={metric} description={description} />
 
       <EuiDescriptionList
         compressed
@@ -91,7 +47,11 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                 </strong>
               </EuiText>
             ),
-            description: <EuiText color="primary">{metric.index}</EuiText>,
+            description: (
+              <EuiText color="primary" size="s">
+                {metric.index}
+              </EuiText>
+            ),
           },
           {
             title: (

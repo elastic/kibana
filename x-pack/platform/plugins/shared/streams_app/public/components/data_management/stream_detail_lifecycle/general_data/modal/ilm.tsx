@@ -78,7 +78,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.frozen', {
             defaultMessage:
-              'Frozen {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Frozen {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.frozen,
@@ -89,7 +89,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.cold', {
             defaultMessage:
-              'Cold {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Cold {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.cold,
@@ -100,7 +100,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.warm', {
             defaultMessage:
-              'Warm {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Warm {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.warm,
@@ -111,7 +111,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.hot', {
             defaultMessage:
-              'Hot {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Hot {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.hot,

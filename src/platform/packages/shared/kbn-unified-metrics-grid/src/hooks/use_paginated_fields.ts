@@ -44,11 +44,9 @@ export const usePaginatedFields = ({
     );
 
     return {
-      allFields,
       currentPageFields,
       filteredFieldsBySearch,
       totalPages,
-      dimensions,
     };
   }, [currentPage, dimensions, fields, pageSize, searchTerm]);
 
