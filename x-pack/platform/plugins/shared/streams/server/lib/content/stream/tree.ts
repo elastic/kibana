@@ -123,13 +123,17 @@ function assertNoConflicts(existing: ContentPackStream, incoming: ContentPackStr
     }
   }
 
-  // fields
-  for (const [field, fieldConfig] of Object.entries(incoming.request.stream.ingest.wired.fields)) {
-    const existingField = existing.request.stream.ingest.wired.fields[field];
-    if (existingField && !isEqual(existingField, fieldConfig)) {
-      throw new ContentPackConflictError(
-        `Cannot change mapping of [${field}] for [${existing.name}]`
-      );
+  // fields (root stream fields are immutable)
+  if (!isRoot(existing.name)) {
+    for (const [field, fieldConfig] of Object.entries(
+      incoming.request.stream.ingest.wired.fields
+    )) {
+      const existingField = existing.request.stream.ingest.wired.fields[field];
+      if (existingField && !isEqual(existingField, fieldConfig)) {
+        throw new ContentPackConflictError(
+          `Cannot change mapping of [${field}] for [${existing.name}]`
+        );
+      }
     }
   }
 
