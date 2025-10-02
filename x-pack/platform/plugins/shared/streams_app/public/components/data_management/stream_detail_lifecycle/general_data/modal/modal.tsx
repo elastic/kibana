@@ -31,7 +31,7 @@ import { IlmField } from './ilm';
 import { DslField, DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE } from './dsl';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-export type LifecycleEditAction = 'ilm' | 'custom' | 'indefinite';
+export type LifecycleEditAction = 'ilm' | 'custom' | 'forever';
 
 interface Props {
   closeModal: () => void;
@@ -55,7 +55,7 @@ export function EditLifecycleModal({
     ? 'ilm'
     : isDslLifecycle(definition.effective_lifecycle) &&
       !definition.effective_lifecycle.dsl.data_retention
-    ? 'indefinite'
+    ? 'forever'
     : 'custom';
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
@@ -73,9 +73,9 @@ export function EditLifecycleModal({
   const toggleButtonsCompressed = useMemo(() => {
     const buttons = [
       {
-        id: 'indefinite',
-        label: i18n.translate('xpack.streams.streamDetailLifecycle.indefinite', {
-          defaultMessage: 'Indefinite',
+        id: 'forever',
+        label: i18n.translate('xpack.streams.streamDetailLifecycle.forever', {
+          defaultMessage: 'Forever',
         }),
       },
       {
@@ -185,7 +185,7 @@ export function EditLifecycleModal({
                 defaultMessage: 'Data retention',
               })}
               onChange={(value) => {
-                if (value === 'indefinite') {
+                if (value === 'forever') {
                   setLifecycle({ dsl: {} });
                   setIsSaveButtonDisabled(false);
                 }

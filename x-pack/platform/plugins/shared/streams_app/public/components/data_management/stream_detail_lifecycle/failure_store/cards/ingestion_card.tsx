@@ -7,8 +7,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
@@ -25,42 +23,17 @@ export const IngestionCard = ({
 }) => {
   const hasPrivileges = definition.privileges?.manage_failure_store;
 
-  const title = (
-    <EuiToolTip
-      title={i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltipTitle',
-        {
-          defaultMessage: 'How we calculate failed ingestion averages',
-        }
-      )}
-      content={i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltip',
-        {
-          defaultMessage:
-            'Approximate average (failure store indices total size divided by the number of days since creation)',
-        }
-      )}
-    >
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title"
-        defaultMessage="Failed ingestion averages {tooltipIcon}"
-        values={{
-          tooltipIcon: <EuiIcon type="question" />,
-        }}
-      />
-    </EuiToolTip>
+  const title = i18n.translate(
+    'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title',
+    {
+      defaultMessage: 'Failed ingestion averages',
+    }
   );
 
   const metrics = [
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={hasPrivileges}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.storagesizeLabel',
-            { defaultMessage: 'storageSize' }
-          )}
-        >
+        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
@@ -75,13 +48,7 @@ export const IngestionCard = ({
     },
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={hasPrivileges}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.storagesizeLabel',
-            { defaultMessage: 'storageSize' }
-          )}
-        >
+        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),

@@ -70,14 +70,9 @@ export const DOCUMENTS_NO_DATA_ICON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'No chart data available' }
 );
 
-export const INDEFINITE_RETENTION_ARIA_LABEL = i18n.translate(
-  'xpack.streams.streamsRetentionColumn.indefiniteRetentionAriaLabel',
-  { defaultMessage: 'Indefinite retention - data is kept indefinitely' }
-);
-
-export const INDEFINITE_RETENTION_LABEL = i18n.translate(
-  'xpack.streams.streamsRetentionColumn.indefiniteRetentionLabel',
-  { defaultMessage: 'Indefinite' }
+export const INFINITE_RETENTION_LABEL = i18n.translate(
+  'xpack.streams.streamsRetentionColumn.infiniteRetentionAriaLabel',
+  { defaultMessage: 'Infinite retention - data is kept indefinitely' }
 );
 
 export const NO_RETENTION_LABEL = i18n.translate(
