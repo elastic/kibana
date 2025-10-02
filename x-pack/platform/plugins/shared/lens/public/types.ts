@@ -1231,7 +1231,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationToolbarProps<T>
   ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
-  SettingsPanelToolbar?: (
+  FlyoutToolbarComponent?: (
     props: VisualizationToolbarProps<T>
   ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
