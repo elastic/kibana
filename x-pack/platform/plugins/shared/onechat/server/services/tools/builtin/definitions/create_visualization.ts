@@ -67,6 +67,7 @@ This tool will:
       try {
         // Step 1: Determine chart type if not provided
         let selectedChartType: SupportedChartType = chartType || 'metric';
+        const parsedExistingConfig = existingConfig ? JSON.parse(existingConfig) : null;
 
         if (!chartType) {
           logger.debug('Chart type not provided, using LLM to suggest one');
@@ -86,7 +87,9 @@ Guidelines:
             },
             {
               role: 'user',
-              content: nlQuery,
+              content: existingConfig
+                ? `Existing chart type to modify: ${parsedExistingConfig.type}\n\nUser query: ${nlQuery}`
+                : nlQuery,
             },
           ]);
 
@@ -111,7 +114,9 @@ Guidelines:
           const generateEsqlResult = await runner.runTool({
             toolId: platformCoreTools.generateEsql,
             toolParams: {
-              query: nlQuery,
+              query: existingConfig
+                ? `Existing esql query to modify: "${parsedExistingConfig.dataset.query}"\n\nUser query: ${nlQuery}`
+                : nlQuery,
             },
           });
 
@@ -145,6 +150,7 @@ Guidelines:
 
         const systemPrompt = `You are a Kibana Lens visualization configuration expert. Generate a valid JSON configuration for a ${selectedChartType} visualization based on the provided schema and ES|QL query.
 
+
 Schema for ${selectedChartType}:
 ${JSON.stringify(schema, null, 2)}
 
@@ -157,7 +163,7 @@ IMPORTANT RULES:
 4. All field names must match those available in the ES|QL query result
 5. Make sure to follow schema definition strictly`;
 
-        logger.debug(`System prompt: ${systemPrompt}`);
+        // logger.debug(`System prompt: ${systemPrompt}`);
 
         // Build conversation messages array that will accumulate across retries
         const conversationMessages: Array<{ role: string; content: string }> = [
