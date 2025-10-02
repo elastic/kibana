@@ -26,7 +26,8 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import YAML, { type Pair, type Scalar, isPair, isScalar } from 'yaml';
+import type YAML from 'yaml';
+import { type Pair, type Scalar, isPair, isScalar } from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getStepNodesWithType,
@@ -59,8 +60,13 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
-import type { StepInfo } from '../lib/state';
-import { selectFocusedStepInfo, setCursorPosition, setYamlString } from '../lib/state';
+import type { StepInfo } from '../lib/store';
+import {
+  selectFocusedStepInfo,
+  selectYamlDocument,
+  setCursorPosition,
+  setYamlString,
+} from '../lib/store';
 import { useFocusedStepOutline } from '../lib/hooks';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
@@ -159,8 +165,6 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
-  const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
-  const yamlDocumentRef = useRef<YAML.Document | null>(null);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
 
   // Keep stepExecutionsRef in sync
@@ -186,6 +190,10 @@ export const WorkflowYAMLEditor = ({
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const yamlDocument = useSelector(selectYamlDocument);
+  const yamlDocumentRef = useRef<YAML.Document | undefined>(undefined);
+  yamlDocumentRef.current = yamlDocument;
+
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
 
@@ -222,10 +230,6 @@ export const WorkflowYAMLEditor = ({
     }
     return changed;
   }, []);
-
-  useEffect(() => {
-    dispatch(setYamlString(yamlDocument?.toString() || ''));
-  }, [yamlDocument, dispatch]);
 
   const updateContainerPosition = (
     stepInfo: StepInfo,
@@ -338,25 +342,23 @@ export const WorkflowYAMLEditor = ({
     (isTypingChange = false) => {
       if (editorRef.current) {
         const model = editorRef.current.getModel();
+
         if (!model) {
           return;
         }
+        dispatch(setYamlString(model.getValue()));
         validateVariables(editorRef.current);
-        try {
-          const value = model.getValue();
-          const parsedDocument = YAML.parseDocument(value ?? '');
-          setYamlDocument(parsedDocument);
-          yamlDocumentRef.current = parsedDocument;
-        } catch (error) {
-          // console.error('❌ Error parsing YAML document:', error);
-          clearAllDecorations();
-          setYamlDocument(null);
-          yamlDocumentRef.current = null;
-        }
       }
     },
-    [validateVariables, clearAllDecorations]
+    [validateVariables, dispatch]
   );
+
+  useEffect(() => {
+    if (yamlDocument) {
+      return;
+    }
+    clearAllDecorations();
+  }, [yamlDocument, clearAllDecorations]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -431,20 +433,12 @@ export const WorkflowYAMLEditor = ({
       const value = model.getValue();
       if (value && value.trim() !== '') {
         validateVariables(editor);
-        try {
-          const parsedDocument = YAML.parseDocument(value);
-          // Use setTimeout to defer state updates until after the current render cycle
-          // This prevents the flushSync warning while maintaining the correct order
-          setTimeout(() => {
-            setYamlDocument(parsedDocument);
-            setIsEditorMounted(true);
-          }, 0);
-        } catch (error) {
-          setTimeout(() => {
-            setYamlDocument(null);
-            setIsEditorMounted(true);
-          }, 0);
-        }
+        // Use setTimeout to defer state updates until after the current render cycle
+        // This prevents the flushSync warning while maintaining the correct order
+        setTimeout(() => {
+          dispatch(setYamlString(value));
+          setIsEditorMounted(true);
+        }, 0);
       } else {
         // If no content, just set the mounted state
         setTimeout(() => {
@@ -482,7 +476,7 @@ export const WorkflowYAMLEditor = ({
 
       // Create unified providers
       const providerConfig = {
-        getYamlDocument: () => yamlDocumentRef.current,
+        getYamlDocument: () => yamlDocumentRef.current || null,
         options: {
           http,
           notifications: notifications as any,
@@ -690,7 +684,7 @@ export const WorkflowYAMLEditor = ({
 
         const stepExecutionProvider = createStepExecutionProvider(editorRef.current!, {
           getYamlDocument: () => {
-            return yamlDocumentRef.current;
+            return yamlDocumentRef.current || null;
           },
           getStepExecutions: () => {
             return stepExecutionsRef.current || [];

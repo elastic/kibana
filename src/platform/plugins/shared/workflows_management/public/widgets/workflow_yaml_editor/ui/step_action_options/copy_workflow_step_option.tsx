@@ -12,7 +12,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useSelector } from 'react-redux';
-import { selectFocusedStepInfo } from '../../lib/state';
+import { selectFocusedStepInfo } from '../../lib/store';
 
 export interface CopyWorkflowStepOption {
   onClick: () => void;
