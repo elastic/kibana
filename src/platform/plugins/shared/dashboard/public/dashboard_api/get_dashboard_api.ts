@@ -285,7 +285,7 @@ export function getDashboardApi({
               resolve();
             });
         });
-      }
+      },
     } as DashboardInternalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
