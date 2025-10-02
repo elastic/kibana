@@ -109,10 +109,6 @@ describe('reindexService', () => {
               allow_restricted_indices: true,
               privileges: ['all'],
             },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
           ],
         },
       });

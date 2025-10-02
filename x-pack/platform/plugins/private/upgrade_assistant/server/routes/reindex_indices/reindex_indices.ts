@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { ReindexStatusResponse, REINDEX_OP_TYPE } from '../../../common/types';
@@ -24,11 +25,16 @@ export function registerReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
+    getSavedObjectsService,
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
+
+  const soClient = new SavedObjectsClient(
+    getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+  );
 
   // Start reindex for an index
   router.post(
@@ -48,13 +54,13 @@ export function registerReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indexName } = request.params;
+
       try {
         const result = await reindexHandler({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          savedObjects: soClient,
           dataClient: esClient,
           indexName,
           log,
@@ -91,16 +97,12 @@ export function registerReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
-      const { getClient } = savedObjects;
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser
-      );
+
+      const reindexActions = reindexActionsFactory( soClient, asCurrentUser);
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
       try {
