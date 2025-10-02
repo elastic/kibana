@@ -92,7 +92,7 @@ export async function loadDashboardApi({
     creationStartTime,
   });
 
-  if (savedObjectId && !incomingEmbeddables) {
+  if (savedObjectId && !incomingEmbeddables?.length) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling

@@ -6,7 +6,6 @@
  */
 import { v4 as generateId } from 'uuid';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Reference } from '@kbn/content-management-utils';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
@@ -14,13 +13,39 @@ import {
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
   DEFAULT_AUTO_APPLY_SELECTIONS,
+  CONTROLS_GROUP_TYPE,
 } from '@kbn/controls-constants';
-import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extract } from '../../common/embeddable_factory';
 import type { LensSerializedState } from '../react_embeddable/types';
+
+/**
+ * Transforms control panels state into controls group state format.
+ * @param controlsState - The control panels state to transform
+ * @returns Array of control configurations for the controls group
+ */
+function transformControlPanelsToControlsGroup(
+  controlsState?: ControlPanelsState
+): ControlsGroupState['controls'] {
+  const controls: ControlsGroupState['controls'] = [];
+
+  Object.values(controlsState ?? {}).forEach((panel, idx) => {
+    const { width, grow, type, ...controlConfig } = panel;
+    const id = generateId();
+    controls.push({
+      id,
+      grow,
+      order: idx,
+      type,
+      width,
+      controlConfig,
+    });
+  });
+
+  return controls;
+}
 
 export const redirectToDashboard = ({
   embeddableInput: rawState,
@@ -41,19 +66,8 @@ export const redirectToDashboard = ({
 
   const appId = originatingApp || 'dashboards';
 
-  const controls: ControlsGroupState['controls'] = [];
-  Object.values(controlsState ?? {}).forEach((panel, idx) => {
-    const { width, grow, type, ...controlConfig } = panel;
-    const id = generateId();
-    controls.push({
-      id,
-      grow,
-      order: idx,
-      type,
-      width,
-      controlConfig,
-    });
-  });
+  const controls = transformControlPanelsToControlsGroup(controlsState);
+
   const embeddablePackages: EmbeddablePackageState[] = [
     {
       type: LENS_EMBEDDABLE_TYPE,
@@ -76,7 +90,7 @@ export const redirectToDashboard = ({
           ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
           controls,
         },
-        references: [] as Reference[],
+        references: [],
       },
     });
   }

@@ -99,7 +99,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     removeAfterFetch?: boolean
   ): EmbeddablePackageState[] | undefined {
-    return this.getIncomingPackageState<EmbeddablePackageState>(
+    return this.getIncomingPackagesState<EmbeddablePackageState>(
       isEmbeddablePackageState,
       appId,
       EMBEDDABLE_PACKAGE_STATE_KEY,
@@ -200,7 +200,17 @@ export class EmbeddableStateTransfer {
     return castState;
   }
 
-  private getIncomingPackageState<IncomingStateType>(
+  /**
+   * Retrieves incoming embeddable package states from session storage, handling both single items and arrays.
+   * Always returns an array format. Filters results using the provided type guard.
+   *
+   * @param guard - Type guard function to validate state items
+   * @param appId - The application ID to fetch state for
+   * @param key - The storage key to retrieve state from
+   * @param options - Optional configuration including keys to remove after fetch
+   * @returns Array of valid package states, or undefined if no valid states found
+   */
+  private getIncomingPackagesState<IncomingStateType>(
     guard: (state: unknown) => state is IncomingStateType,
     appId: string,
     key: string,
@@ -235,7 +245,6 @@ export class EmbeddableStateTransfer {
       return [cloneDeep(incomingState)];
     }
 
-    // Return undefined if neither case is a match
     return undefined;
   }
 

@@ -110,6 +110,78 @@ describe('layout manager', () => {
     });
   });
 
+  test('should append more than one incoming embeddables to existing panels', () => {
+    const incomingEmbeddables = [
+      {
+        embeddableId: 'panelTwo',
+        serializedState: {
+          rawState: {
+            title: 'Panel Two',
+          },
+        },
+        size: {
+          height: 1,
+          width: 1,
+        },
+        type: 'testPanelType',
+      },
+      {
+        embeddableId: 'panelThree',
+        serializedState: {
+          rawState: {
+            title: 'Panel Three',
+          },
+        },
+        size: {
+          height: 1,
+          width: 1,
+        },
+        type: 'anotherPanelType',
+      },
+    ];
+    const layoutManager = initializeLayoutManager(
+      incomingEmbeddables,
+      [panel1],
+      trackPanelMock,
+      () => []
+    );
+
+    const layout = layoutManager.internalApi.layout$.value;
+    expect(Object.keys(layout.panels).length).toBe(3);
+    expect(layout.panels.panelTwo).toEqual({
+      grid: {
+        h: 1,
+        i: 'panelTwo',
+        sectionId: undefined,
+        w: 1,
+        x: 1,
+        y: 0,
+      },
+      type: 'testPanelType',
+    });
+    expect(layout.panels.panelThree).toEqual({
+      grid: {
+        h: 1,
+        i: 'panelThree',
+        sectionId: undefined,
+        w: 1,
+        x: 2,
+        y: 0,
+      },
+      type: 'anotherPanelType',
+    });
+    const incomingPanelStatePanelTwo =
+      layoutManager.internalApi.getSerializedStateForPanel('panelTwo');
+    const incomingPanelStatePanelThree =
+      layoutManager.internalApi.getSerializedStateForPanel('panelThree');
+    expect(incomingPanelStatePanelTwo.rawState).toEqual({
+      title: 'Panel Two',
+    });
+    expect(incomingPanelStatePanelThree.rawState).toEqual({
+      title: 'Panel Three',
+    });
+  });
+
   describe('duplicatePanel', () => {
     test('should add duplicated panel to layout', async () => {
       const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
