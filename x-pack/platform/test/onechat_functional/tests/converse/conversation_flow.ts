@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Simple Conversation Flow', function () {
+  describe('Conversation Flow', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
