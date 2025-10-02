@@ -22,15 +22,15 @@ import { LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PartitionChartsMeta } from './partition_charts_meta';
-import type { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
-import { EmptySizeRatios } from '../../../common/types';
-import { LegendDisplay, NumberDisplay } from '../../../common/constants';
-import type { VisualizationToolbarProps } from '../../types';
-import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
-import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { getLegendStats } from './render_helpers';
+import { DEFAULT_PERCENT_DECIMALS } from '../constants';
+import { PartitionChartsMeta } from '../partition_charts_meta';
+import type { PieVisualizationState, SharedPieLayerState } from '../../../../common/types';
+import { EmptySizeRatios } from '../../../../common/types';
+import { LegendDisplay, NumberDisplay } from '../../../../common/constants';
+import type { VisualizationToolbarProps } from '../../../types';
+import { ToolbarPopover, LegendSettingsPopover } from '../../../shared_components';
+import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
+import { getLegendStats } from '../render_helpers';
 
 const partitionLegendValues = [
   {
@@ -285,6 +285,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           ) : null}
         </ToolbarPopover>
       </EuiFlexItem>
+      {/* legend */}
       <EuiFlexItem grow={false}>
         <LegendSettingsPopover<PartitionLegendValue>
           groupPosition={'none'}
@@ -349,3 +350,156 @@ const DecimalPlaceInput = ({
     />
   );
 };
+
+export function PartitionAppearanceSettings(
+  props: VisualizationToolbarProps<PieVisualizationState>
+) {
+  const { state, setState } = props;
+  const layer = state.layers[0];
+  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const onEmptySizeRatioChange = useCallback(
+    ([option]: Array<EuiComboBoxOptionOption<string>>) => {
+      if (option.value === 'none') {
+        setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
+      } else {
+        const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === option.value)?.value;
+        setState({
+          ...state,
+          shape: 'donut',
+          layers: [{ ...layer, emptySizeRatio }],
+        });
+      }
+    },
+    [emptySizeRatioOptions, layer, setState, state]
+  );
+
+  const options =
+    emptySizeRatioOptions &&
+    emptySizeRatioOptions.map(({ id, label, icon }) => ({
+      value: id,
+      label,
+      prepend: icon ? <EuiIcon type={icon} /> : undefined,
+    }));
+
+  const selectedOption = emptySizeRatioOptions
+    ? emptySizeRatioOptions.find(
+        ({ value }) =>
+          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+      )
+    : undefined;
+
+  const selectedOptions = selectedOption
+    ? [{ value: selectedOption.id, label: selectedOption.label }]
+    : undefined;
+
+  return (
+    <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
+      <EuiComboBox
+        fullWidth
+        compressed
+        data-test-subj="lnsEmptySizeRatioOption"
+        aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
+          defaultMessage: 'Donut hole',
+        })}
+        onChange={onEmptySizeRatioChange}
+        isClearable={false}
+        options={options}
+        selectedOptions={selectedOptions}
+        singleSelection={{ asPlainText: true }}
+        prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
+      />
+    </EuiFormRow>
+  );
+}
+
+export function PartitionTitlesAndTextSettings(
+  props: VisualizationToolbarProps<PieVisualizationState>
+) {
+  const { state, setState } = props;
+  const layer = state.layers[0];
+  const { categoryOptions, numberOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const onStateChange = useCallback(
+    (part: Record<string, unknown>) => {
+      setState({
+        ...state,
+        layers: [{ ...layer, ...part }],
+      });
+    },
+    [layer, state, setState]
+  );
+
+  const onCategoryDisplayChange = useCallback(
+    (option: unknown) => onStateChange({ categoryDisplay: option }),
+    [onStateChange]
+  );
+
+  const onNumberDisplayChange = useCallback(
+    (option: unknown) => onStateChange({ numberDisplay: option }),
+    [onStateChange]
+  );
+
+  const onPercentDecimalsChange = useCallback(
+    (option: unknown) => {
+      onStateChange({ percentDecimals: option });
+    },
+    [onStateChange]
+  );
+
+  return (
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+          defaultMessage: 'Slice labels',
+        })}
+        fullWidth
+        display="columnCompressed"
+        isDisabled={!categoryOptions.length}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+            defaultMessage: 'Slice labels',
+          })}
+          options={categoryOptions}
+          idSelected={layer.categoryDisplay}
+          onChange={onCategoryDisplayChange}
+          buttonSize="compressed"
+          isFullWidth
+        />
+      </EuiFormRow>
+
+      {/* TODO?: Hide this or show disabled  */}
+      {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
+        <>
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.sliceValues', {
+              defaultMessage: 'Slice values',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                defaultMessage: 'Slice values',
+              })}
+              options={numberOptions}
+              idSelected={layer.numberDisplay}
+              onChange={onNumberDisplayChange}
+              buttonSize="compressed"
+              isFullWidth
+            />
+          </EuiFormRow>
+          {layer.numberDisplay === NumberDisplay.PERCENT && (
+            <EuiFormRow label=" " fullWidth display="columnCompressed">
+              <DecimalPlaceInput
+                value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+                setValue={onPercentDecimalsChange}
+              />
+            </EuiFormRow>
+          )}
+        </>
+      ) : null}
+    </>
+  );
+}
