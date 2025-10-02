@@ -12,7 +12,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
-import { useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
 
 // Mock the useWorkflowExecution hook
 jest.mock('../../../../entities/workflows/model/use_workflow_execution');
@@ -82,7 +82,7 @@ describe('useWorkflowExecutionPolling', () => {
     workflowDefinition: createMockWorkflowDefinition(),
     stepId: undefined,
     stepExecutions: [],
-    duration: 1000,
+    duration: PollingIntervalMs * 2,
     triggeredBy: 'manual',
     yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\n    enabled: true\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
   });
@@ -120,7 +120,7 @@ describe('useWorkflowExecutionPolling', () => {
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
     // Fast forward time to check if polling would occur
-    jest.advanceTimersByTime(1000);
+    jest.advanceTimersByTime(PollingIntervalMs * 2);
 
     expect(mockRefetch).not.toHaveBeenCalled();
   });
@@ -134,7 +134,7 @@ describe('useWorkflowExecutionPolling', () => {
     ];
 
     nonTerminalStatuses.forEach((status) => {
-      it(`should poll every 500ms when status is ${status}`, () => {
+      it(`should poll every ${PollingIntervalMs}ms when status is ${status}`, () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
 
         mockUseWorkflowExecution.mockReturnValue(
@@ -148,19 +148,19 @@ describe('useWorkflowExecutionPolling', () => {
 
         hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
-        // Should not call refetch immediately (interval starts but first call is after 500ms)
+        // Should not call refetch immediately (interval starts but first call is after PollingIntervalMs)
         expect(mockRefetch).not.toHaveBeenCalled();
 
-        // After 500ms, should call refetch for the first time
-        jest.advanceTimersByTime(500);
+        // After PollingIntervalMs, should call refetch for the first time
+        jest.advanceTimersByTime(PollingIntervalMs);
         expect(mockRefetch).toHaveBeenCalledTimes(1);
 
-        // After another 500ms, should call refetch again
-        jest.advanceTimersByTime(500);
+        // After another PollingIntervalMs, should call refetch again
+        jest.advanceTimersByTime(PollingIntervalMs);
         expect(mockRefetch).toHaveBeenCalledTimes(2);
 
-        // After another 500ms, should call refetch again
-        jest.advanceTimersByTime(500);
+        // After another PollingIntervalMs, should call refetch again
+        jest.advanceTimersByTime(PollingIntervalMs);
         expect(mockRefetch).toHaveBeenCalledTimes(3);
       });
     });
@@ -193,7 +193,7 @@ describe('useWorkflowExecutionPolling', () => {
         const { rerender } = hookResult;
 
         // Verify polling starts
-        jest.advanceTimersByTime(500);
+        jest.advanceTimersByTime(PollingIntervalMs);
         expect(mockRefetch).toHaveBeenCalledTimes(1);
 
         // Update to terminal status
@@ -213,7 +213,7 @@ describe('useWorkflowExecutionPolling', () => {
         mockRefetch.mockClear();
 
         // Fast forward time - should not call refetch anymore
-        jest.advanceTimersByTime(2000);
+        jest.advanceTimersByTime(PollingIntervalMs * 4);
         expect(mockRefetch).not.toHaveBeenCalled();
       });
 
@@ -232,7 +232,7 @@ describe('useWorkflowExecutionPolling', () => {
         hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
 
         // Fast forward time to check if polling would occur
-        jest.advanceTimersByTime(2000);
+        jest.advanceTimersByTime(PollingIntervalMs * 4);
 
         expect(mockRefetch).not.toHaveBeenCalled();
       });
@@ -255,7 +255,7 @@ describe('useWorkflowExecutionPolling', () => {
     const { unmount } = hookResult;
 
     // Verify polling starts
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(PollingIntervalMs);
     expect(mockRefetch).toHaveBeenCalledTimes(1);
 
     // Unmount the component
@@ -265,7 +265,7 @@ describe('useWorkflowExecutionPolling', () => {
     mockRefetch.mockClear();
 
     // Fast forward time - should not call refetch anymore after unmount
-    jest.advanceTimersByTime(2000);
+    jest.advanceTimersByTime(PollingIntervalMs * 4);
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 
@@ -284,7 +284,7 @@ describe('useWorkflowExecutionPolling', () => {
     const { rerender } = hookResult;
 
     // Should not poll yet
-    jest.advanceTimersByTime(1000);
+    jest.advanceTimersByTime(PollingIntervalMs * 2);
     expect(mockRefetch).not.toHaveBeenCalled();
 
     // Update with workflow execution data
@@ -301,7 +301,7 @@ describe('useWorkflowExecutionPolling', () => {
     rerender();
 
     // Should start polling
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(PollingIntervalMs);
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
@@ -322,7 +322,7 @@ describe('useWorkflowExecutionPolling', () => {
     const { rerender } = hookResult;
 
     // Verify initial polling starts
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(PollingIntervalMs);
     expect(mockRefetch).toHaveBeenCalledTimes(1);
 
     // Change to another non-terminal status
@@ -338,7 +338,7 @@ describe('useWorkflowExecutionPolling', () => {
     rerender();
 
     // Should continue polling
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(PollingIntervalMs);
     expect(mockRefetch).toHaveBeenCalledTimes(2);
 
     // Change to terminal status - create a new execution object
@@ -357,7 +357,7 @@ describe('useWorkflowExecutionPolling', () => {
     mockRefetch.mockClear();
 
     // Should stop polling after status change to terminal
-    jest.advanceTimersByTime(2000);
+    jest.advanceTimersByTime(PollingIntervalMs * 4);
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 });

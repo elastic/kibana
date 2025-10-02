@@ -54,7 +54,7 @@ export const WorkflowStepExecutionList = ({
   selectedId: selectedStepExecutionId,
   onClose,
 }: WorkflowExecutionListProps) => (
-  <EuiPanel paddingSize="m" color="subdued" hasShadow={false} style={{ height: '100%' }}>
+  <EuiPanel paddingSize="m" hasShadow={false} style={{ height: '100%' }}>
     <EuiFlexGroup
       direction="column"
       justifyContent="flexStart"

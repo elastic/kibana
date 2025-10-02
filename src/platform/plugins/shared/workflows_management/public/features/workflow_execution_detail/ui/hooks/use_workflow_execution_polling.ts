@@ -11,6 +11,8 @@ import { useEffect } from 'react';
 import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 import { isTerminalStatus } from '../../lib/execution_status';
 
+export const PollingIntervalMs = 1000 as const;
+
 export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
   const {
     data: workflowExecution,
@@ -32,7 +34,7 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
     // Use setInterval for continuous polling
     const intervalId = setInterval(() => {
       refetch();
-    }, 500); // Refresh every 500ms
+    }, PollingIntervalMs);
 
     return () => clearInterval(intervalId);
   }, [refetch, workflowExecution]);

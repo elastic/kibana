@@ -187,5 +187,10 @@ export const ArrayData: Story = {
 export const Empty: Story = {
   args: {
     title: 'Step Execution Data',
+    mode: 'input',
+    stepExecution: {
+      ...stepExecution,
+      input: {},
+    },
   },
 };
