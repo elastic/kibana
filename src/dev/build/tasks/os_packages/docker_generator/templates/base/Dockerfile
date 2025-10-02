@@ -84,6 +84,7 @@ RUN mkdir -p /opt/filebeat /opt/metricbeat && \
 # Add entrypoint
 ################################################################################
 FROM {{{baseImageName}}}
+ENV KBN_ENABLE_POINTER_COMPRESSION=true
 EXPOSE 5601
 
 {{#ubi}}
